@@ -6,6 +6,8 @@ Project Maya: local inference for very large MoE models (GLM-5.3, DeepSeek-V4.1,
 
 **This fork targets HIP/ROCm on gfx1151 (Strix Halo) Linux only.** Optimize, build, and measure for that one platform. Do not add CUDA/NVIDIA support or multi-backend abstractions. The `tools/check_hip_compat.py` gate exists so the HIP build's CUDA-name shims (`include/strata/hip_compat/`) keep compiling — it is not NVIDIA work.
 
+**Interconnect is RDMA on the APU only** (Thunderbolt `usb4_rdma*`, as in gufo): target **~37 Gb/s, ~6 µs latency**. No TCP data path; sockets are for bootstrap/control only.
+
 ## GitHub workflow (mandatory)
 
 **All development and progress is tracked in GitHub issues on `uv-genai/maya-tp`.** Every agent session must follow this:

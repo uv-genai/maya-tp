@@ -55,6 +55,11 @@ endif()
 option(STRATA_ENABLE_CUDA "Build the CUDA targets (Phase 2+)" OFF)
 option(STRATA_ENABLE_HIP "Build the HIP targets for gfx1100 wave32 hardware" OFF)
 option(STRATA_PREFILL_MMQ "Build the GGML MMQ prompt path for HIP (a HIP build needs it)" OFF)
+# two-host tensor parallel over RDMA (Thunderbolt usb4_rdma / RoCE v2) - gfx1151 APU, HIP only
+option(STRATA_ENABLE_TP2_RDMA "Two-host TP2 collectives over libibverbs (needs STRATA_ENABLE_HIP)" OFF)
+if(STRATA_ENABLE_TP2_RDMA AND NOT STRATA_ENABLE_HIP)
+  message(FATAL_ERROR "STRATA_ENABLE_TP2_RDMA is HIP-only (this fork targets gfx1151): enable STRATA_ENABLE_HIP")
+endif()
 if(STRATA_PREFILL_MMQ AND NOT STRATA_ENABLE_HIP)
   message(FATAL_ERROR "STRATA_PREFILL_MMQ requires STRATA_ENABLE_HIP=ON")
 endif()
@@ -206,6 +211,22 @@ target_link_libraries(strata_plan INTERFACE strata_warnings)
 
 add_executable(strata-plan src/plan/plan_main.cpp)
 target_link_libraries(strata-plan PRIVATE strata_plan)
+
+# ---- strata_net (TP2 RDMA) -------------------------------------------------
+# Two-host collectives over libibverbs (Thunderbolt usb4_rdma / RoCE v2).  HIP only: the GPU stages
+# and waits on the exchange windows in place.
+if(STRATA_ENABLE_TP2_RDMA)
+  find_path(STRATA_IBVERBS_INCLUDE infiniband/verbs.h REQUIRED)
+  find_library(STRATA_IBVERBS_LIB ibverbs REQUIRED)
+  add_library(strata_net STATIC src/net/verbs.cpp src/net/rdma_gid.cpp)
+  target_include_directories(strata_net PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${STRATA_IBVERBS_INCLUDE})
+  target_link_libraries(strata_net PUBLIC strata_warnings ${STRATA_IBVERBS_LIB} hip::host)
+  if(STRATA_BUILD_TESTS)
+    add_executable(tp_comm_rdma_test tests/tp_comm_rdma_test.cpp)
+    target_link_libraries(tp_comm_rdma_test PRIVATE strata_net)
+    # not a ctest: needs two hosts and an RDMA link (tools/tp2/run_comm_test.sh)
+  endif()
+endif()
 
 # ---- strata_core (GPU runtime) ---------------------------------------------
 # Only built when a GPU backend is on, so the Phase 1 targets keep working without a toolkit.
