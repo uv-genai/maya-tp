@@ -406,7 +406,20 @@ public:
       return false;
     }
     completion_channel_ = ibv_create_comp_channel(context_);
-    cq_ = ibv_create_cq(context_, 16, nullptr, completion_channel_, 0);
+    // Try the extended CQ first (raw polling via ibv_start_poll/next_poll avoids
+    // the ibv_poll_cq function-call + ibv_wc fill overhead on every check).
+    {
+      ibv_cq_init_attr_ex cq_ex_attr{};
+      cq_ex_attr.cqe = 16;
+      cq_ex_attr.channel = completion_channel_;
+      cq_ex_attr.comp_vector = 0;
+      cq_ex_ = ibv_create_cq_ex(context_, &cq_ex_attr);
+    }
+    if (cq_ex_ != nullptr) {
+      cq_ = ibv_cq_ex_to_cq(cq_ex_);
+    } else {
+      cq_ = ibv_create_cq(context_, 16, nullptr, completion_channel_, 0);
+    }
     if (cq_ == nullptr) {
       SetError(error, "ibv_create_cq failed");
       return false;
@@ -1312,6 +1325,29 @@ private:
     const auto deadline = start + kExchangeTimeout;
     std::array<ibv_wc, 4> completions{};
     const auto drain = [&]() -> int {
+      if (cq_ex_ != nullptr) {
+        // Raw CQ polling: ibv_start_poll/next_poll avoids the ibv_poll_cq
+        // function-call overhead and the ibv_wc array fill on every check.
+        ibv_poll_cq_attr pattr{};
+        int ret = ibv_start_poll(cq_ex_, &pattr);
+        int count = 0;
+        while (ret == 0) {
+          ibv_wc wc{};
+          wc.status = cq_ex_->status;
+          wc.wr_id = cq_ex_->wr_id;
+          wc.opcode = ibv_wc_read_opcode(cq_ex_);
+          wc.imm_data = ibv_wc_read_imm_data(cq_ex_);
+          wc.wc_flags = ibv_wc_read_wc_flags(cq_ex_);
+          if (!TakeCompletion(wc, operation, &written, &received, error)) {
+            ibv_end_poll(cq_ex_);
+            return -1;
+          }
+          ++count;
+          ret = ibv_next_poll(cq_ex_);
+        }
+        ibv_end_poll(cq_ex_);
+        return count;
+      }
       const int n = ibv_poll_cq(cq_, static_cast<int>(completions.size()),
                                 completions.data());
       if (n < 0) {
@@ -1439,6 +1475,7 @@ private:
     if (cq_ != nullptr) {
       ibv_destroy_cq(cq_);
       cq_ = nullptr;
+      cq_ex_ = nullptr;
     }
     if (pd_ != nullptr) {
       ibv_dealloc_pd(pd_);
@@ -1454,6 +1491,7 @@ private:
   ibv_context* context_{nullptr};
   ibv_pd* pd_{nullptr};
   ibv_cq* cq_{nullptr};
+  ibv_cq_ex* cq_ex_{nullptr};   // raw polling API (ibv_start_poll/next_poll); null = ibv_poll_cq fallback
   ibv_comp_channel* completion_channel_{nullptr};
   ibv_qp* qp_{nullptr};
   ibv_mr* send_mr_{nullptr};
