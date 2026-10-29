@@ -21,6 +21,7 @@
 
 #include "strata/artifact/gguf_reader.hpp"
 #include "strata/core/glm_dflash.hpp"
+#include "strata/core/tp_context.hpp"
 #include "strata/kernels/cpu/native_expert.hpp"
 #include "strata/kernels/exl3.hpp"
 #include "strata/kernels/sampler.hpp"
@@ -127,6 +128,10 @@ public:
     bool fast() const { return fast_ != nullptr; }
     /// Skip the per-token logits download (the driver samples on the device).
     void set_host_logits(bool on) { host_logits_ = on; }
+    /// Two-host tensor parallel: when world > 1 the block's mixer and FFN outs are all-reduced
+    /// before hc_post (include/strata/core/tp_context.hpp).  World 1 keeps today's behaviour.
+    void set_tp(const TpContext& tp) { tp_ = tp; }
+    const TpContext& tp() const { return tp_; }
     /// Live counters of the fast path (both halves summed), for the driver's STAT lines.
     struct FastStats {
         uint64_t tokens = 0, hits = 0, misses = 0, miss_layers = 0;
@@ -543,6 +548,7 @@ public:
     bool fast_mode_ = false;                               // decided at load (STRATA_GLM_SLOW=1 turns it off)
     bool host_logits_ = true;
     int last_tok_ = -1;                                    // the greedy argmax of the last fast forward
+    TpContext tp_;                                         ///< two-host TP (world 1: no-op)
     const strata::kernels::SamplerParams* mtp_sample_ = nullptr;   // decode_spec, STRATA_GLM_SPEC_SAMPLE: fast_mtp DRAWS
     int32_t force_tok_ = -1;                               // force_next()
     // pick_tokens' penalty rows (this part's, allocated with the first request that has penalties): a ring of

@@ -2343,6 +2343,10 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
         }
 
         // ---- hc write (ping-pong), then the FFN half
+        // TP2: the mixer out is this rank's half (row-parallel attn_output); both ranks sum the halves
+        // before hc_post so the residual matches a single-host run up to reduction order.
+        if (tp_.active() && !tp_.all_reduce(A + sc_mixer, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
+            return false;
         strata::kernels::glm_hc_post(A + sc_mixer, R, A + sc_post, A + sc_comb, hcs, S + g.hc * g.n_embd, nullptr);
         R = S + g.hc * g.n_embd;
         cb_dump("hc_attn_post-" + L, R, g.hc * g.n_embd);
@@ -2417,6 +2421,9 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
             cb_dump("ffn_shexp-" + L, A + sc_sh, g.n_embd);
         }
         cb_dump("ffn_out-" + L, A + sc_ffn, g.n_embd);
+        // TP2: routed + shared expert outs are partials (row-parallel down); sum before hc_post.
+        if (tp_.active() && !tp_.all_reduce(A + sc_ffn, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
+            return false;
 
         strata::kernels::glm_hc_post(A + sc_ffn, R, A + sc_post, A + sc_comb, hcs, S, nullptr);
         R = S;
