@@ -710,7 +710,25 @@ public:
       SetError(error, "no control channel");
       return false;
     }
-    return control_->RecvAll(data, bytes, error);
+    // Control-channel recv must block until data arrives (the token mirroring
+    // waits for rank 0).  The bootstrap socket may be non-blocking from the
+    // connect phase, so loop on EAGAIN.
+    auto* cursor = static_cast<std::uint8_t*>(data);
+    std::size_t received = 0;
+    while (received < bytes) {
+      const ssize_t n = ::recv(control_->fd(), cursor + received, bytes - received, 0);
+      if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        continue;
+      }
+      if (n < 0 && errno == EINTR) continue;
+      if (n <= 0) {
+        SetError(error, SystemError("control recv"));
+        return false;
+      }
+      received += static_cast<std::size_t>(n);
+    }
+    return true;
   }
 
   [[nodiscard]] const float* ExchangePartial(const float* data,

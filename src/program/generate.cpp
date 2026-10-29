@@ -3813,29 +3813,13 @@ static int glm_pack_generate(const Options& o) {
             // Rank 0 drives the computation; rank 1 participates in collectives.
             if (o.tp_world > 1 && o.tp_rank > 0) {
                 std::fprintf(stderr, "maya generate: TP2 rank %d worker — waiting for rank 0\n", o.tp_rank);
-                // Receive token batches from rank 0 and process them (same sequence, same kernels).
+                // The forward() call mirrors rank 0's tokens via the control channel.
+                // Each call blocks until rank 0 sends, then processes the same tokens.
                 for (;;) {
-                    if (!tp_comm) { std::this_thread::sleep_for(std::chrono::seconds(60)); continue; }
+                    std::vector<int32_t> dummy;
+                    std::vector<float> logits;
                     std::string tp_err;
-                    int32_t n32 = 0, mn32 = 0;
-                    if (!tp_comm->RecvControl(&n32, sizeof(n32), &tp_err) ||
-                        !tp_comm->RecvControl(&mn32, sizeof(mn32), &tp_err)) {
-                        std::fprintf(stderr, "TP2: recv from rank 0: %s\n", tp_err.c_str());
-                        std::this_thread::sleep_for(std::chrono::seconds(1));
-                        continue;
-                    }
-                    if (n32 <= 0 || n32 > 1000000) continue;
-                    std::vector<int32_t> ids((size_t) n32);
-                    if (!tp_comm->RecvControl(ids.data(), (size_t) n32 * sizeof(int32_t), &tp_err)) {
-                        std::fprintf(stderr, "TP2: recv ids from rank 0: %s\n", tp_err.c_str());
-                        continue;
-                    }
-                    std::fprintf(stderr, "TP2: rank %d processing %d tokens (max_new=%d)\n", o.tp_rank, n32, mn32);
-                    // Process the same tokens as rank 0 via run_request (same code path, same ARs).
-                    std::vector<int64_t> ids64(ids.begin(), ids.end());
-                    strata::kernels::SamplerParams rq;
-                    rq.temperature = 0.0f;   // greedy: same as rank 0's default
-                    run_request(ids64, mn32, rq);
+                    model.forward(dummy, logits, tp_err);
                 }
             }
             std::fprintf(stderr, "maya generate: --tokens is required (this build has no tokenizer; see the "
@@ -4345,18 +4329,6 @@ static int glm_pack_generate(const Options& o) {
                 }
             }
             model.set_image_rows(cur_img_pos, cur_img_rows);
-            // TP2: forward the prompt tokens to rank 1 so both ranks process the same sequence
-            if (tp_comm && tp_comm->rank() == 0) {
-                std::string tp_err;
-                const int32_t n32 = (int32_t) toks.size();
-                const int32_t mn32 = (int32_t) max_new;
-                std::vector<int32_t> t32(toks.begin(), toks.end());
-                if (!tp_comm->SendControl(&n32, sizeof(n32), &tp_err) ||
-                    !tp_comm->SendControl(&mn32, sizeof(mn32), &tp_err) ||
-                    !tp_comm->SendControl(t32.data(), t32.size() * sizeof(int32_t), &tp_err)) {
-                    std::fprintf(stderr, "TP2: send tokens to rank 1: %s\n", tp_err.c_str());
-                }
-            }
             run_request(toks, max_new, rq);
             model.set_image_rows({}, {});
             continue;
