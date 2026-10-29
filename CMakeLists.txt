@@ -1,4 +1,4 @@
-﻿# Strata Engine - top-level build (P1.S1).
+# Strata Engine - top-level build (P1.S1).
 #
 # Targets (phase-1 Ă‚Â§P1.S1): `strata_artifact` (no CUDA dependency), `tests`.  `strata_plan` and the C++
 # `strata-pack` are added when their sources exist - a target with no sources would make the build graph
@@ -187,6 +187,10 @@ if(STRATA_BUILD_TESTS)
   add_executable(gguf_reader_test src/artifact/gguf_reader_test.cpp)
   target_link_libraries(gguf_reader_test PRIVATE strata_artifact)
   add_test(NAME gguf_reader_test COMMAND gguf_reader_test)
+  # two-host tensor parallel split planner (host only, no GPU): TpPartition / blob spans
+  add_executable(tp_partition_test tests/tp_partition_test.cpp)
+  target_link_libraries(tp_partition_test PRIVATE strata_artifact)
+  add_test(NAME tp_partition_test COMMAND tp_partition_test)
   # --ablate's direction loader: what it takes and what it refuses (synthetic GGUFs: no model, no GPU)
   add_executable(ds4_ablate_test tests/ds4_ablate_test.cpp)
   target_link_libraries(ds4_ablate_test PRIVATE strata_artifact)

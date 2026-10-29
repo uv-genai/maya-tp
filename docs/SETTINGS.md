@@ -1273,3 +1273,28 @@ Engine options, in the config's `"args"`:
 |---|---|---|
 | `MAYA_EXPERT_RAM_GB` | unset (what the RAM allows) | caps the experts' RAM tier, in GB (the dashboard's Models page: Experts in RAM) |
 | `MAYA_EXPERT_STAGERS` | a quarter of the CPU threads, 2 to 8 | the threads that read a layer's experts from the file while the CPU prepares the layer (their reads overlap); `0`: read one by one when the CPU needs them |
+
+## GLM: two-host tensor parallel (TP2)
+
+Runs **GLM-5.3-Flash Maya-S** as a 2-way tensor-parallel job on two hosts (design: [TP2-DESIGN.md](TP2-DESIGN.md)).
+Off unless `--tp-world-size 2` is set. The split is intra-expert (each rank holds half of every expert's `n_ff`);
+one all-reduce after the mixer and after the MoE block keeps both ranks identical.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `MAYA_TP_WORLD_SIZE` | 1 | 2 enables two-host TP (must match on both ranks) |
+| `MAYA_TP_RANK` | 0 | this host's rank (0 = server, 1 = worker) |
+| `MAYA_TP_BOOTSTRAP_HOST` | unset | rank 1: where to reach rank 0 for the QP handshake |
+| `MAYA_TP_BOOTSTRAP_PORT` | 18515 | TCP bootstrap (QP / GID exchange) |
+| `MAYA_TP_CONTROL_PORT` | 18516 | TCP control channel (mirrored model calls) |
+| `MAYA_TP_CONTROL_TOKEN` | unset | shared secret; required when world=2 |
+| `MAYA_TP_RDMA_DEVICE` | auto | `usb4_rdma*` (Thunderbolt) or an IB/RoCE device |
+| `MAYA_TP_GID_INDEX` | unset | RoCE v2 GID when the port has several candidates |
+| `MAYA_TP_AR_FP16` | off | F32 partials on the wire by default; `1` sends FP16 (changes reduction order) |
+| `MAYA_TP_PREFILL_ROWS` | 3072 | max prefill rows per exchange (one RDMA window) |
+| `MAYA_TP_OVERLAP` | off | overlap prefill exchanges with the next sub-batch |
+
+Engine flags: `--tp-world-size`, `--tp-rank`, `--tp-bootstrap-host`, `--tp-bootstrap-port`, `--tp-control-port`,
+`--tp-control-token`, `--tp-rdma-device`, `--tp-worker` (rank 1). Both ranks must agree on model pack, context,
+`--parallel`, and sampling defaults; the handshake names any setting that differs. Single-host features stay gated
+off under TP2 (MTP / DFlash drafting, KV streaming, component cache). See [TP2-RUN.md](TP2-RUN.md) for bring-up.

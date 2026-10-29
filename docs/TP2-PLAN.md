@@ -85,7 +85,7 @@ Implements [TP2-DESIGN.md](TP2-DESIGN.md); background in [TP2-ANALYSIS.md](TP2-A
 **Goal:** `step_layers` runs TP=2 and matches single-host greedy except near-ties.
 
 ### Tasks
-4.1 `Glm5Model::TpContext` (null ⇒ unchanged single-node path — **NVIDIA/CUDA path untouched**).  
+4.1 `Glm5Model::TpContext` (null ⇒ unchanged single-host path).  
 4.2 Load: `load_pack` slice upload via Phase-1 planner (dense arena + expert blobs).  
 4.3 AR insertion in `step_layers` only: after mixer out, after MoE/shared sum. F32 partials.  
 4.4 Head replicated; argmax on rank 0.  
@@ -98,7 +98,7 @@ Implements [TP2-DESIGN.md](TP2-DESIGN.md); background in [TP2-ANALYSIS.md](TP2-A
 ### Acceptance (hard gate — do not proceed until green)
 - Both ranks produce **identical** token streams to each other (digest).  
 - vs single-host: document flips; agreement high (target ≥ 95% on greedy factual prompts; investigate any structural mismatch).  
-- `STRATA_USE_HIP` builds; CUDA-only users unchanged (option OFF ⇒ zero behavior change).
+- HIP (gfx1151) builds; single-host HIP behavior unchanged (option OFF ⇒ zero behavior change).
 
 ---
 
@@ -144,7 +144,7 @@ Implements [TP2-DESIGN.md](TP2-DESIGN.md); background in [TP2-ANALYSIS.md](TP2-A
 7.2 Settings: `MAYA_TP_AR_FP16`, `MAYA_TP_PREFILL_ROWS`, `MAYA_TP_OVERLAP` — default preserve Phase-5 behavior.  
 7.3 Update `docs/SETUP.md` / `AMD_MAYA.md` pointer to `TP2-RUN.md`; CHANGELOG entry.  
 7.4 Quality: one perplexity/next-token agreement run vs single-host (Maya-S bench methodology).  
-7.5 PR to `main` per CONTRIBUTING (measurements in description; HIP-only feature; NVIDIA path untouched).
+7.5 PR to `main` per CONTRIBUTING (measurements in description; HIP/gfx1151-only feature).
 
 ### Acceptance
 - CI: hip_compat + serve + tools tests.  
@@ -180,4 +180,4 @@ P1 partition ──► P4 reference TP ──► P5 fast/prefill ──► P6 se
 2. Greedy parity vs single-host documented (flips only near-ties).  
 3. Controlled decode/prefill numbers better than single-host **or** clearly justified if not (expert-residency win should dominate).  
 4. Failure modes match gufo ops (poison, pair-down, status-5 playbook).  
-5. Single-host and NVIDIA builds bit-unchanged when `STRATA_ENABLE_TP2_RDMA=OFF`.
+5. Single-host HIP (gfx1151) bit-unchanged when `STRATA_ENABLE_TP2_RDMA=OFF`.

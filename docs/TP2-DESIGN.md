@@ -13,7 +13,7 @@ Companion to [TP2-ANALYSIS.md](TP2-ANALYSIS.md). Design only — no code in this
 - Both ranks bit-identical to each other on every collective result (gufo’s two-operand sum rule).
 - Greedy outputs match single-host Maya-S except documented near-tie flips from reduction order.
 - Reuse gufo’s proven transport + control discipline; stay idiomatic to Maya (pack loader, fast path, expert tiers).
-- Work on gfx1151 HIP only for v1 (`STRATA_ENABLE_HIP`, wave32). No NVIDIA path changes.
+- **HIP/ROCm on gfx1151 Linux only** (this fork’s platform rule). No CUDA/NVIDIA work.
 
 ### Non-goals (v1)
 - world_size > 2, expert-parallel all-to-all, cross-host KV streaming, images on TP, DFlash2/MTP multi-draft across TP, component cache restore across ranks, bit-identical match to single-host logits.
