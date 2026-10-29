@@ -1276,25 +1276,29 @@ Engine options, in the config's `"args"`:
 
 ## GLM: two-host tensor parallel (TP2)
 
-Runs **GLM-5.3-Flash Maya-S** as a 2-way tensor-parallel job on two hosts (design: [TP2-DESIGN.md](TP2-DESIGN.md)).
+Runs **GLM-5.3-Flash Maya-S** as a 2-way tensor-parallel job on two hosts (design: [TP2-DESIGN.md](TP2-DESIGN.md); ops: [TP2-RUN.md](TP2-RUN.md)).
 Off unless `--tp-world-size 2` is set. The split is intra-expert (each rank holds half of every expert's `n_ff`);
-one all-reduce after the mixer and after the MoE block keeps both ranks identical.
+one all-reduce after the mixer and after the MoE block keeps both ranks identical. Wire format is **float32 partials**
+over RDMA WRITE (`QueuePartial` Stage/Wait/Add). Serve mode mirrors rank 0's model calls to rank 1 on the bootstrap
+TCP socket (`SendControl`/`RecvControl`); do **not** probe the bootstrap port with `/dev/tcp` (that steals rank 0's accept).
 
 | Variable | Default | What it does |
 |---|---|---|
 | `MAYA_TP_WORLD_SIZE` | 1 | 2 enables two-host TP (must match on both ranks) |
 | `MAYA_TP_RANK` | 0 | this host's rank (0 = server, 1 = worker) |
 | `MAYA_TP_BOOTSTRAP_HOST` | unset | rank 1: where to reach rank 0 for the QP handshake |
-| `MAYA_TP_BOOTSTRAP_PORT` | 18515 | TCP bootstrap (QP / GID exchange) |
-| `MAYA_TP_CONTROL_PORT` | 18516 | TCP control channel (mirrored model calls) |
-| `MAYA_TP_CONTROL_TOKEN` | unset | shared secret; required when world=2 |
+| `MAYA_TP_BOOTSTRAP_PORT` | 18515 | TCP bootstrap (QP / GID exchange + serve instruction mirror) |
 | `MAYA_TP_RDMA_DEVICE` | auto | `usb4_rdma*` (Thunderbolt) or an IB/RoCE device |
 | `MAYA_TP_GID_INDEX` | unset | RoCE v2 GID when the port has several candidates |
-| `MAYA_TP_AR_FP16` | off | F32 partials on the wire by default; `1` sends FP16 (changes reduction order) |
-| `MAYA_TP_PREFILL_ROWS` | 3072 | max prefill rows per exchange (one RDMA window) |
-| `MAYA_TP_OVERLAP` | off | overlap prefill exchanges with the next sub-batch |
+| `MAYA_TP_BOOTSTRAP_TIMEOUT` | 120 | seconds rank 1 retries connect (and rank 0 waits to accept) |
+| `MAYA_TP_NOAR` | unset | if set: skip all-reduce (isolation; answers will be wrong) |
+| `MAYA_TP_NOSLICE` | unset | if set: full weights on both ranks (isolation) |
+| `MAYA_TP_SH_BOTH` | unset | if set: shared expert runs on both ranks (AR would double it) |
 
-Engine flags: `--tp-world-size`, `--tp-rank`, `--tp-bootstrap-host`, `--tp-bootstrap-port`, `--tp-control-port`,
-`--tp-control-token`, `--tp-rdma-device`, `--tp-worker` (rank 1). Both ranks must agree on model pack, context,
-`--parallel`, and sampling defaults; the handshake names any setting that differs. Single-host features stay gated
-off under TP2 (MTP / DFlash drafting, KV streaming, component cache). See [TP2-RUN.md](TP2-RUN.md) for bring-up.
+**Not implemented** (do not set): `MAYA_TP_CONTROL_PORT`, `MAYA_TP_CONTROL_TOKEN`, `MAYA_TP_AR_FP16`,
+`MAYA_TP_PREFILL_ROWS`, `MAYA_TP_OVERLAP`. The mirror rides the bootstrap socket; partials are always F32;
+prefill row windows are fixed by the 48 MiB RDMA window; overlap is always on for the queued path.
+
+Engine flags: `--tp-world-size`, `--tp-rank`, `--tp-bootstrap-host`, `--tp-bootstrap-port`, `--tp-rdma-device`.
+Both ranks must agree on model pack and context. Under TP2 the engine forces the simple decode loop (no
+DFlash/MTP/spec), disables conversation reuse, and ignores `MAYA_GLM_SEQS`. See [TP2-RUN.md](TP2-RUN.md) for bring-up.

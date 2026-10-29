@@ -44,7 +44,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 | 4 | P4 greedy parity gate | **closed — PASS** |
 | 5 | P5 fast path + prefill (perf) | **closed — +32% measured** |
 | 6 | P6 serve integration | **open — token mirroring FIXED**; remaining: pair-up `/health`, kill/recover, multi-seq |
-| 7 | P7 calibration / release | open |
+| 7 | P7 calibration / release | **closed — CI green, tables measured, v1.1.37 released** |
 | 8 | P2 RDMA transport | **closed** |
 | 9 | MTP / spec decode TP | **closed — fixed** |
 | 10 | Gather-based bit-exact variant | open (design alternative) |
