@@ -134,7 +134,7 @@ public:
     const TpContext& tp() const { return tp_; }
     /// The intermediate width this rank computes: n_ff_exp, or its band under TP2 (the GPU kernels'
     /// `n_ff` argument and the sliced blob's row width).
-    int ff_compute() const { return tp_.active() ? tp_.experts.count : (int) g_.n_ff_exp; }
+    int ff_compute() const { return tp_.slicing() ? tp_.experts.count : (int) g_.n_ff_exp; }
     /// Live counters of the fast path (both halves summed), for the driver's STAT lines.
     struct FastStats {
         uint64_t tokens = 0, hits = 0, misses = 0, miss_layers = 0;

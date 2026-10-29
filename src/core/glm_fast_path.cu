@@ -5593,7 +5593,9 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
     const int ffn = ff_compute();
     // TP2: the replicated shared expert is added on rank 0 only, so the all-reduce below
     // does not double it (gufo: "a whole shared expert belongs to rank 0").
-    const float* sh_for_down = (!tp_.active() || tp_.rank == 0)
+    // MAYA_TP_SH_BOTH=1: add it on both ranks (isolation; AR then doubles it).
+    static const bool sh_both = getenv("MAYA_TP_SH_BOTH") != nullptr;
+    const float* sh_for_down = (!tp_.active() || tp_.rank == 0 || sh_both)
                                   ? (Ly.sh_down.q != nullptr ? F->sh_out : nullptr)
                                   : nullptr;
     gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, g.n_embd, ffn, g.swiglu_exp, io.xq, F->hq, Ly.sh_down.q,

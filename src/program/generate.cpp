@@ -1117,7 +1117,8 @@ static int glm_pack_generate(const Options& o) {
             return 1;
         }
         model.set_tp(tp);
-        std::printf("INFO tp_world=%d tp_rank=%d rdma=%s\n", o.tp_world, o.tp_rank, comm->Describe().c_str());
+        std::printf("INFO tp_world=%d tp_rank=%d rdma=%s ff_band=[%d,%d)\n", o.tp_world, o.tp_rank,
+                    comm->Describe().c_str(), tp.experts.begin, tp.experts.begin + tp.experts.count);
         // one operation scope for the whole generate run (each collectives carries its ordinal inside it)
         if (!comm->BeginOperation(0, &tp_err)) {
             std::fprintf(stderr, "maya generate: TP2: %s\n", tp_err.c_str());

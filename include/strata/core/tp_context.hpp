@@ -25,7 +25,12 @@ struct TpContext {
     TpPartition experts;   ///< routed + shared expert n_ff (2048 -> 1024)
     TpPartition dense;     ///< dense lead n_ff_dense (12288 -> 6144)
 
-    bool active() const { return world > 1 && comm != nullptr; }
+    bool active() const {
+        // MAYA_TP_NOAR=1: keep the slices but skip the all-reduce (isolates slice vs AR bugs)
+        return world > 1 && comm != nullptr && std::getenv("MAYA_TP_NOAR") == nullptr;
+    }
+    /// Whether weights are sliced to this rank's band (MAYA_TP_NOSLICE=1: full weights on both ranks).
+    bool slicing() const { return world > 1 && std::getenv("MAYA_TP_NOSLICE") == nullptr; }
 
     /// Builds the partitions; fails when widths do not split.  `comm` may be null for unit tests.
     static bool create(int rank, int world, int n_ff, int n_ff_dense, int block,

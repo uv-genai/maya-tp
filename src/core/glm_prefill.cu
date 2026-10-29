@@ -2340,7 +2340,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         cudaStreamWaitEvent(F->copy, S->ev_pfree, 0);
         cudaEventRecord(S->ev_pstart, F->copy);
         for (int j = 0; j < n; ++j) {
-            if (tp_.active()) {
+            if (tp_.slicing()) {
                 // TP2: the RAM tier holds the full blob; cut this rank's column band into pbuf
                 const auto& nl = pack_layers_[(size_t) il];
                 tp_slice_expert(RC.slot((size_t) cand[(size_t) j].rs),

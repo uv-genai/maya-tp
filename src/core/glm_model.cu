@@ -2488,8 +2488,8 @@ cudaError_t strata::core::Glm5Model::pack_moe_tail(std::string& err, const std::
     const void* hq[1] = {host_hq_.data()};
     // TP2: each rank computes its n_ff band of every expert (gate/up rows, down columns) and the
     // all-reduce after this loop sums the ranks' weighted partials.
-    const int ff0 = tp_.active() ? tp_.experts.begin : 0;
-    const int ffn = tp_.active() ? tp_.experts.count : (int) g.n_ff_exp;
+    const int ff0 = tp_.slicing() ? tp_.experts.begin : 0;
+    const int ffn = tp_.slicing() ? tp_.experts.count : (int) g.n_ff_exp;
     std::memset(host_moe_.data(), 0, (size_t) g.n_embd * sizeof(float));
     for (size_t i = 0; i < ids.size(); ++i) {
         const int e = ids[i];
@@ -2577,8 +2577,8 @@ int32_t strata::core::Glm5Model::pool_evict(int cls) {
 void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
     const auto& nl = pack_layers_[(size_t) layer];
     const int64_t ff_full = g_.n_ff_exp;
-    const int64_t ff0 = tp_.active() ? tp_.experts.begin : 0;
-    const int64_t ffn = tp_.active() ? tp_.experts.count : ff_full;
+    const int64_t ff0 = tp_.slicing() ? tp_.experts.begin : 0;
+    const int64_t ffn = tp_.slicing() ? tp_.experts.count : ff_full;
     const uint64_t gu_bytes = (uint64_t) nl.fmt.gu_row * (uint64_t) ffn;   // one role (this rank's band under TP)
     const uint64_t dn_bytes = (uint64_t) nl.fmt.d_row * (uint64_t) g_.n_embd * (uint64_t) ffn / (uint64_t) ff_full;
     const Shard& gs = pack_shards_[(size_t) nl.gate_shard];
@@ -2632,7 +2632,7 @@ void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
                 // pinned staging (STRATA_GLM_BOUNCE=1): CPU into the ring, then one stream-ordered
                 // device copy per miss.  Under TP2 this is where the rank's column band is cut out.
                 uint8_t* b = bounce_ + (size_t) (bounce_i_++ % 24) * slot_bytes_;
-                if (tp_.active()) {
+                if (tp_.slicing()) {
                     tp_slice_expert(gs.base + nl.gate_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.gu_row * ff_full,
                                     us.base + nl.up_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.gu_row * ff_full,
                                     ds.base + nl.down_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.d_row * g_.n_embd,
