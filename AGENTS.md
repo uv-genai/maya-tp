@@ -108,6 +108,10 @@ Manual HIP configure example is in `docs/AMD_RDNA4.md`.
 - AMD / HIP: accepted only with your measurements once NVIDIA still builds and behaves the same.
 - CI must pass: HIP map check + `serve` + `tools` tests. GPU parity suites run on maintainers' machines before merge.
 
+## Session handoff
+
+`Handoff.md` is the **live** restart document (state, issue map, performance, gotchas, how to run). `Handoff-Prompt.md` is the prompt to give a fresh session. **Keep `Handoff.md` current** — update it whenever state changes, and comment on the relevant issue.
+
 ## Key references
 
 - `CONTRIBUTING.md` — PR / bug / bench expectations  
