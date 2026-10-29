@@ -12,7 +12,7 @@ Project Maya: local inference for very large MoE models (GLM-5.3, DeepSeek-V4.1,
 
 **All development and progress is tracked in GitHub issues on `uv-genai/maya-tp`.** Every agent session must follow this:
 
-1. **One issue per workstream** (feature, bug, experiment). Create it before starting work; the issue body is the brief + acceptance criteria.
+1. **One issue per workstream** (a plan phase, feature, bug, or experiment) — **not** one umbrella issue with comments. If a plan lists P1…P7, open one issue per phase and work in that issue. The umbrella epic (if any) only indexes them.
 2. **Comment on the issue while making progress** — status, decisions, blockers, measurements, commit SHAs. Do not wait until the end; comment at meaningful milestones (after analysis, after a design decision, after each phase/PR, when a gate passes or fails).
 3. **Link commits and PRs to the issue** (`refs #N` / `closes #N` in commit or PR body).
 4. **Close or leave open explicitly** when the workstream ends — with a final comment summarizing outcome.
