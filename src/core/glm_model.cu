@@ -2343,10 +2343,8 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
         }
 
         // ---- hc write (ping-pong), then the FFN half
-        // TP2: the mixer out is this rank's half (row-parallel attn_output); both ranks sum the halves
-        // before hc_post so the residual matches a single-host run up to reduction order.
-        if (tp_.active() && !tp_.all_reduce(A + sc_mixer, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
-            return false;
+        // TP2 v1: the mixer is replicated (full weights on both ranks) - no all-reduce here.
+        // Only the routed experts are sliced (pack_moe_tail); their weighted sum is reduced below.
         strata::kernels::glm_hc_post(A + sc_mixer, R, A + sc_post, A + sc_comb, hcs, S + g.hc * g.n_embd, nullptr);
         R = S + g.hc * g.n_embd;
         cb_dump("hc_attn_post-" + L, R, g.hc * g.n_embd);
@@ -2385,7 +2383,8 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
             if (pack_) {
                 // the routed experts ride the native path (quantized blobs, per-token);
                 // docs/GLM5-FLASH.md §9 - device pool with LRU (M2b), CPU native fallback
-                if (dev_experts_) {
+                if (dev_experts_ && !tp_.active()) {
+                    // TP2 v1: the CPU pack path carries the column-band slice (native_down_cols)
                     if (!pack_moe_tail_device(err, ids, rw, A, il)) return false;
                 } else {
                     GM_CHECK(pack_moe_tail(err, ids, rw, A, il), err);
@@ -2408,6 +2407,10 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
                 }
             }
             if (timing_ && !tev_rec(tev_c_, "c")) timing_ = false;   // the expert tail is done
+            // TP2: the routed experts' weighted sum is this rank's band; add the peer's before the
+            // shared expert (which is replicated and must not be doubled).
+            if (tp_.active() && !tp_.all_reduce(A + sc_moe, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
+                return false;
             GM_CHECK(gm_gemv(ws_("ffn_gate_shexp.weight"), A + sc_x, nullptr, 1.0f, A + sc_gate, g.n_ff_exp * g.n_shared,
                 g.n_embd), err);
             GM_CHECK(gm_gemv(ws_("ffn_up_shexp.weight"), A + sc_x, nullptr, 1.0f, A + sc_up, g.n_ff_exp * g.n_shared, g.n_embd), err);
@@ -2421,9 +2424,6 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
             cb_dump("ffn_shexp-" + L, A + sc_sh, g.n_embd);
         }
         cb_dump("ffn_out-" + L, A + sc_ffn, g.n_embd);
-        // TP2: routed + shared expert outs are partials (row-parallel down); sum before hc_post.
-        if (tp_.active() && !tp_.all_reduce(A + sc_ffn, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
-            return false;
 
         strata::kernels::glm_hc_post(A + sc_ffn, R, A + sc_post, A + sc_comb, hcs, S, nullptr);
         R = S;
@@ -2486,6 +2486,10 @@ cudaError_t strata::core::Glm5Model::pack_moe_tail(std::string& err, const std::
     float* ff1[1] = {host_ff_.data()};
     float* dn1[1] = {host_dn_.data()};
     const void* hq[1] = {host_hq_.data()};
+    // TP2: each rank computes its n_ff band of every expert (gate/up rows, down columns) and the
+    // all-reduce after this loop sums the ranks' weighted partials.
+    const int ff0 = tp_.active() ? tp_.experts.begin : 0;
+    const int ffn = tp_.active() ? tp_.experts.count : (int) g.n_ff_exp;
     std::memset(host_moe_.data(), 0, (size_t) g.n_embd * sizeof(float));
     for (size_t i = 0; i < ids.size(); ++i) {
         const int e = ids[i];
@@ -2496,10 +2500,17 @@ cudaError_t strata::core::Glm5Model::pack_moe_tail(std::string& err, const std::
         const uint8_t* ub = us.base + nl.up_off + (uint64_t) e * nl.fmt.gu_row * (uint64_t) g.n_ff_exp;
         const uint8_t* db = ds.base + nl.down_off + (uint64_t) e * nl.fmt.d_row * (uint64_t) g.n_embd;
         strata::kernels::cpu::native_quant_act(nl.fmt, host_x_.data(), host_act_.data());
-        strata::kernels::cpu::native_gu_rows_split(nl.fmt, gb, ub, act, 1, ff1, 0, (int) g.n_ff_exp, g.swiglu_exp);
+        std::memset(host_ff_.data(), 0, (size_t) g.n_ff_exp * sizeof(float));
+        strata::kernels::cpu::native_gu_rows_split(nl.fmt, gb, ub, act, 1, ff1, ff0, ff0 + ffn, g.swiglu_exp);
         cb_dump_h("glm_exp" + std::to_string(e) + "-h-" + std::to_string(layer), host_ff_.data(), g.n_ff_exp);
         strata::kernels::cpu::native_quant_h(nl.fmt, host_ff_.data(), host_hq_.data());
-        strata::kernels::cpu::native_down_rows_split(nl.fmt, db, hq, 1, dn1, 0, (int) g.n_embd);
+        std::memset(host_dn_.data(), 0, (size_t) g.n_embd * sizeof(float));
+        if (tp_.active()) {
+            // the band of this rank's columns; the peer's band is added by the all-reduce
+            strata::kernels::cpu::native_down_cols(nl.fmt, db, ff0, ffn, hq, 1, dn1);
+        } else {
+            strata::kernels::cpu::native_down_rows_split(nl.fmt, db, hq, 1, dn1, 0, (int) g.n_embd);
+        }
         cb_dump_h("glm_exp" + std::to_string(e) + "-dn-" + std::to_string(layer), host_dn_.data(), g.n_embd);
         const float w = rw[i];
         for (int j = 0; j < g.n_embd; ++j) host_moe_[(size_t) j] += w * host_dn_[(size_t) j];
