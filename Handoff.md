@@ -41,8 +41,8 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 | 3 | GPU-staged QueuePartial (6 µs / 37 Gb/s) | open |
 | 4 | P4 greedy parity gate | **closed — PASS** |
 | 5 | P5 fast path + prefill (perf) | open — **active, mixer slice done** |
-| 6 | P6 serve integration | open |
-| 7 | P7 calibration / release | open |
+| 6 | P6 serve integration | open — **launch scripts + config plumbing done** |
+| 7 | P7 calibration / release | open — **ops runbook + quality measured** |
 | 8 | P2 RDMA transport | **closed** |
 | 9 | MTP / spec decode TP | **closed — fixed** |
 | 10 | Gather-based bit-exact variant | open (design alternative) |
@@ -142,13 +142,11 @@ python tools/tp2/greedy_parity.py /tmp/r0.txt /tmp/r1.txt --min-agree 1.0   # pa
 
 ## 10. Next steps (priority)
 
-1. **#5 — measure the mixer slice + T2**: controlled bench (no-MTP, 32 tokens, same prompt). Mixer slice + split_reduce AR both implemented. Target 30%+ vs single-host.
-2. **#5 — prefill two-sub-batch overlap**: interleave two trunk batches a layer apart (gufo's `split_reduce` pair path). This is the remaining T2 win for prefill.
-3. **#5 — remaining paths**: glm_prefill.cu / glm_rows.cu / glm_window.cu / glm_mtp_rows.cu still use `g.n_head` in compute (85 sites) — must use `head_compute_for(il)` before MTP or prefill with TP2.
-4. **#3** — transport: AR cost ~5 ms (90 exch × 55 µs). Link is 6 µs. **Thunderbolt driver limitations**: `IBV_SEND_INLINE` unsupported, `ibv_create_cq_ex` unsupported (falls back to `ibv_poll_cq`). Tried and failed: spin-before-sleep (mutex contention), fused WaitAdd (parity race). Remaining options: pipelined worker (post send + defer CQE wait), or accept the current cost. Prefill two-sub-batch needs two independent token streams (concurrent requests).
-5. **#6** — serve integration + launch scripts.
-6. **#7** — calibration + controlled benches + release.
-7. **#10** — only if bit-exact output is required (gather design).
+1. **#6 — serve pair-up**: `/ready` semantics, mirror `STRATA_GLM_SEQS`, `curl` acceptance test, kill/recover
+2. **#6 — concurrent requests**: 2-4 chats with `--parallel`, verify stable streaming under TP2
+3. **#7 — calibration**: `tools/calibrate_glm_tp.py`, measured defaults for `MAYA_TP_*` knobs
+4. **#7 — release**: CHANGELOG, single-host HIP bit-unchanged with `STRATA_ENABLE_TP2_RDMA=OFF`
+5. **#3** — transport: only if driver adds `ibv_create_cq_ex` or `IBV_SEND_INLINE` support
 
 ## 11. Key commits
 
