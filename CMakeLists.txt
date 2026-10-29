@@ -1195,6 +1195,10 @@ if(STRATA_NATIVE_EXPERTS)
     add_executable(native_split_test src/kernels/cpu/native_split_test.cpp)
     target_link_libraries(native_split_test PRIVATE strata_kernels_cpu)
     add_test(NAME native_split_test COMMAND native_split_test)
+    # two-host TP: a rank's down column band plus the peer's equals the full down
+    add_executable(native_down_cols_test src/kernels/cpu/native_down_cols_test.cpp)
+    target_link_libraries(native_down_cols_test PRIVATE strata_kernels_cpu)
+    add_test(NAME native_down_cols_test COMMAND native_down_cols_test)
     # the multi-token expert rows (iq_avx512 / iq_avx2) bit for bit against ggml-cpu's dot, and GLM's split rows for a
     # window of tokens against the same tokens one at a time
     if(STRATA_CPU_X86)   # (#471: x86-only kernels - native rows, the IQ1_S rows without pdep)

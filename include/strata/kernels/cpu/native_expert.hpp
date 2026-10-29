@@ -58,6 +58,11 @@ void native_gu_rows_split(const NativeFmt& f, const uint8_t* gate_base, const ui
                           float swiglu_limit = std::numeric_limits<float>::infinity());
 void native_down_rows_split(const NativeFmt& f, const uint8_t* down_base, const void* const* hq,
                             int nt, float* const* out, int r0, int r1);
+/// Two-host TP: one rank's column band of the down projection.  out[t][r] = sum_{c in [col0,col0+coln)} W[r][c] * h[t][c]
+/// for every output row r (the full n_embd), so the ranks' partials sum to the full down.  `hq` is the full
+/// quantized activation; this reads only its [col0, col0+coln) band.  `col0`/`coln` must be whole quant blocks.
+void native_down_cols(const NativeFmt& f, const uint8_t* down_base, int64_t col0, int64_t coln,
+                      const void* const* hq, int nt, float* const* out);
 /// Whether the split variants take the multi-token kernels for this weight type here (the CPU has
 /// them, they are not switched off, and they matched ggml-cpu's dot bit for bit on synthetic rows).
 bool native_multi_rows_exact(int ggml_type);

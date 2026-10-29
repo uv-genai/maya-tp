@@ -347,6 +347,32 @@ void native_down_rows_split(const NativeFmt& f, const uint8_t* down_base, const 
     }
 }
 
+void native_down_cols(const NativeFmt& f, const uint8_t* down_base, int64_t col0, int64_t coln,
+                      const void* const* hq, int nt, float* const* out) {
+    if (coln <= 0) return;
+    const int wblck = (int) ggml_blck_size((ggml_type) f.d_type);
+    const ggml_type at = (ggml_type) f.d_act;
+    const int ablck = (int) ggml_blck_size(at);
+    // the band must be whole quant blocks of both the weights and the activation
+    if (col0 % wblck || coln % wblck || col0 % ablck || coln % ablck || col0 + coln > f.n_ff) {
+        std::fprintf(stderr, "native_down_cols: band [%lld,%lld) is not block-aligned (w %d a %d, n_ff %lld)\n",
+                     (long long) col0, (long long) (col0 + coln), wblck, ablck, (long long) f.n_ff);
+        std::abort();
+    }
+    const size_t w_off = (size_t) (col0 / wblck) * ggml_type_size((ggml_type) f.d_type);
+    const size_t a_off = (size_t) (col0 / ablck) * ggml_type_size(at);
+    const ggml_vec_dot_t dot = traits(f.d_type)->vec_dot;
+    const int n = (int) coln;
+    for (int r = 0; r < (int) f.n_embd; ++r) {
+        const uint8_t* dr = down_base + (size_t) r * f.d_row + w_off;
+        for (int t = 0; t < nt; ++t) {
+            float s = 0.f;
+            dot(n, &s, 0, dr, 0, (const uint8_t*) hq[t] + a_off, 0, 1);
+            out[t][r] += s;   // partial: the other rank's band is added by the all-reduce
+        }
+    }
+}
+
 void native_down_rows(const NativeFmt& f, const uint8_t* blob, const void* const* hq, int nt, float* const* out,
                       int r0, int r1) {
     // IQ4_NL down rows: the AVX-2 multi-token kernel decodes the nibbles and absolutises the weights once per
