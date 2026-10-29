@@ -43,7 +43,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 | 3 | GPU-staged QueuePartial (6 µs / 37 Gb/s) | **closed — link metrics confirmed; QueuePartial in engine** |
 | 4 | P4 greedy parity gate | **closed — PASS** |
 | 5 | P5 fast path + prefill (perf) | **closed — +32% measured** |
-| 6 | P6 serve integration | **open — token mirroring FIXED**; remaining: pair-up `/health`, kill/recover, multi-seq |
+| 6 | P6 serve integration | **closed — mirroring, peer /health, kill/recover; multi-seq deferred** |
 | 7 | P7 calibration / release | **closed — CI green, tables measured, v1.1.37 released** |
 | 8 | P2 RDMA transport | **closed** |
 | 9 | MTP / spec decode TP | **closed — fixed** |
