@@ -9,7 +9,8 @@
 #   --serve-port N      HTTP API port (default 8080)
 #   --world N           TP world size (default 2)
 #
-# Start this FIRST, then maya-rank1.sh on the peer within 30 seconds.
+# Start rank1.sh on the peer first (or within ~120 s bootstrap window).
+# Do not probe the bootstrap port with /dev/tcp (steals rank 0's accept).
 set -e
 cd "$(dirname "$0")/../.."
 

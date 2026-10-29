@@ -3,6 +3,8 @@
 Implements [TP2-DESIGN.md](TP2-DESIGN.md); background in [TP2-ANALYSIS.md](TP2-ANALYSIS.md).  
 **Rule for all phases in this session:** no code and no processes until the user says the benchmark is done. This file is the plan of record.
 
+**Status (2026-10-30, historical):** Phases 1–7 landed through **v1.1.37** (see [CHANGELOG.md](../CHANGELOG.md), [TP2-RUN.md](TP2-RUN.md), issues #2–#9). Not from the original plan: serve call-mirroring rides the **bootstrap TCP** socket (no separate control port/token); `MAYA_TP_AR_FP16` / `PREFILL_ROWS` / `OVERLAP` were **not** implemented (see SETTINGS). Remaining work is GitHub **#10–#13**, not this plan.
+
 **Target commit discipline:** branch `tp2` (this tree is already on `tp2`); one PR per phase after Phase 3 when hardware runs are allowed.
 
 ---

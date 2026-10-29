@@ -9,7 +9,8 @@
 #   --config FILE       maya-*.json config (default: first found)
 #   --world N           TP world size (default 2)
 #
-# Start maya-rank0.sh on the first host FIRST, then this within 30 seconds.
+# Prefer starting this BEFORE rank 0, or within rank 0's 120 s accept window.
+# Do not probe the bootstrap port with /dev/tcp.
 set -e
 cd "$(dirname "$0")/../.."
 

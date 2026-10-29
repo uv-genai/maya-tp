@@ -4,6 +4,16 @@ Every release is on GitHub (Releases) with these notes; every published change m
 page's Settings › About and updates (About > Update before the redesign; from v1.0.18), or `git pull`, then `./setup.sh` (Windows: `START-MAYA.bat`) - it recompiles
 only what changed and starts; the model is not downloaded again.
 
+## Unreleased (post-v1.1.37, TP2 fork)
+
+Follow-ups on this fork after the v1.1.37 tag (details in Handoff.md / issues):
+
+- **Serve peer health** (#6): `/health` reports `tp.peer` and `status=degraded` after rank 1 dies; sticky engine `TP2_DOWN`.
+- **Kill/recover** verified; `tools/tp2/acceptance.sh` automates pair-up → chat → kill → restart.
+- **Docs:** SETTINGS lists only implemented `MAYA_TP_*` knobs; TP2-RUN rewritten (rank1-first, no `/dev/tcp` probe, 6 µs / 37 Gb/s meanings).
+- **Calibrator** `tools/calibrate_glm_tp.py`; AR microbench `tp_comm_rdma_test --bench --hidden`.
+- **Open:** #10 bit-exact gather · #11 multi-seq + reuse · #12 pack geometry · #13 MTP under TP2.
+
 ## v1.1.37 - 2026-10-30
 
 Two-host tensor parallel (TP2) for GLM-5.3-Flash Maya-S on twin Strix Halo hosts over Thunderbolt RDMA, including

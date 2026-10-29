@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Maya TP2 rank 0 (OpenAI server) — runs on strix-halo-1.
-# Start this first, then rank1.sh on strix-halo-2 within 30 s.
+# Start rank1.sh on strix-halo-2 first (or within this engine's 120 s
+# bootstrap accept window). Do NOT probe port 18515 with /dev/tcp.
 #
 # Usage: rank0.sh [PORT]   (default 8000)
 #

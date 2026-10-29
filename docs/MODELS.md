@@ -32,6 +32,8 @@ the model's MTP block, which drafts tokens ahead.
 | **GLM-5.3 · Maya-M-Derisked** | `glm-maya-m-derisked` | 116 GB | Maya-M with a weight edit by [Blackfrost_AI](https://x.com/Blackfrost_AI) that reduces blanket refusals ([its repo](https://huggingface.co/peasantsmith/GLM-5.3-Flash-Maya-M-Derisked-IQ2_S-GGUF)); experimental | not measured yet |
 | **GLM-5.3 · Maya-L** | `glm-maya-l` | 156.3 GB | the biggest memory pools | **99.2%**; 90% |
 
+**Two-host TP2** (this fork, `uv-genai/maya-tp`): measured on **Maya-S** IQ2_XXS only ([TP2-RUN.md](TP2-RUN.md)). Maya-M/L share the Flash geometry and are expected to work; width hardcodes are being removed ([issue #12](https://github.com/uv-genai/maya-tp/issues/12)). Under TP2, MTP/DFlash and multi-conversation are off for now (#11, #13).
+
 The setup recommends one for your PC. How they're made and measured: [MAYA-S](../bench/results/MAYA-S.md),
 [MAYA-S24](../bench/results/MAYA-S24.md), [MAYA-M](../bench/results/MAYA-M.md), [MAYA-L](../bench/results/MAYA-L.md). On
 [Hugging Face](https://huggingface.co/peasantsmith/GLM-5.3-Flash-Maya-GGUF).

@@ -6,30 +6,27 @@ Give this prompt to a new session to resume the Maya TP2 work. It points at `Han
 
 Read `/home/ugo/software/project-maya/Handoff.md` in full before doing anything — it is the live handoff and overrides anything you infer. Also read `AGENTS.md` (platform rule, GitHub workflow, git remotes).
 
-**Project:** two-host tensor parallel (TP2) for GLM-5.3-Flash Maya-S on twin Strix Halo gfx1151 hosts over Thunderbolt RDMA. Repo `/home/ugo/software/project-maya`, GitHub `uv-genai/maya-tp`, branch `main`.
+**Project:** two-host tensor parallel (TP2) for GLM-5.3-Flash on twin Strix Halo gfx1151 hosts over Thunderbolt RDMA. Repo `/home/ugo/software/project-maya`, GitHub `uv-genai/maya-tp`, branch `main`, release **v1.1.37**.
 
 **Hard rules (non-negotiable):**
 1. **HIP/ROCm gfx1151 Linux only.** No CUDA/NVIDIA work.
-2. **RDMA only** (`usb4_rdma*`), target ~37 Gb/s / ~6 µs. No TCP data path.
+2. **RDMA only** (`usb4_rdma*`) for tensors. Bootstrap TCP = handshake + serve mirror only.
 3. **GPU is the inference path.** CPU only for unit tests of slice math.
-4. **Track every workstream as its own GitHub issue** on `uv-genai/maya-tp`. Comment while making progress. Link commits `refs #N`.
-5. Push only to `origin` (`uv-genai/maya-tp`). Never push `upstream` (`mw00/project-maya`).
-6. **NEVER use nested SSH.** You are ON strix-halo-2. Use SSH only to reach strix-halo-1.
-7. Python uses `.venv/bin/python`. Shell uses `jq`. Always kill old processes before starting new ones (`pkill -9 maya`; do **not** `pkill -f server.py` — that matches the ssh command line).
+4. **Track work as GitHub issues** on `uv-genai/maya-tp`. Comment while progressing. Link `refs #N`.
+5. Push only to `origin`. Never push `upstream`.
+6. **NEVER nested SSH.** You are ON strix-halo-2. SSH only to strix-halo-1.
+7. Python: `.venv/bin/python`. Shell: `jq`. Kill with `pkill -9 -x maya` — **never** `pkill -f server.py` (kills the ssh shell).
 
-**Current state:** TP2 slicing done (+32%), bench perfect. **Serve-mode token mirroring FIXED** (2026-10-30): rank 0 sends TpMirrorHdr before every collective call; rank 1 worker executes it. Two curl chat/completions verified.
+**Done (do not redo):** full slice + RDMA; serve mirroring; peer `/health` + kill/recover; v1.1.37; CI green. Bench ~+26–32% vs single-host; pair parity 100%. Decode under TP2 is **simple loop only** (no MTP/DFlash).
 
-**NEXT (issue #6 remaining):**
-1. `/health` pair-up: report peer down when rank 1 dies (today it only checks rank 0).
-2. Kill rank 1 → clean pair-down; restart both → recover.
-3. Optional: multi-seq mirror; snapshot/restore mirror for multi-turn reuse.
+**Open issues:** #1 umbrella · #10 bit-exact gather (optional) · #11 multi-seq + snapshot reuse · #12 pack-derived TP geometry · #13 MTP under TP2.
 
-**Launch for serve test:** rank 1 first (`bash tools/tp2/rank1.sh` on this host), then rank 0 (`bash tools/tp2/rank0.sh 18080` on strix-halo-1 via SSH). Never probe 18515 with `/dev/tcp` — it steals rank 0's accept.
+**Serve launch:** rank 1 first (`bash tools/tp2/rank1.sh`), then rank 0 (`bash tools/tp2/rank0.sh 18080` on strix-halo-1). **Never** probe 18515 with `/dev/tcp`. Ops: `docs/TP2-RUN.md`.
 
-**Reference:** gufo at `/home/ugo/projects/gufo`, especially `src/cli/serve/tp_executor.cpp` and `tp_control.cpp`.
+**Reference:** gufo `/home/ugo/projects/gufo` (`tp_executor.cpp`, `tp_control.hpp`).
 
-Verify every step: kill old processes, deploy binary, check timestamp, then test with a curl request.
+Verify every step: kill old processes, deploy binary (both hosts may have separate `build-hip/`), check timestamp, then curl.
 
 ---
 
-_When you make progress, update `Handoff.md` (§4 issue map, §5 what works, §10) and comment on the relevant issue. This file is the restart point — keep it current._
+_When you make progress, update `Handoff.md` and the issue. This file is the restart point — keep it current._
