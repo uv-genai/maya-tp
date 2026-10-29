@@ -145,7 +145,7 @@ python tools/tp2/greedy_parity.py /tmp/r0.txt /tmp/r1.txt --min-agree 1.0   # pa
 1. **#5 — measure the mixer slice + T2**: controlled bench (no-MTP, 32 tokens, same prompt). Mixer slice + split_reduce AR both implemented. Target 30%+ vs single-host.
 2. **#5 — prefill two-sub-batch overlap**: interleave two trunk batches a layer apart (gufo's `split_reduce` pair path). This is the remaining T2 win for prefill.
 3. **#5 — remaining paths**: glm_prefill.cu / glm_rows.cu / glm_window.cu / glm_mtp_rows.cu still use `g.n_head` in compute (85 sites) — must use `head_compute_for(il)` before MTP or prefill with TP2.
-4. **#3** — transport: AR cost ~5 ms (90 exch × 55 µs). Link is 6 µs. Tried and failed: `IBV_SEND_INLINE` (driver rejects), spin-before-sleep (mutex contention), fused WaitAdd (parity race). Next: `ibv_start_poll`/`ibv_next_poll` (raw CQ polling), pipelined worker (post send + defer CQE wait), completion-channel for short waits. Prefill two-sub-batch overlap needs two independent token streams (concurrent requests), not a single prompt.
+4. **#3** — transport: AR cost ~5 ms (90 exch × 55 µs). Link is 6 µs. **Thunderbolt driver limitations**: `IBV_SEND_INLINE` unsupported, `ibv_create_cq_ex` unsupported (falls back to `ibv_poll_cq`). Tried and failed: spin-before-sleep (mutex contention), fused WaitAdd (parity race). Remaining options: pipelined worker (post send + defer CQE wait), or accept the current cost. Prefill two-sub-batch needs two independent token streams (concurrent requests).
 5. **#6** — serve integration + launch scripts.
 6. **#7** — calibration + controlled benches + release.
 7. **#10** — only if bit-exact output is required (gather design).

@@ -2878,6 +2878,32 @@ def set_arg(args: list, flag: str, value) -> None:
         args += [flag, str(value)]
 
 
+TP_FLAGS = {
+    "world_size": "--tp-world-size",
+    "rank": "--tp-rank",
+    "bootstrap_host": "--tp-bootstrap-host",
+    "bootstrap_port": "--tp-bootstrap-port",
+    "rdma_device": "--tp-rdma-device",
+}
+
+
+def tp_inject_args(cfg: dict) -> None:
+    """TP2: inject the config's `tp` block into the engine `args` (in place).
+    A `tp` block in maya-*.json:
+      "tp": {"world_size": 2, "rank": 0, "bootstrap_host": "strix-halo-1.local",
+             "bootstrap_port": 18515, "rdma_device": "usb4_rdma5"}
+    Keys map to --tp-* flags; rank 0 omits bootstrap_host (it listens).
+    """
+    tp = cfg.get("tp")
+    if not tp or tp.get("world_size", 1) <= 1:
+        return
+    args = cfg.setdefault("args", [])
+    for key, flag in TP_FLAGS.items():
+        val = tp.get(key)
+        if val is not None and val != "":
+            set_arg(args, flag, val)
+
+
 def keep_args(old: list, new: list, flags: tuple) -> list:
     """The engine arguments `flags` as the old config had them (edited by hand, or written by an earlier setup):
     their values replace the new ones, or are added.  `new` is changed in place; what was kept is returned."""
@@ -3546,6 +3572,7 @@ def server_command(cfg_path: Path, a) -> tuple:
     """The dashboard's server for an installed config: (its command, its environment, what the setup's screen shows of
     it).  The engine is compiled again first when its source changed (an update)."""
     cfg = read_json(cfg_path)
+    tp_inject_args(cfg)                                # TP2: --tp-* flags from the config's "tp" block
     check_parallel(a, config_family(cfg))
     rename_programs()
     renamed = fix_config_names(cfg)                    # (v1.1.16's names: the programs, and the settings as MAYA_*)

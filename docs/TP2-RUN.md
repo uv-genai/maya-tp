@@ -1,73 +1,91 @@
-# TP2 run book — Maya GLM Maya-S on two Strix Halo hosts
+# TP2 Run Book — two-host tensor parallel for GLM-5.3-Flash
 
-Ops notes for the two-host tensor-parallel pair (design: [TP2-DESIGN.md](TP2-DESIGN.md),
-plan: [TP2-PLAN.md](TP2-PLAN.md)). **HIP/ROCm gfx1151 Linux only. Interconnect: Thunderbolt RDMA
-(`usb4_rdma*`), ~37 Gb/s / ~6 µs target.**
+Operations guide for running Maya TP2 on twin Strix Halo hosts over Thunderbolt RDMA.
 
-## Hosts
+## Prerequisites
 
-| Host | Role | IP |
-| --- | --- | --- |
-| `strix-halo-1.local` | rank 0 (API server) | 192.168.1.22 |
-| `strix-halo-2.local` | rank 1 (worker) | 192.168.1.92 |
+- Both hosts: gfx1151, ROCm, `thunderbolt_ibverbs` loaded (`usb4_rdma5` up)
+- Same model pack on both hosts (`P=/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack`)
+- Engine built: `cmake -S . -B build-hip -DSTRATA_ENABLE_HIP=ON -DSTRATA_PREFILL_MMQ=ON -DSTRATA_ENABLE_TP2_RDMA=ON`
+- SSH access from rank 1 to rank 0 (`strix-halo-1.local`)
 
-Same binary on both hosts (`sha256sum` must match). Start **rank 0 first**, rank 1 within 30 s.
-
-## RDMA link
+## Quick start (benchmark)
 
 ```sh
-ibv_devices                      # usb4_rdma* (lowest GUID = pick, both hosts)
-ibv_devinfo -d usb4_rdma5 | head # state: PORT_ACTIVE, link_layer: Ethernet (RoCE v2)
-sudo cat /sys/kernel/debug/thunderbolt_ibverbs/summary | grep striping
-#   native_write_striping: 1  →  good (one QP over both cables)
+# Single-host reference
+MAYA_GLM_NO_MTP=1 STRATA_GLM_TIMING=1 ./build-hip/maya --glm-pack $P \
+  --tokens 154822,25062,287,29905,371,25,7487,785,6722,315,9621,374 \
+  --max-new 32 --greedy --max-context 4096
+
+# TP2 pair (rank 0 first, rank 1 within 30 s)
+bash tools/tp2/run_bench.sh
 ```
 
-- Links should train at **20 Gb/s × 2 lanes** per cable (`/sys/bus/thunderbolt/devices/*/rx_speed`).
-  `10.0 Gb/s × 2` is a 20 Gb/s cable or poor training — try re-plugging.
-- RoCE GID needs an IPv4 on dummy netdev `tbv0` (10.77.0.1/24 vs .2).
-- After a cable re-plug: wait ~15 s for the link; if `usb4_rdma*` names shift, reload
-  `thunderbolt_ibverbs` (`sudo rmmod thunderbolt_ibverbs && sudo modprobe thunderbolt_ibverbs`).
-
-## Exchange test (no model)
+## Production launch
 
 ```sh
-# both hosts, same --rdma-device (lowest GUID)
-build-tp2/tp_comm_rdma_test --rank 0 --bootstrap-port 18515 --rdma-device usb4_rdma5 --bench
-build-tp2/tp_comm_rdma_test --rank 1 --bootstrap-host strix-halo-1.local \
-    --bootstrap-port 18515 --rdma-device usb4_rdma5 --bench
+# Rank 0 (API server) on strix-halo-1
+tools/tp2/maya-rank0.sh --config maya-glm5.json
+
+# Rank 1 (worker) on strix-halo-2
+tools/tp2/maya-rank1.sh --config maya-glm5.json --host strix-halo-1.local
 ```
 
-Expected: `rdma_ready … link=roce_v2 gid_index=1 mtu=4096`, `tp_comm_rdma_test OK`,
-`allreduce rows=…` lines. Compare against [#3](https://github.com/uv-genai/maya-tp/issues/3).
+## Config (`maya-*.json` `tp` block)
+
+```json
+{
+  "tp": {
+    "world_size": 2,
+    "rank": 0,
+    "bootstrap_port": 18515,
+    "rdma_device": "usb4_rdma5"
+  },
+  "args": ["--glm-pack", "/path/to/pack", "--max-context", "4096"]
+}
+```
+
+Rank 1 adds `"bootstrap_host": "strix-halo-1.local"` and sets `"rank": 1`.
+
+## Isolation flags
+
+| Flag | Effect |
+|---|---|
+| `MAYA_TP_NOSLICE=1` | Full weights on both ranks (isolation) |
+| `MAYA_TP_NOAR=1` | Skip all-reduce (slice vs AR bugs) |
+| `MAYA_TP_SH_BOTH=1` | Shared expert on both ranks (AR doubles it) |
+| `MAYA_GLM_NO_MTP=1` | Disable MTP (controlled benchmarks) |
+| `GLM_CB_DIR=<dir>` | Dump `ffn_out-<il>.f32` / `l_out-<il>.f32` for A/B |
+
+## Health check
+
+```sh
+curl http://127.0.0.1:8080/health
+```
 
 ## Failure playbook
 
 | Symptom | Cause | Fix |
-| --- | --- | --- |
-| `identity or size mismatch` (same scope/op, different bytes) | ranks issued different collectives — mismatched binaries or a skip/branch desync | `sha256sum` both binaries; check draft/row counts are mirrored |
-| `status 5` / `IBV_WC_MW_BIND_ERR` | stale Thunderbolt-RDMA state after a bad restart | reboot both hosts (or reload the module); **do not restart-loop** |
-| `verbs operation scope ended with exchanges in flight` | `EndOperation` before the stream drained | `hipStreamSynchronize` then `CheckQueued` then `EndOperation` |
-| `tp_pair_lost` | the other rank died / link dropped | expected on kill; restart both (rank 0 first) |
-| `no usb4_rdma device found` | links re-negotiating, or `thunderbolt_net` stole the rings | wait 15 s; `sudo rmmod thunderbolt_net` + `modprobe thunderbolt_ibverbs` |
-| handshake HTTP 500 naming a setting | ranks disagree on model/context/sessions | make flags identical |
-| decode / prefill much slower than expected | cables trained at 10 Gb/s×2, or striping off | check `rx_speed`, `native_write_striping: 1` |
+|---|---|---|
+| `bootstrap accept timed out` | Rank 1 not connected in 30 s | Start rank 1 sooner, check SSH |
+| `bootstrap connect: Operation now in progress` | Rank 0 not ready | Wait for rank 0's expert warm-up (~20 s) |
+| `ibv_post_send failed` | RDMA link down | `ip link show usb4_rdma5`, reload `thunderbolt_ibverbs` |
+| `verbs exchange timed out` | Peer died | Restart both ranks |
+| `HSA_STATUS_ERROR_MEMORY_FAULT` | Sliced weight OOB | Check `MAYA_TP_NOSLICE=1` works; report bug |
+| Pair parity < 100% | Slicing bug | Run `greedy_parity.py`, compare with `MAYA_TP_NOSLICE=1` |
 
-## Token parity
+## Performance reference (2026-10-29)
 
-```sh
-# single-host reference
-MAYA_GLM_SPEC_FOLLOW_SAVE=/tmp/single.txt ./maya.sh --bench   # or a generate run
-# TP2 pair
-MAYA_GLM_SPEC_FOLLOW_SAVE=/tmp/tp2.txt   …
-python tools/tp2/greedy_parity.py /tmp/single.txt /tmp/tp2.txt --min-agree 0.95
-```
+| Config | ms/tok | vs single |
+|---|---|---|
+| single-host | 56.81 | — |
+| TP2 full slice + AR | 38.52 | **+32.0%** |
+| TP2 full slice, no AR | 36.57 | +35.6% |
 
-Near-tie flips (reduction order) are expected at a few percent; a flipped prefix or
-empty stream is a bug (see collective invariant in [TP2-DESIGN.md](TP2-DESIGN.md)).
+Pair parity 100% (32/32). Spec-follow 31/32 (1 near-tie).
 
-## Collective invariant
+## Monitoring
 
-> Both ranks must issue the **same** collectives — order, count, bytes.
-
-Any rank-divergent branch (draft acceptance, cache restore, skip) breaks the pair.
-Single-host-only features stay gated off under TP2 (MTP/DFlash, KV streaming).
+- `STRATA_GLM_PROF=1`: per-stage GPU timing (kda_proj, moe_gate_up, tp_ar_mixer, …)
+- `STRATA_GLM_TIMING=1`: ms/token summary
+- `--spec-follow-save PATH`: save generated tokens for parity comparison
