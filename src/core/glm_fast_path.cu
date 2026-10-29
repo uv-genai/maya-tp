@@ -801,7 +801,7 @@ bool Glm5Model::fast_setup(std::string& err) {
                 Ly.gu_type = nl.fmt.gu_type;
                 Ly.d_type = nl.fmt.d_type;
                 // TP2: the pool holds this rank's column band, so the blob is built at ffn width
-                const size_t ffn = (size_t) ff_compute();
+                const size_t ffn = (size_t) ff_compute_for(il);
                 Ly.gu_bytes = (size_t) nl.fmt.gu_row * ffn;
                 Ly.dn_bytes = (size_t) nl.fmt.d_row * (size_t) g.n_embd * ffn / (size_t) g.n_ff_exp;
                 Ly.down_off = 2 * Ly.gu_bytes;
@@ -3788,7 +3788,7 @@ bool Glm5Model::fast_warm(std::string& err) {
                                  : role == 1 ? nl.up_off + (uint64_t) J.e * gu_full
                                              : nl.down_off + (uint64_t) J.e * dn_full;
             uint8_t* base = J.vram ? F->stage[(size_t) (job / 3)] : J.dst;
-            if (tp_.slicing()) {
+            if (slice_this(J.il)) {
                 // TP2: read this rank's column band straight out of the shard (contiguous for
                 // gate/up; a row loop for down).  The shard stride is the FULL expert.  One of
                 // the three role jobs does the whole blob; the other two return.
@@ -4723,7 +4723,7 @@ void Glm5Model::fast_read_part(int il, int e, int role, uint8_t* blob, int chunk
         return;
     }
     const Shard& sh = pack_shards_[(size_t) (role == 0 ? nl.gate_shard : role == 1 ? nl.up_shard : nl.down_shard)];
-    if (tp_.slicing()) {
+    if (slice_this(il)) {
         // TP2: the shard stride is the FULL expert; cut this rank's band into the compact blob.
         // One of the three role calls writes the whole blob (chunk 0 only).
         if (role != 0 || chunk != 0) return;
@@ -5639,7 +5639,7 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
         if (F->prof_on) F->mark("moe_down");
     } else {
     // (the shared expert's down rides the gate/up launch: sh_out)
-    const int ffn = ff_compute();
+    const int ffn = ff_compute_for(il);
     // TP2: the replicated shared expert is added on rank 0 only, so the all-reduce below
     // does not double it (gufo: "a whole shared expert belongs to rank 0").
     // MAYA_TP_SH_BOTH=1: add it on both ranks (isolation; AR then doubles it).

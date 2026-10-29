@@ -135,6 +135,11 @@ public:
     /// The intermediate width this rank computes: n_ff_exp, or its band under TP2 (the GPU kernels'
     /// `n_ff` argument and the sliced blob's row width).
     int ff_compute() const { return tp_.slicing() ? tp_.experts.count : (int) g_.n_ff_exp; }
+    /// Per-layer width: the NextN/MTP draft block (mtp_il_) is replicated - its experts are not sliced.
+    int ff_compute_for(int il) const {
+        return (tp_.slicing() && il != mtp_il_) ? tp_.experts.count : (int) g_.n_ff_exp;
+    }
+    bool slice_this(int il) const { return tp_.slicing() && il != mtp_il_; }
     /// Live counters of the fast path (both halves summed), for the driver's STAT lines.
     struct FastStats {
         uint64_t tokens = 0, hits = 0, misses = 0, miss_layers = 0;

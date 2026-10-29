@@ -636,7 +636,7 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
         }
         if (part == 1) return true;
         // TP2: the pool holds this rank's column band; the kernels run at ffn width
-        const int ffn = ff_compute();
+        const int ffn = ff_compute_for(il);
         if (multi) {
             // (the shared expert's down rides the gate/up launch, from each token's h the route wrote - moe_gate_up's)
             constexpr size_t q8 = 36;   // (a q8_1 block's bytes, as win_alloc's)
@@ -687,7 +687,9 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             jd.xq_cstride = (int64_t) W.sh_hq_s;
             jd.y_cstride = E;
             if (!gf::mv(&jd, 1, s)) { err = "glm window: shared expert down"; return false; }
-            sh_out = W.sh_out + (size_t) t0 * E;
+            // TP2: the replicated shared expert is added on rank 0 only (the all-reduce must not
+            // double it) - same rule as the multi path above and the token path.
+            if (!tp_.active() || tp_.rank == 0) sh_out = W.sh_out + (size_t) t0 * E;
         }
         // EXL3: each distinct expert once for all its tokens (exl3::win_experts, gf::moe_win_experts' groups);
         // STRATA_GLM_WIN_X3=0: each token's routed experts on the token path's kernels (A/B - the same bits)
@@ -803,13 +805,17 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             }
             const x3::MoeArgs xa = x3_args(md);
             x3::moe_gate_up(xa, x, nullptr, s);
-            x3::moe_down(xa, nullptr, Ly.sh_down.q != nullptr ? F->sh_out : nullptr, ffn, s);
+            x3::moe_down(xa, nullptr, (!tp_.active() || tp_.rank == 0) && Ly.sh_down.q != nullptr ? F->sh_out : nullptr, ffn, s);
         } else {
-            gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, E, g.n_ff_exp, g.swiglu_exp, xq, F->hq, Ly.sh_down.q,
+            // TP2: the pool holds this rank's band; the shared expert is added on rank 0 only
+            const int fft = ff_compute_for(il);
+            const float* sh_t = (!tp_.active() || tp_.rank == 0) && Ly.sh_down.q != nullptr ? F->sh_out : nullptr;
+            gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, E, fft, g.swiglu_exp, xq, F->hq, Ly.sh_down.q,
                             Ly.sh_down.type, F->sh_hq, FFs, F->sh_out, s);
-            gf::moe_down(Ly.d_type, md, g.n_exp_used, E, g.n_ff_exp, Ly.down_off, F->hq,
-                         Ly.sh_down.q != nullptr ? F->sh_out : nullptr, ffn, s);
+            gf::moe_down(Ly.d_type, md, g.n_exp_used, E, fft, Ly.down_off, F->hq, sh_t, ffn, s);
         }
+        // TP2: each token's routed sum is this rank's band
+        if (tp_.active() && !tp_.all_reduce(ffn, (std::size_t) E, E, s, err)) return false;
         if (lane) gf::moe_cpu_wait(md, E, ffn, s);
         if (W.uid != nullptr)
             cudaMemcpyAsync(W.uid + ((size_t) (il - l0_) * kWinMax + t) * 8, md.plan_id, 8 * sizeof(int),

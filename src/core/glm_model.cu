@@ -2488,8 +2488,9 @@ cudaError_t strata::core::Glm5Model::pack_moe_tail(std::string& err, const std::
     const void* hq[1] = {host_hq_.data()};
     // TP2: each rank computes its n_ff band of every expert (gate/up rows, down columns) and the
     // all-reduce after this loop sums the ranks' weighted partials.
-    const int ff0 = tp_.slicing() ? tp_.experts.begin : 0;
-    const int ffn = tp_.slicing() ? tp_.experts.count : (int) g.n_ff_exp;
+    const bool sl = slice_this(layer);
+    const int ff0 = sl ? tp_.experts.begin : 0;
+    const int ffn = sl ? tp_.experts.count : (int) g.n_ff_exp;
     std::memset(host_moe_.data(), 0, (size_t) g.n_embd * sizeof(float));
     for (size_t i = 0; i < ids.size(); ++i) {
         const int e = ids[i];
@@ -2577,15 +2578,16 @@ int32_t strata::core::Glm5Model::pool_evict(int cls) {
 void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
     const auto& nl = pack_layers_[(size_t) layer];
     const int64_t ff_full = g_.n_ff_exp;
-    const int64_t ff0 = tp_.slicing() ? tp_.experts.begin : 0;
-    const int64_t ffn = tp_.slicing() ? tp_.experts.count : ff_full;
+    const bool sl = slice_this(layer);
+    const int64_t ff0 = sl ? tp_.experts.begin : 0;
+    const int64_t ffn = sl ? tp_.experts.count : ff_full;
     const uint64_t gu_bytes = (uint64_t) nl.fmt.gu_row * (uint64_t) ffn;   // one role (this rank's band under TP)
     const uint64_t dn_bytes = (uint64_t) nl.fmt.d_row * (uint64_t) g_.n_embd * (uint64_t) ffn / (uint64_t) ff_full;
     const Shard& gs = pack_shards_[(size_t) nl.gate_shard];
     const Shard& us = pack_shards_[(size_t) nl.up_shard];
     const Shard& ds = pack_shards_[(size_t) nl.down_shard];
     static const bool stats = getenv("STRATA_GLM_POOL_STATS") != nullptr;
-    if (bounce_ || tp_.active())   // the staging ring is reused every layer: drain queued miss copies first
+    if (bounce_ || sl)   // the staging ring is reused every layer: drain queued miss copies first
         cudaStreamSynchronize(0);
     // STRATA_GLM_TRACE=<file>: append "layer expert" per routed expert (the routing distribution
     // study - what a static/staged tier could hold)
@@ -2609,7 +2611,7 @@ void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
             pool_key_of_[(size_t) slot] = key;
             pool_count_[(size_t) slot] = 1;
             uint8_t* dst = cls_arena + (size_t) (slot - class_base_[cls]) * cls_stride;
-            if (stage_on_ && !tp_.active()) {
+            if (stage_on_ && !sl) {
                 // stage on a worker in parallel (the NVMe read is the cost; the main thread would
                 // serialize it); the DMA is issued after stage_join() at the end of pool_ensure
                 StageJob j;
@@ -2628,11 +2630,11 @@ void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
                 }
                 staged_dst_[i] = dst;
                 staged_len_[i] = 2 * gu_bytes + dn_bytes;
-            } else if (bounce_ || tp_.active()) {
+            } else if (bounce_ || sl) {
                 // pinned staging (STRATA_GLM_BOUNCE=1): CPU into the ring, then one stream-ordered
                 // device copy per miss.  Under TP2 this is where the rank's column band is cut out.
                 uint8_t* b = bounce_ + (size_t) (bounce_i_++ % 24) * slot_bytes_;
-                if (tp_.slicing()) {
+                if (sl) {
                     tp_slice_expert(gs.base + nl.gate_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.gu_row * ff_full,
                                     us.base + nl.up_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.gu_row * ff_full,
                                     ds.base + nl.down_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.d_row * g_.n_embd,
