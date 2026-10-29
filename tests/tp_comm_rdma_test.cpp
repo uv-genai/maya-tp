@@ -5,9 +5,11 @@
 //   strix-halo-2:  tp_comm_rdma_test --rank 1 --bootstrap-host strix-halo-1.local --bootstrap-port 18515
 // Both print OK and exit 0 when N exchanges of a growing pattern all match the expected sum.
 #include "strata/net/communicator.hpp"
+#include "strata/net/tp_kernels.hpp"
 #include "strata/net/verbs.hpp"
 
 #include <chrono>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -172,6 +174,122 @@ int main(int argc, char** argv) {
         std::printf("bench bandwidth  %d x %.1f MiB: %.2f Gb/s one-way (%.2f us/exchange)\n",
                     reps_big, (double) nbig * sizeof(float) / 1048576.0, 8.0 * bytes / big_s / 1e9,
                     1e6 * big_s / reps_big);
+
+        // --- queued GPU path (gufo's 6 us form): QueuePartial + Stage/Wait/Add, no host round-trip ---
+        // One scope, many queued exchanges (the engine queues a whole forward), then CheckQueued + End.
+        const uint32_t hidden = 4096;
+        {
+            Communicator::QueuedPartial q;
+            if (comm->BeginOperation((uint64_t) (400000), &err) && comm->QueuePartial(n1 * sizeof(float), &q, &err)) {
+                strata::net::StagePartial(dev, q.send, n1, q.arrivals, q.ready, q.value, stream);
+                strata::net::WaitValue(q.arrived, q.value, q.wait_ticks, q.timed_out, stream);
+                strata::net::AddRowsBroadcast(q.peer, dev, (uint32_t) (n1 / hidden), hidden, 1, stream);
+                ok(hipStreamSynchronize(stream) == hipSuccess, "qbench warm sync");
+                ok(comm->CheckQueued(&err), "qbench warm check");
+                ok(comm->EndOperation((uint64_t) (400000), &err), "qbench warm end");
+            } else {
+                std::printf("FAIL queued warm: %s\n", err.c_str());
+                ++g_fail;
+            }
+        }
+        auto q0 = std::chrono::steady_clock::now();
+        for (int i = 0; i < reps; ++i) {
+            const uint64_t op = (uint64_t) (500000 + i);
+            Communicator::QueuedPartial q;
+            if (!comm->BeginOperation(op, &err) || !comm->QueuePartial(n1 * sizeof(float), &q, &err)) {
+                std::printf("FAIL queued %d: %s\n", i, err.c_str());
+                ++g_fail;
+                break;
+            }
+            strata::net::StagePartial(dev, q.send, n1, q.arrivals, q.ready, q.value, stream);
+            strata::net::WaitValue(q.arrived, q.value, q.wait_ticks, q.timed_out, stream);
+            strata::net::AddRowsBroadcast(q.peer, dev, (uint32_t) (n1 / hidden), hidden, 1, stream);
+            // the stream must drain first: the background thread counts the exchange out
+            // before it raises `arrived`, so a drained stream finds nothing in flight.
+            if (hipStreamSynchronize(stream) != hipSuccess || !comm->CheckQueued(&err) ||
+                !comm->EndOperation(op, &err)) {
+                std::printf("FAIL queued end %d: %s\n", i, err.c_str());
+                ++g_fail;
+                break;
+            }
+        }
+        ok(hipStreamSynchronize(stream) == hipSuccess, "qbench sync2");
+        auto q1 = std::chrono::steady_clock::now();
+        const double qlat_us = std::chrono::duration<double, std::micro>(q1 - q0).count() / reps;
+        std::printf("bench queued latency  %d x 16 KiB: %.2f us/exchange\n", reps, qlat_us);
+
+        // pipelined: one scope, many queued exchanges (the host queues ahead; the GPU waits on flags)
+        auto r0 = std::chrono::steady_clock::now();
+        double qbytes = 0;
+        {
+            const uint64_t scope = 700000;
+            if (!comm->BeginOperation(scope, &err)) {
+                std::printf("FAIL queued big begin: %s\n", err.c_str());
+                ++g_fail;
+            } else {
+                const size_t rows = nbig / hidden;
+                for (int i = 0; i < reps_big; ++i) {
+                    Communicator::QueuedPartial q;
+                    if (!comm->QueuePartial(nbig * sizeof(float), &q, &err)) {
+                        std::printf("FAIL queued big %d: %s\n", i, err.c_str());
+                        ++g_fail;
+                        break;
+                    }
+                    strata::net::StagePartial(dev, q.send, nbig, q.arrivals, q.ready, q.value, stream);
+                    strata::net::WaitValue(q.arrived, q.value, q.wait_ticks, q.timed_out, stream);
+                    strata::net::AddRowsBroadcast(q.peer, dev, (uint32_t) rows, hidden, 1, stream);
+                    qbytes += (double) nbig * sizeof(float);
+                }
+                ok(hipStreamSynchronize(stream) == hipSuccess, "qbench sync3");
+                ok(comm->CheckQueued(&err), "qbench check2");
+                ok(comm->EndOperation(scope, &err), "qbench end2");
+            }
+        }
+        auto r1 = std::chrono::steady_clock::now();
+        const double qbig_s = std::chrono::duration<double>(r1 - r0).count();
+        std::printf("bench queued bandwidth  %d x %.1f MiB (pipelined): %.2f Gb/s one-way (%.2f us/exchange)\n",
+                    reps_big, (double) nbig * sizeof(float) / 1048576.0, 8.0 * qbytes / qbig_s / 1e9,
+                    1e6 * qbig_s / reps_big);
+
+        // gufo's --allreduce-bench shape: 1/2/8/512 rows of hidden=4096, queued all-reduce,
+        // timed queuing -> stream drain, min/p50/mean/p99 (comparable with gufo's tp_batched_probe).
+        {
+            const uint32_t H = 4096;
+            const size_t rows_list[] = {1, 2, 8, 512};
+            const uint64_t scope = 800000;
+            if (comm->BeginOperation(scope, &err)) {
+                for (size_t rows : rows_list) {
+                    const size_t bytes = rows * H * sizeof(float);
+                    std::vector<double> us;
+                    us.reserve((size_t) reps);
+                    for (int i = 0; i < reps; ++i) {
+                        const auto s = std::chrono::steady_clock::now();
+                        Communicator::QueuedPartial q;
+                        if (!comm->QueuePartial(bytes, &q, &err)) break;
+                        strata::net::StagePartial(dev, q.send, bytes / sizeof(float), q.arrivals, q.ready, q.value,
+                                                  stream);
+                        strata::net::WaitValue(q.arrived, q.value, q.wait_ticks, q.timed_out, stream);
+                        strata::net::AddRowsBroadcast(q.peer, dev, (uint32_t) rows, H, 1, stream);
+                        if (hipStreamSynchronize(stream) != hipSuccess || !comm->CheckQueued(&err)) break;
+                        us.push_back(std::chrono::duration<double, std::micro>(
+                                         std::chrono::steady_clock::now() - s)
+                                         .count());
+                    }
+                    if (us.empty()) {
+                        std::printf("allreduce rows=%zu FAILED: %s\n", rows, err.c_str());
+                        ++g_fail;
+                        continue;
+                    }
+                    std::sort(us.begin(), us.end());
+                    double total = 0;
+                    for (double v : us) total += v;
+                    std::printf("allreduce rows=%zu bytes=%zu n=%zu min_us=%.1f p50_us=%.1f mean_us=%.1f p99_us=%.1f\n",
+                                rows, rows * H * sizeof(float), us.size(), us.front(), us[us.size() / 2],
+                                total / us.size(), us[(us.size() * 99) / 100]);
+                }
+                ok(comm->EndOperation(scope, &err), "allreduce end");
+            }
+        }
     }
     return 0;
 }
