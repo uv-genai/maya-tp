@@ -3779,11 +3779,39 @@ bool Glm5Model::fast_warm(std::string& err) {
                 return;
             }
             const Shard& sh = pack_shards_[(size_t) (role == 0 ? nl.gate_shard : role == 1 ? nl.up_shard : nl.down_shard)];
-            const uint64_t off = role == 0   ? nl.gate_off + (uint64_t) J.e * Ly.gu_bytes
-                                 : role == 1 ? nl.up_off + (uint64_t) J.e * Ly.gu_bytes
-                                             : nl.down_off + (uint64_t) J.e * Ly.dn_bytes;
-            const size_t len = role == 2 ? Ly.dn_bytes : Ly.gu_bytes;
+            // TP2: the shard stride is the FULL expert (n_ff_exp rows); Ly.gu_bytes is this rank's
+            // band.  Slice the band out of the full blob (tp_slice_expert) instead of using the
+            // sliced size as the file stride - that read the wrong expert's bytes.
+            const uint64_t gu_full = (uint64_t) nl.fmt.gu_row * (uint64_t) g.n_ff_exp;
+            const uint64_t dn_full = (uint64_t) nl.fmt.d_row * (uint64_t) g.n_embd;
+            const uint64_t off = role == 0   ? nl.gate_off + (uint64_t) J.e * gu_full
+                                 : role == 1 ? nl.up_off + (uint64_t) J.e * gu_full
+                                             : nl.down_off + (uint64_t) J.e * dn_full;
             uint8_t* base = J.vram ? F->stage[(size_t) (job / 3)] : J.dst;
+            if (tp_.slicing()) {
+                // TP2: read this rank's column band straight out of the shard (contiguous for
+                // gate/up; a row loop for down).  The shard stride is the FULL expert.  One of
+                // the three role jobs does the whole blob; the other two return.
+                if (role != 0) return;
+                const uint64_t gu_full = (uint64_t) nl.fmt.gu_row * (uint64_t) g.n_ff_exp;
+                const uint64_t dn_full = (uint64_t) nl.fmt.d_row * (uint64_t) g.n_embd;
+                const int64_t ff0 = tp_.experts.begin, ffn = tp_.experts.count;
+                const size_t gu_band = (size_t) nl.fmt.gu_row * (size_t) ffn;
+                const size_t d_band = (size_t) nl.fmt.d_row * (size_t) ffn / (size_t) g.n_ff_exp;
+                const uint8_t* gsrc = pack_shards_[(size_t) nl.gate_shard].base + nl.gate_off + (uint64_t) J.e * gu_full;
+                const uint8_t* usrc = pack_shards_[(size_t) nl.up_shard].base + nl.up_off + (uint64_t) J.e * gu_full;
+                const uint8_t* dsrc = pack_shards_[(size_t) nl.down_shard].base + nl.down_off + (uint64_t) J.e * dn_full;
+                std::memcpy(base, gsrc + (size_t) ff0 * nl.fmt.gu_row, gu_band);
+                std::memcpy(base + gu_band, usrc + (size_t) ff0 * nl.fmt.gu_row, gu_band);
+                uint8_t* dd = base + 2 * gu_band;
+                for (int64_t r = 0; r < g.n_embd; ++r)
+                    std::memcpy(dd + (size_t) r * d_band,
+                                dsrc + (size_t) r * nl.fmt.d_row +
+                                    (size_t) nl.fmt.d_row * (size_t) ff0 / (size_t) g.n_ff_exp,
+                                d_band);
+                return;
+            }
+            const size_t len = role == 2 ? Ly.dn_bytes : Ly.gu_bytes;
             uint8_t* d = base + (role == 0 ? 0 : role == 1 ? Ly.gu_bytes : 2 * Ly.gu_bytes);
             read_slice(sh, off, len, d);
         });
@@ -4695,6 +4723,27 @@ void Glm5Model::fast_read_part(int il, int e, int role, uint8_t* blob, int chunk
         return;
     }
     const Shard& sh = pack_shards_[(size_t) (role == 0 ? nl.gate_shard : role == 1 ? nl.up_shard : nl.down_shard)];
+    if (tp_.slicing()) {
+        // TP2: the shard stride is the FULL expert; cut this rank's band into the compact blob.
+        // One of the three role calls writes the whole blob (chunk 0 only).
+        if (role != 0 || chunk != 0) return;
+        const uint64_t gu_full = (uint64_t) nl.fmt.gu_row * (uint64_t) g_.n_ff_exp;
+        const uint64_t dn_full = (uint64_t) nl.fmt.d_row * (uint64_t) g_.n_embd;
+        const int64_t ff0 = tp_.experts.begin, ffn = tp_.experts.count;
+        const size_t gu_band = (size_t) nl.fmt.gu_row * (size_t) ffn;
+        const size_t d_band = (size_t) nl.fmt.d_row * (size_t) ffn / (size_t) g_.n_ff_exp;
+        const uint8_t* gsrc = pack_shards_[(size_t) nl.gate_shard].base + nl.gate_off + (uint64_t) e * gu_full;
+        const uint8_t* usrc = pack_shards_[(size_t) nl.up_shard].base + nl.up_off + (uint64_t) e * gu_full;
+        const uint8_t* dsrc = pack_shards_[(size_t) nl.down_shard].base + nl.down_off + (uint64_t) e * dn_full;
+        std::memcpy(blob, gsrc + (size_t) ff0 * nl.fmt.gu_row, gu_band);
+        std::memcpy(blob + gu_band, usrc + (size_t) ff0 * nl.fmt.gu_row, gu_band);
+        uint8_t* dd = blob + 2 * gu_band;
+        for (int64_t r = 0; r < g_.n_embd; ++r)
+            std::memcpy(dd + (size_t) r * d_band,
+                        dsrc + (size_t) r * nl.fmt.d_row + (size_t) nl.fmt.d_row * (size_t) ff0 / (size_t) g_.n_ff_exp,
+                        d_band);
+        return;
+    }
     const uint64_t off = role == 0   ? nl.gate_off + (uint64_t) e * Ly.gu_bytes
                          : role == 1 ? nl.up_off + (uint64_t) e * Ly.gu_bytes
                                      : nl.down_off + (uint64_t) e * Ly.dn_bytes;
