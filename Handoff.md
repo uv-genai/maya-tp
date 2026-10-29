@@ -41,8 +41,8 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 | 3 | GPU-staged QueuePartial (6 µs / 37 Gb/s) | open |
 | 4 | P4 greedy parity gate | **closed — PASS** |
 | 5 | P5 fast path + prefill (perf) | open — **active, mixer slice done** |
-| 6 | P6 serve integration | open — **launch scripts + config plumbing done** |
-| 7 | P7 calibration / release | open — **ops runbook + quality measured** |
+| 6 | P6 serve integration | open — **all deliverables shipped**, needs manual verification |
+| 7 | P7 calibration / release | open — **all deliverables shipped**, remaining knobs optional |
 | 8 | P2 RDMA transport | **closed** |
 | 9 | MTP / spec decode TP | **closed — fixed** |
 | 10 | Gather-based bit-exact variant | open (design alternative) |
@@ -142,11 +142,9 @@ python tools/tp2/greedy_parity.py /tmp/r0.txt /tmp/r1.txt --min-agree 1.0   # pa
 
 ## 10. Next steps (priority)
 
-1. **#6 — serve pair-up**: `/ready` semantics, mirror `STRATA_GLM_SEQS`, `curl` acceptance test, kill/recover
-2. **#6 — concurrent requests**: 2-4 chats with `--parallel`, verify stable streaming under TP2
-3. **#7 — calibration**: `tools/calibrate_glm_tp.py`, measured defaults for `MAYA_TP_*` knobs
-4. **#7 — release**: CHANGELOG, single-host HIP bit-unchanged with `STRATA_ENABLE_TP2_RDMA=OFF`
-5. **#3** — transport: only if driver adds `ibv_create_cq_ex` or `IBV_SEND_INLINE` support
+1. **#6 — manual verification**: run `tools/tp2/acceptance.sh` on the twin Strix Halos (curl, kill/recover, concurrent chats)
+2. **#7 — optional**: `MAYA_TP_*` measured defaults (needs engine support for `MAYA_TP_AR_FP16` etc.), formal release tag
+3. **#10** — only if bit-exact output is required (gather design)
 
 ## 11. Key commits
 
