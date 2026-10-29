@@ -212,7 +212,7 @@ bool Glm5Model::win_alloc(int tmax, std::string& err) {
     W.sh_hq_s = (size_t) FF / 32 * q8;
     W.sh_hq = take_b(at, T * W.sh_hq_s);
     W.sh_out = take_f(at, T * E);
-    W.whq = take_b(at, T * 8 * ((size_t) g.n_ff_exp / 32 * q8));
+    W.whq = take_b(at, T * 8 * ((size_t) ff_compute() / 32 * q8));
     W.wpart = take_f(at, T * 8 * E);
     W.grp_ptr = (unsigned long long*) take_b(at, T * 8 * 8);
     W.grp_start = (int*) take_b(at, (T * 8 + 1) * f4);
@@ -635,34 +635,43 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
         if (prof_b) W.mark("moe_routes", s);
         }
         if (part == 1) return true;
+        // TP2: the pool holds this rank's column band; the kernels run at ffn width
+        const int ffn = ff_compute();
         if (multi) {
             // (the shared expert's down rides the gate/up launch, from each token's h the route wrote - moe_gate_up's)
             constexpr size_t q8 = 36;   // (a q8_1 block's bytes, as win_alloc's)
             gf::MoeDev mm = tok_dev(t0);
             mm.mt_T = T;
             mm.mt_xq_s = (unsigned int) (W.xq_s / q8);
-            mm.mt_hq_s = (unsigned int) (8 * (g.n_ff_exp / 32));
+            mm.mt_hq_s = (unsigned int) (8 * (ffn / 32));
             mm.mt_sh_hq_s = (unsigned int) (W.sh_hq_s / q8);
             mm.mt_out_s = (unsigned int) E;
             mm.mt_cpu_s = (unsigned int) E;
-            const size_t hq_t = 8 * ((size_t) g.n_ff_exp / 32) * q8;
+            const size_t hq_t = 8 * ((size_t) ffn / 32) * q8;
             const bool sh = Ly.sh_down.q != nullptr;
-            if (!gf::moe_experts_multi(Ly.gu_type, Ly.d_type, mm, g.n_exp_used, E, g.n_ff_exp, g.swiglu_exp,
+            // TP2: the replicated shared expert is added on rank 0 only (the all-reduce must not double it)
+            float* sh_out_w = (!tp_.active() || tp_.rank == 0) ? (sh ? W.sh_out + (size_t) t0 * E : nullptr)
+                                                               : nullptr;
+            if (!gf::moe_experts_multi(Ly.gu_type, Ly.d_type, mm, g.n_exp_used, E, ffn, g.swiglu_exp,
                                        Ly.down_off, (const uint8_t*) W.xq + (size_t) t0 * W.xq_s,
                                        (uint8_t*) W.whq + (size_t) t0 * hq_t, Ly.sh_down.q, Ly.sh_down.type,
                                        sh ? (const uint8_t*) W.sh_hq + (size_t) t0 * W.sh_hq_s : nullptr, FFs,
-                                       sh ? W.sh_out + (size_t) t0 * E : nullptr, W.ffn + (size_t) t0 * E, s)) {
+                                       sh_out_w, W.ffn + (size_t) t0 * E, s)) {
                 // (not here: each token's on its own launches, the same kernels)
                 for (int t = t0; t < t0 + T; ++t) {
                     const gf::MoeDev mt = tok_dev(t);
                     uint8_t* hq = (uint8_t*) W.whq + (size_t) t * hq_t;
-                    float* so = sh ? W.sh_out + (size_t) t * E : nullptr;
-                    gf::moe_gate_up(Ly.gu_type, mt, g.n_exp_used, E, g.n_ff_exp, g.swiglu_exp,
+                    float* so = (!tp_.active() || tp_.rank == 0) ? (sh ? W.sh_out + (size_t) t * E : nullptr) : nullptr;
+                    gf::moe_gate_up(Ly.gu_type, mt, g.n_exp_used, E, ffn, g.swiglu_exp,
                                     (const uint8_t*) W.xq + (size_t) t * W.xq_s, hq, Ly.sh_down.q, Ly.sh_down.type,
                                     sh ? (const uint8_t*) W.sh_hq + (size_t) t * W.sh_hq_s : nullptr, FFs, so, s);
-                    gf::moe_down(Ly.d_type, mt, g.n_exp_used, E, g.n_ff_exp, Ly.down_off, hq, so,
+                    gf::moe_down(Ly.d_type, mt, g.n_exp_used, E, ffn, Ly.down_off, hq, so,
                                  W.ffn + (size_t) t * E, s);
                 }
+            }
+            // TP2: the routed experts' sums are this rank's band; sum the ranks before the CPU lane
+            if (tp_.active()) {
+                if (!tp_.all_reduce(W.ffn + (size_t) t0 * E, (std::size_t) T * E, E, s, err)) return false;
             }
             if (prof_b) W.mark("moe_experts", s);
             if (lane)
@@ -750,13 +759,17 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             mw.T = T;
             mw.k = g.n_exp_used;
             mw.n_embd = E;
-            mw.n_ff = g.n_ff_exp;
+            mw.n_ff = ffn;
             mw.limit = g.swiglu_exp;
             mw.down_off = Ly.down_off;
             if (!gf::moe_win_experts(Ly.gu_type, Ly.d_type, mw, s)) {
                 err = "glm window: the batched experts (types " + std::to_string(Ly.gu_type) + " / " +
                       std::to_string(Ly.d_type) + ")";
                 return false;
+            }
+            // TP2: sum the ranks' routed bands before the residual
+            if (tp_.active()) {
+                if (!tp_.all_reduce(W.ffn + (size_t) t0 * E, (std::size_t) T * E, E, s, err)) return false;
             }
         }
         if (prof_b) W.mark("moe_experts", s);
