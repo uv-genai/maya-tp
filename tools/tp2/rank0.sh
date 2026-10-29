@@ -17,7 +17,7 @@ ENGINE="${ENGINE:-$ROOT/build-hip/maya}"
 RDEV=$(ibv_devices | awk '/usb4_rdma/{print $2, $1}' | sort | head -n1 | awk '{print $2}')
 [ -n "$RDEV" ] || { echo "no usb4_rdma device found" >&2; exit 1; }
 
-# Generate a TP2 config from the base config: add the tp block and --tp-* flags.
+# Generate a TP2 config from the base config: add tp block and --tp-* flags.
 TP_CONFIG=$(mktemp /tmp/maya-tp2-rank0-XXXXXX.json)
 trap 'rm -f "$TP_CONFIG"' EXIT
 python3 - "$MAYA_CONFIG" "$TP_CONFIG" "$RDEV" << 'PYEOF'
@@ -33,9 +33,11 @@ for k, v in [("--tp-world-size", "2"), ("--tp-rank", "0"),
     else:
         args += [k, v]
 json.dump(cfg, open(dst, "w"), indent=1)
-print(f"rank0: tp config -> {dst} (rdma={rdev})")
+print(f"rank0: tp config -> {dst} (rdma={rdev} port={sys.argv[1]})")
 PYEOF
+
+TOKENIZER="${TOKENIZER:-$(python3 -c "import json; print(json.load(open('$MAYA_CONFIG')).get('tokenizer',''))")}"
 
 exec python3 "$ROOT/serve/server.py" --engine strata --config "$TP_CONFIG" \
   --host 0.0.0.0 --port "$PORT" \
-  --tokenizer "${TOKENIZER:-$(python3 -c "import json; print(json.load(open('$MAYA_CONFIG')).get('tokenizer',''))")}"
+  --tokenizer "$TOKENIZER"
