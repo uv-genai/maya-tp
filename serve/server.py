@@ -3990,7 +3990,9 @@ def make_handler(svc: Service):
                                  "max_context": svc.engine.max_context, "model": svc.model,
                                  "model_label": svc.model_label,   # (the model first: "GLM-5.3 · Maya-S24")
                                  "images": svc.vision is not None, "api_key": bool(svc.api_key), "defaults": rec,
-                                 "version": MAYA_VERSION, "mcp_tools": bool(svc.mcp), "unloaded": svc.unloaded})
+                                 "version": MAYA_VERSION, "mcp_tools": bool(svc.mcp), "unloaded": svc.unloaded,
+                                 "tp": {"world_size": getattr(svc.engine, "info", {}).get("tp_world", 1),
+                                        "rank": getattr(svc.engine, "info", {}).get("tp_rank", 0)}})
             elif path == "/api/context":
                 # the dashboard's Context size: the range, the measured cost of the current size, a reload's state
                 if self._authorized():

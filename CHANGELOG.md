@@ -4,6 +4,22 @@ Every release is on GitHub (Releases) with these notes; every published change m
 page's Settings › About and updates (About > Update before the redesign; from v1.0.18), or `git pull`, then `./setup.sh` (Windows: `START-MAYA.bat`) - it recompiles
 only what changed and starts; the model is not downloaded again.
 
+## TP2 (two-host tensor parallel) — 2026-10-29
+
+Tensor parallel for GLM-5.3-Flash across twin Strix Halo hosts over Thunderbolt RDMA. **+32% vs single-host**
+(56.81 → 38.52 ms/tok), pair parity 100%, spec-follow 31/32 (1 near-tie).
+
+- **Full tensor-parallel slicing**: KDA mixer (heads 64→32), DSA head-slice, experts (2048→1024), shared expert,
+  dense FFN (12288→6144), attn_output column-slice. Two all-reduces per layer (mixer + FFN).
+- **RDMA transport**: gufo Ibrverbs port (`usb4_rdma*`, RoCE v2, write striping). ~37 Gb/s link, ~6 µs transit.
+  `ibv_create_cq_ex`/`IBV_SEND_INLINE` unsupported on Thunderbolt driver (graceful fallback).
+- **Config**: `maya-*.json` `tp` block → `--tp-*` flags (`maya.py tp_inject_args`). Launch scripts
+  `tools/tp2/maya-rank0.sh`/`maya-rank1.sh`. `/health` reports `tp` status.
+- **Tools**: `tools/tp2/acceptance.sh` (pair-up, curl, kill/recover), `tools/calibrate_glm_tp.py` (AR cost),
+  `tools/test_tp_config.py` (10 CI tests), `docs/TP2-RUN.md` (ops runbook).
+- **Isolation flags**: `MAYA_TP_NOSLICE`, `MAYA_TP_NOAR`, `MAYA_TP_SH_BOTH`, `MAYA_GLM_NO_MTP`.
+- **CI**: `check_hip_compat.py` + `serve` + `tools` tests. No GPU required.
+
 ## v1.1.36 - 2026-10-28
 
 DeepSeek drafting now works with `--parallel` (#611), MiniMax keeps its experts once in RAM instead of twice, the same
