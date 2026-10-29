@@ -695,6 +695,24 @@ public:
     return true;
   }
 
+  [[nodiscard]] bool SendControl(const void* data, std::size_t bytes,
+                                 std::string* error) override {
+    if (!control_ || !control_->valid()) {
+      SetError(error, "no control channel");
+      return false;
+    }
+    return control_->SendAll(data, bytes, error);
+  }
+
+  [[nodiscard]] bool RecvControl(void* data, std::size_t bytes,
+                                 std::string* error) override {
+    if (!control_ || !control_->valid()) {
+      SetError(error, "no control channel");
+      return false;
+    }
+    return control_->RecvAll(data, bytes, error);
+  }
+
   [[nodiscard]] const float* ExchangePartial(const float* data,
                                              std::size_t bytes,
                                              hipStream_t stream,

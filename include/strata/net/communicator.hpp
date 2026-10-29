@@ -34,6 +34,20 @@ public:
                                             std::string* error) = 0;
   [[nodiscard]] virtual bool EndOperation(std::uint64_t scope_id,
                                           std::string* error) = 0;
+  /// Sends `bytes` of `data` over the control channel (rank 0 -> rank 1).
+  /// Used to forward token IDs so both ranks process the same sequence.
+  [[nodiscard]] virtual bool SendControl(const void* data, std::size_t bytes,
+                                         std::string* error) {
+    (void)data; (void)bytes; (void)error;
+    return false;
+  }
+  /// Receives `bytes` into `data` from the control channel (rank 1 <- rank 0).
+  /// Blocks until the data arrives.  Returns false on error or disconnect.
+  [[nodiscard]] virtual bool RecvControl(void* data, std::size_t bytes,
+                                         std::string* error) {
+    (void)data; (void)bytes; (void)error;
+    return false;
+  }
   /// Sends this rank's `bytes` of `data`, complete once `stream` drains, and
   /// returns a GPU-readable pointer to the peer's partial of the same size, or
   /// null on failure. Every exchange must use the same stream, and the add

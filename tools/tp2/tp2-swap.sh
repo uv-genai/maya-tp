@@ -44,7 +44,7 @@ case "${1:?usage: tp2-swap.sh run PORT | tp2-swap.sh stop}" in
     ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=5 "$RANK1_HOST" \
       "$ENGINE --glm-pack '$P' --tp-world-size 2 --tp-rank 1 \
        --tp-bootstrap-host 192.168.1.22 --tp-bootstrap-port 18515 \
-       --tp-rdma-device $RDEV --max-context 4096 --serve" \
+       --tp-rdma-device $RDEV --max-context 4096" \
       > /home/ugo/rank1.log 2>&1 &
     R1PID=$!
 
