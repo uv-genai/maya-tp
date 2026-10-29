@@ -304,20 +304,6 @@ namespace {
 
 constexpr int GM_THREADS = 256;
 
-/// TP2: copy one expert's column band into a compact blob the GPU kernels run with n_ff = ffn.
-/// Layout: [gate rows [ff0,ff0+ffn) | up rows [ff0,ff0+ffn) | down columns [ff0,ff0+ffn) of each output row].
-void tp_slice_expert(const uint8_t* gs, const uint8_t* us, const uint8_t* ds, int64_t ff0, int64_t ffn,
-                     int64_t n_ff, int64_t n_embd, size_t gu_row, size_t d_row, uint8_t* dst) {
-    const size_t gu_bytes = (size_t) ffn * gu_row;
-    const size_t d_row_band = d_row * (size_t) ffn / (size_t) n_ff;   // ffn values, block-aligned
-    std::memcpy(dst, gs + (size_t) ff0 * gu_row, gu_bytes);
-    std::memcpy(dst + gu_bytes, us + (size_t) ff0 * gu_row, gu_bytes);
-    uint8_t* dd = dst + 2 * gu_bytes;
-    for (int64_t r = 0; r < n_embd; ++r)
-        std::memcpy(dd + (size_t) r * d_row_band, ds + (size_t) r * d_row + d_row * (size_t) ff0 / (size_t) n_ff,
-                    d_row_band);
-}
-
 /// gemv_bias_kernel is warp-per-output (one warp per row): the grid must cover `out` WARPS.
 constexpr int gm_blocks(int64_t out) { return (int) ((out * 32 + GM_THREADS - 1) / GM_THREADS); }
 
