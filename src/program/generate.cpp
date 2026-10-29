@@ -22,7 +22,11 @@
 #include "strata/core/layer.hpp"
 #include "strata/core/layout.hpp"
 #include "strata/core/session.hpp"
+#include "strata/core/tp_context.hpp"
 #include "strata/core/weights.hpp"
+#if defined(STRATA_ENABLE_TP2_RDMA)
+#include "strata/net/verbs.hpp"
+#endif
 #include "strata/kernels/cpu/expert.hpp"
 #include "strata/kernels/cpu/pool.hpp"
 #include "strata/kernels/cpu/expert_layout.hpp"
@@ -120,6 +124,10 @@ struct Options {
     int top_k = 20;
     float top_p = 0.95f;
     float temperature = 1.0f;
+    // two-host tensor parallel (TP2): rank 0 is the API server, rank 1 the worker (include/strata/core/tp_context.hpp)
+    int tp_world = 1, tp_rank = 0;
+    std::string tp_bootstrap_host, tp_rdma_device;
+    int tp_bootstrap_port = 18515;
     std::string dump_logits;          // one line of logits per generated position
     int64_t logits_stride = 1;        // storage selection; all prompt tokens remain conditioned
     /// **THE RESIDUAL, SO THE HEAD CAN BE CHECKED WITHOUT THE LAYERS.**
@@ -1040,6 +1048,17 @@ static bool cuda_context_broken(const std::string& why) {
 }
 
 static int glm_pack_generate(const Options& o) {
+    std::shared_ptr<strata::net::Communicator> tp_comm;   // TP2: bound for the whole run
+    struct TpScopeEnd {
+        std::shared_ptr<strata::net::Communicator>* c;
+        ~TpScopeEnd() {
+            if (*c) {
+                std::string e;
+                (*c)->CheckQueued(&e);
+                (*c)->EndOperation(0, &e);
+            }
+        }
+    } tp_scope_end{&tp_comm};
 #if !defined(_WIN32)
     // serving: the server ends the engine with QUIT (or by closing its input), and the engine then sets the conversation
     // aside (STRATA_GLM_SLOT_KEEP).  A SIGTERM to the whole process group (systemd stopping a service, a supervisor
@@ -1074,6 +1093,41 @@ static int glm_pack_generate(const Options& o) {
     if (!o.dump_routing.empty() && !strata::core::Glm5Model::set_routing_dump(o.dump_routing, err)) {
         std::fprintf(stderr, "maya generate: --dump-routing: %s\n", err.c_str());
         return 1;
+    }
+    // two-host tensor parallel (TP2): connect FIRST (the model load then warms ~40 s of expert
+    // tiers and the peer's bootstrap would time out), then load with this rank's weight slices.
+    if (o.tp_world > 1) {
+#if defined(STRATA_ENABLE_TP2_RDMA)
+        strata::net::IbrverbsConfig cfg;
+        cfg.rank = (uint32_t) o.tp_rank;
+        cfg.world_size = (uint32_t) o.tp_world;
+        cfg.bootstrap_host = o.tp_bootstrap_host;
+        cfg.bootstrap_port = (uint16_t) o.tp_bootstrap_port;
+        cfg.rdma_device = o.tp_rdma_device;
+        std::string tp_err;
+        auto comm = strata::net::CreateIbrverbsCommunicator(cfg, &tp_err);
+        if (!comm) {
+            std::fprintf(stderr, "maya generate: TP2: %s\n", tp_err.c_str());
+            return 1;
+        }
+        strata::core::TpContext tp;
+        // geometry defaults match Glm5Geometry; the load's pack must agree (checked by the slices)
+        if (!strata::core::TpContext::create(o.tp_rank, o.tp_world, 2048, 12288, 256, comm, tp, tp_err)) {
+            std::fprintf(stderr, "maya generate: TP2: %s\n", tp_err.c_str());
+            return 1;
+        }
+        model.set_tp(tp);
+        std::printf("INFO tp_world=%d tp_rank=%d rdma=%s\n", o.tp_world, o.tp_rank, comm->Describe().c_str());
+        // one operation scope for the whole generate run (each collectives carries its ordinal inside it)
+        if (!comm->BeginOperation(0, &tp_err)) {
+            std::fprintf(stderr, "maya generate: TP2: %s\n", tp_err.c_str());
+            return 1;
+        }
+        tp_comm = comm;
+#else
+        std::fprintf(stderr, "maya generate: built without TP2 RDMA (STRATA_ENABLE_TP2_RDMA)\n");
+        return 1;
+#endif
     }
     // the layer split across the visible GPUs: STRATA_GLM_SPLIT, else --layer-split (auto | K1,K2,..)
     if (!model.load_pack_env(o.glm_pack, o.max_context, err, o.layer_split)) {
@@ -4373,6 +4427,11 @@ int main(int argc, char** argv) {
         else if (a == "--max-new") o.max_new = std::atoll(next("--max-new"));
         else if (a == "--max-context") o.max_context = std::atoll(next("--max-context"));
         else if (a == "--greedy") o.greedy = true;
+        else if (a == "--tp-world-size") o.tp_world = std::atoi(next("--tp-world-size"));
+        else if (a == "--tp-rank") o.tp_rank = std::atoi(next("--tp-rank"));
+        else if (a == "--tp-bootstrap-host") o.tp_bootstrap_host = next("--tp-bootstrap-host");
+        else if (a == "--tp-bootstrap-port") o.tp_bootstrap_port = std::atoi(next("--tp-bootstrap-port"));
+        else if (a == "--tp-rdma-device") o.tp_rdma_device = next("--tp-rdma-device");
         else if (a == "--seed") { o.seed = (uint64_t) std::atoll(next("--seed")); o.greedy = false; }
         else if (a == "--top-k") o.top_k = std::atoi(next("--top-k"));
         else if (a == "--top-p") o.top_p = (float) std::atof(next("--top-p"));

@@ -800,13 +800,15 @@ bool Glm5Model::fast_setup(std::string& err) {
             } else {
                 Ly.gu_type = nl.fmt.gu_type;
                 Ly.d_type = nl.fmt.d_type;
-                Ly.gu_bytes = (size_t) nl.fmt.gu_row * (size_t) g.n_ff_exp;
-                Ly.dn_bytes = (size_t) nl.fmt.d_row * (size_t) g.n_embd;
+                // TP2: the pool holds this rank's column band, so the blob is built at ffn width
+                const size_t ffn = (size_t) ff_compute();
+                Ly.gu_bytes = (size_t) nl.fmt.gu_row * ffn;
+                Ly.dn_bytes = (size_t) nl.fmt.d_row * (size_t) g.n_embd * ffn / (size_t) g.n_ff_exp;
                 Ly.down_off = 2 * Ly.gu_bytes;
                 Ly.blob = 2 * Ly.gu_bytes + Ly.dn_bytes;
                 if (!gf::moe_supported(Ly.gu_type) || !gf::moe_supported(Ly.d_type) ||
                     gf::row_bytes(Ly.gu_type, g.n_embd) != nl.fmt.gu_row ||
-                    gf::row_bytes(Ly.d_type, g.n_ff_exp) != nl.fmt.d_row)
+                    gf::row_bytes(Ly.d_type, (int64_t) ffn) * g.n_ff_exp / ffn != nl.fmt.d_row)
                     missing += P + "expert types " + std::to_string(Ly.gu_type) + "/" + std::to_string(Ly.d_type) + " ";
             }
         } else {
@@ -5588,12 +5590,27 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
         if (F->prof_on) F->mark("moe_down");
     } else {
     // (the shared expert's down rides the gate/up launch: sh_out)
-    gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, g.n_embd, g.n_ff_exp, g.swiglu_exp, io.xq, F->hq, Ly.sh_down.q,
+    const int ffn = ff_compute();
+    // TP2: the replicated shared expert is added on rank 0 only, so the all-reduce below
+    // does not double it (gufo: "a whole shared expert belongs to rank 0").
+    const float* sh_for_down = (!tp_.active() || tp_.rank == 0)
+                                  ? (Ly.sh_down.q != nullptr ? F->sh_out : nullptr)
+                                  : nullptr;
+    gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, g.n_embd, ffn, g.swiglu_exp, io.xq, F->hq, Ly.sh_down.q,
                     Ly.sh_down.type, F->sh_hq, FFs, F->sh_out, s);
     if (F->prof_on) F->mark("moe_gate_up");
-    gf::moe_down(Ly.d_type, md, g.n_exp_used, g.n_embd, g.n_ff_exp, Ly.down_off, F->hq,
-                 Ly.sh_down.q != nullptr ? F->sh_out : nullptr, io.ffn, s);
+    gf::moe_down(Ly.d_type, md, g.n_exp_used, g.n_embd, ffn, Ly.down_off, F->hq, sh_for_down, io.ffn, s);
     if (F->prof_on) F->mark("moe_down");
+    }
+    // TP2: the routed experts' weighted sum is this rank's band; sum the ranks before the CPU lane
+    // and the shared expert (which is replicated) are added.
+    if (tp_.active()) {
+        std::string ar_err;
+        if (!tp_.all_reduce(io.ffn, (std::size_t) g.n_embd, g.n_embd, s, ar_err)) {
+            err = ar_err;
+            return false;
+        }
+        if (F->prof_on) F->mark("tp_all_reduce");
     }
     // the CPU lane's experts last: the device's own down rows ran while the CPU worked (none: all in VRAM)
     if (lane && !empty && !moe_defer_wait_) {

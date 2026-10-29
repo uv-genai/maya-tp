@@ -867,7 +867,7 @@ bool Glm5Model::prefill_calc(const CalcJob& J, std::string& err) {
     PrefillState* O = J.owner->pf_;
     auto& cb = S->cb;
     const cudaStream_t s = fast_->cs, cp = fast_->copy;
-    const int T = J.T, E = g_.n_embd, K = g_.n_exp_used, NE = g_.n_expert, nff = g_.n_ff_exp;
+    const int T = J.T, E = g_.n_embd, K = g_.n_exp_used, NE = g_.n_expert, nff = ff_compute();
     const int n = (int) J.e.size();
     constexpr int GE = PrefillState::GE;
     if (cb.T != T || cb.ring == nullptr || J.blob > cb.stride || NE > 4096) {
@@ -2760,14 +2760,19 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         // ---- MoE: the shared expert (sub-batches, straight into ffn), the routes, the expert groups
         Carve c{S->uni};
         MoeBufs M = carve_moe(c, (size_t) T, (size_t) S->sh_sub(), g);
-        const int FF = g.n_ff_exp * g.n_shared, NE = g.n_expert, nff = g.n_ff_exp;
+        const int FF = g.n_ff_exp * g.n_shared, NE = g.n_expert, nff = ff_compute();
         for (int t0 = 0, shs = S->sh_sub(); t0 < T; t0 += shs) {
             const int tn = std::min(shs, T - t0);
             const uint16_t* x16 = S->x16 + (size_t) t0 * E;
             hgemm_q(Ly.sh_gate, FF, E, x16, E, M.sh_g, FF, tn, 0.0f);
             hgemm_q(Ly.sh_up, FF, E, x16, E, M.sh_u, FF, tn, 0.0f);
             gb::swiglu_f16(M.sh_g, M.sh_u, M.sh16, (int64_t) tn * FF, g.swiglu_shexp, s);
-            hgemm_q(Ly.sh_down, E, FF, M.sh16, FF, S->ffn + (size_t) t0 * E, E, tn, 0.0f);
+            // TP2: the replicated shared expert is written on rank 0 only (the all-reduce must not
+            // double it); the routed experts are added below and then reduced.
+            if (!tp_.active() || tp_.rank == 0)
+                hgemm_q(Ly.sh_down, E, FF, M.sh16, FF, S->ffn + (size_t) t0 * E, E, tn, 0.0f);
+            else
+                cudaMemsetAsync(S->ffn + (size_t) t0 * E, 0, (size_t) tn * E * sizeof(float), s);
         }
         S->mark("shexp", s);
         sgemm_bf16(Ly.router, NE, E, S->x, E, M.logits, NE, T, 1.0f);
@@ -3468,8 +3473,10 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
             else if (use_blas) run_set_q(wbase, n_exp, stride, d_bounds, hb, r0);
             else run_set(wbase, n_exp, stride, d_bounds, hb, r0);
         };
-        if (2 * nff != E) {
-            err = "glm prefill: 2 * n_ff_exp != n_embd (the gate/up rows would not fit the set's output rows)";
+        // TP2: the rank's band makes 2*nff < n_embd; the set's rows are n_embd wide so the gate/up
+        // pair still fits (it is laid out 2*nff per row).  Only 2*nff > n_embd is fatal.
+        if (2 * nff > E) {
+            err = "glm prefill: 2 * n_ff > n_embd (the gate/up rows would not fit the set's output rows)";
             return false;
         }
         // the disk-only experts (staged last, ascending): their indices in the reader's order - inside the segment
@@ -3972,6 +3979,12 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         }
         if (S->trace) cudaEventRecord(S->tr[(size_t) il].end, s);
         dump_row("ffn_out-" + std::to_string(il), S->ffn, E);
+        // TP2: the routed experts' sum is this rank's band (shared is rank-0 only); reduce before
+        // the next layer's hc_read consumes S->ffn.
+        if (tp_.active()) {
+            if (!tp_.all_reduce(S->ffn, (std::size_t) T * E, E, s, err)) return false;
+            S->mark("tp_all_reduce", s);
+        }
         if (glmfast::prefill_submit()) glmfast::submit_queued(s);   // (Windows HIP: the experts start now)
     }
     // the last layer's write half: R = post x ffn + comb . R

@@ -224,6 +224,9 @@ if(STRATA_ENABLE_TP2_RDMA)
   find_library(STRATA_IBVERBS_LIB ibverbs REQUIRED)
   add_library(strata_net STATIC src/net/verbs.cpp src/net/rdma_gid.cpp src/net/tp_kernels.cu)
   target_include_directories(strata_net PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${STRATA_IBVERBS_INCLUDE})
+  # GCC 16 + HIP: <format> parses [[__gnu__::__noinline__]] as an attribute name unless <format>
+  # is included first (gufo's build-gufo.sh workaround).  Harmless elsewhere.
+  target_compile_options(strata_net PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include;format>)
   target_link_libraries(strata_net PUBLIC strata_warnings ${STRATA_IBVERBS_LIB} hip::host)
   if(STRATA_BUILD_TESTS)
     add_executable(tp_comm_rdma_test tests/tp_comm_rdma_test.cpp)
@@ -515,6 +518,11 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
   add_executable(maya src/program/generate.cpp)
   target_include_directories(maya PRIVATE ${_strata_gpu_include_directories})
   target_link_libraries(maya PRIVATE strata_engine strata_prefill strata_spec ${_strata_gpu_runtime_target})
+  if(STRATA_ENABLE_TP2_RDMA)
+    target_sources(maya PRIVATE src/core/tp_context.cu)
+    target_link_libraries(maya PRIVATE strata_net)
+    target_compile_definitions(maya PRIVATE STRATA_ENABLE_TP2_RDMA=1)
+  endif()
 
   # DeepSeek-V4.1-Flash (EXL3, tools/ds4/pack.py; or a GGUF, tools/ds4/pack_gguf.py): its own engine over the kernel
   # libraries (src/ds4)

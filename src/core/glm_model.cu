@@ -304,6 +304,20 @@ namespace {
 
 constexpr int GM_THREADS = 256;
 
+/// TP2: copy one expert's column band into a compact blob the GPU kernels run with n_ff = ffn.
+/// Layout: [gate rows [ff0,ff0+ffn) | up rows [ff0,ff0+ffn) | down columns [ff0,ff0+ffn) of each output row].
+void tp_slice_expert(const uint8_t* gs, const uint8_t* us, const uint8_t* ds, int64_t ff0, int64_t ffn,
+                     int64_t n_ff, int64_t n_embd, size_t gu_row, size_t d_row, uint8_t* dst) {
+    const size_t gu_bytes = (size_t) ffn * gu_row;
+    const size_t d_row_band = d_row * (size_t) ffn / (size_t) n_ff;   // ffn values, block-aligned
+    std::memcpy(dst, gs + (size_t) ff0 * gu_row, gu_bytes);
+    std::memcpy(dst + gu_bytes, us + (size_t) ff0 * gu_row, gu_bytes);
+    uint8_t* dd = dst + 2 * gu_bytes;
+    for (int64_t r = 0; r < n_embd; ++r)
+        std::memcpy(dd + (size_t) r * d_row_band, ds + (size_t) r * d_row + d_row * (size_t) ff0 / (size_t) n_ff,
+                    d_row_band);
+}
+
 /// gemv_bias_kernel is warp-per-output (one warp per row): the grid must cover `out` WARPS.
 constexpr int gm_blocks(int64_t out) { return (int) ((out * 32 + GM_THREADS - 1) / GM_THREADS); }
 
@@ -2576,13 +2590,16 @@ int32_t strata::core::Glm5Model::pool_evict(int cls) {
 
 void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
     const auto& nl = pack_layers_[(size_t) layer];
-    const uint64_t gu_bytes = (uint64_t) nl.fmt.gu_row * (uint64_t) g_.n_ff_exp;   // one role
-    const uint64_t dn_bytes = (uint64_t) nl.fmt.d_row * (uint64_t) g_.n_embd;
+    const int64_t ff_full = g_.n_ff_exp;
+    const int64_t ff0 = tp_.active() ? tp_.experts.begin : 0;
+    const int64_t ffn = tp_.active() ? tp_.experts.count : ff_full;
+    const uint64_t gu_bytes = (uint64_t) nl.fmt.gu_row * (uint64_t) ffn;   // one role (this rank's band under TP)
+    const uint64_t dn_bytes = (uint64_t) nl.fmt.d_row * (uint64_t) g_.n_embd * (uint64_t) ffn / (uint64_t) ff_full;
     const Shard& gs = pack_shards_[(size_t) nl.gate_shard];
     const Shard& us = pack_shards_[(size_t) nl.up_shard];
     const Shard& ds = pack_shards_[(size_t) nl.down_shard];
     static const bool stats = getenv("STRATA_GLM_POOL_STATS") != nullptr;
-    if (bounce_)   // the staging ring is reused every layer: drain queued miss copies first
+    if (bounce_ || tp_.active())   // the staging ring is reused every layer: drain queued miss copies first
         cudaStreamSynchronize(0);
     // STRATA_GLM_TRACE=<file>: append "layer expert" per routed expert (the routing distribution
     // study - what a static/staged tier could hold)
@@ -2606,7 +2623,7 @@ void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
             pool_key_of_[(size_t) slot] = key;
             pool_count_[(size_t) slot] = 1;
             uint8_t* dst = cls_arena + (size_t) (slot - class_base_[cls]) * cls_stride;
-            if (stage_on_) {
+            if (stage_on_ && !tp_.active()) {
                 // stage on a worker in parallel (the NVMe read is the cost; the main thread would
                 // serialize it); the DMA is issued after stage_join() at the end of pool_ensure
                 StageJob j;
@@ -2625,15 +2642,21 @@ void strata::core::Glm5Model::pool_ensure(int layer, const int* ids, int k) {
                 }
                 staged_dst_[i] = dst;
                 staged_len_[i] = 2 * gu_bytes + dn_bytes;
-            } else if (bounce_) {
+            } else if (bounce_ || tp_.active()) {
                 // pinned staging (STRATA_GLM_BOUNCE=1): CPU into the ring, then one stream-ordered
-                // device copy per miss.  Left of the default path after two driver wedges on this
-                // host; the ring drains via the sync at the head of every pool_ensure.
+                // device copy per miss.  Under TP2 this is where the rank's column band is cut out.
                 uint8_t* b = bounce_ + (size_t) (bounce_i_++ % 24) * slot_bytes_;
-                std::memcpy(b, gs.base + nl.gate_off + (uint64_t) ids[i] * gu_bytes, gu_bytes);
-                std::memcpy(b + gu_bytes, us.base + nl.up_off + (uint64_t) ids[i] * gu_bytes, gu_bytes);
-                std::memcpy(b + 2 * gu_bytes, ds.base + nl.down_off + (uint64_t) ids[i] * dn_bytes, dn_bytes);
-                cudaMemcpyAsync(dst, b, slot_bytes_, cudaMemcpyHostToDevice);
+                if (tp_.active()) {
+                    tp_slice_expert(gs.base + nl.gate_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.gu_row * ff_full,
+                                    us.base + nl.up_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.gu_row * ff_full,
+                                    ds.base + nl.down_off + (uint64_t) ids[i] * (uint64_t) nl.fmt.d_row * g_.n_embd,
+                                    ff0, ffn, ff_full, g_.n_embd, nl.fmt.gu_row, nl.fmt.d_row, b);
+                } else {
+                    std::memcpy(b, gs.base + nl.gate_off + (uint64_t) ids[i] * gu_bytes, gu_bytes);
+                    std::memcpy(b + gu_bytes, us.base + nl.up_off + (uint64_t) ids[i] * gu_bytes, gu_bytes);
+                    std::memcpy(b + 2 * gu_bytes, ds.base + nl.down_off + (uint64_t) ids[i] * dn_bytes, dn_bytes);
+                }
+                cudaMemcpyAsync(dst, b, 2 * gu_bytes + dn_bytes, cudaMemcpyHostToDevice);
             } else {
                 // the verified phase-1 default: three stream-ordered copies out of the mmap'd
                 // shards (the roles share a shard but an expert's gate/up rows are not adjacent)
@@ -3529,7 +3552,8 @@ bool strata::core::Glm5Model::load_pack(const std::string& pack_dir, int64_t max
             gu_row_max = std::max(gu_row_max, nl.fmt.gu_row);
             d_row_max = std::max(d_row_max, nl.fmt.d_row);
         }
-        slot_bytes_ = 2 * gu_row_max * (size_t) g_.n_ff_exp + d_row_max * (size_t) g_.n_embd;
+        slot_bytes_ = 2 * gu_row_max * (size_t) ff_compute() +
+                      d_row_max * (size_t) g_.n_embd * (size_t) ff_compute() / (size_t) g_.n_ff_exp;
         // SIZE CLASSES: one class per distinct (gu_row, d_row).  Uniform slots at the largest blob
         // pad ~20% of the arena (8.78 MB max vs 7.03 MB average on this pack); per-class sub-arenas
         // sized by layer-count-weighted demand recover it (~+25% slots).
