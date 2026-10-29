@@ -235,6 +235,8 @@ if(STRATA_ENABLE_TP2_RDMA)
   if(STRATA_BUILD_TESTS)
     add_executable(tp_comm_rdma_test tests/tp_comm_rdma_test.cpp)
     target_link_libraries(tp_comm_rdma_test PRIVATE strata_net)
+    # same GCC 16 + <format> workaround as strata_net
+    target_compile_options(tp_comm_rdma_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include;format>)
     # not a ctest: needs two hosts and an RDMA link (tools/tp2/run_comm_test.sh)
   endif()
 endif()

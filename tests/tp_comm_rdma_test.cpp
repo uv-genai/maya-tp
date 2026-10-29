@@ -36,6 +36,9 @@ int main(int argc, char** argv) {
     cfg.bootstrap_port = 18515;
     int exchanges = 200;
     bool bench = false;
+    // Decode AR unit: float32 residual width. Maya GLM n_embd=12288 (48 KiB/row).
+    // Gufo Flash-Next uses 2560 (10 KiB/row) — pass --hidden 2560 to compare.
+    uint32_t hidden_bench = 12288;
     for (int i = 1; i < argc; ++i) {
         std::string a = argv[i];
         auto next = [&](const char* what) -> const char* {
@@ -52,9 +55,10 @@ int main(int argc, char** argv) {
         else if (a == "--gid-index") cfg.gid_index = (uint32_t) std::atoi(next("--gid-index"));
         else if (a == "--exchanges") exchanges = std::atoi(next("--exchanges"));
         else if (a == "--bench") bench = true;
+        else if (a == "--hidden") hidden_bench = (uint32_t) std::atoi(next("--hidden"));
         else {
             std::fprintf(stderr, "usage: %s --rank N [--bootstrap-host H] [--bootstrap-port P] "
-                                 "[--rdma-device D] [--gid-index G] [--exchanges N] [--bench]\n", argv[0]);
+                                 "[--rdma-device D] [--gid-index G] [--exchanges N] [--bench] [--hidden H]\n", argv[0]);
             return 2;
         }
     }
@@ -130,9 +134,31 @@ int main(int argc, char** argv) {
                 exchanges, ms, 1000.0 * ms / exchanges);
 
     if (bench) {
-        // latency: 1-row (4096 F32 = 16 KiB) exchanges, no D2H; bandwidth: 3072 rows (one window)
-        const int warm = 50, reps = 2000;
-        const size_t n1 = 4096, nbig = 3071 * 4096;   // 3071 rows fit a 48 MiB window minus the 64 B header
+        // Three layers of "latency" — do not mix them up:
+        //  1) ib_write_lat 2 B RTT (~6 µs) — pure link (gufo docs §7)
+        //  2) Blocking ExchangePartial — host staging + write + wait (Maya's ~55 µs form)
+        //  3) Queued QueuePartial Stage/Wait/Add — gufo's overlapped AR (~10 KiB/row there)
+        // Payload: --hidden floats (default 12288 = 48 KiB/row, Maya GLM n_embd).
+        // Gufo Flash-Next uses 2560 (10 KiB/row); pass --hidden 2560 to match theirs.
+        const int warm = 50, reps = 2000, reps_big = 200;
+        const size_t n1 = hidden_bench;
+        // One RDMA window is 48 MiB; pick the largest row count that fits.
+        const size_t window_bytes = 48u * 1024u * 1024u - 64u;
+        const size_t rows_big = std::max<size_t>(1, window_bytes / (sizeof(float) * hidden_bench));
+        const size_t nbig = rows_big * hidden_bench;
+        // The correctness loop allocated rows_max*4096; bench may need more.
+        (void) hipFree(dev);
+        (void) hipFree(sum);
+        dev = sum = nullptr;
+        const size_t need = std::max(n1, nbig);
+        if (hipMalloc(&dev, need * sizeof(float)) != hipSuccess || hipMalloc(&sum, need * sizeof(float)) != hipSuccess) {
+            std::printf("FAIL bench alloc %zu floats\n", need);
+            ++g_fail;
+            return 1;
+        }
+        (void) hipMemset(dev, 0, need * sizeof(float));
+        std::printf("bench hidden=%u  row=%.1f KiB  big=%zu rows (%.1f MiB)\n", hidden_bench,
+                    (double) n1 * sizeof(float) / 1024.0, rows_big, (double) nbig * sizeof(float) / 1048576.0);
         for (int i = 0; i < warm; ++i) {
             if (!comm->BeginOperation((uint64_t) (100000 + i), &err)) break;
             if (!comm->ExchangePartial(dev, n1 * sizeof(float), stream, &err)) break;
@@ -152,9 +178,9 @@ int main(int argc, char** argv) {
         ok(hipStreamSynchronize(stream) == hipSuccess, "bench sync2");
         auto b1 = std::chrono::steady_clock::now();
         const double lat_us = std::chrono::duration<double, std::micro>(b1 - b0).count() / reps;
-        std::printf("bench latency  %d x 16 KiB: %.2f us/exchange\n", reps, lat_us);
+        std::printf("bench blocking  %d x %.1f KiB: %.2f us/exchange\n", reps, (double) n1 * sizeof(float) / 1024.0,
+                    lat_us);
 
-        const int reps_big = 200;
         auto c0 = std::chrono::steady_clock::now();
         double bytes = 0;
         for (int i = 0; i < reps_big; ++i) {
@@ -171,13 +197,11 @@ int main(int argc, char** argv) {
         auto c1 = std::chrono::steady_clock::now();
         const double big_s = std::chrono::duration<double>(c1 - c0).count();
         // one-way payload rate (the write carries bytes; the peer's partial is the same size back)
-        std::printf("bench bandwidth  %d x %.1f MiB: %.2f Gb/s one-way (%.2f us/exchange)\n",
-                    reps_big, (double) nbig * sizeof(float) / 1048576.0, 8.0 * bytes / big_s / 1e9,
-                    1e6 * big_s / reps_big);
+        std::printf("bench blocking BW  %d x %.1f MiB: %.2f Gb/s one-way (%.2f us/exchange)\n", reps_big,
+                    (double) nbig * sizeof(float) / 1048576.0, 8.0 * bytes / big_s / 1e9, 1e6 * big_s / reps_big);
 
-        // --- queued GPU path (gufo's 6 us form): QueuePartial + Stage/Wait/Add, no host round-trip ---
-        // One scope, many queued exchanges (the engine queues a whole forward), then CheckQueued + End.
-        const uint32_t hidden = 4096;
+        // --- queued GPU path (gufo's overlapped AR form): QueuePartial + Stage/Wait/Add ---
+        const uint32_t hidden = hidden_bench;
         {
             Communicator::QueuedPartial q;
             if (comm->BeginOperation((uint64_t) (400000), &err) && comm->QueuePartial(n1 * sizeof(float), &q, &err)) {
@@ -216,7 +240,8 @@ int main(int argc, char** argv) {
         ok(hipStreamSynchronize(stream) == hipSuccess, "qbench sync2");
         auto q1 = std::chrono::steady_clock::now();
         const double qlat_us = std::chrono::duration<double, std::micro>(q1 - q0).count() / reps;
-        std::printf("bench queued latency  %d x 16 KiB: %.2f us/exchange\n", reps, qlat_us);
+        std::printf("bench queued latency  %d x %.1f KiB: %.2f us/exchange\n", reps,
+                    (double) n1 * sizeof(float) / 1024.0, qlat_us);
 
         // pipelined: one scope, many queued exchanges (the host queues ahead; the GPU waits on flags)
         auto r0 = std::chrono::steady_clock::now();
@@ -251,10 +276,10 @@ int main(int argc, char** argv) {
                     reps_big, (double) nbig * sizeof(float) / 1048576.0, 8.0 * qbytes / qbig_s / 1e9,
                     1e6 * qbig_s / reps_big);
 
-        // gufo's --allreduce-bench shape: 1/2/8/512 rows of hidden=4096, queued all-reduce,
-        // timed queuing -> stream drain, min/p50/mean/p99 (comparable with gufo's tp_batched_probe).
+        // gufo --allreduce-bench shape: 1/2/8/512 rows of --hidden, queued all-reduce,
+        // timed queuing → stream drain, min/p50/mean/p99.
         {
-            const uint32_t H = 4096;
+            const uint32_t H = hidden_bench;
             const size_t rows_list[] = {1, 2, 8, 512};
             const uint64_t scope = 800000;
             if (comm->BeginOperation(scope, &err)) {

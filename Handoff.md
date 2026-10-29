@@ -91,7 +91,11 @@ docs/TP2-RUN.md                        ops runbook
 
 ## 8. Critical gotchas
 
-0. **Transport latency:** ~6 µs is the RDMA write transit; ~35 µs is the end-to-end blocking exchange. Both Maya and gufo have identical transport code. gufo's "6 µs" is the overlapped residual.
+0. **What “6 µs / 37 Gb/s” means (do not mix them with AR cost).** Gufo’s Thunderbolt doc measures the **link**, not the model’s all-reduce:
+   - **6.0 µs** = `ib_write_lat` **2 B WRITE round-trip** (one-way ≈ 3 µs). Confirmed again 2026-10-30: t_typical **6.04 µs**.
+   - **37.4 Gb/s** = `ib_write_bw` **1 MiB WRITEs** (`-s 1048576`). Confirmed: 4459 MiB/s.
+   - At **actual AR row sizes** sustained BW collapses: **48 KiB → 8.9 Gb/s**, **10 KiB → 9.1 Gb/s** (per-message overhead).
+   - Maya’s **blocking** `ExchangePartial` at one decode row is **~58 µs** (48 KiB / hidden 12288), **~66 µs** at 10 KiB — host staging + driver + peer wait, not the 37 Gb/s ceiling. Gufo’s “~6 µs” in the TP path is the **overlapped residual** (`QueuePartial` Stage/Wait/Add), not a 48 KiB AR cost. See `tools/tp2` / `tp_comm_rdma_test --bench`.
 1. **Shard stride rule:** `Ly.gu_bytes` under TP is the **sliced** width; the GGUF shard's expert stride is always the **full** expert (`gu_row * n_ff_exp`).
 2. **Per-layer width:** `ff_compute_for(il)` — the MTP draft layer stays full.
 3. **Shared expert is summed across ranks** (sliced = partial). `MAYA_TP_SH_BOTH=1` forces both ranks.
@@ -102,6 +106,7 @@ docs/TP2-RUN.md                        ops runbook
 8. **`ggml_quantize_chunk` is `(type, src, dst, start, nrows, n_per_row, imatrix)`**.
 9. **`ibv_create_cq_ex` and `IBV_SEND_INLINE` are unsupported** by the Thunderbolt driver. Graceful fallback.
 10. **Bootstrap socket is non-blocking** after connect. `RecvControl` must loop on EAGAIN.
+11. **Do not probe the bootstrap port with `/dev/tcp`** — that steals rank 0’s single `accept()` (EAGAIN/EISDIR). Rank 1’s engine already retries connect.
 
 ## 9. How to run
 
