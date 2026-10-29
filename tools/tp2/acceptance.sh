@@ -1,103 +1,83 @@
 #!/bin/bash
-# tools/tp2/acceptance.sh — TP2 acceptance test: pair up, curl API, kill/recover.
+# tools/tp2/acceptance.sh — TP2 serve acceptance: pair up, chat, peer health, kill/recover.
 #
-# Usage: tools/tp2/acceptance.sh [--host HOST] [--port N] [--serve-port N]
+# Usage: tools/tp2/acceptance.sh [--serve-host HOST] [--port PORT]
 #
+# Run from rank 1 (strix-halo-2). Rank 0 is started via SSH.
 # Tests:
-#   1. Start rank 0 + rank 1, wait for pair ready
-#   2. curl /health (check tp status)
-#   3. curl /v1/chat/completions (basic generation)
-#   4. Kill rank 1 -> verify rank 0 reports pair-down
-#   5. Restart both -> verify recovery
-set -e
+#   1. Start rank1 worker + rank0 server; wait for /health peer=up
+#   2. curl chat/completions
+#   3. Kill rank1; next chat fails; /health degraded peer=down
+#   4. Restart both; health peer=up; chat works again
+set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-HOST="strix-halo-1.local"
-PORT=18515
-SERVE_PORT=8080
+HOST="${HOST:-strix-halo-1.local}"
+PORT="${PORT:-18080}"
 PASS=0
 FAIL=0
 
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --host) HOST="$2"; shift 2 ;;
-    --port) PORT="$2"; shift 2 ;;
-    --serve-port) SERVE_PORT="$2"; shift 2 ;;
-    *) echo "unknown arg: $1" >&2; exit 2 ;;
-  esac
-done
-
 check() {
   local desc="$1" expected="$2" actual="$3"
-  if echo "$actual" | grep -q "$expected"; then
+  if echo "$actual" | grep -qF "$expected"; then
     echo "  PASS: $desc"
     PASS=$((PASS + 1))
   else
-    echo "  FAIL: $desc (expected '$expected', got: $actual)"
+    echo "  FAIL: $desc (expected '$expected', got: ${actual:0:200})"
     FAIL=$((FAIL + 1))
   fi
 }
 
-echo "=== TP2 acceptance test ==="
-echo "  rank 0 host:  $HOST"
-echo "  bootstrap:    port $PORT"
-echo "  serve:        port $SERVE_PORT"
-echo ""
-
-# cleanup on exit
-cleanup() {
-  echo ""
-  echo "=== cleanup ==="
-  ssh "$HOST" "pkill -x maya-tp2 2>/dev/null" 2>/dev/null || true
-  pkill -x maya 2>/dev/null || true
-  sleep 1
+health() { curl -s -m 5 "http://$HOST:$PORT/health" 2>/dev/null || echo '{}'; }
+chat() {
+  curl -s -m 120 "http://$HOST:$PORT/v1/chat/completions" \
+    -H 'Content-Type: application/json' \
+    -d '{"model":"maya","messages":[{"role":"user","content":"Say hello."}],"max_tokens":8}' \
+    2>/dev/null || echo '{}'
 }
-trap cleanup EXIT
 
-echo "--- 1. start rank 0 + rank 1 ---"
-ssh "$HOST" "pkill -x maya-tp2 2>/dev/null" 2>/dev/null || true
+start_pair() {
+  pkill -9 -x maya 2>/dev/null || true
+  ssh -o BatchMode=yes "$HOST" 'pkill -9 -x maya 2>/dev/null; fuser -k '"$PORT"'/tcp 2>/dev/null; pkill -9 -f "[s]erve/server" 2>/dev/null; true'
+  sleep 1
+  setsid nohup bash tools/tp2/rank1.sh >/tmp/tp2-acc-r1.log 2>&1 </dev/null &
+  disown
+  sleep 1
+  ssh -o BatchMode=yes "$HOST" "cd $PWD && setsid nohup bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null & echo started"
+  for i in $(seq 1 36); do
+    if health | grep -q '"peer"'; then return 0; fi
+    sleep 5
+  done
+  echo "pair did not become ready" >&2
+  return 1
+}
+
+echo "=== TP2 acceptance ($HOST:$PORT) ==="
+echo "--- 1. start pair ---"
+start_pair
+H=$(health)
+check "health peer up" '"peer": "up"' "$H"
+check "status ok" '"status": "ok"' "$H"
+
+echo "--- 2. chat ---"
+R=$(chat)
+check "chat content" '"content"' "$R"
+
+echo "--- 3. kill rank1 ---"
+pkill -9 -x maya 2>/dev/null || true
 sleep 1
+R=$(chat)
+check "chat fails cleanly" 'TP2 pair down' "$R"
+H=$(health)
+check "health degraded" '"status": "degraded"' "$H"
+check "peer down" '"peer": "down"' "$H"
 
-# start rank 0 (the HTTP server + engine)
-tools/tp2/maya-rank0.sh --config maya-glm5.json --port "$PORT" --serve-port "$SERVE_PORT" &
-R0PID=$!
-sleep 8
-
-# start rank 1 (the worker)
-tools/tp2/maya-rank1.sh --config maya-glm5.json --host "$HOST" --port "$PORT" &
-R1PID=$!
-sleep 5
-
-echo "--- 2. /health ---"
-HEALTH=$(curl -s "http://127.0.0.1:$SERVE_PORT/health" 2>/dev/null || echo "{}")
-check "health returns ok" '"status"' "$HEALTH"
-check "health has tp info" '"tp"' "$HEALTH"
-
-echo "--- 3. /v1/chat/completions ---"
-RESPONSE=$(curl -s "http://127.0.0.1:$SERVE_PORT/v1/chat/completions" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"maya","messages":[{"role":"user","content":"Say hello in one word."}],"max_tokens":5}' \
-  2>/dev/null || echo "{}")
-check "chat returns content" '"content"' "$RESPONSE"
-
-echo "--- 4. kill rank 1 ---"
-kill $R1PID 2>/dev/null || true
-sleep 3
-HEALTH2=$(curl -s "http://127.0.0.1:$SERVE_PORT/health" 2>/dev/null || echo "{}")
-echo "  (rank 1 killed; health: $(echo "$HEALTH2" | head -c 80)...)"
-# after killing rank 1, the engine may crash or report an error — either is acceptable
-
-echo "--- 5. restart both ---"
-kill $R0PID 2>/dev/null || true
-sleep 2
-tools/tp2/maya-rank0.sh --config maya-glm5.json --port "$PORT" --serve-port "$SERVE_PORT" &
-R0PID=$!
-sleep 8
-tools/tp2/maya-rank1.sh --config maya-glm5.json --host "$HOST" --port "$PORT" &
-R1PID=$!
-sleep 5
-HEALTH3=$(curl -s "http://127.0.0.1:$SERVE_PORT/health" 2>/dev/null || echo "{}")
-check "recovery: health returns ok" '"status"' "$HEALTH3"
+echo "--- 4. restart both ---"
+start_pair
+H=$(health)
+check "recover peer up" '"peer": "up"' "$H"
+R=$(chat)
+check "chat after recover" '"content"' "$R"
 
 echo ""
 echo "=== results: $PASS passed, $FAIL failed ==="

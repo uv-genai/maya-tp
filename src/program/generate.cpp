@@ -1837,13 +1837,21 @@ static int glm_pack_generate(const Options& o) {
     // with --tokens and must not push control traffic rank 1 never reads
     // (a full TCP buffer would block rank 0 mid-decode).
     const bool tp_mirror = tp_comm != nullptr && tp_comm->rank() == 0 && o.serve && tp2;
+    // Sticky pair-down: the first failed mirror send ends the pair for good until both ranks restart.
+    // serve/server.py watches stdout for "TP2_DOWN" and reports it on /health (issue #6).
+    bool tp_pair_down = false;
     const auto tp_send = [&](int32_t op, const int32_t* toks, int32_t n, int32_t next_token = -1) -> bool {
         if (!tp_mirror) return true;
+        if (tp_pair_down) return false;
         const TpMirrorHdr h{op, n, next_token};
         std::string e;
         if (!tp_comm->SendControl(&h, sizeof(h), &e) ||
             (n > 0 && !tp_comm->SendControl(toks, (size_t) n * sizeof(int32_t), &e))) {
-            std::fprintf(stderr, "TP2 mirror send: %s\n", e.c_str());
+            tp_pair_down = true;
+            // Machine-readable on stdout (the server's pipe); human detail on stderr.
+            std::printf("TP2_DOWN %s\n", e.empty() ? "send failed" : e.c_str());
+            std::fflush(stdout);
+            std::fprintf(stderr, "TP2 mirror send: %s (pair down)\n", e.c_str());
             return false;
         }
         return true;
@@ -2006,7 +2014,11 @@ static int glm_pack_generate(const Options& o) {
                     return !read_stopped();
                 };
                 // Mirror immediately before the collective: rank 1 prefills the same part.
-                if (!tp_send_vec(kTpMirrorPrefill, part, prompt[end])) return 1;
+                if (!tp_send_vec(kTpMirrorPrefill, part, prompt[end])) {
+                    err = "TP2 pair down (rank 1 mirror send failed)";
+                    std::printf("ERR %s\n", err.c_str());
+                    return 1;
+                }
                 pok = guarded([&] { return model.prefill(part, err, prompt[end]); }, err);   // (the NextN block's caches read the next token)
                 model.prefill_progress = nullptr;
                 model.prefill_min_chunks = 1;
@@ -2079,7 +2091,11 @@ static int glm_pack_generate(const Options& o) {
             if (model.fast() && !snapped && i + chunk > prompt.size() - 1) chunk = prompt.size() - 1 - i;
             std::vector<int32_t> part(prompt.begin() + (long) i, prompt.begin() + (long) (i + chunk));
             // Mirror immediately before the collective: rank 1 forwards the same ids.
-            if (!tp_send_vec(kTpMirrorForward, part)) return 1;
+            if (!tp_send_vec(kTpMirrorForward, part)) {
+                err = "TP2 pair down (rank 1 mirror send failed)";
+                std::printf("ERR %s\n", err.c_str());
+                return 1;
+            }
             const bool ok = model.forward(part, lg, err);
             if (!ok) {
                 snap_tokens.clear();
@@ -2365,7 +2381,11 @@ static int glm_pack_generate(const Options& o) {
                 if (!on_token(tok)) break;
                 // Mirror the sampled id immediately before the decode collective.
                 const int32_t tok32 = (int32_t) tok;
-                if (!tp_send(kTpMirrorForward, &tok32, 1)) return 1;
+                if (!tp_send(kTpMirrorForward, &tok32, 1)) {
+                    err = "TP2 pair down (rank 1 mirror send failed)";
+                    std::printf("ERR %s\n", err.c_str());
+                    return 1;
+                }
                 if (!model.forward({(int32_t) tok}, lg, err)) {
                     drop_if_poisoned(prompt, err);
                     std::printf("ERR %s\n", err.c_str());

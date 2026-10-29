@@ -98,9 +98,11 @@ See `docs/SETTINGS.md` for the full `MAYA_TP_*` list (only implemented knobs are
 curl http://192.168.1.22:18080/health
 ```
 
-`/health` reports `tp.world_size` / `tp.rank` from the engine INFO line. **It does not check that
-rank 1 is alive** — if rank 1 dies mid-request, rank 0 hangs on the all-reduce or fails the request
-while `/health` still says `ok` (issue #6).
+`tp.world_size` / `tp.rank` come from the engine INFO line. **`tp.peer`** is `up` while the pair is healthy and
+`down` after the first failed mirror send (rank 1 died). `status` becomes **`degraded`** then — `/health` does not
+claim ok when TP2 cannot serve. Restart **both** ranks to clear it (`rank1.sh` then `rank0.sh`).
+
+Acceptance: `tools/tp2/acceptance.sh` (pair up, chat, kill rank1 → degraded, restart → recover).
 
 ## Failure playbook
 
@@ -109,7 +111,8 @@ while `/health` still says `ok` (issue #6).
 | `bootstrap accept timed out` | Rank 1 never connected | Start rank 1; check `usb4_rdma*` on both hosts |
 | `bootstrap receive: Resource temporarily unavailable` / `Is a directory` | Something stole accept (`/dev/tcp` probe) | Remove port probes; restart both |
 | `bootstrap connect: Operation now in progress` | Rank 0 not listening yet | Wait; engine retries 120 s (`MAYA_TP_BOOTSTRAP_TIMEOUT`) |
-| `TP2 mirror send: Broken pipe` | Rank 1 died | Restart both; check rank 1 log |
+| `TP2 mirror send: Broken pipe` | Rank 1 died | Restart **both**; `/health` → `status=degraded`, `tp.peer=down` |
+| Request: `TP2 pair down` | Peer already lost | Restart both ranks (engine sticky until restart) |
 | Request hangs after “reading the prompt” | Rank 1 not in worker mode / AR mismatch | Kill both; rank 1 without `--tokens` must log “mirroring” |
 | `ibv_post_send failed` | RDMA link down | `ip link show`, reload `thunderbolt_ibverbs` |
 | Pair parity < 100% | Slicing bug | `greedy_parity.py`; try `MAYA_TP_NOSLICE=1` |

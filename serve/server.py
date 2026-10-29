@@ -672,6 +672,18 @@ class StrataEngine:
             if line.startswith("VRAM "):
                 self._vram_line(line)
                 continue
+            # Engine-wide lines (STAT, NOTE, TP2 pair-down) are handled even without multi
+            if line.startswith("TP2_DOWN"):
+                self.info["tp_pair"] = "down"
+                print("[maya] TP2 pair down: " + (line[8:].strip() or "mirror send failed") +
+                      " - restart both ranks (rank1.sh then rank0.sh)", flush=True)
+                continue
+            if line.startswith("STAT "):
+                self._parse_stat(line)
+                continue
+            if line.startswith("NOTE "):
+                print("[maya] " + line[5:].strip(), flush=True)
+                continue
             if self.multi and self._route(line):
                 continue
             self.lines.put(line)
@@ -708,6 +720,12 @@ class StrataEngine:
             return True
         if line.startswith("NOTE "):
             print("[maya] " + line[5:].strip(), flush=True)
+            return True
+        if line.startswith("TP2_DOWN"):
+            # Rank 0 lost rank 1's control socket (issue #6). Sticky until both ranks restart.
+            self.info["tp_pair"] = "down"
+            print("[maya] TP2 pair down: " + (line[8:].strip() or "mirror send failed") +
+                  " - restart both ranks (tools/tp2/rank1.sh then rank0.sh)", flush=True)
             return True
         return False
 
@@ -3985,14 +4003,26 @@ def make_handler(svc: Service):
                         svc.default_effort) or svc.default_effort
                     if getattr(svc.template, "forced_thinking", False):
                         rec["reasoning_effort"] = QWEN_EFFORT.get(rec["reasoning_effort"], rec["reasoning_effort"])
-                self._json(200, {"status": "updating" if svc.updater.busy() else
-                                           "reloading" if svc.reloading() else "ok",
+                tp_world = int(getattr(svc.engine, "info", {}).get("tp_world", 1) or 1)
+                tp_rank = int(getattr(svc.engine, "info", {}).get("tp_rank", 0) or 0)
+                tp_peer = "down" if getattr(svc.engine, "info", {}).get("tp_pair") == "down" else (
+                    "up" if tp_world > 1 and tp_rank == 0 else None)
+                # TP2 with a dead rank 1 is degraded, not ok: /health must not lie (issue #6)
+                if tp_peer == "down":
+                    status = "degraded"
+                elif svc.updater.busy():
+                    status = "updating"
+                elif svc.reloading():
+                    status = "reloading"
+                else:
+                    status = "ok"
+                self._json(200, {"status": status,
                                  "max_context": svc.engine.max_context, "model": svc.model,
                                  "model_label": svc.model_label,   # (the model first: "GLM-5.3 · Maya-S24")
                                  "images": svc.vision is not None, "api_key": bool(svc.api_key), "defaults": rec,
                                  "version": MAYA_VERSION, "mcp_tools": bool(svc.mcp), "unloaded": svc.unloaded,
-                                 "tp": {"world_size": getattr(svc.engine, "info", {}).get("tp_world", 1),
-                                        "rank": getattr(svc.engine, "info", {}).get("tp_rank", 0)}})
+                                 "tp": {"world_size": tp_world, "rank": tp_rank,
+                                        **({"peer": tp_peer} if tp_peer else {})}})
             elif path == "/api/context":
                 # the dashboard's Context size: the range, the measured cost of the current size, a reload's state
                 if self._authorized():
