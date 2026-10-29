@@ -36,24 +36,22 @@ __global__ void WaitValueKernel(const uint64_t* flag, uint64_t value, uint64_t t
     }
 }
 
-// Fused WaitValue + AddRowsBroadcast: spin until `arrived`, then add the peer's partial.
-// Saves one kernel launch per exchange over the two-kernel form.
+// Fused WaitValue + AddRowsBroadcast: every block spins until `arrived`, then adds
+// the peer's partial.  Saves one kernel launch per exchange over the two-kernel form.
 __global__ void WaitAddKernel(const uint64_t* flag, uint64_t value, uint64_t ticks, uint32_t* timed_out,
                               const float* __restrict__ addend, float* __restrict__ residual,
                               uint32_t hidden, uint32_t streams) {
-    // one block for the wait, then the add over the whole grid
-    if (blockIdx.x == 0 && threadIdx.x == 0) {
-        const uint64_t start = wall_clock64();
-        while (__hip_atomic_load(flag, __ATOMIC_ACQUIRE, __HIP_MEMORY_SCOPE_SYSTEM) < value) {
-            if (wall_clock64() - start > ticks) {
-                __hip_atomic_store(timed_out, 1u, __ATOMIC_RELAXED, __HIP_MEMORY_SCOPE_SYSTEM);
-                return;
-            }
-            __builtin_amdgcn_s_sleep(1);
+    // every block spins (no grid-wide sync needed — each block independently
+    // sees the flag and proceeds to its slice of the add)
+    const uint64_t start = wall_clock64();
+    while (__hip_atomic_load(flag, __ATOMIC_ACQUIRE, __HIP_MEMORY_SCOPE_SYSTEM) < value) {
+        if (wall_clock64() - start > ticks) {
+            __hip_atomic_store(timed_out, 1u, __ATOMIC_RELAXED, __HIP_MEMORY_SCOPE_SYSTEM);
+            return;
         }
+        __builtin_amdgcn_s_sleep(1);
     }
-    __syncthreads();
-    // the grid-wide add (same as AddRowsBroadcastKernel)
+    // grid-wide add (same as AddRowsBroadcastKernel)
     const uint32_t t = blockIdx.x;
     const uint32_t i = blockIdx.y * blockDim.x + threadIdx.x;
     if (t >= streams || i >= hidden) return;
