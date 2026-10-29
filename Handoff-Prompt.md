@@ -10,25 +10,21 @@ Read `/home/ugo/software/project-maya/Handoff.md` in full before doing anything 
 
 **Hard rules (non-negotiable):**
 1. **HIP/ROCm gfx1151 Linux only.** No CUDA/NVIDIA work.
-2. **RDMA only** (`usb4_rdma*`), target ~37 Gb/s / ~6 µs as in gufo. No TCP data path.
+2. **RDMA only** (`usb4_rdma*`), target ~37 Gb/s / ~6 µs. No TCP data path.
 3. **GPU is the inference path.** CPU only for unit tests of slice math.
-4. **Track every workstream as its own GitHub issue** on `uv-genai/maya-tp` (not one umbrella with comments). Comment while making progress. Link commits `refs #N`. Open a new issue for any bug/gap not already covered.
+4. **Track every workstream as its own GitHub issue** on `uv-genai/maya-tp`. Comment while making progress. Link commits `refs #N`.
 5. Push only to `origin` (`uv-genai/maya-tp`). Never push `upstream` (`mw00/project-maya`).
+6. **NEVER use nested SSH.** You are ON strix-halo-2. Use SSH only to reach strix-halo-1.
+7. Python uses `.venv/bin/python`. Shell uses `jq`. Always kill old processes before starting new ones (`pkill -9 maya; pkill -9 -f server.py`).
 
-**Reference implementation:** gufo at `/home/ugo/projects/gufo` (TP2/RDMA). See its `TP2-SETUP.md` and `docs/models/qwen3.8-flash-next/TP2.md`.
+**Current state:** TP2 slicing is done — +32% vs single-host (56.81 → 38.50 ms/tok), pair parity 100% (32/32), spec-follow 31/32 (1 near-tie). The benchmark (`tools/tp2/run_bench.sh`) works perfectly.
 
-**Current state:** correctness is done — pair parity 100%, 31/32 tokens are the model's own greedy picks (1 near-tie). RDMA pair live. Expert pool sliced to 44.3 GB/rank. MTP window fixed.
+**THE OPEN PROBLEM (do this):** Serve-mode TP2 token mirroring. Only rank 0's GPU works; tokens never reach rank 1. The fix is gufo's `TpInstruction` pattern: put `SendControl`/`RecvControl` at every `model.forward()` call site in `prep_prompt` and `run_request` (see Handoff.md §10 for exact line numbers and gufo reference files). Do NOT put the mirror inside `forward()` — `prep_prompt` blocks before `forward()` is called.
 
-**The open gap is performance:** experts-only slice gives +9.4% (with AR) to +16.8% (no AR) vs single-host; gufo gets 30%+. The mixer is still replicated and the all-reduce is on the critical path.
+**Reference:** gufo at `/home/ugo/projects/gufo`, especially `src/cli/serve/tp_executor.cpp` and `tp_control.cpp`.
 
-**Next work (issue #5 — do this):**
-1. Slice the KDA mixer (heads 64→32): `attn_q/k/v` row-slice, `attn_output` column-slice, per-head recurrent state; DSA head-slice (MLA latent stays replicated).
-2. Move the all-reduce to the overlapped `split_reduce` form (`StartPartial`/`FinishPartial`) to reclaim the 6.7%.
-
-Then re-measure with the controlled protocol in `Handoff.md` §6/§9 (no-MTP, same prompt, report ms/tok and `--spec-follow` near-tie count). Target 30%+ vs single-host.
-
-**Watch the gotchas in `Handoff.md` §8** — especially the shard-stride rule (sliced `Ly.gu_bytes` is NOT the GGUF stride) and the per-layer width (`ff_compute_for(il)`; the MTP draft layer stays full).
+Verify every step: kill old processes, deploy binary, check timestamp, then test with a curl request.
 
 ---
 
-_When you make progress, update `Handoff.md` (§4 issue map, §5 what works, §6 performance, §10 next steps) and comment on the relevant issue. This file is the restart point — keep it current._
+_When you make progress, update `Handoff.md` (§4 issue map, §5 what works, §10 the open problem) and comment on the relevant issue. This file is the restart point — keep it current._
