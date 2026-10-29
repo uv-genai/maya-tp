@@ -4,20 +4,31 @@ Every release is on GitHub (Releases) with these notes; every published change m
 page's Settings › About and updates (About > Update before the redesign; from v1.0.18), or `git pull`, then `./setup.sh` (Windows: `START-MAYA.bat`) - it recompiles
 only what changed and starts; the model is not downloaded again.
 
-## TP2 (two-host tensor parallel) — 2026-10-29
+## v1.1.37 - 2026-10-30
 
-Tensor parallel for GLM-5.3-Flash across twin Strix Halo hosts over Thunderbolt RDMA. **+32% vs single-host**
-(56.81 → 38.52 ms/tok), pair parity 100%, spec-follow 31/32 (1 near-tie).
+Two-host tensor parallel (TP2) for GLM-5.3-Flash Maya-S on twin Strix Halo hosts over Thunderbolt RDMA, including
+**serve-mode token mirroring** so an OpenAI API on rank 0 drives both GPUs. Controlled bench: **+32% vs single-host**
+(56.81 → 38.50 ms/tok), pair parity 100% (32/32), spec-follow 31/32. Two live `curl /v1/chat/completions` requests
+verified the pair end-to-end (#6).
 
+- **Serve-mode TP2 mirroring** (#6): rank 0 sends a `TpMirrorHdr` (reset / prefill / forward) plus token ids on the
+  bootstrap control socket immediately before every model call that issues all-reduce; rank 1’s worker executes the
+  same call (gufo’s `TpInstruction` pattern — not inside `forward()`, which `prep_prompt` never reaches). Under TP2
+  the engine forces the simple decode loop (skips DFlash/MTP/spec), disables conversation reuse, and ignores
+  `MAYA_GLM_SEQS`, so both ranks stay in lockstep.
 - **Full tensor-parallel slicing**: KDA mixer (heads 64→32), DSA head-slice, experts (2048→1024), shared expert,
   dense FFN (12288→6144), attn_output column-slice. Two all-reduces per layer (mixer + FFN).
 - **RDMA transport**: gufo Ibrverbs port (`usb4_rdma*`, RoCE v2, write striping). ~37 Gb/s link, ~6 µs transit.
-  `ibv_create_cq_ex`/`IBV_SEND_INLINE` unsupported on Thunderbolt driver (graceful fallback).
-- **Config**: `maya-*.json` `tp` block → `--tp-*` flags (`maya.py tp_inject_args`). Launch scripts
-  `tools/tp2/maya-rank0.sh`/`maya-rank1.sh`. `/health` reports `tp` status.
+  `ibv_create_cq_ex`/`IBV_SEND_INLINE` unsupported on the Thunderbolt driver (graceful fallback). Bootstrap accept
+  window matches rank 1’s 120 s connect retry; rank 1 must not probe the port with `/dev/tcp` (that stole accept).
+- **Launch**: `tools/tp2/rank0.sh` (API server via `serve/server.py`), `tools/tp2/rank1.sh` (worker, no `--serve`,
+  no port probe), `tools/llama-swap/tp2.sh` for llama-swap. Config `tp` block → `--tp-*` flags
+  (`maya.py tp_inject_args`). `/health` reports `tp.world_size` / `tp.rank`.
 - **Tools**: `tools/tp2/acceptance.sh` (pair-up, curl, kill/recover), `tools/calibrate_glm_tp.py` (AR cost),
   `tools/test_tp_config.py` (10 CI tests), `docs/TP2-RUN.md` (ops runbook).
 - **Isolation flags**: `MAYA_TP_NOSLICE`, `MAYA_TP_NOAR`, `MAYA_TP_SH_BOTH`, `MAYA_GLM_NO_MTP`.
+- **Still open on #6**: `/health` does not yet report peer-down when rank 1 dies; kill/recover pair-down; multi-seq
+  mirror; snapshot/restore mirror for multi-turn reuse (every TP2 request re-prefills).
 - **CI**: `check_hip_compat.py` + `serve` + `tools` tests. No GPU required.
 
 ## v1.1.36 - 2026-10-28

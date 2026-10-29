@@ -1,7 +1,7 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 · HEAD `e43c95d` + serve-mirror commit · branch `main` on `uv-genai/maya-tp`
+> Last updated: 2026-10-30 · v1.1.37 · branch `main` on `uv-genai/maya-tp`
 
 ## 1. What we are building
 
