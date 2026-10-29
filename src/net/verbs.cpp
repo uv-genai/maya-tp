@@ -79,6 +79,16 @@ constexpr std::size_t kFlagBytes = 4096;
 // mismatched configuration fails instead of desynchronizing.
 constexpr std::size_t kAuthBytes = 64;
 constexpr auto kCollectiveTimeout = std::chrono::seconds(30);
+// Bootstrap connect retry window.  Rank 0 behind serve/server.py can take >30 s
+// to spawn the engine and open the bootstrap port, so rank 1's connect retries
+// longer by default.  MAYA_TP_BOOTSTRAP_TIMEOUT overrides (seconds).
+static std::chrono::seconds BootstrapTimeout() {
+  if (const char* v = std::getenv("MAYA_TP_BOOTSTRAP_TIMEOUT")) {
+    const int s = std::atoi(v);
+    if (s > 0) return std::chrono::seconds(s);
+  }
+  return std::chrono::seconds(120);
+}
 // A living peer may fall far behind, e.g. while its n-gram reads wait on a
 // throttled SSD; a dead one closes the bootstrap socket, and a vanished host
 // fails its TCP keepalive, both long before this.
@@ -235,7 +245,7 @@ public:
       SetError(error, "rank one requires a bootstrap host");
       return {};
     }
-    const auto deadline = std::chrono::steady_clock::now() + kCollectiveTimeout;
+    const auto deadline = std::chrono::steady_clock::now() + BootstrapTimeout();
     for (;;) {
       struct addrinfo hints{};
       hints.ai_family = AF_INET;

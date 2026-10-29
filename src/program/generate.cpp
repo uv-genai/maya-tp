@@ -3809,6 +3809,12 @@ static int glm_pack_generate(const Options& o) {
 
     if (!o.serve) {
         if (o.tokens.empty()) {
+            // TP2 rank > 0: stay alive as a persistent worker (gufo's `serve` behavior).
+            // Rank 0 drives the computation; rank 1 participates in collectives.
+            if (o.tp_world > 1 && o.tp_rank > 0) {
+                std::fprintf(stderr, "maya generate: TP2 rank %d worker — waiting for rank 0\n", o.tp_rank);
+                for (;;) std::this_thread::sleep_for(std::chrono::seconds(60));
+            }
             std::fprintf(stderr, "maya generate: --tokens is required (this build has no tokenizer; see the "
                                  "header of src/program/generate.cpp)\n");
             return 2;
@@ -4037,6 +4043,12 @@ static int glm_pack_generate(const Options& o) {
                 continue;
             }
         } else if (!next_line(line)) {
+            // TP2 rank > 0: stay alive as a persistent worker when stdin reaches EOF.
+            // Rank 0 drives the computation; rank 1 participates in collectives.
+            if (o.tp_world > 1 && o.tp_rank > 0) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                continue;
+            }
             break;
         }
         std::istringstream ss(line);
