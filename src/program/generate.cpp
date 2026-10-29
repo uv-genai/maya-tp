@@ -1817,17 +1817,53 @@ static int glm_pack_generate(const Options& o) {
     std::vector<DeferredPause> deferred_pauses;
     std::function<void()> gap_reset;
     std::chrono::steady_clock::time_point gap_mark;   // the read's start (after any restore), then each gap's end
+    // TP2 serve-mode call mirroring (gufo's TpInstruction pattern, simplified).
+    // Rank 0 sends an instruction immediately BEFORE every model call that
+    // participates in a collective; rank 1's worker executes the same call in
+    // the same order.  The ARs then pair them.  Do NOT mirror inside forward():
+    // prep_prompt blocks (snapshot/restore) before forward() is ever reached.
+    // Wire: TpMirrorHdr + n * int32_t tokens.
+    enum : int32_t { kTpMirrorReset = 0, kTpMirrorPrefill = 1, kTpMirrorForward = 2 };
+    struct TpMirrorHdr {
+        int32_t op;
+        int32_t n;
+        int32_t next_token;   // kTpMirrorPrefill: the prompt's next token (NextN cache)
+    };
+    // Both ranks of a TP pair must share conversation state.  Snapshot /
+    // checkpoint / slot reuse cannot be mirrored yet (gufo sends kReuse /
+    // kRestore), so TP2 always resets and re-reads the full prompt.
+    const bool tp2 = tp_comm != nullptr && tp_comm->world_size() > 1;
+    // Active only when rank 0 is serving: a controlled bench runs BOTH ranks
+    // with --tokens and must not push control traffic rank 1 never reads
+    // (a full TCP buffer would block rank 0 mid-decode).
+    const bool tp_mirror = tp_comm != nullptr && tp_comm->rank() == 0 && o.serve && tp2;
+    const auto tp_send = [&](int32_t op, const int32_t* toks, int32_t n, int32_t next_token = -1) -> bool {
+        if (!tp_mirror) return true;
+        const TpMirrorHdr h{op, n, next_token};
+        std::string e;
+        if (!tp_comm->SendControl(&h, sizeof(h), &e) ||
+            (n > 0 && !tp_comm->SendControl(toks, (size_t) n * sizeof(int32_t), &e))) {
+            std::fprintf(stderr, "TP2 mirror send: %s\n", e.c_str());
+            return false;
+        }
+        return true;
+    };
+    const auto tp_send_vec = [&](int32_t op, const std::vector<int32_t>& toks,
+                                 int32_t next_token = -1) -> bool {
+        return tp_send(op, toks.empty() ? nullptr : toks.data(), (int32_t) toks.size(), next_token);
+    };
     const auto prep_prompt = [&](const std::vector<int32_t>& prompt, size_t& reuse, const char*& finish,
                                  std::chrono::steady_clock::time_point& t0) -> int {
         // CONVERSATION REUSE (the fast path): the previous prompt's state, saved just before its last token, is
         // restored when this prompt extends it - a chat's next turn reads only what is new
         strata::core::progress_at("the request: restoring a conversation");
-        const bool snap_ok = model.fast() && !snap_tokens.empty() && snap_tokens.size() < prompt.size() &&
+        // TP2: no conversation reuse (gufo mirrors kReuse/kRestore; we reset both ranks).
+        const bool snap_ok = !tp2 && model.fast() && !snap_tokens.empty() && snap_tokens.size() < prompt.size() &&
                              std::equal(snap_tokens.begin(), snap_tokens.end(), prompt.begin()) &&
                              img_hash(snap_tokens.size()) == snap_img_hash && getenv("STRATA_GLM_NO_REUSE") == nullptr;
         // the longest checkpoint this prompt starts with (it holds less than the snapshot when both match)
         int ck = -1;
-        if (ckpt_max > 0 && cur_img_pos.empty())
+        if (ckpt_max > 0 && cur_img_pos.empty() && !tp2)
             for (int c = 0; c < (int) ckpts.size(); ++c) {
                 const auto& t = ckpts[(size_t) c].tokens;
                 if (!t.empty() && t.size() < prompt.size() && (ck < 0 || t.size() > ckpts[(size_t) ck].tokens.size()) &&
@@ -1859,7 +1895,7 @@ static int glm_pack_generate(const Options& o) {
                 ckpts[(size_t) ck].tokens.clear();
             }
         }
-        if (reuse == 0 && slot_max > 0) {
+        if (reuse == 0 && !tp2 && slot_max > 0) {
             slot_put("");              // the conversation in the model, before this prompt overwrites it
             reuse = slot_take(prompt);
             if (reuse > 0) ckpt_drop_past(0);   // another conversation's state now
@@ -1873,7 +1909,10 @@ static int glm_pack_generate(const Options& o) {
                 reuse = back;
             }
         }
-        if (reuse == 0) model.reset();
+        if (reuse == 0) {
+            tp_send(kTpMirrorReset, nullptr, 0);   // rank 1 clears its state too
+            model.reset();
+        }
         ckpt_drop_past(reuse);   // this prompt writes the state from `reuse` on (all of it after a reset)
         // THE TURN'S START: a prompt that goes on from the snapshot and opens its last turn (<|user|> / <|observation|>)
         // within 512 tokens of it gets no checkpoint there from ckpt_marks - so an edit of that turn's message read the
@@ -1966,6 +2005,8 @@ static int glm_pack_generate(const Options& o) {
                     pp_line(base + (size_t) done);
                     return !read_stopped();
                 };
+                // Mirror immediately before the collective: rank 1 prefills the same part.
+                if (!tp_send_vec(kTpMirrorPrefill, part, prompt[end])) return 1;
                 pok = guarded([&] { return model.prefill(part, err, prompt[end]); }, err);   // (the NextN block's caches read the next token)
                 model.prefill_progress = nullptr;
                 model.prefill_min_chunks = 1;
@@ -2009,6 +2050,7 @@ static int glm_pack_generate(const Options& o) {
                 pp_line(prompt.size() - 1 - reuse);
             } else if (err == "cancelled") {
                 snap_tokens.clear();
+                tp_send(kTpMirrorReset, nullptr, 0);
                 model.reset();
                 ckpt_drop_past(0);
                 finish = "cancel";
@@ -2036,6 +2078,8 @@ static int glm_pack_generate(const Options& o) {
             size_t chunk = std::min<size_t>(8, prompt.size() - i);
             if (model.fast() && !snapped && i + chunk > prompt.size() - 1) chunk = prompt.size() - 1 - i;
             std::vector<int32_t> part(prompt.begin() + (long) i, prompt.begin() + (long) (i + chunk));
+            // Mirror immediately before the collective: rank 1 forwards the same ids.
+            if (!tp_send_vec(kTpMirrorForward, part)) return 1;
             const bool ok = model.forward(part, lg, err);
             if (!ok) {
                 snap_tokens.clear();
@@ -2253,7 +2297,11 @@ static int glm_pack_generate(const Options& o) {
             return produced < max_new;
         };
         const uint64_t spec0 = model.spec_steps_, hits0 = model.spec_hits_;
-        if (std::strcmp(finish, "cancel") != 0 && model.fast() && model.dflash_ready() && req_spec != 1) {
+        // TP2: only the simple decode loop is mirrored.  DFlash / MTP / pipelined spec
+        // issue many internal forwards whose token choices rank 1 cannot reproduce
+        // without sampler state on the wire (gufo carries RNG in kDecode).  Force the
+        // one-token path so every collective has an explicit mirror.
+        if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.dflash_ready() && req_spec != 1) {
             // the DFlash decode: a block of drafts a round, one verify window checks them (same tokens as the loop
             // below for the same samples); --spec T caps a round's window at T tokens
             int64_t n_spec = 0;
@@ -2270,7 +2318,7 @@ static int glm_pack_generate(const Options& o) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
             }
-        } else if (std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
+        } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
             // the one-GPU MTP decode (glm_mtp.cu; by default on the Strix / Gorgon Halo APUs): the NextN block drafts,
             // one verify window checks the drafts (same tokens as the loop below for the same samples)
             int64_t n_spec = 0;
@@ -2291,7 +2339,7 @@ static int glm_pack_generate(const Options& o) {
                              (unsigned long long) (model.mtp_rounds_ - rounds0),
                              (double) n_spec / (double) (model.mtp_rounds_ - rounds0), lens.c_str());
             }
-        } else if (std::strcmp(finish, "cancel") != 0 && model.fast() && model.spec_ready()) {
+        } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.spec_ready()) {
             // the pipelined speculative decode: the two halves of the split work on consecutive tokens, the head
             // running the NextN block's draft (same tokens as the loop below)
             int64_t n_spec = 0;
@@ -2315,6 +2363,9 @@ static int glm_pack_generate(const Options& o) {
                 tok = model.forced(tok);
                 sp.counter += 1;
                 if (!on_token(tok)) break;
+                // Mirror the sampled id immediately before the decode collective.
+                const int32_t tok32 = (int32_t) tok;
+                if (!tp_send(kTpMirrorForward, &tok32, 1)) return 1;
                 if (!model.forward({(int32_t) tok}, lg, err)) {
                     drop_if_poisoned(prompt, err);
                     std::printf("ERR %s\n", err.c_str());
@@ -2399,7 +2450,12 @@ static int glm_pack_generate(const Options& o) {
     // read, nothing loaded), else the least recently used idle one, whose conversation goes to a slot first.  A
     // request alone decodes through the speculative path (the fastest for one); as soon as a second one comes, both go
     // through the pipelined decode (Glm5Model::multi_issue), each card of the split on a different conversation.
-    const bool multi = o.serve && model.fast() && model.seq_count() > 1;
+    // TP2: multi-conversation scheduling calls forward() from paths that are not
+    // mirrored yet — force single-conversation serve so every collective has an
+    // explicit instruction (gufo batches kAdvanceBatch / kDecodeBatch).
+    const bool multi = o.serve && model.fast() && model.seq_count() > 1 && !tp2;
+    if (tp2 && o.serve && model.seq_count() > 1)
+        std::fprintf(stderr, "glm multi: MAYA_GLM_SEQS is ignored under TP2 (one conversation at a time)\n");
     if (multi && !follow_ids.empty()) {
         std::fprintf(stderr, "glm follow: not used with MAYA_GLM_SEQS=%d - one conversation at a time only\n",
                      model.seq_count());
@@ -3807,21 +3863,56 @@ static int glm_pack_generate(const Options& o) {
         return 0;
     }
 
+    // TP2 rank > 0 without --tokens: persistent instruction worker (gufo's serve
+    // behavior).  Rank 0 mirrors every collective model call; this loop executes
+    // the same call.  Runs regardless of --serve — rank 1 never serves HTTP.
+    if (o.tp_world > 1 && o.tp_rank > 0 && o.tokens.empty()) {
+        std::fprintf(stderr, "maya generate: TP2 rank %d worker — mirroring rank 0's model calls\n", o.tp_rank);
+        for (;;) {
+            TpMirrorHdr h{};
+            std::string tp_err;
+            if (tp_comm == nullptr || !tp_comm->RecvControl(&h, sizeof(h), &tp_err)) {
+                std::fprintf(stderr, "TP2 worker recv: %s\n", tp_err.empty() ? "no communicator" : tp_err.c_str());
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                continue;
+            }
+            if (h.n < 0 || h.n > 1000000) {
+                std::fprintf(stderr, "TP2 worker: bad instruction n=%d op=%d\n", h.n, h.op);
+                continue;
+            }
+            std::vector<int32_t> toks((size_t) h.n);
+            if (h.n > 0 && !tp_comm->RecvControl(toks.data(), (size_t) h.n * sizeof(int32_t), &tp_err)) {
+                std::fprintf(stderr, "TP2 worker tokens: %s\n", tp_err.c_str());
+                continue;
+            }
+            std::string e;
+            std::vector<float> lg;
+            switch (h.op) {
+                case kTpMirrorReset:
+                    model.reset();
+                    std::fprintf(stderr, "TP2 worker: reset\n");
+                    break;
+                case kTpMirrorPrefill:
+                    if (!model.prefill(toks, e, h.next_token))
+                        std::fprintf(stderr, "TP2 worker prefill: %s\n", e.c_str());
+                    else
+                        std::fprintf(stderr, "TP2 worker: prefill %d next=%d\n", h.n, h.next_token);
+                    break;
+                case kTpMirrorForward:
+                    if (!model.forward(toks, lg, e))
+                        std::fprintf(stderr, "TP2 worker forward: %s\n", e.c_str());
+                    else
+                        std::fprintf(stderr, "TP2 worker: forward %d\n", h.n);
+                    break;
+                default:
+                    std::fprintf(stderr, "TP2 worker: unknown op %d\n", h.op);
+                    break;
+            }
+        }
+    }
+
     if (!o.serve) {
         if (o.tokens.empty()) {
-            // TP2 rank > 0: stay alive as a persistent worker (gufo's `serve` behavior).
-            // Rank 0 drives the computation; rank 1 participates in collectives.
-            if (o.tp_world > 1 && o.tp_rank > 0) {
-                std::fprintf(stderr, "maya generate: TP2 rank %d worker — waiting for rank 0\n", o.tp_rank);
-                // The forward() call mirrors rank 0's tokens via the control channel.
-                // Each call blocks until rank 0 sends, then processes the same tokens.
-                for (;;) {
-                    std::vector<int32_t> dummy;
-                    std::vector<float> logits;
-                    std::string tp_err;
-                    model.forward(dummy, logits, tp_err);
-                }
-            }
             std::fprintf(stderr, "maya generate: --tokens is required (this build has no tokenizer; see the "
                                  "header of src/program/generate.cpp)\n");
             return 2;

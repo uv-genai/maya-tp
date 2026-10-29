@@ -1,7 +1,7 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-29 · HEAD `e43c95d` · branch `main` on `uv-genai/maya-tp`
+> Last updated: 2026-10-30 · HEAD `e43c95d` + serve-mirror commit · branch `main` on `uv-genai/maya-tp`
 
 ## 1. What we are building
 
@@ -43,7 +43,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 | 3 | GPU-staged QueuePartial (6 µs / 37 Gb/s) | open |
 | 4 | P4 greedy parity gate | **closed — PASS** |
 | 5 | P5 fast path + prefill (perf) | **closed — +32% measured** |
-| 6 | P6 serve integration | **open — BLOCKED on TP2 token mirroring** |
+| 6 | P6 serve integration | **open — token mirroring FIXED**; remaining: pair-up `/health`, kill/recover, multi-seq |
 | 7 | P7 calibration / release | open |
 | 8 | P2 RDMA transport | **closed** |
 | 9 | MTP / spec decode TP | **closed — fixed** |
@@ -56,6 +56,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 - **Benchmark mode works perfectly** (`run_bench.sh`): +32% vs single-host (56.81 → 38.50 ms/tok), pair parity 100% (32/32), spec-follow 31/32.
 - **Engine stays alive as TP2 worker** (gufo serve behavior): `--tp-rank 1` without `--tokens` enters worker loop.
 - **Transport:** `SendControl`/`RecvControl` on bootstrap TCP socket (with EAGAIN fix).
+- **Serve-mode TP2 token mirroring** (#6): FIXED 2026-10-30. Rank 0 sends `TpMirrorHdr`+tokens immediately before every collective model call (reset / prefill / forward); rank 1's worker executes the same call. Verified with two `curl /v1/chat/completions` requests (8 and 5 tokens; rank 1 log shows reset → prefill N → N× forward 1).
 
 ## 6. Performance status (measured 2026-10-29)
 
@@ -115,13 +116,18 @@ MAYA_GLM_NO_MTP=1 STRATA_GLM_TIMING=1 ./build-hip/maya --glm-pack $P --tokens $T
 bash tools/tp2/run_bench.sh
 ```
 
-### Serve mode (BROKEN — see §10)
+### Serve mode (WORKS — verified 2026-10-30)
 ```sh
 # llama-swap config:
 #   "maya-glm5-tp2":
 #     cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT}
 #     cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
 #     proxy: http://127.0.0.1:${PORT}
+#
+# Or manually:
+#   rank 1 first (strix-halo-2):  bash tools/tp2/rank1.sh
+#   rank 0 (strix-halo-1):        bash tools/tp2/rank0.sh 18080
+#   curl http://192.168.1.22:18080/v1/chat/completions ...
 ```
 
 ### Isolation flags
@@ -133,41 +139,43 @@ bash tools/tp2/run_bench.sh
 | `MAYA_GLM_NO_MTP=1` | Disable MTP |
 | `GLM_CB_DIR=<dir>` | Dump layer outputs |
 
-## 10. THE OPEN PROBLEM: serve-mode TP2 token mirroring
+## 10. Serve-mode TP2 token mirroring — FIXED (2026-10-30)
 
-**Status: NOT WORKING. Only rank 0's GPU is used. Tokens never reach rank 1.**
+**Status: WORKING.** Two chat/completions requests completed; rank 1 logs `reset` → `prefill N` → N× `forward 1`.
 
-**What gufo does** (`src/cli/serve/tp_executor.cpp`, `tp_control.cpp`):
-- `TpMirroredRunner` sends a `TpInstruction` (kPrefill / kAdvance / kDecode) to rank 1 over a TCP control channel **before every model call**.
-- Rank 1's `TpExecutor` executes the same call. Both ranks make identical calls in identical order.
-- The mirroring is at the **caller level** (the runner), not inside the model's `forward()`.
+**Pattern (gufo `TpInstruction`, simplified):** rank 0 sends an instruction immediately BEFORE every model call that participates in a collective. Rank 1's worker executes the same call. Do **not** mirror inside `forward()` — `prep_prompt` blocks before `forward()` is called.
 
-**What Maya has tried (all failed):**
-1. Mirror inside `forward()` — `prep_prompt` blocks before `forward()` is called, so the mirror never fires.
-2. Send at start of `run_request` — rank 1 calls `forward()` immediately while rank 0 is stuck in `prep_prompt`, ARs mismatch.
-3. Rank 1 worker loop calls `forward()` with dummy tokens — RecvControl gets EAGAIN (fixed) but rank 0 never sends.
+**Wire** (`TpMirrorHdr` + `n * int32_t` tokens):
+```
+op: 0=reset, 1=prefill(+next_token), 2=forward
+```
 
-**Root cause:** `prep_prompt` (generate.cpp:1820) does snapshot/checkpoint restore BEFORE calling `forward()` (line 2039). The "reading the prompt: N tokens" message comes from `serve/server.py`'s progress monitor, not the engine. `forward()` is never reached on rank 0.
+**Call sites mirrored** (`src/program/generate.cpp`):
+- `prep_prompt`: `model.reset()` when reuse==0; `model.prefill(part, …, prompt[end])`; token-path `model.forward(part)`
+- `run_request` simple decode loop: `model.forward({tok})` (after `on_token`)
+- TP2 forces the simple decode loop (skips DFlash/MTP/spec — those need sampler state on the wire)
+- TP2 disables conversation reuse (snapshot/checkpoint/slot) and multi-seq (`MAYA_GLM_SEQS`)
 
-**The fix (gufo's pattern):** Put `SendControl`/`RecvControl` at EVERY `model.forward()` call site in the request path:
-- `prep_prompt` line 2039: `model.forward(part, lg, err)` — prompt processing
-- `run_request` line 2318: `model.forward({tok}, lg, err)` — decode step
-- Any other `forward()` call in `run_request`
+**Rank 1 worker:** `--tp-rank N` without `--tokens`, regardless of `--serve`. Entered after multi-bench, before `if (!o.serve)`.
 
-Before each call: rank 0 sends the token IDs, rank 1 receives and calls `forward()` with the same IDs. The ARs synchronize them.
+**Gotchas fixed along the way:**
+1. **Do NOT probe the bootstrap port with `/dev/tcp`** — the probe completes a TCP connection and rank 0's single `accept()` takes it as the peer; handshake then fails with EAGAIN/EISDIR. Rank 1's engine already retries connect (`MAYA_TP_BOOTSTRAP_TIMEOUT`, default 120 s). `tools/tp2/rank1.sh` no longer probes.
+2. Rank 0 accept poll now matches that 120 s window (was hardcoded 30 s → “bootstrap accept timed out”).
+3. Mirror traffic is **serve-only** (`tp_mirror = rank 0 && o.serve && tp2`). A bench run gives both ranks `--tokens`; pushing control traffic rank 1 never reads would fill the TCP buffer and block rank 0.
+
+**Still open on #6:** `/health` reports `ok` from rank 0 alone (no peer liveness); kill/recover; multi-seq mirror (`kAdvanceBatch`/`kDecodeBatch`); mirror snapshot/restore for multi-turn reuse.
 
 **Key files:**
-- `src/program/generate.cpp` — `run_request` (line 2114), `prep_prompt` (line 1820), `forward()` calls at lines 2039, 2318
-- `src/core/glm_model.cu` — `Glm5Model::forward()` (line 1001), `tp_` member
-- `src/net/verbs.cpp` — `SendControl`/`RecvControl` (lines 700-730)
-- `include/strata/net/communicator.hpp` — `SendControl`/`RecvControl` interface
+- `src/program/generate.cpp` — `TpMirrorHdr`, `tp_send`, worker loop, prep_prompt/run_request hooks
+- `src/net/verbs.cpp` — `SendControl`/`RecvControl`; accept timeout = `BootstrapTimeout()`
+- `include/strata/net/communicator.hpp` — control channel interface
+- `tools/tp2/rank0.sh`, `tools/tp2/rank1.sh` — launch scripts (rank1: no `--serve`, no port probe)
 - `tools/llama-swap/tp2.sh` — llama-swap launcher
-- `tools/tp2/tp2-swap.sh` — swap launcher (rank 0 = serve/server.py, rank 1 = engine worker)
 
-**Gufo reference files:**
-- `/home/ugo/projects/gufo/src/cli/serve/tp_executor.cpp` — `TpMirroredRunner`, instruction mirroring
+**Gufo reference:**
+- `/home/ugo/projects/gufo/src/cli/serve/tp_executor.cpp` — `TpMirroredRunner`
 - `/home/ugo/projects/gufo/src/cli/serve/tp_control.hpp` — `TpInstruction`, `TpControlChannel`
-- `/home/ugo/projects/gufo/src/cli/serve/tp_control.cpp` — control channel implementation
+- `/home/ugo/projects/gufo/src/cli/serve/tp_control.cpp`
 
 ## 11. Key commits
 

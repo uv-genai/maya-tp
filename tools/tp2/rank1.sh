@@ -16,19 +16,11 @@ PACK=$(jq -r '(.args // []) as $a | [range(0; $a|length) | select($a[.] == "--gl
 
 echo "rank1: pack=$PACK rdma=$RDEV bootstrap=$BOOTSTRAP_HOST"
 
-# Wait for rank 0's bootstrap port before starting the engine.
-# The engine uses a non-blocking connect and dies on EINPROGRESS if
-# rank 0 is not yet listening.
-echo "rank1: waiting for $BOOTSTRAP_HOST:18515 ..."
-for _ in $(seq 1 60); do
-  if (echo >/dev/tcp/"$BOOTSTRAP_HOST"/18515) 2>/dev/null; then
-    echo "rank1: bootstrap port is open"
-    break
-  fi
-  sleep 2
-done
-
-exec "$ENGINE" --serve --glm-pack "$PACK" \
+# Do NOT probe the bootstrap port with /dev/tcp: that completes a TCP
+# connection and rank 0's single accept() takes it as the peer handshake,
+# then fails (EAGAIN / EISDIR) when the probe closes.  The engine's own
+# connect retries until rank 0 is listening (MAYA_TP_BOOTSTRAP_TIMEOUT).
+exec "$ENGINE" --glm-pack "$PACK" \
   --tp-world-size 2 --tp-rank 1 \
   --tp-bootstrap-host "$BOOTSTRAP_HOST" \
   --tp-bootstrap-port 18515 \

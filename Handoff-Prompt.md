@@ -15,11 +15,16 @@ Read `/home/ugo/software/project-maya/Handoff.md` in full before doing anything 
 4. **Track every workstream as its own GitHub issue** on `uv-genai/maya-tp`. Comment while making progress. Link commits `refs #N`.
 5. Push only to `origin` (`uv-genai/maya-tp`). Never push `upstream` (`mw00/project-maya`).
 6. **NEVER use nested SSH.** You are ON strix-halo-2. Use SSH only to reach strix-halo-1.
-7. Python uses `.venv/bin/python`. Shell uses `jq`. Always kill old processes before starting new ones (`pkill -9 maya; pkill -9 -f server.py`).
+7. Python uses `.venv/bin/python`. Shell uses `jq`. Always kill old processes before starting new ones (`pkill -9 maya`; do **not** `pkill -f server.py` — that matches the ssh command line).
 
-**Current state:** TP2 slicing is done — +32% vs single-host (56.81 → 38.50 ms/tok), pair parity 100% (32/32), spec-follow 31/32 (1 near-tie). The benchmark (`tools/tp2/run_bench.sh`) works perfectly.
+**Current state:** TP2 slicing done (+32%), bench perfect. **Serve-mode token mirroring FIXED** (2026-10-30): rank 0 sends TpMirrorHdr before every collective call; rank 1 worker executes it. Two curl chat/completions verified.
 
-**THE OPEN PROBLEM (do this):** Serve-mode TP2 token mirroring. Only rank 0's GPU works; tokens never reach rank 1. The fix is gufo's `TpInstruction` pattern: put `SendControl`/`RecvControl` at every `model.forward()` call site in `prep_prompt` and `run_request` (see Handoff.md §10 for exact line numbers and gufo reference files). Do NOT put the mirror inside `forward()` — `prep_prompt` blocks before `forward()` is called.
+**NEXT (issue #6 remaining):**
+1. `/health` pair-up: report peer down when rank 1 dies (today it only checks rank 0).
+2. Kill rank 1 → clean pair-down; restart both → recover.
+3. Optional: multi-seq mirror; snapshot/restore mirror for multi-turn reuse.
+
+**Launch for serve test:** rank 1 first (`bash tools/tp2/rank1.sh` on this host), then rank 0 (`bash tools/tp2/rank0.sh 18080` on strix-halo-1 via SSH). Never probe 18515 with `/dev/tcp` — it steals rank 0's accept.
 
 **Reference:** gufo at `/home/ugo/projects/gufo`, especially `src/cli/serve/tp_executor.cpp` and `tp_control.cpp`.
 
@@ -27,4 +32,4 @@ Verify every step: kill old processes, deploy binary, check timestamp, then test
 
 ---
 
-_When you make progress, update `Handoff.md` (§4 issue map, §5 what works, §10 the open problem) and comment on the relevant issue. This file is the restart point — keep it current._
+_When you make progress, update `Handoff.md` (§4 issue map, §5 what works, §10) and comment on the relevant issue. This file is the restart point — keep it current._

@@ -1004,43 +1004,6 @@ bool Glm5Model::forward(const std::vector<int32_t>& tokens, std::vector<float>& 
         err = "glm5_model: not loaded";
         return false;
     }
-    // TP2 call mirroring: rank 0 sends the token IDs, rank 1 receives and uses them.
-    // Both ranks make identical forward calls in identical order (gufo's TpInstruction pattern).
-    static thread_local bool in_mirror = false;
-    std::fprintf(stderr, "TP2 forward: rank %d tokens=%d active=%d comm=%p mirror=%d\n",
-                 tp_.rank, (int) tokens.size(), (int) tp_.active(), (void*) tp_.comm.get(), (int) in_mirror);
-    if (tp_.active() && tp_.comm && !in_mirror) {
-        std::string tp_err;
-        if (tp_.rank == 0) {
-            const int32_t n = (int32_t) tokens.size();
-            std::fprintf(stderr, "TP2 mirror: rank 0 send %d tokens\n", (int) n);
-            if (!tp_.comm->SendControl(&n, sizeof(n), &tp_err) ||
-                (n > 0 && !tp_.comm->SendControl(tokens.data(), (size_t) n * sizeof(int32_t), &tp_err))) {
-                err = "tp mirror send: " + tp_err;
-                std::fprintf(stderr, "TP2 mirror: rank 0 SEND FAILED: %s\n", tp_err.c_str());
-                return false;
-            }
-        } else {
-            int32_t n = 0;
-            std::fprintf(stderr, "TP2 mirror: rank 1 recv...\n");
-            if (!tp_.comm->RecvControl(&n, sizeof(n), &tp_err) || n < 0 || n > 1000000) {
-                err = "tp mirror recv: " + tp_err;
-                std::fprintf(stderr, "TP2 mirror: rank 1 RECV FAILED: %s\n", tp_err.c_str());
-                return false;
-            }
-            std::fprintf(stderr, "TP2 mirror: rank 1 got %d tokens\n", (int) n);
-            std::vector<int32_t> mirrored((size_t) n);
-            if (n > 0 && !tp_.comm->RecvControl(mirrored.data(), (size_t) n * sizeof(int32_t), &tp_err)) {
-                err = "tp mirror recv ids: " + tp_err;
-                std::fprintf(stderr, "TP2 mirror: rank 1 RECV IDS FAILED: %s\n", tp_err.c_str());
-                return false;
-            }
-            in_mirror = true;
-            bool ok = forward(mirrored, logits_out, err);
-            in_mirror = false;
-            return ok;
-        }
-    }
     if (pos_ + (int64_t) tokens.size() > max_ctx_) {
         err = "glm5_model: the sequence exceeds max_ctx";
         return false;

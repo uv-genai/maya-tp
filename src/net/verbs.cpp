@@ -217,8 +217,12 @@ public:
       return {};
     }
     SetTimeouts(fd);
+    // Match rank 1's connect-retry window (BootstrapTimeout, default 120 s):
+    // behind serve/server.py the peer engine can take a while to start, and a
+    // 30 s accept used to expire while rank 1 was still retrying.
     pollfd poll_fd{.fd = fd, .events = POLLIN, .revents = 0};
-    const int poll_result = ::poll(&poll_fd, 1, 30000);
+    const int poll_ms = static_cast<int>(BootstrapTimeout().count()) * 1000;
+    const int poll_result = ::poll(&poll_fd, 1, poll_ms);
     if (poll_result <= 0) {
       SetError(error, poll_result == 0 ? "bootstrap accept timed out"
                                        : SystemError("bootstrap poll"));
