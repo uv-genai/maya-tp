@@ -20,6 +20,11 @@ void StagePartial(const float* partial, float* send, std::size_t count, std::uin
 /// One-wave spin until `*flag >= value`, or `ticks` of the device wall clock (then stores 1 in `timed_out`).
 void WaitValue(const std::uint64_t* flag, std::uint64_t value, std::uint64_t ticks, std::uint32_t* timed_out,
                hipStream_t stream);
+/// Fused WaitValue + AddRowsBroadcast: spin until `*flag >= value` (or `ticks` timeout), then
+/// residual[t*streams*hidden + i] += addend[t*hidden + i%hidden].  One kernel launch instead of two.
+void WaitAdd(const std::uint64_t* flag, std::uint64_t value, std::uint64_t ticks, std::uint32_t* timed_out,
+             const float* addend, float* residual, uint32_t rows, uint32_t hidden, uint32_t streams,
+             hipStream_t stream);
 
 /// residual[t] += addend  for every row (broadcast): the two-rank all-reduce's add of the peer partial.
 void AddRowsBroadcast(const float* addend, float* residual, std::uint32_t rows, std::uint32_t hidden,

@@ -36,6 +36,30 @@ __global__ void WaitValueKernel(const uint64_t* flag, uint64_t value, uint64_t t
     }
 }
 
+// Fused WaitValue + AddRowsBroadcast: spin until `arrived`, then add the peer's partial.
+// Saves one kernel launch per exchange over the two-kernel form.
+__global__ void WaitAddKernel(const uint64_t* flag, uint64_t value, uint64_t ticks, uint32_t* timed_out,
+                              const float* __restrict__ addend, float* __restrict__ residual,
+                              uint32_t hidden, uint32_t streams) {
+    // one block for the wait, then the add over the whole grid
+    if (blockIdx.x == 0 && threadIdx.x == 0) {
+        const uint64_t start = wall_clock64();
+        while (__hip_atomic_load(flag, __ATOMIC_ACQUIRE, __HIP_MEMORY_SCOPE_SYSTEM) < value) {
+            if (wall_clock64() - start > ticks) {
+                __hip_atomic_store(timed_out, 1u, __ATOMIC_RELAXED, __HIP_MEMORY_SCOPE_SYSTEM);
+                return;
+            }
+            __builtin_amdgcn_s_sleep(1);
+        }
+    }
+    __syncthreads();
+    // the grid-wide add (same as AddRowsBroadcastKernel)
+    const uint32_t t = blockIdx.x;
+    const uint32_t i = blockIdx.y * blockDim.x + threadIdx.x;
+    if (t >= streams || i >= hidden) return;
+    residual[(size_t) t * streams * hidden + i] += addend[(size_t) t * hidden + i % hidden];
+}
+
 __global__ void AddRowsBroadcastKernel(const float* addend, float* residual, uint32_t hidden, uint32_t streams) {
     const uint32_t t = blockIdx.x;
     const uint32_t i = blockIdx.y * blockDim.x + threadIdx.x;
@@ -74,6 +98,15 @@ void StagePartial(const float* partial, float* send, size_t count, uint32_t* arr
 
 void WaitValue(const uint64_t* flag, uint64_t value, uint64_t ticks, uint32_t* timed_out, hipStream_t stream) {
     hipLaunchKernelGGL(WaitValueKernel, dim3(1), dim3(1), 0, stream, flag, value, ticks, timed_out);
+}
+
+void WaitAdd(const uint64_t* flag, uint64_t value, uint64_t ticks, uint32_t* timed_out,
+             const float* addend, float* residual, uint32_t rows, uint32_t hidden, uint32_t streams,
+             hipStream_t stream) {
+    // grid: (streams, ceil(hidden/threads)) — block (0,0) does the wait, all blocks do the add
+    const dim3 grid(streams, (unsigned) ((hidden + kThreads - 1) / kThreads));
+    hipLaunchKernelGGL(WaitAddKernel, grid, dim3(kThreads), 0, stream,
+                       flag, value, ticks, timed_out, addend, residual, hidden, streams);
 }
 
 void AddRowsBroadcast(const float* addend, float* residual, uint32_t rows, uint32_t hidden, uint32_t streams,

@@ -57,6 +57,14 @@ struct TpContext {
     /// `hidden` is the residual width (n_embd); `n` is a multiple of it (rows x hidden).
     bool all_reduce(float* dev, std::size_t n, int hidden, hipStream_t stream, std::string& err) const;
 
+    /// Overlapped all-reduce, gufo's split_reduce form.  `start_reduce` queues the exchange and returns at
+    /// once; the worker thread stages the partial (D2H) and posts the RDMA write while the GPU computes.
+    /// `finish_reduce` waits for the exchange and adds the peer's partial on `stream`.
+    /// Use when independent compute can run between start and finish (prefill two-sub-batch).
+    /// Every start must be matched by a finish in FIFO order before the next ExchangePartial or EndOperation.
+    bool start_reduce(float* dev, std::size_t n, int hidden, hipStream_t stream, std::string& err) const;
+    bool finish_reduce(float* dev, std::size_t n, int hidden, hipStream_t stream, std::string& err) const;
+
     /// After a call's collectives: the stream must drain before the scope ends (gufo's rule).
     bool drain(std::string& err) const {
         if (world == 1 || comm == nullptr) return true;

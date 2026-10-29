@@ -101,9 +101,9 @@ uint64_t Glm5Model::seq_layout(int64_t ctx, SeqCtx& c) const {
     for (int il = l0_; il < l1_; ++il) {
         if (g.is_recr(il)) {
             c.kda_S[(size_t) il] = floats;
-            floats += (int64_t) g.d_inner() * g.kda_head_dim;
+            floats += (int64_t) head_compute() * g.kda_head_dim * g.kda_head_dim;
             c.kda_conv[(size_t) il] = floats;
-            floats += (int64_t) 3 * g.d_inner() * (g.d_conv - 1);
+            floats += (int64_t) 3 * head_compute() * g.kda_head_dim * (g.d_conv - 1);
         } else {
             dsa(il);
         }
@@ -157,7 +157,7 @@ bool Glm5Model::seq_alloc_arenas(std::string& err) {
     // every sequence's snapshot (its recurrent states and the open key pool: the prompt cache, PAUSE) now as well:
     // made on demand, after the expert pool had taken the card, only the first found room
     const Glm5Geometry& g = g_;
-    const size_t run = (size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
+    const size_t run = (size_t) kda_run_floats();
     int n_rec = 0;
     for (int il = l0_; il < l1_; ++il) n_rec += g.is_recr(il) ? 1 : 0;
     const size_t pool_floats = dsa_layers().size() * 2 * (size_t) ((g.idx_kpool - 1) * g.idx_key);

@@ -131,15 +131,33 @@ public:
     /// Two-host tensor parallel: when world > 1 the block's mixer and FFN outs are all-reduced
     /// before hc_post (include/strata/core/tp_context.hpp).  World 1 keeps today's behaviour.
     void set_tp(const TpContext& tp) { tp_ = tp; }
+    /// TP2: point every head-dependent mixer weight at this rank's head band (after loading).
+    void slice_mixer_weights(std::string& err);
     const TpContext& tp() const { return tp_; }
     /// The intermediate width this rank computes: n_ff_exp, or its band under TP2 (the GPU kernels'
     /// `n_ff` argument and the sliced blob's row width).
     int ff_compute() const { return tp_.slicing() ? tp_.experts.count : (int) g_.n_ff_exp; }
+    /// Dense-lead FFN width per rank (12288 -> 6144 under TP).
+    int ff_compute_dense() const { return tp_.slicing() ? tp_.dense.count : (int) g_.n_ff_dense; }
     /// Per-layer width: the NextN/MTP draft block (mtp_il_) is replicated - its experts are not sliced.
     int ff_compute_for(int il) const {
         return (tp_.slicing() && il != mtp_il_) ? tp_.experts.count : (int) g_.n_ff_exp;
     }
     bool slice_this(int il) const { return tp_.slicing() && il != mtp_il_; }
+    /// Heads this rank computes for layer il (the MTP draft layer stays full).
+    int head_compute_for(int il) const {
+        return (tp_.slicing() && il != mtp_il_) ? g_.n_head / tp_.world : g_.n_head;
+    }
+    int head_begin_for(int il) const {
+        return (tp_.slicing() && il != mtp_il_) ? tp_.rank * (g_.n_head / tp_.world) : 0;
+    }
+    /// Trunk head count (every trunk layer shares it; the MTP draft layer uses g_.n_head).
+    int head_compute() const { return tp_.slicing() ? g_.n_head / tp_.world : g_.n_head; }
+    /// Per-layer KDA state floats (recurrent S + conv history) at the compute head count.
+    int64_t kda_run_floats() const {
+        const int64_t nh = head_compute();
+        return nh * g_.kda_head_dim * g_.kda_head_dim + 3 * nh * g_.kda_head_dim * (g_.d_conv - 1);
+    }
     /// Live counters of the fast path (both halves summed), for the driver's STAT lines.
     struct FastStats {
         uint64_t tokens = 0, hits = 0, misses = 0, miss_layers = 0;
@@ -322,6 +340,7 @@ private:
     std::map<std::string, const float*> w_;       // name -> device pointer (the weights arena)
     float* w_arena_ = nullptr;
     uint64_t w_arena_bytes_ = 0;                           // (the VRAM report at load)
+    std::vector<void*> mixer_copies_;                      // TP2: attn_output column-slice compacts
     // state and scratch arenas (device), carved in load(); see glm_model.cpp for the layout
     float* state_ = nullptr;
     uint64_t state_bytes_ = 0;

@@ -119,11 +119,12 @@ bool Glm5Model::mtpw_alloc(std::string& err) {
     M->W = std::min(1 + multi_mtp_setting(), std::min(kWinMax, multi_mtp_cap()));
     M->n_seq = seq_count();
     const int n = M->n_seq;
-    const size_t DI = (size_t) g.d_inner(), E = (size_t) g.n_embd, hcE = (size_t) g.hc * E;
+    const int NH = head_compute();
+    const size_t DI = (size_t) NH * g.kda_head_dim, E = (size_t) g.n_embd, hcE = (size_t) g.hc * E;
     M->kin_of.assign((size_t) g.n_layers + 1, -1);
     for (int il = l0_; il < l1_; ++il)
         if (g.is_recr(il)) M->kin_of[(size_t) il] = M->n_kda++;
-    M->kin_layer = (size_t) M->W * (3 * DI + 2 * (size_t) g.kda_head_dim + (size_t) g.n_head);
+    M->kin_layer = (size_t) M->W * (3 * DI + 2 * (size_t) g.kda_head_dim + (size_t) NH);
     M->run = DI * (size_t) g.kda_head_dim + 3 * DI * (size_t) (g.d_conv - 1);
     const bool first = l0_ == 0, last = l1_ == g.n_layers;
     cudaSetDevice(dev_);
@@ -467,7 +468,7 @@ bool Glm5Model::mtpw_commit_part(const int* seqs, const int* counts, const int* 
     const Glm5Geometry& g = g_;
     cudaSetDevice(dev_);
     cudaStream_t s = F->cs;
-    const size_t DI = (size_t) g.d_inner(), sd = DI * (size_t) g.kda_head_dim;
+    const size_t DI = (size_t) head_compute() * g.kda_head_dim, sd = DI * (size_t) g.kda_head_dim;
     std::vector<int> layers;
     for (int il = l0_; il < l1_; ++il)
         if (M->kin_of[(size_t) il] >= 0) layers.push_back(il);

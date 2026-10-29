@@ -5379,6 +5379,7 @@ bool Glm5Model::fast_dsa(int il, int64_t p, std::string& err) {
     static const bool dumps = getenv("GLM_CB_DIR") != nullptr;
     const auto& Ly = F->L[(size_t) il];
     const float prescale = 1.0f / std::sqrt((float) (g.idx_key * g.idx_heads));
+    const int NH = head_compute_for(il);
     gf::MvJob j[5];
     j[0] = {Ly.q_a.q, F->xq, F->x, F->qr_raw, nullptr, 1.0f, Ly.q_a.type, g.n_embd, g.q_lora};
     j[1] = {Ly.kv_a.q, F->xq, F->x, F->kv_raw, nullptr, 1.0f, Ly.kv_a.type, g.n_embd, g.kv_lora};
@@ -5419,7 +5420,7 @@ bool Glm5Model::fast_dsa(int il, int64_t p, std::string& err) {
     const int pool_done = (int) ((p + 1) / g.idx_kpool);
     const bool all = pool_done <= g.top_pools_max() && gf::dsa_select_all_on();
     gf::MvJob j2[2];
-    j2[0] = {Ly.q_b.q, F->qr_q, F->qr, F->q, nullptr, 1.0f, Ly.q_b.type, g.q_lora, g.n_head * g.qk_nope};
+    j2[0] = {Ly.q_b.q, F->qr_q, F->qr, F->q, nullptr, 1.0f, Ly.q_b.type, g.q_lora, NH * g.qk_nope};
     j2[1] = Ly.idx_q_b_x.q != nullptr
                 ? gf::MvJob{Ly.idx_q_b_x.q, F->qr_q, F->qr, F->iq, nullptr, 1.0f, Ly.idx_q_b_x.type, g.q_lora,
                             g.idx_heads * g.idx_key}
@@ -5429,7 +5430,7 @@ bool Glm5Model::fast_dsa(int il, int64_t p, std::string& err) {
     if (F->prof_on) F->mark("dsa_q_mv");
     if (dumps) {
         fast_dump(s, "dsa_qr-" + std::to_string(il), F->qr, g.q_lora);
-        fast_dump(s, "dsa_q-" + std::to_string(il), F->q, (int64_t) g.n_head * g.qk_nope);
+        fast_dump(s, "dsa_q-" + std::to_string(il), F->q, (int64_t) NH * g.qk_nope);
         fast_dump(s, "dsa_iq-" + std::to_string(il), F->iq, (int64_t) g.idx_heads * g.idx_key);
     }
     if (pool_done > 0 && !all) {
@@ -5447,12 +5448,20 @@ bool Glm5Model::fast_dsa(int il, int64_t p, std::string& err) {
     if (F->prof_on && cells != F->cells) F->mark("kv_resolve");
     // (with the profiler on, mla() marks its own steps)
     const gf::MlaMarks mla_marks = {[](void* f, const char* nm) { static_cast<FastState*>(f)->mark(nm); }, F};
-    gf::mla(F->q, Ly.k_b, Ly.v_b, lat, cells, n_sel, g.n_head, g.qk_nope, g.kv_lora, g.v_head, F->attn_q, s, lat_q8_,
+    gf::mla(F->q, Ly.k_b, Ly.v_b, lat, cells, n_sel, NH, g.qk_nope, g.kv_lora, g.v_head, F->attn_q, s, lat_q8_,
             F->prof_on ? &mla_marks : nullptr, true);
     gf::MvJob o = {Ly.out.q, F->attn_q, nullptr, F->mixer, nullptr, 1.0f, Ly.out.type,
-                   g.n_head * g.v_head, g.n_embd};
+                   NH * g.v_head, g.n_embd};
     if (!gf::mv(&o, 1, s)) { err = "glm fast: dsa output"; return false; }
     if (F->prof_on) F->mark("dsa_out_mv");
+    if (tp_.active()) {
+        std::string ar_err;
+        if (!tp_.all_reduce(F->mixer, (std::size_t) g.n_embd, g.n_embd, s, ar_err)) {
+            err = ar_err;
+            return false;
+        }
+        if (F->prof_on) F->mark("tp_ar_mixer");
+    }
     return true;
 }
 
@@ -5497,7 +5506,7 @@ bool Glm5Model::fast_moe(int il, bool& pf_pending, std::string& err, bool cpu_wa
     const Glm5Geometry& g = g_;
     cudaStream_t s = F->cs;
     const auto& Ly = F->L[(size_t) il];
-    const int FFs = g.n_ff_exp * g.n_shared;
+    const int FFs = ff_compute() * g.n_shared;
     gf::MvJob j[gf::kMaxMvJobs];
     int nj = 3;
     j[0] = {Ly.router, nullptr, F->x, F->rlog, nullptr, 1.0f, gf::kTypeBF16, g.n_embd, g.n_expert};
@@ -5533,7 +5542,7 @@ void Glm5Model::fast_moe_route(int il, const MoeIo& io, const gf::MoeDev& md, vo
     FastState* F = fast_;
     const Glm5Geometry& g = g_;
     const auto& Ly = F->L[(size_t) il];
-    const int FFs = g.n_ff_exp * g.n_shared;
+    const int FFs = ff_compute() * g.n_shared;
     // STRATA_GLM_PROMOTE_MIN=<n>: a fetched expert is kept in VRAM only when its aged route count clears n.
     // Unset or <= 1: the old rule (keep it whenever a spare is free).
     static const int promote_min = [] {
@@ -5565,7 +5574,7 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
     const Glm5Geometry& g = g_;
     cudaStream_t s = F->cs;
     const auto& Ly = F->L[(size_t) il];
-    const int FFs = g.n_ff_exp * g.n_shared;
+    const int FFs = ff_compute() * g.n_shared;
     // the prefetch list of THIS route lives in the buffer of this layer's parity (the side stream may still
     // read the previous layer's list while this route writes)
     gf::MoeDev md = F->md;
@@ -5640,11 +5649,10 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
     } else {
     // (the shared expert's down rides the gate/up launch: sh_out)
     const int ffn = ff_compute_for(il);
-    // TP2: the replicated shared expert is added on rank 0 only, so the all-reduce below
-    // does not double it (gufo: "a whole shared expert belongs to rank 0").
-    // MAYA_TP_SH_BOTH=1: add it on both ranks (isolation; AR then doubles it).
+    // TP2: the sliced shared expert is summed across ranks like the routed experts
+    // (each rank's down is a partial).  Replicated (MAYA_TP_NOSLICE or not TP): rank 0 only.
     static const bool sh_both = getenv("MAYA_TP_SH_BOTH") != nullptr;
-    const float* sh_for_down = (!tp_.active() || tp_.rank == 0 || sh_both)
+    const float* sh_for_down = (!tp_.active() || tp_.rank == 0 || sh_both || tp_.slicing())
                                   ? (Ly.sh_down.q != nullptr ? F->sh_out : nullptr)
                                   : nullptr;
     gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, g.n_embd, ffn, g.swiglu_exp, io.xq, F->hq, Ly.sh_down.q,
@@ -5745,7 +5753,8 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
         }
 
         if (Ly.recr) {
-            const int DI = g.d_inner();
+            const int NH = head_compute_for(il);
+            const int DI = NH * g.kda_head_dim;
             // a pipelined window's token: the projections into its window input rows (window_commit replays the
             // kept tokens from them)
             float* pj[3] = {F->proj[0], F->proj[1], F->proj[2]};
@@ -5757,7 +5766,7 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
             j[2] = {Ly.v.q, F->xq, F->x, pj[2], nullptr, 1.0f, Ly.v.type, g.n_embd, DI};
             j[3] = {Ly.f_a, nullptr, F->x, pfa, nullptr, 1.0f, gf::kTypeBF16, g.n_embd, g.kda_head_dim};
             j[4] = {Ly.g_a, nullptr, F->x, pga, nullptr, 1.0f, gf::kTypeBF16, g.n_embd, g.kda_head_dim};
-            j[5] = {Ly.beta, nullptr, F->x, pbeta, nullptr, 1.0f, gf::kTypeBF16, g.n_embd, g.n_head};
+            j[5] = {Ly.beta, nullptr, F->x, pbeta, nullptr, 1.0f, gf::kTypeBF16, g.n_embd, NH};
             if (!gf::mv(j, 6, s)) { err = "glm fast: kda projections"; return false; }
             if (F->prof_on) F->mark("kda_proj_mv");
             gf::KdaPrepArgs k;
@@ -5776,17 +5785,25 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
             k.lower_bound = g.kda_lb;
             k.g1 = F->g1;
             k.g2 = F->g2;
-            k.n_head = g.n_head;
+            k.n_head = NH;
             k.head_dim = g.kda_head_dim;
             k.d_conv = g.d_conv;
             gf::kda_prep(k, s);
             if (F->prof_on) F->mark("kda_prep");
             gf::kda_rec(F->conv[0], F->conv[1], F->conv[2], F->g1, pbeta, state_ + kda_S_[(size_t) il], F->g2,
-                        Ly.ssm_norm, g.norm_eps, g.n_head, g.kda_head_dim, F->gated_q, s);
+                        Ly.ssm_norm, g.norm_eps, NH, g.kda_head_dim, F->gated_q, s);
             if (F->prof_on) F->mark("kda_rec");
             gf::MvJob o = {Ly.out.q, F->gated_q, nullptr, F->mixer, nullptr, 1.0f, Ly.out.type, DI, g.n_embd};
             if (!gf::mv(&o, 1, s)) { err = "glm fast: kda output"; return false; }
             if (F->prof_on) F->mark("kda_out_mv");
+            if (tp_.active()) {
+                std::string ar_err;
+                if (!tp_.all_reduce(F->mixer, (std::size_t) g.n_embd, g.n_embd, s, ar_err)) {
+                    err = ar_err;
+                    return false;
+                }
+                if (F->prof_on) F->mark("tp_ar_mixer");
+            }
         } else {
             if (!fast_dsa(il, p, err)) return false;
         }
@@ -5815,14 +5832,15 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
         }
 
         if (!Ly.moe) {
+            const int FFD = ff_compute_dense();
             gf::MvJob j[2];
-            j[0] = {Ly.ffn_gate.q, F->xq, F->x, F->dg, nullptr, 1.0f, Ly.ffn_gate.type, g.n_embd, g.n_ff_dense};
-            j[1] = {Ly.ffn_up.q, F->xq, F->x, F->du, nullptr, 1.0f, Ly.ffn_up.type, g.n_embd, g.n_ff_dense};
+            j[0] = {Ly.ffn_gate.q, F->xq, F->x, F->dg, nullptr, 1.0f, Ly.ffn_gate.type, g.n_embd, FFD};
+            j[1] = {Ly.ffn_up.q, F->xq, F->x, F->du, nullptr, 1.0f, Ly.ffn_up.type, g.n_embd, FFD};
             if (!gf::mv(j, 2, s)) { err = "glm fast: dense ffn"; return false; }
             if (F->prof_on) F->mark("dense_gu_mv");
-            gf::swiglu_q8(F->dg, F->du, g.swiglu_shexp, g.n_ff_dense, F->dhq, s);
+            gf::swiglu_q8(F->dg, F->du, g.swiglu_shexp, FFD, F->dhq, s);
             if (F->prof_on) F->mark("dense_swiglu");
-            gf::MvJob dn = {Ly.ffn_down.q, F->dhq, nullptr, F->ffn, nullptr, 1.0f, Ly.ffn_down.type, g.n_ff_dense,
+            gf::MvJob dn = {Ly.ffn_down.q, F->dhq, nullptr, F->ffn, nullptr, 1.0f, Ly.ffn_down.type, FFD,
                             g.n_embd};
             if (!gf::mv(&dn, 1, s)) { err = "glm fast: dense ffn down"; return false; }
             if (F->prof_on) F->mark("dense_down_mv");
@@ -6448,16 +6466,17 @@ bool Glm5Model::hop_to_next(Glm5Model* B, int64_t p, std::string& err) {
     return B->fast_layers(p, true, err);
 }
 
-// one recurrent layer's saved state: S (d_inner x head_dim) then the conv histories (3 x d_inner x (d_conv - 1))
-static size_t spec_kda_run(const Glm5Geometry& g) {
-    return ((size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1)) * sizeof(float);
+// one recurrent layer's saved state: S (nh x head_dim x head_dim) then the conv histories (3 x nh x head_dim x (d_conv - 1))
+static size_t spec_kda_run(const Glm5Geometry& g, int nh) {
+    return ((size_t) nh * g.kda_head_dim * g.kda_head_dim + (size_t) 3 * nh * g.kda_head_dim * (g.d_conv - 1)) *
+           sizeof(float);
 }
 
 // this part's share of the head's saved recurrent states (0: nothing recurrent here, so every caller may skip it)
 size_t Glm5Model::spec_kda_bytes() const {
     int n_rec = 0;
     for (int il = l0_; il < l1_; ++il) n_rec += g_.is_recr(il);
-    return (size_t) n_rec * spec_kda_run(g_);
+    return (size_t) n_rec * spec_kda_run(g_, head_compute());
 }
 
 // the same backup, taken at setup instead of on the spec path's first decode step: by then the pool holds all but the
@@ -6491,7 +6510,7 @@ bool Glm5Model::spec_kda_copy(bool restore) {
         kda_bak_ = nullptr;
         return false;
     }
-    const size_t run = spec_kda_run(g) / sizeof(float);
+    const size_t run = spec_kda_run(g, head_compute()) / sizeof(float);
     int k = 0;
     for (int il = l0_; il < l1_; ++il)
         if (g.is_recr(il)) {
@@ -6975,7 +6994,7 @@ bool Glm5Model::snapshot_save() {
     for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get()) {
         if (m->fast_ == nullptr) return false;
         const Glm5Geometry& g = m->g_;
-        const size_t run = (size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const size_t run = (size_t) kda_run_floats();
         int n_rec = 0;
         for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
         cudaSetDevice(m->dev_);
@@ -7008,7 +7027,7 @@ bool Glm5Model::snapshot_restore() {
         if (m->fast_ == nullptr || m->snap_pos_ < 0) return false;
     for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get()) {
         const Glm5Geometry& g = m->g_;
-        const size_t run = (size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const size_t run = (size_t) kda_run_floats();
         cudaSetDevice(m->dev_);
         int k = 0;
         for (int il = m->l0_; il < m->l1_; ++il)
@@ -7065,7 +7084,7 @@ bool Glm5Model::ckpt_save_snapshot(int slot, std::string& err) {
     // the host buffers here (an allocation failure is reported now); the copies on the thread
     for (Glm5Model* m : ms) {
         const Glm5Geometry& g = m->g_;
-        const size_t run = (size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const size_t run = (size_t) kda_run_floats();
         int n_rec = 0;
         for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
         const size_t pool = m->dsa_layers().size() * 2 * (size_t) (g.idx_kpool - 1) * (size_t) g.idx_key;
@@ -7087,7 +7106,7 @@ bool Glm5Model::ckpt_save_snapshot(int slot, std::string& err) {
         bool ok = true;
         for (Glm5Model* m : ms) {
             const Glm5Geometry& g = m->g_;
-            const size_t run = (size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
+            const size_t run = (size_t) m->kda_run_floats();
             int n_rec = 0;
             for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
             const size_t pool = m->dsa_layers().size() * 2 * (size_t) (g.idx_kpool - 1) * (size_t) g.idx_key;
@@ -7129,7 +7148,7 @@ bool Glm5Model::ckpt_save(int slot, std::string& err) {
         }
     for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get()) {
         const Glm5Geometry& g = m->g_;
-        const size_t run = (size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const size_t run = (size_t) kda_run_floats();
         int n_rec = 0;
         for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
         const size_t pool = m->dsa_layers().size() * 2 * (size_t) (g.idx_kpool - 1) * (size_t) g.idx_key;
@@ -7175,7 +7194,7 @@ bool Glm5Model::ckpt_restore(int slot, std::string& err) {
         }
     for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get()) {
         const Glm5Geometry& g = m->g_;
-        const size_t run = (size_t) g.d_inner() * g.kda_head_dim + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const size_t run = (size_t) kda_run_floats();
         int n_rec = 0;
         for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
         const std::vector<float>& b = m->ckpt_buf_[(size_t) slot];
@@ -7260,7 +7279,7 @@ uint64_t Glm5Model::slot_save(const std::string& path, std::string& err) {
     double t_sync = 0, t_copy = 0, t_write = 0;
     for (Glm5Model* m : halves) {
         const Glm5Geometry& g = m->g_;
-        const int64_t run = (int64_t) g.d_inner() * g.kda_head_dim + (int64_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const int64_t run = kda_run_floats();
         int32_t n_rec = 0;
         for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
         const auto runs = slot_dsa_runs(g, m->fast_mode_, m->lat_q8_, m->l0_, m->l1_, m->mtp_il_, m->state_,
@@ -7338,7 +7357,7 @@ bool Glm5Model::slot_load(const std::string& path, int64_t n_pos, std::string& e
             return false;
         }
         const Glm5Geometry& g = m->g_;
-        const int64_t run = (int64_t) g.d_inner() * g.kda_head_dim + (int64_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const int64_t run = kda_run_floats();
         int32_t n_rec = 0;
         for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
         const auto runs = slot_dsa_runs(g, m->fast_mode_, m->lat_q8_, m->l0_, m->l1_, m->mtp_il_, m->state_,
@@ -7438,7 +7457,7 @@ uint64_t Glm5Model::slot_save(std::vector<uint8_t>& data, std::string& err) {
         Half h;
         h.m = m;
         h.g = &g;
-        h.run = (int64_t) g.d_inner() * g.kda_head_dim + (int64_t) 3 * g.d_inner() * (g.d_conv - 1);
+        h.run = kda_run_floats();
         for (int il = m->l0_; il < m->l1_; ++il) h.n_rec += g.is_recr(il);
         h.runs = slot_dsa_runs(g, m->fast_mode_, m->lat_q8_, m->l0_, m->l1_, m->mtp_il_, m->state_,
                                m->kv_ != nullptr ? &m->kv_->host : nullptr, m->dsa_lat_, m->dsa_ik_,
@@ -7533,7 +7552,7 @@ bool Glm5Model::slot_load(const std::vector<uint8_t>& data, int64_t n_pos, std::
             return false;
         }
         const Glm5Geometry& g = m->g_;
-        const int64_t run = (int64_t) g.d_inner() * g.kda_head_dim + (int64_t) 3 * g.d_inner() * (g.d_conv - 1);
+        const int64_t run = kda_run_floats();
         int32_t n_rec = 0;
         for (int il = m->l0_; il < m->l1_; ++il) n_rec += g.is_recr(il);
         const auto runs = slot_dsa_runs(g, m->fast_mode_, m->lat_q8_, m->l0_, m->l1_, m->mtp_il_, m->state_,

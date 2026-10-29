@@ -1773,9 +1773,10 @@ void Glm5Model::win_commit_part(int n_keep) {
         return v == nullptr || std::atoi(v) != 0;
     }();
     if (batched && F->rep != nullptr && kda_bak_ != nullptr && g.kda_head_dim == 128) {
-        const size_t sd = (size_t) g.d_inner() * g.kda_head_dim;
-        const size_t run = sd + (size_t) 3 * g.d_inner() * (g.d_conv - 1);
-        const size_t di = (size_t) g.d_inner();
+        const int NH = head_compute();
+        const size_t sd = (size_t) NH * g.kda_head_dim * g.kda_head_dim;
+        const size_t run = (size_t) kda_run_floats();
+        const size_t di = (size_t) NH * g.kda_head_dim;
         std::vector<int> layers;
         for (int il = l0_; il < l1_; ++il)
             if (g.is_recr(il)) layers.push_back(il);
@@ -1806,7 +1807,7 @@ void Glm5Model::win_commit_part(int n_keep) {
                     k.lower_bound = g.kda_lb;
                     k.g1 = sc + 3 * di;
                     k.g2 = sc + 4 * di;
-                    k.n_head = g.n_head;
+                    k.n_head = NH;
                     k.head_dim = g.kda_head_dim;
                     k.d_conv = g.d_conv;
                     gf::KdaRecArgs& r = ra[i];

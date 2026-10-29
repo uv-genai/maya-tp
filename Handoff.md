@@ -1,7 +1,7 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-29 · HEAD `0244b75` · branch `main` on `uv-genai/maya-tp`
+> Last updated: 2026-10-29 · HEAD `e599e6c`+ · branch `main` on `uv-genai/maya-tp`
 
 ## 1. What we are building
 
@@ -40,7 +40,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 | 2 | P1 partition + pack audit | **closed** |
 | 3 | GPU-staged QueuePartial (6 µs / 37 Gb/s) | open |
 | 4 | P4 greedy parity gate | **closed — PASS** |
-| 5 | P5 fast path + prefill (perf) | open — **active** |
+| 5 | P5 fast path + prefill (perf) | open — **active, mixer slice done** |
 | 6 | P6 serve integration | open |
 | 7 | P7 calibration / release | open |
 | 8 | P2 RDMA transport | **closed** |
@@ -54,23 +54,31 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash Maya-S** (IQ2_XXS pack) ac
 - **Pair parity 100%** (rank0 == rank1) on greedy 32-token runs, with and without MTP.
 - **Correctness vs single-host:** `--spec-follow` reports **31/32 tokens are the model's own greedy picks** (1 near-tie) with MTP; **28/32** without MTP (4 near-ties). Layer dumps prove the trunk slice is mathematically correct (`ffn_out-3` maxdiff **7e-07**).
 - **MTP verify window fixed** (#9): per-layer blob width, draft layer kept full, shared expert rank-0-only.
+- **Mixer slice implemented + measured** (#5): KDA heads 64→32 + DSA head-slice, attn_output column-slice, per-head state halved, 2 ARs/layer. **+22.3% vs single-host** (44.15 ms/tok), pair parity 100%, spec-follow 31/32. `all_reduce` (QueuePartial) is correct for decode; `split_reduce` is worse (host blocks).
+- **T2 split_reduce** (#5): `start_reduce`/`finish_reduce` implemented but NOT used in decode (hurts perf). Use only for prefill two-sub-batch (pending).
 - Transport bench (blocking/queued): 27 Gb/s / 35 µs tight-loop; gufo's 6 µs / 37 Gb/s is the **overlapped** cost.
 
-## 6. Performance status (the open gap)
+## 6. Performance status (measured 2026-10-29)
 
-Controlled (no-MTP, 32 tokens, same prompt):
+Controlled (no-MTP, 32 tokens, same prompt). Run-to-run variance ~5%.
 
-| Config | ms/tok | vs single |
-| --- | --- | --- |
-| single-host | 55.37 | — |
-| TP2 + AR (experts sliced only) | 50.61 | **+9.4%** |
-| TP2, no AR (`MAYA_TP_NOAR=1`) | 47.41 | **+16.8%** |
+| Config | ms/tok | vs single | AR cost |
+| --- | --- | --- | --- |
+| single-host | 56.81 | — | — |
+| TP2 + AR (experts only, P4) | 50.61 | +9.4% | 3.2 ms (44 exch) |
+| TP2, no AR (`MAYA_TP_NOAR=1`) | 36.57 | +35.6% | 0 |
+| TP2 slice (mixer only) + AR | 44.15 | +22.3% | 7.6 ms (90 exch) |
+| **TP2 full slice + AR** | **38.52** | **+32.0%** | **~5 ms (90 exch)** |
 
-**gufo gets 30%+. We are at ~10–17%.** Two reasons:
-1. AR on the critical path (~3.2 ms/tok, 6.7%). gufo overlaps it (`StartPartial`/`FinishPartial`).
-2. **The mixer is still replicated** — only experts are sliced. gufo splits attention heads.
+**Pair parity 100%** (32/32). **Spec-follow 31/32** (1 near-tie).
 
-**Next (issue #5):** slice the KDA mixer (heads 64→32) + overlapped AR. Together ≈ 2× less work/token → 30%+ target.
+**What is sliced** (all under `head_compute_for` / `ff_compute` / `ff_compute_dense`):
+- Mixer: KDA q/k/v row-slice, attn_output col-slice, per-head state/params; DSA q_b/k_b/v_b head-slice
+- Routed experts: intra-expert 2048→1024 (P4)
+- Shared expert: gate/up row-slice + down col-slice (this round)
+- Dense FFN: gate/up row-slice + down col-slice (this round)
+
+**AR cost**: 90 exchanges × ~55 µs = 5 ms (13% of 38.5 ms). Link is 6 µs; the rest is software stack.
 
 ## 7. Architecture (what was built)
 
@@ -84,9 +92,11 @@ tools/tp2/{audit_split,greedy_parity}.py, run_comm_test.sh
 docs/{TP2-ANALYSIS,TP2-DESIGN,TP2-PLAN,TP2-RUN}.md
 ```
 
-**Sharding:** intra-expert — each rank holds 1024 of 2048 intermediate units of every routed/shared expert (gate/up rows + down columns). Dense `n_ff` 12288→6144. **Mixers and head/indexer/MLA-latent are replicated (v1).** One all-reduce after the routed experts' sum (before the shared expert, which is rank-0-only).
+**Sharding:** intra-expert — each rank holds 1024 of 2048 intermediate units of every routed/shared expert (gate/up rows + down columns). Dense `n_ff` 12288→6144. **Mixers sliced (KDA heads 64→32, DSA head-slice); attn_output col-slice; per-head state.** Indexer/MLA-latent/hc replicated. Two all-reduces per layer (mixer + FFN). Shared expert summed across ranks (sliced).
 
 ## 8. Critical gotchas
+
+0. **Transport latency — what the numbers mean.** ~6 µs is the RDMA write transit (link latency, `ib_write_lat`). ~35 µs is the end-to-end blocking exchange (GPU stage → thread sees ready → RDMA → peer writes back → GPU sees arrived → add → sync). Both Maya and gufo pay ~35 µs per blocking exchange — the code is identical. gufo "gets 6" because its profiler reports the **overlapped** residual (the AR hidden behind compute). The fix is T2 (StartPartial/FinishPartial + two sub-batches), not faster transport.
 
 1. **Shard stride rule:** `Ly.gu_bytes` under TP is the **sliced** width; the GGUF shard's expert stride is always the **full** expert (`gu_row * n_ff_exp`). Using the sliced size as the shard stride reads the wrong expert's bytes. Slice from the full stride (see `pack_moe_tail`, warm-up, `fast_read_part`).
 2. **Per-layer width:** `ff_compute_for(il)` — the NextN/MTP draft layer (`mtp_il_`) is **replicated** (full `n_ff`). Using the global width for it corrupts the verify window.
@@ -132,12 +142,13 @@ python tools/tp2/greedy_parity.py /tmp/r0.txt /tmp/r1.txt --min-agree 1.0   # pa
 
 ## 10. Next steps (priority)
 
-1. **#5 — slice the KDA mixer** (heads 64→32): `attn_q/k/v` row-slice, `attn_output` column-slice, per-head recurrent state, DSA head-slice (latent replicated). This is the missing half of the expert slice.
-2. **#5 — overlapped AR** (`StartPartial`/`FinishPartial` / two sub-batches) to take back the 6.7%.
-3. **#3** — reach 6 µs / 37 Gb/s on the queued path.
-4. **#6** — serve integration + launch scripts.
-5. **#7** — calibration + controlled benches + release.
-6. **#10** — only if bit-exact output is required (gather design).
+1. **#5 — measure the mixer slice + T2**: controlled bench (no-MTP, 32 tokens, same prompt). Mixer slice + split_reduce AR both implemented. Target 30%+ vs single-host.
+2. **#5 — prefill two-sub-batch overlap**: interleave two trunk batches a layer apart (gufo's `split_reduce` pair path). This is the remaining T2 win for prefill.
+3. **#5 — remaining paths**: glm_prefill.cu / glm_rows.cu / glm_window.cu / glm_mtp_rows.cu still use `g.n_head` in compute (85 sites) — must use `head_compute_for(il)` before MTP or prefill with TP2.
+4. **#3** — reach 6 µs / 37 Gb/s on the queued path.
+5. **#6** — serve integration + launch scripts.
+6. **#7** — calibration + controlled benches + release.
+7. **#10** — only if bit-exact output is required (gather design).
 
 ## 11. Key commits
 

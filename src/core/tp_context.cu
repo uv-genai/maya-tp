@@ -20,4 +20,27 @@ bool TpContext::all_reduce(float* dev, std::size_t n, int hidden, hipStream_t st
     return true;
 }
 
+bool TpContext::start_reduce(float* dev, std::size_t n, int hidden, hipStream_t stream, std::string& err) const {
+    if (world == 1 || comm == nullptr) return true;
+    if (n == 0) return true;
+    if (hidden <= 0 || n % (std::size_t) hidden != 0) {
+        err = "tp start-reduce: n is not a multiple of hidden";
+        return false;
+    }
+    return comm->StartPartial(dev, n * sizeof(float), stream, &err);
+}
+
+bool TpContext::finish_reduce(float* dev, std::size_t n, int hidden, hipStream_t stream, std::string& err) const {
+    if (world == 1 || comm == nullptr) return true;
+    if (n == 0) return true;
+    if (hidden <= 0 || n % (std::size_t) hidden != 0) {
+        err = "tp finish-reduce: n is not a multiple of hidden";
+        return false;
+    }
+    const float* peer = comm->FinishPartial(n * sizeof(float), &err);
+    if (peer == nullptr) return false;
+    net::AddRowsBroadcast(peer, dev, (uint32_t) (n / (std::size_t) hidden), (uint32_t) hidden, 1, stream);
+    return true;
+}
+
 }  // namespace strata::core

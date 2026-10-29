@@ -697,6 +697,8 @@ Glm5Model::~Glm5Model() {
     ht_pair_h_ = ht_pair_d_ = nullptr;
     head_helper_ = nullptr;
     if (w_arena_) cudaFree(w_arena_);
+    for (void* p : mixer_copies_) cudaFree(p);
+    mixer_copies_.clear();
     if (mtp_arena_) cudaFree(mtp_arena_);
     kv_stream_free(kv_);
     if (state_) cudaFree(state_);
@@ -761,9 +763,9 @@ bool Glm5Model::load(const std::string& gguf_path, int64_t max_ctx, std::string&
         if (il < l0_ || il >= l1_) continue;   // the other half's caches stay on the other device
         if (g_.is_recr(il)) {
             kda_S_[(size_t) il] = floats;
-            floats += (int64_t) g_.d_inner() * g_.kda_head_dim;
+            floats += (int64_t) head_compute() * g_.kda_head_dim * g_.kda_head_dim;
             kda_conv_[(size_t) il] = floats;
-            floats += (int64_t) 3 * g_.d_inner() * (g_.d_conv - 1);
+            floats += (int64_t) 3 * head_compute() * g_.kda_head_dim * (g_.d_conv - 1);
         } else {
             dsa_lat_[(size_t) il] = floats;
             floats += (int64_t) g_.kv_lora * max_ctx;
@@ -2239,6 +2241,8 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
                                            g.norm_eps);
         cb_dump("attn_norm-" + L, A + sc_x, g.n_embd);
 
+        const int NH = head_compute_for(il);
+        const int DI = NH * g.kda_head_dim;
         if (g.is_recr(il)) {
             // ---- the KDA mixer
             const char* streams[] = {"q", "k", "v"};
@@ -2246,36 +2250,38 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
                 const std::string attn = std::string("attn_") + streams[si] + ".weight";
                 const std::string conv = std::string("ssm_conv1d_") + streams[si] + ".weight";
                 GM_CHECK(gm_gemv(ws_(attn), A + sc_x, nullptr, 1.0f,
-                                 A + sc_proj, g.d_inner(), g.n_embd), err);
+                                 A + sc_proj, DI, g.n_embd), err);
                 strata::kernels::glm_kda_conv(A + sc_proj, W(conv.c_str()),
-                                              S + kda_conv_[(size_t) il] + (int64_t) si * g.d_inner() * (g.d_conv - 1),
-                                              g.d_inner(), g.d_conv, 1, A + sc_conv[si], nullptr);
+                                              S + kda_conv_[(size_t) il] + (int64_t) si * DI * (g.d_conv - 1),
+                                              DI, g.d_conv, 1, A + sc_conv[si], nullptr);
             }
-            l2_heads_kernel<<<blocks(g.n_head), GM_THREADS>>>(A + sc_conv[0], A + sc_conv[0], g.kda_head_dim,
-                                                              g.n_head, 1);
-            l2_heads_kernel<<<blocks(g.n_head), GM_THREADS>>>(A + sc_conv[1], A + sc_conv[1], g.kda_head_dim,
-                                                              g.n_head, 1);
+            l2_heads_kernel<<<blocks(NH), GM_THREADS>>>(A + sc_conv[0], A + sc_conv[0], g.kda_head_dim,
+                                                              NH, 1);
+            l2_heads_kernel<<<blocks(NH), GM_THREADS>>>(A + sc_conv[1], A + sc_conv[1], g.kda_head_dim,
+                                                              NH, 1);
             GM_CHECK(gm_gemv(ws_("ssm_f_a.weight"), A + sc_x, nullptr, 1.0f,
                                                                      A + sc_tmp, g.kda_head_dim, g.n_embd), err);
             GM_CHECK(gm_gemv(ws_("ssm_f_b.weight"), A + sc_tmp, nullptr, 1.0f,
-                                                                 A + sc_g, g.d_inner(), g.kda_head_dim), err);
-            axpy_kernel<<<blocks(g.d_inner()), GM_THREADS>>>(A + sc_g, 1.0f, W("ssm_dt.bias"), g.d_inner());
-            strata::kernels::glm_kda_gate(A + sc_g, W("ssm_a"), g.kda_lb, g.kda_head_dim, g.n_head, 1,
+                                                                 A + sc_g, DI, g.kda_head_dim), err);
+            axpy_kernel<<<blocks(DI), GM_THREADS>>>(A + sc_g, 1.0f, W("ssm_dt.bias"), DI);
+            strata::kernels::glm_kda_gate(A + sc_g, W("ssm_a"), g.kda_lb, g.kda_head_dim, NH, 1,
                                           A + sc_g1, nullptr);
             GM_CHECK(gm_gemv(ws_("ssm_beta.weight"), A + sc_x, nullptr, 1.0f,
-                                                               A + sc_beta, g.n_head, g.n_embd), err);
-            sigmoid_kernel<<<blocks(g.n_head), GM_THREADS>>>(A + sc_beta, g.n_head);
+                                                               A + sc_beta, NH, g.n_embd), err);
+            sigmoid_kernel<<<blocks(NH), GM_THREADS>>>(A + sc_beta, NH);
             strata::kernels::glm_kda_recurrence(A + sc_conv[0], A + sc_conv[1], A + sc_conv[2], A + sc_g1,
-                                                A + sc_beta, S + kda_S_[(size_t) il], g.n_head, g.kda_head_dim, 1,
+                                                A + sc_beta, S + kda_S_[(size_t) il], NH, g.kda_head_dim, 1,
                                                 A + sc_scan, nullptr);
             GM_CHECK(gm_gemv(ws_("ssm_g_a.weight"), A + sc_x, nullptr, 1.0f,
                                                                      A + sc_tmp, g.kda_head_dim, g.n_embd), err);
             GM_CHECK(gm_gemv(ws_("ssm_g_b.weight"), A + sc_tmp, nullptr, 1.0f,
-                                                                 A + sc_g2, g.d_inner(), g.kda_head_dim), err);
+                                                                 A + sc_g2, DI, g.kda_head_dim), err);
             strata::kernels::glm_kda_out_gate(A + sc_scan, W("ssm_norm.weight"), A + sc_g2, g.kda_head_dim,
-                                              g.n_head, 1, g.norm_eps, A + sc_gated, nullptr);
+                                              NH, 1, g.norm_eps, A + sc_gated, nullptr);
             GM_CHECK(gm_gemv(ws_("attn_output.weight"), A + sc_gated, nullptr, 1.0f,
-                                                               A + sc_mixer, g.n_embd, g.d_inner()), err);
+                                                               A + sc_mixer, g.n_embd, DI), err);
+            if (tp_.active() && !tp_.all_reduce(A + sc_mixer, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
+                return false;
         } else {
             // ---- the DSA mixer
             GM_CHECK(gm_gemv(ws_("attn_q_a.weight"), A + sc_x, nullptr, 1.0f,
@@ -2290,9 +2296,9 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
             GM_CHECK(cudaMemcpy(lat + (int64_t) g.kv_lora * p, A + sc_kv, (size_t) g.kv_lora * sizeof(float),
                                 cudaMemcpyDeviceToDevice), err);
 
-            GM_CHECK(gm_gemv(ws_("attn_q_b.weight"), A + sc_qr, nullptr, 1.0f, A + sc_q, g.n_head * g.qk_nope, g.q_lora), err);
-            q_absorb_kernel<<<blocks((int64_t) g.kv_lora * g.n_head), GM_THREADS>>>(
-                W("attn_k_b.weight"), A + sc_q, A + sc_qabs, g.qk_nope, g.kv_lora, g.n_head, 1);
+            GM_CHECK(gm_gemv(ws_("attn_q_b.weight"), A + sc_qr, nullptr, 1.0f, A + sc_q, NH * g.qk_nope, g.q_lora), err);
+            q_absorb_kernel<<<blocks((int64_t) g.kv_lora * NH), GM_THREADS>>>(
+                W("attn_k_b.weight"), A + sc_q, A + sc_qabs, g.qk_nope, g.kv_lora, NH, 1);
 
             // the indexer: per-token key/gate into their buffers; a pool's key when it completes
             GM_CHECK(gm_gemv(ws_("indexer.attn_k.weight"), A + sc_x, nullptr,
@@ -2333,18 +2339,19 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
                                                 g.idx_select_tail, 1, n_sel, d_pos_, (int*) (A + sc_cells),
                                                 nullptr);
                 strata::kernels::glm_mla_attention(A + sc_qabs, lat, (const int*) (A + sc_cells),
-                                                   W("attn_v_b.weight"), g.kv_lora, g.n_head, g.v_head,
+                                                   W("attn_v_b.weight"), g.kv_lora, NH, g.v_head,
                                                    g.qk_nope, 1, n_sel, A + sc_attn, nullptr);
             } else {
-                GM_CHECK(cudaMemset(A + sc_attn, 0, (size_t) g.v_head * g.n_head * sizeof(float)), err);
+                GM_CHECK(cudaMemset(A + sc_attn, 0, (size_t) g.v_head * NH * sizeof(float)), err);
             }
             GM_CHECK(gm_gemv(ws_("attn_output.weight"), A + sc_attn, nullptr, 1.0f,
-                             A + sc_mixer, g.n_embd, (int64_t) g.n_head * g.v_head), err);
+                             A + sc_mixer, g.n_embd, (int64_t) NH * g.v_head), err);
+            if (tp_.active() && !tp_.all_reduce(A + sc_mixer, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
+                return false;
         }
 
         // ---- hc write (ping-pong), then the FFN half
-        // TP2 v1: the mixer is replicated (full weights on both ranks) - no all-reduce here.
-        // Only the routed experts are sliced (pack_moe_tail); their weighted sum is reduced below.
+        // TP2: the mixer output is all-reduced above; the routed experts' sum is reduced after moe_down.
         strata::kernels::glm_hc_post(A + sc_mixer, R, A + sc_post, A + sc_comb, hcs, S + g.hc * g.n_embd, nullptr);
         R = S + g.hc * g.n_embd;
         cb_dump("hc_attn_post-" + L, R, g.hc * g.n_embd);
@@ -2357,13 +2364,13 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
 
         if (il < g.dense_lead) {
             GM_CHECK(gm_gemv(ws_("ffn_gate.weight"), A + sc_x, nullptr, 1.0f,
-                                                                   A + sc_gate, g.n_ff_dense, g.n_embd), err);
+                                                                   A + sc_gate, ff_compute_dense(), g.n_embd), err);
             GM_CHECK(gm_gemv(ws_("ffn_up.weight"), A + sc_x, nullptr, 1.0f,
-                                                                   A + sc_up, g.n_ff_dense, g.n_embd), err);
-            strata::kernels::glm_swiglu_clamp(A + sc_gate, A + sc_up, g.swiglu_shexp, g.n_ff_dense, A + sc_h,
+                                                                   A + sc_up, ff_compute_dense(), g.n_embd), err);
+            strata::kernels::glm_swiglu_clamp(A + sc_gate, A + sc_up, g.swiglu_shexp, ff_compute_dense(), A + sc_h,
                                               nullptr);
             GM_CHECK(gm_gemv(ws_("ffn_down.weight"), A + sc_h, nullptr, 1.0f,
-                                                               A + sc_ffn, g.n_embd, g.n_ff_dense), err);
+                                                               A + sc_ffn, g.n_embd, ff_compute_dense()), err);
         } else {
             GM_CHECK(gm_gemv(ws_("ffn_gate_inp.weight"), A + sc_x, nullptr, 1.0f,
                                                                  A + sc_tmp, g.n_expert, g.n_embd), err);
@@ -2411,14 +2418,14 @@ bool Glm5Model::step_layers(int64_t p, std::string& err) {
             // shared expert (which is replicated and must not be doubled).
             if (tp_.active() && !tp_.all_reduce(A + sc_moe, (std::size_t) g.n_embd, g.n_embd, nullptr, err))
                 return false;
-            GM_CHECK(gm_gemv(ws_("ffn_gate_shexp.weight"), A + sc_x, nullptr, 1.0f, A + sc_gate, g.n_ff_exp * g.n_shared,
+            GM_CHECK(gm_gemv(ws_("ffn_gate_shexp.weight"), A + sc_x, nullptr, 1.0f, A + sc_gate, ff_compute() * g.n_shared,
                 g.n_embd), err);
-            GM_CHECK(gm_gemv(ws_("ffn_up_shexp.weight"), A + sc_x, nullptr, 1.0f, A + sc_up, g.n_ff_exp * g.n_shared, g.n_embd), err);
-            strata::kernels::glm_swiglu_clamp(A + sc_gate, A + sc_up, g.swiglu_shexp, g.n_ff_exp * g.n_shared,
+            GM_CHECK(gm_gemv(ws_("ffn_up_shexp.weight"), A + sc_x, nullptr, 1.0f, A + sc_up, ff_compute() * g.n_shared, g.n_embd), err);
+            strata::kernels::glm_swiglu_clamp(A + sc_gate, A + sc_up, g.swiglu_shexp, ff_compute() * g.n_shared,
                                               A + sc_h, nullptr);
             GM_CHECK(gm_gemv(ws_("ffn_down_shexp.weight"), A + sc_h, nullptr,
                                                                1.0f, A + sc_sh, g.n_embd,
-                                                               (int64_t) g.n_ff_exp * g.n_shared), err);
+                                                               (int64_t) ff_compute() * g.n_shared), err);
             add_kernel<<<blocks(g.n_embd), GM_THREADS>>>(A + sc_moe, A + sc_sh, A + sc_ffn, g.n_embd);
             cb_dump("ffn_moe_weighted-" + L, A + sc_moe, g.n_embd);
             cb_dump("ffn_shexp-" + L, A + sc_sh, g.n_embd);
@@ -2854,6 +2861,162 @@ void strata::core::Glm5Model::pack_release_views() {
             s.base = nullptr;
         }
 #endif
+}
+
+// TP2 mixer slice: point every head-dependent weight at this rank's head band.
+// Row-sliced (q/k/v, q_b): contiguous output rows — offset the pointer, halve n_out.
+// Per-head (conv, f_b/g_b, beta, dt_bias, ssm_a, k_b/v_b): contiguous — offset the pointer.
+// Column-sliced (attn_output): strided input band per row — compact copy (like expert down).
+// Replicated (f_a, g_a, ssm_norm, q_a, kv_a, indexer, hc, norms): untouched.
+void strata::core::Glm5Model::slice_mixer_weights(std::string& err) {
+    if (!tp_.slicing()) return;
+    const int nh = head_compute();
+    const int hb = tp_.rank * nh;
+    const int hd = g_.kda_head_dim;
+    const Glm5Geometry& g = g_;
+    for (int il = 0; il < g.n_layers; ++il) {
+        if (il == mtp_il_) continue;
+        const std::string P = "blk." + std::to_string(il) + ".";
+        if (g.is_recr(il)) {
+            // attn_q / attn_k / attn_v: row-slice output rows for this rank's heads
+            for (const char* nm : {"attn_q.weight", "attn_k.weight", "attn_v.weight"}) {
+                auto it = ws_map_.find(P + nm);
+                if (it == ws_map_.end() || it->second.q == nullptr) continue;
+                auto& ws = it->second;
+                const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                ws.q = (const uint8_t*) ws.q + (size_t) hb * hd * row_b;
+                ws.n_out = (int64_t) nh * hd;
+            }
+            // attn_output: column-slice the input band -> compact copy
+            if (auto it = ws_map_.find(P + "attn_output.weight"); it != ws_map_.end() && it->second.q != nullptr) {
+                auto& ws = it->second;
+                const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                const int64_t slice = (int64_t) nh * hd;
+                const size_t span_b = row_b * (size_t) slice / (size_t) ws.n_in;
+                const size_t band_b = row_b * (size_t) hb * hd / (size_t) ws.n_in;
+                void* copy = nullptr;
+                if (cudaMalloc(&copy, span_b * (size_t) ws.n_out) != cudaSuccess) {
+                    err = "tp mixer: attn_output compact copy did not allocate";
+                    return;
+                }
+                if (cudaMemcpy2D(copy, span_b, (const uint8_t*) ws.q + band_b, row_b, span_b,
+                                 (size_t) ws.n_out, cudaMemcpyDeviceToDevice) != cudaSuccess) {
+                    err = "tp mixer: attn_output column slice copy failed";
+                    cudaFree(copy);
+                    return;
+                }
+                ws.q = copy;
+                ws.n_in = slice;
+                mixer_copies_.push_back(copy);
+            }
+            // per-head f32: conv, dt_bias, ssm_a
+            for (int i = 0; i < 3; ++i) {
+                static const char* const cnn[3] = {"ssm_conv1d_q.weight", "ssm_conv1d_k.weight", "ssm_conv1d_v.weight"};
+                const std::string nm = P + cnn[i];
+                if (auto it = w_.find(nm); it != w_.end()) it->second += (size_t) hb * hd * g.d_conv;
+            }
+            if (auto it = w_.find(P + "ssm_dt.bias"); it != w_.end()) it->second += (size_t) hb * hd;
+            if (auto it = w_.find(P + "ssm_a"); it != w_.end()) it->second += (size_t) hb;
+            // per-head BF16: f_b, g_b, beta
+            for (const char* nm : {"ssm_f_b.weight", "ssm_g_b.weight"}) {
+                if (auto it = w16_.find(P + nm); it != w16_.end()) it->second += (size_t) hb * hd * hd;
+            }
+            if (auto it = w16_.find(P + "ssm_beta.weight"); it != w16_.end())
+                it->second += (size_t) hb * g.n_embd;
+        } else {
+            // DSA: attn_q_b row-slice
+            if (auto it = ws_map_.find(P + "attn_q_b.weight"); it != ws_map_.end() && it->second.q != nullptr) {
+                auto& ws = it->second;
+                const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                ws.q = (const uint8_t*) ws.q + (size_t) hb * g.qk_nope * row_b;
+                ws.n_out = (int64_t) nh * g.qk_nope;
+            }
+            // k_b / v_b per-head BF16
+            if (auto it = w16_.find(P + "attn_k_b.weight"); it != w16_.end())
+                it->second += (size_t) hb * g.kv_lora * g.qk_nope;
+            if (auto it = w16_.find(P + "attn_v_b.weight"); it != w16_.end())
+                it->second += (size_t) hb * g.kv_lora * g.v_head;
+            // attn_output: column-slice input band -> compact copy
+            if (auto it = ws_map_.find(P + "attn_output.weight"); it != ws_map_.end() && it->second.q != nullptr) {
+                auto& ws = it->second;
+                const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                const int64_t slice = (int64_t) nh * g.v_head;
+                const size_t span_b = row_b * (size_t) slice / (size_t) ws.n_in;
+                const size_t band_b = row_b * (size_t) hb * g.v_head / (size_t) ws.n_in;
+                void* copy = nullptr;
+                if (cudaMalloc(&copy, span_b * (size_t) ws.n_out) != cudaSuccess) {
+                    err = "tp mixer: dsa attn_output compact copy did not allocate";
+                    return;
+                }
+                if (cudaMemcpy2D(copy, span_b, (const uint8_t*) ws.q + band_b, row_b, span_b,
+                                 (size_t) ws.n_out, cudaMemcpyDeviceToDevice) != cudaSuccess) {
+                    err = "tp mixer: dsa attn_output column slice copy failed";
+                    cudaFree(copy);
+                    return;
+                }
+                ws.q = copy;
+                ws.n_in = slice;
+                mixer_copies_.push_back(copy);
+            }
+        }
+        // dense FFN (dense lead layers) and shared expert: same gate/up row-slice + down column-slice
+        if (il < g.dense_lead) {
+            for (const char* nm : {"ffn_gate.weight", "ffn_up.weight"}) {
+                if (auto it = ws_map_.find(P + nm); it != ws_map_.end() && it->second.q != nullptr) {
+                    auto& ws = it->second;
+                    const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                    const int64_t slice = tp_.dense.count;
+                    ws.q = (const uint8_t*) ws.q + (size_t) tp_.dense.begin * row_b;
+                    ws.n_out = slice;
+                }
+            }
+            if (auto it = ws_map_.find(P + "ffn_down.weight"); it != ws_map_.end() && it->second.q != nullptr) {
+                auto& ws = it->second;
+                const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                const int64_t slice = tp_.dense.count;
+                const size_t span_b = row_b * (size_t) slice / (size_t) ws.n_in;
+                const size_t band_b = row_b * (size_t) tp_.dense.begin / (size_t) ws.n_in;
+                void* copy = nullptr;
+                if (cudaMalloc(&copy, span_b * (size_t) ws.n_out) != cudaSuccess) {
+                    err = "tp mixer: dense ffn_down compact copy did not allocate";
+                    return;
+                }
+                cudaMemcpy2D(copy, span_b, (const uint8_t*) ws.q + band_b, row_b, span_b,
+                             (size_t) ws.n_out, cudaMemcpyDeviceToDevice);
+                ws.q = copy;
+                ws.n_in = slice;
+                mixer_copies_.push_back(copy);
+            }
+        }
+        // shared expert (MoE layers): gate/up row-slice + down column-slice
+        if (il >= g.dense_lead) {
+            for (const char* nm : {"ffn_gate_shexp.weight", "ffn_up_shexp.weight"}) {
+                if (auto it = ws_map_.find(P + nm); it != ws_map_.end() && it->second.q != nullptr) {
+                    auto& ws = it->second;
+                    const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                    ws.q = (const uint8_t*) ws.q + (size_t) tp_.experts.begin * row_b;
+                    ws.n_out = tp_.experts.count;
+                }
+            }
+            if (auto it = ws_map_.find(P + "ffn_down_shexp.weight"); it != ws_map_.end() && it->second.q != nullptr) {
+                auto& ws = it->second;
+                const size_t row_b = strata::kernels::glmf::row_bytes(ws.type, ws.n_in);
+                const int64_t slice = tp_.experts.count;
+                const size_t span_b = row_b * (size_t) slice / (size_t) ws.n_in;
+                const size_t band_b = row_b * (size_t) tp_.experts.begin / (size_t) ws.n_in;
+                void* copy = nullptr;
+                if (cudaMalloc(&copy, span_b * (size_t) ws.n_out) != cudaSuccess) {
+                    err = "tp mixer: shexp down compact copy did not allocate";
+                    return;
+                }
+                cudaMemcpy2D(copy, span_b, (const uint8_t*) ws.q + band_b, row_b, span_b,
+                             (size_t) ws.n_out, cudaMemcpyDeviceToDevice);
+                ws.q = copy;
+                ws.n_in = slice;
+                mixer_copies_.push_back(copy);
+            }
+        }
+    }
 }
 
 bool strata::core::Glm5Model::load_pack(const std::string& pack_dir, int64_t max_ctx, std::string& err, int dev,
@@ -3407,6 +3570,10 @@ bool strata::core::Glm5Model::load_pack(const std::string& pack_dir, int64_t max
                        (size_t) g_.n_expert * sizeof(float), cudaMemcpyDeviceToHost);
     }
 
+    // TP2: slice the mixer weights to this rank's head band before the state arena is sized
+    slice_mixer_weights(err);
+    if (!err.empty()) return false;
+
     // 6. the state and scratch arenas (identical to load()), then the CPU MoE buffers
     const int64_t hc_dim = (int64_t) g_.hc * g_.n_embd;
     const int64_t max_pools = max_ctx / g_.idx_kpool;
@@ -3449,9 +3616,9 @@ bool strata::core::Glm5Model::load_pack(const std::string& pack_dir, int64_t max
         if (il < l0_ || il >= l1_) continue;   // the other half's caches stay on the other device
         if (g_.is_recr(il)) {
             kda_S_[(size_t) il] = floats;
-            floats += (int64_t) g_.d_inner() * g_.kda_head_dim;
+            floats += (int64_t) head_compute() * g_.kda_head_dim * g_.kda_head_dim;
             kda_conv_[(size_t) il] = floats;
-            floats += (int64_t) 3 * g_.d_inner() * (g_.d_conv - 1);
+            floats += (int64_t) 3 * head_compute() * g_.kda_head_dim * (g_.d_conv - 1);
         } else {
             dsa_lat_[(size_t) il] = floats;
             floats += lat_floats;

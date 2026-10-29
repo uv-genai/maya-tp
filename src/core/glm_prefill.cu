@@ -2477,6 +2477,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         progress_at("the prompt: layer", il);   // a layer is the serve watchdog's heartbeat (issue #40)
         progress_beat();
         const auto& Ly = F->L[(size_t) il];
+        const int NH = head_compute_for(il), DI = NH * HD;
         const bool skip_output = tail_skip && il == g.n_layers - 1;
         if (S->trace) cudaEventRecord(S->tr[(size_t) il].start, s);
         hc_read(il == l0_ ? nullptr : S->ffn, Ly.hc_attn_fn, Ly.hc_attn_scale, Ly.hc_attn_base, Ly.attn_norm);
@@ -2518,7 +2519,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
                 hgemm_q(Ly.v, DI, E, x16, E, B.proj[2], DI, tn, 0.0f);
                 sgemm_bf16(Ly.f_a, HD, E, xs, E, B.fa, HD, tn, 1.0f);
                 sgemm_bf16(Ly.g_a, HD, E, xs, E, B.ga, HD, tn, 1.0f);
-                sgemm_bf16(Ly.beta, g.n_head, E, xs, E, B.beta, g.n_head, tn, 1.0f);
+                sgemm_bf16(Ly.beta, NH, E, xs, E, B.beta, NH, tn, 1.0f);
                 const float* pr[3] = {B.proj[0], B.proj[1], B.proj[2]};
                 float* cv[3] = {B.conv[0], B.conv[1], B.conv[2]};
                 float* cst = state_ + kda_conv_[(size_t) il];
@@ -2540,16 +2541,16 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
                 float* Sl = state_ + kda_S_[(size_t) il];
                 if (kda_split > 0) {
                     static const bool chk = getenv("STRATA_GLM_KDA_SPLIT_CHECK") != nullptr;
-                    const size_t sn = (size_t) g.n_head * 128 * 128, on = (size_t) tn * DI;
+                    const size_t sn = (size_t) NH * 128 * 128, on = (size_t) tn * DI;
                     float* rs = nullptr;
                     __half* ro = nullptr;
                     if (chk && cudaMalloc(&rs, sn * 4) == cudaSuccess && cudaMalloc(&ro, on * 2) == cudaSuccess) {
                         cudaMemcpyAsync(rs, Sl, sn * 4, cudaMemcpyDeviceToDevice, s);
                         gb::kda_rec(B.conv[0], B.conv[1], B.conv[2], B.g1, Ly.dt_bias, Ly.ssm_a, g.kda_lb, B.beta, rs,
-                                    B.g2, Ly.ssm_norm, g.norm_eps, g.n_head, tn, ro, s);
+                                    B.g2, Ly.ssm_norm, g.norm_eps, NH, tn, ro, s);
                     }
                     gb::kda_rec_split(B.conv[0], B.conv[1], B.conv[2], B.g1, Ly.dt_bias, Ly.ssm_a, g.kda_lb, B.beta, Sl,
-                                      B.g2, Ly.ssm_norm, g.norm_eps, g.n_head, tn, B.out16, s, kda_split);
+                                      B.g2, Ly.ssm_norm, g.norm_eps, NH, tn, B.out16, s, kda_split);
                     if (rs != nullptr && ro != nullptr) {
                         std::vector<float> a1(sn), a2(sn);
                         std::vector<__half> o1(on), o2(on);
@@ -2572,7 +2573,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
                     if (ro) cudaFree(ro);
                 } else {
                     gb::kda_rec(B.conv[0], B.conv[1], B.conv[2], B.g1, Ly.dt_bias, Ly.ssm_a, g.kda_lb, B.beta, Sl, B.g2,
-                                Ly.ssm_norm, g.norm_eps, g.n_head, tn, B.out16, s);
+                                Ly.ssm_norm, g.norm_eps, NH, tn, B.out16, s);
                 }
                 S->mark("kda_rec", s);
                 if (!skip_output) hgemm_q(Ly.out, E, DI, B.out16, DI, mixer, E, tn, 0.0f);
@@ -2622,7 +2623,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
                     gb::dsa_pool(state_ + dsa_ik_[(size_t) il], state_ + dsa_ig_[(size_t) il], Ly.ape,
                                  state_ + dsa_pool_[(size_t) il], g.idx_key, kp, pool_lo, pool_hi - pool_lo + 1, s,
                                  ik_ring_);
-                hgemm_q(Ly.q_b, g.n_head * g.qk_nope, g.q_lora, B.qr16, g.q_lora, B.q, g.n_head * g.qk_nope, tn, 0.0f);
+                hgemm_q(Ly.q_b, NH * g.qk_nope, g.q_lora, B.qr16, g.q_lora, B.q, NH * g.qk_nope, tn, 0.0f);
                 if (Ly.idx_q_b_x.q != nullptr)   // an EXL3 pack quantizes it
                     hgemm_q(Ly.idx_q_b_x, g.idx_heads * g.idx_key, g.q_lora, B.qr16, g.q_lora, B.iq,
                             g.idx_heads * g.idx_key, tn, 0.0f);
@@ -2647,74 +2648,74 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
                 uint16_t* const hp_q = (uint16_t*) B.attn;
                 uint16_t* const hp_c = (uint16_t*) B.q_abs;
                 if (f16) {
-                    bf16_to_f16<<<1024, 256, 0, s>>>(Ly.k_b, S->w16, (int64_t) g.n_head * g.kv_lora * g.qk_nope);
-                    pack_heads_f16<<<2048, 256, 0, s>>>(B.q, hp_q, tn, g.n_head, g.qk_nope);
+                    bf16_to_f16<<<1024, 256, 0, s>>>(Ly.k_b, S->w16, (int64_t) NH * g.kv_lora * g.qk_nope);
+                    pack_heads_f16<<<2048, 256, 0, s>>>(B.q, hp_q, tn, NH, g.qk_nope);
                     blas_ck(hipblasGemmStridedBatchedEx(S->blas, HIPBLAS_OP_T, HIPBLAS_OP_N, g.kv_lora, tn, g.qk_nope, &one,
                                                         S->w16, HIP_R_16F, g.qk_nope, (long long) g.kv_lora * g.qk_nope,
                                                         hp_q, HIP_R_16F, g.qk_nope, (long long) tn * g.qk_nope, &zero,
-                                                        B.q_abs, use_f16q ? HIP_R_16F : HIP_R_32F, g.n_head * g.kv_lora,
-                                                        g.kv_lora, g.n_head, HIPBLAS_COMPUTE_32F, HIPBLAS_GEMM_DEFAULT),
+                                                        B.q_abs, use_f16q ? HIP_R_16F : HIP_R_32F, NH * g.kv_lora,
+                                                        g.kv_lora, NH, HIPBLAS_COMPUTE_32F, HIPBLAS_GEMM_DEFAULT),
                             "q_abs f16");
                 } else
 #endif
                 {
-                gb::bf16_to_f32(Ly.k_b, S->w32, (int64_t) g.n_head * g.kv_lora * g.qk_nope, s);
+                gb::bf16_to_f32(Ly.k_b, S->w32, (int64_t) NH * g.kv_lora * g.qk_nope, s);
                 blas_ck(cublasSgemmStridedBatched(S->blas, CUBLAS_OP_T, CUBLAS_OP_N, g.kv_lora, tn, g.qk_nope, &one,
                                                   S->w32, g.qk_nope, (long long) g.kv_lora * g.qk_nope, B.q,
-                                                  g.n_head * g.qk_nope, g.qk_nope, &zero, B.q_abs, g.n_head * g.kv_lora,
-                                                  g.kv_lora, g.n_head),
+                                                  NH * g.qk_nope, g.qk_nope, &zero, B.q_abs, NH * g.kv_lora,
+                                                  g.kv_lora, NH),
                         "q_abs");
                 }
                 S->mark("dsa_qabs", s);
 #if defined(STRATA_USE_HIP)
                 if (use_f16q)
                     gb::mla_attn_f16q((const uint16_t*) B.q_abs, lat, B.cells,
-                                      B.n_sel, g.n_sel_max(), g.n_head, g.kv_lora, 1.0f / std::sqrt((float) g.qk_nope), tn,
+                                      B.n_sel, g.n_sel_max(), NH, g.kv_lora, 1.0f / std::sqrt((float) g.qk_nope), tn,
                                       B.ctx, s, lat_q8_);
                 else if (use_wmma2)
                     gb::mla_attn_wmma2(B.q_abs, lat, B.cells,
-                                       B.n_sel, g.n_sel_max(), g.n_head, g.kv_lora, 1.0f / std::sqrt((float) g.qk_nope), tn,
+                                       B.n_sel, g.n_sel_max(), NH, g.kv_lora, 1.0f / std::sqrt((float) g.qk_nope), tn,
                                        B.ctx, s, lat_q8_);
                 else
 #endif
-                gb::mla_attn(B.q_abs, lat, B.cells, B.n_sel, g.n_sel_max(), g.n_head,
+                gb::mla_attn(B.q_abs, lat, B.cells, B.n_sel, g.n_sel_max(), NH,
                              g.kv_lora, 1.0f / std::sqrt((float) g.qk_nope), tn, B.ctx, s, lat_q8_);
                 S->mark("dsa_attn", s);
                 // out[t][h] = wv_b[h] (v_head x kv_lora) . ctx[t][h]
 #if defined(STRATA_USE_HIP)
                 if (f16) {
-                    bf16_to_f16<<<1024, 256, 0, s>>>(Ly.v_b, S->w16, (int64_t) g.n_head * g.v_head * g.kv_lora);
-                    pack_heads_f16<<<2048, 256, 0, s>>>(B.ctx, hp_c, tn, g.n_head, g.kv_lora);
+                    bf16_to_f16<<<1024, 256, 0, s>>>(Ly.v_b, S->w16, (int64_t) NH * g.v_head * g.kv_lora);
+                    pack_heads_f16<<<2048, 256, 0, s>>>(B.ctx, hp_c, tn, NH, g.kv_lora);
                     blas_ck(hipblasGemmStridedBatchedEx(S->blas, HIPBLAS_OP_T, HIPBLAS_OP_N, g.v_head, tn, g.kv_lora, &one,
                                                         S->w16, HIP_R_16F, g.kv_lora, (long long) g.v_head * g.kv_lora,
                                                         hp_c, HIP_R_16F, g.kv_lora, (long long) tn * g.kv_lora, &zero,
-                                                        B.attn, HIP_R_32F, g.n_head * g.v_head, g.v_head, g.n_head,
+                                                        B.attn, HIP_R_32F, NH * g.v_head, g.v_head, NH,
                                                         HIPBLAS_COMPUTE_32F, HIPBLAS_GEMM_DEFAULT),
                             "mla out f16");
                 } else
 #endif
                 {
-                gb::bf16_to_f32(Ly.v_b, S->w32, (int64_t) g.n_head * g.v_head * g.kv_lora, s);
+                gb::bf16_to_f32(Ly.v_b, S->w32, (int64_t) NH * g.v_head * g.kv_lora, s);
                 blas_ck(cublasSgemmStridedBatched(S->blas, CUBLAS_OP_T, CUBLAS_OP_N, g.v_head, tn, g.kv_lora, &one,
                                                   S->w32, g.kv_lora, (long long) g.v_head * g.kv_lora, B.ctx,
-                                                  g.n_head * g.kv_lora, g.kv_lora, &zero, B.attn, g.n_head * g.v_head,
-                                                  g.v_head, g.n_head),
+                                                  NH * g.kv_lora, g.kv_lora, &zero, B.attn, NH * g.v_head,
+                                                  g.v_head, NH),
                         "mla out");
                 }
-                gb::f32_to_f16(B.attn, B.attn16, (int64_t) tn * g.n_head * g.v_head, s);
+                gb::f32_to_f16(B.attn, B.attn16, (int64_t) tn * NH * g.v_head, s);
                 if (!skip_output)
-                    hgemm_q(Ly.out, E, g.n_head * g.v_head, B.attn16, g.n_head * g.v_head, mixer, E, tn, 0.0f);
+                    hgemm_q(Ly.out, E, NH * g.v_head, B.attn16, NH * g.v_head, mixer, E, tn, 0.0f);
                 if (t0 + tn == T) {
                     const std::string Ls = std::to_string(il);
                     dump_row("dsa_qr-" + Ls, B.qr, g.q_lora, tn - 1);
-                    dump_row("dsa_q-" + Ls, B.q, g.n_head * g.qk_nope, tn - 1);
+                    dump_row("dsa_q-" + Ls, B.q, NH * g.qk_nope, tn - 1);
                     dump_row("dsa_iq-" + Ls, B.iq, g.idx_heads * g.idx_key, tn - 1);
 #if defined(STRATA_USE_HIP)
                     if (!f16)   // with the FP16 products q_abs holds FP16 / the packed context
 #endif
-                    dump_row("pf_qabs-" + Ls, B.q_abs, g.n_head * g.kv_lora, tn - 1);
-                    dump_row("pf_ctx-" + Ls, B.ctx, g.n_head * g.kv_lora, tn - 1);
-                    dump_row("pf_attn-" + Ls, B.attn, g.n_head * g.v_head, tn - 1);
+                    dump_row("pf_qabs-" + Ls, B.q_abs, NH * g.kv_lora, tn - 1);
+                    dump_row("pf_ctx-" + Ls, B.ctx, NH * g.kv_lora, tn - 1);
+                    dump_row("pf_attn-" + Ls, B.attn, NH * g.v_head, tn - 1);
                 }
             }
             // Windows HIP: the sub-batch goes to the GPU while the next one queues (glmfast::submit_queued)
@@ -2725,6 +2726,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         S->mark(Ly.recr ? "kda" : "dsa", s);
         if (skip_output) continue;   // every KDA/DSA cache update above still ran; these output rows feed nothing
         dump_row("mixer-" + std::to_string(il), S->mixer, E);
+        if (tp_.active() && !tp_.all_reduce(S->mixer, (std::size_t) T * E, E, s, err)) return false;
         hc_read(S->mixer, Ly.hc_ffn_fn, Ly.hc_ffn_scale, Ly.hc_ffn_base, Ly.ffn_norm);
         S->mark("hc", s);
         dump_row("ffn_norm-" + std::to_string(il), S->x, E);
@@ -2758,10 +2760,11 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
                 Carve c{S->uni};
                 DenseBufs B = carve_dense(c, (size_t) tn, g);
                 const uint16_t* x16 = S->x16 + (size_t) t0 * E;
-                hgemm_q(Ly.ffn_gate, g.n_ff_dense, E, x16, E, B.dg, g.n_ff_dense, tn, 0.0f);
-                hgemm_q(Ly.ffn_up, g.n_ff_dense, E, x16, E, B.du, g.n_ff_dense, tn, 0.0f);
-                gb::swiglu_f16(B.dg, B.du, B.dh16, (int64_t) tn * g.n_ff_dense, g.swiglu_shexp, s);
-                hgemm_q(Ly.ffn_down, E, g.n_ff_dense, B.dh16, g.n_ff_dense, S->ffn + (size_t) t0 * E, E, tn, 0.0f);
+                const int FFD = ff_compute_dense();
+                hgemm_q(Ly.ffn_gate, FFD, E, x16, E, B.dg, FFD, tn, 0.0f);
+                hgemm_q(Ly.ffn_up, FFD, E, x16, E, B.du, FFD, tn, 0.0f);
+                gb::swiglu_f16(B.dg, B.du, B.dh16, (int64_t) tn * FFD, g.swiglu_shexp, s);
+                hgemm_q(Ly.ffn_down, E, FFD, B.dh16, FFD, S->ffn + (size_t) t0 * E, E, tn, 0.0f);
             }
             S->mark("dense_ffn", s);
             dump_row("ffn_out-" + std::to_string(il), S->ffn, E);
@@ -2771,7 +2774,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         // ---- MoE: the shared expert (sub-batches, straight into ffn), the routes, the expert groups
         Carve c{S->uni};
         MoeBufs M = carve_moe(c, (size_t) T, (size_t) S->sh_sub(), g);
-        const int FF = g.n_ff_exp * g.n_shared, NE = g.n_expert, nff = ff_compute();
+        const int FF = ff_compute() * g.n_shared, NE = g.n_expert, nff = ff_compute();
         for (int t0 = 0, shs = S->sh_sub(); t0 < T; t0 += shs) {
             const int tn = std::min(shs, T - t0);
             const uint16_t* x16 = S->x16 + (size_t) t0 * E;
@@ -2780,7 +2783,7 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
             gb::swiglu_f16(M.sh_g, M.sh_u, M.sh16, (int64_t) tn * FF, g.swiglu_shexp, s);
             // TP2: the replicated shared expert is written on rank 0 only (the all-reduce must not
             // double it); the routed experts are added below and then reduced.
-            if (!tp_.active() || tp_.rank == 0)
+            if (!tp_.active() || tp_.rank == 0 || tp_.slicing())
                 hgemm_q(Ly.sh_down, E, FF, M.sh16, FF, S->ffn + (size_t) t0 * E, E, tn, 0.0f);
             else
                 cudaMemsetAsync(S->ffn + (size_t) t0 * E, 0, (size_t) tn * E * sizeof(float), s);
