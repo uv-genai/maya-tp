@@ -51,6 +51,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 13 | MTP under TP2 | **Complete (§11). Opt-in `MAYA_TP_MTP=1`; simple loop remains default.** |
 | 14 | Controlled MTP on/off benchmark | complete; warm median off 38.255 / on 52.235 ms/token (§13) |
 | 15 | MTP deployment + llama-swap launcher verification | complete; runtime flags and both-rank propagation (§14) |
+| 16 | GLM vision on HIP + RDMA TP2 embedding synchronization | open, deferred by user (§15) |
 
 ## 5. What works (Maya-S pack)
 
@@ -284,3 +285,12 @@ The worker consumes the wrong header, then resumes in the middle of the protocol
   `/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --mtp --drafts 4`.
   For llama-swap edit just that model's `cmd` to append `--mtp --drafts 4`, then restart the model.
   Stop: same wrapper `stop`. Full examples: `docs/TP2-RUN.md`, settings in `docs/SETTINGS.md`.
+
+## 15. #16 deferred vision work
+
+User requested tracking only; **do not implement until asked**. GLM-5.3-Flash has a compatible vision tower/projector
+in the quant repo's `vision/` folder (`mmproj-GLM-5.3-Flash-F16.gguf` and `GLM-5.3-Flash-vocab.gguf`).
+Current HIP installer skips GLM vision; neither host's deployed config enables it. Future work must enable GPU
+encoding on gfx1151 and synchronize image positions/embedding tensors across TP2 (tensors over RDMA, not TCP).
+Scope/evidence/acceptance: https://github.com/uv-genai/maya-tp/issues/16 . Issue intentionally left open and deferred.
+No model files downloaded, no runtime configuration changed, no inference processes started/stopped for this task.

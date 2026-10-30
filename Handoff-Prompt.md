@@ -38,7 +38,7 @@ Kill/recover: `MAYA_TP_MTP=1 bash tools/tp2/acceptance.sh`.
 Same-reference follow run had cold-I/O noise (44.20 / 58.50); do not claim a precise delta. MTP has no demonstrated
 speed win. Overlapped AR (gufo `StartPartial`/`FinishPartial`) is future work; **no `MAYA_TP_OVERLAP` knob exists**.
 
-**Open:** #1 umbrella, #10 optional gather design, #11 multi-seq still gated (`SEQS>1` prompt `mv_rdna`).
+**Open:** #1 umbrella, #10 optional gather design, **#16 vision deferred (tracking only until user asks)**, #11 multi-seq still gated (`SEQS>1` prompt `mv_rdna`).
 `glm_rows.cu` has the same full-width shared `FFs` bug the window had; fix when explicitly resuming #11.
 **#14 benchmark completed (Handoff §13):** same resident pair, fixed 256-token continuation, two warmups per
 mode, four measured runs/mode: MTP off **38.255 ms/token, 26.14 tok/s**; MTP on **52.235 ms/token, 19.14 tok/s**.
