@@ -1859,6 +1859,16 @@ static int glm_pack_generate(const Options& o) {
         kTpMirrorMultiIssue = 7,  // next_token=seq, payload: one token
         kTpMirrorMultiRowsIssue = 8,  // same wire as MultiRows (issue-only batch)
         kTpMirrorMultiBoundary = 9,
+        kTpMirrorMtp = 10,        // n=max_new, then TpMtpSp POD (+ optional penalty history)
+        kTpMirrorForce = 11,      // payload: one forced token id (-1 clears)
+    };
+    // Sampler scalars for a mirrored decode_mtp (no host pointers).
+    struct TpMtpSp {
+        int32_t top_k, min_keep, penalty_last_n, greedy;
+        float top_p, min_p, temperature, penalty_repeat, penalty_freq, penalty_present;
+        uint64_t seed, counter;
+        int32_t stop_on_eos, eos0, eos1, eos2;
+        int32_t think_budget, think_end;   // both ranks force think_end at the same produced count
     };
     struct TpMirrorHdr {
         int32_t op;
@@ -1901,6 +1911,58 @@ static int glm_pack_generate(const Options& o) {
     const auto tp_send_vec = [&](int32_t op, const std::vector<int32_t>& toks,
                                  int32_t next_token = -1) -> bool {
         return tp_send(op, toks.empty() ? nullptr : toks.data(), (int32_t) toks.size(), next_token);
+    };
+    // Mirror model.force_next so both ranks share forced() decisions (#13).
+    const auto tp_force = [&](int32_t t) -> bool {
+        if (!tp_mirror) return true;
+        return tp_send(kTpMirrorForce, &t, 1);
+    };
+    const auto tp_send_mtp = [&](int64_t max_new, const strata::kernels::SamplerParams& sq,
+                                 int think_budget, int think_end, const std::vector<int64_t>& eos_ids,
+                                 bool stop_eos) -> bool {
+        if (!tp_mirror) return true;
+        TpMirrorHdr h{kTpMirrorMtp, (int32_t) max_new, 0};
+        TpMtpSp s{};
+        s.top_k = sq.top_k;
+        s.min_keep = sq.min_keep;
+        s.penalty_last_n = sq.penalty_last_n;
+        s.greedy = sq.greedy ? 1 : 0;
+        s.top_p = sq.top_p;
+        s.min_p = sq.min_p;
+        s.temperature = sq.temperature;
+        s.penalty_repeat = sq.penalty_repeat;
+        s.penalty_freq = sq.penalty_freq;
+        s.penalty_present = sq.penalty_present;
+        s.seed = sq.seed;
+        s.counter = sq.counter;
+        s.stop_on_eos = stop_eos ? 1 : 0;
+        s.eos0 = eos_ids.size() > 0 ? (int32_t) eos_ids[0] : -1;
+        s.eos1 = eos_ids.size() > 1 ? (int32_t) eos_ids[1] : -1;
+        s.eos2 = eos_ids.size() > 2 ? (int32_t) eos_ids[2] : -1;
+        s.think_budget = think_budget;
+        s.think_end = think_end;
+        // Penalty history (if any) follows the POD.
+        std::vector<int32_t> hist;
+        if (sq.penalty_last_n > 0 && sq.host_history != nullptr) {
+            const auto& hst = *sq.host_history;
+            hist.assign(hst.begin(), hst.end());
+        }
+        h.next_token = (int32_t) hist.size();
+        std::string e;
+        if (!tp_comm->SendControl(&h, sizeof(h), &e)) {
+            tp_pair_down = true;
+            std::printf("TP2_DOWN %s\n", e.empty() ? "mtp send" : e.c_str());
+            std::fflush(stdout);
+            return false;
+        }
+        if (!tp_comm->SendControl(&s, sizeof(s), &e) ||
+            (!hist.empty() && !tp_comm->SendControl(hist.data(), hist.size() * sizeof(int32_t), &e))) {
+            tp_pair_down = true;
+            std::printf("TP2_DOWN %s\n", e.empty() ? "mtp send" : e.c_str());
+            std::fflush(stdout);
+            return false;
+        }
+        return true;
     };
     const auto prep_prompt = [&](const std::vector<int32_t>& prompt, size_t& reuse, const char*& finish,
                                  std::chrono::steady_clock::time_point& t0) -> int {
@@ -2238,6 +2300,7 @@ static int glm_pack_generate(const Options& o) {
         stop_req.store(false);
         pause_req.store(false);
         pause_keep.store(false);
+        tp_force(-1);
         model.force_next(-1);
         model.set_follow(follow_ids);   // STRATA_GLM_SPEC_FOLLOW: this request's tokens (empty: its own picks)
         if (!follow_ids.empty()) max_new = std::min<int64_t>(max_new, (int64_t) follow_ids.size());
@@ -2303,7 +2366,11 @@ static int glm_pack_generate(const Options& o) {
             gen_hist.push_back(tok);
             if (in_think && tok != req_think_end) {
                 if (const int per = looping(loop_w_think)) {
-                    model.force_next(req_think_end);   // as the budget does: the next token closes the reasoning
+                    // TP2+MTP: loop-guard force is rank0-only — would desync forced() (#13).
+                    if (!tp2) {
+                        model.force_next(req_think_end);   // as the budget does: the next token closes the reasoning
+                        tp_force(req_think_end);
+                    }
                     in_think = false;
                     char m[200];
                     std::snprintf(m, sizeof m, "thinking was repeating a %d-token pattern (%d tokens in): closed, "
@@ -2324,7 +2391,10 @@ static int glm_pack_generate(const Options& o) {
                         // a soft landing: close what the model is in the middle of instead of cutting the response -
                         // a tool call's argument ends (the call completes with what was written, the agent runs it
                         // and sees the result), plain text ends the turn (finish "stop")
-                        model.force_next(in_arg ? kArgValueEnd : kUser);
+                        if (!tp2) {
+                            model.force_next(in_arg ? kArgValueEnd : kUser);
+                            tp_force(in_arg ? kArgValueEnd : kUser);
+                        }
                         std::snprintf(m, sizeof m, "the answer was repeating a %d-token pattern (%d tokens in): %s",
                                       per, (int) produced, in_arg ? "the tool call's argument was closed there"
                                                                   : "the turn was ended there");
@@ -2342,7 +2412,10 @@ static int glm_pack_generate(const Options& o) {
                 }
             }
             if (in_think && (tok == req_think_end || produced >= req_think_budget || wrap_req.load())) {
-                if (tok != req_think_end) model.force_next(req_think_end);   // the budget: the next token closes it
+                if (tok != req_think_end) {
+                    tp_force(req_think_end);   // the budget: the next token closes it (mirrored for #13)
+                    model.force_next(req_think_end);
+                }
                 in_think = false;
                 gen_hist.clear();
             }
@@ -2374,10 +2447,8 @@ static int glm_pack_generate(const Options& o) {
             return produced < max_new;
         };
         const uint64_t spec0 = model.spec_steps_, hits0 = model.spec_hits_;
-        // TP2: only the simple decode loop is mirrored.  DFlash / MTP / pipelined spec
-        // issue many internal forwards whose token choices rank 1 cannot reproduce
-        // without sampler state on the wire (gufo carries RNG in kDecode).  Force the
-        // one-token path so every collective has an explicit mirror.
+        // TP2: DFlash and pipelined spec stay off (many internal forwards, no sampler on the wire).
+        // MTP is mirrored as one decode_mtp call (#13); draft width is fixed when tp_.active().
         if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.dflash_ready() && req_spec != 1) {
             // the DFlash decode: a block of drafts a round, one verify window checks them (same tokens as the loop
             // below for the same samples); --spec T caps a round's window at T tokens
@@ -2396,12 +2467,18 @@ static int glm_pack_generate(const Options& o) {
                 return 1;
             }
         } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
-            // the one-GPU MTP decode (glm_mtp.cu; by default on the Strix / Gorgon Halo APUs): the NextN block drafts,
-            // one verify window checks the drafts (same tokens as the loop below for the same samples)
+            // MTP under TP2 (#13): mirror + fixed draft width are implemented (kTpMirrorMtp), but window()/verify
+            // still faults (mv_rdna HSA) or desyncs — #9 was closed by gating, not by a TP-aware window. Off until
+            // glm_window/expert paths are audited for sliced n_ff.
             int64_t n_spec = 0;
             const uint64_t rounds0 = model.mtp_rounds_;
             uint64_t len0[9];
             std::copy(model.mtp_round_n_, model.mtp_round_n_ + 9, len0);
+            if (tp2 && !tp_send_mtp(max_new, sp, req_think_budget, req_think_end, eos, stop_on_eos)) {
+                err = "TP2 pair down (mtp)";
+                std::printf("ERR %s\n", err.c_str());
+                return 1;
+            }
             if (!model.decode_mtp(sp, max_new, on_token, n_spec, err)) {
                 drop_if_poisoned(prompt, err);
                 std::printf("ERR %s\n", err.c_str());
@@ -4003,6 +4080,51 @@ static int glm_pack_generate(const Options& o) {
                 std::fprintf(stderr, "TP2 worker: bad instruction n=%d op=%d\n", h.n, h.op);
                 continue;
             }
+            // MTP carries a POD sampler + optional history before any token vector.
+            if (h.op == kTpMirrorMtp) {
+                TpMtpSp s{};
+                if (!tp_comm->RecvControl(&s, sizeof(s), &tp_err)) {
+                    std::fprintf(stderr, "TP2 worker mtp sp: %s\n", tp_err.c_str());
+                    continue;
+                }
+                std::vector<int32_t> hist((size_t) std::max(0, h.next_token));
+                if (h.next_token > 0 &&
+                    !tp_comm->RecvControl(hist.data(), hist.size() * sizeof(int32_t), &tp_err)) {
+                    std::fprintf(stderr, "TP2 worker mtp hist: %s\n", tp_err.c_str());
+                    continue;
+                }
+                strata::kernels::SamplerParams sp;
+                sp.top_k = s.top_k;
+                sp.min_keep = s.min_keep;
+                sp.penalty_last_n = s.penalty_last_n;
+                sp.greedy = s.greedy != 0;
+                sp.top_p = s.top_p;
+                sp.min_p = s.min_p;
+                sp.temperature = s.temperature;
+                sp.penalty_repeat = s.penalty_repeat;
+                sp.penalty_freq = s.penalty_freq;
+                sp.penalty_present = s.penalty_present;
+                sp.seed = s.seed;
+                sp.counter = s.counter;
+                if (!hist.empty()) sp.host_history = &hist;
+                const int64_t max_new = h.n;
+                const int tb = s.think_budget, te = s.think_end;
+                const bool stop_eos = s.stop_on_eos != 0;
+                const int e0 = s.eos0, e1 = s.eos1, e2 = s.eos2;
+                int64_t produced = 0;
+                std::string mtp_err;
+                const auto emit = [&](int tok) -> bool {
+                    ++produced;
+                    if (stop_eos && (tok == e0 || tok == e1 || tok == e2)) return false;
+                    if (tb > 0 && te >= 0 && produced >= tb && tok != te) model.force_next(te);
+                    return produced < max_new;
+                };
+                if (!model.decode_mtp(sp, max_new, emit, produced, mtp_err))
+                    std::fprintf(stderr, "TP2 worker mtp: %s\n", mtp_err.c_str());
+                else
+                    std::fprintf(stderr, "TP2 worker: mtp decode %lld tokens\n", (long long) produced);
+                continue;
+            }
             std::vector<int32_t> toks((size_t) h.n);
             if (h.n > 0 && !tp_comm->RecvControl(toks.data(), (size_t) h.n * sizeof(int32_t), &tp_err)) {
                 std::fprintf(stderr, "TP2 worker tokens: %s\n", tp_err.c_str());
@@ -4089,6 +4211,15 @@ static int glm_pack_generate(const Options& o) {
                         std::fprintf(stderr, "TP2 worker boundary: %s\n", e.c_str());
                     else
                         std::fprintf(stderr, "TP2 worker: boundary\n");
+                    break;
+                case kTpMirrorForce: {
+                    const int32_t ft = h.n >= 1 && !toks.empty() ? toks[0] : -1;
+                    model.force_next(ft);
+                    std::fprintf(stderr, "TP2 worker: force %d\n", ft);
+                    break;
+                }
+                case kTpMirrorMtp:
+                    // handled before the token-vector receive
                     break;
                 default:
                     std::fprintf(stderr, "TP2 worker: unknown op %d\n", h.op);

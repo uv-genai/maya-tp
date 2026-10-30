@@ -476,6 +476,15 @@ int Glm5Model::mtp_choose(int n_cap) {
     }();
     if (forced_n >= 0) return std::min(forced_n, n_cap);
     if (n_cap <= 0) return 0;
+    // TP2 (#13): adaptive length uses wall-clock ms — the two ranks would pick different
+    // draft counts and mismatch window() AR sizes. Fixed width on both ranks.
+    if (tp_.active()) {
+        static const int tp_n = [] {
+            const char* e = getenv("STRATA_GLM_MTP_FIXED");
+            return e != nullptr ? std::max(0, std::atoi(e)) : 2;
+        }();
+        return std::min(tp_n, n_cap);
+    }
     if (fixed) return n_cap;
     ++mtp_round_no_;
     // a length runs in stints: a round's time holds the tiers' work left from the round before, so the first two
