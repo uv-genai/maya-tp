@@ -1847,20 +1847,25 @@ static int glm_pack_generate(const Options& o) {
     // the same order.  The ARs then pair them.  Do NOT mirror inside forward():
     // prep_prompt blocks (snapshot/restore) before forward() is ever reached.
     // Wire: TpMirrorHdr + n * int32_t tokens.
-    enum : int32_t { kTpMirrorReset = 0, kTpMirrorPrefill = 1, kTpMirrorForward = 2 };
+    // Ops: reset / prefill / forward / snapshot / restore (multi-turn reuse, #11).
+    enum : int32_t {
+        kTpMirrorReset = 0,
+        kTpMirrorPrefill = 1,
+        kTpMirrorForward = 2,
+        kTpMirrorSnapshot = 3,
+        kTpMirrorRestore = 4,
+    };
     struct TpMirrorHdr {
         int32_t op;
         int32_t n;
         int32_t next_token;   // kTpMirrorPrefill: the prompt's next token (NextN cache)
     };
-    // Both ranks of a TP pair must share conversation state.  Snapshot /
-    // checkpoint / slot reuse cannot be mirrored yet (gufo sends kReuse /
-    // kRestore), so TP2 always resets and re-reads the full prompt.
+    // TP2 pair. Snapshot reuse is allowed when this rank can either run the same
+    // code as its peer (bench: both --tokens) or mirror snapshot/restore (serve rank 0).
+    // Checkpoints/slots stay off under TP2 (not mirrored yet).
     const bool tp2 = tp_comm != nullptr && tp_comm->world_size() > 1;
-    // Active only when rank 0 is serving: a controlled bench runs BOTH ranks
-    // with --tokens and must not push control traffic rank 1 never reads
-    // (a full TCP buffer would block rank 0 mid-decode).
     const bool tp_mirror = tp_comm != nullptr && tp_comm->rank() == 0 && o.serve && tp2;
+    const bool tp_reuse_ok = !tp2 || tp_mirror || !o.serve;
     // Sticky pair-down: the first failed mirror send ends the pair for good until both ranks restart.
     // serve/server.py watches stdout for "TP2_DOWN" and reports it on /health (issue #6).
     bool tp_pair_down = false;
@@ -1889,8 +1894,9 @@ static int glm_pack_generate(const Options& o) {
         // CONVERSATION REUSE (the fast path): the previous prompt's state, saved just before its last token, is
         // restored when this prompt extends it - a chat's next turn reads only what is new
         strata::core::progress_at("the request: restoring a conversation");
-        // TP2: no conversation reuse (gufo mirrors kReuse/kRestore; we reset both ranks).
-        const bool snap_ok = !tp2 && model.fast() && !snap_tokens.empty() && snap_tokens.size() < prompt.size() &&
+        // Conversation reuse: rank 0 mirrors snapshot/restore to rank 1 when serving (#11).
+        // Checkpoints and slots remain single-host / non-TP2 only.
+        const bool snap_ok = tp_reuse_ok && model.fast() && !snap_tokens.empty() && snap_tokens.size() < prompt.size() &&
                              std::equal(snap_tokens.begin(), snap_tokens.end(), prompt.begin()) &&
                              img_hash(snap_tokens.size()) == snap_img_hash && getenv("STRATA_GLM_NO_REUSE") == nullptr;
         // the longest checkpoint this prompt starts with (it holds less than the snapshot when both match)
@@ -1904,7 +1910,16 @@ static int glm_pack_generate(const Options& o) {
             }
         const size_t ck_len = ck >= 0 ? ckpts[(size_t) ck].tokens.size() : 0;
         bool from_ckpt = false;
-        if (snap_ok && snap_tokens.size() >= ck_len && model.snapshot_restore()) reuse = snap_tokens.size();
+        if (snap_ok && snap_tokens.size() >= ck_len) {
+            // Mirror before the local restore so both ranks snapshot-restore together.
+            if (tp_mirror && !tp_send(kTpMirrorRestore, nullptr, 0)) return 1;
+            if (model.snapshot_restore()) {
+                reuse = snap_tokens.size();
+            } else if (tp_mirror) {
+                // Rank 1 may have restored; put it back to a clean state with us.
+                tp_send(kTpMirrorReset, nullptr, 0);
+            }
+        }
         if (reuse == 0 && ck >= 0) {
             slot_put("");              // the conversation in the model goes on differently past the checkpoint: kept
             size_t slot_len = 0;       // a slot that holds more of this prompt is taken instead (below)
@@ -2102,7 +2117,16 @@ static int glm_pack_generate(const Options& o) {
             strata::core::progress_at("the prompt: the token path, at token", (int64_t) i);
             strata::core::progress_beat();
             if (model.fast() && !snapped && i == prompt.size() - 1) {
-                if (model.snapshot_save()) {
+                // Both ranks snapshot at the same point (before the last prompt token).
+                bool saved = false;
+                if (tp_mirror) {
+                    if (!tp_send(kTpMirrorSnapshot, nullptr, 0)) return 1;
+                    saved = model.snapshot_save();
+                    if (!saved) tp_send(kTpMirrorReset, nullptr, 0);
+                } else {
+                    saved = model.snapshot_save();
+                }
+                if (saved) {
                     snap_tokens.assign(prompt.begin(), prompt.end() - 1);
                     snap_img_hash = img_hash(snap_tokens.size());
                     snap_in_slot = false;
@@ -3947,6 +3971,18 @@ static int glm_pack_generate(const Options& o) {
                         std::fprintf(stderr, "TP2 worker forward: %s\n", e.c_str());
                     else
                         std::fprintf(stderr, "TP2 worker: forward %d\n", h.n);
+                    break;
+                case kTpMirrorSnapshot:
+                    if (!model.snapshot_save())
+                        std::fprintf(stderr, "TP2 worker snapshot: %s\n", e.c_str());
+                    else
+                        std::fprintf(stderr, "TP2 worker: snapshot\n");
+                    break;
+                case kTpMirrorRestore:
+                    if (!model.snapshot_restore())
+                        std::fprintf(stderr, "TP2 worker restore: %s\n", e.c_str());
+                    else
+                        std::fprintf(stderr, "TP2 worker: restore\n");
                     break;
                 default:
                     std::fprintf(stderr, "TP2 worker: unknown op %d\n", h.op);
