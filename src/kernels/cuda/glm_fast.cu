@@ -6087,6 +6087,12 @@ void mla_out(const float* ctx, int64_t ctx_stride, const uint16_t* wv_b, int n_h
 static float* mla_part(int dev, int n_head, int kv_lora, int chunks, int* cap) {
     static float* part[16] = {};
     static int part_chunks[16] = {};
+#if defined(STRATA_USE_HIP)
+    // TP trunk and replicated draft layers can request different head widths.
+    // Chunk capacity alone does not describe this allocation's byte capacity.
+    static int part_heads[16] = {}, part_kv[16] = {};
+    if (part_heads[dev] != n_head || part_kv[dev] != kv_lora) part_chunks[dev] = 0;
+#endif
     if (part_chunks[dev] < chunks) {
         if (part[dev]) cudaFree(part[dev]);
         const int want = std::max(chunks, 80);
@@ -6096,6 +6102,10 @@ static float* mla_part(int dev, int n_head, int kv_lora, int chunks, int* cap) {
             part_chunks[dev] = 0;
         } else {
             part_chunks[dev] = want;
+#if defined(STRATA_USE_HIP)
+            part_heads[dev] = n_head;
+            part_kv[dev] = kv_lora;
+#endif
         }
     }
     *cap = part_chunks[dev];

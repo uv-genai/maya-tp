@@ -442,7 +442,7 @@ bool Glm5Model::fast_dsa_window(int il, int64_t p0, int t0, int T, std::string& 
     const int64_t qd = (int64_t) g.n_head * g.qk_nope, ad = (int64_t) g.n_head * g.kv_lora;
     bool batched = mla_batch && W.q_abs != nullptr && T > 1;
     if (batched)
-        gf::mla_q_abs(W.q + (size_t) t0 * qd, qd, Ly.k_b, g.n_head, g.qk_nope, g.kv_lora, T, W.q_abs + (size_t) t0 * ad,
+        gf::mla_q_abs(W.q + (size_t) t0 * qd, qd, Ly.k_b, NHd, g.qk_nope, g.kv_lora, T, W.q_abs + (size_t) t0 * ad,
                       ad, s);
     uint16_t* const lat = (uint16_t*) (state_ + dsa_lat_[(size_t) il]);
     // every token's selection into its own row of W.cells, then one batched attention (not under KV streaming: there a
@@ -470,7 +470,7 @@ bool Glm5Model::fast_dsa_window(int il, int64_t p0, int t0, int T, std::string& 
         }
         // KV streaming: this token's blocks resident before its attention (the next token's resolve runs after it)
         const int* cells = kv_attend_cells(kv_, il, lat, F->cells, n_sel, F->slot_cells, s);
-        if (batched && gf::mla_attend(W.q_abs + (size_t) t * ad, lat, cells, n_sel, g.n_head, g.qk_nope, g.kv_lora,
+        if (batched && gf::mla_attend(W.q_abs + (size_t) t * ad, lat, cells, n_sel, NHd, g.qk_nope, g.kv_lora,
                                       W.ctx + (size_t) t * ad, s, lat_q8_))
             continue;
         if (batched) {   // (the first token: the split attention is not available here - every token per token)
@@ -480,15 +480,15 @@ bool Glm5Model::fast_dsa_window(int il, int64_t p0, int t0, int T, std::string& 
                 return false;
             }
         }
-        gf::mla(W.q + (size_t) t * qd, Ly.k_b, Ly.v_b, lat, cells, n_sel, g.n_head, g.qk_nope, g.kv_lora, g.v_head,
+        gf::mla(W.q + (size_t) t * qd, Ly.k_b, Ly.v_b, lat, cells, n_sel, NHd, g.qk_nope, g.kv_lora, g.v_head,
                 (uint8_t*) W.attn_q + (size_t) t * W.aq_s, s, lat_q8_);
     }
-    if (rows && !gf::mla_attend_batch(W.q_abs + (size_t) t0 * ad, ad, lat, W.cells, nsm, nsel.data(), T, g.n_head,
+    if (rows && !gf::mla_attend_batch(W.q_abs + (size_t) t0 * ad, ad, lat, W.cells, nsm, nsel.data(), T, NHd,
                                       g.qk_nope, g.kv_lora, W.ctx + (size_t) t0 * ad, ad, s, lat_q8_)) {
         for (int t = t0; t < t0 + T; ++t) {   // (no tensor-core attention here: per token, as without the rows)
             const int* cells = W.cells + (size_t) (t - t0) * nsm;
             const int n_sel = nsel[(size_t) (t - t0)];
-            if (batched && gf::mla_attend(W.q_abs + (size_t) t * ad, lat, cells, n_sel, g.n_head, g.qk_nope, g.kv_lora,
+            if (batched && gf::mla_attend(W.q_abs + (size_t) t * ad, lat, cells, n_sel, NHd, g.qk_nope, g.kv_lora,
                                           W.ctx + (size_t) t * ad, s, lat_q8_))
                 continue;
             if (batched) {
@@ -498,12 +498,12 @@ bool Glm5Model::fast_dsa_window(int il, int64_t p0, int t0, int T, std::string& 
                     return false;
                 }
             }
-            gf::mla(W.q + (size_t) t * qd, Ly.k_b, Ly.v_b, lat, cells, n_sel, g.n_head, g.qk_nope, g.kv_lora, g.v_head,
+            gf::mla(W.q + (size_t) t * qd, Ly.k_b, Ly.v_b, lat, cells, n_sel, NHd, g.qk_nope, g.kv_lora, g.v_head,
                     (uint8_t*) W.attn_q + (size_t) t * W.aq_s, s, lat_q8_);
         }
     }
     if (batched)
-        gf::mla_out(W.ctx + (size_t) t0 * ad, ad, Ly.v_b, g.n_head, g.kv_lora, g.v_head, T,
+        gf::mla_out(W.ctx + (size_t) t0 * ad, ad, Ly.v_b, NHd, g.kv_lora, g.v_head, T,
                     (uint8_t*) W.attn_q + (size_t) t0 * W.aq_s, (int64_t) W.aq_s, s);
     mark("dsa_attn");
     // TP2: attn_output input band is this rank's heads — NH*v_head (NHd at function start) (#13)

@@ -288,10 +288,20 @@ bool mla_run(const MlaInputs& M, int set, float* ctx, hipStream_t s) {
 }
 bool mla_parity(MlaInputs& M, const char* pattern, const std::vector<std::string>& shapes, std::vector<bool>& exact, hipStream_t s) {
     hb::mla_attn_config("original");
+    // TP decode first allocates scratch for 32 heads. A later replicated layer
+    // can need 64 heads at the same chunk count; check capacity and head parity.
+    constexpr int half_heads = kHeads / 2;
+    if (!gf::mla_attend(M.q_abs, M.lat, M.cells[0], kSel, half_heads, kNope, kLora, M.ctx, s, false))
+        return false;
+    check(hipStreamSynchronize(s), "32-head scratch");
+    const auto half = host_copy(M.ctx, (size_t) half_heads * kLora);
     if (!mla_run(M, 0, M.ref, s)) { std::fprintf(stderr, "mla_attend not available\n"); return false; }
     check(hipStreamSynchronize(s), "ref");
     const auto ref = host_copy(M.ref, (size_t) kHeads * kLora);
-    bool ok = true;
+    const Diff geometry = compare(half, std::vector<float>(ref.begin(), ref.begin() + half.size()));
+    bool ok = geometry.differ == 0 && geometry.nonfinite == 0;
+    std::printf("parity mla scratch heads=32->64 n_sel=%d cells=%s differ=%zu nonfinite=%zu %s\n",
+                kSel, pattern, geometry.differ, geometry.nonfinite, ok ? "PASS" : "FAIL");
     for (size_t k = 0; k < shapes.size(); ++k) {
         const std::string& sh = shapes[k];
         if (!hb::mla_attn_config(sh.c_str())) { std::fprintf(stderr, "no shape %s\n", sh.c_str()); return false; }
