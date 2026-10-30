@@ -2474,9 +2474,8 @@ static int glm_pack_generate(const Options& o) {
                 return 1;
             }
         } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
-            // Gufo-style draft width + emit fix are in (n=2, nd matched, produced synced for ~8
-            // rounds) but rank0 still hangs in the 9th window() on NOSLICE. Re-enable when that
-            // hang is fixed; SLICE still faults moe_gate_up in window (#13).
+            // MTP+TP2 (#13): cycle sync (emit/greedy/n=2) works; window still too slow (server
+            // cancel ~0.1 tok/s) and SLICE faults moe_gate_up. Keep off until both fixed.
             int64_t n_spec = 0;
             const uint64_t rounds0 = model.mtp_rounds_;
             uint64_t len0[9];

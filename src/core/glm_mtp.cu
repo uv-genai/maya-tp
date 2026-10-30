@@ -726,6 +726,10 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
                 ok = false;
                 break;
             }
+            if (tp_.active()) {
+                std::fprintf(stderr, "glm mtp TP: rank=%d after-commit p0=%lld keep=%d\n", tp_.rank,
+                             (long long) p0, keep);
+            }
             // ---- 5. the NextN cache: entries p0 .. p0 + keep - 2 from the kept rows' trunk states and the accepted
             //         drafts; entry p0 + keep - 1 is the next round's first draft step (or the token path's)
             const float* rows_hx = F->win.head_x;
@@ -739,6 +743,10 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
             mtp_hx_pos_ = p0 + keep - 1;
             ph[2] += ms_since(t2);
             ++n_ph;
+        }
+        if (tp_.active()) {
+            std::fprintf(stderr, "glm mtp TP: rank=%d round-end p0=%lld produced=%lld keep=%d\n", tp_.rank,
+                         (long long) p0, (long long) produced, keep);
         }
         // the statistics and the adaptive length's measurements
         ++mtp_rounds_;

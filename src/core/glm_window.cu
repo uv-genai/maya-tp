@@ -680,6 +680,9 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             }
             // TP2: the routed experts' sums are this rank's band; sum the ranks before the CPU lane
             if (tp_.active()) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "win AR r=%d ffn-multi1 T=%d bytes=%zu t0=%d\n", tp_.rank, T,
+                                 (size_t) T * E, t0);
                 if (!tp_.all_reduce(W.ffn + (size_t) t0 * E, (std::size_t) T * E, E, s, err)) return false;
             }
             if (prof_b) W.mark("moe_experts", s);
@@ -780,6 +783,9 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             }
             // TP2: sum the ranks' routed bands before the residual
             if (tp_.active()) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "win AR r=%d ffn-multi T=%d bytes=%zu t0=%d\n", tp_.rank, T,
+                                 (size_t) T * E, t0);
                 if (!tp_.all_reduce(W.ffn + (size_t) t0 * E, (std::size_t) T * E, E, s, err)) return false;
             }
         }
@@ -824,7 +830,11 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             gf::moe_down(Ly.d_type, md, g.n_exp_used, E, fft, Ly.down_off, F->hq, sh_t, ffn, s);
         }
         // TP2: each token's routed sum is this rank's band
-        if (tp_.active() && !tp_.all_reduce(ffn, (std::size_t) E, E, s, err)) return false;
+        if (tp_.active()) {
+            if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                std::fprintf(stderr, "win AR r=%d ffn-tok t=%d bytes=%zu\n", tp_.rank, t, (size_t) E);
+            if (!tp_.all_reduce(ffn, (std::size_t) E, E, s, err)) return false;
+        }
         if (lane) gf::moe_cpu_wait(md, E, ffn, s);
         if (W.uid != nullptr)
             cudaMemcpyAsync(W.uid + ((size_t) (il - l0_) * kWinMax + t) * 8, md.plan_id, 8 * sizeof(int),
@@ -932,15 +942,23 @@ bool Glm5Model::fast_window_layers(int64_t p0, int T, std::string& err) {
             if (!gf::mv(&o, 1, s)) { err = "glm window: kda output"; return false; }
             mark("kda_out_mv");
             // TP2: same mixer all-reduce as the token path before the FFN-side residual read (#13)
-            if (tp_.active() &&
-                !tp_.all_reduce(W.mixer + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
-                return false;
+            if (tp_.active()) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "win AR r=%d mixer n=%d bytes=%zu p0=%lld il=%d\n", tp_.rank, n,
+                                 (size_t) n * E, (long long) p0, il);
+                if (!tp_.all_reduce(W.mixer + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
+                    return false;
+            }
         } else {
             if (!fast_dsa_window(il, p0, t0, n, err)) return false;
             // DSA window writes W.mixer without its own AR (fast_dsa does on the token path)
-            if (tp_.active() &&
-                !tp_.all_reduce(W.mixer + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
-                return false;
+            if (tp_.active()) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "win AR r=%d mixer-dsa n=%d bytes=%zu p0=%lld il=%d\n", tp_.rank, n,
+                                 (size_t) n * E, (long long) p0, il);
+                if (!tp_.all_reduce(W.mixer + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
+                    return false;
+            }
         }
         // ---- the FFN-side read (folds the mixer's write in)
         hc_rows(il, false, rc_mid[(size_t) k], t0, n);
@@ -965,9 +983,12 @@ bool Glm5Model::fast_window_layers(int64_t p0, int T, std::string& err) {
             if (!gf::mv(&dn, 1, s)) { err = "glm window: dense ffn down"; return false; }
             mark("dense_ffn");
             // TP2: dense partials sum to the residual before the next layer
-            if (tp_.active() &&
-                !tp_.all_reduce(W.ffn + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
-                return false;
+            if (tp_.active()) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "win AR r=%d dense n=%d bytes=%zu t0=%d\n", tp_.rank, n, (size_t) n * E, t0);
+                if (!tp_.all_reduce(W.ffn + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
+                    return false;
+            }
             return true;
         }
         return fast_moe_window(il, t0, n, moe_part, gid, err);
