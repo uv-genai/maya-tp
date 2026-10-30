@@ -18,17 +18,20 @@ RDEV=$(ibv_devices | awk '/usb4_rdma/{print $2, $1}' | sort | head -n1 | awk '{p
 [ -n "$RDEV" ] || { echo "no usb4_rdma device found" >&2; exit 1; }
 
 # Generate a TP2 config from the base config: add tp block and --tp-* flags.
+# SEQS must match rank 1 (SEQS=4 rank0.sh / SEQS=4 rank1.sh) for multi-conversation TP2 (#11).
+SEQS="${SEQS:-1}"
 TP_CONFIG=$(mktemp /tmp/maya-tp2-rank0-XXXXXX.json)
 trap 'rm -f "$TP_CONFIG"' EXIT
 
-jq --arg rdev "$RDEV" \
+jq --arg rdev "$RDEV" --argjson seqs "$SEQS" \
    '.tp = {world_size: 2, rank: 0, bootstrap_port: 18515, rdma_device: $rdev}
-    | .args += ["--tp-world-size","2","--tp-rank","0","--tp-bootstrap-port","18515","--tp-rdma-device",$rdev]' \
+    | .args += ["--tp-world-size","2","--tp-rank","0","--tp-bootstrap-port","18515","--tp-rdma-device",$rdev,
+                "--parallel",($seqs|tostring)]' \
    "$MAYA_CONFIG" > "$TP_CONFIG"
 
 TOKENIZER=$(jq -r '.tokenizer // ""' "$MAYA_CONFIG")
 
-echo "rank0: port=$PORT rdma=$RDEV config=$TP_CONFIG"
+echo "rank0: port=$PORT rdma=$RDEV config=$TP_CONFIG seqs=$SEQS"
 
 exec "$ROOT/.venv/bin/python" "$ROOT/serve/server.py" --engine strata --config "$TP_CONFIG" \
   --host 0.0.0.0 --port "$PORT" \

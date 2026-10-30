@@ -1854,6 +1854,11 @@ static int glm_pack_generate(const Options& o) {
         kTpMirrorForward = 2,
         kTpMirrorSnapshot = 3,
         kTpMirrorRestore = 4,
+        kTpMirrorBindCtx = 5,     // payload: one int32 context id
+        kTpMirrorMultiRows = 6,   // payload: n seqs + n tokens
+        kTpMirrorMultiIssue = 7,  // next_token=seq, payload: one token
+        kTpMirrorMultiRowsIssue = 8,  // same wire as MultiRows (issue-only batch)
+        kTpMirrorMultiBoundary = 9,
     };
     struct TpMirrorHdr {
         int32_t op;
@@ -1869,6 +1874,14 @@ static int glm_pack_generate(const Options& o) {
     // Sticky pair-down: the first failed mirror send ends the pair for good until both ranks restart.
     // serve/server.py watches stdout for "TP2_DOWN" and reports it on /health (issue #6).
     bool tp_pair_down = false;
+    // Rank 1's sampler for mirrored multi_rows/issue: greedy forward is what pairs ARs;
+    // rank 0 owns the pick.  (No host_history / logit_bias pointers on the wire.)
+    const auto tp_peer_sp = []() {
+        strata::kernels::SamplerParams sp;
+        sp.greedy = true;
+        sp.temperature = 0.0f;
+        return sp;
+    };
     const auto tp_send = [&](int32_t op, const int32_t* toks, int32_t n, int32_t next_token = -1) -> bool {
         if (!tp_mirror) return true;
         if (tp_pair_down) return false;
@@ -2518,12 +2531,13 @@ static int glm_pack_generate(const Options& o) {
     // read, nothing loaded), else the least recently used idle one, whose conversation goes to a slot first.  A
     // request alone decodes through the speculative path (the fastest for one); as soon as a second one comes, both go
     // through the pipelined decode (Glm5Model::multi_issue), each card of the split on a different conversation.
-    // TP2: multi-conversation scheduling calls forward() from paths that are not
-    // mirrored yet — force single-conversation serve so every collective has an
-    // explicit instruction (gufo batches kAdvanceBatch / kDecodeBatch).
+    // TP2 (#11): multi_rows / multi_issue in glm_rows.cu have no TP all-reduce hooks — enabling STRATA_GLM_SEQS
+    // under TP2 faults the GPU. Concurrent chats still work via the server FIFO with seq_count=1. Snapshot/reuse
+    // is mirrored separately (single conversation).
     const bool multi = o.serve && model.fast() && model.seq_count() > 1 && !tp2;
     if (tp2 && o.serve && model.seq_count() > 1)
-        std::fprintf(stderr, "glm multi: MAYA_GLM_SEQS is ignored under TP2 (one conversation at a time)\n");
+        std::fprintf(stderr, "glm multi: STRATA_GLM_SEQS ignored under TP2 until glm_rows has TP ARs (#11); "
+                             "concurrent HTTP requests serialize on the FIFO\n");
     if (multi && !follow_ids.empty()) {
         std::fprintf(stderr, "glm follow: not used with MAYA_GLM_SEQS=%d - one conversation at a time only\n",
                      model.seq_count());
@@ -2567,6 +2581,11 @@ static int glm_pack_generate(const Options& o) {
             cur_ctx = c;
         }
         model.seq_bind_all(c);   // (the pipelined decode binds the model's sequences itself)
+        if (tp_mirror) {
+            const int32_t ci = (int32_t) c;
+            if (!tp_send(kTpMirrorBindCtx, &ci, 1))
+                std::printf("ERR TP2 pair down (bind ctx)\n");
+        }
     };
     struct Gen {
         int rid = -1, ctx = 0;
@@ -2975,6 +2994,7 @@ static int glm_pack_generate(const Options& o) {
         for (int c = 0; c < (int) ctxs.size(); ++c) {
             bind_ctx(c);
             snap_tokens.clear();
+            if (tp_mirror) tp_send(kTpMirrorReset, nullptr, 0);
             model.reset();
         }
         gen_sweep();
@@ -3225,7 +3245,7 @@ static int glm_pack_generate(const Options& o) {
             std::none_of(gens.begin(), gens.end(), [](const std::unique_ptr<Gen>& p) { return p->ready && !p->done; }))
             flush_pauses();
         Gen* only = gens.size() == 1 ? gens[0].get() : nullptr;
-        if (only != nullptr && !only->inflight && multi_spec && !step_no_spec && model.spec_ready()) {
+        if (!tp2 && only != nullptr && !only->inflight && multi_spec && !step_no_spec && model.spec_ready()) {
             Gen& g = *only;
             bind_ctx(g.ctx);
             if (g.pending >= 0) {   // its last token through the token path: the next one's logits on the tail
@@ -3284,7 +3304,7 @@ static int glm_pack_generate(const Options& o) {
         static const int mtp_max = (int) env_num("STRATA_GLM_MULTI_MTP_MAX", 4);
         int n_run = 0;
         for (auto& gp : gens) n_run += !gp->done;
-        const bool use_win = mtp_rows && (mtp_max <= 0 || n_run <= mtp_max);
+        const bool use_win = !tp2 && mtp_rows && (mtp_max <= 0 || n_run <= mtp_max);
         if ((use_win && !flight.empty()) || (!use_win && !wflight.empty())) {
             if (!multi_drain()) {
                 multi_fail(err);
@@ -3364,6 +3384,17 @@ static int glm_pack_generate(const Options& o) {
                 }
             if (!rg.empty()) {
                 out.resize(rg.size());
+                // Mirror the batch before the collective (rank 1 runs the same rows).
+                if (tp_mirror) {
+                    std::vector<int32_t> wire;
+                    wire.reserve(seqs.size() * 2);
+                    for (int s : seqs) wire.push_back((int32_t) s);
+                    for (int32_t t : toks) wire.push_back(t);
+                    if (!tp_send_vec(kTpMirrorMultiRows, wire)) {
+                        multi_fail("TP2 pair down (multi_rows)");
+                        return;
+                    }
+                }
                 if (!model.multi_rows(seqs.data(), toks.data(), sps.data(), (int) rg.size(), out.data(), err)) {
                     multi_fail(err);
                     return;
@@ -3390,9 +3421,17 @@ static int glm_pack_generate(const Options& o) {
                     split_toks.push_back(gp->pending);
                     split_sps.push_back(gp->sp);
                 }
+                if (tp_mirror) {
+                    std::vector<int32_t> wire;
+                    wire.reserve(split_seqs.size() * 2);
+                    for (int s : split_seqs) wire.push_back((int32_t) s);
+                    for (int32_t t : split_toks) wire.push_back(t);
+                    if (!tp_send_vec(kTpMirrorMultiRowsIssue, wire)) return false;
+                }
                 if (!model.multi_issue_rows(split_seqs.data(), split_toks.data(), split_sps.data(),
                                            (int) split_group.size(), err))
                     return false;
+                // rank 1 issue_rows then take is inside the worker; rank 0 takes below after the loop.
                 for (Gen* gp : split_group) {
                     gp->sp.counter += 1;
                     gp->pending = -1;
@@ -3435,6 +3474,10 @@ static int glm_pack_generate(const Options& o) {
             if (multi_boundary_every > 0 && !in_read_gap &&
                 since_boundary >= multi_boundary_every * (int) std::max<size_t>(1, gens.size())) {
                 since_boundary = 0;
+                if (tp_mirror && !tp_send(kTpMirrorMultiBoundary, nullptr, 0)) {
+                    multi_fail("TP2 pair down (boundary)");
+                    return;
+                }
                 if (!multi_drain() || !model.multi_boundary(err)) { multi_fail(err); return; }
             }
             gen_sweep();
@@ -3443,6 +3486,14 @@ static int glm_pack_generate(const Options& o) {
         for (auto& gp : gens) {
             Gen& g = *gp;
             if (g.done || g.inflight || g.pending < 0) continue;
+            if (tp_mirror) {
+                const int32_t seqs1[] = {(int32_t) g.ctx, g.pending};
+                // next_token=seq, payload=token
+                if (!tp_send(kTpMirrorMultiIssue, &seqs1[1], 1, seqs1[0])) {
+                    multi_fail("TP2 pair down (multi_issue)");
+                    return;
+                }
+            }
             if (!model.multi_issue(g.ctx, g.pending, g.sp, err)) {
                 multi_fail(err);
                 return;
@@ -3467,6 +3518,10 @@ static int glm_pack_generate(const Options& o) {
         gen_took(g, tok);
         if (multi_boundary_every > 0 && ++since_boundary >= multi_boundary_every * (int) std::max<size_t>(1, gens.size())) {
             since_boundary = 0;
+            if (tp_mirror && !tp_send(kTpMirrorMultiBoundary, nullptr, 0)) {
+                multi_fail("TP2 pair down (boundary)");
+                return;
+            }
             if (!multi_drain() || !model.multi_boundary(err)) {
                 multi_fail(err);
                 return;
@@ -3983,6 +4038,57 @@ static int glm_pack_generate(const Options& o) {
                         std::fprintf(stderr, "TP2 worker restore: %s\n", e.c_str());
                     else
                         std::fprintf(stderr, "TP2 worker: restore\n");
+                    break;
+                case kTpMirrorBindCtx:
+                    if (h.n >= 1 && !toks.empty())
+                        model.seq_bind_all(toks[0]);
+                    std::fprintf(stderr, "TP2 worker: bind %d\n", h.n >= 1 ? toks[0] : -1);
+                    break;
+                case kTpMirrorMultiRows:
+                case kTpMirrorMultiRowsIssue: {
+                    if (h.n < 1 || (size_t) h.n * 2 > toks.size()) {
+                        std::fprintf(stderr, "TP2 worker: bad multi batch n=%d\n", h.n);
+                        break;
+                    }
+                    std::vector<int> seqs((size_t) h.n), out((size_t) h.n);
+                    std::vector<int32_t> mtoks((size_t) h.n);
+                    std::vector<strata::kernels::SamplerParams> sps((size_t) h.n, tp_peer_sp());
+                    for (int i = 0; i < h.n; ++i) {
+                        seqs[(size_t) i] = toks[(size_t) i];
+                        mtoks[(size_t) i] = toks[(size_t) h.n + (size_t) i];
+                    }
+                    if (h.op == kTpMirrorMultiRows) {
+                        if (!model.multi_rows(seqs.data(), mtoks.data(), sps.data(), h.n, out.data(), e))
+                            std::fprintf(stderr, "TP2 worker multi_rows: %s\n", e.c_str());
+                        else
+                            std::fprintf(stderr, "TP2 worker: multi_rows n=%d\n", h.n);
+                    } else {
+                        if (!model.multi_issue_rows(seqs.data(), mtoks.data(), sps.data(), h.n, e))
+                            std::fprintf(stderr, "TP2 worker issue_rows: %s\n", e.c_str());
+                        else {
+                            for (int i = 0; i < h.n; ++i) (void) model.multi_take(seqs[(size_t) i], e);
+                            std::fprintf(stderr, "TP2 worker: issue_rows n=%d\n", h.n);
+                        }
+                    }
+                    break;
+                }
+                case kTpMirrorMultiIssue: {
+                    if (h.n < 1 || toks.empty()) break;
+                    const int seq = h.next_token;
+                    strata::kernels::SamplerParams sp = tp_peer_sp();
+                    if (!model.multi_issue(seq, toks[0], sp, e))
+                        std::fprintf(stderr, "TP2 worker issue: %s\n", e.c_str());
+                    else {
+                        (void) model.multi_take(seq, e);
+                        std::fprintf(stderr, "TP2 worker: issue seq=%d tok=%d\n", seq, toks[0]);
+                    }
+                    break;
+                }
+                case kTpMirrorMultiBoundary:
+                    if (!model.multi_boundary(e))
+                        std::fprintf(stderr, "TP2 worker boundary: %s\n", e.c_str());
+                    else
+                        std::fprintf(stderr, "TP2 worker: boundary\n");
                     break;
                 default:
                     std::fprintf(stderr, "TP2 worker: unknown op %d\n", h.op);

@@ -14,15 +14,17 @@ RDEV=$(ibv_devices | awk '/usb4_rdma/{print $2, $1}' | sort | head -n1 | awk '{p
 
 PACK=$(jq -r '(.args // []) as $a | [range(0; $a|length) | select($a[.] == "--glm-pack" or $a[.] == "--pack") | $a[.+1]][0] // ""' "$MAYA_CONFIG")
 
-echo "rank1: pack=$PACK rdma=$RDEV bootstrap=$BOOTSTRAP_HOST"
+echo "rank1: pack=$PACK rdma=$RDEV bootstrap=$BOOTSTRAP_HOST seqs=${SEQS:-1}"
 
 # Do NOT probe the bootstrap port with /dev/tcp: that completes a TCP
 # connection and rank 0's single accept() takes it as the peer handshake,
 # then fails (EAGAIN / EISDIR) when the probe closes.  The engine's own
 # connect retries until rank 0 is listening (MAYA_TP_BOOTSTRAP_TIMEOUT).
+# SEQS must match rank 0 (--parallel) so context ids line up (#11).
 exec "$ENGINE" --glm-pack "$PACK" \
   --tp-world-size 2 --tp-rank 1 \
   --tp-bootstrap-host "$BOOTSTRAP_HOST" \
   --tp-bootstrap-port 18515 \
   --tp-rdma-device "$RDEV" \
+  --parallel "${SEQS:-1}" \
   --max-context "${CONTEXT:-4096}"

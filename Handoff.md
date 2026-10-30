@@ -49,7 +49,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 8 | P2 RDMA transport | closed |
 | 9 | MTP / spec decode TP | closed — fixed (MTP still **off** under two-host TP; see #13) |
 | 10 | Gather bit-exact variant | open (optional design) |
-| 11 | Multi-seq + snapshot reuse | **open — snapshot/reuse DONE; multi-seq remaining** |
+| 11 | Multi-seq + snapshot reuse | **partial — snapshot/reuse DONE; multi-seq blocked on TP ARs in glm_rows.cu** |
 | 12 | Pack-derived TP geometry | **closed — peek_pack_geometry + post-load check** |
 | 13 | MTP under TP2 | open |
 
