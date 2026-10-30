@@ -1,8 +1,8 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 (session 2, #13 deep dive) · v1.1.37 · branch `main` on `uv-genai/maya-tp` · HEAD `a4c10d5` + **uncommitted WIP (see §11 — commit it first thing)**.
-> Both hosts' GPUs are **free** (all engines/servers killed). Rank binaries on disk: `26babb5e…` (accept wire, no traces); local `build-hip/maya` is `e668184c…` (+wire traces), **not yet scp'd to strix-halo-1** (last scp failed, text-file-busy).
+> Last updated: 2026-10-30 (session 3, #13 protocol fix + acceptance) · v1.1.37 · branch `main` on `uv-genai/maya-tp` · engine fix **`5b547ce`**; prior WIP preserved in `74a47d8`.
+> **Both GPUs are free** (no engines or servers running). Both deployed rank-0 paths and local binary match MD5 **`75a180099201dbc0abdf29808a536022`**. All #13 exit checks pass; MTP ships opt-in (§11).
 
 ## 1. What we are building
 
@@ -27,7 +27,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 6. **Python uses `.venv/bin/python`.** Shell uses `jq`.
 7. **Kill old processes before starting new ones.** `pkill -9 -x maya` — **do not** `pkill -f server.py` (matches the ssh shell and kills the session).
 8. **Binaries are per-host.** After every build: `scp build-hip/maya strix-halo-1.local:.../maya` **and** `strix-halo-1.local:/tmp/maya-tp2` (used by `run_bench.sh`). Verify `md5sum` matches both sides before a test.
-9. **Kill rank 0's server.py too before redeploying** — a live server respawns its engine (issue #27) and holds the binary open (`scp` fails "text file busy"); the respawned engine also inherits the OLD environment (no new env vars). Safe form over ssh: `ssh strix-halo-1.local 'pkill -9 -x maya; pkill -9 -f "[s]erver.py --engine"'` (the `[s]` bracket stops the remote shell matching itself).
+9. **Kill rank 0's server.py too before redeploying** — a live server respawns its engine (issue #27) and holds the binary open (`scp` fails "text file busy"); the respawned engine also inherits the OLD environment (no new env vars). Kill the server first to prevent respawn: `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'` (the `[s]` bracket stops the remote shell matching itself).
 
 ## 3. Git / GitHub
 
@@ -48,7 +48,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 10 | Gather bit-exact variant | open (optional design) |
 | 11 | Multi-seq + snapshot reuse | **partial — snapshot/reuse + rows ARs done; multi gated (`seq_count>1` prompt `mv_rdna`). NOTE: `glm_rows.cu` still has the full-width `FFs` bug (see §11.4) — fix when re-enabling multi.** |
 | 12 | Pack-derived TP geometry | closed |
-| 13 | MTP under TP2 | **in progress — (a) SLICE window fault FIXED (uncommitted); (b) slow verify RESOLVED; (c) accept wire implemented but turn-2 desyncs (root-cause with wire traces). MTP gate is currently OPEN (`!tp2` removed) for diagnosis — re-gate before any merge until (c) is fixed.** |
+| 13 | MTP under TP2 | **Complete (§11). Opt-in `MAYA_TP_MTP=1`; simple loop remains default.** |
 
 ## 5. What works (Maya-S pack)
 
@@ -57,9 +57,9 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 - **Bench** (`tools/tp2/run_bench.sh`): both ranks `--tokens`; pair parity **100%**.
 - **Serve** (`tools/tp2/rank1.sh` then `rank0.sh`): rank 0 mirrors `TpMirrorHdr` before every collective; rank 1 worker executes them. `curl /v1/chat/completions` works; multi-turn reuse works (simple loop).
 - **Peer health:** `/health` → `tp.peer: up|down`, `status: degraded` after first failed mirror send. Sticky `TP2_DOWN` until both ranks restart.
-- **TP2 + MTP (CLI, `MAYA_GLM_NO_MTP` unset):** completes on both ranks, **pair parity 100% (32/32)**, round streams identical. Serve turn 1 works (~17–19 tok/s e2e).
+- **TP2 + MTP:** opt-in `MAYA_TP_MTP=1` (leave `MAYA_GLM_NO_MTP` unset). Three-turn serve with restore/reuse, thinking-budget force, and cancel/follow-up verified (§11). Rank 0 owns inputs, acceptance and continuation; tensors stay on RDMA.
 - **Acceptance:** `tools/tp2/acceptance.sh`.
-- **Decode under TP2:** simple loop is the default-shipped path; MTP currently ON only for diagnosis (see #13).
+- **Decode under TP2:** simple loop is the default; MTP is opt-in and greedy (see #13).
 
 ## 6. Performance (Maya-S IQ2_XXS, 32-tok controlled runs, 2026-10-30)
 
@@ -91,7 +91,7 @@ docs/TP2-RUN.md                        ops runbook
 
 **Call mirroring:** send immediately **before** each collective `prefill`/`forward` (not inside `forward()`). Rank 1: `--tp-rank 1` without `--tokens`.
 
-**MTP mirror:** `kTpMirrorMtp` + `TpMtpSp` (sampler, eos, think budget, penalty history); rank 1 runs `decode_mtp` with matching emit. `force_next` mirrored (`kTpMirrorForce`). **NEW `kTpMirrorMtpRound` (op 12):** per verify round, rank 0 sends `{n=keep, tokens[]}` after its accept loop; rank 1 receives before its accept loop and commits the wired tokens (glm_mtp.cu `decode_mtp`, wire lambdas in generate.cpp).
+**MTP mirror:** op 10 starts decode with sampler/request metadata. Op 13 wires the anchor and each draft window before collective verification. Op 12 wires accepted token IDs and `next_token=more` after rank 0's emit callback (also for the first anchor and T=1). Op 14 aborts an incomplete decode. `force_next` remains mirrored outside MTP; inside MTP no op 11 is injected, since accepted tokens already carry forced results. Same wire works for paired CLI requests. Bounds/op mismatch or truncated frames stop the worker; restart both ranks after failure.
 
 ## 8. Critical gotchas
 
@@ -108,7 +108,7 @@ docs/TP2-RUN.md                        ops runbook
 10. **`pkill -f server.py` over SSH kills the shell** — use `pkill -9 -x maya` for engines and the `[s]erver.py` bracket form for the server (§2.9).
 11. **SETTINGS:** only implemented `MAYA_TP_*` knobs are real (see `docs/SETTINGS.md`). `MAYA_TP_OVERLAP` is NOT one.
 12. **Per-host binaries + scripts** — always scp after build (§2.8/2.9).
-13. **Gufo MTP pattern:** rank 0 `PlanDecode` → wire draft count → rank 1 `DecodeStepPlanned(forced_drafts)`; one `Forward(verify chain)` per step. Maya analogue: fixed `n=2` + accept wire (op 12).
+13. **Gufo MTP pattern:** rank 0 plans and wires inputs/decisions; Maya uses fixed draft width (default 2), canonical input tokens (op 13), and accepted tokens/continuation (op 12).
 14. **Idle TP worker holds ~45 GB VRAM with zero kernels** — normal (persistent worker waiting on the mirror socket); `pkill -9 -x maya` frees it.
 15. **rank 0 logs are split:** engine stderr → repo `maya-maya-s-v2-iq2_xxs-hip.log` (**append mode** — multiple runs; segment by the last `glm prefill: CUDA0 chunks` line); server narration → `/tmp/tp2-r0.log`. rank 1 has everything in `/tmp/tp2-r1.log`.
 16. **Engine restart during a request wipes TP INFO** — `/health` can briefly report `world_size: 1`; wait for `INFO tp_world=2` before judging. **Poisoned verbs communicator is sticky** — restart both ranks after any `size mismatch`/`timed out`.
@@ -123,16 +123,16 @@ MAYA_GLM_NO_MTP=1 STRATA_GLM_TIMING=1 ./build-hip/maya --glm-pack $P \
   --tokens $TOKS --max-new 32 --greedy --max-context 4096
 bash tools/tp2/run_bench.sh   # both ranks, parity check
 ```
-TP2+MTP variant: same but `MAYA_GLM_NO_MTP` **unset**; rank 0 via `ssh strix-halo-1.local "/tmp/maya-tp2 --glm-pack $P --tokens $TOKS --max-new 32 --greedy --spec-follow-save /tmp/r0.txt --max-context 4096 --tp-world-size 2 --tp-rank 0 --tp-bootstrap-port 18515 --tp-rdma-device usb4_rdma5"`, rank 1 local with `--tp-rank 1 --tp-bootstrap-host strix-halo-1.local`.
+TP2+MTP variant: same but `MAYA_GLM_NO_MTP` **unset**, and **`MAYA_TP_MTP=1` on both CLI ranks**; rank 0 via `ssh strix-halo-1.local "/tmp/maya-tp2 --glm-pack $P --tokens $TOKS --max-new 32 --greedy --spec-follow-save /tmp/r0.txt --max-context 4096 --tp-world-size 2 --tp-rank 0 --tp-bootstrap-port 18515 --tp-rdma-device usb4_rdma5"`, rank 1 local with `--tp-rank 1 --tp-bootstrap-host strix-halo-1.local`.
 
 ### Serve (rank 1 first, no `/dev/tcp` probe)
 ```sh
 bash tools/tp2/rank1.sh        # local; add env before it for the worker engine
-ssh strix-halo-1.local 'cd /home/ugo/software/project-maya && \
+ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; \
   setsid nohup bash tools/tp2/rank0.sh 18080 >/tmp/tp2-r0.log 2>&1 </dev/null &'
 curl http://192.168.1.22:18080/health   # expect tp.peer=up
 ```
-Kill: `pkill -9 -x maya` locally; `ssh strix-halo-1.local 'pkill -9 -x maya; pkill -9 -f "[s]erver.py --engine"'`.
+Kill: `pkill -9 -x maya` locally; `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'`.
 
 Runbook: **`docs/TP2-RUN.md`**. Settings: **`docs/SETTINGS.md`**.
 
@@ -154,57 +154,73 @@ Rank 0 `tp_send` before each collective: `{op, n, next_token}` + `int32` tokens 
 | 5 | bind context id |
 | 10 | `decode_mtp` + `TpMtpSp` POD (+ optional penalty history) |
 | 11 | `force_next` |
-| 12 | **MTP accept wire: `n=keep`, payload = accepted token ids (rank 0 → rank 1, one per verify round, inside the op-10 decode)** |
+| 12 | MTP accept wire: `n=keep`, `next_token=more`, payload = accepted token IDs (also initial anchor and T=1) |
+| 13 | MTP inputs: canonical anchor or draft-window token IDs before collective verification |
+| 14 | MTP abort: incomplete decode; worker stops and both ranks must restart |
 
 Sticky pair-down prints `TP2_DOWN` on stdout; server sets `status=degraded` / `tp.peer=down`.
 
-## 11. #13 current state (MTP under TP2) — resume here
+## 11. #13 completed — protocol fix and opt-in MTP (session 3)
 
-### 11.1 Done this session (all in the uncommitted WIP — commit first)
+### 11.1 Preserved work and root cause
 
-1. **SLICE window fault FIXED (was blocker a).** `fast_moe_window` computed the shared-expert width as full `FFs = g.n_ff_exp * g.n_shared` while consumers run against **sliced** shared weights (gate/up row-sliced, down col-sliced at load, glm_model.cu post-load pass). The shared gate/up MvJobs, the shared-down MvJob, and `moe_gate_up`'s shared section all read past the sliced weights → the `moe_gate_up_kernel` HSA fault, slice-only, both WIN_MULTI styles. The token path was fine because it uses `ff_compute() * n_shared`. **Fix:** `FFs = ff_compute_for(il) * g.n_shared` (glm_window.cu:530). Buffers were never the problem — all hq/sh buffers are allocated full-width (`mt_sh_hq_s` is only a stride — verified).
-2. **Slow verify (blocker b) resolved:** verify is now **73–77 ms/round** under slice+AR (the 2.8 s/window was a NOSLICE-era measurement, before the `57c30ce`/`64ba3c6` window width fixes).
-3. **Accept wire implemented** (gufo's decide-and-wire pattern): `decode_mtp` gained `tp_round_send`/`tp_round_recv` params (glm_model.hpp, glm_mtp.cu); rank 0 sends `{keep, tokens}` per round (op 12) right after its accept loop, unconditionally; rank 1 receives before its accept loop and commits the wired tokens. Worker emit's rank1-only think-budget `force_next` removed (rank 0 never forces under TP2; wire is authoritative). Wire traces under `STRATA_GLM_TP_AR_TRACE` (`wire-send`/`wire-recv wait`/`wire-got`).
-4. **MTP gate OPENED** in `run_request` (the `!tp2` on the MTP branch removed) — **diagnosis only; re-gate until 11.3 is fixed.**
-5. Trace instrumentation added: prefill AR sites (glm_prefill.cu mixer/ffn), rows AR sites (glm_rows.cu ×4).
+Prior WIP committed first as **`74a47d8`** (window shared-expert `FFs` slice fix, accept-wire groundwork, AR traces, diagnostic gate).
+The traced old binary `e668184c` reproduced failure at the thinking budget on **turn 1**:
+rank 1 waits for op 12 at `p0=44 / produced=30`, rank 0 accepts two tokens and advances.
+The handoff's assumption that rank 0 never forces under TP2 was false: the **thinking-budget branch of
+`on_token` calls `tp_force(think_end)`**, injecting op 11 before the pending op-12 accept frame.
+The worker consumes the wrong header, then resumes in the middle of the protocol.
 
-Verified on the pair (slice + MTP, gate open): 16/32-token CLI runs complete, **pair parity 100%**, `n=2 nd=2 T=3` streams identical; serve turn 1 ~17–19 tok/s; near-ties 6/32 vs single-host MTP text.
+### 11.2 Fix implemented
 
-### 11.2 Measured (2026-10-30, this session)
+- Rank 0 owns the anchor and draft window tokens (op 13), accepted tokens and continuation (op 12).
+  Canonical draft inputs also prevent draft-head near-ties from giving the two collective windows different inputs.
+- No nested force op while MTP is decoding; forced tokens already ride the accept frame.
+- Continuation includes EOS, cancellation, output/context limit, and rank-0-only loop-guard decisions.
+  Initial-anchor exit and T=1 use the same wire. Synchronized counters permit safe output/context clamps again.
+- Bounds and expected op checked **before** reading a token payload. Protocol failures, truncated payloads,
+  or disconnect stop the worker. Rank 0 sends op 14 on incomplete decode, marks pair down, rejects subsequent requests.
+- Failed force-reset and snapshot save/restore mirror sends terminate the request with `ERR` (previously restore
+  could silently return while HTTP waited forever). Accepted recovery for a failed pair remains restart both ranks.
+- **MTP gate decision: opt-in `MAYA_TP_MTP=1`.** Default stays simple loop; MTP's prior 44.2 ms/tok vs 41–43
+  simple is not a speed win. Serve flag on rank 0; paired CLI flag on both ranks. Greedy only for opt-in MTP.
+- `tools/tp2/mtp_acceptance.py` exercises three turns/reuse, thinking-budget forces, stream cancel/follow-up,
+  and output limits 1/2/3. Existing `acceptance.sh` propagates MTP opt-in remotely; its SSH launch now backgrounds
+  only the redirected server command (the old `cd ... && server &` held SSH pipes open and stalled the harness).
 
-- TP2+MTP CLI: 44.18 ms/tok (drafts 9.3 + verify 73–77 + commit 0.1 ms/round; 1.88 tok/round at fixed n=2). Single-host MTP 41.86 ms/tok (adaptive n, 2.46 tok/round). TP2 simple 41.1–43. → MTP not yet a win; overlap is the lever.
-- Serve turn 1: works. Multi-turn (turn 2 with restore) = the current bug (11.3).
+### 11.3 Final verification (engine commit `5b547ce`)
 
-### 11.3 CURRENT BLOCKER — turn-2 desync with the accept wire (root-cause next)
+- Opt-in MD5 `9e1ed096`: turn outputs 64/64/35 (last EOS), cached tokens **14 / 85** on turns 2/3.
+- Stream disconnect confirmed server `cancel=True`; next 16-token request works. Limits 1/2/3 pass; peer remains up.
+- Traces: **113/113** round-end `(p0, produced, keep)` tuples identical across ranks, **110 sends / 110 receives**.
+- CI trio: HIP map **PASS**; **464 serve tests** (11 skips), **614 tools tests** (31 skips), both PASS.
+- Latest binary MD5 **`75a180099201dbc0abdf29808a536022`** includes silent-ERR peer-loss fix. Deployed to local
+  `build-hip/maya` and rank 0 `build-hip/maya` + `/tmp/maya-tp2`; hashes match.
+- **Final binary: all 8 kill/recover acceptance checks pass.** After killing rank 1, chat fails cleanly and health
+  is degraded/peer down; restarting both ranks restores health and chat.
+- Final `mtp_acceptance.py`: three 64-token turns, reuse 14/85 tokens on turns 2/3; stream cancel and follow-up,
+  limits 1/2/3 all pass; peer up. (First turn also reused 14 tokens from acceptance's smoke request.)
+- CLI **simple and MTP pair parity 32/32**, both free generation and `--spec-follow`.
+- Single-host MTP **32/32 identical to the saved pre-session baseline** `/tmp/single-mtp.txt` (42.01 ms/tok).
+  MTP TP2 follows that reference with **6/32 near-tie differences**; simple TP2 has 2/32 on this run (prior 4/32).
+- Short free-greedy runs: simple **37.81 ms/tok**, MTP **44.06 ms/tok**; MTP verify **75.52 ms/round**.
+  These are different free-greedy continuations. The same-reference follow runs were **44.20** simple / **58.50**
+  MTP ms/tok, with unequal cold I/O (4.66 / 8.67 ms/tok; MTP prefill took 10 s after the 89 GB single-host run).
+  Do not claim a precise performance delta from those cold samples. They provide no reason to enable MTP by default.
+- Logs: `/tmp/maya-13-{acceptance,final-mtp-acceptance,final-gates,serve-tests,tools-tests}.log`,
+  `/tmp/maya-13-{simple,mtp,single}-*.log` (single log is `/tmp/maya-13-single.log`).
+- Final state: both engines/servers stopped; both GPUs free; MD5 verified on both rank-0 paths after final build.
 
-Repro: fresh pair → turn-1 chat (64 tok) OK → turn-2 chat (restore + prefill 25 + decode) stalls after ~22 tokens:
-- rank1 blocks in **round-13 `wire-recv`** (its log ends: `n=2 p0=69 produced=21`, `nd=2 T=3 ok=1`, then `TP2 worker mtp: TP2 pair down (mtp accept wire)`).
-- rank0 advances **one round ahead** (its round-14 window AR gets no peer AR) → `verbs all-reduce timed out` (~150 s) → poison; server cancels; rank0's cleanup ops land in rank1's pending recv → recv rejects a non-op-12 header → mirror loop misaligned (`unknown op 154842` — a template token from a payload) → pair dead.
-- So rank0 completed round 13 (and sent its wire message — its ph[2] shows fast sends for all its rounds) yet rank1's round-13 recv got nothing. **A one-round send/recv skew exists.** Both ranks report `nd=2 T=3` on every visible round, so the skew mechanism is still unknown.
+### 11.4 Remaining scope and cautions
 
-**Next diagnostic step (do this first):** deploy the traced local binary (`e668184c…`) to **both** hosts (`build-hip/maya` **and** `/tmp/maya-tp2`, after killing engines+server per §2.9), run the 2-turn serve test with `STRATA_GLM_TP_AR_TRACE=1` on both ranks, then diff the `wire-send` (rank0 hip.log) vs `wire-recv wait`/`wire-got` (rank1) sequences — the first round where a `wire-send` has no matching `wire-got` localizes the skew. Check hypotheses in order:
-1. **A round where one rank skips the wire** — e.g. `T==1` plain-token path taken on one rank only (mtp_choose must return constant 2 under TP — verify), or an early `break` between the window and the wire on one side (window error paths before the recv/send point).
-2. **Off-by-one from an extra/missing socket message** — anything else sent on the bootstrap socket during decode (compare against the ops the worker logged). The op-10 header/TpMtpSp/penalty-history reads are byte-exact only if `h.next_token` (hist len) matches what rank0 sent.
-3. **Turn-2 specifics:** restore→prefill→decode. Confirm both ranks' first post-restore round starts at the same `p0` and that no extra mirror op interleaves with the first wire message.
-
-**Also to fix (after the skew): cancel robustness.** When rank0 aborts mid-round (window error / cancel), rank1 can sit in `wire-recv` until a cleanup op arrives, and the recv-fn consuming a non-op-12 header misaligns the op stream. Mitigations to consider: (a) `RecvControl` timeout in the wire recv (fail fast → both ranks restart, the accepted recovery for poisoned pairs), (b) a flush/abort round message from rank0 when its decode exits with an incomplete round, (c) on op mismatch, worker treats the pair as down and stops cleanly instead of reading on.
-
-### 11.4 Carried-over notes (unchanged from previous session)
-
-- `glm_rows.cu` still has the **full-width `FFs`** pattern (lines ~87/672/759) — same latent OOB as the window bug; rows never runs under TP2 today (`multi` gated `!tp2`). Fix with `ff_compute_for(il) * g.n_shared` when re-enabling multi (#11).
-- NOSLICE+AR doubles expert compute — for isolation use `NOSLICE=1`+`NOAR=1`.
-- `W.whq` stays full `n_ff_exp` (window runs unsliced `mtp_il_`); `W.whq` full-width fix (`64ba3c6`) is in the verified set.
-- Window TP checklist (durable): residual ARs after mixer and FFN; expert launches use `ff_compute_for(il)`/`ff_compute_dense()`; head-dependent MvJobs use `head_compute_for(il)` widths; window buffers serving `mtp_il_` stay full-width.
-
-### 11.5 Exit criteria for #13
-
-1. Two-turn (and three-turn) serve chat works with MTP under TP2 (restore/reuse + wire).
-2. Cancel mid-request + kill/recover leave the pair restartable (no sticky misalignment beyond the accepted "restart both ranks").
-3. CLI pair parity 100%; near-tie rate vs single-host in line with simple-loop (4–6/32).
-4. Decide the gate: keep MTP opt-in under TP2 vs default-on, given 44.2 vs 41–43 ms/tok (probably ship gated/opt-in until the overlapped AR lands).
-5. Run `tools/tp2/acceptance.sh` + the CI trio (`tools/check_hip_compat.py`, serve tests, tools tests), commit (`refs #13`), update the issue and this file.
+- `glm_rows.cu` still has full-width shared `FFs` (same latent OOB as window had). Multi stays gated (#11);
+  fix when explicitly resuming that issue.
+- Overlapped AR (`StartPartial`/`FinishPartial`, gufo) is future performance work; **no `MAYA_TP_OVERLAP` knob**.
+- Protocol changed: always deploy matching binaries on both ranks, killing the remote server **before** its engine.
+- #13 work is complete in `5b547ce`; no new performance work started. #1 stays open as the umbrella, #10 is optional,
+  #11 remains open with multi-sequence decode gated. Start a separate issue for any new performance workstream.
 
 ## 12. Key commits
 
 `a4c10d5` Handoff (pre-#13 restart) · `bd4607d`/`af0c398` AR traces · `63d3966` emit/greedy/n=2 sync · `57c30ce` window/rows TP dims · `64ba3c6` whq/n=0 drafts · `aec2829` peer health · `805ee0b` serve mirroring · `0b9f5c4` v1.1.37 · earlier TP2 slice/transport.
-**Uncommitted WIP (this session):** window FFs slice fix + prefill/rows AR traces + MTP accept wire (op 12) + gate opened + wire traces — see §11.1. Changed files: `include/strata/core/glm_model.hpp`, `src/core/glm_mtp.cu`, `src/core/glm_prefill.cu`, `src/core/glm_rows.cu`, `src/core/glm_window.cu`, `src/program/generate.cpp`.
+**`74a47d8`** preserves the prior verified WIP. **`5b547ce`** completes the protocol fix, failure handling, MTP opt-in and regression harness (§11).
