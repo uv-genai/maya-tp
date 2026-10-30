@@ -5640,7 +5640,7 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
         xa.lay = Ly.xl;
         xa.k = g.n_exp_used;
         xa.n_embd = g.n_embd;
-        xa.n_ff = g.n_ff_exp;
+        xa.n_ff = ff_compute_for(il);   // TP2: sliced band (#13)
         xa.limit = g.swiglu_exp;
         strata::kernels::exl3::moe_gate_up(xa, io.x, nullptr, s);
         if (F->prof_on) F->mark("moe_gate_up");

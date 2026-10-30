@@ -348,13 +348,16 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
         if (batch) gf::hc_rows(hb, n, s);
 
         if (Ly.recr) {
+            // TP2: q/k/v/beta weights are head-sliced — NH/DIw as the token path (#11)
+            const int NH = head_compute_for(il);
+            const int DIw = NH * g.kda_head_dim;
             gf::MvJob j[6];
-            j[0] = {Ly.q.q, S->xq, S->x, S->proj[0], nullptr, 1.0f, Ly.q.type, E, DI};
-            j[1] = {Ly.k.q, S->xq, S->x, S->proj[1], nullptr, 1.0f, Ly.k.type, E, DI};
-            j[2] = {Ly.v.q, S->xq, S->x, S->proj[2], nullptr, 1.0f, Ly.v.type, E, DI};
+            j[0] = {Ly.q.q, S->xq, S->x, S->proj[0], nullptr, 1.0f, Ly.q.type, E, DIw};
+            j[1] = {Ly.k.q, S->xq, S->x, S->proj[1], nullptr, 1.0f, Ly.k.type, E, DIw};
+            j[2] = {Ly.v.q, S->xq, S->x, S->proj[2], nullptr, 1.0f, Ly.v.type, E, DIw};
             j[3] = {Ly.f_a, nullptr, S->x, S->fa, nullptr, 1.0f, gf::kTypeBF16, E, g.kda_head_dim};
             j[4] = {Ly.g_a, nullptr, S->x, S->ga, nullptr, 1.0f, gf::kTypeBF16, E, g.kda_head_dim};
-            j[5] = {Ly.beta, nullptr, S->x, S->beta, nullptr, 1.0f, gf::kTypeBF16, E, g.n_head};
+            j[5] = {Ly.beta, nullptr, S->x, S->beta, nullptr, 1.0f, gf::kTypeBF16, E, NH};
             if (!mv(j, 6, "kda projections")) return false;
             if (keep_in) {   // (STRATA_GLM_MULTI_MTP: the window rows' inputs, for the commit's replay)
                 gf::KdaGatherArgs ga;
@@ -368,7 +371,7 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
                 ga.tmax = mtpw_window();
                 ga.di = DI;
                 ga.hd = g.kda_head_dim;
-                ga.nh = g.n_head;
+                ga.nh = NH;
                 const size_t off = mtpw_kin_offset(il);
                 for (int i = 0; i < n; ++i) {
                     ga.dst[i] = rw[i].kin != nullptr ? rw[i].kin + off : nullptr;
@@ -395,7 +398,7 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
                 k.lower_bound = g.kda_lb;
                 k.g1 = kda_batch ? rows(S->kg1, DI, i) : F->g1;
                 k.g2 = kda_batch ? rows(S->kg2, DI, i) : F->g2;
-                k.n_head = g.n_head;
+                k.n_head = NH;   // TP2 sliced heads (#11)
                 k.head_dim = g.kda_head_dim;
                 k.d_conv = g.d_conv;
                 if (kda_batch) {   // (both kernels for all the rows below: kda_layers)
@@ -413,16 +416,18 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
                 }
                 gf::kda_prep(k, s);
                 gf::kda_rec(F->conv[0], F->conv[1], F->conv[2], F->g1, rows(S->beta, g.n_head, i),
-                            rw[i].state + (*rw[i].kda_S)[(size_t) il], F->g2, Ly.ssm_norm, g.norm_eps, g.n_head,
+                            rw[i].state + (*rw[i].kda_S)[(size_t) il], F->g2, Ly.ssm_norm, g.norm_eps, NH,
                             g.kda_head_dim, rows_q(S->gated_q, DI, i), s);
             }
             for (int i0 = 0; kda_batch && i0 < n; i0 += gf::kKdaLayers)
                 gf::kda_layers(kp + i0, kr + i0, std::min(gf::kKdaLayers, n - i0), g.norm_eps, s);
-            gf::MvJob o = {Ly.out.q, S->gated_q, nullptr, S->mixer, nullptr, 1.0f, Ly.out.type, DI, E};
+            gf::MvJob o = {Ly.out.q, S->gated_q, nullptr, S->mixer, nullptr, 1.0f, Ly.out.type, DIw, E};
             if (!mv(&o, 1, "kda output")) return false;
         } else {
             if (!rows_dsa(il, rw, n, err)) return false;
         }
+        // TP2: mixer partials before the FFN-side residual read (token path ARs here) (#11)
+        if (tp_.active() && !tp_.all_reduce(S->mixer, (std::size_t) n * E, E, s, err)) return false;
 
         // ---- the FFN-side read (fused with the mixer's write), per row
         h.w_fn = Ly.hc_ffn_fn;
@@ -436,16 +441,19 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
         if (batch) gf::hc_rows(hb, n, s);
 
         if (!Ly.moe) {
+            // TP2: dense FFN is sliced — mv_nt uses y_cstride = n_out, so row stride must match (#11)
+            const int FFD = ff_compute_dense();
             gf::MvJob j[2];
-            j[0] = {Ly.ffn_gate.q, S->xq, S->x, S->dg, nullptr, 1.0f, Ly.ffn_gate.type, E, g.n_ff_dense};
-            j[1] = {Ly.ffn_up.q, S->xq, S->x, S->du, nullptr, 1.0f, Ly.ffn_up.type, E, g.n_ff_dense};
+            j[0] = {Ly.ffn_gate.q, S->xq, S->x, S->dg, nullptr, 1.0f, Ly.ffn_gate.type, E, FFD};
+            j[1] = {Ly.ffn_up.q, S->xq, S->x, S->du, nullptr, 1.0f, Ly.ffn_up.type, E, FFD};
             if (!mv(j, 2, "dense ffn")) return false;
             for (int i = 0; i < n; ++i)
-                gf::swiglu_q8(rows(S->dg, g.n_ff_dense, i), rows(S->du, g.n_ff_dense, i), g.swiglu_shexp,
-                              g.n_ff_dense, rows_q(S->dhq, g.n_ff_dense, i), s);
-            gf::MvJob dn = {Ly.ffn_down.q, S->dhq, nullptr, S->ffn, nullptr, 1.0f, Ly.ffn_down.type, g.n_ff_dense,
+                gf::swiglu_q8(rows(S->dg, FFD, i), rows(S->du, FFD, i), g.swiglu_shexp,
+                              FFD, rows_q(S->dhq, FFD, i), s);
+            gf::MvJob dn = {Ly.ffn_down.q, S->dhq, nullptr, S->ffn, nullptr, 1.0f, Ly.ffn_down.type, FFD,
                             E};
             if (!mv(&dn, 1, "dense ffn down")) return false;
+            if (tp_.active() && !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
         } else {
             if (!rows_moe(il, rw, n, err)) return false;
         }
@@ -477,6 +485,8 @@ bool Glm5Model::rows_dsa(int il, RowSeq* rw, int n, std::string& err) {
     };
     const auto& Ly = F->L[(size_t) il];
     const float prescale = 1.0f / std::sqrt((float) (g.idx_key * g.idx_heads));
+    // TP2: attn_q_b is row-sliced to this rank's heads (#11)
+    const int NHq = head_compute_for(il);
     gf::MvJob j[5];
     j[0] = {Ly.q_a.q, S->xq, S->x, S->qr_raw, nullptr, 1.0f, Ly.q_a.type, E, g.q_lora};
     j[1] = {Ly.kv_a.q, S->xq, S->x, S->kv_raw, nullptr, 1.0f, Ly.kv_a.type, E, g.kv_lora};
@@ -512,7 +522,7 @@ bool Glm5Model::rows_dsa(int il, RowSeq* rw, int n, std::string& err) {
         gf::dsa_prep(d, s);
     }
     gf::MvJob j2[2];
-    j2[0] = {Ly.q_b.q, S->qr_q, S->qr, S->q, nullptr, 1.0f, Ly.q_b.type, g.q_lora, g.n_head * g.qk_nope};
+    j2[0] = {Ly.q_b.q, S->qr_q, S->qr, S->q, nullptr, 1.0f, Ly.q_b.type, g.q_lora, NHq * g.qk_nope};
     j2[1] = Ly.idx_q_b_x.q != nullptr   // (an EXL3 pack quantizes the indexer's q_b)
                 ? gf::MvJob{Ly.idx_q_b_x.q, S->qr_q, S->qr, S->iq, nullptr, 1.0f, Ly.idx_q_b_x.type, g.q_lora,
                             g.idx_heads * g.idx_key}
@@ -765,7 +775,7 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
     mw.T = n;
     mw.k = K;
     mw.n_embd = E;
-    mw.n_ff = g.n_ff_exp;
+    mw.n_ff = ff_compute_for(il);   // TP2 sliced (#11)
     mw.limit = g.swiglu_exp;
     if (Ly.exl3) {
         gf::moe_win_group(mw, s, rows_small_on());
@@ -789,12 +799,14 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
         xa.T = n;
         xa.k = K;
         xa.n_embd = E;
-        xa.n_ff = g.n_ff_exp;
+        xa.n_ff = ff_compute_for(il);   // TP2 (#11)
         xa.limit = g.swiglu_exp;
         if (!x3::win_experts(xa, s)) {
             err = "glm rows: the grouped EXL3 experts";
             return false;
         }
+        if (tp_.active() && !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+        return true;
     } else {
         mw.xq = S->xq;
         mw.xq_stride = (size_t) (E / 32) * kQ8;
@@ -809,6 +821,7 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
                   std::to_string(Ly.d_type) + ")";
             return false;
         }
+        if (tp_.active() && !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
     }
     // the CPU lane's answers last: the device's experts ran while the host computed the group's merged request
     if (lane && !empty && md.cpu_seq != nullptr) {

@@ -2467,9 +2467,9 @@ static int glm_pack_generate(const Options& o) {
                 return 1;
             }
         } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
-            // MTP under TP2 (#13): mirror + fixed draft width are implemented (kTpMirrorMtp), but window()/verify
-            // still faults (mv_rdna HSA) or desyncs — #9 was closed by gating, not by a TP-aware window. Off until
-            // glm_window/expert paths are audited for sliced n_ff.
+            // MTP + TP2: window's moe_gate_up still faults with sliced experts (pool/blob audit
+            // incomplete). Mirror protocol + window KDA/DSA/dense AR fixes are in; re-enable here
+            // when gate_up matches the token path under TP (#13).
             int64_t n_spec = 0;
             const uint64_t rounds0 = model.mtp_rounds_;
             uint64_t len0[9];
@@ -2611,10 +2611,13 @@ static int glm_pack_generate(const Options& o) {
     // TP2 (#11): multi_rows / multi_issue in glm_rows.cu have no TP all-reduce hooks — enabling STRATA_GLM_SEQS
     // under TP2 faults the GPU. Concurrent chats still work via the server FIFO with seq_count=1. Snapshot/reuse
     // is mirrored separately (single conversation).
+    // TP2 (#11): rows mixer/FFN ARs and KDA NH slicing are implemented, but the first request still
+    // faults (mv_rdna) when seq_count>1 (seq arenas shrink the expert pool / change prompt paths).
+    // Multi stays off under TP until that is bisected; single-conv serve + snapshot reuse work.
     const bool multi = o.serve && model.fast() && model.seq_count() > 1 && !tp2;
     if (tp2 && o.serve && model.seq_count() > 1)
-        std::fprintf(stderr, "glm multi: STRATA_GLM_SEQS ignored under TP2 until glm_rows has TP ARs (#11); "
-                             "concurrent HTTP requests serialize on the FIFO\n");
+        std::fprintf(stderr, "glm multi: STRATA_GLM_SEQS ignored under TP2 (rows ARs in, seq>1 prompt "
+                             "fault open — #11); concurrent HTTP serializes on the FIFO\n");
     if (multi && !follow_ids.empty()) {
         std::fprintf(stderr, "glm follow: not used with MAYA_GLM_SEQS=%d - one conversation at a time only\n",
                      model.seq_count());

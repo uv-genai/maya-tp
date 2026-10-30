@@ -70,9 +70,11 @@ KdaIn kda_in(const Glm5Geometry& g, float* base, int tmax, int t) {
 }
 
 // one token of a KDA layer: its convolution (advancing the conv history) and recurrence (advancing S), the gated
-// output to `gated_q` - the per-token half of fast_layers' KDA block
+// output to `gated_q` - the per-token half of fast_layers' KDA block.
+// `n_head`: this rank's head count under TP2 (head_compute_for); full g.n_head when not sliced.
 void kda_token(Glm5Model::FastState* F, const Glm5Model::FastState::Layer& Ly, const Glm5Geometry& g, const KdaIn& in,
-               float* conv_state, float* S, void* gated_q, cudaStream_t s) {
+               float* conv_state, float* S, void* gated_q, cudaStream_t s, int n_head = -1) {
+    if (n_head < 0) n_head = g.n_head;
     gf::KdaPrepArgs k;
     for (int i = 0; i < 3; ++i) {
         k.proj[i] = in.proj[i];
@@ -89,11 +91,11 @@ void kda_token(Glm5Model::FastState* F, const Glm5Model::FastState::Layer& Ly, c
     k.lower_bound = g.kda_lb;
     k.g1 = F->g1;
     k.g2 = F->g2;
-    k.n_head = g.n_head;
+    k.n_head = n_head;
     k.head_dim = g.kda_head_dim;
     k.d_conv = g.d_conv;
     gf::kda_prep(k, s);
-    gf::kda_rec(F->conv[0], F->conv[1], F->conv[2], F->g1, in.beta, S, F->g2, Ly.ssm_norm, g.norm_eps, g.n_head,
+    gf::kda_rec(F->conv[0], F->conv[1], F->conv[2], F->g1, in.beta, S, F->g2, Ly.ssm_norm, g.norm_eps, n_head,
                 g.kda_head_dim, gated_q, s);
 }
 
@@ -356,6 +358,8 @@ bool Glm5Model::fast_dsa_window(int il, int64_t p0, int t0, int T, std::string& 
     const auto& Ly = F->L[(size_t) il];
     const int E = g.n_embd;
     const float prescale = 1.0f / std::sqrt((float) (g.idx_key * g.idx_heads));
+    // TP2: attn_q_b / attn_output use this rank's head band (#13)
+    const int NHd = head_compute_for(il);
     const auto cols = [&](gf::MvJob j, int64_t xq_s, int64_t xf_s, int64_t y_s) {
         j.ncol = T;
         j.xq_cstride = xq_s;
@@ -415,8 +419,10 @@ bool Glm5Model::fast_dsa_window(int il, int64_t p0, int t0, int T, std::string& 
     const void* qrq0 = (const uint8_t*) W.qr_q + (size_t) t0 * W.qrq_s;
     const float* qr0 = W.qr + (size_t) t0 * g.q_lora;
     float* iq0 = W.iq + (size_t) t0 * g.idx_heads * g.idx_key;
+    // TP2: attn_q_b is row-sliced — n_out = NH*qk_nope, y_cstride = full buffer (#13)
+    const int qb_out = NHd * g.qk_nope;
     j2[0] = cols({Ly.q_b.q, qrq0, qr0, W.q + (size_t) t0 * g.n_head * g.qk_nope, nullptr, 1.0f, Ly.q_b.type, g.q_lora,
-                  g.n_head * g.qk_nope}, W.qrq_s, g.q_lora, (int64_t) g.n_head * g.qk_nope);
+                  qb_out}, W.qrq_s, g.q_lora, (int64_t) g.n_head * g.qk_nope);
     j2[1] = Ly.idx_q_b_x.q != nullptr
                 ? cols({Ly.idx_q_b_x.q, qrq0, qr0, iq0, nullptr, 1.0f, Ly.idx_q_b_x.type, g.q_lora,
                         g.idx_heads * g.idx_key}, W.qrq_s, g.q_lora, (int64_t) g.idx_heads * g.idx_key)
@@ -498,8 +504,9 @@ bool Glm5Model::fast_dsa_window(int il, int64_t p0, int t0, int T, std::string& 
         gf::mla_out(W.ctx + (size_t) t0 * ad, ad, Ly.v_b, g.n_head, g.kv_lora, g.v_head, T,
                     (uint8_t*) W.attn_q + (size_t) t0 * W.aq_s, (int64_t) W.aq_s, s);
     mark("dsa_attn");
+    // TP2: attn_output input band is this rank's heads — NH*v_head (NHd at function start) (#13)
     gf::MvJob o = cols({Ly.out.q, (const uint8_t*) W.attn_q + (size_t) t0 * W.aq_s, nullptr, W.mixer + (size_t) t0 * E,
-                        nullptr, 1.0f, Ly.out.type, g.n_head * g.v_head, E}, W.aq_s, 0, E);
+                        nullptr, 1.0f, Ly.out.type, NHd * g.v_head, E}, W.aq_s, 0, E);
     if (!gf::mv(&o, 1, s)) { err = "glm window: dsa output"; return false; }
     mark("dsa_out_mv");
     return true;
@@ -552,7 +559,7 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
         a.lay = Ly.xl;
         a.k = g.n_exp_used;
         a.n_embd = E;
-        a.n_ff = g.n_ff_exp;
+        a.n_ff = ff_compute_for(il);   // TP2: sliced band, not full n_ff_exp (#13)
         a.limit = g.swiglu_exp;
         return a;
     };
@@ -727,7 +734,7 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             xa.T = T;
             xa.k = g.n_exp_used;
             xa.n_embd = E;
-            xa.n_ff = g.n_ff_exp;
+            xa.n_ff = ff_compute_for(il);   // TP2 sliced (#13)
             xa.limit = g.swiglu_exp;
             if (!x3::win_experts(xa, s)) {
                 err = "glm window: the batched EXL3 experts";
@@ -898,50 +905,67 @@ bool Glm5Model::fast_window_layers(int64_t p0, int T, std::string& err) {
             const KdaIn k0 = kda_in(g, base, W.tmax, t0);
             const void* xq0 = (const uint8_t*) W.xq + (size_t) t0 * W.xq_s;
             const float* x0 = W.x + (size_t) t0 * E;
+            // TP2: q/k/v and beta weights are head-sliced — same NH/DIw as the token path (#13)
+            const int NH = head_compute_for(il);
+            const int DIw = NH * g.kda_head_dim;
             gf::MvJob j[6];
-            j[0] = {Ly.q.q, xq0, x0, k0.proj[0], nullptr, 1.0f, Ly.q.type, E, DI};
-            j[1] = {Ly.k.q, xq0, x0, k0.proj[1], nullptr, 1.0f, Ly.k.type, E, DI};
-            j[2] = {Ly.v.q, xq0, x0, k0.proj[2], nullptr, 1.0f, Ly.v.type, E, DI};
+            j[0] = {Ly.q.q, xq0, x0, k0.proj[0], nullptr, 1.0f, Ly.q.type, E, DIw};
+            j[1] = {Ly.k.q, xq0, x0, k0.proj[1], nullptr, 1.0f, Ly.k.type, E, DIw};
+            j[2] = {Ly.v.q, xq0, x0, k0.proj[2], nullptr, 1.0f, Ly.v.type, E, DIw};
             j[3] = {Ly.f_a, nullptr, x0, k0.fa, nullptr, 1.0f, gf::kTypeBF16, E, g.kda_head_dim};
             j[4] = {Ly.g_a, nullptr, x0, k0.ga, nullptr, 1.0f, gf::kTypeBF16, E, g.kda_head_dim};
-            j[5] = {Ly.beta, nullptr, x0, k0.beta, nullptr, 1.0f, gf::kTypeBF16, E, g.n_head};
+            j[5] = {Ly.beta, nullptr, x0, k0.beta, nullptr, 1.0f, gf::kTypeBF16, E, NH};
+            // y_cstride = full buffer layout (kda_in uses g.d_inner() / g.n_head slots)
             const int64_t ys[6] = {DI, DI, DI, g.kda_head_dim, g.kda_head_dim, g.n_head};
             for (int i = 0; i < 6; ++i) cols(j[i], n, (int64_t) W.xq_s, E, ys[i]);
             if (!gf::mv(j, 6, s)) { err = "glm window: kda projections"; return false; }
             mark("kda_proj_mv");
             for (int t = t0; t < t0 + n; ++t)
                 kda_token(F, Ly, g, kda_in(g, base, W.tmax, t), state_ + kda_conv_[(size_t) il],
-                          state_ + kda_S_[(size_t) il], (uint8_t*) W.gated_q + (size_t) t * W.gq_s, s);
+                          state_ + kda_S_[(size_t) il], (uint8_t*) W.gated_q + (size_t) t * W.gq_s, s, NH);
             mark("kda_tokens");
             gf::MvJob o = {Ly.out.q, (const uint8_t*) W.gated_q + (size_t) t0 * W.gq_s, nullptr, W.mixer + (size_t) t0 * E,
-                           nullptr, 1.0f, Ly.out.type, DI, E};
+                           nullptr, 1.0f, Ly.out.type, DIw, E};
             cols(o, n, (int64_t) W.gq_s, 0, E);
             if (!gf::mv(&o, 1, s)) { err = "glm window: kda output"; return false; }
             mark("kda_out_mv");
+            // TP2: same mixer all-reduce as the token path before the FFN-side residual read (#13)
+            if (tp_.active() &&
+                !tp_.all_reduce(W.mixer + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
+                return false;
         } else {
             if (!fast_dsa_window(il, p0, t0, n, err)) return false;
+            // DSA window writes W.mixer without its own AR (fast_dsa does on the token path)
+            if (tp_.active() &&
+                !tp_.all_reduce(W.mixer + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
+                return false;
         }
         // ---- the FFN-side read (folds the mixer's write in)
         hc_rows(il, false, rc_mid[(size_t) k], t0, n);
         mark("hc");
         if (!Ly.moe) {
+            // TP2: dense FFN is column-sliced — same as the token path's ff_compute_dense() (#13)
+            const int FFD = ff_compute_dense();
+            const int64_t dg_stride = g.n_ff_dense;   // buffer token stride (allocated full)
             const void* xq0 = (const uint8_t*) W.xq + (size_t) t0 * W.xq_s;
             const float* x0 = W.x + (size_t) t0 * E;
             gf::MvJob j[2];
-            j[0] = {Ly.ffn_gate.q, xq0, x0, W.dg + (size_t) t0 * g.n_ff_dense, nullptr, 1.0f, Ly.ffn_gate.type, E,
-                    g.n_ff_dense};
-            j[1] = {Ly.ffn_up.q, xq0, x0, W.du + (size_t) t0 * g.n_ff_dense, nullptr, 1.0f, Ly.ffn_up.type, E,
-                    g.n_ff_dense};
-            for (auto& jj : j) cols(jj, n, (int64_t) W.xq_s, E, g.n_ff_dense);
+            j[0] = {Ly.ffn_gate.q, xq0, x0, W.dg + (size_t) t0 * dg_stride, nullptr, 1.0f, Ly.ffn_gate.type, E, FFD};
+            j[1] = {Ly.ffn_up.q, xq0, x0, W.du + (size_t) t0 * dg_stride, nullptr, 1.0f, Ly.ffn_up.type, E, FFD};
+            for (auto& jj : j) cols(jj, n, (int64_t) W.xq_s, E, dg_stride);
             if (!gf::mv(j, 2, s)) { err = "glm window: dense ffn"; return false; }
             for (int t = t0; t < t0 + n; ++t)
-                gf::swiglu_q8(W.dg + (size_t) t * g.n_ff_dense, W.du + (size_t) t * g.n_ff_dense, g.swiglu_shexp,
-                              g.n_ff_dense, (uint8_t*) W.dhq + (size_t) t * W.dhq_s, s);
+                gf::swiglu_q8(W.dg + (size_t) t * dg_stride, W.du + (size_t) t * dg_stride, g.swiglu_shexp,
+                              FFD, (uint8_t*) W.dhq + (size_t) t * W.dhq_s, s);
             gf::MvJob dn = {Ly.ffn_down.q, (const uint8_t*) W.dhq + (size_t) t0 * W.dhq_s, nullptr, W.ffn + (size_t) t0 * E,
-                            nullptr, 1.0f, Ly.ffn_down.type, g.n_ff_dense, E};
+                            nullptr, 1.0f, Ly.ffn_down.type, FFD, E};
             cols(dn, n, (int64_t) W.dhq_s, 0, E);
             if (!gf::mv(&dn, 1, s)) { err = "glm window: dense ffn down"; return false; }
             mark("dense_ffn");
+            // TP2: dense partials sum to the residual before the next layer
+            if (tp_.active() &&
+                !tp_.all_reduce(W.ffn + (size_t) t0 * E, (std::size_t) n * E, E, s, err))
+                return false;
             return true;
         }
         return fast_moe_window(il, t0, n, moe_part, gid, err);
@@ -1833,9 +1857,10 @@ void Glm5Model::win_commit_part(int n_keep) {
         const auto& Ly = F->L[(size_t) il];
         if (!Ly.recr) continue;
         float* base = W.kin + (size_t) W.kin_of[(size_t) il] * W.kin_layer;
+        const int NH = head_compute_for(il);
         for (int t = 0; t < n_keep; ++t)
             kda_token(F, Ly, g, kda_in(g, base, W.tmax, t), state_ + kda_conv_[(size_t) il], state_ + kda_S_[(size_t) il],
-                      F->gated_q, F->cs);
+                      F->gated_q, F->cs, NH);
     }
 }
 
