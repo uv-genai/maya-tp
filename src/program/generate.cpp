@@ -2297,6 +2297,13 @@ static int glm_pack_generate(const Options& o) {
     const auto run_request = [&](const std::vector<int64_t>& ids, int64_t max_new,
                                  const strata::kernels::SamplerParams& rq_in) -> int {
         strata::kernels::SamplerParams sp = rq_in;   // per request (the server sends sampling keys per GEN)
+        // TP2+MTP (#13): force greedy so both ranks draw the same argmax from identical logits.
+        // Sampled RNG (seed/counter) is on the wire but accept-loop counters had already diverged;
+        // greedy removes that class of desync until per-round draw state is mirrored like gufo.
+        if (tp2 && model.mtp_ready() && req_spec != 1) {
+            sp.greedy = true;
+            sp.temperature = 0.0f;
+        }
         stop_req.store(false);
         pause_req.store(false);
         pause_keep.store(false);
@@ -2467,9 +2474,9 @@ static int glm_pack_generate(const Options& o) {
                 return 1;
             }
         } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
-            // MTP+TP2 (#13): window KDA/whq/dense fixes + fixed n=0 drafts are in, but an AR of
-            // 32768 vs 16384 bytes still desyncs (not from draft window when n=0). Keep off until
-            // that exchange is identified.
+            // Gufo-style draft width + emit fix are in (n=2, nd matched, produced synced for ~8
+            // rounds) but rank0 still hangs in the 9th window() on NOSLICE. Re-enable when that
+            // hang is fixed; SLICE still faults moe_gate_up in window (#13).
             int64_t n_spec = 0;
             const uint64_t rounds0 = model.mtp_rounds_;
             uint64_t len0[9];
@@ -4116,8 +4123,9 @@ static int glm_pack_generate(const Options& o) {
                 const int e0 = s.eos0, e1 = s.eos1, e2 = s.eos2;
                 int64_t produced = 0;
                 std::string mtp_err;
+                // decode_mtp already ++produced before emit — do not increment again (rank0's
+                // on_token uses a different counter). Double-increment desynced p0/keep (#13).
                 const auto emit = [&](int tok) -> bool {
-                    ++produced;
                     if (stop_eos && (tok == e0 || tok == e1 || tok == e2)) return false;
                     if (tb > 0 && te >= 0 && produced >= tb && tok != te) model.force_next(te);
                     return produced < max_new;

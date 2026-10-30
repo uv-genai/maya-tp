@@ -476,12 +476,16 @@ int Glm5Model::mtp_choose(int n_cap) {
     }();
     if (forced_n >= 0) return std::min(forced_n, n_cap);
     if (n_cap <= 0) return 0;
-    // TP2 (#13): adaptive length uses wall-clock ms — ranks would pick different draft counts and
-    // mismatch window() AR sizes. Also force 0 drafts: even a fixed n lets nd differ if fast_mtp
-    // fails on one rank (T*E AR size mismatch). decode_mtp still runs (mirror + hx_pos) on the
-    // T==1 path; re-enable drafts when both ranks' nd is proven equal.
+    // TP2 (#13): gufo pattern — both ranks must run the SAME draft width every round.
+    // Adaptive length uses wall-clock (would diverge). Return a constant so every round
+    // has the same T and window() AR size. (Produced/max_ctx clamps stay in decode_mtp;
+    // they only bind near the end when both ranks share `produced` via mirrored emit.)
     if (tp_.active()) {
-        return 0;
+        static const int tp_n = [] {
+            const char* e = getenv("STRATA_GLM_MTP_FIXED");
+            return e != nullptr ? std::max(0, std::atoi(e)) : 2;
+        }();
+        return std::min(tp_n, n_cap);
     }
     if (fixed) return n_cap;
     ++mtp_round_no_;
@@ -604,15 +608,18 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
     for (;;) {
         const auto t0 = std::chrono::steady_clock::now();
         int n = mtp_choose(n_cap);
-        n = (int) std::min<int64_t>(n, max_new - produced - 1);
-        n = (int) std::min<int64_t>(n, max_ctx_ - 1 - p0);
-        // TP2: hx_pos is per-rank; zeroing n here desyncs window() AR widths (#13).
-        // Fixed mtp_choose width above keeps T identical on both ranks.
-        if (!tp_.active() && mtp_hx_pos_ != p0 - 1) n = 0;
-        n = std::max(n, 0);
-        if (tp_.active() && n != 0) {
-            std::fprintf(stderr, "glm mtp TP: n=%d nd_will_use p0=%lld produced=%lld\n", n, (long long) p0,
-                         (long long) produced);
+        // TP2: draft width must match on both ranks every round (gufo forced_drafts).
+        // Skip produced/max_ctx/hx_pos clamps that depend on per-rank counters — emit
+        // already stops at max_new / EOS on both ranks the same way (#13).
+        if (!tp_.active()) {
+            n = (int) std::min<int64_t>(n, max_new - produced - 1);
+            n = (int) std::min<int64_t>(n, max_ctx_ - 1 - p0);
+            if (mtp_hx_pos_ != p0 - 1) n = 0;
+            n = std::max(n, 0);
+        }
+        if (tp_.active()) {
+            std::fprintf(stderr, "glm mtp TP: rank=%d n=%d p0=%lld produced=%lld\n", tp_.rank, n,
+                         (long long) p0, (long long) produced);
         }
         win[0] = y;
         int nd = 0;
@@ -656,6 +663,9 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
             ++n_drafting;
             mtp_hx_pos_ = -1;   // (head_x holds the block's hidden state now)
             if (!ok) break;
+        }
+        if (tp_.active()) {
+            std::fprintf(stderr, "glm mtp TP: rank=%d nd=%d T=%d ok=%d\n", tp_.rank, nd, 1 + nd, (int) ok);
         }
         const int T = 1 + nd;
         int keep = 1, acc = 0;
