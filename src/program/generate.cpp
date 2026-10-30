@@ -2467,9 +2467,9 @@ static int glm_pack_generate(const Options& o) {
                 return 1;
             }
         } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
-            // MTP + TP2: window's moe_gate_up still faults with sliced experts (pool/blob audit
-            // incomplete). Mirror protocol + window KDA/DSA/dense AR fixes are in; re-enable here
-            // when gate_up matches the token path under TP (#13).
+            // MTP+TP2 (#13): window KDA/whq/dense fixes + fixed n=0 drafts are in, but an AR of
+            // 32768 vs 16384 bytes still desyncs (not from draft window when n=0). Keep off until
+            // that exchange is identified.
             int64_t n_spec = 0;
             const uint64_t rounds0 = model.mtp_rounds_;
             uint64_t len0[9];

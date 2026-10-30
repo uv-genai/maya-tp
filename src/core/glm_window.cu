@@ -214,7 +214,9 @@ bool Glm5Model::win_alloc(int tmax, std::string& err) {
     W.sh_hq_s = (size_t) FF / 32 * q8;
     W.sh_hq = take_b(at, T * W.sh_hq_s);
     W.sh_out = take_f(at, T * E);
-    W.whq = take_b(at, T * 8 * ((size_t) ff_compute() / 32 * q8));
+    // Full n_ff_exp: the window also runs the MTP draft layer (mtp_il_), whose experts are NOT sliced.
+    // A sliced-only buffer overflows moe_gate_up's hq write there (#13).
+    W.whq = take_b(at, T * 8 * ((size_t) g.n_ff_exp / 32 * q8));
     W.wpart = take_f(at, T * 8 * E);
     W.grp_ptr = (unsigned long long*) take_b(at, T * 8 * 8);
     W.grp_start = (int*) take_b(at, (T * 8 + 1) * f4);

@@ -476,14 +476,12 @@ int Glm5Model::mtp_choose(int n_cap) {
     }();
     if (forced_n >= 0) return std::min(forced_n, n_cap);
     if (n_cap <= 0) return 0;
-    // TP2 (#13): adaptive length uses wall-clock ms — the two ranks would pick different
-    // draft counts and mismatch window() AR sizes. Fixed width on both ranks.
+    // TP2 (#13): adaptive length uses wall-clock ms — ranks would pick different draft counts and
+    // mismatch window() AR sizes. Also force 0 drafts: even a fixed n lets nd differ if fast_mtp
+    // fails on one rank (T*E AR size mismatch). decode_mtp still runs (mirror + hx_pos) on the
+    // T==1 path; re-enable drafts when both ranks' nd is proven equal.
     if (tp_.active()) {
-        static const int tp_n = [] {
-            const char* e = getenv("STRATA_GLM_MTP_FIXED");
-            return e != nullptr ? std::max(0, std::atoi(e)) : 2;
-        }();
-        return std::min(tp_n, n_cap);
+        return 0;
     }
     if (fixed) return n_cap;
     ++mtp_round_no_;
@@ -608,8 +606,14 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
         int n = mtp_choose(n_cap);
         n = (int) std::min<int64_t>(n, max_new - produced - 1);
         n = (int) std::min<int64_t>(n, max_ctx_ - 1 - p0);
-        if (mtp_hx_pos_ != p0 - 1) n = 0;   // (no trunk state to draft from: a plain token)
+        // TP2: hx_pos is per-rank; zeroing n here desyncs window() AR widths (#13).
+        // Fixed mtp_choose width above keeps T identical on both ranks.
+        if (!tp_.active() && mtp_hx_pos_ != p0 - 1) n = 0;
         n = std::max(n, 0);
+        if (tp_.active() && n != 0) {
+            std::fprintf(stderr, "glm mtp TP: n=%d nd_will_use p0=%lld produced=%lld\n", n, (long long) p0,
+                         (long long) produced);
+        }
         win[0] = y;
         int nd = 0;
         if (n > 0) {
