@@ -1,8 +1,8 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 (session 5, #15 MTP deployment + llama-swap launchers) · v1.1.37 · branch `main` on `uv-genai/maya-tp` · engine fix **`5b547ce`**; prior WIP preserved in `74a47d8`.
-> **Both GPUs are free** (no engines or servers running). #15 deployment/launcher verification complete; see §14. Both deployed rank-0 paths and local binary match MD5 **`75a180099201dbc0abdf29808a536022`**. All #13 exit checks pass; MTP ships opt-in (§11).
+> Last updated: 2026-10-30 (#18–#21 regression fixes complete and validated) · **v1.1.37 unchanged**. Release #17 stopped; no tag/release created.
+> Both hosts have matching fixed binaries, MD5 **`d6cd72ab0376c8df1d58cd1c2a20441b`**. All GPU/CI checks pass. Test engines/server stopped; llama-swap daemon running. See §16.
 
 ## 1. What we are building
 
@@ -52,6 +52,11 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 14 | Controlled MTP on/off benchmark | complete; warm median off 38.255 / on 52.235 ms/token (§13) |
 | 15 | MTP deployment + llama-swap launcher verification | complete; runtime flags and both-rank propagation (§14) |
 | 16 | GLM vision on HIP + RDMA TP2 embedding synchronization | open, deferred by user (§15) |
+| 17 | Release v1.1.38 | stopped/deferred by user; no version/tag/release changes |
+| 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
+| 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
+| 20 | Large-prompt cache double-slice | fixed and validated (§16) |
+| 21 | MTP window attention head width / HIP scratch capacity | fixed and validated (§16) |
 
 ## 5. What works (Maya-S pack)
 
@@ -66,7 +71,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 
 ## 6. Performance (Maya-S IQ2_XXS)
 
-Latest warm resident-pair test (#14, 256 identical output tokens, four measured runs per mode):
+Historical warm resident-pair test (#14, before #18–#21 correctness fixes, 256 identical output tokens, four measured runs per mode; rerun before current performance claims):
 **38.255 ms/token without MTP vs 52.235 with MTP**, zero measured disk I/O. See §13 and the durable report.
 
 Earlier 32-token measurements (2026-10-30):
@@ -294,3 +299,52 @@ Current HIP installer skips GLM vision; neither host's deployed config enables i
 encoding on gfx1151 and synchronize image positions/embedding tensors across TP2 (tensors over RDMA, not TCP).
 Scope/evidence/acceptance: https://github.com/uv-genai/maya-tp/issues/16 . Issue intentionally left open and deferred.
 No model files downloaded, no runtime configuration changed, no inference processes started/stopped for this task.
+
+## 16. #18–#21 regressions — fixed and validated
+
+**Release remains stopped/deferred (#17).** No VERSION bump, tag or release. User stopped Jen testing and
+explicitly authorized fixes and GPU validation. Original errors were MTP-seven
+`outgoing=0/539/16384 incoming=0/539/131072` and non-MTP large-prompt
+`all-reduce payload of 118521856 bytes exceeds the receive window of 50331584`.
+
+Root causes / fixes:
+- **#18 `aee442e`:** rank-local MTP window scratch retry changes AR shapes from T rows to one row/token.
+  `TpContext::agree_min` exchanges/drains/checks two-float RDMA votes before accepting/retrying. Any clash makes
+  both ranks restore and replay. Diagnostic `MAYA_TP_TEST_WINDOW_RETRY=N` defaults off.
+- **#19 `9623e7e`:** cap prefill by `MaxPartialBytes()` and pack hidden width (3008 aligned rows at 4096,
+  49283072 bytes < 50331584). Agree on readiness, chunk and layout retries despite differing local budgets
+  (25088 vs 32768). Dense lead FFN `continue` previously skipped AR; now sum its sliced outputs too.
+  Pure host boundary helper/test covers exact 7234 rows/118521856 bytes, registered in CMake and unittest.
+- **#20 `a732362`:** prefill prestage (T>=1024) double-sliced RAM blobs already compacted by preload/readers,
+  causing nonfinite routes / CPU memcpy SIGSEGV. Copy compact Ly.blob over the event-ordered H2D stream instead.
+- **#21 2e44a8a:** window q_b/k_b/v_b are sliced to 32 heads but MLA calls still computed 64;
+  correct all calls to local heads, preserve allocation strides. HIP partial scratch now tracks head/KV dimensions,
+  avoiding reuse of 80x32-head capacity for 65x64-head work. New HIP parity regression covers that transition.
+
+Validation on binary **`d6cd72ab0376c8df1d58cd1c2a20441b`**, gfx1151/MMQ/RDMA:
+- Identical hashes on local `build-hip/maya`, rank0 `build-hip/maya` and `/tmp/maya-tp2`.
+- Context 32768, MTP fixed/cap 7: prompt 990 ->64 output; prompt 7290 ->32; cached follow-up 7333 ->24
+  (7289 cached); prompt 14550 ->32; streamed follow-up DONE; peer up throughout. Same matrix passes simple mode.
+- **Eight rank1-only forced retries**: rank0 local-clash=0/retry=1 at matching positions; no shape divergence.
+  All **150/150** MTP round-end `(p0,produced,keep)` records identical between ranks.
+- Seven-draft three-turn reuse, stream cancellation after 8 text chunks + successful follow-up, limits 1/2/3 PASS.
+- CLI simple and seven-draft MTP **32/32 pair parity** each.
+- Peer death/restart with seven drafts: **8 passed, 0 failed**. Chat errors cleanly/health degraded after rank1 kill;
+  restarting both recovers peer and chat. Used acceptance orchestration with draft env forwarded explicitly.
+- HIP map PASS; serve **464 tests / 11 skips** PASS; tools **621 tests / 31 skips** PASS.
+- Host helper passes unittest and CMake target. `glm_attn_bench --parity-only` on gfx1151 PASS, including
+  32->64-head shared-output bit parity for all/tail/chunk masks at 2051 selected cells. build-tp2 cache corrected
+  from old gfx1100 to gfx1151 before executing. Engine build-hip was already gfx1151 throughout.
+
+Durable report/raw API data: **docs/validation/tp2-collectives-2026-10-30/RESULTS.md**.
+New live harness: `.venv/bin/python tools/tp2/regression_collectives.py --mode mtp|simple --output PATH`.
+Logs: `/tmp/maya-21-{mtp,simple}-{tests,r1}.log`, `*-results.json`, `*-r0-engine.log`,
+`/tmp/maya-21-{mtp-acceptance,cli-checks,kill-recover,attn-parity}.log`, and CI logs
+`/tmp/maya-20-serve-tests.log` / `/tmp/maya-21-tools-tests.log`.
+
+Final operations: **test engines and API server stopped, both GPUs free**. Llama-swap daemon remains running.
+Live rank0 YAML now has user-configured models `maya-glm5-s-tp2` (simple) and `maya-glm5-s-tp2-mtp`
+(`--mtp --drafts 7`). YAML untouched by us. Launch flags unchanged.
+Rank0 checkout has older HEAD `7ee8f27` and staged/unstaged user work; **do not pull/reset or rebuild there**
+without preserving it. Fixed binaries are deployed directly; the authoritative fixed source is this checkout/origin.
+Prior #14 perf numbers predate these output-affecting fixes; rerun a controlled benchmark before new claims.

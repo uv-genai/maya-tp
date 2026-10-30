@@ -1,0 +1,132 @@
+[
+  {
+    "case": "seven-draft-window",
+    "mode": "simple",
+    "wall_s": 7.197,
+    "usage": {
+      "prompt_tokens": 990,
+      "completion_tokens": 64,
+      "total_tokens": 1054,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 990,
+      "prompt_ms": 4645.4,
+      "prompt_per_token_ms": 4.692,
+      "prompt_per_second": 213.1,
+      "predicted_n": 64,
+      "predicted_ms": 2537.9,
+      "predicted_per_token_ms": 39.655,
+      "predicted_per_second": 25.2,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "The document you've provided is a transport stress-test file consisting of the word \"alpha\" repeated hundreds of times with no other substantive content. There is no actual",
+      "reasoning_content": "The user has provided a document that consists entirely of the word \"alpha\" repeated many times, and describes it as a \"transport stress-test document.\" They"
+    }
+  },
+  {
+    "case": "over-48MiB",
+    "mode": "simple",
+    "wall_s": 30.363,
+    "usage": {
+      "prompt_tokens": 7290,
+      "completion_tokens": 32,
+      "total_tokens": 7322,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 7290,
+      "prompt_ms": 28905.5,
+      "prompt_per_token_ms": 3.965,
+      "prompt_per_second": 252.2,
+      "predicted_n": 32,
+      "predicted_ms": 1447.6,
+      "predicted_per_token_ms": 45.237,
+      "predicted_per_second": 22.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "The document you provided consists entirely of the word \"alpha\" repeated many times,",
+      "reasoning_content": "The user has provided a document that consists entirely of the word \"alpha\""
+    }
+  },
+  {
+    "case": "reuse-after-large-prompt",
+    "mode": "simple",
+    "wall_s": 2.123,
+    "usage": {
+      "prompt_tokens": 7333,
+      "completion_tokens": 24,
+      "total_tokens": 7357,
+      "prompt_tokens_details": {
+        "cached_tokens": 7289
+      }
+    },
+    "timings": {
+      "cache_n": 7289,
+      "prompt_n": 44,
+      "prompt_ms": 977.7,
+      "prompt_per_token_ms": 22.22,
+      "prompt_per_second": 45.0,
+      "predicted_n": 24,
+      "predicted_ms": 1122.8,
+      "predicted_per_token_ms": 46.783,
+      "predicted_per_second": 21.4,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "The document doesn't contain any real content \u2014 it's just",
+      "reasoning_content": "The user wants me to explain the same idea more simply"
+    }
+  },
+  {
+    "case": "multiple-prefill-chunks",
+    "mode": "simple",
+    "wall_s": 56.71,
+    "usage": {
+      "prompt_tokens": 14550,
+      "completion_tokens": 32,
+      "total_tokens": 14582,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 14550,
+      "prompt_ms": 55282.9,
+      "prompt_per_token_ms": 3.8,
+      "prompt_per_second": 263.2,
+      "predicted_n": 32,
+      "predicted_ms": 1414.1,
+      "predicted_per_token_ms": 44.191,
+      "predicted_per_second": 22.6,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "consistent batch sizes. The document is a transport stress-test file consisting of\nre",
+      "reasoning_content": "The user wants me to summarize the document and then explain why network framing needs"
+    }
+  },
+  {
+    "case": "stream-after-large-prompt",
+    "mode": "simple",
+    "chunks": 25,
+    "wall_s": 1.814
+  }
+]
