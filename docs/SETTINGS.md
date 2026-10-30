@@ -1292,6 +1292,8 @@ TCP socket (`SendControl`/`RecvControl`); do **not** probe the bootstrap port wi
 | `MAYA_TP_GID_INDEX` | unset | RoCE v2 GID when the port has several candidates |
 | `MAYA_TP_BOOTSTRAP_TIMEOUT` | 120 | seconds rank 1 retries connect (and rank 0 waits to accept) |
 | `MAYA_TP_MTP` | off | `1`: opt into GLM MTP under TP2 (rank 0 for serve, both ranks for paired CLI). Requires MTP loaded (`MAYA_GLM_NO_MTP` unset). Rank 0 wires anchor/draft tokens, acceptance and stop decisions on the bootstrap control channel; verification tensors stay on RDMA. Uses greedy sampling and fixed draft width (default 2). Measured slower than the simple loop on Maya-S; keep off for normal serving. |
+| `MAYA_GLM_MTP_FIXED` | 2 under TP2; adaptive on one host | Requested draft tokens per round (`1`–`8` for TP2; `0` is the diagnostic token-only path). Must match on both ranks. Clamped by `MAYA_GLM_MTP_DRAFT` and the remaining output/context budget. |
+| `MAYA_GLM_MTP_DRAFT` | 3 | MTP draft capacity; `0` disables MTP loading/decode. Set at least as high as `MAYA_GLM_MTP_FIXED` when requesting more than 3 drafts (decode supports at most 8). The llama-swap launcher's `--drafts N` sets both variables on both ranks. |
 | `MAYA_TP_NOAR` | unset | if set: skip all-reduce (isolation; answers will be wrong) |
 | `MAYA_TP_NOSLICE` | unset | if set: full weights on both ranks (isolation) |
 | `MAYA_TP_SH_BOTH` | unset | if set: shared expert runs on both ranks (AR would double it) |

@@ -128,6 +128,45 @@ MAYA_TP_MTP=1 bash tools/tp2/acceptance.sh
 A malformed or interrupted MTP frame stops the worker; rank 0 marks the pair down on decode failure.
 Restart both ranks after a protocol or RDMA failure.
 
+### llama-swap on strix-halo-1
+
+The installed `~/.config/llama-swap/config.yaml` model **`maya-glm5-tp2`** uses
+`tools/llama-swap/tp2.sh run ${PORT}` and the matching `stop` command. The wrapper starts
+`tools/tp2/rank1.sh` over SSH on strix-halo-2, then runs `tools/tp2/rank0.sh` locally in the foreground.
+`tools/tp2/tp2-swap.sh` delegates to this same wrapper.
+
+To enable MTP with four drafts, run **on strix-halo-1**:
+
+```sh
+/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --mtp --drafts 4
+```
+
+For llama-swap, use these fields in the existing model entry (the live YAML is not changed automatically):
+
+```yaml
+models:
+  maya-glm5-tp2:
+    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --mtp --drafts 4
+    cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
+    proxy: http://127.0.0.1:${PORT}
+```
+
+`--no-mtp` uses the simple loop; no flag preserves the default off (or `MAYA_TP_MTP` from the environment).
+`--drafts N` accepts 1–8, defaults to 2, and forwards both `MAYA_GLM_MTP_FIXED=N` and
+`MAYA_GLM_MTP_DRAFT=N` to both hosts. `--context N` also sets the same context on both ranks;
+otherwise the context comes from the base Maya JSON config. One sequence is used while #11 remains gated.
+
+For direct engine/manual rank launches, put these environment assignments on **both** ranks before the command:
+
+```sh
+MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=4 MAYA_GLM_MTP_DRAFT=4 <engine-or-rank-script> ...
+```
+
+There is no separate MTP build switch: the HIP `maya` target includes it. The `--mtp` and `--drafts` options
+above belong to the llama-swap wrapper; direct engine invocations use the environment variables.
+Unset `MAYA_GLM_NO_MTP` / `MAYA_GLM_NO_SPEC` (and their `STRATA_` aliases) when launching manually.
+MTP verification currently uses greedy sampling under TP2.
+
 ## Failure playbook
 
 | Symptom | Cause | Fix |

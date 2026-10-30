@@ -45,6 +45,14 @@ mode, four measured runs/mode: MTP off **38.255 ms/token, 26.14 tok/s**; MTP on 
 MTP throughput −26.76% on this workload, 25.97% draft acceptance. All measured runs have zero disk I/O.
 Harness `tools/tp2/bench_mtp.py`; durable data/report `docs/benchmarks/tp2-mtp-2026-10-30/RESULTS.md`.
 Fixed-length microbenchmark ignores EOS (reference crosses turn boundaries); default gate unchanged.
+**#15 deployment + launchers verified (Handoff §14):** MTP-capable HIP target built and matching binary copied to
+both hosts, same MD5. Canonical rank-0 wrapper `tools/llama-swap/tp2.sh` now accepts
+`run PORT --mtp --drafts N` (1..8) and forwards both fixed count and capacity to rank 1; contexts match.
+Live rank-0 YAML `~/.config/llama-swap/config.yaml` model `maya-glm5-tp2` already points to this wrapper,
+**unchanged**, so still MTP off until the user appends `--mtp --drafts N` to its `cmd`.
+Remote wrapper backed up as `tp2.sh.pre-mtp-15`; new scripts deployed, six wiring tests and a two-turn four-draft
+GPU smoke pass. CI trio: HIP mapping, 464 serve / 620 tools tests. User will run tests themselves now;
+**leave both GPUs free and do not start more inference without their request**.
 Follow the next user request; don't reopen completed #13 diagnosis.
 
 **Operations:** start rank 1 first (`bash tools/tp2/rank1.sh`), then rank 0 on strix-halo-1

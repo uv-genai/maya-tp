@@ -1,8 +1,8 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 (session 4, #14 warm MTP benchmark) · v1.1.37 · branch `main` on `uv-genai/maya-tp` · engine fix **`5b547ce`**; prior WIP preserved in `74a47d8`.
-> **Both GPUs are free** (no engines or servers running). #14 benchmark complete; see §13. Both deployed rank-0 paths and local binary match MD5 **`75a180099201dbc0abdf29808a536022`**. All #13 exit checks pass; MTP ships opt-in (§11).
+> Last updated: 2026-10-30 (session 5, #15 MTP deployment + llama-swap launchers) · v1.1.37 · branch `main` on `uv-genai/maya-tp` · engine fix **`5b547ce`**; prior WIP preserved in `74a47d8`.
+> **Both GPUs are free** (no engines or servers running). #15 deployment/launcher verification complete; see §14. Both deployed rank-0 paths and local binary match MD5 **`75a180099201dbc0abdf29808a536022`**. All #13 exit checks pass; MTP ships opt-in (§11).
 
 ## 1. What we are building
 
@@ -50,6 +50,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 12 | Pack-derived TP geometry | closed |
 | 13 | MTP under TP2 | **Complete (§11). Opt-in `MAYA_TP_MTP=1`; simple loop remains default.** |
 | 14 | Controlled MTP on/off benchmark | complete; warm median off 38.255 / on 52.235 ms/token (§13) |
+| 15 | MTP deployment + llama-swap launcher verification | complete; runtime flags and both-rank propagation (§14) |
 
 ## 5. What works (Maya-S pack)
 
@@ -252,3 +253,34 @@ The worker consumes the wrong header, then resumes in the middle of the protocol
   Use a fresh output directory; harness stops both hosts afterward. Both GPUs are free.
 - Local CI trio PASS: HIP mapping, 464 serve tests (11 skips), 614 tools tests (31 skips). Benchmark helper
   `--help` and compilation pass. Test suites ran only after both GPUs were free. No engine defaults changed.
+
+## 14. #15 MTP deployment and llama-swap verification (session 5)
+
+- User is taking over manual testing. **Leave both engines/servers stopped**; do not launch further GPU tests
+  without a new request. HIP gfx1151/MMQ/RDMA `maya` target builds successfully; MTP is compiled in (no special
+  MTP build flag). Target was already current. Binary deployed to both hosts and rank-0 `/tmp/maya-tp2`,
+  MD5 remains **`75a180099201dbc0abdf29808a536022`** on all three paths.
+- Actual rank-0 `/home/ugo/.config/llama-swap/config.yaml` model **`maya-glm5-tp2`** points to
+  `/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT}`; cmdStop uses the same wrapper's `stop`,
+  proxy `http://127.0.0.1:${PORT}`. **Live YAML unchanged**; it still defaults to the simple loop.
+- Canonical wrapper now accepts **`run PORT --mtp --drafts N [--context N]`**, or `--no-mtp`. N=1..8, default 2.
+  It sets `MAYA_TP_MTP`, **both** `MAYA_GLM_MTP_FIXED` and `MAYA_GLM_MTP_DRAFT`, and the context on **both** ranks.
+  Setting FIXED alone above 3 would otherwise silently hit the default capacity of 3. Raw engine calls use env vars,
+  not native `--mtp` / `--drafts` flags. MTP under TP2 remains greedy.
+- Wrapper starts `tools/tp2/rank1.sh` remotely on strix-halo-2 and execs `tools/tp2/rank0.sh` on rank 0.
+  Supervisor killed before engine, bracket-safe server pattern; SSH startup errors propagate; remote launch is a
+  fully redirected `setsid nohup ... &` with no backgrounded `cd &&` subshell. No bootstrap socket probes.
+- Rank scripts now match context: explicit `CONTEXT`, otherwise the base JSON's `--max-context` (currently 32768).
+  Wrapper fixes SEQS=1 while #11 remains gated. Old `tools/tp2/tp2-swap.sh` delegates to the canonical wrapper.
+  Older `maya-rank0.sh` / `maya-rank1.sh` are not the llama-swap path; use the canonical scripts above.
+- Remote wrapper had divergent changes; preserved as `tools/llama-swap/tp2.sh.pre-mtp-15` before deployment.
+  New wrapper and both rank scripts are deployed to both systems; SHA256 matches.
+- Verification: six no-GPU launcher tests (SSH/process commands mocked); directly orchestrated two-turn GPU smoke
+  with **four drafts** and context 4096 passes, both 16 tokens, turn-2 cached_tokens=14; peer up. Logs prove rank1
+  `n=4`, `mtp=1`. No nested SSH: rank1 local, rank0 launched directly over one hop; full llama-swap wrapper SSH
+  propagation is tested with mocks, not by invoking the wrapper through nested SSH.
+- Gates: HIP map PASS, 464 serve tests (11 skips), **620 tools tests** (31 skips). Scripts `bash -n` PASS.
+- To test on **strix-halo-1**:
+  `/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --mtp --drafts 4`.
+  For llama-swap edit just that model's `cmd` to append `--mtp --drafts 4`, then restart the model.
+  Stop: same wrapper `stop`. Full examples: `docs/TP2-RUN.md`, settings in `docs/SETTINGS.md`.
