@@ -50,7 +50,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 9 | MTP / spec decode TP | closed — fixed (MTP still **off** under two-host TP; see #13) |
 | 10 | Gather bit-exact variant | open (optional design) |
 | 11 | Multi-seq + snapshot reuse | open |
-| 12 | Pack-derived TP geometry | open |
+| 12 | Pack-derived TP geometry | **closed — peek_pack_geometry + post-load check** |
 | 13 | MTP under TP2 | open |
 
 ## 5. What works (Maya-S pack)

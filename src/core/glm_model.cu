@@ -1936,6 +1936,23 @@ static std::vector<int> glm_search_bounds(const std::string& pack_dir, int64_t m
 // STRATA_GLM_DFLASH=<a DFlash2 GGUF drafted for this model> (the driver's --dflash): the decode drafts blocks with it
 // (decode_dflash).  It sits on the device of the part with the head and replaces the NextN block's drafting, so the
 // NextN block is not loaded (STRATA_GLM_NO_MTP) and the split search prices the drafter instead.
+bool Glm5Model::peek_pack_geometry(const std::string& pack_dir, Glm5Geometry& out, std::string& err) {
+    std::vector<std::string> names;
+    if (!pack_shard_names(pack_dir, names, err)) return false;
+    try {
+        strata::GgufFile first(pack_dir + "/../" + names[0]);
+        if (!Glm5Geometry::from_gguf(first, out, err)) return false;
+    } catch (const std::exception& e) {
+        err = "pack geometry peek: " + pack_dir + "/" + names[0] + ": " + e.what();
+        return false;
+    }
+    if (out.n_ff_exp <= 0 || out.n_ff_dense <= 0) {
+        err = "pack geometry peek: expert_feed_forward_length / feed_forward_length missing or non-positive";
+        return false;
+    }
+    return true;
+}
+
 bool Glm5Model::load_pack_env(const std::string& pack_dir, int64_t max_ctx, std::string& err,
                               const std::string& layer_split) {
     if (const char* df = getenv("STRATA_GLM_DFLASH"); df != nullptr && df[0] != '\0') {

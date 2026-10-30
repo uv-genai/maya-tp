@@ -80,7 +80,7 @@ Rank 1 log should show `TP2 rank 1 worker — mirroring…` then `reset` / `pref
 ```
 
 Rank 1 adds `"bootstrap_host": "strix-halo-1.local"` and `"rank": 1`.
-See `docs/SETTINGS.md` for the full `MAYA_TP_*` list (only implemented knobs are listed).
+Partition widths (`n_ff_exp`, `n_ff_dense`) are **read from the pack’s GGUF** before bootstrap (issue #12); the engine refuses a pack whose widths do not split under TP. See `docs/SETTINGS.md` for `MAYA_TP_*`.
 
 ## Isolation flags
 

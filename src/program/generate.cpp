@@ -1094,31 +1094,39 @@ static int glm_pack_generate(const Options& o) {
         std::fprintf(stderr, "maya generate: --dump-routing: %s\n", err.c_str());
         return 1;
     }
-    // two-host tensor parallel (TP2): connect FIRST (the model load then warms ~40 s of expert
-    // tiers and the peer's bootstrap would time out), then load with this rank's weight slices.
+    // two-host tensor parallel (TP2): peek pack geometry first (fail fast, #12), then connect
+    // (bootstrap must finish before the model load warms ~40 s of expert tiers).
     if (o.tp_world > 1) {
 #if defined(STRATA_ENABLE_TP2_RDMA)
+        strata::core::Glm5Geometry pack_g;
+        std::string tp_err;
+        if (!strata::core::Glm5Model::peek_pack_geometry(o.glm_pack, pack_g, tp_err)) {
+            std::fprintf(stderr, "maya generate: TP2: pack geometry: %s\n", tp_err.c_str());
+            return 1;
+        }
         strata::net::IbrverbsConfig cfg;
         cfg.rank = (uint32_t) o.tp_rank;
         cfg.world_size = (uint32_t) o.tp_world;
         cfg.bootstrap_host = o.tp_bootstrap_host;
         cfg.bootstrap_port = (uint16_t) o.tp_bootstrap_port;
         cfg.rdma_device = o.tp_rdma_device;
-        std::string tp_err;
         auto comm = strata::net::CreateIbrverbsCommunicator(cfg, &tp_err);
         if (!comm) {
             std::fprintf(stderr, "maya generate: TP2: %s\n", tp_err.c_str());
             return 1;
         }
         strata::core::TpContext tp;
-        // geometry defaults match Glm5Geometry; the load's pack must agree (checked by the slices)
-        if (!strata::core::TpContext::create(o.tp_rank, o.tp_world, 2048, 12288, 256, comm, tp, tp_err)) {
-            std::fprintf(stderr, "maya generate: TP2: %s\n", tp_err.c_str());
+        const int tp_block = 256;   // IQ*/Q6_K intermediate block; TpPartition refuses a non-split width
+        if (!strata::core::TpContext::create(o.tp_rank, o.tp_world, pack_g.n_ff_exp, pack_g.n_ff_dense, tp_block,
+                                             comm, tp, tp_err)) {
+            std::fprintf(stderr, "maya generate: TP2: create(n_ff=%d, n_ff_dense=%d): %s\n", pack_g.n_ff_exp,
+                         pack_g.n_ff_dense, tp_err.c_str());
             return 1;
         }
         model.set_tp(tp);
-        std::printf("INFO tp_world=%d tp_rank=%d rdma=%s ff_band=[%d,%d)\n", o.tp_world, o.tp_rank,
-                    comm->Describe().c_str(), tp.experts.begin, tp.experts.begin + tp.experts.count);
+        std::printf("INFO tp_world=%d tp_rank=%d rdma=%s n_ff=%d n_ff_dense=%d ff_band=[%d,%d)\n", o.tp_world,
+                    o.tp_rank, comm->Describe().c_str(), pack_g.n_ff_exp, pack_g.n_ff_dense, tp.experts.begin,
+                    tp.experts.begin + tp.experts.count);
         // one operation scope for the whole generate run (each collectives carries its ordinal inside it)
         if (!comm->BeginOperation(0, &tp_err)) {
             std::fprintf(stderr, "maya generate: TP2: %s\n", tp_err.c_str());
@@ -1135,6 +1143,22 @@ static int glm_pack_generate(const Options& o) {
         std::fprintf(stderr, "maya generate: %s\n", err.c_str());
         return 1;
     }
+#if defined(STRATA_ENABLE_TP2_RDMA)
+    // After load, the pack's geometry must match the TP partitions (#12).
+    if (o.tp_world > 1 && o.tp_rank >= 0) {
+        const auto& tg = model.geometry();
+        const auto& tp = model.tp();
+        if (tp.world > 1) {
+            if (tp.experts.ff != tg.n_ff_exp || tp.dense.ff != tg.n_ff_dense) {
+                std::fprintf(stderr,
+                             "maya generate: TP2: partition widths do not match the pack: "
+                             "tp n_ff=%d n_ff_dense=%d vs pack %d / %d (rebuild after a pack change?)\n",
+                             tp.experts.ff, tp.dense.ff, tg.n_ff_exp, tg.n_ff_dense);
+                return 1;
+            }
+        }
+    }
+#endif
     const int64_t n_vocab = model.geometry().n_vocab;
     // the driver samples on the device (sample_token), so the fast path never downloads the logits
     model.set_host_logits(false);

@@ -117,6 +117,9 @@ public:
     /// hop of the residual at each boundary (no peer access needed).
     bool load_pack_env(const std::string& pack_dir, int64_t max_ctx, std::string& err,
                        const std::string& layer_split = "");
+    /// Read the pack's GGUF geometry without loading weights (TP partition widths, #12). Opens the
+    /// first shard's metadata only.  `out.n_ff_exp` / `n_ff_dense` must match what load_pack will use.
+    static bool peek_pack_geometry(const std::string& pack_dir, Glm5Geometry& out, std::string& err);
     bool load_pack_place(const std::string& pack_dir, int64_t max_ctx, std::string& err, const std::string& layer_split);
     /// The explicit split form behind load_pack_env: devs[i] runs layers [bounds[i-1], bounds[i]) (bounds holds
     /// the first layer of each later part, devs.size() - 1 of them).
