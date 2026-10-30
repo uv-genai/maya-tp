@@ -532,6 +532,9 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
     // g.n_ff_exp here reads past the sliced sh_* weights in the gate/up mv, the shared down and
     // moe_gate_up's shared section (the slice-only window fault, #13).
     const int E = g.n_embd, FFs = ff_compute_for(il) * g.n_shared;
+    // Trunk shared weights are sliced: both ranks contribute their local partial.
+    const bool add_shared = !tp_.active() || tp_.rank == 0 || tp_.slicing() ||
+                            getenv("MAYA_TP_SH_BOTH") != nullptr;
     static const bool prof = getenv("STRATA_GLM_WIN_PROF") != nullptr;
     if (part != 2) {
         gf::MvJob j[3];
@@ -662,9 +665,8 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             mm.mt_cpu_s = (unsigned int) E;
             const size_t hq_t = 8 * ((size_t) ffn / 32) * q8;
             const bool sh = Ly.sh_down.q != nullptr;
-            // TP2: the replicated shared expert is added on rank 0 only (the all-reduce must not double it)
-            float* sh_out_w = (!tp_.active() || tp_.rank == 0) ? (sh ? W.sh_out + (size_t) t0 * E : nullptr)
-                                                               : nullptr;
+            // Include this rank's sliced shared partial before the all-reduce.
+            float* sh_out_w = add_shared && sh ? W.sh_out + (size_t) t0 * E : nullptr;
             if (!gf::moe_experts_multi(Ly.gu_type, Ly.d_type, mm, g.n_exp_used, E, ffn, g.swiglu_exp,
                                        Ly.down_off, (const uint8_t*) W.xq + (size_t) t0 * W.xq_s,
                                        (uint8_t*) W.whq + (size_t) t0 * hq_t, Ly.sh_down.q, Ly.sh_down.type,
@@ -674,7 +676,7 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
                 for (int t = t0; t < t0 + T; ++t) {
                     const gf::MoeDev mt = tok_dev(t);
                     uint8_t* hq = (uint8_t*) W.whq + (size_t) t * hq_t;
-                    float* so = (!tp_.active() || tp_.rank == 0) ? (sh ? W.sh_out + (size_t) t * E : nullptr) : nullptr;
+                    float* so = add_shared ? (sh ? W.sh_out + (size_t) t * E : nullptr) : nullptr;
                     gf::moe_gate_up(Ly.gu_type, mt, g.n_exp_used, E, ffn, g.swiglu_exp,
                                     (const uint8_t*) W.xq + (size_t) t * W.xq_s, hq, Ly.sh_down.q, Ly.sh_down.type,
                                     sh ? (const uint8_t*) W.sh_hq + (size_t) t * W.sh_hq_s : nullptr, FFs, so, s);
@@ -703,9 +705,8 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             jd.xq_cstride = (int64_t) W.sh_hq_s;
             jd.y_cstride = E;
             if (!gf::mv(&jd, 1, s)) { err = "glm window: shared expert down"; return false; }
-            // TP2: the replicated shared expert is added on rank 0 only (the all-reduce must not
-            // double it) - same rule as the multi path above and the token path.
-            if (!tp_.active() || tp_.rank == 0) sh_out = W.sh_out + (size_t) t0 * E;
+            // Same shared-partial policy as the multi path and ordinary token decoding.
+            if (add_shared) sh_out = W.sh_out + (size_t) t0 * E;
         }
         // EXL3: each distinct expert once for all its tokens (exl3::win_experts, gf::moe_win_experts' groups);
         // STRATA_GLM_WIN_X3=0: each token's routed experts on the token path's kernels (A/B - the same bits)
@@ -824,11 +825,11 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
             }
             const x3::MoeArgs xa = x3_args(md);
             x3::moe_gate_up(xa, x, nullptr, s);
-            x3::moe_down(xa, nullptr, (!tp_.active() || tp_.rank == 0) && Ly.sh_down.q != nullptr ? F->sh_out : nullptr, ffn, s);
+            x3::moe_down(xa, nullptr, add_shared && Ly.sh_down.q != nullptr ? F->sh_out : nullptr, ffn, s);
         } else {
-            // TP2: the pool holds this rank's band; the shared expert is added on rank 0 only
+            // Include the local shared partial before reducing this rank's sliced FFN.
             const int fft = ff_compute_for(il);
-            const float* sh_t = (!tp_.active() || tp_.rank == 0) && Ly.sh_down.q != nullptr ? F->sh_out : nullptr;
+            const float* sh_t = add_shared && Ly.sh_down.q != nullptr ? F->sh_out : nullptr;
             gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, E, fft, g.swiglu_exp, xq, F->hq, Ly.sh_down.q,
                             Ly.sh_down.type, F->sh_hq, FFs, F->sh_out, s);
             gf::moe_down(Ly.d_type, md, g.n_exp_used, E, fft, Ly.down_off, F->hq, sh_t, ffn, s);
