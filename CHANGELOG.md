@@ -4,7 +4,11 @@ Every release is on GitHub (Releases) with these notes; every published change m
 page's Settings › About and updates (About > Update before the redesign; from v1.0.18), or `git pull`, then `./setup.sh` (Windows: `START-MAYA.bat`) - it recompiles
 only what changed and starts; the model is not downloaded again.
 
-## Unreleased — after v1.1.38
+## v1.1.39 - 2026-10-31
+
+Maya-TP now presents its focus on tensor parallel inference across dual Strix Halo systems. This release
+corrects draft and target computation under TP2, improves HIP verification kernels, and documents measured
+speed and capacity benefits while crediting Project Maya and its creators.
 
 - **Maya-TP project documentation** (#27): rewrite the README around dual Strix Halo HIP/RDMA tensor
   parallelism, measured throughput, larger-model capacity and current validated scope. Credit upstream
@@ -21,7 +25,16 @@ only what changed and starts; the model is not downloaded again.
   supports draft sweeps, framed prompts, shared references and a single-host control, and rejects raw-pick
   disagreement even when emitted IDs are forced. See [measurements and validation](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md).
 
-The published v1.1.38 tag does not include these follow-up changes.
+- **Regression validation**: simple and seven-draft MTP pass large prompts (990/7290/14550 tokens),
+  cached follow-ups and streaming. MTP cancellation and output limits 1/2/3 pass. Eight rank-1-only forced
+  retries coordinate correctly; all 94 MTP round records match. CLI pair outputs agree 32/32 in both modes,
+  captured hidden rows match, and all eight peer kill/recovery checks pass. Required CPU gates pass:
+  HIP name mapping, 464 server tests and 625 tools tests.
+
+Source release with no prebuilt binary assets. Build the same revision on both ranks and restart the pair.
+The numerical fixes can change generated answers; regenerate saved benchmark references after updating.
+MTP stays opt-in, one active TP2 sequence is supported, and vision/DFlash/multi-sequence TP2 remain deferred
+or gated. Published model validation covers Maya-S; larger GLM packs need their own fit and performance checks.
 
 ## v1.1.38 - 2026-10-30
 

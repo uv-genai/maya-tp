@@ -173,8 +173,8 @@ Useful references:
 - [Contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md) and [releases](https://github.com/uv-genai/maya-tp/releases)
 
 Some inherited documentation describes upstream Maya's broader platform and model support; the validated
-Maya-TP scope is listed above. Current performance/correctness follow-ups are on `main` after v1.1.38;
-consult the changelog when selecting a revision.
+Maya-TP scope is listed above. Release **v1.1.39** includes the corrected TP2/MTP computation and
+measurements described here; consult the changelog when selecting a revision.
 
 ## Credits and license
 

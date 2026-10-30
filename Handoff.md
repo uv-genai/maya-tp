@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 (post-v1.1.38 MTP review) · **v1.1.38** source release at `c322b3e`.
-> #22 and #23–#26 completed/closed; report CI41088587233 passed at e91b0a3 (§18). README now presents Maya-TP; #27 tracks the documentation change (§19).
+> Last updated: 2026-10-31 · **v1.1.39** release metadata prepared; tag/publication/CI outcome tracked in #28 (§20).
+> #22–#27 completed/closed. Review CI41088587233 and README CI41091273791 passed. v1.1.39 includes the fixes and Maya-TP identity.
 > Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** deployed identically to all three paths.
 > Test engines/server stopped; llama-swap daemon/config preserved. Published v1.1.38 predates the post-release fixes.
 
@@ -38,7 +38,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | `origin` | `https://github.com/uv-genai/maya-tp.git` |
 | `upstream` | `https://github.com/mw00/project-maya.git` (read/merge only) |
 | `main` | tracks `origin/main` |
-| Release version | **v1.1.38** ([release #17](https://github.com/uv-genai/maya-tp/issues/17)) |
+| Release version | **v1.1.39** ([publication #28](https://github.com/uv-genai/maya-tp/issues/28)); previous v1.1.38 unchanged |
 
 ## 4. Issue map
 
@@ -60,7 +60,8 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 24 | Rank1 shared partial omitted in verifier | fixed and validated `56b9755` (§18) |
 | 25 | Padded outputs bypass HIP RDNA GEMV | fixed `ec22f4d`, GPU parity/microbench pass (§18) |
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
-| 27 | Maya-TP README identity, scope and upstream attribution | documentation updated (§19); final CI/disposition tracked in #27 |
+| 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
+| 28 | Release v1.1.39 | metadata prepared; tag/publication/CI disposition tracked in #28 (§20) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -437,7 +438,8 @@ Pinned llama.cpp post-output-norm NextN seeding matches Maya. No alternate batch
 - **Test engines and API server stopped; both GPUs free.** Llama-swap daemon still running on 8080,
   user YAML unchanged. All three binary hashes rechecked after testing. Remote dirty checkout preserved.
 - #23–#26 are fixed/validated; #22 has the final diagnosis. No new release created automatically.
-  New changes are under Unreleased in CHANGELOG; v1.1.38 remains immutable and predates these fixes.
+  At the end of #22 these changes were unreleased; they are included in v1.1.39 (§20).
+  v1.1.38 remains immutable and predates these fixes.
 
 Never nested SSH, preserve rank0 checkout 7ee8f27 dirty work, llama-swap daemon/YAML. Stop server before engine.
 Local build tests are ON temporarily; gfx1151. No background CPU work during performance timing; timings are complete.
@@ -461,3 +463,21 @@ Checks pass: README local links/anchors, shell syntax of examples, source flags,
 repository-wide donation-reference scan. Inherited platform guides point their removed README sections
 back to the pinned upstream README; CONTRIBUTING's benchmark link/methodology points to current TP2 data.
 Final commit/CI outcome and closure are recorded in issue #27; no new tag/release.
+
+
+## 20. v1.1.39 release (#28)
+
+User explicitly requested commit, tag, push and release after #27. This authorizes publication and
+supersedes the prior no-automatic-release instruction for this release only. VERSION is 1.1.39;
+CHANGELOG has dated notes covering all changes since v1.1.38: #23/#24/#26 numerical corrections,
+#25 padded-output HIP RDNA GEMV, #22 benchmark fidelity/results and #27 Maya-TP identity/credits.
+README version guidance updated. Release title: **v1.1.39 — Maya-TP correctness and performance**.
+
+Publish a source release matching the prior format, with an annotated tag and explicit release notes;
+no binary assets. Release-commit CI must pass before publication. Verify the tag points to the release
+commit and GitHub reports public/latest/non-prerelease. Exact SHA, CI run and publication result are
+recorded in issue #28; check it before repeating release work. v1.1.38 stays unchanged.
+
+Engine code was already built/deployed/validated in #22. This metadata-only release requires no new
+GPU run or engine build/deployment. Current functional binary remains 5dbc93560e0eb024dcbdc0d9eb60ea57
+on all three paths; test engines stopped, llama-swap daemon/config and remote dirty checkout preserved.

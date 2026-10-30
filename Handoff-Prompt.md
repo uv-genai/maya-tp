@@ -8,14 +8,15 @@ Repository `uv-genai/maya-tp`, local branch main. No subagents unless explicitly
 
 ## Current state
 
-MTP review #22 and fixes #23–#26 are complete and closed; final report CI41088587233 passed at e91b0a3.
-The current documentation work #27 rewrites README as Maya-TP with dual Strix Halo purpose, measurements,
-capacity, setup and credits, and removes inherited donation references/funding metadata. Handoff §19 and
-issue #27 record final commit/CI/disposition. No engine, deployment or live-config changes for this work.
+MTP review/fixes #22–#26 and README rebranding #27 are complete/closed, with CI passed.
+User now explicitly requested the next release: **v1.1.39**, tracked in #28 / Handoff §20.
+VERSION/CHANGELOG/README release metadata is prepared. Exact release commit, CI and annotated-tag/publication
+outcome are recorded in #28; check that issue before repeating release work. Publication is authorized.
+Source release with explicit notes, no binary assets; preserve the old v1.1.38 tag at c322b3e.
+No engine, deployment or live-config changes are needed for this metadata release.
 Test engines/server remain stopped, GPUs free, llama-swap daemon running.
 
-Source release **v1.1.38** is already published at `c322b3e`; #17 is closed. Do not redo or retag it,
-or publish another release automatically. Subsequent fixes on main are recorded under Unreleased:
+v1.1.39 includes the post-v1.1.38 fixes:
 
 - #23 `dc4c484`: keep replicated NextN outputs local and use its full shared-expert width.
 - #24 `56b9755`: verifier includes both sliced shared-expert partials.
@@ -52,7 +53,7 @@ Source CI41081377055 passes. Thirty-two new padded-output GPU parity cases plus 
 Simple/seven-draft API matrices pass 990/7290/14550-token prompts, reuse, stream DONE and peer health.
 MTP cancel/follow-up and limits1/2/3 pass; eight forced rank1-only retries coordinate; 94/94 round records match.
 CLI pair outputs 32/32 and captured hidden-state bytes match in both modes (32 simple rows, 1 initial MTP row).
-Seven-draft peer kill/recovery passes 8/8. Final tooling/report CI and issue closure are tracked in #22.
+Seven-draft peer kill/recovery passes 8/8. Final tooling/report CI and issue closure are recorded in #22.
 
 ## Operations / constraints
 
@@ -75,5 +76,5 @@ Seven-draft peer kill/recovery passes 8/8. Final tooling/report CI and issue clo
 8. #16 vision is deferred; #11 multi-sequence stays gated. `glm_rows.cu` needs its own shared-width/attention
    audit before enabling it. #10 gather-based bit-exact reduction remains optional future work.
 
-Check #27 for documentation CI/issue status; finish any still-running final gate, then follow the next user request.
+Check #28 for release CI/tag/publication status; finish any explicitly pending release step, then follow the next user request.
 Do not repeat completed measurements or publish a new release automatically.
