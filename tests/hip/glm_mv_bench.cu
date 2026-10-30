@@ -247,6 +247,69 @@ bool run_case(const Case& c, const std::vector<Config>& cfgs, const std::vector<
     }
     return ok;
 }
+// TP projection outputs retain full buffer strides after slicing their row count.
+// Compare packed/padded multi-column outputs with independent original GEMVs;
+// sentinel guards catch writes into another rank's unused rows or outside a tile.
+bool padded_output_parity(hipStream_t stream) {
+    constexpr int max_nt = 8, guard = 8, padding = 17;
+    bool ok = true;
+    std::mt19937 rng(0x254151u);
+    for (const Shape shape : {Shape{14, 512, 19}, Shape{30, 512, 13}}) {
+        std::vector<uint8_t> weights, quant;
+        std::vector<float> values;
+        fill_weights(weights, shape, rng);
+        fill_act(shape.n_in, max_nt, rng, values, quant);
+        void *dw = nullptr, *dq = nullptr, *df = nullptr;
+        float *reference = nullptr, *output = nullptr;
+        const size_t total = guard * 2 + max_nt * (shape.n_out + padding);
+        check(hipMalloc(&dw, weights.size()), "padded weights");
+        check(hipMalloc(&dq, quant.size()), "padded activations");
+        check(hipMalloc(&df, values.size() * sizeof(float)), "padded float activations");
+        check(hipMalloc(&reference, max_nt * shape.n_out * sizeof(float)), "padded reference");
+        check(hipMalloc(&output, total * sizeof(float)), "padded output");
+        check(hipMemcpy(dw, weights.data(), weights.size(), hipMemcpyHostToDevice), "H2D weights");
+        check(hipMemcpy(dq, quant.data(), quant.size(), hipMemcpyHostToDevice), "H2D quant");
+        check(hipMemcpy(df, values.data(), values.size() * sizeof(float), hipMemcpyHostToDevice), "H2D floats");
+        const size_t qstride = (size_t) shape.n_in / 32 * sizeof(block_q8_1);
+        gf::hip_expert_bench::mv_config(0, 1, 8, 0);
+        for (int t = 0; t < max_nt; ++t) {
+            gf::MvJob job = {dw, shape.type == 14 ? (uint8_t*) dq + t * qstride : nullptr,
+                            shape.type == 30 ? (float*) df + t * shape.n_in : nullptr,
+                            reference + t * shape.n_out, nullptr, 0.75f, shape.type, shape.n_in, shape.n_out};
+            if (!gf::mv(&job, 1, stream)) return false;
+        }
+        check(hipStreamSynchronize(stream), "padded reference sync");
+        std::vector<uint32_t> expected(max_nt * shape.n_out), got(total);
+        check(hipMemcpy(expected.data(), reference, expected.size() * sizeof(uint32_t), hipMemcpyDeviceToHost), "D2H ref");
+        gf::hip_expert_bench::mv_config(-1, 2, 8, -1);
+        for (int nt = 1; nt <= max_nt; ++nt) {
+            for (const int pad : {0, padding}) {
+                const int stride = shape.n_out + pad;
+                check(hipMemset(output, 0xff, total * sizeof(float)), "padded sentinel");
+                gf::MvJob job = {dw, shape.type == 14 ? dq : nullptr,
+                                shape.type == 30 ? (float*) df : nullptr,
+                                output + guard, nullptr, 0.75f, shape.type, shape.n_in, shape.n_out};
+                job.ncol = nt;
+                job.xq_cstride = qstride;
+                job.xf_cstride = shape.n_in;
+                job.y_cstride = stride;
+                if (!gf::mv(&job, 1, stream)) return false;
+                check(hipStreamSynchronize(stream), "padded output sync");
+                check(hipMemcpy(got.data(), output, total * sizeof(uint32_t), hipMemcpyDeviceToHost), "D2H output");
+                std::vector<uint32_t> want(total, 0xffffffffu);
+                for (int t = 0; t < nt; ++t)
+                    std::copy_n(expected.begin() + t * shape.n_out, shape.n_out, want.begin() + guard + t * stride);
+                size_t different = 0;
+                for (size_t i = 0; i < total; ++i) different += got[i] != want[i];
+                ok &= different == 0;
+                std::printf("parity padded-output type=%d nt=%d padding=%d differ=%zu %s\n",
+                            shape.type, nt, pad, different, different == 0 ? "PASS" : "FAIL");
+            }
+        }
+        for (void* ptr : {dw, dq, df, (void*) reference, (void*) output}) check(hipFree(ptr), "padded free");
+    }
+    return ok;
+}
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -292,7 +355,7 @@ int main(int argc, char** argv) {
                     for (int u : {1, 2, 4}) cfgs.push_back({r, u, wpb, lds});
         cfgs.push_back({-1, 2, 8, -1});   // and the default (its LDS choice)
     }
-    bool ok = true;
+    bool ok = padded_output_parity(s);
     for (const Case& c : kCases) {
         if (!only.empty() && only != c.name) continue;
         std::vector<Config> cc = cfgs;

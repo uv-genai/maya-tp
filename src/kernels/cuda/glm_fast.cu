@@ -2255,6 +2255,7 @@ __global__ void __launch_bounds__(WPB * 32) mv_rdna_kernel(const STRATA_GRID_CON
     const MvJob& J = b.j[ji];
     const int blk0 = ji ? b.blk_end[ji - 1] : 0;
     const int lane = threadIdx.x & 31, wave = threadIdx.x >> 5;
+    const int64_t y_stride = J.y_cstride > 0 ? J.y_cstride : J.n_out;
     if (J.type == 14) {
         const block_q8_1* xq = (const block_q8_1*) J.xq;
         if constexpr (XL) {   // the block's activation rows staged in LDS once (dynamic: NT * n_in / 32 q8_1 blocks)
@@ -2288,7 +2289,7 @@ __global__ void __launch_bounds__(WPB * 32) mv_rdna_kernel(const STRATA_GRID_CON
                 if (row + r >= J.n_out) break;
                 const float bias = J.bias ? J.bias[row + r] : 0.0f;
 #pragma unroll
-                for (int t = 0; t < NT; ++t) J.y[(size_t) t * J.n_out + row + r] = mv_out(J.alpha, s[r][t], bias);
+                for (int t = 0; t < NT; ++t) J.y[(size_t) t * y_stride + row + r] = mv_out(J.alpha, s[r][t], bias);
             }
         }
     } else {   // kTypeBF16
@@ -2299,7 +2300,7 @@ __global__ void __launch_bounds__(WPB * 32) mv_rdna_kernel(const STRATA_GRID_CON
         if (lane == 0) {
             const float bias = J.bias ? J.bias[row] : 0.0f;
 #pragma unroll
-            for (int t = 0; t < NT; ++t) J.y[(size_t) t * J.n_out + row] = mv_out(J.alpha, s[t], bias);
+            for (int t = 0; t < NT; ++t) J.y[(size_t) t * y_stride + row] = mv_out(J.alpha, s[t], bias);
         }
     }
 }
@@ -5354,16 +5355,17 @@ bool mv(const MvJob* jobs, int n, cudaStream_t s) {
     if (typed && one_col) {
         mv_rdna(jobs, n, 1, done, s);
     } else if (typed && mv_rdna_device()) {
-        // a verify window's several-column jobs whose columns sit one after another (mv_nt's layout): the RDNA3 kernel
-        // takes them as NT activations, each column bit for bit its one-column result - the token path's on the APUs
-        // (the MTP decode's window on the Strix / Gorgon Halo).  The rest go to the tiled kernels below.
+        // A verify window's packed input rows use the RDNA3 kernel even when TP
+        // retains full-width output strides for rank-local projection rows.
+        // Each column retains the token path's arithmetic. Other input layouts
+        // continue through the tiled kernels below.
         MvJob sub[kMaxMvJobs];
         int idx[kMaxMvJobs], m = 0, nc = 0;
         for (int i = 0; i < n; ++i) {
             const MvJob& J = jobs[i];
             const bool packed = J.ncol >= 2 && J.ncol <= kMaxRdnaNt && (J.type == kTypeBF16 || J.type == 14) &&
                                 (J.xq == nullptr || J.xq_cstride == (int64_t) (J.n_in / 32) * (int64_t) sizeof(block_q8_1)) &&
-                                (J.xf == nullptr || J.xf_cstride == J.n_in) && J.y_cstride == J.n_out;
+                                (J.xf == nullptr || J.xf_cstride == J.n_in) && J.y_cstride >= J.n_out;
             if (!done[i] && packed && (nc == 0 || J.ncol == nc)) {
                 nc = J.ncol;
                 sub[m] = J;
