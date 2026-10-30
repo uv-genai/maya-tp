@@ -1170,6 +1170,23 @@ bool Glm5Model::window(const int32_t* tokens, int T, int32_t* out, std::string& 
         cudaStreamSynchronize(m->fast_->cs);
         if (Wm.scr_h != nullptr && ((Wm.scr_h[0] | Wm.scr_h[2]) & 0x80000000u) != 0u) clash = true;
     }
+    if (tp_.active()) {
+        // Scratch residency differs between ranks. A local retry changes the FFN
+        // collectives from T rows to one row per token, so BOTH ranks must replay.
+        // Also checks queued AR failures before either rank accepts this window.
+        static int force_retry = [] {
+            const char* v = getenv("STRATA_TP_TEST_WINDOW_RETRY");
+            return v ? std::max(0, std::atoi(v)) : 0;
+        }();
+        if (attempt == 0 && force_retry > 0) { clash = true; --force_retry; }
+        const bool local_clash = clash;
+        int clean = clash ? 0 : 1;
+        if (!tp_.agree_min(clean, fast_->part, fast_->cs, err)) return false;
+        clash = clean == 0;
+        if (clash)
+            std::fprintf(stderr, "glm window TP: rank=%d p0=%lld T=%d attempt=%d local-clash=%d retry=%d\n",
+                         tp_.rank, (long long) p0, T, attempt, (int) local_clash, attempt == 0);
+    }
     if (clash && attempt == 0) {
         static bool told = false;
         if (!told) {

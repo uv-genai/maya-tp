@@ -1297,6 +1297,7 @@ TCP socket (`SendControl`/`RecvControl`); do **not** probe the bootstrap port wi
 | `MAYA_TP_NOAR` | unset | if set: skip all-reduce (isolation; answers will be wrong) |
 | `MAYA_TP_NOSLICE` | unset | if set: full weights on both ranks (isolation) |
 | `MAYA_TP_SH_BOTH` | unset | if set: shared expert runs on both ranks (AR would double it) |
+| `MAYA_TP_TEST_WINDOW_RETRY` | 0 | Diagnostic only: force a local scratch-retry vote for the first N MTP windows on this rank. Set on rank 1 alone to verify both ranks replay together; leave unset for normal inference. |
 
 **Not implemented** (do not set): `MAYA_TP_CONTROL_PORT`, `MAYA_TP_CONTROL_TOKEN`, `MAYA_TP_AR_FP16`,
 `MAYA_TP_PREFILL_ROWS`, `MAYA_TP_OVERLAP`. The mirror rides the bootstrap socket; partials are always F32;

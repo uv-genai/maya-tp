@@ -57,6 +57,11 @@ struct TpContext {
     /// `hidden` is the residual width (n_embd); `n` is a multiple of it (rows x hidden).
     bool all_reduce(float* dev, std::size_t n, int hidden, hipStream_t stream, std::string& err) const;
 
+    /// Agree on a nonnegative integer minimum before a rank-local scheduling decision.
+    /// `scratch` holds two device floats, unused by other work on this stream. The vote
+    /// goes over RDMA and drains/checks the stream before returning. Exact up to 2^24.
+    bool agree_min(int& value, float* scratch, hipStream_t stream, std::string& err) const;
+
     /// Overlapped all-reduce, gufo's split_reduce form.  `start_reduce` queues the exchange and returns at
     /// once; the worker thread stages the partial (D2H) and posts the RDMA write while the GPU computes.
     /// `finish_reduce` waits for the exchange and adds the peer's partial on `stream`.
