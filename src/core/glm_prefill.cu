@@ -22,6 +22,7 @@
 #include "strata/core/prefill_chunks.hpp"
 #include "strata/core/prefill_gaps.hpp"
 #include "strata/core/progress.hpp"
+#include "strata/core/tp_collective.hpp"
 #include "strata/kernels/cpu/exl3_cpu.hpp"
 #include "strata/kernels/cpu/kq_avx512.hpp"
 #include "strata/kernels/dequant_bf16.hpp"
@@ -2771,6 +2772,14 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
                 hgemm_q(Ly.ffn_down, E, FFD, B.dh16, FFD, S->ffn + (size_t) t0 * E, E, tn, 0.0f);
             }
             S->mark("dense_ffn", s);
+            // Dense lead weights are sliced too. The MoE reduce below is bypassed
+            // by this continue; sum dense partials before the next residual read.
+            if (tp_.active()) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "pre AR r=%d dense il=%d T=%d floats=%zu\n",
+                                 tp_.rank, il, T, (size_t) T * E);
+                if (!tp_.all_reduce(S->ffn, (std::size_t) T * E, E, s, err)) return false;
+            }
             dump_row("ffn_out-" + std::to_string(il), S->ffn, E);
             continue;
         }
@@ -4232,6 +4241,7 @@ int Glm5Model::prefill_chunk_for(int64_t nn) const {   // (prefill's own choice 
         if (m->pf_ == nullptr) return 0;
         Tmax = std::min(Tmax, m->pf_->T);
     }
+    if (tp_.active()) Tmax = tp_prefill_limit(Tmax, g_.n_embd, tp_.comm->MaxPartialBytes());
     return strata::core::prefill_chunk_len(nn, Tmax, split_next_ != nullptr, prefill_floor(nn, 1));
 }
 
@@ -4255,19 +4265,33 @@ bool Glm5Model::prefill(const std::vector<int32_t>& tokens, std::string& err, in
     err.clear();
     prefill_next_ = next_token;
     if (fast_ == nullptr || tokens.empty()) return false;
-    for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get())   // (a tail lent to the vision encoder: the
-        if (m->pf_ == nullptr || m->fast_ == nullptr || m->vis_lent_) return false;   // token path, until it is back)
+    bool available = true;
+    for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get())   // a tail lent to the vision encoder
+        if (m->pf_ == nullptr || m->fast_ == nullptr || m->vis_lent_) available = false;
     // a handful of tokens costs less through the token path (the batched path streams every expert they touch).  One
     // GPU: from 8 tokens - an agent session's later turns (13.5K of history + a short user turn, Maya-S24 on a V100,
     // two cooled rounds of three turns): prompt 1,041 / 648 / 521 ms at 32 -> 488 / 405 / 577 at 8 (4: 508 / 397 /
     // 576, 16: 502 / 716 / 540); a split keeps 32
     int64_t min_n = split_next_ == nullptr && n_parts_ <= 1 ? 8 : 32;
     if (const char* mn = getenv("STRATA_GLM_PREFILL_MIN")) min_n = std::max<int64_t>(1, std::atoll(mn));
-    if ((int64_t) tokens.size() < min_n) return false;
+    available = available && (int64_t) tokens.size() >= min_n;
+    if (tp_.active()) {
+        int ready = available ? 1 : 0;
+        if (!tp_.agree_min(ready, fast_->part, fast_->cs, err)) return false;
+        available = ready != 0;
+    }
+    if (!available) return false;   // both ranks take the mirrored token path
     // the chunk for this prompt: no bigger than it needs (rounded up to 64), so it borrows only that much; a prompt
     // longer than the largest chunk is cut into EQUAL chunks (the parts of a split pipeline chunks)
     int Tmax = pf_->T;
     for (Glm5Model* m = split_next_.get(); m != nullptr; m = m->split_next_.get()) Tmax = std::min(Tmax, m->pf_->T);
+    if (tp_.active()) {
+        Tmax = tp_prefill_limit(Tmax, g_.n_embd, tp_.comm->MaxPartialBytes());
+        if (Tmax == 0) {
+            err = "glm prefill: the TP receive window cannot hold one residual row";
+            return false;
+        }
+    }
     const int64_t nn = (int64_t) tokens.size();
     // one GPU has no pipeline to balance: full chunks and the remainder last - every chunk stages nearly every expert,
     // so 8449 tokens as 8192 + 257 cost about one chunk's experts, as two equal 4225s about two (240 -> ~300 tok/s).
@@ -4282,11 +4306,23 @@ bool Glm5Model::prefill(const std::vector<int32_t>& tokens, std::string& err, in
     // with a smaller one (nothing has been computed yet, so this is safe) - and a chunk that does not fit at 256
     // tokens is the end of the prompt path's memory: the request ends with an error, the engine lives.
     int Trun = Trun_max;
+    if (tp_.active()) {
+        // Local memory, tuning and layout budgets differ (e.g. 25088 vs 32768).
+        // Choose one chunk shape before any layer collective, including retries below.
+        if (!tp_.agree_min(Trun, fast_->part, fast_->cs, err)) return false;
+        std::fprintf(stderr, "glm prefill TP: rank=%d chunk=%d rows (RDMA payload max=%zu bytes)\n",
+                     tp_.rank, Trun, tp_.comm->MaxPartialBytes());
+    }
     for (;;) {
         bool laid_out = true;
         for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get()) {
             cudaSetDevice(m->dev_);
             if (!m->prefill_carve(Trun, pos_ + nn)) laid_out = false;
+        }
+        if (tp_.active()) {
+            int fit = laid_out ? 1 : 0;
+            if (!tp_.agree_min(fit, fast_->part, fast_->cs, err)) return false;
+            laid_out = fit != 0;
         }
         if (laid_out) break;
         if (Trun <= kMinPrefillChunk) {

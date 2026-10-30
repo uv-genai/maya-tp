@@ -1302,6 +1302,8 @@ TCP socket (`SendControl`/`RecvControl`); do **not** probe the bootstrap port wi
 **Not implemented** (do not set): `MAYA_TP_CONTROL_PORT`, `MAYA_TP_CONTROL_TOKEN`, `MAYA_TP_AR_FP16`,
 `MAYA_TP_PREFILL_ROWS`, `MAYA_TP_OVERLAP`. The mirror rides the bootstrap socket; partials are always F32;
 prefill row windows are fixed by the 48 MiB RDMA window; overlap is always on for the queued path.
+The prefill batch is capped to the transport's actual payload budget (3008 aligned rows for 4096-wide GLM)
+and negotiated across ranks; layout retries and MTP scratch-overflow retries also require a shared decision.
 
 Engine flags: `--tp-world-size`, `--tp-rank`, `--tp-bootstrap-host`, `--tp-bootstrap-port`, `--tp-rdma-device`.
 Both ranks must agree on model pack and context. Under TP2 the simple decode loop is the default;
