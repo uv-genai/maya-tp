@@ -4,13 +4,13 @@ Read `/home/ugo/software/project-maya/Handoff.md` **in full**, especially §16, 
 
 Project: GLM-5.3-Flash/Maya-S TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
 GPU inference, RDMA tensor path only. Bootstrap/control/token metadata may use TCP.
-Repo `uv-genai/maya-tp`, local branch main, VERSION/release still **v1.1.37**.
+Repo `uv-genai/maya-tp`, local branch main, release version **v1.1.38**.
 
 ## Current state
 
-User stopped release #17 after MTP-seven and large non-MTP failures, then authorized fixing/testing.
-**#18–#21 fixes are implemented and fully validated** (Handoff §16). No version bump/tag/release;
-**do not resume release work unless the user requests it**.
+**#18–#21 fixes are implemented and fully validated** (Handoff §16). The user then explicitly resumed
+release #17. VERSION is 1.1.38; release notes are in CHANGELOG.md. Source release with an annotated v1.1.38
+tag and no binary assets; publication/CI outcome is tracked in #17 and Handoff §17.
 
 Binary MD5 **`d6cd72ab0376c8df1d58cd1c2a20441b`** matches local `build-hip/maya` and both rank0
 `build-hip/maya` + `/tmp/maya-tp2`. Test engines/API server stopped, both GPUs free. Llama-swap daemon running.
@@ -52,4 +52,4 @@ unless needed for a new user request.
 7. No subagents authorized unless requested. #16 vision remains tracking-only/deferred; #11 multi-seq gated.
    `glm_rows.cu` still needs its own shared-width/attention audit before re-enabling multi-sequence work.
 
-Follow the next user request. Do not redo completed diagnosis or create a release automatically.
+Follow the next user request. Do not redo completed diagnosis or publish another release automatically.

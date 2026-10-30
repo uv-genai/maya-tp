@@ -1,5 +1,8 @@
 # TP2 MTP on/off benchmark — 2026-10-30
 
+> Historical measurement: this run predates the MTP attention and collective fixes in v1.1.38.
+> It does not establish the MTP performance of v1.1.38; repeat the controlled comparison for current timings.
+
 Issue [#14](https://github.com/uv-genai/maya-tp/issues/14), engine `5b547ce`, binary MD5
 `75a180099201dbc0abdf29808a536022` verified on both hosts. No engine changes.
 

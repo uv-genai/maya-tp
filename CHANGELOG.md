@@ -4,15 +4,41 @@ Every release is on GitHub (Releases) with these notes; every published change m
 page's Settings › About and updates (About > Update before the redesign; from v1.0.18), or `git pull`, then `./setup.sh` (Windows: `START-MAYA.bat`) - it recompiles
 only what changed and starts; the model is not downloaded again.
 
-## Unreleased (post-v1.1.37, TP2 fork)
+## v1.1.38 - 2026-10-30
 
-Follow-ups on this fork after the v1.1.37 tag (details in Handoff.md / issues):
+Opt-in MTP and conversation reuse for two-host GLM TP2, with fixes for seven-draft collective mismatches and large
+prompts exceeding the RDMA receive window. This fork targets HIP/ROCm gfx1151 Strix Halo Linux over Thunderbolt RDMA.
+The simple decode loop remains the default.
 
-- **Serve peer health** (#6): `/health` reports `tp.peer` and `status=degraded` after rank 1 dies; sticky engine `TP2_DOWN`.
-- **Kill/recover** verified; `tools/tp2/acceptance.sh` automates pair-up → chat → kill → restart.
-- **Docs:** SETTINGS lists only implemented `MAYA_TP_*` knobs; TP2-RUN rewritten (rank1-first, no `/dev/tcp` probe, 6 µs / 37 Gb/s meanings).
-- **Calibrator** `tools/calibrate_glm_tp.py`; AR microbench `tp_comm_rdma_test --bench --hidden`.
-- **Open:** #10 bit-exact gather · #11 multi-seq + reuse · #12 pack geometry · #13 MTP under TP2.
+- **Opt-in TP2 MTP** (#13, #18): rank 0 coordinates draft inputs, accepted tokens, stopping and aborts. Both ranks
+  now agree before retrying a verification window after a scratch clash, keeping collective sizes in sync.
+  Thinking-budget forcing, cancellation and short output limits follow the same mirrored protocol.
+- **Large prompts within the RDMA window** (#19): prefill batches respect the actual transport payload budget
+  and both ranks agree on chunk sizes and layout retries. For hidden width 4096, the aligned cap is 3008 rows
+  (49283072 bytes, below the 50331584-byte payload). Dense lead FFN partials are also summed before the residual.
+- **Correct expert staging and MTP attention** (#20, #21): prefill copies already compact RAM expert bands through
+  the ordered GPU copy stream, fixing double-slicing, nonfinite routes and crashes above the staging threshold.
+  MTP window attention uses each rank's head count; HIP scratch capacity tracks head and KV dimensions.
+- **Conversation reuse and peer health** (#6, #11): snapshot/restore is mirrored for a single conversation;
+  `/health` reports peer loss and degraded status, requests fail cleanly, and restarting both ranks recovers service.
+- **Pack-derived TP geometry** (#12): expert and dense widths come from pack metadata rather than fixed constants.
+- **llama-swap controls** (#15): `tools/llama-swap/tp2.sh run PORT --mtp --drafts N [--context N]` accepts 1–8
+  drafts and forwards both draft count/capacity and context to both ranks. `--no-mtp` selects simple decoding.
+  The canonical rank scripts use matching contexts and one sequence.
+- **Validation and tooling**: MTP off and seven drafts both pass 990-, 7290- and 14550-token requests, large
+  conversation reuse and streaming. Eight rank-1-only forced retries produce matching global replays;
+  all 150 MTP round records match. Cancellation/follow-up, output limits 1/2/3, 32/32 CLI pair parity in both
+  modes and all eight peer kill/recovery checks pass. Host receive-window boundaries and gfx1151 attention
+  parity pass. CPU-only gates pass: HIP mapping, 464 server tests (11 skips), 621 tools tests (31 skips).
+  See [the validation report](docs/validation/tp2-collectives-2026-10-30/RESULTS.md).
+- **Reproducible benchmarks and runbook** (#14): added `tools/tp2/bench_mtp.py` and updated the TP calibrator,
+  RDMA microbench and run instructions. The saved MTP comparison predates these correctness fixes; rerun it before making
+  performance claims for this release. MTP remains opt-in without a current speedup claim.
+- **Remaining scope**: multi-sequence TP2 (#11) and DFlash remain gated; gather-based bit-exact reduction (#10)
+  is future work, and HIP/TP2 vision (#16) remains deferred.
+
+Source release, with no prebuilt binary assets. Use matching builds on both ranks and restart the pair after updating.
+Dense prefill summation and corrected MTP attention can change generated answers.
 
 ## v1.1.37 - 2026-10-30
 

@@ -1,7 +1,7 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 (#18–#21 regression fixes complete and validated) · **v1.1.37 unchanged**. Release #17 stopped; no tag/release created.
+> Last updated: 2026-10-30 (release #17 resumed after validated #18–#21 fixes) · **v1.1.38**. Source release; publication tracked in #17.
 > Both hosts have matching fixed binaries, MD5 **`d6cd72ab0376c8df1d58cd1c2a20441b`**. All GPU/CI checks pass. Test engines/server stopped; llama-swap daemon running. See §16.
 
 ## 1. What we are building
@@ -36,7 +36,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | `origin` | `https://github.com/uv-genai/maya-tp.git` |
 | `upstream` | `https://github.com/mw00/project-maya.git` (read/merge only) |
 | `main` | tracks `origin/main` |
-| Latest release | **v1.1.37** |
+| Release version | **v1.1.38** ([release #17](https://github.com/uv-genai/maya-tp/issues/17)) |
 
 ## 4. Issue map
 
@@ -52,7 +52,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 14 | Controlled MTP on/off benchmark | complete; warm median off 38.255 / on 52.235 ms/token (§13) |
 | 15 | MTP deployment + llama-swap launcher verification | complete; runtime flags and both-rank propagation (§14) |
 | 16 | GLM vision on HIP + RDMA TP2 embedding synchronization | open, deferred by user (§15) |
-| 17 | Release v1.1.38 | stopped/deferred by user; no version/tag/release changes |
+| 17 | Release v1.1.38 | v1.1.38 source release; publication record in #17 (§17) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -302,8 +302,8 @@ No model files downloaded, no runtime configuration changed, no inference proces
 
 ## 16. #18–#21 regressions — fixed and validated
 
-**Release remains stopped/deferred (#17).** No VERSION bump, tag or release. User stopped Jen testing and
-explicitly authorized fixes and GPU validation. Original errors were MTP-seven
+**These regressions blocked the original release attempt.** User stopped Jen testing and explicitly authorized
+fixes and GPU validation, then resumed release #17 after validation (see §17). Original errors were MTP-seven
 `outgoing=0/539/16384 incoming=0/539/131072` and non-MTP large-prompt
 `all-reduce payload of 118521856 bytes exceeds the receive window of 50331584`.
 
@@ -348,3 +348,18 @@ Live rank0 YAML now has user-configured models `maya-glm5-s-tp2` (simple) and `m
 Rank0 checkout has older HEAD `7ee8f27` and staged/unstaged user work; **do not pull/reset or rebuild there**
 without preserving it. Fixed binaries are deployed directly; the authoritative fixed source is this checkout/origin.
 Prior #14 perf numbers predate these output-affecting fixes; rerun a controlled benchmark before new claims.
+
+## 17. v1.1.38 source release (#17)
+
+The user explicitly resumed release work after #18–#21 passed GPU tests and GitHub CI at `08e242b`.
+`VERSION` is 1.1.38; `CHANGELOG.md` records all changes since v1.1.37, leading with MTP/large-prompt correctness.
+Annotated tag/release: **v1.1.38**, title **v1.1.38 — TP2 MTP and large-prompt fixes**.
+Source release matching the prior format; no binary assets. Publication/commit/CI outcome is recorded in
+[issue #17](https://github.com/uv-genai/maya-tp/issues/17) and the
+[GitHub release](https://github.com/uv-genai/maya-tp/releases/tag/v1.1.38).
+
+Release preparation changes version metadata and documentation only. The deployed gfx1151 binary hash stays
+`d6cd72ab0376c8df1d58cd1c2a20441b`; GPU validation is in §16 and the durable report.
+No new inference, service restarts, binary deployment, rank0 checkout edits or llama-swap YAML changes are needed.
+Existing hardware validation applies; release-commit CPU-only gates/CI must pass before tagging/publishing.
+Historical #14 performance is explicitly marked as predating the correctness fixes; no current MTP speedup claimed.

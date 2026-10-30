@@ -1,5 +1,7 @@
 # TP2 collective regression validation — 2026-10-30
 
+> These fixes ship in v1.1.38. Version/release status below records the validation state before the release bump.
+
 HIP/ROCm gfx1151, two Strix Halo APUs, `usb4_rdma5` RDMA. Maya-S-v2 IQ2_XXS,
 context 32768, one conversation. Binary MD5 `d6cd72ab0376c8df1d58cd1c2a20441b`
 matched local `build-hip/maya` and rank 0 `build-hip/maya` + `/tmp/maya-tp2`.
