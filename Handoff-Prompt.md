@@ -40,7 +40,12 @@ speed win. Overlapped AR (gufo `StartPartial`/`FinishPartial`) is future work; *
 
 **Open:** #1 umbrella, #10 optional gather design, #11 multi-seq still gated (`SEQS>1` prompt `mv_rdna`).
 `glm_rows.cu` has the same full-width shared `FFs` bug the window had; fix when explicitly resuming #11.
-No new performance workstream has been started. Follow the next user request; don't reopen completed #13 diagnosis.
+**#14 benchmark completed (Handoff §13):** same resident pair, fixed 256-token continuation, two warmups per
+mode, four measured runs/mode: MTP off **38.255 ms/token, 26.14 tok/s**; MTP on **52.235 ms/token, 19.14 tok/s**.
+MTP throughput −26.76% on this workload, 25.97% draft acceptance. All measured runs have zero disk I/O.
+Harness `tools/tp2/bench_mtp.py`; durable data/report `docs/benchmarks/tp2-mtp-2026-10-30/RESULTS.md`.
+Fixed-length microbenchmark ignores EOS (reference crosses turn boundaries); default gate unchanged.
+Follow the next user request; don't reopen completed #13 diagnosis.
 
 **Operations:** start rank 1 first (`bash tools/tp2/rank1.sh`), then rank 0 on strix-halo-1
 (`bash tools/tp2/rank0.sh 18080`). Never probe bootstrap port 18515 with `/dev/tcp`.

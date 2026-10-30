@@ -1,8 +1,8 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 (session 3, #13 protocol fix + acceptance) · v1.1.37 · branch `main` on `uv-genai/maya-tp` · engine fix **`5b547ce`**; prior WIP preserved in `74a47d8`.
-> **Both GPUs are free** (no engines or servers running). Both deployed rank-0 paths and local binary match MD5 **`75a180099201dbc0abdf29808a536022`**. All #13 exit checks pass; MTP ships opt-in (§11).
+> Last updated: 2026-10-30 (session 4, #14 warm MTP benchmark) · v1.1.37 · branch `main` on `uv-genai/maya-tp` · engine fix **`5b547ce`**; prior WIP preserved in `74a47d8`.
+> **Both GPUs are free** (no engines or servers running). #14 benchmark complete; see §13. Both deployed rank-0 paths and local binary match MD5 **`75a180099201dbc0abdf29808a536022`**. All #13 exit checks pass; MTP ships opt-in (§11).
 
 ## 1. What we are building
 
@@ -49,6 +49,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 11 | Multi-seq + snapshot reuse | **partial — snapshot/reuse + rows ARs done; multi gated (`seq_count>1` prompt `mv_rdna`). NOTE: `glm_rows.cu` still has the full-width `FFs` bug (see §11.4) — fix when re-enabling multi.** |
 | 12 | Pack-derived TP geometry | closed |
 | 13 | MTP under TP2 | **Complete (§11). Opt-in `MAYA_TP_MTP=1`; simple loop remains default.** |
+| 14 | Controlled MTP on/off benchmark | complete; warm median off 38.255 / on 52.235 ms/token (§13) |
 
 ## 5. What works (Maya-S pack)
 
@@ -61,7 +62,12 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 - **Acceptance:** `tools/tp2/acceptance.sh`.
 - **Decode under TP2:** simple loop is the default; MTP is opt-in and greedy (see #13).
 
-## 6. Performance (Maya-S IQ2_XXS, 32-tok controlled runs, 2026-10-30)
+## 6. Performance (Maya-S IQ2_XXS)
+
+Latest warm resident-pair test (#14, 256 identical output tokens, four measured runs per mode):
+**38.255 ms/token without MTP vs 52.235 with MTP**, zero measured disk I/O. See §13 and the durable report.
+
+Earlier 32-token measurements (2026-10-30):
 
 | Config | ms/tok | notes |
 | --- | --- | --- |
@@ -217,10 +223,32 @@ The worker consumes the wrong header, then resumes in the middle of the protocol
   fix when explicitly resuming that issue.
 - Overlapped AR (`StartPartial`/`FinishPartial`, gufo) is future performance work; **no `MAYA_TP_OVERLAP` knob**.
 - Protocol changed: always deploy matching binaries on both ranks, killing the remote server **before** its engine.
-- #13 work is complete in `5b547ce`; no new performance work started. #1 stays open as the umbrella, #10 is optional,
-  #11 remains open with multi-sequence decode gated. Start a separate issue for any new performance workstream.
+- #13 work is complete in `5b547ce`. #14 measured MTP on/off performance (§13). #1 stays open as the umbrella,
+  #10 is optional, #11 remains open with multi-sequence decode gated. Use a separate issue for new optimization work.
 
 ## 12. Key commits
 
 `a4c10d5` Handoff (pre-#13 restart) · `bd4607d`/`af0c398` AR traces · `63d3966` emit/greedy/n=2 sync · `57c30ce` window/rows TP dims · `64ba3c6` whq/n=0 drafts · `aec2829` peer health · `805ee0b` serve mirroring · `0b9f5c4` v1.1.37 · earlier TP2 slice/transport.
 **`74a47d8`** preserves the prior verified WIP. **`5b547ce`** completes the protocol fix, failure handling, MTP opt-in and regression harness (§11).
+
+## 13. #14 controlled warm MTP on/off benchmark (session 4)
+
+- User requested a fresh direct comparison. **No engine changes/rebuild**; MD5 remains `75a180099201dbc0abdf29808a536022`.
+- Reproducible stdlib harness: `tools/tp2/bench_mtp.py`. Same resident pair, MTP loaded for both modes;
+  toggle `GEN spec=1` / `spec=0`, following the identical 256-token TP2 simple-loop reference via `--spec-follow`.
+- 12-token prompt, context 4096, MTP fixed width 2; two excluded warmups per mode, four measured runs per mode,
+  balanced ABBAABBA order. All measured outputs identical; all measured VRAM hits 100%, zero disk time.
+- **MTP off: median 38.255 ms/token, 26.14 tok/s** (range 38.163–38.301).
+- **MTP on: median 52.235 ms/token, 19.14 tok/s** (range 52.169–52.302).
+- MTP: **26.76% lower throughput**, **36.55% higher token latency** on this workload; 87/335 drafts accepted
+  (25.97%), 168 rounds, 1.52 tokens/round; drafting 9.95 + verify 69.56 + commit/cache 0.09 ms/round.
+- First excluded simple warmup was 75.47 ms/token (36.91 ms/token disk wait), then 37.80 warm; this confirms
+  why the older cold 32-token samples were noisy. Only the warm repetitions enter the result.
+- Fixed-length microbenchmark: EOS sentinel 2147483647 and loop guards off. Reference crosses turn boundaries
+  at positions 51/125/187; do not generalize this acceptance rate to all natural chats. Default gate unchanged.
+- Durable report + raw results + exact reference: **[docs/benchmarks/tp2-mtp-2026-10-30/RESULTS.md](docs/benchmarks/tp2-mtp-2026-10-30/RESULTS.md)**.
+- Logs: `/tmp/maya-mtp-bench-14-progress.log` and `/tmp/maya-mtp-bench-14/{reference,benchmark}-rank{0,1}.log`.
+- Re-run: `.venv/bin/python tools/tp2/bench_mtp.py --output /tmp/maya-mtp-comparison --tokens 256 --runs 4`.
+  Use a fresh output directory; harness stops both hosts afterward. Both GPUs are free.
+- Local CI trio PASS: HIP mapping, 464 serve tests (11 skips), 614 tools tests (31 skips). Benchmark helper
+  `--help` and compilation pass. Test suites ran only after both GPUs were free. No engine defaults changed.

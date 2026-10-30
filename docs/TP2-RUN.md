@@ -112,7 +112,11 @@ MTP uses greedy verification with a fixed draft width (default 2); rank 0 sends 
 accepted tokens, and the continue/stop decision over the bootstrap control channel. Tensors stay on RDMA.
 Thinking-budget forces and client cancellation use this same round protocol. Both hosts need matching binaries.
 
-MTP has not measured faster than the simple loop on this pair. Validate it with:
+The [warm resident-pair comparison](benchmarks/tp2-mtp-2026-10-30/RESULTS.md) measured
+38.255 ms/token without MTP versus 52.235 with MTP on a fixed 256-token continuation.
+Re-run with `.venv/bin/python tools/tp2/bench_mtp.py --output /tmp/mtp-comparison` (stops existing engines).
+
+Validate MTP correctness with:
 
 ```sh
 # Against a running MTP-enabled pair: 3 turns with reuse, cancellation, and small output limits
