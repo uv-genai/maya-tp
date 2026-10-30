@@ -5454,7 +5454,8 @@ bool Glm5Model::fast_dsa(int il, int64_t p, std::string& err) {
                    NH * g.v_head, g.n_embd};
     if (!gf::mv(&o, 1, s)) { err = "glm fast: dsa output"; return false; }
     if (F->prof_on) F->mark("dsa_out_mv");
-    if (tp_.active()) {
+    // The NextN draft layer is replicated: only trunk outputs are TP partials.
+    if (tp_.active() && il != mtp_il_) {
         std::string ar_err;
         if (!tp_.all_reduce(F->mixer, (std::size_t) g.n_embd, g.n_embd, s, ar_err)) {
             err = ar_err;
@@ -5506,7 +5507,7 @@ bool Glm5Model::fast_moe(int il, bool& pf_pending, std::string& err, bool cpu_wa
     const Glm5Geometry& g = g_;
     cudaStream_t s = F->cs;
     const auto& Ly = F->L[(size_t) il];
-    const int FFs = ff_compute() * g.n_shared;
+    const int FFs = ff_compute_for(il) * g.n_shared;
     gf::MvJob j[gf::kMaxMvJobs];
     int nj = 3;
     j[0] = {Ly.router, nullptr, F->x, F->rlog, nullptr, 1.0f, gf::kTypeBF16, g.n_embd, g.n_expert};
@@ -5542,7 +5543,7 @@ void Glm5Model::fast_moe_route(int il, const MoeIo& io, const gf::MoeDev& md, vo
     FastState* F = fast_;
     const Glm5Geometry& g = g_;
     const auto& Ly = F->L[(size_t) il];
-    const int FFs = ff_compute() * g.n_shared;
+    const int FFs = ff_compute_for(il) * g.n_shared;
     // STRATA_GLM_PROMOTE_MIN=<n>: a fetched expert is kept in VRAM only when its aged route count clears n.
     // Unset or <= 1: the old rule (keep it whenever a spare is free).
     static const int promote_min = [] {
@@ -5574,7 +5575,7 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
     const Glm5Geometry& g = g_;
     cudaStream_t s = F->cs;
     const auto& Ly = F->L[(size_t) il];
-    const int FFs = ff_compute() * g.n_shared;
+    const int FFs = ff_compute_for(il) * g.n_shared;
     // the prefetch list of THIS route lives in the buffer of this layer's parity (the side stream may still
     // read the previous layer's list while this route writes)
     gf::MoeDev md = F->md;
@@ -5650,9 +5651,10 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
     // (the shared expert's down rides the gate/up launch: sh_out)
     const int ffn = ff_compute_for(il);
     // TP2: the sliced shared expert is summed across ranks like the routed experts
-    // (each rank's down is a partial).  Replicated (MAYA_TP_NOSLICE or not TP): rank 0 only.
+    // (each rank's down is a partial). The replicated NextN is entirely local.
+    // A replicated trunk (MAYA_TP_NOSLICE) adds shared output on rank 0 only.
     static const bool sh_both = getenv("MAYA_TP_SH_BOTH") != nullptr;
-    const float* sh_for_down = (!tp_.active() || tp_.rank == 0 || sh_both || tp_.slicing())
+    const float* sh_for_down = (!tp_.active() || il == mtp_il_ || tp_.rank == 0 || sh_both || tp_.slicing())
                                   ? (Ly.sh_down.q != nullptr ? F->sh_out : nullptr)
                                   : nullptr;
     gf::moe_gate_up(Ly.gu_type, md, g.n_exp_used, g.n_embd, ffn, g.swiglu_exp, io.xq, F->hq, Ly.sh_down.q,
@@ -5661,9 +5663,9 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
     gf::moe_down(Ly.d_type, md, g.n_exp_used, g.n_embd, ffn, Ly.down_off, F->hq, sh_for_down, io.ffn, s);
     if (F->prof_on) F->mark("moe_down");
     }
-    // TP2: the routed experts' weighted sum is this rank's band; sum the ranks before the CPU lane
-    // and the shared expert (which is replicated) are added.
-    if (tp_.active()) {
+    // Trunk expert/shared outputs are rank-local partials. The replicated NextN
+    // output is already complete and must not be summed across ranks.
+    if (tp_.active() && il != mtp_il_) {
         std::string ar_err;
         if (!tp_.all_reduce(io.ffn, (std::size_t) g.n_embd, g.n_embd, s, ar_err)) {
             err = ar_err;
