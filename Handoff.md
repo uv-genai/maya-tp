@@ -1,8 +1,10 @@
 # Handoff — Maya TP2 (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-30 (release #17 resumed after validated #18–#21 fixes) · **v1.1.38**. Source release; publication tracked in #17.
-> Both hosts have matching fixed binaries, MD5 **`d6cd72ab0376c8df1d58cd1c2a20441b`**. All GPU/CI checks pass. Test engines/server stopped; llama-swap daemon running. See §16.
+> Last updated: 2026-10-30 (post-v1.1.38 MTP review) · **v1.1.38** source release at `c322b3e`.
+> #22 diagnosis/measurements and hardware/CPU gates complete; #23–#26 fixes on main (§18). Final report CI/status is tracked in #22.
+> Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** deployed identically to all three paths.
+> Test engines/server stopped; llama-swap daemon/config preserved. Published v1.1.38 predates the post-release fixes.
 
 ## 1. What we are building
 
@@ -49,10 +51,15 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 11 | Multi-seq + snapshot reuse | **partial — snapshot/reuse + rows ARs done; multi gated (`seq_count>1` prompt `mv_rdna`). NOTE: `glm_rows.cu` still has the full-width `FFs` bug (see §11.4) — fix when re-enabling multi.** |
 | 12 | Pack-derived TP geometry | closed |
 | 13 | MTP under TP2 | **Complete (§11). Opt-in `MAYA_TP_MTP=1`; simple loop remains default.** |
-| 14 | Controlled MTP on/off benchmark | complete; warm median off 38.255 / on 52.235 ms/token (§13) |
+| 14 | Historical MTP on/off benchmark | complete; predates numerical fixes, superseded by #22 (§18) |
 | 15 | MTP deployment + llama-swap launcher verification | complete; runtime flags and both-rank propagation (§14) |
 | 16 | GLM vision on HIP + RDMA TP2 embedding synchronization | open, deferred by user (§15) |
-| 17 | Release v1.1.38 | v1.1.38 source release; publication record in #17 (§17) |
+| 17 | Release v1.1.38 | published from c322b3e; closed (§17) |
+| 22 | MTP limited speedup: sweep and code review | complete (§18); final report CI/status tracked in #22 |
+| 23 | Replicated NextN reduced / shared width truncated | fixed and validated `dc4c484` (§18) |
+| 24 | Rank1 shared partial omitted in verifier | fixed and validated `56b9755` (§18) |
+| 25 | Padded outputs bypass HIP RDNA GEMV | fixed `ec22f4d`, GPU parity/microbench pass (§18) |
+| 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -71,21 +78,25 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 
 ## 6. Performance (Maya-S IQ2_XXS)
 
-Historical warm resident-pair test (#14, before #18–#21 correctness fixes, 256 identical output tokens, four measured runs per mode; rerun before current performance claims):
-**38.255 ms/token without MTP vs 52.235 with MTP**, zero measured disk I/O. See §13 and the durable report.
+**Current corrected engine**, framed chat, warm resident 256-token common references, all raw picks agree:
 
-Earlier 32-token measurements (2026-10-30):
+| Workload | Drafts | Simple tok/s | MTP tok/s | Gain |
+| --- | ---: | ---: | ---: | ---: |
+| Technical | 1 | 25.82 | 28.60 | +10.79% |
+| Technical | 2 | 25.97 | 27.79 | +6.99% |
+| Technical | 3 | 25.95 | 24.78 | −4.53% |
+| Technical | 7 | 25.51 | 15.67 | −38.58% |
+| Code | 1 | 25.64 | 31.30 | +22.07% |
+| Code | 2 | 25.86 | 33.53 | +29.64% |
 
-| Config | ms/tok | notes |
-| --- | --- | --- |
-| single-host simple loop (warm) | **55.76** | pre-#13 baseline |
-| single-host + MTP | **41.86** | 13 rounds, 2.46 tok/round (adaptive n) |
-| TP2 + AR simple loop (spec-follow) | **41.1** | ~43 free greedy |
-| **TP2 + AR + MTP** | **44.18** | 17 rounds, 1.88 tok/round (fixed n=2); drafts 9.3 ms + verify 73–77 ms + commit 0.1 ms per round |
+One-host technical control: 18.55→23.40 tok/s (+26.11%, one draft), +27.26% with two.
+Acceptance and verification amortization govern the gain; TP2 accelerates ordinary tokens more than verification.
+All experts resident, zero measured disk/CPU expert work. No defaults/YAML changed.
+Durable report/raw data: **docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md**.
 
-- **MTP is not yet a win under TP2** (44.2 vs 41–43 simple). Verify is well-batched already; the lever is the **overlapped AR** (gufo `StartPartial`/`FinishPartial`; `MAYA_TP_OVERLAP` is NOT implemented — no such knob).
-- Near-ties vs single-host MTP text (`--spec-follow`): **6/32** (simple-loop baseline 4/32 — normal AR reduction-order near-ties).
-- Link: **6.04 µs** WRITE RTT; **37.4 Gb/s at 1 MiB**; **~9 Gb/s** at 10–48 KiB AR rows. Blocking AR ~58 µs. See §8.0.
+Historical #14 and early 32-token results in §13/§11 predate numerical fixes and are not current claims.
+Link measurements: 6.04 µs tiny WRITE RTT, 37.4 Gb/s at 1 MiB; ~9 Gb/s at 10–48 KiB AR rows.
+Blocking AR ~58 µs; `MAYA_TP_OVERLAP` is NOT implemented.
 
 ## 7. Architecture
 
@@ -114,7 +125,7 @@ docs/TP2-RUN.md                        ops runbook
 3. **Shard stride:** GGUF expert stride is full `gu_row * n_ff_exp`; `Ly.gu_bytes` is sliced.
 4. **`NOSLICE=1` + AR doubles the FFN** (both ranks full compute then AR). Isolation = `NOSLICE=1` + `NOAR=1`.
 5. **Drain:** `hipStreamSynchronize` before `CheckQueued`/`EndOperation`.
-6. **Near-ties:** use `--spec-follow`; free-generation agreement is not a quality gate.
+6. **Raw picks:** use `--spec-follow` diagnostics as well as emitted IDs. Same-topology ordinary/MTP picks must agree; forced IDs alone hide defects. Cross-topology reduction order can change greedy text.
 7. **GCC 16 + HIP `<format>`:** `-include format` (already in CMake for TP targets).
 8. **`ibv_create_cq_ex` / `IBV_SEND_INLINE` unsupported** on Thunderbolt.
 9. **`RecvControl` must loop on EAGAIN.**
@@ -358,8 +369,74 @@ Source release matching the prior format; no binary assets. Publication/commit/C
 [issue #17](https://github.com/uv-genai/maya-tp/issues/17) and the
 [GitHub release](https://github.com/uv-genai/maya-tp/releases/tag/v1.1.38).
 
-Release preparation changes version metadata and documentation only. The deployed gfx1151 binary hash stays
+At release time, preparation changed version metadata and documentation only. The deployed gfx1151 binary hash was
 `d6cd72ab0376c8df1d58cd1c2a20441b`; GPU validation is in §16 and the durable report.
-No new inference, service restarts, binary deployment, rank0 checkout edits or llama-swap YAML changes are needed.
-Existing hardware validation applies; release-commit CPU-only gates/CI must pass before tagging/publishing.
+That metadata-only release required no engine rebuild/deployment or rank0 checkout/YAML edits.
+Release-commit CI41072147262 passed before publication. Post-release engine changes and current hashes are in §18.
 Historical #14 performance is explicitly marked as predating the correctness fixes; no current MTP speedup claimed.
+
+## 18. #22 MTP performance/code review — completed diagnosis and validation
+
+User authorized all testing/review; will not run workloads until completion. No agents used.
+Published v1.1.38 remains at `c322b3edaf3380457ec98662a9d17c95ae415a22`, release CI41072147262 passed.
+New fixes below are committed/pushed to main, not included in that tag. VERSION remains 1.1.38.
+
+### Findings and changes
+
+- **#23 `dc4c484`:** NextN layer is fully replicated but fast_dsa/fast_moe wrongly reduced full outputs.
+  Keep NextN local and use `ff_compute_for(il)` at all three draft shared GEMVs; include full draft shared output.
+  Isolated old-reference one-draft acceptance 58.75→80.85%, draft~5.3→4.1ms; speed+3.06→18.56%.
+- **#24 `56b9755`:** all five trunk window inclusion paths now include rank1 sliced shared partial.
+  Old-reference ordinary/verifier differences 55→18/256.
+- **#26 `c8758cb`:** ordinary fast_layers dense lead FFN skipped AR (prefill/window already sum).
+  Reduce before residual. Fresh corrected ordinary reference gives **0/256 raw picks differences in both modes**.
+  The remaining18 differences were a numerical bug, not harmless reduction-order near ties.
+- **#25 `ec22f4d`:** HIP RDNA dense GEMV honors padded y stride and dispatch permits packed inputs/padded outputs.
+  Thirty-two new Q6_K/BF16 NT1…8 output/guard tests plus existing GPU MV parity all pass.
+  Targeted real-shape before/after kernel microbench: 1–52% improvement; not a whole-model gain claim.
+
+Current engine **5dbc93560e0eb024dcbdc0d9eb60ea57**, all three paths hash-matched; source c8758cb.
+No source edits since build/deploy. Baseline backup `/tmp/maya-22-baseline-maya` (d6cd72ab);
+#23-only `/tmp/maya-23-only-maya`, #23+#24 `/tmp/maya-24-correctness-maya` (f021a5a2).
+
+### Measurement conclusions
+
+§6 lists final corrected-model results; report/raw data saved in
+`docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md`.
+Technical one-draft acceptance 105/149; code one-draft 118/136. With two drafts useful tokens/round are 2.10 vs 2.56,
+while verification is ~67–69 ms, explaining technical +7% vs code +30%. Seven technical drafts yield only 2.35 tokens/round
+for ~151 ms draft+verify. Single-host technical +26–27% vs TP +7–11%: ordinary 54→39 ms scales more than verify 72→56 ms.
+Own common reference per topology; not identical outputs across topologies or exact causal decomposition.
+No experiment establishes a draft-quantization contribution. One draft technical/two code are measured choices.
+
+Old #14/#22 prompt decoded as `[gMASK]Reasoning Effort: MaxThe capital of France is`, lacks chat framing and
+crosses answer boundaries. Pre-fix ablations prove implementation effects only, not final speed claims.
+Forced emitted-ID equality hid raw pick differences; benchmark now rejects raw-pick disagreements (default 0),
+with four unit tests. New flags: --drafts, --reference, --prompt-file, --single-host, --window-profile
+(instrumented results excluded), --max-pick-differences (explicit diagnostic tolerance only).
+Pinned llama.cpp post-output-norm NextN seeding matches Maya. No alternate batching/replay toggle fixed the 18 pick differences.
+
+### Final validation status / operations
+
+- Required CPU gates PASS in order: HIP map, 464 serve / 11 skips, 625 tools / 31 skips.
+  Logs `/tmp/maya-22-{hip-map,serve,tools}-tests.log`; source CI41081377055 at c8758cb PASS.
+- Context 32768 **simple and seven-draft MTP** API matrices PASS: 990/7290/14550 prompt tokens,
+  large reuse, stream DONE, peer up. MTP cancel/follow-up and limits 1/2/3 PASS.
+- Eight forced rank1-only clashes have matching global retry shapes; **94/94 round records match**.
+  `/tmp/maya-22-final-trace-audit.json`; no transport/nonfinite/GPU errors in captured API engine logs.
+- CLI **32/32** pair tokens agree in simple/seven-draft MTP. Captured hidden bytes match (32 ordinary
+  rows in simple, one initial ordinary row in MTP; batched verifier is not covered by the dump).
+  `/tmp/maya-22-final-cli-results.json` and `*-cli-progress.log`.
+- Seven-draft peer death/restart **8 passed, 0 failed**; final stable `acceptance.sh` forwards fixed count,
+  capacity/context to both ranks, stops server before engine and allows cold disk-backed loading.
+  `/tmp/maya-22-final-kill-recover-rerun.log`; durable copy `kill-recovery.txt` in the report directory.
+- Final report, all raw performance/API data, microbenchmark source/results, trace audit and CLI parity:
+  **docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md**. Final tooling/report CI and issue closure
+  are tracked in #22; check that issue for the final run/commit. Source-fix CI already passes.
+- **Test engines and API server stopped; both GPUs free.** Llama-swap daemon still running on 8080,
+  user YAML unchanged. All three binary hashes rechecked after testing. Remote dirty checkout preserved.
+- #23–#26 are fixed/validated; #22 has the final diagnosis. No new release created automatically.
+  New changes are under Unreleased in CHANGELOG; v1.1.38 remains immutable and predates these fixes.
+
+Never nested SSH, preserve rank0 checkout 7ee8f27 dirty work, llama-swap daemon/YAML. Stop server before engine.
+Local build tests are ON temporarily; gfx1151. No background CPU work during performance timing; timings are complete.

@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import queue
+import re
 import shlex
 import statistics
 import subprocess
@@ -25,8 +26,20 @@ PROMPT = "154822,25062,287,29905,371,25,7487,785,6722,315,9621,374"
 PACK = "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack"
 # Explicitly neutralize inherited test/isolation settings on the remote host too.
 CLEAR = ("GLM_NO_MTP", "GLM_SPEC_FOLLOW", "GLM_SPEC_FOLLOW_SAVE", "GLM_TP_AR_TRACE",
-         "GLM_MTP_TRACE", "GLM_MTP_FIXED", "GLM_NO_REUSE", "TP_NOAR", "TP_NOSLICE", "TP_SH_BOTH")
+         "GLM_MTP_TRACE", "GLM_MTP_FIXED", "GLM_MTP_DRAFT", "TP_TEST_WINDOW_RETRY",
+         "GLM_WIN_PROF", "GLM_NO_REUSE", "TP_NOAR", "TP_NOSLICE", "TP_SH_BOTH")
 SETTINGS = dict(MAYA_TP_MTP="1", MAYA_GLM_MTP_FIXED="2", MAYA_GLM_LOOP_THINK="0", MAYA_GLM_LOOP_ANSWER="0")
+
+
+def check_fidelity(diagnostics, maximum=0):
+    """Forced output IDs alone do not establish agreement with the model's picks."""
+    counts = [int(match.group(1)) for line in diagnostics
+              if (match := re.search(r"(\d+) of them differ from the model's own pick", line))]
+    if len(counts) != 1:
+        raise RuntimeError("missing or ambiguous raw-pick agreement diagnostic")
+    if counts[0] > maximum:
+        raise RuntimeError(f"{counts[0]} raw model picks differ from reference (maximum {maximum})")
+    return counts[0]
 
 
 def remote(argv, **kwargs):
@@ -41,33 +54,37 @@ def cleanup():
 
 
 class Pair:
-    def __init__(self, output, label, context, follow=None):
+    def __init__(self, output, label, context, follow=None, single_host=False):
         self.output = output
         self.label = label
         self.lines = queue.Queue()
         self.r0 = self.r1 = None
         self.log0 = (output / f"{label}-rank0.log").open("w")
         self.log1 = (output / f"{label}-rank1.log").open("w")
-        args = ["--glm-pack", PACK, "--max-context", str(context), "--greedy", "--parallel", "1",
-                "--tp-world-size", "2", "--tp-bootstrap-port", "18515", "--tp-rdma-device", "usb4_rdma5"]
+        args = ["--glm-pack", PACK, "--max-context", str(context), "--greedy", "--parallel", "1"]
+        tp_args = ["--tp-world-size", "2", "--tp-bootstrap-port", "18515", "--tp-rdma-device", "usb4_rdma5"]
         env = {k: v for k, v in os.environ.items() if not k.startswith(("MAYA_", "STRATA_"))}
         env.update(SETTINGS)
         try:
-            self.r1 = subprocess.Popen([str(ROOT / "build-hip/maya"), *args, "--tp-rank", "1",
-                                        "--tp-bootstrap-host", HOST], stdin=subprocess.DEVNULL,
-                                       stdout=self.log1, stderr=subprocess.STDOUT, env=env)
-            remote_env = ["env"]
-            for setting in CLEAR:
-                for prefix in ("MAYA_", "STRATA_"):
-                    remote_env += ["-u", prefix + setting]
-            remote_env += [f"{k}={v}" for k, v in SETTINGS.items()]
-            cmd = [*remote_env, str(ROOT / "build-hip/maya"), *args, "--tp-rank", "0", "--serve",
-                   "--eos-ids", "2147483647"]
+            if single_host:
+                cmd = [str(ROOT / "build-hip/maya"), *args, "--serve", "--eos-ids", "2147483647"]
+            else:
+                self.r1 = subprocess.Popen([str(ROOT / "build-hip/maya"), *args, *tp_args, "--tp-rank", "1",
+                                            "--tp-bootstrap-host", HOST], stdin=subprocess.DEVNULL,
+                                           stdout=self.log1, stderr=subprocess.STDOUT, env=env)
+                remote_env = ["env"]
+                for setting in CLEAR:
+                    for prefix in ("MAYA_", "STRATA_"):
+                        remote_env += ["-u", prefix + setting]
+                remote_env += [f"{k}={v}" for k, v in SETTINGS.items()]
+                cmd = [*remote_env, str(ROOT / "build-hip/maya"), *args, *tp_args, "--tp-rank", "0", "--serve",
+                       "--eos-ids", "2147483647"]
             if follow:
                 cmd += ["--spec-follow", follow]
-            self.r0 = subprocess.Popen(["ssh", "-o", "BatchMode=yes", HOST, "exec " + shlex.join(cmd)],
+            command = cmd if single_host else ["ssh", "-o", "BatchMode=yes", HOST, "exec " + shlex.join(cmd)]
+            self.r0 = subprocess.Popen(command,
                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                       text=True, bufsize=1)
+                                       text=True, bufsize=1, env=env if single_host else None)
             self.pump = threading.Thread(target=self._read, daemon=True)
             self.pump.start()
             self.until(lambda line: line.startswith("READY "), 240)
@@ -146,45 +163,73 @@ class Pair:
 
 
 def main():
+    global PROMPT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--tokens", type=int, default=256)
     parser.add_argument("--context", type=int, default=4096)
     parser.add_argument("--runs", type=int, default=4, help="measured runs per mode (positive, even)")
+    parser.add_argument("--drafts", type=int, default=2, choices=range(1, 9), help="fixed MTP draft count and capacity")
+    parser.add_argument("--reference", type=Path, help="reuse reference IDs from a prior sweep run")
+    parser.add_argument("--prompt-file", type=Path, help="comma-separated prompt IDs for a representative workload")
+    parser.add_argument("--window-profile", action="store_true", help="instrument verification; exclude from performance comparisons")
+    parser.add_argument("--max-pick-differences", type=int, default=0,
+                        help="raw model-pick differences allowed against the forced reference (default: 0)")
+    parser.add_argument("--single-host", action="store_true", help="local gfx1151 control without TP or RDMA")
     args = parser.parse_args()
+    if args.prompt_file:
+        ids = [int(x) for x in args.prompt_file.read_text().strip().split(",")]
+        if not ids or min(ids) < 0:
+            parser.error("--prompt-file must contain nonnegative token IDs")
+        PROMPT = ",".join(map(str, ids))
     if args.runs < 2 or args.runs % 2 or args.tokens < 4:
         parser.error("--runs must be positive/even and >=2; --tokens must be >=4")
+    if args.max_pick_differences < 0:
+        parser.error("--max-pick-differences must be nonnegative")
     if args.context <= args.tokens + len(PROMPT.split(",")) + 3:
         parser.error("--context must have room for the prompt, output and draft window")
+    SETTINGS.update(MAYA_GLM_MTP_FIXED=str(args.drafts), MAYA_GLM_MTP_DRAFT=str(args.drafts))
+    if args.window_profile:
+        SETTINGS["MAYA_GLM_WIN_PROF"] = "1"
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
     binary = ROOT / "build-hip/maya"
     md5 = hashlib.md5(binary.read_bytes()).hexdigest()
-    peer_md5 = remote(["md5sum", str(binary), "/tmp/maya-tp2"], capture_output=True, text=True).stdout
-    if any(line.split()[0] != md5 for line in peer_md5.splitlines()) or not peer_md5.strip():
-        raise RuntimeError("host binary hashes do not match")
+    if not args.single_host:
+        peer_md5 = remote(["md5sum", str(binary), "/tmp/maya-tp2"], capture_output=True, text=True).stdout
+        if any(line.split()[0] != md5 for line in peer_md5.splitlines()) or not peer_md5.strip():
+            raise RuntimeError("host binary hashes do not match")
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-    metadata = dict(binary_md5=md5, source_head=head, host=HOST, pack=PACK, prompt=PROMPT,
+    metadata = dict(binary_md5=md5, source_head=head, host=os.uname().nodename if args.single_host else HOST,
+                    world_size=1 if args.single_host else 2, pack=PACK, prompt=PROMPT,
                     context=args.context, tokens=args.tokens, runs_per_mode=args.runs,
                     settings=SETTINGS, timing="DONE decode_ms / output tokens; model load/prefill excluded",
+                    max_pick_differences=args.max_pick_differences,
                     warmup_order=["simple", "mtp", "mtp", "simple"], results=[], warmups=[])
     (out / "results.json").write_text(json.dumps(metadata, indent=2) + "\n")
     cleanup()
     pair = None
     try:
-        print("Generating common reference with the simple TP2 loop...", flush=True)
-        pair = Pair(out, "reference", args.context)
-        seed, reference = pair.request("simple", args.tokens)
-        metadata["reference"] = seed
+        if args.reference:
+            reference = [int(x) for x in args.reference.read_text().strip().split(",")]
+            if len(reference) != args.tokens:
+                raise ValueError("--reference must contain exactly --tokens IDs")
+            metadata["reference_source"] = str(args.reference.resolve())
+        else:
+            print("Generating common reference with the simple TP2 loop...", flush=True)
+            pair = Pair(out, "reference", args.context, single_host=args.single_host)
+            seed, reference = pair.request("simple", args.tokens)
+            metadata["reference"] = seed
+            pair.close()
+            pair = None
         (out / "results.json").write_text(json.dumps(metadata, indent=2) + "\n")
         reference_file = out / "reference.txt"
         reference_file.write_text(",".join(map(str, reference)) + "\n")
-        pair.close()
-        pair = None
-        remote_reference = f"/tmp/{out.name}-reference.txt"
-        subprocess.run(["scp", str(reference_file), f"{HOST}:{remote_reference}"], check=True)
+        remote_reference = str(reference_file) if args.single_host else f"/tmp/{out.name}-reference.txt"
+        if not args.single_host:
+            subprocess.run(["scp", str(reference_file), f"{HOST}:{remote_reference}"], check=True)
         print("Starting resident pair with fixed reference; warmups first...", flush=True)
-        pair = Pair(out, "benchmark", args.context, remote_reference)
+        pair = Pair(out, "benchmark", args.context, remote_reference, single_host=args.single_host)
         order = ["simple", "mtp", "mtp", "simple"]
         # Each ABBA block gives both modes the same mean position in the run order.
         measured = order * (args.runs // 2)
@@ -194,6 +239,7 @@ def main():
                 result, ids = pair.request(mode, args.tokens, follow=True)
                 if ids != reference:
                     raise RuntimeError(f"{mode}: output differs from common reference")
+                result["model_pick_differences"] = check_fidelity(result["diagnostics"], args.max_pick_differences)
                 group = "warmups" if warm else "results"
                 metadata[group].append(result)
                 (out / "results.json").write_text(json.dumps(metadata, indent=2) + "\n")

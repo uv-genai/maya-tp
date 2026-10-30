@@ -1,0 +1,242 @@
+[
+  {
+    "file": "single-technical-d1.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 53.903125,
+        "median_tokens_per_second": 18.551800104353873,
+        "min_ms_per_token": 53.896484375,
+        "max_ms_per_token": 53.909765625,
+        "mean_ms_per_token": 53.903125,
+        "stdev_ms_per_token": 0.009391261937632829
+      },
+      "mtp": {
+        "median_ms_per_token": 42.7421875,
+        "median_tokens_per_second": 23.396088466459513,
+        "min_ms_per_token": 42.740625,
+        "max_ms_per_token": 42.74375,
+        "mean_ms_per_token": 42.7421875,
+        "stdev_ms_per_token": 0.0022097086912059513
+      },
+      "mtp_latency_change_percent": -20.705548147718712,
+      "mtp_throughput_change_percent": 26.112228111862557
+    },
+    "accepted": 111,
+    "proposed": 144,
+    "median_phase_ms": {
+      "draft": 4.195,
+      "verify": 71.745,
+      "commit": 0.05
+    }
+  },
+  {
+    "file": "single-technical-d2.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 53.882226562499994,
+        "median_tokens_per_second": 18.55899549436887,
+        "min_ms_per_token": 53.8765625,
+        "max_ms_per_token": 53.887890625,
+        "mean_ms_per_token": 53.882226562499994,
+        "stdev_ms_per_token": 0.008010194005627854
+      },
+      "mtp": {
+        "median_ms_per_token": 42.3396484375,
+        "median_tokens_per_second": 23.618523934513952,
+        "min_ms_per_token": 42.3359375,
+        "max_ms_per_token": 42.343359375,
+        "mean_ms_per_token": 42.3396484375,
+        "stdev_ms_per_token": 0.005248058141617902
+      },
+      "mtp_latency_change_percent": -21.421865541527552,
+      "mtp_throughput_change_percent": 27.261865771130942
+    },
+    "accepted": 141,
+    "proposed": 226,
+    "median_phase_ms": {
+      "draft": 9.36,
+      "verify": 85.9,
+      "commit": 0.1
+    }
+  },
+  {
+    "file": "tp2-technical-d1.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 38.7298828125,
+        "median_tokens_per_second": 25.819856074474146,
+        "min_ms_per_token": 38.4265625,
+        "max_ms_per_token": 39.1484375,
+        "mean_ms_per_token": 38.75869140625,
+        "stdev_ms_per_token": 0.327221035166301
+      },
+      "mtp": {
+        "median_ms_per_token": 34.959375,
+        "median_tokens_per_second": 28.604630374541877,
+        "min_ms_per_token": 34.8734375,
+        "max_ms_per_token": 35.388671875,
+        "mean_ms_per_token": 35.04521484375,
+        "stdev_ms_per_token": 0.23425373924742238
+      },
+      "mtp_latency_change_percent": -9.735396904643034,
+      "mtp_throughput_change_percent": 10.785398230088505
+    },
+    "accepted": 105,
+    "proposed": 149,
+    "median_phase_ms": {
+      "draft": 4.09,
+      "verify": 55.635000000000005,
+      "commit": 0.03
+    }
+  },
+  {
+    "file": "tp2-technical-d2.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 38.505078125,
+        "median_tokens_per_second": 25.970600468688183,
+        "min_ms_per_token": 38.311328125,
+        "max_ms_per_token": 38.77734375,
+        "mean_ms_per_token": 38.52470703125,
+        "stdev_ms_per_token": 0.24484977735847188
+      },
+      "mtp": {
+        "median_ms_per_token": 35.990625,
+        "median_tokens_per_second": 27.785013458365892,
+        "min_ms_per_token": 35.8046875,
+        "max_ms_per_token": 36.63203125,
+        "mean_ms_per_token": 36.1044921875,
+        "stdev_ms_per_token": 0.364269977874375
+      },
+      "mtp_latency_change_percent": -6.530185750661932,
+      "mtp_throughput_change_percent": 6.986411391855496
+    },
+    "accepted": 133,
+    "proposed": 241,
+    "median_phase_ms": {
+      "draft": 8.37,
+      "verify": 67.37,
+      "commit": 0.06
+    }
+  },
+  {
+    "file": "tp2-technical-d3.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 38.531640625,
+        "median_tokens_per_second": 25.952697154327307,
+        "min_ms_per_token": 38.36796875,
+        "max_ms_per_token": 38.6953125,
+        "mean_ms_per_token": 38.531640625,
+        "stdev_ms_per_token": 0.2314669854040319
+      },
+      "mtp": {
+        "median_ms_per_token": 40.3619140625,
+        "median_tokens_per_second": 24.775831950177352,
+        "min_ms_per_token": 40.044140625,
+        "max_ms_per_token": 40.6796875,
+        "mean_ms_per_token": 40.3619140625,
+        "stdev_ms_per_token": 0.44939950507442106
+      },
+      "mtp_latency_change_percent": 4.750053223304707,
+      "mtp_throughput_change_percent": -4.534654711037334
+    },
+    "accepted": 139,
+    "proposed": 343,
+    "median_phase_ms": {
+      "draft": 12.87,
+      "verify": 76.545,
+      "commit": 0.08
+    }
+  },
+  {
+    "file": "tp2-technical-d7.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 39.1986328125,
+        "median_tokens_per_second": 25.511093837974656,
+        "min_ms_per_token": 38.5515625,
+        "max_ms_per_token": 39.845703125,
+        "mean_ms_per_token": 39.1986328125,
+        "stdev_ms_per_token": 0.9150956117464949
+      },
+      "mtp": {
+        "median_ms_per_token": 63.8216796875,
+        "median_tokens_per_second": 15.668656871715932,
+        "min_ms_per_token": 63.76171875,
+        "max_ms_per_token": 63.881640625,
+        "mean_ms_per_token": 63.8216796875,
+        "stdev_ms_per_token": 0.08479757102510752
+      },
+      "mtp_latency_change_percent": 62.816085940497366,
+      "mtp_throughput_change_percent": -38.58100726205522
+    },
+    "accepted": 146,
+    "proposed": 746,
+    "median_phase_ms": {
+      "draft": 25.83,
+      "verify": 124.96,
+      "commit": 0.1
+    }
+  },
+  {
+    "file": "tp2-code-d1.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 39.0033203125,
+        "median_tokens_per_second": 25.63884284691307,
+        "min_ms_per_token": 38.41640625,
+        "max_ms_per_token": 39.40859375,
+        "mean_ms_per_token": 38.95791015625,
+        "stdev_ms_per_token": 0.4847392757200711
+      },
+      "mtp": {
+        "median_ms_per_token": 31.952734375000002,
+        "median_tokens_per_second": 31.29622611523368,
+        "min_ms_per_token": 31.679296875,
+        "max_ms_per_token": 32.062109375,
+        "mean_ms_per_token": 31.91171875,
+        "stdev_ms_per_token": 0.172371147055532
+      },
+      "mtp_latency_change_percent": -18.07688648302177,
+      "mtp_throughput_change_percent": 22.065673174488687
+    },
+    "accepted": 118,
+    "proposed": 136,
+    "median_phase_ms": {
+      "draft": 3.6950000000000003,
+      "verify": 56.125,
+      "commit": 0.03
+    }
+  },
+  {
+    "file": "tp2-code-d2.json",
+    "summary": {
+      "simple": {
+        "median_ms_per_token": 38.6638671875,
+        "median_tokens_per_second": 25.863941523244712,
+        "min_ms_per_token": 38.329296875,
+        "max_ms_per_token": 39.473828125,
+        "mean_ms_per_token": 38.78271484375,
+        "stdev_ms_per_token": 0.48860524407100975
+      },
+      "mtp": {
+        "median_ms_per_token": 29.8244140625,
+        "median_tokens_per_second": 33.52957740944722,
+        "min_ms_per_token": 29.719140625,
+        "max_ms_per_token": 29.92265625,
+        "mean_ms_per_token": 29.82265625,
+        "stdev_ms_per_token": 0.08990430477417051
+      },
+      "mtp_latency_change_percent": -22.86230987224628,
+      "mtp_throughput_change_percent": 29.63831278118676
+    },
+    "accepted": 155,
+    "proposed": 199,
+    "median_phase_ms": {
+      "draft": 7.485,
+      "verify": 68.815,
+      "commit": 0.05
+    }
+  }
+]

@@ -1,0 +1,132 @@
+[
+  {
+    "case": "seven-draft-window",
+    "mode": "mtp",
+    "wall_s": 21.031,
+    "usage": {
+      "prompt_tokens": 990,
+      "completion_tokens": 64,
+      "total_tokens": 1054,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 990,
+      "prompt_ms": 15684.8,
+      "prompt_per_token_ms": 15.843,
+      "prompt_per_second": 63.1,
+      "predicted_n": 64,
+      "predicted_ms": 5331.3,
+      "predicted_per_token_ms": 83.302,
+      "predicted_per_second": 12.0,
+      "draft_n": 162,
+      "draft_n_accepted": 39
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Summary\n\nThe document does not contain substantive content to summarize. It consists of the word \"alpha\" repeated hundreds of times with no sentences, structure, headings",
+      "reasoning_content": "The document is just repeated \"alpha\" text \u2014 a stress test. I should summarize honestly: it contains no substantive content, just repeated tokens. Then explain"
+    }
+  },
+  {
+    "case": "over-48MiB",
+    "mode": "mtp",
+    "wall_s": 31.264,
+    "usage": {
+      "prompt_tokens": 7290,
+      "completion_tokens": 32,
+      "total_tokens": 7322,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 7290,
+      "prompt_ms": 28361.5,
+      "prompt_per_token_ms": 3.89,
+      "prompt_per_second": 257.0,
+      "predicted_n": 32,
+      "predicted_ms": 2890.6,
+      "predicted_per_token_ms": 90.331,
+      "predicted_per_second": 11.1,
+      "draft_n": 80,
+      "draft_n_accepted": 18
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Document Summary\n\nThe document you provided does not contain substantive content to summarize.",
+      "reasoning_content": "The document is just repeated \"alpha\" words \u2014 a stress test. I"
+    }
+  },
+  {
+    "case": "reuse-after-large-prompt",
+    "mode": "mtp",
+    "wall_s": 2.82,
+    "usage": {
+      "prompt_tokens": 7333,
+      "completion_tokens": 24,
+      "total_tokens": 7357,
+      "prompt_tokens_details": {
+        "cached_tokens": 7289
+      }
+    },
+    "timings": {
+      "cache_n": 7289,
+      "prompt_n": 44,
+      "prompt_ms": 798.2,
+      "prompt_per_token_ms": 18.141,
+      "prompt_per_second": 55.1,
+      "predicted_n": 24,
+      "predicted_ms": 2007.1,
+      "predicted_per_token_ms": 83.629,
+      "predicted_per_second": 12.0,
+      "draft_n": 49,
+      "draft_n_accepted": 14
+    },
+    "message": {
+      "role": "assistant",
+      "content": "Sure \u2014 here's the simpler version:\n\n**Why consistent batch",
+      "reasoning_content": "The user wants a simpler explanation of why network framing needs"
+    }
+  },
+  {
+    "case": "multiple-prefill-chunks",
+    "mode": "mtp",
+    "wall_s": 57.792,
+    "usage": {
+      "prompt_tokens": 14550,
+      "completion_tokens": 32,
+      "total_tokens": 14582,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 14550,
+      "prompt_ms": 55537.5,
+      "prompt_per_token_ms": 3.817,
+      "prompt_per_second": 262.0,
+      "predicted_n": 32,
+      "predicted_ms": 2240.6,
+      "predicted_per_token_ms": 70.019,
+      "predicted_per_second": 14.3,
+      "draft_n": 74,
+      "draft_n_accepted": 19
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Document Summary\n\nThe document you provided does not contain substantive content to summarize.",
+      "reasoning_content": "The document is just \"alpha\" repeated many times \u2014 a stress test."
+    }
+  },
+  {
+    "case": "stream-after-large-prompt",
+    "mode": "mtp",
+    "chunks": 25,
+    "wall_s": 2.017
+  }
+]

@@ -1,0 +1,9 @@
+chat: 1.10s tokens=13 cached=0 drafts=28
+chat: 1.77s tokens=24 cached=14 drafts=56
+chat: 1.23s tokens=15 cached=33 drafts=28
+cancelled after 8 text chunks
+chat: 1.23s tokens=13 cached=0 drafts=33
+chat: 0.45s tokens=1 cached=0 drafts=0
+chat: 0.08s tokens=2 cached=15 drafts=0
+chat: 0.15s tokens=3 cached=15 drafts=1
+PASS: three turns with reuse, cancel/follow-up, short limits, peer up

@@ -1,0 +1,220 @@
+{
+  "binary_md5": "f021a5a263b0eb9eb6a3cff587168f78",
+  "source_head": "c322b3edaf3380457ec98662a9d17c95ae415a22",
+  "host": "strix-halo-1.local",
+  "pack": "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack",
+  "prompt": "154822,25062,287,29905,371,25,7487,785,6722,315,9621,374",
+  "context": 4096,
+  "tokens": 256,
+  "runs_per_mode": 2,
+  "settings": {
+    "MAYA_TP_MTP": "1",
+    "MAYA_GLM_MTP_FIXED": "2",
+    "MAYA_GLM_LOOP_THINK": "0",
+    "MAYA_GLM_LOOP_ANSWER": "0",
+    "MAYA_GLM_MTP_DRAFT": "2"
+  },
+  "timing": "DONE decode_ms / output tokens; model load/prefill excluded",
+  "warmup_order": [
+    "simple",
+    "mtp",
+    "mtp",
+    "simple"
+  ],
+  "results": [
+    {
+      "mode": "simple",
+      "tokens": 256,
+      "prompt_ms": 41.5,
+      "decode_ms": 9966.0,
+      "ms_per_token": 38.9296875,
+      "tokens_per_second": 25.68733694561509,
+      "wall_ms": 10009.620570985135,
+      "accepted_drafts": 0,
+      "drafts": 0,
+      "cached_tokens": 11,
+      "cache_hits": 85680,
+      "cache_lookups": 85680,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm stat: decode 38.93 ms/tok (25.69 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.5 ms/tok | vram 12384/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick"
+      ]
+    },
+    {
+      "mode": "mtp",
+      "tokens": 256,
+      "prompt_ms": 42.5,
+      "decode_ms": 7801.8,
+      "ms_per_token": 30.47578125,
+      "tokens_per_second": 32.812940603450485,
+      "wall_ms": 7845.78670799965,
+      "accepted_drafts": 156,
+      "drafts": 198,
+      "cached_tokens": 11,
+      "cache_hits": 101376,
+      "cache_lookups": 101376,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm mtp: a drafting round's host time - drafts 8.39 ms, verify 70.36 ms, commit + cache 0.06 ms (99 rounds)",
+        "glm mtp: the draft vocabulary (98304 + 437 tokens) - 4 of 256 emitted tokens outside it, 31 of 99 drafting rounds on the whole head",
+        "glm mtp: 99 rounds, 2.59 tokens a round | rounds by draft length 2:99",
+        "glm stat: decode 30.48 ms/tok (32.81 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.5 ms/tok | vram 12384/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 18 of them differ from the model's own pick"
+      ]
+    },
+    {
+      "mode": "mtp",
+      "tokens": 256,
+      "prompt_ms": 40.1,
+      "decode_ms": 7814.1,
+      "ms_per_token": 30.523828125,
+      "tokens_per_second": 32.761290487708116,
+      "wall_ms": 7855.945287970826,
+      "accepted_drafts": 156,
+      "drafts": 198,
+      "cached_tokens": 11,
+      "cache_hits": 101376,
+      "cache_lookups": 101376,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm mtp: a drafting round's host time - drafts 8.22 ms, verify 70.66 ms, commit + cache 0.05 ms (99 rounds)",
+        "glm mtp: the draft vocabulary (98304 + 437 tokens) - 4 of 256 emitted tokens outside it, 31 of 99 drafting rounds on the whole head",
+        "glm mtp: 99 rounds, 2.59 tokens a round | rounds by draft length 2:99",
+        "glm stat: decode 30.52 ms/tok (32.76 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.3 ms/tok | vram 12384/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 18 of them differ from the model's own pick"
+      ]
+    },
+    {
+      "mode": "simple",
+      "tokens": 256,
+      "prompt_ms": 37.5,
+      "decode_ms": 9861.2,
+      "ms_per_token": 38.5203125,
+      "tokens_per_second": 25.960329371678903,
+      "wall_ms": 9900.6904020207,
+      "accepted_drafts": 0,
+      "drafts": 0,
+      "cached_tokens": 11,
+      "cache_hits": 85680,
+      "cache_lookups": 85680,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm stat: decode 38.52 ms/tok (25.96 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.1 ms/tok | vram 12384/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick"
+      ]
+    }
+  ],
+  "warmups": [
+    {
+      "mode": "simple",
+      "tokens": 256,
+      "prompt_ms": 490.4,
+      "decode_ms": 10381.8,
+      "ms_per_token": 40.55390625,
+      "tokens_per_second": 24.65853705523127,
+      "wall_ms": 10873.957731993869,
+      "accepted_drafts": 0,
+      "drafts": 0,
+      "cached_tokens": 0,
+      "cache_hits": 85635,
+      "cache_lookups": 85680,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm follow: every request decodes the 256 tokens of /tmp/maya-24-drafts2-reference.txt (MAYA_GLM_SPEC_FOLLOW)",
+        "glm stat: decode 40.55 ms/tok (24.66 tok/s) | vram hit 99.95% | ram fetches 0.00/tok | disk 0.18 reads/tok in 0.15 waits/tok, 1.15 ms/tok | promotions 0.17/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 40.9 ms/tok | vram 12383/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick"
+      ]
+    },
+    {
+      "mode": "mtp",
+      "tokens": 256,
+      "prompt_ms": 38.1,
+      "decode_ms": 7911.9,
+      "ms_per_token": 30.905859375,
+      "tokens_per_second": 32.35632401825099,
+      "wall_ms": 7951.453005021904,
+      "accepted_drafts": 155,
+      "drafts": 200,
+      "cached_tokens": 11,
+      "cache_hits": 102399,
+      "cache_lookups": 102400,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm mtp: a drafting round's host time - drafts 8.28 ms, verify 70.78 ms, commit + cache 0.06 ms (100 rounds)",
+        "glm mtp: the draft vocabulary (98304 + 437 tokens) - 4 of 256 emitted tokens outside it, 18 of 100 drafting rounds on the whole head",
+        "glm mtp: 100 rounds, 2.56 tokens a round | rounds by draft length 2:100",
+        "glm stat: decode 30.91 ms/tok (32.36 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.28 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.2 ms/tok | vram 12384/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 18 of them differ from the model's own pick"
+      ]
+    },
+    {
+      "mode": "mtp",
+      "tokens": 256,
+      "prompt_ms": 37.4,
+      "decode_ms": 7896.3,
+      "ms_per_token": 30.844921875,
+      "tokens_per_second": 32.420247457670044,
+      "wall_ms": 7935.598376963753,
+      "accepted_drafts": 156,
+      "drafts": 198,
+      "cached_tokens": 11,
+      "cache_hits": 101376,
+      "cache_lookups": 101376,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm mtp: a drafting round's host time - drafts 8.20 ms, verify 71.51 ms, commit + cache 0.05 ms (99 rounds)",
+        "glm mtp: the draft vocabulary (98304 + 437 tokens) - 4 of 256 emitted tokens outside it, 30 of 99 drafting rounds on the whole head",
+        "glm mtp: 99 rounds, 2.59 tokens a round | rounds by draft length 2:99",
+        "glm stat: decode 30.84 ms/tok (32.42 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.1 ms/tok | vram 12384/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 18 of them differ from the model's own pick"
+      ]
+    },
+    {
+      "mode": "simple",
+      "tokens": 256,
+      "prompt_ms": 40.6,
+      "decode_ms": 9984.8,
+      "ms_per_token": 39.003125,
+      "tokens_per_second": 25.638971236279147,
+      "wall_ms": 10026.86772600282,
+      "accepted_drafts": 0,
+      "drafts": 0,
+      "cached_tokens": 11,
+      "cache_hits": 85680,
+      "cache_lookups": 85680,
+      "output_sha256": "06f945ce15bd40387e6b24b4f6d58c516779e01fa6bd9e8644107d3c4c52e59a",
+      "diagnostics": [
+        "glm stat: decode 39.00 ms/tok (25.64 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.4 ms/tok | vram 12384/12384 ram 0/48",
+        "glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick"
+      ]
+    }
+  ],
+  "reference_source": "/tmp/maya-22-drafts1/reference.txt",
+  "measured_order": [
+    "simple",
+    "mtp",
+    "mtp",
+    "simple"
+  ],
+  "summary": {
+    "simple": {
+      "median_ms_per_token": 38.725,
+      "median_tokens_per_second": 25.823111684958036,
+      "min_ms_per_token": 38.5203125,
+      "max_ms_per_token": 38.9296875,
+      "mean_ms_per_token": 38.725,
+      "stdev_ms_per_token": 0.2894718385482409
+    },
+    "mtp": {
+      "median_ms_per_token": 30.499804687500003,
+      "median_tokens_per_second": 32.78709520424695,
+      "min_ms_per_token": 30.47578125,
+      "max_ms_per_token": 30.523828125,
+      "mean_ms_per_token": 30.499804687500003,
+      "stdev_ms_per_token": 0.0339742711273229
+    },
+    "mtp_latency_change_percent": -21.240013718528083,
+    "mtp_throughput_change_percent": 26.968026178446316
+  }
+}

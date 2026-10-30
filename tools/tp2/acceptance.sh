@@ -19,6 +19,11 @@ PASS=0
 FAIL=0
 TP_MTP=0
 if [ "${MAYA_TP_MTP:-0}" = 1 ]; then TP_MTP=1; fi
+TP_FIXED="${MAYA_GLM_MTP_FIXED:-2}"
+TP_CAP="${MAYA_GLM_MTP_DRAFT:-$TP_FIXED}"
+TP_CONTEXT="${CONTEXT:-32768}"
+[[ "$TP_FIXED" =~ ^[1-8]$ && "$TP_CAP" =~ ^[1-8]$ && "$TP_FIXED" -le "$TP_CAP" &&
+   "$TP_CONTEXT" =~ ^[1-9][0-9]*$ ]] || { echo "invalid draft count/capacity or context" >&2; exit 2; }
 
 check() {
   local desc="$1" expected="$2" actual="$3"
@@ -35,29 +40,31 @@ health() { curl -s -m 5 "http://$HOST:$PORT/health" 2>/dev/null || echo '{}'; }
 chat() {
   curl -s -m 120 "http://$HOST:$PORT/v1/chat/completions" \
     -H 'Content-Type: application/json' \
-    -d '{"model":"maya","messages":[{"role":"user","content":"Say hello."}],"max_tokens":8}' \
+    -d '{"model":"maya","messages":[{"role":"user","content":"Say hello."}],"max_tokens":16}' \
     2>/dev/null || echo '{}'
 }
 
 start_pair() {
+  ssh -o BatchMode=yes "$HOST" 'pkill -9 -f "[s]erver.py --engine" 2>/dev/null; pkill -9 -x maya 2>/dev/null; fuser -k '"$PORT"'/tcp 2>/dev/null; true'
   pkill -9 -x maya 2>/dev/null || true
-  ssh -o BatchMode=yes "$HOST" 'pkill -9 -x maya 2>/dev/null; fuser -k '"$PORT"'/tcp 2>/dev/null; pkill -9 -f "[s]erve/server" 2>/dev/null; true'
   sleep 1
-  setsid nohup bash tools/tp2/rank1.sh >/tmp/tp2-acc-r1.log 2>&1 </dev/null &
+  setsid nohup env MAYA_TP_MTP="$TP_MTP" MAYA_GLM_MTP_FIXED="$TP_FIXED" MAYA_GLM_MTP_DRAFT="$TP_CAP" \
+    CONTEXT="$TP_CONTEXT" bash tools/tp2/rank1.sh >/tmp/tp2-acc-r1.log 2>&1 </dev/null &
   disown
   sleep 1
   # Background only the server command: `cd ... && server &` leaves a subshell holding
   # SSH's stdout/stderr open for the server's lifetime, so the readiness loop never starts.
-  ssh -o BatchMode=yes "$HOST" "cd '$PWD' || exit; setsid nohup env MAYA_TP_MTP=$TP_MTP bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null &"
-  for i in $(seq 1 36); do
-    if health | grep -q '"peer"'; then return 0; fi
+  ssh -o BatchMode=yes "$HOST" "cd '$PWD' || exit; setsid nohup env MAYA_TP_MTP=$TP_MTP MAYA_GLM_MTP_FIXED=$TP_FIXED MAYA_GLM_MTP_DRAFT=$TP_CAP CONTEXT=$TP_CONTEXT bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null &"
+  # Cold disk-backed expert loading can exceed three minutes on rank 0.
+  for i in $(seq 1 120); do
+    if health | grep -q '"peer": "up"'; then return 0; fi
     sleep 5
   done
   echo "pair did not become ready" >&2
   return 1
 }
 
-echo "=== TP2 acceptance ($HOST:$PORT) ==="
+echo "=== TP2 acceptance ($HOST:$PORT, mtp=$TP_MTP drafts=$TP_FIXED cap=$TP_CAP context=$TP_CONTEXT) ==="
 echo "--- 1. start pair ---"
 start_pair
 H=$(health)

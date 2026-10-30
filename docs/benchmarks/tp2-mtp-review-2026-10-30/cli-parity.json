@@ -1,0 +1,18 @@
+[
+  {
+    "mode": "simple",
+    "tokens": 32,
+    "pair_token_agreement": "32/32",
+    "hidden_state_rows": 32,
+    "hidden_states_bit_identical": true,
+    "hidden_state_sha256": "e9242bc662d3966aeb15367f9e1ecab90d798e83e591d2b6b686e071ec581f41"
+  },
+  {
+    "mode": "mtp",
+    "tokens": 32,
+    "pair_token_agreement": "32/32",
+    "hidden_state_rows": 1,
+    "hidden_states_bit_identical": true,
+    "hidden_state_sha256": "bbd29188a04800230c2db5dd2456f8a4aa4bb0aa9100d35caa8a7794181d7f2b"
+  }
+]

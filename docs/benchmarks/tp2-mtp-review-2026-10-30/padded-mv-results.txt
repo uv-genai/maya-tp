@@ -1,0 +1,10 @@
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+PADDED nin=4096 nout=4096 nt=2 copies=20 original_us=74.274 rdna_us=73.318 speedup=1.0130 exact=1
+PADDED nin=4096 nout=4096 nt=3 copies=20 original_us=83.508 rdna_us=73.326 speedup=1.1389 exact=1
+PADDED nin=4096 nout=4096 nt=8 copies=20 original_us=139.390 rdna_us=95.663 speedup=1.4571 exact=1
+PADDED nin=1536 nout=8192 nt=2 copies=27 original_us=54.306 rdna_us=49.709 speedup=1.0925 exact=1
+PADDED nin=1536 nout=8192 nt=3 copies=27 original_us=74.312 rdna_us=50.947 speedup=1.4586 exact=1
+PADDED nin=1536 nout=8192 nt=8 copies=27 original_us=103.823 rdna_us=79.248 speedup=1.3101 exact=1
+PADDED nin=4096 nout=6144 nt=2 copies=14 original_us=107.141 rdna_us=101.843 speedup=1.0520 exact=1
+PADDED nin=4096 nout=6144 nt=3 copies=14 original_us=155.632 rdna_us=102.685 speedup=1.5156 exact=1
+PADDED nin=4096 nout=6144 nt=8 copies=14 original_us=172.803 rdna_us=140.082 speedup=1.2336 exact=1

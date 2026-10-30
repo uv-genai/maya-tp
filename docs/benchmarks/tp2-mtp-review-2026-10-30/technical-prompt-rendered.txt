@@ -1,0 +1,1 @@
+[gMASK]<sop><|system|>Reasoning Effort: High<|system|>You are a helpful assistant.<|user|>Explain how distributed systems maintain consistency during network partitions. Cover leader election, replicated logs, quorum reads and writes, failure detection, retries, and recovery. Give concrete examples and trade-offs in at least eight substantial paragraphs.<|assistant|><think>

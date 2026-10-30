@@ -4,6 +4,22 @@ Every release is on GitHub (Releases) with these notes; every published change m
 page's Settings › About and updates (About > Update before the redesign; from v1.0.18), or `git pull`, then `./setup.sh` (Windows: `START-MAYA.bat`) - it recompiles
 only what changed and starts; the model is not downloaded again.
 
+## Unreleased — after v1.1.38
+
+- **Correct TP2 draft and target computation** (#23, #24, #26): replicated NextN layers keep their full shared
+  width and local outputs; verification includes both sliced shared-expert partials; ordinary token decoding
+  sums dense lead FFN partials before the residual. These fixes can change generated answers. Corrected
+  ordinary and MTP paths agree on all 256 raw greedy picks in the controlled workloads.
+- **HIP verification GEMVs** (#25): the RDNA dense kernel handles padded output strides used by TP2 windows.
+  Thirty-two new Q6_K/BF16 cases pass bit-exact output and padding checks; targeted kernels improve 1–52%.
+- **Measured MTP behavior** (#22): corrected Maya-S TP2 gains 10.8% on a technical prompt with one draft,
+  and 29.6% on code with two. Seven drafts slow the technical case by 38.6%; acceptance and verification
+  cost determine the useful width. Defaults and llama-swap configuration are unchanged. The benchmark now
+  supports draft sweeps, framed prompts, shared references and a single-host control, and rejects raw-pick
+  disagreement even when emitted IDs are forced. See [measurements and validation](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md).
+
+The published v1.1.38 tag does not include these follow-up changes.
+
 ## v1.1.38 - 2026-10-30
 
 Opt-in MTP and conversation reuse for two-host GLM TP2, with fixes for seven-draft collective mismatches and large
