@@ -1862,6 +1862,8 @@ static int glm_pack_generate(const Options& o) {
         kTpMirrorMtp = 10,        // n=max_new, then TpMtpSp POD (+ optional penalty history)
         kTpMirrorForce = 11,      // payload: one forced token id (-1 clears)
         kTpMirrorMtpRound = 12,   // #13: n=keep, payload: the accepted token ids (rank 0 -> rank 1, per round)
+        kTpMirrorMtpInputs = 13,  // authoritative anchor / draft window tokens
+        kTpMirrorMtpAbort = 14,   // incomplete decode: fail the pair without parsing cleanup as round data
     };
     // Sampler scalars for a mirrored decode_mtp (no host pointers).
     struct TpMtpSp {
@@ -1869,7 +1871,7 @@ static int glm_pack_generate(const Options& o) {
         float top_p, min_p, temperature, penalty_repeat, penalty_freq, penalty_present;
         uint64_t seed, counter;
         int32_t stop_on_eos, eos0, eos1, eos2;
-        int32_t think_budget, think_end;   // both ranks force think_end at the same produced count
+        int32_t think_budget, think_end;   // request metadata; forced tokens are carried by the accept wire
     };
     struct TpMirrorHdr {
         int32_t op;
@@ -1880,11 +1882,68 @@ static int glm_pack_generate(const Options& o) {
     // code as its peer (bench: both --tokens) or mirror snapshot/restore (serve rank 0).
     // Checkpoints/slots stay off under TP2 (not mirrored yet).
     const bool tp2 = tp_comm != nullptr && tp_comm->world_size() > 1;
+    const bool tp_mtp_enabled = !tp2 || [] {
+        const char* e = getenv("STRATA_TP_MTP");
+        return e != nullptr && std::atoi(e) != 0;
+    }();
     const bool tp_mirror = tp_comm != nullptr && tp_comm->rank() == 0 && o.serve && tp2;
     const bool tp_reuse_ok = !tp2 || tp_mirror || !o.serve;
     // Sticky pair-down: the first failed mirror send ends the pair for good until both ranks restart.
     // serve/server.py watches stdout for "TP2_DOWN" and reports it on /health (issue #6).
     bool tp_pair_down = false;
+    bool tp_mtp_decoding = false;
+    const auto tp_down = [&](const std::string& why) {
+        tp_pair_down = true;
+        std::printf("TP2_DOWN %s\n", why.c_str());
+        std::fflush(stdout);
+    };
+    // MTP has an ordered subprotocol, used by both serve workers and paired CLI requests.
+    // Validate a frame before reading its payload; a mismatch ends the worker, never resumes mid-frame.
+    const auto tp_mtp_frame = [&](int32_t op, int32_t* toks, int& n, int capacity, bool& more) -> bool {
+        if (!tp2) return true;
+        TpMirrorHdr h{op, n, more ? 1 : 0};
+        std::string e;
+        bool ok;
+        if (tp_comm->rank() == 0) {
+            ok = !tp_pair_down && tp_comm->SendControl(&h, sizeof h, &e) &&
+                 tp_comm->SendControl(toks, (size_t) n * sizeof(int32_t), &e);
+        } else {
+            ok = tp_comm->RecvControl(&h, sizeof h, &e);
+            if (ok && (h.op != op || h.n < 1 || h.n > capacity ||
+                       (op == kTpMirrorMtpInputs && h.n != n) ||
+                       (h.next_token != 0 && h.next_token != 1))) {
+                e = "unexpected MTP frame op=" + std::to_string(h.op) + " n=" + std::to_string(h.n);
+                ok = false;
+            }
+            if (ok) {
+                n = h.n;
+                more = h.next_token != 0;
+                ok = tp_comm->RecvControl(toks, (size_t) n * sizeof(int32_t), &e);
+            }
+        }
+        if (!ok) {
+            std::fprintf(stderr, "TP2 MTP wire: %s\n", e.c_str());
+            tp_down(e.empty() ? "MTP wire failed" : e);
+        }
+        return ok;
+    };
+    const auto mtp_inputs = [&](int32_t* toks, int n) -> bool {
+        bool more = true;
+        return tp_mtp_frame(kTpMirrorMtpInputs, toks, n, n, more);
+    };
+    const auto mtp_round_send = [&](int n, const int32_t* toks, bool more) -> bool {
+        return tp_mtp_frame(kTpMirrorMtpRound, const_cast<int32_t*>(toks), n, n, more);
+    };
+    const auto mtp_round_recv = [&](int& n, int32_t* toks, int capacity, bool& more) -> bool {
+        return tp_mtp_frame(kTpMirrorMtpRound, toks, n, capacity, more);
+    };
+    const auto mtp_abort = [&](const std::string& why) {
+        if (!tp2) return;
+        const TpMirrorHdr h{kTpMirrorMtpAbort, 0, 0};
+        std::string e;
+        (void) tp_comm->SendControl(&h, sizeof h, &e);
+        tp_down(why);
+    };
     // Rank 1's sampler for mirrored multi_rows/issue: greedy forward is what pairs ARs;
     // rank 0 owns the pick.  (No host_history / logit_bias pointers on the wire.)
     const auto tp_peer_sp = []() {
@@ -1915,7 +1974,9 @@ static int glm_pack_generate(const Options& o) {
     };
     // Mirror model.force_next so both ranks share forced() decisions (#13).
     const auto tp_force = [&](int32_t t) -> bool {
-        if (!tp_mirror) return true;
+        // Inside decode_mtp the accept wire carries forced tokens. An op-11 here would precede
+        // the round frame and strand the peer (thinking-budget failure, #13).
+        if (!tp_mirror || tp_mtp_decoding) return true;
         return tp_send(kTpMirrorForce, &t, 1);
     };
     const auto tp_send_mtp = [&](int64_t max_new, const strata::kernels::SamplerParams& sq,
@@ -1988,7 +2049,10 @@ static int glm_pack_generate(const Options& o) {
         bool from_ckpt = false;
         if (snap_ok && snap_tokens.size() >= ck_len) {
             // Mirror before the local restore so both ranks snapshot-restore together.
-            if (tp_mirror && !tp_send(kTpMirrorRestore, nullptr, 0)) return 1;
+            if (tp_mirror && !tp_send(kTpMirrorRestore, nullptr, 0)) {
+                std::printf("ERR TP2 pair down (snapshot restore mirror failed)\n");
+                return 1;
+            }
             if (model.snapshot_restore()) {
                 reuse = snap_tokens.size();
             } else if (tp_mirror) {
@@ -2196,7 +2260,10 @@ static int glm_pack_generate(const Options& o) {
                 // Both ranks snapshot at the same point (before the last prompt token).
                 bool saved = false;
                 if (tp_mirror) {
-                    if (!tp_send(kTpMirrorSnapshot, nullptr, 0)) return 1;
+                    if (!tp_send(kTpMirrorSnapshot, nullptr, 0)) {
+                        std::printf("ERR TP2 pair down (snapshot save mirror failed)\n");
+                        return 1;
+                    }
                     saved = model.snapshot_save();
                     if (!saved) tp_send(kTpMirrorReset, nullptr, 0);
                 } else {
@@ -2297,18 +2364,23 @@ static int glm_pack_generate(const Options& o) {
     }
     const auto run_request = [&](const std::vector<int64_t>& ids, int64_t max_new,
                                  const strata::kernels::SamplerParams& rq_in) -> int {
+        if (tp_pair_down) {
+            std::printf("ERR TP2 pair down: restart both ranks\n");
+            return 1;
+        }
         strata::kernels::SamplerParams sp = rq_in;   // per request (the server sends sampling keys per GEN)
-        // TP2+MTP (#13): force greedy so both ranks draw the same argmax from identical logits.
-        // Sampled RNG (seed/counter) is on the wire but accept-loop counters had already diverged;
-        // greedy removes that class of desync until per-round draw state is mirrored like gufo.
-        if (tp2 && model.mtp_ready() && req_spec != 1) {
+        // TP2+MTP currently supports greedy verification; rank 0 owns all accepted tokens.
+        if (tp2 && tp_mtp_enabled && model.mtp_ready() && req_spec != 1) {
             sp.greedy = true;
             sp.temperature = 0.0f;
         }
         stop_req.store(false);
         pause_req.store(false);
         pause_keep.store(false);
-        tp_force(-1);
+        if (!tp_force(-1)) {
+            std::printf("ERR TP2 pair down (force reset mirror failed)\n");
+            return 1;
+        }
         model.force_next(-1);
         model.set_follow(follow_ids);   // STRATA_GLM_SPEC_FOLLOW: this request's tokens (empty: its own picks)
         if (!follow_ids.empty()) max_new = std::min<int64_t>(max_new, (int64_t) follow_ids.size());
@@ -2474,9 +2546,8 @@ static int glm_pack_generate(const Options& o) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
             }
-        } else if (std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
-            // MTP+TP2 (#13): ON for diagnosis — SLICE moe_gate_up fixed (FFs sliced); slow verify
-            // (~2.8 s/window) still open. Re-gate `!tp2` until that lands too.
+        } else if (tp_mtp_enabled && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
+            // MTP+TP2 uses authoritative inputs, accepted tokens and continuation from rank 0.
             int64_t n_spec = 0;
             const uint64_t rounds0 = model.mtp_rounds_;
             uint64_t len0[9];
@@ -2489,10 +2560,12 @@ static int glm_pack_generate(const Options& o) {
             // TP2 (#13): rank 0 wires its per-round accept decision (kept count + accepted ids); rank 1
             // commits the same tokens — verify picks can flip at near-ties and an independent keep
             // desyncs the ranks until one outruns the other into the next request.
-            const auto mtp_round_send = [&](int keep, const int32_t* toks) -> bool {
-                return tp_send(kTpMirrorMtpRound, toks, keep);
-            };
-            if (!model.decode_mtp(sp, max_new, on_token, n_spec, err, mtp_round_send, {})) {
+            tp_mtp_decoding = true;
+            const bool mtp_ok = model.decode_mtp(sp, max_new, on_token, n_spec, err,
+                                                mtp_round_send, mtp_round_recv, mtp_inputs);
+            tp_mtp_decoding = false;
+            if (!mtp_ok) {
+                mtp_abort(err);
                 drop_if_poisoned(prompt, err);
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
@@ -4089,25 +4162,28 @@ static int glm_pack_generate(const Options& o) {
             std::string tp_err;
             if (tp_comm == nullptr || !tp_comm->RecvControl(&h, sizeof(h), &tp_err)) {
                 std::fprintf(stderr, "TP2 worker recv: %s\n", tp_err.empty() ? "no communicator" : tp_err.c_str());
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-                continue;
+                return 1;
             }
             if (h.n < 0 || h.n > 1000000) {
                 std::fprintf(stderr, "TP2 worker: bad instruction n=%d op=%d\n", h.n, h.op);
-                continue;
+                return 1;
             }
             // MTP carries a POD sampler + optional history before any token vector.
             if (h.op == kTpMirrorMtp) {
                 TpMtpSp s{};
                 if (!tp_comm->RecvControl(&s, sizeof(s), &tp_err)) {
                     std::fprintf(stderr, "TP2 worker mtp sp: %s\n", tp_err.c_str());
-                    continue;
+                    return 1;
+                }
+                if (h.next_token < 0 || h.next_token > 1000000) {
+                    std::fprintf(stderr, "TP2 worker mtp: invalid history length %d\n", h.next_token);
+                    return 1;
                 }
                 std::vector<int32_t> hist((size_t) std::max(0, h.next_token));
                 if (h.next_token > 0 &&
                     !tp_comm->RecvControl(hist.data(), hist.size() * sizeof(int32_t), &tp_err)) {
                     std::fprintf(stderr, "TP2 worker mtp hist: %s\n", tp_err.c_str());
-                    continue;
+                    return 1;
                 }
                 strata::kernels::SamplerParams sp;
                 sp.top_k = s.top_k;
@@ -4124,38 +4200,31 @@ static int glm_pack_generate(const Options& o) {
                 sp.counter = s.counter;
                 if (!hist.empty()) sp.host_history = &hist;
                 const int64_t max_new = h.n;
-                const int tb = s.think_budget, te = s.think_end;
                 const bool stop_eos = s.stop_on_eos != 0;
                 const int e0 = s.eos0, e1 = s.eos1, e2 = s.eos2;
                 int64_t produced = 0;
                 std::string mtp_err;
                 // decode_mtp already ++produced before emit — do not increment again (rank0's
                 // on_token uses a different counter). Double-increment desynced p0/keep (#13).
-                // No think-budget force here: rank 0 does not force under TP2 (the loop guard is
-                // rank-0-only and gated !tp2) and the accept wire is authoritative for the tokens.
+                // Rank 0 applies the thinking budget and cancellation; the accept wire carries
+                // both the resulting tokens and the decision to end this decode.
                 const auto emit = [&](int tok) -> bool {
                     if (stop_eos && (tok == e0 || tok == e1 || tok == e2)) return false;
                     return produced < max_new;
                 };
                 // TP2 (#13): receive rank 0's per-round accept decision and commit identical tokens.
-                const auto mtp_round_recv = [&](int& keep, int32_t* toks) -> bool {
-                    TpMirrorHdr rh{};
-                    std::string re;
-                    if (!tp_comm->RecvControl(&rh, sizeof rh, &re)) return false;
-                    if (rh.op != kTpMirrorMtpRound || rh.n < 1) return false;
-                    keep = rh.n;
-                    return tp_comm->RecvControl(toks, (size_t) rh.n * sizeof(int32_t), &re);
-                };
-                if (!model.decode_mtp(sp, max_new, emit, produced, mtp_err, {}, mtp_round_recv))
+                if (!model.decode_mtp(sp, max_new, emit, produced, mtp_err,
+                                      mtp_round_send, mtp_round_recv, mtp_inputs)) {
                     std::fprintf(stderr, "TP2 worker mtp: %s\n", mtp_err.c_str());
-                else
+                    return 1;   // the stream may be mid-frame; recovery always restarts both ranks
+                } else
                     std::fprintf(stderr, "TP2 worker: mtp decode %lld tokens\n", (long long) produced);
                 continue;
             }
             std::vector<int32_t> toks((size_t) h.n);
             if (h.n > 0 && !tp_comm->RecvControl(toks.data(), (size_t) h.n * sizeof(int32_t), &tp_err)) {
                 std::fprintf(stderr, "TP2 worker tokens: %s\n", tp_err.c_str());
-                continue;
+                return 1;
             }
             std::string e;
             std::vector<float> lg;
@@ -4248,9 +4317,12 @@ static int glm_pack_generate(const Options& o) {
                 case kTpMirrorMtp:
                     // handled before the token-vector receive
                     break;
+                case kTpMirrorMtpAbort:
+                    std::fprintf(stderr, "TP2 worker: peer aborted MTP; restart both ranks\n");
+                    return 1;
                 default:
                     std::fprintf(stderr, "TP2 worker: unknown op %d\n", h.op);
-                    break;
+                    return 1;
             }
         }
     }

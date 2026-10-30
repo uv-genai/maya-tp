@@ -1291,6 +1291,7 @@ TCP socket (`SendControl`/`RecvControl`); do **not** probe the bootstrap port wi
 | `MAYA_TP_RDMA_DEVICE` | auto | `usb4_rdma*` (Thunderbolt) or an IB/RoCE device |
 | `MAYA_TP_GID_INDEX` | unset | RoCE v2 GID when the port has several candidates |
 | `MAYA_TP_BOOTSTRAP_TIMEOUT` | 120 | seconds rank 1 retries connect (and rank 0 waits to accept) |
+| `MAYA_TP_MTP` | off | `1`: opt into GLM MTP under TP2 (rank 0 for serve, both ranks for paired CLI). Requires MTP loaded (`MAYA_GLM_NO_MTP` unset). Rank 0 wires anchor/draft tokens, acceptance and stop decisions on the bootstrap control channel; verification tensors stay on RDMA. Uses greedy sampling and fixed draft width (default 2). Measured slower than the simple loop on Maya-S; keep off for normal serving. |
 | `MAYA_TP_NOAR` | unset | if set: skip all-reduce (isolation; answers will be wrong) |
 | `MAYA_TP_NOSLICE` | unset | if set: full weights on both ranks (isolation) |
 | `MAYA_TP_SH_BOTH` | unset | if set: shared expert runs on both ranks (AR would double it) |
@@ -1300,5 +1301,7 @@ TCP socket (`SendControl`/`RecvControl`); do **not** probe the bootstrap port wi
 prefill row windows are fixed by the 48 MiB RDMA window; overlap is always on for the queued path.
 
 Engine flags: `--tp-world-size`, `--tp-rank`, `--tp-bootstrap-host`, `--tp-bootstrap-port`, `--tp-rdma-device`.
-Both ranks must agree on model pack and context. Under TP2 the engine forces the simple decode loop (no
-DFlash/MTP/spec), disables conversation reuse, and ignores `MAYA_GLM_SEQS`. See [TP2-RUN.md](TP2-RUN.md) for bring-up.
+Both ranks must agree on model pack and context. Under TP2 the simple decode loop is the default;
+MTP is opt-in, DFlash and multi-sequence decode remain gated. Single-conversation snapshot reuse is supported.
+After a protocol or RDMA failure restart both ranks; a worker exits rather than resuming a partial message.
+See [TP2-RUN.md](TP2-RUN.md) for bring-up.

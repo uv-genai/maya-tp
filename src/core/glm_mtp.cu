@@ -550,8 +550,9 @@ int Glm5Model::mtp_choose(int n_cap) {
 // ---------------------------------------------------------------- the decode
 bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, const std::function<bool(int)>& emit,
                            int64_t& produced, std::string& err,
-                           const std::function<bool(int, const int32_t*)>& tp_round_send,
-                           const std::function<bool(int&, int32_t*)>& tp_round_recv) {
+                           const std::function<bool(int, const int32_t*, bool)>& tp_round_send,
+                           const std::function<bool(int&, int32_t*, int, bool&)>& tp_round_recv,
+                           const std::function<bool(int32_t*, int)>& tp_inputs) {
     produced = 0;
     if (!mtp_ready()) {
         err = "glm mtp: the MTP decode is not set up on this model";
@@ -562,6 +563,21 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
     const int64_t E = g.n_embd;
     const int n_cap = std::min(mtp_draft_cap(), std::min(kWinMax - 1, 8));
     static const bool trace = getenv("STRATA_GLM_MTP_TRACE") != nullptr;
+    const bool wire = tp_.active();
+    if (wire && (!tp_inputs || (tp_.rank == 0 ? !tp_round_send : !tp_round_recv))) {
+        err = "glm mtp: TP2 requires the input and accept wire";
+        return false;
+    }
+    const auto accept_wire = [&](int& count, int32_t* tokens, int capacity, bool& more) {
+        if (!wire) return true;
+        const bool sent = tp_.rank == 0 ? tp_round_send(count, tokens, more)
+                                       : tp_round_recv(count, tokens, capacity, more);
+        if (!sent || count < 1 || count > capacity) {
+            err = "TP2 pair down (mtp accept wire)";
+            return false;
+        }
+        return true;
+    };
     // the first token: the prompt's last forward left its logits (and greedy argmax)
     int y = -1;
     if (sp.greedy && sp.penalty_last_n <= 0 && last_tok_ >= 0) {   // (penalties: picked through the sampler)
@@ -571,10 +587,17 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
         if (y < 0) return false;
     }
     y = forced(y);
+    if (wire && !tp_inputs(&y, 1)) {
+        err = "TP2 pair down (mtp anchor wire)";
+        return false;
+    }
     sp.counter += 1;
     last_tok_ = y;
     ++produced;
-    if (!emit(y) || produced >= max_new || pos_ + 1 >= max_ctx_) return true;
+    bool first_more = emit(y) && produced < max_new && pos_ + 1 < max_ctx_;
+    int first_keep = 1;
+    if (!accept_wire(first_keep, &y, 1, first_more)) return false;
+    if (!first_more) return true;
     int64_t p0 = pos_;   // where y goes
     mtp_same_ = 0;       // (a request's first rounds carry its prompt's tier work: not measured)
     std::vector<int32_t> win((size_t) n_cap + 1), out((size_t) n_cap + 1);
@@ -610,15 +633,11 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
     for (;;) {
         const auto t0 = std::chrono::steady_clock::now();
         int n = mtp_choose(n_cap);
-        // TP2: draft width must match on both ranks every round (gufo forced_drafts).
-        // Skip produced/max_ctx/hx_pos clamps that depend on per-rank counters — emit
-        // already stops at max_new / EOS on both ranks the same way (#13).
-        if (!tp_.active()) {
-            n = (int) std::min<int64_t>(n, max_new - produced - 1);
-            n = (int) std::min<int64_t>(n, max_ctx_ - 1 - p0);
-            if (mtp_hx_pos_ != p0 - 1) n = 0;
-            n = std::max(n, 0);
-        }
+        // TP2 counters now follow rank 0's wire, so the output/context clamps agree too.
+        n = (int) std::min<int64_t>(n, max_new - produced - 1);
+        n = (int) std::min<int64_t>(n, max_ctx_ - 1 - p0);
+        if (!wire && mtp_hx_pos_ != p0 - 1) n = 0;
+        n = std::max(n, 0);
         if (tp_.active()) {
             std::fprintf(stderr, "glm mtp TP: rank=%d n=%d p0=%lld produced=%lld\n", tp_.rank, n,
                          (long long) p0, (long long) produced);
@@ -670,6 +689,13 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
             std::fprintf(stderr, "glm mtp TP: rank=%d nd=%d T=%d ok=%d\n", tp_.rank, nd, 1 + nd, (int) ok);
         }
         const int T = 1 + nd;
+        // Near-ties in a draft head must not feed different inputs to the collective window.
+        if (wire && !tp_inputs(win.data(), T)) {
+            err = "TP2 pair down (mtp draft wire)";
+            ok = false;
+            break;
+        }
+        y = win[0];
         int keep = 1, acc = 0;
         bool more = true;
         const auto t1 = std::chrono::steady_clock::now();
@@ -690,12 +716,21 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
                 }
             }
             y2 = forced(y2);
+            if (wire && !tp_inputs(&y2, 1)) {
+                err = "TP2 pair down (mtp token wire)";
+                ok = false;
+                break;
+            }
             sp.counter += 1;
             last_tok_ = y2;
             ++produced;
             y = y2;
             note(y2);
             more = emit(y2) && produced < max_new && p0 + 2 < max_ctx_;
+            if (!accept_wire(keep, &y2, 1, more)) {
+                ok = false;
+                break;
+            }
         } else {
             // ---- 2. the verify: the window through every layer, every row's pick
             if (!window(win.data(), T, out.data(), err, &sp)) {
@@ -711,15 +746,14 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
             // counts until one rank outruns the other (gufo wires the plan the same way).  Rank 1 waits
             // for the round message before its accept loop; rank 0 sends it right after its own loop,
             // unconditionally (also when `more` stopped it early), so the pair never desyncs the stream.
-            const bool wire = tp_.active() && (tp_round_send || tp_round_recv);
             std::vector<int32_t> wire_tok((size_t) T, 0);
             int wire_keep = -1;
+            bool wire_more = true;
             if (wire && tp_.rank != 0) {
                 if (getenv("STRATA_GLM_TP_AR_TRACE"))
                     std::fprintf(stderr, "glm mtp TP: rank=%d wire-recv wait p0=%lld produced=%lld T=%d\n",
                                  tp_.rank, (long long) p0, (long long) produced, T);
-                if (!tp_round_recv(wire_keep, wire_tok.data()) || wire_keep < 1 || wire_keep > T) {
-                    err = "TP2 pair down (mtp accept wire)";
+                if (!accept_wire(wire_keep, wire_tok.data(), T, wire_more)) {
                     ok = false;
                     break;
                 }
@@ -728,7 +762,7 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
                                  tp_.rank, wire_keep, (long long) p0, (long long) produced);
             }
             for (int t = 0; t < T; ++t) {
-                const int yy = wire && tp_.rank != 0 ? forced(wire_tok[(size_t) t]) : forced(out[(size_t) t]);
+                const int yy = wire && tp_.rank != 0 ? wire_tok[(size_t) t] : forced(out[(size_t) t]);
                 if (wire && tp_.rank == 0) wire_tok[(size_t) t] = yy;
                 sp.counter += 1;
                 last_tok_ = yy;
@@ -737,6 +771,8 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
                 y = yy;
                 note(yy);
                 more = emit(yy) && produced < max_new && p0 + keep + 1 < max_ctx_;
+                // Only rank 0 owns EOS/cancel/loop-guard decisions. Rank 1 commits the whole frame.
+                if (wire && tp_.rank != 0) more = t + 1 < wire_keep || wire_more;
                 if (!more || t + 1 >= T) break;
                 // draft t + 1 is compared (every draft before it stood): its counts decay first (acc_keep)
                 mtp_hit_[t + 1] *= acc_keep;
@@ -758,8 +794,7 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
                 if (getenv("STRATA_GLM_TP_AR_TRACE"))
                     std::fprintf(stderr, "glm mtp TP: rank=%d wire-send keep=%d p0=%lld produced=%lld\n",
                                  tp_.rank, keep, (long long) p0, (long long) produced);
-                if (!tp_round_send(keep, wire_tok.data())) {
-                    err = "TP2 pair down (mtp accept wire)";
+                if (!accept_wire(keep, wire_tok.data(), T, more)) {
                     ok = false;
                     break;
                 }

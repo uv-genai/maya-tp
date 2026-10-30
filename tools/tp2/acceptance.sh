@@ -2,6 +2,7 @@
 # tools/tp2/acceptance.sh — TP2 serve acceptance: pair up, chat, peer health, kill/recover.
 #
 # Usage: tools/tp2/acceptance.sh [--serve-host HOST] [--port PORT]
+# Set MAYA_TP_MTP=1 to exercise opt-in MTP on the remote server as well.
 #
 # Run from rank 1 (strix-halo-2). Rank 0 is started via SSH.
 # Tests:
@@ -16,6 +17,8 @@ HOST="${HOST:-strix-halo-1.local}"
 PORT="${PORT:-18080}"
 PASS=0
 FAIL=0
+TP_MTP=0
+if [ "${MAYA_TP_MTP:-0}" = 1 ]; then TP_MTP=1; fi
 
 check() {
   local desc="$1" expected="$2" actual="$3"
@@ -43,7 +46,9 @@ start_pair() {
   setsid nohup bash tools/tp2/rank1.sh >/tmp/tp2-acc-r1.log 2>&1 </dev/null &
   disown
   sleep 1
-  ssh -o BatchMode=yes "$HOST" "cd $PWD && setsid nohup bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null & echo started"
+  # Background only the server command: `cd ... && server &` leaves a subshell holding
+  # SSH's stdout/stderr open for the server's lifetime, so the readiness loop never starts.
+  ssh -o BatchMode=yes "$HOST" "cd '$PWD' || exit; setsid nohup env MAYA_TP_MTP=$TP_MTP bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null &"
   for i in $(seq 1 36); do
     if health | grep -q '"peer"'; then return 0; fi
     sleep 5

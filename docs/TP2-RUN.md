@@ -53,8 +53,8 @@ The engine already retries connect for `MAYA_TP_BOOTSTRAP_TIMEOUT` (default 120 
 bash tools/tp2/rank1.sh
 
 # Rank 0 API server (strix-halo-1) — via SSH; server.py spawns the engine with --serve
-ssh strix-halo-1.local 'cd /home/ugo/software/project-maya && nohup bash tools/tp2/rank0.sh 18080 \
-  > /tmp/tp2-rank0.log 2>&1 &'
+ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; setsid nohup bash tools/tp2/rank0.sh 18080 \
+  > /tmp/tp2-rank0.log 2>&1 </dev/null &'
 
 # Smoke test
 curl -s http://192.168.1.22:18080/health
@@ -103,6 +103,26 @@ curl http://192.168.1.22:18080/health
 claim ok when TP2 cannot serve. Restart **both** ranks to clear it (`rank1.sh` then `rank0.sh`).
 
 Acceptance: `tools/tp2/acceptance.sh` (pair up, chat, kill rank1 → degraded, restart → recover).
+
+### Opt-in MTP
+
+The simple decode loop remains the default. Set `MAYA_TP_MTP=1` on rank 0's server to use MTP;
+leave `MAYA_GLM_NO_MTP` unset. For paired CLI requests, set `MAYA_TP_MTP=1` on both ranks.
+MTP uses greedy verification with a fixed draft width (default 2); rank 0 sends anchor/draft token IDs,
+accepted tokens, and the continue/stop decision over the bootstrap control channel. Tensors stay on RDMA.
+Thinking-budget forces and client cancellation use this same round protocol. Both hosts need matching binaries.
+
+MTP has not measured faster than the simple loop on this pair. Validate it with:
+
+```sh
+# Against a running MTP-enabled pair: 3 turns with reuse, cancellation, and small output limits
+.venv/bin/python tools/tp2/mtp_acceptance.py
+# Starts its own pair and checks peer death/restart with MTP enabled
+MAYA_TP_MTP=1 bash tools/tp2/acceptance.sh
+```
+
+A malformed or interrupted MTP frame stops the worker; rank 0 marks the pair down on decode failure.
+Restart both ranks after a protocol or RDMA failure.
 
 ## Failure playbook
 
