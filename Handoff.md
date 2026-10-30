@@ -1,8 +1,8 @@
-# Handoff — Maya TP2 (two-host tensor parallel)
+# Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-10-30 (post-v1.1.38 MTP review) · **v1.1.38** source release at `c322b3e`.
-> #22 diagnosis/measurements and hardware/CPU gates complete; #23–#26 fixes on main (§18). Final report CI/status is tracked in #22.
+> #22 and #23–#26 completed/closed; report CI41088587233 passed at e91b0a3 (§18). README now presents Maya-TP; #27 tracks the documentation change (§19).
 > Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** deployed identically to all three paths.
 > Test engines/server stopped; llama-swap daemon/config preserved. Published v1.1.38 predates the post-release fixes.
 
@@ -29,7 +29,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 6. **Python uses `.venv/bin/python`.** Shell uses `jq`.
 7. **Kill old processes before starting new ones.** `pkill -9 -x maya` — **do not** `pkill -f server.py` (matches the ssh shell and kills the session).
 8. **Binaries are per-host.** After every build: `scp build-hip/maya strix-halo-1.local:.../maya` **and** `strix-halo-1.local:/tmp/maya-tp2` (used by `run_bench.sh`). Verify `md5sum` matches both sides before a test.
-9. **Kill rank 0's server.py too before redeploying** — a live server respawns its engine (issue #27) and holds the binary open (`scp` fails "text file busy"); the respawned engine also inherits the OLD environment (no new env vars). Kill the server first to prevent respawn: `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'` (the `[s]` bracket stops the remote shell matching itself).
+9. **Kill rank 0's server.py too before redeploying** — a live server respawns its engine and holds the binary open (`scp` fails "text file busy"); the respawned engine also inherits the OLD environment (no new env vars). Kill the server first to prevent respawn: `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'` (the `[s]` bracket stops the remote shell matching itself).
 
 ## 3. Git / GitHub
 
@@ -60,6 +60,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 24 | Rank1 shared partial omitted in verifier | fixed and validated `56b9755` (§18) |
 | 25 | Padded outputs bypass HIP RDNA GEMV | fixed `ec22f4d`, GPU parity/microbench pass (§18) |
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
+| 27 | Maya-TP README identity, scope and upstream attribution | documentation updated (§19); final CI/disposition tracked in #27 |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -440,3 +441,23 @@ Pinned llama.cpp post-output-norm NextN seeding matches Maya. No alternate batch
 
 Never nested SSH, preserve rank0 checkout 7ee8f27 dirty work, llama-swap daemon/YAML. Stop server before engine.
 Local build tests are ON temporarily; gfx1151. No background CPU work during performance timing; timings are complete.
+
+## 19. #27 Maya-TP README and project identity
+
+User requested a cosmetic rewrite presenting the fork as its own derived project, Maya-TP, focused on
+HIP/ROCm gfx1151 Linux tensor parallelism across dual Strix Halo systems over Thunderbolt RDMA.
+README now explains speed and larger-model capacity, implemented TP2/MTP/serve/reliability work, current
+scope and setup. Current #22 measurements replace inherited NVIDIA benchmark tables; the single-host
+technical control is 18.55 vs TP2 25.82 tok/s (~39% gain), with the separate-reference caveat preserved.
+MTP examples use one draft; code measurements include two. Larger GLM packs are capacity targets, with
+published validation still Maya-S; other inherited engines and deferred vision/multi-sequence are explicit.
+
+Peasant Smith (@mw00), @needmorevram, Maya contributors and foundation/dependency credits are retained.
+Donation banners, the GitHub funding entry and historical donation-promotion bullet removed; copyright
+and license files preserved. Clone/issues/release links point to uv-genai/maya-tp. Runtime names unchanged.
+
+Documentation/metadata only: no engine build, deployment, inference or live configuration changes.
+Checks pass: README local links/anchors, shell syntax of examples, source flags, benchmark facts and
+repository-wide donation-reference scan. Inherited platform guides point their removed README sections
+back to the pinned upstream README; CONTRIBUTING's benchmark link/methodology points to current TP2 data.
+Final commit/CI outcome and closure are recorded in issue #27; no new tag/release.

@@ -6,6 +6,9 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased — after v1.1.38
 
+- **Maya-TP project documentation** (#27): rewrite the README around dual Strix Halo HIP/RDMA tensor
+  parallelism, measured throughput, larger-model capacity and current validated scope. Credit upstream
+  Project Maya and its creators; remove inherited donation promotions and GitHub funding metadata.
 - **Correct TP2 draft and target computation** (#23, #24, #26): replicated NextN layers keep their full shared
   width and local outputs; verification includes both sliced shared-expert partials; ordinary token decoding
   sums dense lead FFN partials before the residual. These fixes can change generated answers. Corrected
@@ -1863,8 +1866,6 @@ Faster prefill (how fast Maya reads your prompt): up to 46% on two GPUs and up t
   times every expert is fetched). Prefill measured on 2x Tesla V100 32 GB with 30 GB RAM, prompts of 2k / 8k / 16k /
   30k tokens: 240 / 331 / 345 / - -> 273 / 428 / 487 / 506 tokens/s. On one of those GPUs: prefill of an 8k-token
   prompt 115 -> 226 tokens/s. Answers are unchanged in quality (the same text, up to rounding).
-- **Support Project Maya:** [buymeacoffee.com/peasantsmith](https://buymeacoffee.com/peasantsmith) (README, and the
-  Sponsor button on GitHub).
 - README: how Maya grew out of Strata; exported chats are named `maya-chat-*.md`.
 
 ## v1.0.1 - 2026-10-07

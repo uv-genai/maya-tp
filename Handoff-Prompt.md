@@ -2,16 +2,17 @@
 
 Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §18, then `AGENTS.md`.
 
-Project: GLM-5.3-Flash/Maya-S TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
+Project: **Maya-TP**, GLM-5.3-Flash/Maya-S TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
 GPU inference, RDMA tensor path only. Bootstrap/control/token metadata may use TCP.
 Repository `uv-genai/maya-tp`, local branch main. No subagents unless explicitly authorized.
 
 ## Current state
 
-The user authorized autonomous MTP performance investigation and code review, and will not use the
-GPUs until it is finished. **#22 diagnosis, measurements and hardware/CPU validation are complete**.
-Final report/tooling commit, GitHub CI and issue disposition are tracked in #22; check that issue before
-repeating work. See Handoff §18. Test engines/server are stopped, GPUs free, llama-swap daemon running.
+MTP review #22 and fixes #23–#26 are complete and closed; final report CI41088587233 passed at e91b0a3.
+The current documentation work #27 rewrites README as Maya-TP with dual Strix Halo purpose, measurements,
+capacity, setup and credits, and removes inherited donation references/funding metadata. Handoff §19 and
+issue #27 record final commit/CI/disposition. No engine, deployment or live-config changes for this work.
+Test engines/server remain stopped, GPUs free, llama-swap daemon running.
 
 Source release **v1.1.38** is already published at `c322b3e`; #17 is closed. Do not redo or retag it,
 or publish another release automatically. Subsequent fixes on main are recorded under Unreleased:
@@ -74,5 +75,5 @@ Seven-draft peer kill/recovery passes 8/8. Final tooling/report CI and issue clo
 8. #16 vision is deferred; #11 multi-sequence stays gated. `glm_rows.cu` needs its own shared-width/attention
    audit before enabling it. #10 gather-based bit-exact reduction remains optional future work.
 
-Check #22 for final CI/issue status; finish any still-running final gate, then follow the next user request.
+Check #27 for documentation CI/issue status; finish any still-running final gate, then follow the next user request.
 Do not repeat completed measurements or publish a new release automatically.

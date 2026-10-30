@@ -32,7 +32,7 @@ and measured on Linux; on Windows 11 a user runs Maya-L on an RTX 4090, built wi
 
    `--check` reports the GPUs, toolkit, compiler, RAM and page file without downloading the model or building the
    engine. Maya finds Visual Studio's compiler environment itself; a Developer Command Prompt is not needed.
-3. Start the setup, putting the model on an NVMe SSD with enough [free space](../README.md#what-you-need) for the chosen model.
+3. Start the setup, putting the model on an NVMe SSD with enough [free space](https://github.com/mw00/project-maya/blob/f031a23b9682551e744e29d0e9f8d527df49f282/README.md#what-you-need) for the chosen model.
    Change the drive and folder to suit your PC:
 
    ```powershell
@@ -63,7 +63,7 @@ and measured on Linux; on Windows 11 a user runs Maya-L on an RTX 4090, built wi
   `--nvcc "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\bin\nvcc.exe"` to the setup command.
 - After setup, stop any running Maya server and run `.\START-MAYA.bat --calibrate --no-start` to tune the CPU/PCIe
   split and thread count for your PC. Then start Maya normally. See [Tuning](SETTINGS.md) for the optional RAM-resident
-  tier and other settings, and [Something went wrong?](../README.md#something-went-wrong) for `--bench` / `--report`.
+  tier and other settings, and [Something went wrong?](https://github.com/mw00/project-maya/blob/f031a23b9682551e744e29d0e9f8d527df49f282/README.md#something-went-wrong) for `--bench` / `--report`.
 - Not WSL2: WSL2's GPU driver pins only about 1 GB of RAM, and Maya pins tens of GB. Run
   `START-MAYA.bat` in Windows itself.
 - A Tesla V100 runs it too, built with CUDA 12.4 ([#57](https://github.com/mw00/project-maya/issues/57)). Run

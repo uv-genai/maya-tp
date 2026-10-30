@@ -14,8 +14,9 @@ Open an issue with:
   - model and context length;
   - the engine log's `glm fast:`, `glm split`, `glm stat:` and `glm spec:` lines.
 
-  For numbers comparable with the README's [speed tables](README.md#how-fast-is-it), measure the way `--bench` does: three questions of 256 tokens,
-  greedy, thinking off, one short warm-up first; prefill (reading the prompt) at 2048 and 8192 tokens.
+  For numbers comparable with Maya-TP's [measurements](README.md#measured-performance), use the
+  [controlled TP2 harness](tools/tp2/bench_mtp.py) and [saved methodology](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md):
+  the same prompt/continuation, excluded warmups, balanced run order and raw model-pick agreement.
 
 Name your Maya version (`VERSION`, or the commit). Say what you measured and what you didn't.
 
