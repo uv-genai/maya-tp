@@ -2341,19 +2341,10 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         cudaStreamWaitEvent(F->copy, S->ev_pfree, 0);
         cudaEventRecord(S->ev_pstart, F->copy);
         for (int j = 0; j < n; ++j) {
-            if (tp_.slicing()) {
-                // TP2: the RAM tier holds the full blob; cut this rank's column band into pbuf
-                const auto& nl = pack_layers_[(size_t) il];
-                tp_slice_expert(RC.slot((size_t) cand[(size_t) j].rs),
-                                RC.slot((size_t) cand[(size_t) j].rs) + (size_t) nl.fmt.gu_row * g.n_ff_exp,
-                                RC.slot((size_t) cand[(size_t) j].rs) +
-                                    (size_t) nl.fmt.gu_row * g.n_ff_exp * 2,
-                                tp_.experts.begin, tp_.experts.count, g.n_ff_exp, g.n_embd, nl.fmt.gu_row,
-                                nl.fmt.d_row, S->pbuf + (size_t) j * P.stride);
-            } else {
-                cudaMemcpyAsync(S->pbuf + (size_t) j * P.stride, RC.slot((size_t) cand[(size_t) j].rs), Ly.blob,
-                                cudaMemcpyHostToDevice, F->copy);
-            }
+            // fast_read_part/preload already store compact rank-local blobs in RAM.
+            // Copy on the stream so ev_pfree also orders writes to the reusable pbuf.
+            cudaMemcpyAsync(S->pbuf + (size_t) j * P.stride, RC.slot((size_t) cand[(size_t) j].rs), Ly.blob,
+                            cudaMemcpyHostToDevice, F->copy);
             if ((j + 1) % PrefillState::kPreEv == 0 || j + 1 == n)
                 cudaEventRecord(S->ev_pdone[(size_t) j / PrefillState::kPreEv], F->copy);
             S->pre_e.push_back(cand[(size_t) j].e);
