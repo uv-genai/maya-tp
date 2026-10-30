@@ -5846,6 +5846,13 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
                             g.n_embd};
             if (!gf::mv(&dn, 1, s)) { err = "glm fast: dense ffn down"; return false; }
             if (F->prof_on) F->mark("dense_down_mv");
+            // Dense lead weights are sliced just like the MoE weights. Complete
+            // the residual here, matching prefill and window verification.
+            if (tp_.active()) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "token AR r=%d dense il=%d floats=%d\n", tp_.rank, il, g.n_embd);
+                if (!tp_.all_reduce(F->ffn, (std::size_t) g.n_embd, g.n_embd, s, err)) return false;
+            }
         } else {
             const bool def = defer && il + 1 < l1_ && F->cpu_fmt[(size_t) il].n_ff > 0;
             if (!fast_moe(il, pf_pending, err, !def)) return false;
