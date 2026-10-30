@@ -527,7 +527,11 @@ bool Glm5Model::fast_moe_window(int il, int t0, int T, int part, int gid, std::s
     const Glm5Geometry& g = g_;
     cudaStream_t s = F->cs;
     const auto& Ly = F->L[(size_t) il];
-    const int E = g.n_embd, FFs = g.n_ff_exp * g.n_shared;
+    // TP2: the shared expert is sliced with the routed ones (gate/up row-slice, down col-slice;
+    // the MTP draft layer stays full). The token path's width is ff_compute() * n_shared — a full
+    // g.n_ff_exp here reads past the sliced sh_* weights in the gate/up mv, the shared down and
+    // moe_gate_up's shared section (the slice-only window fault, #13).
+    const int E = g.n_embd, FFs = ff_compute_for(il) * g.n_shared;
     static const bool prof = getenv("STRATA_GLM_WIN_PROF") != nullptr;
     if (part != 2) {
         gf::MvJob j[3];

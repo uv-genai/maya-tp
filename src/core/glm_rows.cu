@@ -427,7 +427,11 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
             if (!rows_dsa(il, rw, n, err)) return false;
         }
         // TP2: mixer partials before the FFN-side residual read (token path ARs here) (#11)
-        if (tp_.active() && !tp_.all_reduce(S->mixer, (std::size_t) n * E, E, s, err)) return false;
+        if (tp_.active()) {
+            if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                std::fprintf(stderr, "rows AR r=%d mixer il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
+            if (!tp_.all_reduce(S->mixer, (std::size_t) n * E, E, s, err)) return false;
+        }
 
         // ---- the FFN-side read (fused with the mixer's write), per row
         h.w_fn = Ly.hc_ffn_fn;
@@ -453,7 +457,11 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
             gf::MvJob dn = {Ly.ffn_down.q, S->dhq, nullptr, S->ffn, nullptr, 1.0f, Ly.ffn_down.type, FFD,
                             E};
             if (!mv(&dn, 1, "dense ffn down")) return false;
-            if (tp_.active() && !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+            if (tp_.active()) {
+            if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
+            if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+        }
         } else {
             if (!rows_moe(il, rw, n, err)) return false;
         }
@@ -805,7 +813,11 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
             err = "glm rows: the grouped EXL3 experts";
             return false;
         }
-        if (tp_.active() && !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+        if (tp_.active()) {
+            if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
+            if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+        }
         return true;
     } else {
         mw.xq = S->xq;
@@ -821,7 +833,11 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
                   std::to_string(Ly.d_type) + ")";
             return false;
         }
-        if (tp_.active() && !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+        if (tp_.active()) {
+            if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
+            if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+        }
     }
     // the CPU lane's answers last: the device's experts ran while the host computed the group's merged request
     if (lane && !empty && md.cpu_seq != nullptr) {

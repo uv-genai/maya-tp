@@ -779,8 +779,14 @@ public:
     /// elsewhere, =0 off.  mtp_ready(): this model was set up for it.
     static bool mtp_decode_wanted(int dev, int n_parts);
     bool mtp_ready() const;
+    /// TP2 (#13): with the accept wire, rank 0 sends its per-round accept decision (kept count + the
+    /// accepted token ids) and rank 1 receives it and commits identical tokens — the verify picks can
+    /// flip at near-ties between ranks, and an independent keep desyncs produced/p0 until one rank
+    /// outruns the other into the next request.  Null: decide locally (single host).
     bool decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, const std::function<bool(int)>& emit,
-                    int64_t& produced, std::string& err);
+                    int64_t& produced, std::string& err,
+                    const std::function<bool(int, const int32_t*)>& tp_round_send = {},
+                    const std::function<bool(int&, int32_t*)>& tp_round_recv = {});
     uint64_t mtp_rounds_ = 0;                              // verify passes (spec_steps_ / spec_hits_: drafts, accepted)
     uint64_t mtp_round_n_[9] = {};                         // ... by the draft length the round used
     bool mtp_fill_prev(int32_t token, int64_t p, std::string& err);   // the token path: entry p - 1 from head_x and token

@@ -2726,7 +2726,11 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         S->mark(Ly.recr ? "kda" : "dsa", s);
         if (skip_output) continue;   // every KDA/DSA cache update above still ran; these output rows feed nothing
         dump_row("mixer-" + std::to_string(il), S->mixer, E);
-        if (tp_.active() && !tp_.all_reduce(S->mixer, (std::size_t) T * E, E, s, err)) return false;
+        if (tp_.active()) {
+            if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                std::fprintf(stderr, "pre AR r=%d mixer il=%d T=%d floats=%zu\n", tp_.rank, il, T, (size_t) T * E);
+            if (!tp_.all_reduce(S->mixer, (std::size_t) T * E, E, s, err)) return false;
+        }
         hc_read(S->mixer, Ly.hc_ffn_fn, Ly.hc_ffn_scale, Ly.hc_ffn_base, Ly.ffn_norm);
         S->mark("hc", s);
         dump_row("ffn_norm-" + std::to_string(il), S->x, E);
@@ -3996,6 +4000,8 @@ bool Glm5Model::prefill_half(int64_t p0, int T, std::string& err, const int32_t*
         // TP2: the routed experts' sum is this rank's band (shared is rank-0 only); reduce before
         // the next layer's hc_read consumes S->ffn.
         if (tp_.active()) {
+            if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                std::fprintf(stderr, "pre AR r=%d ffn il=%d T=%d floats=%zu\n", tp_.rank, il, T, (size_t) T * E);
             if (!tp_.all_reduce(S->ffn, (std::size_t) T * E, E, s, err)) return false;
             S->mark("tp_all_reduce", s);
         }

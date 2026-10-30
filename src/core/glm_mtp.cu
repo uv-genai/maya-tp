@@ -549,7 +549,9 @@ int Glm5Model::mtp_choose(int n_cap) {
 
 // ---------------------------------------------------------------- the decode
 bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, const std::function<bool(int)>& emit,
-                           int64_t& produced, std::string& err) {
+                           int64_t& produced, std::string& err,
+                           const std::function<bool(int, const int32_t*)>& tp_round_send,
+                           const std::function<bool(int&, int32_t*)>& tp_round_recv) {
     produced = 0;
     if (!mtp_ready()) {
         err = "glm mtp: the MTP decode is not set up on this model";
@@ -704,8 +706,30 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
             ph[0] += std::chrono::duration<double, std::milli>(t1 - t0).count();
             ph[1] += std::chrono::duration<double, std::milli>(t2 - t1).count();
             // ---- 3. accept: row t's pick is the truth for p0 + t + 1; draft t + 1 stands while they match
+            // TP2 (#13): rank 0 decides and wires the accept; rank 1 takes the wired tokens — the verify
+            // picks can flip at near-ties between the ranks, and an independent keep desyncs the round
+            // counts until one rank outruns the other (gufo wires the plan the same way).  Rank 1 waits
+            // for the round message before its accept loop; rank 0 sends it right after its own loop,
+            // unconditionally (also when `more` stopped it early), so the pair never desyncs the stream.
+            const bool wire = tp_.active() && (tp_round_send || tp_round_recv);
+            std::vector<int32_t> wire_tok((size_t) T, 0);
+            int wire_keep = -1;
+            if (wire && tp_.rank != 0) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "glm mtp TP: rank=%d wire-recv wait p0=%lld produced=%lld T=%d\n",
+                                 tp_.rank, (long long) p0, (long long) produced, T);
+                if (!tp_round_recv(wire_keep, wire_tok.data()) || wire_keep < 1 || wire_keep > T) {
+                    err = "TP2 pair down (mtp accept wire)";
+                    ok = false;
+                    break;
+                }
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "glm mtp TP: rank=%d wire-got keep=%d p0=%lld produced=%lld\n",
+                                 tp_.rank, wire_keep, (long long) p0, (long long) produced);
+            }
             for (int t = 0; t < T; ++t) {
-                const int yy = forced(out[(size_t) t]);
+                const int yy = wire && tp_.rank != 0 ? forced(wire_tok[(size_t) t]) : forced(out[(size_t) t]);
+                if (wire && tp_.rank == 0) wire_tok[(size_t) t] = yy;
                 sp.counter += 1;
                 last_tok_ = yy;
                 ++produced;
@@ -717,9 +741,28 @@ bool Glm5Model::decode_mtp(strata::kernels::SamplerParams& sp, int64_t max_new, 
                 // draft t + 1 is compared (every draft before it stood): its counts decay first (acc_keep)
                 mtp_hit_[t + 1] *= acc_keep;
                 mtp_reach_[t + 1] = mtp_reach_[t + 1] * acc_keep + 1.0;
-                if (yy != win[(size_t) t + 1]) break;
-                mtp_hit_[t + 1] += 1.0;
-                ++acc;
+                if (wire && tp_.rank != 0) {
+                    // rank 1: the wired boundary decides; its own drafts may differ at near-ties (stats only)
+                    if (t + 1 >= wire_keep) break;
+                    if (yy == win[(size_t) t + 1]) {
+                        mtp_hit_[t + 1] += 1.0;
+                        ++acc;
+                    }
+                } else {
+                    if (yy != win[(size_t) t + 1]) break;
+                    mtp_hit_[t + 1] += 1.0;
+                    ++acc;
+                }
+            }
+            if (wire && tp_.rank == 0) {
+                if (getenv("STRATA_GLM_TP_AR_TRACE"))
+                    std::fprintf(stderr, "glm mtp TP: rank=%d wire-send keep=%d p0=%lld produced=%lld\n",
+                                 tp_.rank, keep, (long long) p0, (long long) produced);
+                if (!tp_round_send(keep, wire_tok.data())) {
+                    err = "TP2 pair down (mtp accept wire)";
+                    ok = false;
+                    break;
+                }
             }
             // ---- 4. the commit: the recurrent states advanced by the kept rows (positions p0 .. p0 + keep - 1)
             if (!window_commit(keep, err)) {

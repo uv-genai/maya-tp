@@ -1861,6 +1861,7 @@ static int glm_pack_generate(const Options& o) {
         kTpMirrorMultiBoundary = 9,
         kTpMirrorMtp = 10,        // n=max_new, then TpMtpSp POD (+ optional penalty history)
         kTpMirrorForce = 11,      // payload: one forced token id (-1 clears)
+        kTpMirrorMtpRound = 12,   // #13: n=keep, payload: the accepted token ids (rank 0 -> rank 1, per round)
     };
     // Sampler scalars for a mirrored decode_mtp (no host pointers).
     struct TpMtpSp {
@@ -2473,9 +2474,9 @@ static int glm_pack_generate(const Options& o) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
             }
-        } else if (!tp2 && std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
-            // MTP+TP2 (#13): cycle sync (emit/greedy/n=2) works; window still too slow (server
-            // cancel ~0.1 tok/s) and SLICE faults moe_gate_up. Keep off until both fixed.
+        } else if (std::strcmp(finish, "cancel") != 0 && model.fast() && model.mtp_ready() && req_spec != 1) {
+            // MTP+TP2 (#13): ON for diagnosis — SLICE moe_gate_up fixed (FFs sliced); slow verify
+            // (~2.8 s/window) still open. Re-gate `!tp2` until that lands too.
             int64_t n_spec = 0;
             const uint64_t rounds0 = model.mtp_rounds_;
             uint64_t len0[9];
@@ -2485,7 +2486,13 @@ static int glm_pack_generate(const Options& o) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
             }
-            if (!model.decode_mtp(sp, max_new, on_token, n_spec, err)) {
+            // TP2 (#13): rank 0 wires its per-round accept decision (kept count + accepted ids); rank 1
+            // commits the same tokens — verify picks can flip at near-ties and an independent keep
+            // desyncs the ranks until one outruns the other into the next request.
+            const auto mtp_round_send = [&](int keep, const int32_t* toks) -> bool {
+                return tp_send(kTpMirrorMtpRound, toks, keep);
+            };
+            if (!model.decode_mtp(sp, max_new, on_token, n_spec, err, mtp_round_send, {})) {
                 drop_if_poisoned(prompt, err);
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
@@ -4124,12 +4131,22 @@ static int glm_pack_generate(const Options& o) {
                 std::string mtp_err;
                 // decode_mtp already ++produced before emit — do not increment again (rank0's
                 // on_token uses a different counter). Double-increment desynced p0/keep (#13).
+                // No think-budget force here: rank 0 does not force under TP2 (the loop guard is
+                // rank-0-only and gated !tp2) and the accept wire is authoritative for the tokens.
                 const auto emit = [&](int tok) -> bool {
                     if (stop_eos && (tok == e0 || tok == e1 || tok == e2)) return false;
-                    if (tb > 0 && te >= 0 && produced >= tb && tok != te) model.force_next(te);
                     return produced < max_new;
                 };
-                if (!model.decode_mtp(sp, max_new, emit, produced, mtp_err))
+                // TP2 (#13): receive rank 0's per-round accept decision and commit identical tokens.
+                const auto mtp_round_recv = [&](int& keep, int32_t* toks) -> bool {
+                    TpMirrorHdr rh{};
+                    std::string re;
+                    if (!tp_comm->RecvControl(&rh, sizeof rh, &re)) return false;
+                    if (rh.op != kTpMirrorMtpRound || rh.n < 1) return false;
+                    keep = rh.n;
+                    return tp_comm->RecvControl(toks, (size_t) rh.n * sizeof(int32_t), &re);
+                };
+                if (!model.decode_mtp(sp, max_new, emit, produced, mtp_err, {}, mtp_round_recv))
                     std::fprintf(stderr, "TP2 worker mtp: %s\n", mtp_err.c_str());
                 else
                     std::fprintf(stderr, "TP2 worker: mtp decode %lld tokens\n", (long long) produced);
