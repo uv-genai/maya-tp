@@ -113,12 +113,13 @@ Before a live pair, confirm identical pack hashes on both hosts and `audit_split
 Controlled `run_bench.sh --model Maya-M` (2026-10-31, binary `5dbc9356…`, simple decode, 32 tokens):
 **pair parity 32/32**, decode **42.57 / 42.83 ms/token** (rank0 / rank1), prefill 11 tokens ≈ 470 ms.
 
-Full Maya-S MTP suite also run on Maya-M (7-draft API matrices, `mtp_acceptance`, CLI 32/32 both modes,
-kill/recover 8/8, `bench_mtp` +8.11% @2 drafts): see
-[tp2-maya-m-mtp-2026-10-31](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md).
+**Maya-S, Maya-M and Maya-L** have passed the suite (S/M: 7-draft API matrices, `mtp_acceptance`, CLI 32/32
+both modes, kill/recover 8/8, `bench_mtp`). Reports:
+[Maya-M](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md),
+[Maya-L](benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md).
 Maya-S raw MTP data remains in [tp2-mtp-review](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md).
-**Maya-L is untested** — run the same suite with `--model Maya-L` when the pack exists on both hosts;
-tracked in [issue #30](https://github.com/uv-genai/maya-tp/issues/30).
+On Maya-L, rank0’s cold expert warm can exceed rank1’s by minutes — for **paired CLI** decode set
+`STRATA_GLM_WARM=0` on both ranks (or wait out the warm); serve mode is unaffected.
 
 ## What “6 µs / 37 Gb/s” means
 

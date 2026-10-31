@@ -32,10 +32,11 @@ Maya-TP adds that coordination to Maya:
   request coordination and token decisions. The measured Thunderbolt link reaches about 37 Gb/s for
   large transfers and 6 µs for tiny WRITE round trips; collective costs also include staging and driver work.
 
-The published simple/MTP speed tables use **GLM-5.3-Flash / Maya-S IQ2_XXS**. **TP2 and MTP have also been
-validated end-to-end on Maya-M** (same API matrices, acceptance, CLI parity and controlled bench). **Maya-L
-is next** and is tracked as [issue #30](https://github.com/uv-genai/maya-tp/issues/30); larger packs stay
-capacity targets until that suite passes.
+The published simple/MTP speed tables use **GLM-5.3-Flash / Maya-S IQ2_XXS**. **TP2 and MTP have been
+validated end-to-end on Maya-S, Maya-M and Maya-L** (same API matrices, acceptance, CLI parity and
+controlled bench). Reports: [Maya-S](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md),
+[Maya-M](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md),
+[Maya-L](docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md).
 
 ## What this project adds
 
@@ -88,8 +89,7 @@ MTP/API suite passing. Report:
 | Area | Status |
 | --- | --- |
 | Platform | Two Strix Halo gfx1151 systems, Linux, HIP/ROCm, Thunderbolt/USB4 RDMA |
-| Validated models (TP2 + MTP) | **Maya-S IQ2_XXS** and **Maya-M IQ2_S**, text inference — API matrices, CLI pair parity, kill/recover, controlled bench ([Maya-S review](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md), [Maya-M suite](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md)) |
-| Next model under test | **Maya-L** — same suite, tracked in [issue #30](https://github.com/uv-genai/maya-tp/issues/30) |
+| Validated models (TP2 + MTP) | **Maya-S**, **Maya-M**, **Maya-L** — API matrices, CLI pair parity, kill/recover, controlled bench ([S](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md), [M](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md), [L](docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md)) |
 | Larger GLM packs | Partition geometry comes from pack metadata; validate memory fit and results per pack before claiming support |
 | MTP | Opt-in, greedy TP2 verification, configurable fixed width of 1–8 drafts |
 | Conversations | One active sequence; cached follow-ups and cancellation tested |
@@ -188,14 +188,12 @@ draft width, cache/disk counters and reproduction steps. `./maya.sh --report` co
 
 GitHub CI runs CPU-only checks: the HIP compatibility-name gate, server tests and installer/tools tests.
 GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery are exercised on the
-Strix Halo pair for **Maya-S and Maya-M** (simple and MTP). Evidence:
+Strix Halo pair for **Maya-S, Maya-M and Maya-L** (simple and MTP). Evidence:
 
 - [Maya-S MTP review](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md)
 - [Maya-M TP2/MTP suite](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md)
+- [Maya-L TP2/MTP suite](docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md)
 - [Collective regression report](docs/validation/tp2-collectives-2026-10-30/RESULTS.md) (Maya-S)
-
-**Maya-L** uses the same checklist and is open as
-[issue #30](https://github.com/uv-genai/maya-tp/issues/30).
 
 Useful references:
 

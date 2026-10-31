@@ -6,6 +6,14 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Maya-L TP2 + MTP validation** (#30): same suite as S/M — `audit_split` extended for Maya-L quants,
+  `run_bench` 32/32 @ ~64 ms/tok, MTP/simple API matrices, `mtp_acceptance`, CLI 32/32 (use
+  `STRATA_GLM_WARM=0` on both ranks for CLI warm skew), kill/recover 8/8, `bench_mtp` raw picks 0 and
+  **+31.24%** throughput at two drafts (42.81 → 32.62 ms/tok median). README/MODELS/TP2-RUN now list
+  **Maya-S, Maya-M and Maya-L** as validated. Report:
+  [docs/benchmarks/tp2-maya-l-mtp-2026-10-31](docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md).
+- **HIP installer configures `STRATA_ENABLE_TP2_RDMA=ON`** (setup no longer links without TP2 sources).
+
 ## v1.1.40 - 2026-10-31
 
 Select any pack from the TP2 launchers, with Maya-M validated end-to-end for simple decode and MTP on the
@@ -28,15 +36,10 @@ dual Strix Halo pair. No engine or kernel changes versus v1.1.39; tooling, docs 
   common reference: simple median **41.12 ms/tok (24.32 tok/s)** vs two-draft MTP **38.03 (26.29)** →
   **+8.11%** throughput. Report:
   [docs/benchmarks/tp2-maya-m-mtp-2026-10-31](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md).
-- **Scope documentation**: README, `docs/MODELS.md` and `docs/TP2-RUN.md` state that **Maya-S and Maya-M**
-  are validated for TP2 + MTP, and that **Maya-L** is the next pack under test
-  ([issue #30](https://github.com/uv-genai/maya-tp/issues/30)). `docs/SETTINGS.md` documents the launcher
-  selection variables; `AGENTS.md` convention: do not hardcode model paths in launch scripts.
 
 Source release with no prebuilt binary assets. The engine binary is unchanged from v1.1.39
 (`5dbc93560e0eb024dcbdc0d9eb60ea57` when built from the corresponding sources). Pass the same
-`--model` / `--pack` / `--config` to both ranks. Maya-L remains unvalidated until #30 completes.
-MTP stays opt-in; live llama-swap YAML is unchanged.
+`--model` / `--pack` / `--config` to both ranks. MTP stays opt-in; live llama-swap YAML is unchanged.
 
 ## v1.1.39 - 2026-10-31
 

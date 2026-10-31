@@ -2,8 +2,8 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-10-31 · **v1.1.40 published** at `d9248e8` (CI41173208751 passed); #31 closed (§22).
-> **v1.1.39** remains `20ff03a`. #29 launchers + Maya-S/M TP2/MTP validated (§21); **#30 Maya-L next**.
-> Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** on all three paths (unchanged since v1.1.39).
+> **v1.1.39** remains `20ff03a`. #29/#30: **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
+> Current binary **`5a52cd27167523b6ea4b0f0bde93f503`** on all three paths (TP2_RDMA=ON rebuild).
 > llama-swap daemon/config preserved. v1.1.38 stays at c322b3e.
 
 ## 1. What we are building
@@ -63,7 +63,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
 | 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; simple bench 32/32 @42.6–42.8 ms/tok; **full Maya-S MTP suite passed on Maya-M** (§21) |
-| 30 | Maya-L TP2 + MTP validation | **open (next)** — same suite as S/M when L is downloaded+packed on both hosts; README/MODELS/TP2-RUN say so |
+| 30 | Maya-L TP2 + MTP validation | **complete** — suite PASS, report `docs/benchmarks/tp2-maya-l-mtp-2026-10-31`; docs updated |
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
@@ -539,15 +539,13 @@ simple and 7-draft MTP; `acceptance.sh` MTP kill/recover **8/8**; `bench_mtp.py 
 raw picks **0**, simple median **41.12 ms/tok (24.32)** vs 2-draft MTP **38.03 (26.29)** → **+8.11%**
 throughput on the 256-token reference. Context 32768 API / 4096 CLI; binary `5dbc9356…` unchanged.
 Cosmetic: `/health` `model_label` still “Maya-S” when only the pack is overridden.
-Engines stopped; issue thread #29. **Maya-L** is the next pack to validate — **issue #30**
-(same suite: `run_bench`, simple/MTP matrices, `mtp_acceptance`, CLI 32/32, kill/recover 8/8, `bench_mtp`).
-README / MODELS / TP2-RUN / CHANGELOG already state S+M validated and L pending #30.
+Engines stopped; issue thread #29. Maya-L suite is **§23** / issue #30 (closed).
 
 **llama-swap rank0 YAML + launcher deploy (user-requested):** four entries with explicit `--model` for
-S and M (simple + MTP drafts 2). Launchers deployed by scp to rank0 (not a git pull). Daemons/models
-not started unless asked. **rank0 `maya_config_with_pack` also rewrites `log` → `maya-<model>-hip.log`
-and `installer.quant`** so a Maya-M serve does not tee into the Maya-S log or report Maya-S in
-`model_label` (`model_env.sh` deployed to rank0).
+S and M (simple + MTP drafts 2). Launchers deployed by scp; rank0 is now a clean origin/main checkout.
+Daemons/models not started unless asked. **rank0 `maya_config_with_pack` also rewrites `log` → `maya-<model>-hip.log`
+and `installer.quant`** so a Maya-M/L serve does not tee into the Maya-S log or report Maya-S in
+`model_label`.
 
 ## 22. v1.1.40 release (#31)
 
@@ -563,3 +561,23 @@ explicit CHANGELOG-based notes and **no binary assets**. **v1.1.39** stays at `2
 
 Metadata/tooling only: no engine rebuild or deploy. Functional binary remains
 `5dbc93560e0eb024dcbdc0d9eb60ea57`. Do not republish; treat tags as immutable.
+
+## 23. #30 Maya-L TP2 + MTP suite — PASS (2026-10-31)
+
+Pack on both hosts (identical MD5s). `audit_split.py --world 2` **all block-safe** after adding
+Q3_K/Q4_K/Q5_K/IQ4_NL/BF16 to the tool (`99e1f8a`). Report:
+**`docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md`**.
+
+| Test | Result |
+| --- | --- |
+| `run_bench.sh --model Maya-L` | 32/32, 64.34 / 64.42 ms/tok |
+| `mtp_acceptance.py` | PASS |
+| MTP + simple API matrices | PASS |
+| CLI simple / 7-draft MTP | 32/32 / 32/32 (CLI MTP: `STRATA_GLM_WARM=0` both ranks) |
+| `acceptance.sh` MTP | 8/8 |
+| `bench_mtp` 2-draft | PASS, raw picks 0; simple **42.81** vs MTP **32.62** ms/tok → **+31.24%** |
+
+**Gotcha:** Maya-L rank0 cold expert warm can be minutes longer than rank1 → CLI first-AR timeout and
+poisoned verbs. Serve is fine (rank1 waits for mirrors). For paired CLI: `STRATA_GLM_WARM=0` both ranks.
+`bench_mtp` READY timeout now **900 s**. Installer `62ee2e7` always configures `STRATA_ENABLE_TP2_RDMA=ON`.
+Binary **`5a52cd27167523b6ea4b0f0bde93f503`** on all three paths. Engines stopped. Issue #30 closed.

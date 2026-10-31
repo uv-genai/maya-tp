@@ -21,8 +21,9 @@ new release without an explicit request.
 - **Maya-M full MTP suite PASS** (same as Maya-S): `docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md`
   — API MTP/simple matrices, mtp_acceptance, CLI 32/32 both modes, kill/recover 8/8,
   `bench_mtp` +8.11% @2 drafts (41.12→38.03 ms/tok).
-- **Maya-S + Maya-M are the validated TP2/MTP models.** **#30 open for Maya-L** (same suite when
-  packed on both hosts). README scope, MODELS, TP2-RUN, CHANGELOG updated accordingly.
+- **#30 Maya-L suite PASS** (report `docs/benchmarks/tp2-maya-l-mtp-2026-10-31`): bench 32/32,
+  matrices, mtp_acceptance, CLI 32/32 (`STRATA_GLM_WARM=0` for warm skew), kill/recover 8/8,
+  bench_mtp +31.24% @2 drafts. **S, M and L all validated.**
 - `run_bench.sh` scps rank0’s token save before parity (`36b38ef`).
 - **Rank0 llama-swap YAML (user-configured):** `maya-glm5-s-tp2`, `maya-glm5-s-tp2-mtp`,
   `maya-glm5-m-tp2`, `maya-glm5-m-tp2-mtp` with `--model` + `--no-mtp` / `--mtp --drafts 2`.
@@ -65,6 +66,5 @@ CPU gates: HIP map; serve and tools suites green (629 tools tests at last run).
 9. Do not hardcode model paths in launch scripts (AGENTS.md convention 8). Document new flags in
    `docs/TP2-RUN.md`.
 
-Check **#30** if the user wants Maya-L TP2/MTP validation (pack first, then the suite in the issue).
-Otherwise follow the next user request. Do not repeat completed measurements or publish a new release
+#30 (Maya-L) is closed. Follow the next user request. Do not repeat completed measurements or publish a new release
 automatically.
