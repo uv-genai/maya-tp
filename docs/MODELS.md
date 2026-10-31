@@ -35,8 +35,9 @@ the model's MTP block, which drafts tokens ahead.
 **Two-host TP2** (this fork, `uv-genai/maya-tp`): pick the pack on the launch scripts with `--model NAME`
 (or `MAYA_MODEL` / `MAYA_PACK` / `--config`); see [TP2-RUN.md](TP2-RUN.md#choosing-a-model) for flags and
 examples (`rank0.sh`, `rank1.sh`, `run_bench.sh`, llama-swap `tp2.sh`, `acceptance.sh`, `bench_mtp.py`).
-Geometry is pack-derived ([issue #12](https://github.com/uv-genai/maya-tp/issues/12)). Full MTP/API validation
-remains **Maya-S**; a controlled Maya-M pair bench (2026-10-31) reached 32/32 parity at ~43 ms/tok
+Geometry is pack-derived ([issue #12](https://github.com/uv-genai/maya-tp/issues/12)). Maya-S and Maya-M
+have each passed the TP2 MTP suite (API matrices, acceptance, CLI parity, kill/recover, controlled bench);
+Maya-M results: [tp2-maya-m-mtp-2026-10-31](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md)
 ([issue #29](https://github.com/uv-genai/maya-tp/issues/29)). Under TP2, MTP/DFlash and multi-conversation
 are off for now (#11, #13).
 

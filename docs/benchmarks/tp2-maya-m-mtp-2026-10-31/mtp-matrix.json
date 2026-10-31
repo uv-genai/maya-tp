@@ -1,0 +1,132 @@
+[
+  {
+    "case": "seven-draft-window",
+    "mode": "mtp",
+    "wall_s": 9.68,
+    "usage": {
+      "prompt_tokens": 990,
+      "completion_tokens": 64,
+      "total_tokens": 1054,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 990,
+      "prompt_ms": 5327.4,
+      "prompt_per_token_ms": 5.381,
+      "prompt_per_second": 185.8,
+      "predicted_n": 64,
+      "predicted_ms": 4335.8,
+      "predicted_per_token_ms": 67.747,
+      "predicted_per_second": 14.8,
+      "draft_n": 144,
+      "draft_n_accepted": 41
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Summary\n\nThe document does not contain substantive content to summarize. It consists entirely of the word \"alpha\" repeated hundreds of times, with no sentences, arguments",
+      "reasoning_content": "The document is just repeated \"alpha\" words \u2014 a stress test. I should summarize honestly: it contains no substantive content, just repeated filler. Then explain"
+    }
+  },
+  {
+    "case": "over-48MiB",
+    "mode": "mtp",
+    "wall_s": 31.196,
+    "usage": {
+      "prompt_tokens": 7290,
+      "completion_tokens": 32,
+      "total_tokens": 7322,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 7290,
+      "prompt_ms": 29244.9,
+      "prompt_per_token_ms": 4.012,
+      "prompt_per_second": 249.3,
+      "predicted_n": 32,
+      "predicted_ms": 1940.0,
+      "predicted_per_token_ms": 60.625,
+      "predicted_per_second": 16.5,
+      "draft_n": 68,
+      "draft_n_accepted": 20
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Document Summary\n\nThe document provided contains no substantive content. It consists entirely of",
+      "reasoning_content": "The document is just repeated \"alpha\" filler text \u2014 a stress test."
+    }
+  },
+  {
+    "case": "reuse-after-large-prompt",
+    "mode": "mtp",
+    "wall_s": 2.348,
+    "usage": {
+      "prompt_tokens": 7333,
+      "completion_tokens": 24,
+      "total_tokens": 7357,
+      "prompt_tokens_details": {
+        "cached_tokens": 7289
+      }
+    },
+    "timings": {
+      "cache_n": 7289,
+      "prompt_n": 44,
+      "prompt_ms": 795.2,
+      "prompt_per_token_ms": 18.073,
+      "prompt_per_second": 55.3,
+      "predicted_n": 24,
+      "predicted_ms": 1532.6,
+      "predicted_per_token_ms": 63.858,
+      "predicted_per_second": 15.7,
+      "draft_n": 51,
+      "draft_n_accepted": 14
+    },
+    "message": {
+      "role": "assistant",
+      "content": "Networks send data in chunks called frames. Each frame needs",
+      "reasoning_content": "The user wants a simpler explanation of why network framing needs"
+    }
+  },
+  {
+    "case": "multiple-prefill-chunks",
+    "mode": "mtp",
+    "wall_s": 58.679,
+    "usage": {
+      "prompt_tokens": 14550,
+      "completion_tokens": 32,
+      "total_tokens": 14582,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 14550,
+      "prompt_ms": 56470.5,
+      "prompt_per_token_ms": 3.881,
+      "prompt_per_second": 257.7,
+      "predicted_n": 32,
+      "predicted_ms": 2195.8,
+      "predicted_per_token_ms": 68.619,
+      "predicted_per_second": 14.6,
+      "draft_n": 76,
+      "draft_n_accepted": 19
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Document Summary\n\nThe document contains no substantive content. It consists entirely of the",
+      "reasoning_content": "The document is just repeated \"alpha\" filler text \u2014 a stress test."
+    }
+  },
+  {
+    "case": "stream-after-large-prompt",
+    "mode": "mtp",
+    "chunks": 25,
+    "wall_s": 2.916
+  }
+]

@@ -15,7 +15,11 @@ only what changed and starts; the model is not downloaded again.
   (a stale local `r0.txt` reported a false mismatch).
 - **Maya-M packed and pair-benched** (#29): `Maya-M/pack` built on both hosts (`iq_pack.py --compat-bf16`);
   `audit_split.py --world 2` all block-safe. Controlled `run_bench.sh --model Maya-M`: pair parity 32/32,
-  42.57 / 42.83 ms/token. Full MTP/API matrices remain Maya-S-only for now.
+  42.57 / 42.83 ms/token.
+- **Maya-M MTP validation** (#29): same suite as Maya-S — MTP and simple large-prompt API matrices,
+  `mtp_acceptance.py`, CLI 32/32 both modes, kill/recover 8/8, `bench_mtp` raw picks 0 and **+8.11%**
+  throughput at two drafts (41.12 → 38.03 ms/tok median on the 256-token reference). Report:
+  [docs/benchmarks/tp2-maya-m-mtp-2026-10-31](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md).
 
 ## v1.1.39 - 2026-10-31
 

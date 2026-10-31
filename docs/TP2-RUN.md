@@ -112,8 +112,11 @@ Before a live pair, confirm identical pack hashes on both hosts and `audit_split
 
 Controlled `run_bench.sh --model Maya-M` (2026-10-31, binary `5dbc9356…`, simple decode, 32 tokens):
 **pair parity 32/32**, decode **42.57 / 42.83 ms/token** (rank0 / rank1), prefill 11 tokens ≈ 470 ms.
-Maya-S controlled MTP/simple results remain in [benchmarks](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md);
-Maya-M has **not** been through the full MTP/API matrices.
+
+Full Maya-S MTP suite also run on Maya-M (7-draft API matrices, `mtp_acceptance`, CLI 32/32 both modes,
+kill/recover 8/8, `bench_mtp` +8.11% @2 drafts): see
+[tp2-maya-m-mtp-2026-10-31](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md).
+Maya-S raw MTP data remains in [tp2-mtp-review](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md).
 
 ## What “6 µs / 37 Gb/s” means
 

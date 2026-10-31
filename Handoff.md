@@ -63,7 +63,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
-| 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; controlled bench **32/32 parity**, 42.6–42.8 ms/tok (§21) |
+| 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; simple bench 32/32 @42.6–42.8 ms/tok; **full Maya-S MTP suite passed on Maya-M** (§21) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -523,4 +523,13 @@ prefill 11 tokens ~470 ms. Binary `5dbc9356…` on all three paths (rank0 `/tmp/
 redeployed). `run_bench.sh` now **scps rank0’s `--spec-follow-save`** before parity (`36b38ef`) — a stale local
 `r0.txt` had produced a false 3/32 FAIL. NOSLICE logs also showed identical T-lines on both ranks.
 Single-host Maya-M is a weak reference (disk streaming, ~79 ms/tok). Engines stopped after the run;
-llama-swap YAML and rank0 checkout untouched. Durable issue thread: #29.
+llama-swap YAML and rank0 checkout untouched.
+
+**Maya-M MTP suite (same as Maya-S #22/#16), all PASS** — report
+`docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md`: `mtp_acceptance.py`; MTP and simple
+`regression_collectives` matrices (990/7290/14550, reuse 7289, stream DONE); CLI pair **32/32**
+simple and 7-draft MTP; `acceptance.sh` MTP kill/recover **8/8**; `bench_mtp.py --model Maya-M`
+raw picks **0**, simple median **41.12 ms/tok (24.32)** vs 2-draft MTP **38.03 (26.29)** → **+8.11%**
+throughput on the 256-token reference. Context 32768 API / 4096 CLI; binary `5dbc9356…` unchanged.
+Cosmetic: `/health` `model_label` still “Maya-S” when only the pack is overridden.
+Engines stopped; issue thread #29.

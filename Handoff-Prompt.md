@@ -18,8 +18,12 @@ measurements or start a new release without an explicit request.
 - Docs updated: `docs/TP2-RUN.md` “Choosing a model”, README, MODELS, SETTINGS, Handoff §9, AGENTS.md #8,
   CHANGELOG Unreleased.
 - Maya-M packed on **both** hosts; `run_bench.sh --model Maya-M` → **32/32 parity**, 42.57/42.83 ms/tok.
+- **Maya-M full MTP suite PASS** (same as Maya-S): `docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md`
+  — API MTP/simple matrices, mtp_acceptance, CLI 32/32 both modes, kill/recover 8/8,
+  `bench_mtp` +8.11% @2 drafts (41.12→38.03 ms/tok).
 - `run_bench.sh` scps rank0’s token save before parity (`36b38ef`).
-- Full MTP/API matrices still Maya-S-only; live llama-swap YAML still Maya-S entries.
+- Docs cover model flags (TP2-RUN “Choosing a model”, README, MODELS, SETTINGS, AGENTS #8).
+- Live llama-swap YAML still Maya-S entries.
 
 Current engine MD5 **`5dbc93560e0eb024dcbdc0d9eb60ea57`** matches local `build-hip/maya`, rank0
 `build-hip/maya` and `/tmp/maya-tp2`. Never rebuild on the remote dirty checkout.
