@@ -89,7 +89,8 @@ class Pair:
                                        text=True, bufsize=1, env=env if single_host else None)
             self.pump = threading.Thread(target=self._read, daemon=True)
             self.pump.start()
-            self.until(lambda line: line.startswith("READY "), 240)
+            # Maya-L rank0 expert warm can exceed 8 minutes on a cold page cache.
+            self.until(lambda line: line.startswith("READY "), 900)
         except BaseException:
             self.close()
             raise
@@ -120,7 +121,7 @@ class Pair:
         before = time.monotonic()
         self.r0.stdin.write(f"GEN {tokens} temperature=0 spec={0 if mode == 'mtp' else 1} {PROMPT}\n")
         self.r0.stdin.flush()
-        lines = self.until(lambda line: line.startswith("DONE "), 180)
+        lines = self.until(lambda line: line.startswith("DONE "), 600)
         wall_ms = 1000 * (time.monotonic() - before)
         done = lines[-1].split()
         ids = [int(line.split()[1]) for line in lines if line.startswith("T ")]

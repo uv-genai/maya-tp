@@ -16,7 +16,7 @@ import argparse
 import sys
 from pathlib import Path
 
-# ggml type id -> (name, block values, bytes per block) for the types Maya-S uses.
+# ggml type id -> (name, block values, bytes per block) for Maya pack types (S/M/L).
 # Sizes from ggml-common.h static_asserts (IQ2_XXS 66, IQ3_XXS 98, IQ2_S 82, ...); block length
 # is what matters for split alignment.
 GGML = {
@@ -24,15 +24,20 @@ GGML = {
     1: ("F16", 1, 2),
     8: ("Q8_0", 32, 34),
     10: ("Q2_K", 256, 84),
+    11: ("Q3_K", 256, 110),
+    12: ("Q4_K", 256, 144),
+    13: ("Q5_K", 256, 176),
     14: ("Q6_K", 256, 210),
     15: ("Q8_K", 256, 292),
     16: ("IQ2_XXS", 256, 66),
     17: ("IQ2_XS", 256, 74),
     18: ("IQ3_XXS", 256, 98),
     19: ("IQ1_S", 256, 50),
+    20: ("IQ4_NL", 32, 18),
     21: ("IQ3_S", 256, 110),
     22: ("IQ2_S", 256, 82),
     23: ("IQ4_XS", 256, 136),
+    30: ("BF16", 1, 2),
 }
 
 

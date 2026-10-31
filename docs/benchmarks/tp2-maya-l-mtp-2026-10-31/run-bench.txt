@@ -1,0 +1,19 @@
+=== pack: /home/ugo/software/Maya-data/models/Maya-L/pack (model=Maya-L) ===
+=== rank 0 on strix-halo-1 ===
+=== rank 1 here ===
+INFO tp_world=2 tp_rank=1 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[1024,2048)
+glm pack: CUDA0 dense weights 6.86 GB: | kda q/k/v q14 2677 MB | attn output q14 1470 MB | shared experts q14 826 MB | other q14 496 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 352 MB | mla q/kv q14 288 MB | kda small bf16 221 MB | mla q/kv bf16 132 MB | routers bf16 94 MB | mhc bf16 67 MB | dsa indexer bf16 24 MB | kda small f32 13 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+INFO context=4096 kv=fp16 kv_resident=0 expert_slots=12096 expert_cache_mib=68740 engine_kind=glm-fast experts=12096 vram_slots=12096 vram_gb=67.1 ram_slots=32 ram_gb=0.2 mtp=0 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+glm prefill: 11 tokens in 752.2 ms (68.38 ms/token, 15 tok/s), 1 chunk of 64 tokens | CUDA0 748 ms
+glm fast timing: 32 tokens, 64.34 ms/token
+=== rank 0 output ===
+INFO tp_world=2 tp_rank=0 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[0,1024)
+glm pack: CUDA0 dense weights 6.86 GB: | kda q/k/v q14 2677 MB | attn output q14 1470 MB | shared experts q14 826 MB | other q14 496 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 352 MB | mla q/kv q14 288 MB | kda small bf16 221 MB | mla q/kv bf16 132 MB | routers bf16 94 MB | mhc bf16 67 MB | dsa indexer bf16 24 MB | kda small f32 13 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+INFO context=4096 kv=fp16 kv_resident=0 expert_slots=12096 expert_cache_mib=68740 engine_kind=glm-fast experts=12096 vram_slots=12096 vram_gb=67.1 ram_slots=32 ram_gb=0.2 mtp=0 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+glm prefill: 11 tokens in 629.4 ms (57.22 ms/token, 17 tok/s), 1 chunk of 64 tokens | CUDA0 617 ms
+glm fast timing: 32 tokens, 64.42 ms/token
+=== pair parity ===
+tokens: a=32 b=32 compared=32 agree=32 (1.0000)
+OK: agreement 1.0000 >= 1.0

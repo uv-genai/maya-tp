@@ -1,0 +1,33 @@
+Starting resident pair with fixed reference; warmups first...
+warmup simple: 46.706 ms/tok, 21.41 tok/s, drafts=0/0
+warmup mtp   : 34.621 ms/tok, 28.88 tok/s, drafts=158/193
+warmup mtp   : 33.288 ms/tok, 30.04 tok/s, drafts=158/193
+warmup simple: 42.725 ms/tok, 23.41 tok/s, drafts=0/0
+measure simple: 42.832 ms/tok, 23.35 tok/s, drafts=0/0
+measure mtp   : 47.695 ms/tok, 20.97 tok/s, drafts=158/193
+measure mtp   : 32.800 ms/tok, 30.49 tok/s, drafts=158/193
+measure simple: 42.962 ms/tok, 23.28 tok/s, drafts=0/0
+measure simple: 42.610 ms/tok, 23.47 tok/s, drafts=0/0
+measure mtp   : 32.364 ms/tok, 30.90 tok/s, drafts=158/193
+measure mtp   : 32.443 ms/tok, 30.82 tok/s, drafts=158/193
+measure simple: 42.791 ms/tok, 23.37 tok/s, drafts=0/0
+{
+  "simple": {
+    "median_ms_per_token": 42.8119140625,
+    "median_tokens_per_second": 23.35798391401342,
+    "min_ms_per_token": 42.609765625,
+    "max_ms_per_token": 42.962109375,
+    "mean_ms_per_token": 42.79892578125,
+    "stdev_ms_per_token": 0.14558958482485
+  },
+  "mtp": {
+    "median_ms_per_token": 32.6212890625,
+    "median_tokens_per_second": 30.654827836020623,
+    "min_ms_per_token": 32.364453125,
+    "max_ms_per_token": 47.6953125,
+    "mean_ms_per_token": 36.3255859375,
+    "stdev_ms_per_token": 7.582182671857578
+  },
+  "mtp_latency_change_percent": -23.803245482374315,
+  "mtp_throughput_change_percent": 31.239185491644772
+}
