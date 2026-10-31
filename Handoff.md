@@ -63,7 +63,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
-| 29 | Maya-M TP2 + model-selectable launchers | open; launchers take `--model`/`MAYA_MODEL` or `--pack`/`MAYA_PACK` (§21); Maya-M shards present, pack/ still needed |
+| 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; controlled bench **32/32 parity**, 42.6–42.8 ms/tok (§21) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -500,7 +500,11 @@ Updated: `rank0.sh`/`rank1.sh`, `llama-swap/tp2.sh` (forwards to both ranks), `r
 when the model differs from the config’s pack. Docs: `docs/TP2-RUN.md` “Choosing a model”.
 Launcher unit tests extended; tools suite **629 tests / 31 skips** PASS; HIP map PASS.
 
-**Maya-M status:** GGUF shards exist on both hosts under `Maya-data/models/Maya-M/`; **no `pack/` yet**.
-Before a live Maya-M pair: pack on both hosts (installer/`iq_pack.py`), optional `maya-maya-m-hip.json`,
-then `run_bench.sh --model Maya-M` / rank scripts with `--model Maya-M`. Live llama-swap YAML untouched;
-a Maya-S TP2 pair was observed running at session start (user-owned; not stopped). No GPU run for this change.
+**Maya-M status:** packed on **both** hosts (`iq_pack.py --compat-bf16`; v4 native experts, IQ2_S/IQ3_S);
+pack MD5s match across ranks; `audit_split.py --world 2` all block-safe (n_ff 2048→1024, dense 12288→6144, trunk 0..44).
+Controlled **`run_bench.sh --model Maya-M`**: pair parity **32/32**, decode **42.57 / 42.83 ms/token** (r0/r1),
+prefill 11 tokens ~470 ms. Binary `5dbc9356…` on all three paths (rank0 `/tmp/maya-tp2` was missing once and was
+redeployed). `run_bench.sh` now **scps rank0’s `--spec-follow-save`** before parity (`36b38ef`) — a stale local
+`r0.txt` had produced a false 3/32 FAIL. NOSLICE logs also showed identical T-lines on both ranks.
+Single-host Maya-M is a weak reference (disk streaming, ~79 ms/tok). Engines stopped after the run;
+llama-swap YAML and rank0 checkout untouched. Durable issue thread: #29.
