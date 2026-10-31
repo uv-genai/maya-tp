@@ -1,11 +1,13 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-31 · **v1.1.41 published** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
+> Last updated: 2026-10-31 · **v1.1.42 preparation authorized** — release #35 (§28).
+> Latest published: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
 > **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
 > Open perf: **#33** TP2 prefill — sliced GEMM calibration + rank1 config inheritance improve Maya-S
 > median prompt throughput **32–37%** at 1K/4K/8K (§27). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
-> unchanged on all three paths. Work on `perf/tp2-prefill-33`; rank0 has user work (see §27).
+> unchanged on all three paths. Prefill commit `9bc0ec9`, PR #34 CI PASS; release branch
+> `release/v1.1.42`. Rank0 has user work (see §27); preserve it.
 > Llama-swap daemon + 6 maya YAML entries preserved (Maya-L `--context 524288`).
 
 ## 1. What we are building
@@ -70,6 +72,7 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 32 | Release v1.1.41 | published from `a6d15a7`; tag/CI/publication verified; closed (§24) |
 | 33 | TP2 prefill throughput | **open** — sliced GEMM tuning + rank1 config inheritance improve S 32–37% (§27); row cap/short-request overhead remain |
+| 35 | Release v1.1.42 | **in progress** — user authorized handoff updates, commit/push/tag and release; PR #34 has passed CI (§28) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -651,10 +654,29 @@ Keep investigating startup/lending and the user's exact long-context workload; n
 claim without its own A/B. Final CPU gates PASS in order: HIP map, **464 serve / 11 skips**,
 **630 tools / 31 skips**; 11 launcher tests PASS. Engines/server stopped after tests; all three binary
 MD5s unchanged. Llama-swap daemon (rank0 pid 736) and YAML left alone. Source/review:
-`perf/tp2-prefill-33`, commit/PR/CI links tracked in #33. No new release.
+**`9bc0ec90ae66e501d597e661facc5a2ebc319711`**, [PR #34](https://github.com/uv-genai/maya-tp/pull/34).
+Both GitHub CI runs PASS: [push 41202760879](https://github.com/uv-genai/maya-tp/actions/runs/41202760879),
+[PR 41202777839](https://github.com/uv-genai/maya-tp/actions/runs/41202777839).
+User subsequently requested release v1.1.42; preparation is tracked in #35 / §28.
 
 The 3008-row cap and `MAYA_TP_PREFILL_ROWS` remain unchanged/unimplemented. Original user request-11
 9.6 tok/s is not reproduced by the controlled fresh-prompt benchmark; #33 stays open for that workload
 and further short-request/window work. Rank0 launcher + tuning file deployed; their SHA256s match
 local files. Existing user edits preserved. Remote tree is intentionally dirty with those deployments
 beside the pre-existing `maya.py` edit/backups; no pull/reset was performed.
+
+## 28. v1.1.42 release (#35) — preparation authorized
+
+User explicitly requested updating **both handoff documents**, then committing, pushing, tagging and
+publishing. Release workstream: [#35](https://github.com/uv-genai/maya-tp/issues/35).
+PR #34 is mergeable and both CI runs passed at `9bc0ec9`. Release scope: integrate that work,
+VERSION/CHANGELOG/README metadata, and the final §27 results/operational state in these handoffs.
+
+Next: integrate PR #34 into origin/main, commit release metadata with `refs #35`, wait for
+release-commit CPU CI, create annotated **v1.1.42**, and publish a public/latest/non-prerelease
+source release with no binary assets. Record the exact commit, CI, tag and release outcome here
+and in #35 afterward. Do not close #33: cold Maya-L/request-11/row-cap work remains.
+
+No engine rebuild, binary redeploy or repeated GPU measurements needed. Binary remains
+`5a52cd27167523b6ea4b0f0bde93f503`; test engines/server remain stopped; preserve rank0's dirty
+checkout and llama-swap daemon/YAML. v1.1.41 and all older tags remain immutable.

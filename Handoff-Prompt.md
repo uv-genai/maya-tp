@@ -1,16 +1,19 @@
 # Handoff-Prompt — Maya TP2 restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §18, §21, §23, §24, **§27**), then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §18, §21, §23, §24, **§27–§28**), then `AGENTS.md`.
 
 Project: **Maya-TP**, GLM-5.3-Flash TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
 GPU inference, RDMA tensor path only. Bootstrap/control/token metadata may use TCP.
-Repository `uv-genai/maya-tp`, local branch **perf/tp2-prefill-33** (based on main `5067ed9`).
+Repository `uv-genai/maya-tp`, local branch **release/v1.1.42**, based on prefill commit `9bc0ec9`.
 Rank0 is at `777cc92` with user-modified `maya.py` and two untracked Maya-L config backups; preserve them.
 No subagents unless explicitly authorized.
 
 ## Current state
 
-**v1.1.41 published** (`a6d15a7`, CI41191735148); **#32 closed** (Handoff §24). Do **not** republish.
+**v1.1.42 release explicitly authorized**, tracked in **#35** / Handoff §28. Both handoffs updated
+first. Integrate green PR #34 (`9bc0ec9`), commit/push release metadata, wait for release-commit CI,
+then create the annotated tag and publish a source release. Verify #35 for completion before resuming.
+**v1.1.41 published** (`a6d15a7`, CI41191735148); **#32 closed** (Handoff §24). Do **not** republish it.
 Older tags: v1.1.40 = `d9248e8`, v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e`.
 Do not repeat completed measurements or start a release without an explicit request.
 
@@ -47,7 +50,8 @@ and `/tmp/maya-tp2` (built with `STRATA_ENABLE_TP2_RDMA=ON`; installer always pa
 **Engines:** test engines/server **stopped**; GPUs free; llama-swap daemon left alone.
 **#33 gates:** HIP map + 464 serve / 11 skips + 630 tools / 31 skips PASS. No engine rebuild;
 rank1 launcher + hipBLASLt 100401 tuning table deployed to rank0 with matching SHA256s.
-Commit/PR/CI links are tracked in #33. Do not repeat the completed fresh-prompt comparison.
+Prefill commit **9bc0ec9**, [PR #34](https://github.com/uv-genai/maya-tp/pull/34); both CI runs
+**41202760879 / 41202777839 PASS**. Do not repeat the completed fresh-prompt comparison.
 
 ## Conclusions / evidence
 
@@ -70,7 +74,7 @@ CPU gates green at last run (HIP map + serve + tools). CPU CI passed for release
 3. After every engine build, copy to **both** rank0 paths (`build-hip/maya` and `/tmp/maya-tp2`) and
    verify **three** hashes. `/tmp/maya-tp2` can disappear — redeploy if missing.
 4. Rank0 has user work (above), plus the deployed rank1 launcher and tuning table from #33. **No pull/reset/rebuild there.**
-   Local source is on `perf/tp2-prefill-33`; do not drop that work by resetting to origin/main.
+   Local release source includes `9bc0ec9`; do not drop that work by resetting to an older main.
    The binary is unchanged. Do not leave worktrees dirty without saying so.
 5. Use `.venv/bin/python`, jq. One issue per workstream on `uv-genai/maya-tp`; comment at milestones;
    `refs #N`; push only origin; close or leave open explicitly. Keep Handoff current.

@@ -202,9 +202,10 @@ Useful references:
 - [Contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md) and [releases](https://github.com/uv-genai/maya-tp/releases)
 
 Some inherited documentation describes upstream Maya's broader platform and model support; the validated
-Maya-TP scope is listed above. Release **v1.1.41** adds Maya-L TP2/MTP validation and the TP2 installer
-configure fix on top of v1.1.40's model-selectable launchers; consult the changelog when selecting a
-revision.
+Maya-TP scope is listed above. Release **v1.1.42** improves controlled Maya-S TP2 prefill throughput by
+32–37% through worker configuration and gfx1151/hipBLASLt 100401 tuning. Cold Maya-L delays and the
+prefill row cap remain open; consult the [changelog](CHANGELOG.md) and
+[prefill report](docs/benchmarks/tp2-prefill-2026-10-31/RESULTS.md) when selecting a revision.
 
 ## Credits and license
 

@@ -6,6 +6,34 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+## v1.1.42 - 2026-10-31
+
+Faster TP2 prefill on the dual gfx1151 pair through worker configuration and measured projection tuning.
+Controlled **Maya-S** prompt throughput improves **31.9% / 34.7% / 37.2%** at approximately 1K/4K/8K
+tokens, with MTP fixed at two drafts and context 32768. The 8K median prompt time falls from **31.42 s
+to 22.90 s**. No engine/kernel, transport or decode-default changes versus v1.1.41.
+
+- **Worker configuration** (#33, PR #34): `rank1.sh` applies the base config's `env`, matching the rank0
+  server's precedence. This carries configured prefill sub-batches and hipBLASLt tuning to both ranks;
+  previously the worker used smaller sub-batches and uncalibrated GEMMs. Values are passed literally,
+  including whitespace/newlines, without shell evaluation.
+- **TP2 projection calibration** (#33): 18 measured entries for six sliced GLM projection shapes at
+  T=64/256/1024, scoped to **gfx1151 / hipBLASLt 100401**. Other library versions are unchanged.
+  Numerical and padding checks pass. GEMM accumulation order can change; all six short greedy Maya-S
+  responses in the controlled comparison match baseline, without a general bit-exactness claim.
+- **Prefill probe and evidence**: `tools/tp2/bench_prefill.py` measures fresh 1K/4K/8K prompts against
+  an idle pair. Full methodology, raw responses, calibration data and stage logs are in the
+  [prefill report](docs/benchmarks/tp2-prefill-2026-10-31/RESULTS.md). The copy-lane span includes idle
+  mixer windows; the report corrects the earlier interpretation that its entire span was copying.
+- **Validation**: Maya-S MTP reuse/cancel/limits and long-prompt/reuse/stream regression pass; Maya-M/L
+  fresh 1K/4K/8K smoke and twelve Maya-L cached turns pass. Required gates pass: HIP mappings,
+  464 server tests (11 skips), 630 tools tests (31 skips), including eleven launcher tests.
+
+**Still open in #33:** cold Maya-L startup/lending delays, the original 9.6 tok/s request-11 workload,
+and the ~3008-row RDMA cap / unimplemented `MAYA_TP_PREFILL_ROWS`. No comparative speedup is claimed
+for Maya-M/L. Source release with no prebuilt binary assets; existing engine binaries remain valid.
+MTP stays opt-in. Llama-swap daemon/YAML and older tags are unchanged.
+
 ## v1.1.41 - 2026-10-31
 
 **Maya-L** joins Maya-S and Maya-M as a validated two-host TP2 + MTP pack, with the HIP installer fixed so
