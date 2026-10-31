@@ -3,9 +3,10 @@
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-10-31 · **v1.1.41 published** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
 > **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
-> Open perf: **#33** TP2 prefill (copy/staging, ~3008-row window). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
-> on all three paths. Both checkouts clean origin/main. Engines stopped; llama-swap daemon + 6 maya YAML
-> entries preserved (Maya-L `--context 524288`). v1.1.38 stays at c322b3e.
+> Open perf: **#33** TP2 prefill — sliced GEMM calibration + rank1 config inheritance improve Maya-S
+> median prompt throughput **32–37%** at 1K/4K/8K (§27). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
+> unchanged on all three paths. Work on `perf/tp2-prefill-33`; rank0 has user work (see §27).
+> Llama-swap daemon + 6 maya YAML entries preserved (Maya-L `--context 524288`).
 
 ## 1. What we are building
 
@@ -68,7 +69,7 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 30 | Maya-L TP2 + MTP validation | **complete** — suite PASS, report `docs/benchmarks/tp2-maya-l-mtp-2026-10-31`; docs updated |
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 32 | Release v1.1.41 | published from `a6d15a7`; tag/CI/publication verified; closed (§24) |
-| 33 | TP2 prefill slow (staging; ~3008-row window) | **open** — primary perf backlog; includes `MAYA_TP_PREFILL_ROWS` (§25); decode is fine |
+| 33 | TP2 prefill throughput | **open** — sliced GEMM tuning + rank1 config inheritance improve S 32–37% (§27); row cap/short-request overhead remain |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -602,8 +603,9 @@ Metadata only — no engine rebuild. Do not republish.
 User: decode/MTP generation is fine (2 drafts); **prefill** is not — **9.6 tok/s on the 11th request**.
 Issue [uv-genai/maya-tp#33](https://github.com/uv-genai/maya-tp/issues/33).
 
-Measured TP2+MTP(2) Maya-S with `STRATA_GLM_PREFILL_STAGES=1`: **copy/expert-staging lane ≈ 90% of
-chunk wall** (e.g. 4782 ms chunk → 4380 ms copy, layer lane ~37 ms). Long prompts cap at **~3008 rows**
+Initial interpretation was corrected in §27: the **copy-lane span includes idle mixer windows**;
+it does not mean 90% copying (4782 ms chunk → 4380 ms span, only 124 ms actual copies).
+Long prompts cap at **~3008 rows**
 (RDMA 48 MiB window). Short prompts: fixed lead 0.1–1.2 s + staging → 55–150 tok/s; ≥4K → ~240–270.
 Saved matrices (S/M/L): ~1K often 55–65 tok/s (some M ~186); ≥7K ~90–260.
 
@@ -618,3 +620,41 @@ overlap stage+AR; re-measure 1K/4K/8K with MTP 2 drafts.
 - Packs present both hosts: Maya-S-v2-IQ2_XXS, Maya-M, Maya-L (identical pack MD5s when built).
 - Configs on rank0: `maya-maya-s-v2-iq2_xxs-hip.json`, `maya-maya-l-hip.json` (context 524288).
 - No GPU processes expected at rest; llama-swap pid listening on :8080 rank0.
+
+## 27. #33 prefill optimization — resumed (2026-10-31)
+
+User requested speeding up prefill. Initial inspection: local main `5067ed9` clean; rank0 now at
+`777cc92` with user-modified `maya.py` and two untracked Maya-L config backups. **Preserve rank0's
+work; do not pull/reset/rebuild there.** Three deployed binary MD5s still `5a52cd27167523b6ea4b0f0bde93f503`.
+Test engines/server stopped at startup. Llama-swap daemon/YAML untouched. Progress is tracked in #33.
+
+**Diagnosis:** the copy-lane label was misleading: in the saved 1052-token chunk, actual copies were
+124 ms, ring wait 1072 ms, idle mixer windows 3182 ms. Detailed baseline profile: rank1 KDA projections
+30.4%, resident experts 15.7%, mHC/mixer-AR 12.8%, DSA projections 10.0%, staged experts 4.0%.
+Rank1 ignored config.env (256-row sub-batches versus rank0's 1024; no Lt tuning). Existing gfx1151
+calibrations also omitted six TP2 projection shapes, so these used slow hipBLAS GEMM fallbacks.
+
+**Changes:** rank1 safely inherits config.env, matching server.child_env; 18 gfx1151/hipBLASLt **100401**
+calibration entries (six sliced shapes × T=64/256/1024), all measured/accuracy checked. Other versions
+unchanged. No engine build/deploy needed; no kernel, decode or transport changes. New fresh-prompt
+probe `tools/tp2/bench_prefill.py`. Report/raw data: `docs/benchmarks/tp2-prefill-2026-10-31/`.
+
+**Controlled Maya-S comparison:** context 32768, MTP fixed/cap 2, same six fresh 990/4062/8158-token
+prompts, two samples per length. Median prefill ms: **4732→3588 / 16189→12016 / 31416→22897**;
+throughput **+31.9% / +34.7% / +37.2%**. Six 8-token greedy messages unchanged; arithmetic is not
+bit-exact (calibration relative L2 ≤1.91e-5). Config parity alone was only ~4–6%.
+MTP acceptance and 990/7290/14550 + reuse/stream matrix PASS. Maya-M 1K/4K/8K smoke PASS;
+Maya-L 1K/4K/8K smoke and 12 cached turns PASS. Turns 11/12: 35 fresh tokens in 603/612 ms
+(58.0/57.2 tok/s, 338/372 cached); context 32768, not the live YAML's 524288. First cold L request
+still slow: 38.6 s API prompt time, 9.56 s main chunk; rank1 actual copies 6.05 s at ~0.1 GiB/s.
+Keep investigating startup/lending and the user's exact long-context workload; no general L speedup
+claim without its own A/B. Final CPU gates PASS in order: HIP map, **464 serve / 11 skips**,
+**630 tools / 31 skips**; 11 launcher tests PASS. Engines/server stopped after tests; all three binary
+MD5s unchanged. Llama-swap daemon (rank0 pid 736) and YAML left alone. Source/review:
+`perf/tp2-prefill-33`, commit/PR/CI links tracked in #33. No new release.
+
+The 3008-row cap and `MAYA_TP_PREFILL_ROWS` remain unchanged/unimplemented. Original user request-11
+9.6 tok/s is not reproduced by the controlled fresh-prompt benchmark; #33 stays open for that workload
+and further short-request/window work. Rank0 launcher + tuning file deployed; their SHA256s match
+local files. Existing user edits preserved. Remote tree is intentionally dirty with those deployments
+beside the pre-existing `maya.py` edit/backups; no pull/reset was performed.

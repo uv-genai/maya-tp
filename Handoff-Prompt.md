@@ -1,11 +1,12 @@
 # Handoff-Prompt — Maya TP2 restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §18, §21, §23, §24), then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §18, §21, §23, §24, **§27**), then `AGENTS.md`.
 
 Project: **Maya-TP**, GLM-5.3-Flash TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
 GPU inference, RDMA tensor path only. Bootstrap/control/token metadata may use TCP.
-Repository `uv-genai/maya-tp`, local branch **main** (both hosts clean at origin). No subagents unless
-explicitly authorized.
+Repository `uv-genai/maya-tp`, local branch **perf/tp2-prefill-33** (based on main `5067ed9`).
+Rank0 is at `777cc92` with user-modified `maya.py` and two untracked Maya-L config backups; preserve them.
+No subagents unless explicitly authorized.
 
 ## Current state
 
@@ -22,8 +23,12 @@ kill/recover, `bench_mtp`). Reports:
 
 **Open work:**
 
-- **#33** — TP2 **prefill** is slow (copy/staging bound; ~3008-row RDMA window). Decode/MTP generation is fine.
-  Includes unimplemented `MAYA_TP_PREFILL_ROWS` (same issue, not separate). User saw **9.6 tok/s** on request 11.
+- **#33** — TP2 **prefill**: rank1 config inheritance + 18 sliced GEMM calibration rows (gfx1151,
+  hipBLASLt 100401) improve Maya-S 1K/4K/8K median throughput **32–37%**. Report:
+  `docs/benchmarks/tp2-prefill-2026-10-31/RESULTS.md`; handoff §27. M/L smoke and 12 L turns PASS.
+  The “copy lane” includes idle mixer windows: initial staging diagnosis was incomplete.
+  Cold L startup/lending remains slow; user **9.6 tok/s** request 11 not reproduced (test turn 11: 58).
+  ~3008-row RDMA cap and unimplemented `MAYA_TP_PREFILL_ROWS` remain. Decode/MTP generation is fine.
 - **#29** — launchers + Maya-M; work done, issue still open (close when user agrees).
 - **#1** umbrella, **#10** optional, **#11** multi gated, **#16** vision deferred.
 
@@ -40,6 +45,9 @@ Backups sit beside the YAML.
 and `/tmp/maya-tp2` (built with `STRATA_ENABLE_TP2_RDMA=ON`; installer always passes that flag now).
 
 **Engines:** test engines/server **stopped**; GPUs free; llama-swap daemon left alone.
+**#33 gates:** HIP map + 464 serve / 11 skips + 630 tools / 31 skips PASS. No engine rebuild;
+rank1 launcher + hipBLASLt 100401 tuning table deployed to rank0 with matching SHA256s.
+Commit/PR/CI links are tracked in #33. Do not repeat the completed fresh-prompt comparison.
 
 ## Conclusions / evidence
 
@@ -61,8 +69,9 @@ CPU gates green at last run (HIP map + serve + tools). CPU CI passed for release
    Local: `pkill -9 -x maya`. Never `pkill -f server.py`.
 3. After every engine build, copy to **both** rank0 paths (`build-hip/maya` and `/tmp/maya-tp2`) and
    verify **three** hashes. `/tmp/maya-tp2` can disappear — redeploy if missing.
-4. Both checkouts are **clean origin/main** (user reset rank0 earlier). Do not leave them dirty without
-   saying so; no pull on a dirty tree. Authoritative source is origin/main.
+4. Rank0 has user work (above), plus the deployed rank1 launcher and tuning table from #33. **No pull/reset/rebuild there.**
+   Local source is on `perf/tp2-prefill-33`; do not drop that work by resetting to origin/main.
+   The binary is unchanged. Do not leave worktrees dirty without saying so.
 5. Use `.venv/bin/python`, jq. One issue per workstream on `uv-genai/maya-tp`; comment at milestones;
    `refs #N`; push only origin; close or leave open explicitly. Keep Handoff current.
 6. Start rank1 locally before SSH-launching rank0. Pass the **same** `--model`/`--pack`/`--config` (or
