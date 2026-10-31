@@ -202,8 +202,8 @@ Useful references:
 - [Contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md) and [releases](https://github.com/uv-genai/maya-tp/releases)
 
 Some inherited documentation describes upstream Maya's broader platform and model support; the validated
-Maya-TP scope is listed above. Release **v1.1.40** adds model-selectable TP2 launchers and the Maya-M
-TP2/MTP validation suite on top of v1.1.39's corrected computation; consult the changelog when selecting a
+Maya-TP scope is listed above. Release **v1.1.41** adds Maya-L TP2/MTP validation and the TP2 installer
+configure fix on top of v1.1.40's model-selectable launchers; consult the changelog when selecting a
 revision.
 
 ## Credits and license

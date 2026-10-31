@@ -6,13 +6,32 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
-- **Maya-L TP2 + MTP validation** (#30): same suite as S/M — `audit_split` extended for Maya-L quants,
-  `run_bench` 32/32 @ ~64 ms/tok, MTP/simple API matrices, `mtp_acceptance`, CLI 32/32 (use
-  `STRATA_GLM_WARM=0` on both ranks for CLI warm skew), kill/recover 8/8, `bench_mtp` raw picks 0 and
-  **+31.24%** throughput at two drafts (42.81 → 32.62 ms/tok median). README/MODELS/TP2-RUN now list
-  **Maya-S, Maya-M and Maya-L** as validated. Report:
+## v1.1.41 - 2026-10-31
+
+**Maya-L** joins Maya-S and Maya-M as a validated two-host TP2 + MTP pack, with the HIP installer fixed so
+setup always configures the TP2 sources. Tooling and documentation only; no engine/kernel changes versus
+v1.1.40.
+
+- **Maya-L TP2 + MTP validation** (#30): same suite as S/M — `run_bench` pair parity **32/32** at
+  64.34/64.42 ms/token, simple and seven-draft MTP large-prompt API matrices, `mtp_acceptance.py`,
+  CLI pair parity **32/32** both modes, MTP kill/recover **8/8**, and `bench_mtp.py` with **0** raw-pick
+  differences. On the 256-token common reference: simple median **42.81 ms/tok (23.36 tok/s)** vs
+  two-draft MTP **32.62 (30.65)** → **+31.24%** throughput. For paired CLI on Maya-L set
+  `STRATA_GLM_WARM=0` on both ranks (rank0’s cold expert warm can otherwise outrun rank1 and time out the
+  first all-reduce; serve mode is unaffected). Report:
   [docs/benchmarks/tp2-maya-l-mtp-2026-10-31](docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md).
-- **HIP installer configures `STRATA_ENABLE_TP2_RDMA=ON`** (setup no longer links without TP2 sources).
+- **`audit_split.py`**: GGML table includes Q3_K/Q4_K/Q5_K/IQ4_NL/BF16 so Maya-L down-quants pass the
+  two-host block-safety audit (all splits block-safe on this pack).
+- **`bench_mtp.py`**: READY/DONE waits raised to 900/600 s so a large model’s rank0 warm can finish.
+- **HIP installer** (`maya.py`): setup always passes `-DSTRATA_ENABLE_TP2_RDMA=ON`. Without it, a fresh
+  configure linked only part of the TP2 objects and the gfx1151 build failed (`TpContext` undefined).
+- **Pack override identity**: when `--model`/`--pack` rewrites the base config, `log` becomes
+  `maya-<model>-hip.log` and `installer.quant` follows the pack so `/health` `model_label` is not Maya-S.
+- **Scope docs**: README, `docs/MODELS.md` and `docs/TP2-RUN.md` list **Maya-S, Maya-M and Maya-L** as
+  validated for TP2 + MTP.
+
+Source release with no prebuilt binary assets. Pass the same `--model` / `--pack` / `--config` to both
+ranks. MTP stays opt-in; llama-swap YAML is unchanged. Older tags (v1.1.40 and below) are immutable.
 
 ## v1.1.40 - 2026-10-31
 
