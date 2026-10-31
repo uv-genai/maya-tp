@@ -12,3 +12,4 @@ Repository `uv-genai/maya-tp`, local branch main. No subagents unless explicitly
 **v1.1.41 is published** (`a6d15a7`, CI41191735148); #32 closed (Handoff §24) — do not republish.
 v1.1.40 = `d9248e8`; v1.1.39 = `20ff03a`. Do not repeat completed measurements or start a
 new release without an explicit request.
+- Rank0 YAML also has **maya-glm5-l-tp2** / **-l-tp2-mtp** (`--model Maya-L`).

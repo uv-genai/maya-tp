@@ -542,11 +542,9 @@ throughput on the 256-token reference. Context 32768 API / 4096 CLI; binary `5db
 Cosmetic: `/health` `model_label` still “Maya-S” when only the pack is overridden.
 Engines stopped; issue thread #29. Maya-L suite is **§23** / issue #30 (closed).
 
-**llama-swap rank0 YAML + launcher deploy (user-requested):** four entries with explicit `--model` for
-S and M (simple + MTP drafts 2). Launchers deployed by scp; rank0 is now a clean origin/main checkout.
-Daemons/models not started unless asked. **rank0 `maya_config_with_pack` also rewrites `log` → `maya-<model>-hip.log`
-and `installer.quant`** so a Maya-M/L serve does not tee into the Maya-S log or report Maya-S in
-`model_label`.
+**llama-swap rank0 YAML (user-requested):** six entries — `maya-glm5-{s,m,l}-tp2` (`--no-mtp`) and
+`maya-glm5-{s,m,l}-tp2-mtp` (`--mtp --drafts 2`), each with explicit `--model`. Backups beside the file
+(`…pre-maya-l`). Watch-config lists all six. Do not edit YAML unless asked.
 
 ## 22. v1.1.40 release (#31)
 

@@ -262,7 +262,7 @@ The installed `~/.config/llama-swap/config.yaml` (on **strix-halo-1**) uses
 `rank0.sh`, `rank1.sh` from current main). Deploy by copying those files only — **never** `git pull` /
 reset the remote `7ee8f27` checkout. Without them, `tp2.sh` rejects `--model` with the old usage line.
 
-Current live entries (2026-10-31, user-configured; backups beside the file):
+Current live entries (user-configured on strix-halo-1; backups beside the file):
 
 ```yaml
 models:
@@ -280,6 +280,14 @@ models:
     proxy: http://127.0.0.1:${PORT}
   maya-glm5-m-tp2-mtp:
     cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-M --mtp --drafts 2
+    cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
+    proxy: http://127.0.0.1:${PORT}
+  maya-glm5-l-tp2:
+    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-L --no-mtp
+    cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
+    proxy: http://127.0.0.1:${PORT}
+  maya-glm5-l-tp2-mtp:
+    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-L --mtp --drafts 2
     cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
     proxy: http://127.0.0.1:${PORT}
 ```
