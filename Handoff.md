@@ -545,7 +545,9 @@ README / MODELS / TP2-RUN / CHANGELOG already state S+M validated and L pending 
 
 **llama-swap rank0 YAML + launcher deploy (user-requested):** four entries with explicit `--model` for
 S and M (simple + MTP drafts 2). Launchers deployed by scp to rank0 (not a git pull). Daemons/models
-not started unless asked.
+not started unless asked. **rank0 `maya_config_with_pack` also rewrites `log` → `maya-<model>-hip.log`
+and `installer.quant`** so a Maya-M serve does not tee into the Maya-S log or report Maya-S in
+`model_label` (`model_env.sh` deployed to rank0).
 
 ## 22. v1.1.40 release (#31)
 
