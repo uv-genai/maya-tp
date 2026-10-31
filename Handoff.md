@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-31 · **v1.1.40 published** at `d9248e8` (CI41173208751 passed); #31 closed (§22).
-> **v1.1.39** remains `20ff03a`. #29/#30: **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
+> Last updated: 2026-10-31 · **v1.1.41 published** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
+> **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. #29/#30: **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
 > Current binary **`5a52cd27167523b6ea4b0f0bde93f503`** on all three paths (TP2_RDMA=ON rebuild).
 > llama-swap daemon/config preserved. v1.1.38 stays at c322b3e.
 
@@ -38,7 +38,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | `origin` | `https://github.com/uv-genai/maya-tp.git` |
 | `upstream` | `https://github.com/mw00/project-maya.git` (read/merge only) |
 | `main` | tracks `origin/main` |
-| Release version | **v1.1.40** published from `d9248e8` ([#31](https://github.com/uv-genai/maya-tp/issues/31)); previous v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e` |
+| Release version | **v1.1.41** published from `a6d15a7` ([#32](https://github.com/uv-genai/maya-tp/issues/32)); previous v1.1.40 = `d9248e8`, v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e` |
 
 ## 4. Issue map
 
@@ -65,6 +65,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; simple bench 32/32 @42.6–42.8 ms/tok; **full Maya-S MTP suite passed on Maya-M** (§21) |
 | 30 | Maya-L TP2 + MTP validation | **complete** — suite PASS, report `docs/benchmarks/tp2-maya-l-mtp-2026-10-31`; docs updated |
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
+| 32 | Release v1.1.41 | published from `a6d15a7`; tag/CI/publication verified; closed (§24) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -581,3 +582,14 @@ Q3_K/Q4_K/Q5_K/IQ4_NL/BF16 to the tool (`99e1f8a`). Report:
 poisoned verbs. Serve is fine (rank1 waits for mirrors). For paired CLI: `STRATA_GLM_WARM=0` both ranks.
 `bench_mtp` READY timeout now **900 s**. Installer `62ee2e7` always configures `STRATA_ENABLE_TP2_RDMA=ON`.
 Binary **`5a52cd27167523b6ea4b0f0bde93f503`** on all three paths. Engines stopped. Issue #30 closed.
+
+## 24. v1.1.41 release (#32)
+
+User requested tag and release. `VERSION` 1.1.41; CHANGELOG dated section covers #30 Maya-L suite,
+`audit_split`/`bench_mtp` tooling, installer `STRATA_ENABLE_TP2_RDMA=ON`, pack-override log/label.
+
+**Outcome:** release commit **`a6d15a7a64775f005e9840f6c4fd0a0818ef1dc4`**.
+CI [41191735148](https://github.com/uv-genai/maya-tp/actions/runs/41191735148) passed before tagging.
+Annotated tag **v1.1.41** peels to that commit; release public/latest/non-prerelease, **0** assets.
+**v1.1.40** stays `d9248e8`; v1.1.39 `20ff03a`; v1.1.38 `c322b3e`. Issue #32 closed.
+Metadata only — no engine rebuild. Do not republish.
