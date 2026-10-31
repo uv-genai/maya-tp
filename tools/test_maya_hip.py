@@ -730,6 +730,7 @@ class WindowsHipSetupTests(unittest.TestCase):
                      f"-DCMAKE_HIP_COMPILER={root}/lib/llvm/bin/clang++.exe",
                      f"-DCMAKE_HIP_COMPILER_ROCM_ROOT={root}",
                      "-DSTRATA_ENABLE_HIP=ON", "-DSTRATA_ENABLE_CUDA=OFF", "-DSTRATA_PREFILL_MMQ=ON",
+                     "-DSTRATA_ENABLE_TP2_RDMA=ON",
                      "-DSTRATA_PORTABLE=ON", "-DCMAKE_HIP_ARCHITECTURES=gfx1151"):
             self.assertIn(want, conf)
         if " " not in root:

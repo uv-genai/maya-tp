@@ -1862,6 +1862,8 @@ def compile_engine_hip(pc: dict, llama: Path, src: str, soft=False, target: str 
             conf.append(f"-DCMAKE_HIP_FLAGS=--rocm-path={root.as_posix()} --rocm-device-lib-path={bitcode.as_posix()}")
     conf += ["-S", str(ROOT), "-B", str(BUILD), "-DCMAKE_BUILD_TYPE=Release",
              "-DSTRATA_ENABLE_HIP=ON", "-DSTRATA_ENABLE_CUDA=OFF", "-DSTRATA_PREFILL_MMQ=ON",
+             # Maya-TP: glm_rows/glm_window call TpContext; without TP2 sources the HIP link fails.
+             "-DSTRATA_ENABLE_TP2_RDMA=ON",
              "-DSTRATA_NATIVE_EXPERTS=ON", "-DSTRATA_BUILD_TESTS=OFF",
              f"-DCMAKE_HIP_ARCHITECTURES={';'.join(pc['archs'])}",
              f"-DCMAKE_HIP_COMPILER={clang.as_posix()}", f"-DCMAKE_PREFIX_PATH={root.as_posix()}",
