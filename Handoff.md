@@ -2,13 +2,15 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-10-31 · **v1.1.41 published** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
-> **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. #29/#30: **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
-> Current binary **`5a52cd27167523b6ea4b0f0bde93f503`** on all three paths (TP2_RDMA=ON rebuild).
-> llama-swap daemon/config preserved. v1.1.38 stays at c322b3e.
+> **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
+> Open perf: **#33** TP2 prefill (copy/staging, ~3008-row window). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
+> on all three paths. Both checkouts clean origin/main. Engines stopped; llama-swap daemon + 6 maya YAML
+> entries preserved (Maya-L `--context 524288`). v1.1.38 stays at c322b3e.
 
 ## 1. What we are building
 
-Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** IQ2_XXS; Maya-M/L expected same geometry — code is pack-derived via #12) across two twin hosts:
+Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (**Maya-S, Maya-M and Maya-L** all passed the full
+TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 
 | Host | Role | IP |
 | --- | --- | --- |
@@ -62,10 +64,11 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
-| 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; simple bench 32/32 @42.6–42.8 ms/tok; **full Maya-S MTP suite passed on Maya-M** (§21) |
+| 29 | Maya-M TP2 + model-selectable launchers | open (work done; close when agreed) — launchers parameterized; Maya-M packed + full suite PASS (§21) |
 | 30 | Maya-L TP2 + MTP validation | **complete** — suite PASS, report `docs/benchmarks/tp2-maya-l-mtp-2026-10-31`; docs updated |
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 32 | Release v1.1.41 | published from `a6d15a7`; tag/CI/publication verified; closed (§24) |
+| 33 | TP2 prefill slow (staging; ~3008-row window) | **open** — primary perf backlog; includes `MAYA_TP_PREFILL_ROWS` (§25); decode is fine |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -542,9 +545,11 @@ throughput on the 256-token reference. Context 32768 API / 4096 CLI; binary `5db
 Cosmetic: `/health` `model_label` still “Maya-S” when only the pack is overridden.
 Engines stopped; issue thread #29. Maya-L suite is **§23** / issue #30 (closed).
 
-**llama-swap rank0 YAML (user-requested):** six entries — `maya-glm5-{s,m,l}-tp2` (`--no-mtp`) and
-`maya-glm5-{s,m,l}-tp2-mtp` (`--mtp --drafts 2`), each with explicit `--model`. Backups beside the file
-(`…pre-maya-l`). Watch-config lists all six. Do not edit YAML unless asked.
+**llama-swap rank0 YAML (user-requested; do not edit unless asked):** six entries —
+`maya-glm5-{s,m,l}-tp2` (`--model … --no-mtp`) and `maya-glm5-{s,m,l}-tp2-mtp` (`--model … --mtp --drafts 2`).
+Maya-L also passes **`--context 524288`** (matches `maya-maya-l-hip.json` `--max-context 524288`; earlier
+32768 was setup default and rejected long prompts). Watch-config lists all six. Backups beside the YAML.
+Wrapper/scripts on rank0 are origin/main (supports `--model`/`--context`). Daemon left running.
 
 ## 22. v1.1.40 release (#31)
 
@@ -591,3 +596,25 @@ CI [41191735148](https://github.com/uv-genai/maya-tp/actions/runs/41191735148) p
 Annotated tag **v1.1.41** peels to that commit; release public/latest/non-prerelease, **0** assets.
 **v1.1.40** stays `d9248e8`; v1.1.39 `20ff03a`; v1.1.38 `c322b3e`. Issue #32 closed.
 Metadata only — no engine rebuild. Do not republish.
+
+## 25. #33 TP2 prefill performance — open (2026-10-31)
+
+User: decode/MTP generation is fine (2 drafts); **prefill** is not — **9.6 tok/s on the 11th request**.
+Issue [uv-genai/maya-tp#33](https://github.com/uv-genai/maya-tp/issues/33).
+
+Measured TP2+MTP(2) Maya-S with `STRATA_GLM_PREFILL_STAGES=1`: **copy/expert-staging lane ≈ 90% of
+chunk wall** (e.g. 4782 ms chunk → 4380 ms copy, layer lane ~37 ms). Long prompts cap at **~3008 rows**
+(RDMA 48 MiB window). Short prompts: fixed lead 0.1–1.2 s + staging → 55–150 tok/s; ≥4K → ~240–270.
+Saved matrices (S/M/L): ~1K often 55–65 tok/s (some M ~186); ≥7K ~90–260.
+
+**`MAYA_TP_PREFILL_ROWS`** is **not** a separate issue — same ticket (knob for TP2 prompt rows; still
+“not implemented” in SETTINGS, with `MAYA_TP_OVERLAP`). Next: larger window / implement rows knob /
+overlap stage+AR; re-measure 1K/4K/8K with MTP 2 drafts.
+
+## 26. Session-end snapshot (for the next restart)
+
+- Trees: both hosts clean at `origin/main` (`e4c11c3` at handoff time; check `git log -1`).
+- VERSION **1.1.41**; releases through v1.1.41 published.
+- Packs present both hosts: Maya-S-v2-IQ2_XXS, Maya-M, Maya-L (identical pack MD5s when built).
+- Configs on rank0: `maya-maya-s-v2-iq2_xxs-hip.json`, `maya-maya-l-hip.json` (context 524288).
+- No GPU processes expected at rest; llama-swap pid listening on :8080 rank0.
