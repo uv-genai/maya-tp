@@ -265,19 +265,31 @@ To enable MTP with four drafts, run **on strix-halo-1**:
 /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2
 ```
 
-For llama-swap, use these fields in the existing model entry (the live YAML is not changed automatically):
+For llama-swap, use these fields in the existing model entry (the live YAML is not changed automatically;
+**as of v1.1.40 / 2026-10-31 the development rank0 config already contains**):
 
 ```yaml
 models:
-  maya-glm5-tp2:
-    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --mtp --drafts 4
+  maya-glm5-s-tp2:
+    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-S-v2-IQ2_XXS --no-mtp
+    cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
+    proxy: http://127.0.0.1:${PORT}
+  maya-glm5-s-tp2-mtp:
+    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-S-v2-IQ2_XXS --mtp --drafts 2
     cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
     proxy: http://127.0.0.1:${PORT}
   maya-glm5-m-tp2:
+    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-M --no-mtp
+    cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
+    proxy: http://127.0.0.1:${PORT}
+  maya-glm5-m-tp2-mtp:
     cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-M --mtp --drafts 2
     cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
     proxy: http://127.0.0.1:${PORT}
 ```
+
+`--model` is required for a non-default pack and is forwarded to both ranks. Both packs must already exist
+(`…/Maya-S-v2-IQ2_XXS/pack` and `…/Maya-M/pack`). llama-swap `--watch-config` reloads on edit.
 
 `--no-mtp` uses the simple loop; no flag preserves the default off (or `MAYA_TP_MTP` from the environment).
 `--drafts N` accepts 1–8, defaults to 2, and forwards both `MAYA_GLM_MTP_FIXED=N` and

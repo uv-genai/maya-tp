@@ -375,8 +375,11 @@ Logs: `/tmp/maya-21-{mtp,simple}-{tests,r1}.log`, `*-results.json`, `*-r0-engine
 `/tmp/maya-20-serve-tests.log` / `/tmp/maya-21-tools-tests.log`.
 
 Final operations: **test engines and API server stopped, both GPUs free**. Llama-swap daemon remains running.
-Live rank0 YAML now has user-configured models `maya-glm5-s-tp2` (simple) and `maya-glm5-s-tp2-mtp`
-(`--mtp --drafts 7`). YAML untouched by us. Launch flags unchanged.
+Live rank0 YAML (2026-10-31 update, user-requested) now has four models:
+`maya-glm5-s-tp2` / `maya-glm5-s-tp2-mtp` with explicit `--model Maya-S-v2-IQ2_XXS` and `--no-mtp` /
+`--mtp --drafts 2`, plus **`maya-glm5-m-tp2` / `maya-glm5-m-tp2-mtp`** with `--model Maya-M` and the same
+`--no-mtp` / `--mtp --drafts 2` shape. Backup: `config.yaml.bak-2026-10-31-v1.1.40`. `--watch-config`
+reloaded all four (`/v1/models` on rank0 lists them). Wrapper: `tp2.sh run PORT [--model …] [--mtp] …`.
 Rank0 checkout has older HEAD `7ee8f27` and staged/unstaged user work; **do not pull/reset or rebuild there**
 without preserving it. Fixed binaries are deployed directly; the authoritative fixed source is this checkout/origin.
 Prior #14 perf numbers predate these output-affecting fixes; rerun a controlled benchmark before new claims.
@@ -536,6 +539,12 @@ Cosmetic: `/health` `model_label` still “Maya-S” when only the pack is overr
 Engines stopped; issue thread #29. **Maya-L** is the next pack to validate — **issue #30**
 (same suite: `run_bench`, simple/MTP matrices, `mtp_acceptance`, CLI 32/32, kill/recover 8/8, `bench_mtp`).
 README / MODELS / TP2-RUN / CHANGELOG already state S+M validated and L pending #30.
+
+**llama-swap rank0 YAML (user-requested 2026-10-31):** four entries —
+`maya-glm5-s-tp2` (`--model Maya-S-v2-IQ2_XXS --no-mtp`), `maya-glm5-s-tp2-mtp` (`… --mtp --drafts 2`),
+`maya-glm5-m-tp2` (`--model Maya-M --no-mtp`), `maya-glm5-m-tp2-mtp` (`… --mtp --drafts 2`).
+Backup `~/.config/llama-swap/config.yaml.bak-2026-10-31-v1.1.40` on strix-halo-1. Daemon `--watch-config`
+reloaded; do not start models unless asked. Docs: TP2-RUN llama-swap section.
 
 ## 22. v1.1.40 release (#31)
 

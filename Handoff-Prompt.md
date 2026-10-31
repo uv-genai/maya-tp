@@ -24,7 +24,9 @@ new release without an explicit request.
 - **Maya-S + Maya-M are the validated TP2/MTP models.** **#30 open for Maya-L** (same suite when
   packed on both hosts). README scope, MODELS, TP2-RUN, CHANGELOG updated accordingly.
 - `run_bench.sh` scps rank0’s token save before parity (`36b38ef`).
-- Live llama-swap YAML still Maya-S entries.
+- Live rank0 llama-swap YAML (user-updated): `maya-glm5-s-tp2`, `maya-glm5-s-tp2-mtp` (`--model Maya-S-v2-IQ2_XXS`, drafts 2),
+  **`maya-glm5-m-tp2`**, **`maya-glm5-m-tp2-mtp`** (`--model Maya-M`, drafts 2). Backup
+  `config.yaml.bak-2026-10-31-v1.1.40`.
 
 Current engine MD5 **`5dbc93560e0eb024dcbdc0d9eb60ea57`** matches local `build-hip/maya`, rank0
 `build-hip/maya` and `/tmp/maya-tp2`. Never rebuild on the remote dirty checkout.
@@ -54,8 +56,8 @@ CPU gates: HIP map; serve and tools suites green (629 tools tests at last run).
    `MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=N MAYA_GLM_MTP_DRAFT=N`; unset MAYA_GLM_NO_MTP.
    Simple: `MAYA_GLM_NO_MTP=1`. Match contexts (32768 for API tests).
    Never probe bootstrap 18515 with /dev/tcp; restart BOTH ranks after any poisoned communicator/peer failure.
-7. Stop test engines/server after finishing, leave llama-swap daemon/config alone. User's YAML entries:
-   `maya-glm5-s-tp2` and `maya-glm5-s-tp2-mtp` (currently `--mtp --drafts 7`).
+7. Stop test engines/server after finishing; leave the llama-swap **daemon** alone. Rank0 YAML entries now:
+   `maya-glm5-s-tp2` / `maya-glm5-s-tp2-mtp` / `maya-glm5-m-tp2` / `maya-glm5-m-tp2-mtp` (see Handoff §21).
 8. #16 vision is deferred; #11 multi-sequence stays gated. #10 gather bit-exact reduction remains optional.
 9. Do not hardcode model paths in launch scripts (AGENTS.md convention 8). Document new flags in
    `docs/TP2-RUN.md`.
