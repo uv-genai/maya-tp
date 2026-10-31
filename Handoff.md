@@ -2,9 +2,9 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-10-31 · **v1.1.39 published** at `20ff03a` (CI41092302606 passed); #28 closed (§20).
-> #29 open: launchers take `--model`/`--pack` (§21); docs cover usage (TP2-RUN “Choosing a model”, README, AGENTS #8).
-> #22–#27 completed/closed. Review CI41088587233 and README CI41091273791 passed. v1.1.39 includes the fixes and Maya-TP identity.
-> Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** deployed identically to all three paths.
+> #29: launchers take `--model`/`--pack` (§21); **Maya-S + Maya-M TP2/MTP validated**; docs updated.
+> #30 open: **Maya-L** same suite when packed on both hosts. #22–#27 closed.
+> Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** on all three paths.
 > llama-swap daemon/config preserved. Published v1.1.38 remains at c322b3e and predates the post-release fixes.
 
 ## 1. What we are building
@@ -64,6 +64,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
 | 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; simple bench 32/32 @42.6–42.8 ms/tok; **full Maya-S MTP suite passed on Maya-M** (§21) |
+| 30 | Maya-L TP2 + MTP validation | **open (next)** — same suite as S/M when L is downloaded+packed on both hosts; README/MODELS/TP2-RUN say so |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -532,4 +533,6 @@ simple and 7-draft MTP; `acceptance.sh` MTP kill/recover **8/8**; `bench_mtp.py 
 raw picks **0**, simple median **41.12 ms/tok (24.32)** vs 2-draft MTP **38.03 (26.29)** → **+8.11%**
 throughput on the 256-token reference. Context 32768 API / 4096 CLI; binary `5dbc9356…` unchanged.
 Cosmetic: `/health` `model_label` still “Maya-S” when only the pack is overridden.
-Engines stopped; issue thread #29.
+Engines stopped; issue thread #29. **Maya-L** is the next pack to validate — **issue #30**
+(same suite: `run_bench`, simple/MTP matrices, `mtp_acceptance`, CLI 32/32, kill/recover 8/8, `bench_mtp`).
+README / MODELS / TP2-RUN / CHANGELOG already state S+M validated and L pending #30.

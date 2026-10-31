@@ -21,6 +21,8 @@ measurements or start a new release without an explicit request.
 - **Maya-M full MTP suite PASS** (same as Maya-S): `docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md`
   — API MTP/simple matrices, mtp_acceptance, CLI 32/32 both modes, kill/recover 8/8,
   `bench_mtp` +8.11% @2 drafts (41.12→38.03 ms/tok).
+- **Maya-S + Maya-M are the validated TP2/MTP models.** **#30 open for Maya-L** (same suite when
+  packed on both hosts). README scope, MODELS, TP2-RUN, CHANGELOG updated accordingly.
 - `run_bench.sh` scps rank0’s token save before parity (`36b38ef`).
 - Docs cover model flags (TP2-RUN “Choosing a model”, README, MODELS, SETTINGS, AGENTS #8).
 - Live llama-swap YAML still Maya-S entries.

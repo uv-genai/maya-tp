@@ -117,6 +117,8 @@ Full Maya-S MTP suite also run on Maya-M (7-draft API matrices, `mtp_acceptance`
 kill/recover 8/8, `bench_mtp` +8.11% @2 drafts): see
 [tp2-maya-m-mtp-2026-10-31](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md).
 Maya-S raw MTP data remains in [tp2-mtp-review](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md).
+**Maya-L is untested** — run the same suite with `--model Maya-L` when the pack exists on both hosts;
+tracked in [issue #30](https://github.com/uv-genai/maya-tp/issues/30).
 
 ## What “6 µs / 37 Gb/s” means
 

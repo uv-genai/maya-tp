@@ -20,6 +20,8 @@ only what changed and starts; the model is not downloaded again.
   `mtp_acceptance.py`, CLI 32/32 both modes, kill/recover 8/8, `bench_mtp` raw picks 0 and **+8.11%**
   throughput at two drafts (41.12 → 38.03 ms/tok median on the 256-token reference). Report:
   [docs/benchmarks/tp2-maya-m-mtp-2026-10-31](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md).
+- **Scope: Maya-S and Maya-M validated for TP2 + MTP; Maya-L pending** (#30): README, `docs/MODELS.md`
+  and `docs/TP2-RUN.md` state both completed suites and link the open Maya-L tracking issue.
 
 ## v1.1.39 - 2026-10-31
 
