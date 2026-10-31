@@ -4,6 +4,19 @@ Every release is on GitHub (Releases) with these notes; every published change m
 page's Settings › About and updates (About > Update before the redesign; from v1.0.18), or `git pull`, then `./setup.sh` (Windows: `START-MAYA.bat`) - it recompiles
 only what changed and starts; the model is not downloaded again.
 
+## Unreleased
+
+- **TP2 model selection** (#29): launch scripts no longer hardcode Maya-S. `rank0.sh`, `rank1.sh`,
+  `llama-swap/tp2.sh`, `run_bench.sh`, `run_prof.sh`, `run_noar.sh` accept `--model NAME` / `--pack PATH` /
+  `--config PATH`; the same choices work as `MAYA_MODEL` / `MAYA_PACK` / `MAYA_CONFIG` (root: `MAYA_MODELS_DIR`).
+  `acceptance.sh` and the llama-swap wrapper forward the selection to both ranks; `bench_mtp.py` takes
+  `--model`/`--pack`. Shared resolver: `tools/tp2/model_env.sh`. Runbook: [Choosing a model](docs/TP2-RUN.md#choosing-a-model).
+- **`run_bench.sh` parity fix** (#29): scp rank 0’s `--spec-follow-save` file before `greedy_parity.py`
+  (a stale local `r0.txt` reported a false mismatch).
+- **Maya-M packed and pair-benched** (#29): `Maya-M/pack` built on both hosts (`iq_pack.py --compat-bf16`);
+  `audit_split.py --world 2` all block-safe. Controlled `run_bench.sh --model Maya-M`: pair parity 32/32,
+  42.57 / 42.83 ms/token. Full MTP/API matrices remain Maya-S-only for now.
+
 ## v1.1.39 - 2026-10-31
 
 Maya-TP now presents its focus on tensor parallel inference across dual Strix Halo systems. This release

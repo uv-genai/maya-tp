@@ -17,6 +17,8 @@ Open an issue with:
   For numbers comparable with Maya-TP's [measurements](README.md#measured-performance), use the
   [controlled TP2 harness](tools/tp2/bench_mtp.py) and [saved methodology](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md):
   the same prompt/continuation, excluded warmups, balanced run order and raw model-pick agreement.
+  Select the pack with `--model NAME` / `--pack PATH` (or `MAYA_MODEL` / `MAYA_PACK`); the same
+  choice must be on both ranks — see [Choosing a model](docs/TP2-RUN.md#choosing-a-model).
 
 Name your Maya version (`VERSION`, or the commit). Say what you measured and what you didn't.
 

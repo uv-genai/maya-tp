@@ -19,32 +19,101 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 
 ## Choosing a model
 
-Launchers no longer hardcode Maya-S. Selection is by **model id** or **pack path**, via CLI or environment
-(`tools/tp2/model_env.sh`):
+Launchers do **not** hardcode Maya-S. Pick a model by **model id** or **pack path**, with a CLI flag or an
+environment variable. The shared resolver is `tools/tp2/model_env.sh` (sourced by the rank scripts,
+`run_*`, and the llama-swap wrapper).
 
-| Input | Meaning |
-|---|---|
-| `--model NAME` / `MAYA_MODEL` | `$MAYA_MODELS_DIR/NAME/pack` (default dir `/home/ugo/software/Maya-data/models`) |
-| `--pack PATH` / `MAYA_PACK` | explicit pack directory |
-| `--config PATH` / `MAYA_CONFIG` | base `maya-*.json` (tokenizer, env, exe) |
+### Selection inputs
 
-When only the model/pack changes and no `--config` is given, serve launchers start from the Maya-S JSON
-(or `maya-<model>-hip.json` if that file exists beside the repo root) and rewrite `--glm-pack` / tokenizer
-to the selected pack. Both hosts must have the same pack tree.
+| CLI | Environment | Meaning |
+|---|---|---|
+| `--model NAME` | `MAYA_MODEL` | `$MAYA_MODELS_DIR/NAME/pack` |
+| `--pack PATH` | `MAYA_PACK` | explicit pack directory (wins over `--model`) |
+| `--config PATH` | `MAYA_CONFIG` | base `maya-*.json` (exe, env, tokenizer, context defaults) |
+| — | `MAYA_MODELS_DIR` | model root (default `/home/ugo/software/Maya-data/models`) |
+
+**Precedence (pack):** `--pack` / `MAYA_PACK` → `--model` / `MAYA_MODEL` → default
+`Maya-S-v2-IQ2_XXS`. **Precedence (serve config):** `--config` / `MAYA_CONFIG` →
+`maya-<model>-hip.json` beside the repo root if that file exists → `maya-maya-s-v2-iq2_xxs-hip.json`.
+
+When only the model/pack changes and no `--config` is given, serve launchers start from that base JSON and
+rewrite `--glm-pack` (and `tokenizer` when set) to the selected pack. **Both hosts must have the same pack
+tree** (index, dense weights, tokenizer, and the GGUF shards beside `pack/`).
+
+### Per-script reference
+
+| Script | Model flags | Notes |
+|---|---|---|
+| `tools/tp2/rank0.sh [PORT]` | `--model` `--pack` `--config` | API server on rank 0; env works too |
+| `tools/tp2/rank1.sh` | `--model` `--pack` `--config` | worker on rank 1; start first |
+| `tools/llama-swap/tp2.sh run PORT` | `--model` `--pack` `--config` (+ `--mtp` `--drafts` `--context`) | forwards selection to both ranks over SSH |
+| `tools/tp2/run_bench.sh` | `--model` `--pack` | paired `--tokens` bench + parity (scps rank0’s save file) |
+| `tools/tp2/run_prof.sh` / `run_noar.sh` | `--model` `--pack` | AR profile / no-AR isolation |
+| `tools/tp2/acceptance.sh` | env only: `MAYA_MODEL` / `MAYA_PACK` / `MAYA_CONFIG` | forwards env to both rank launches |
+| `tools/tp2/bench_mtp.py` | `--model` / `--pack` (or env) | MTP vs simple harness; `--output` required |
+| `tools/calibrate_glm_tp.py` | `--pack` | end-to-end + microbench |
+
+All of the above also accept the matching environment variables, which is how `acceptance.sh` and
+the llama-swap wrapper propagate a choice to the remote rank.
+
+### Examples
 
 ```sh
-# Serve Maya-M (after the pack exists on both hosts)
-bash tools/tp2/rank1.sh --model Maya-M
-ssh strix-halo-1.local 'cd /home/ugo/software/project-maya && \
-  setsid nohup bash tools/tp2/rank0.sh 18080 --model Maya-M >/tmp/tp2-r0.log 2>&1 </dev/null &'
+# --- pack selection (defaults to Maya-S-v2-IQ2_XXS) ---
+bash tools/tp2/run_bench.sh                         # default Maya-S
+bash tools/tp2/run_bench.sh --model Maya-M          # $MAYA_MODELS_DIR/Maya-M/pack
+bash tools/tp2/run_bench.sh --pack /data/packs/mymodel
+MAYA_MODEL=Maya-M bash tools/tp2/run_bench.sh
 
-# Pair bench / llama-swap wrapper
-bash tools/tp2/run_bench.sh --model Maya-M
-tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2
+# --- serve one model on both ranks (rank 1 first) ---
+bash tools/tp2/rank1.sh --model Maya-M
+ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; \
+  setsid nohup bash tools/tp2/rank0.sh 18080 --model Maya-M \
+    >/tmp/tp2-r0.log 2>&1 </dev/null &'
+curl -s http://192.168.1.22:18080/health            # tp.peer: up
+
+# --- serve with an explicit pack + a dedicated base config ---
+bash tools/tp2/rank1.sh --config ./maya-maya-m-hip.json --pack /home/ugo/software/Maya-data/models/Maya-M/pack
+ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; \
+  setsid nohup bash tools/tp2/rank0.sh 18080 --config ./maya-maya-m-hip.json \
+    >/tmp/tp2-r0.log 2>&1 </dev/null &'
+
+# --- llama-swap wrapper (run on rank 0 only; it SSHes to rank 1) ---
+tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2 --context 32768
+tools/llama-swap/tp2.sh stop
+
+# --- acceptance / MTP harness ---
+MAYA_MODEL=Maya-M MAYA_TP_MTP=1 bash tools/tp2/acceptance.sh
+.venv/bin/python tools/tp2/bench_mtp.py --output /tmp/mtp-maya-m --model Maya-M --tokens 256 --runs 4
 ```
 
-Maya-M GGUF shards may be present without a `pack/` directory; the engine needs the pack
-(`tools/iq_pack.py` / installer repack). Validation so far is Maya-S only.
+### If `pack/` is missing
+
+The engine needs `<model>/pack/` (index, dense, tokenizer, `native_experts.txt`), not only GGUF shards.
+Pack each host from shard 1 (few minutes; writes ~0.9 GiB beside the shards):
+
+```sh
+export STRATA_GGUF_PY="$PWD/third_party/llama.cpp/gguf-py"
+.venv/bin/python tools/iq_pack.py \
+  --gguf /home/ugo/software/Maya-data/models/Maya-M/GLM-5.3-Flash-Maya-M-IQ2_S-00001-of-00003.gguf \
+  --out  /home/ugo/software/Maya-data/models/Maya-M/pack \
+  --compat-bf16
+# repeat on the other host (or run the installer’s pack step / ./maya.sh --repack)
+```
+
+Before a live pair, confirm identical pack hashes on both hosts and `audit_split.py`:
+
+```sh
+.venv/bin/python tools/tp2/audit_split.py --world 2 \
+  /home/ugo/software/Maya-data/models/Maya-M/pack    # expect: all splits block-safe
+```
+
+### Measured on this pair (Maya-M)
+
+Controlled `run_bench.sh --model Maya-M` (2026-10-31, binary `5dbc9356…`, simple decode, 32 tokens):
+**pair parity 32/32**, decode **42.57 / 42.83 ms/token** (rank0 / rank1), prefill 11 tokens ≈ 470 ms.
+Maya-S controlled MTP/simple results remain in [benchmarks](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md);
+Maya-M has **not** been through the full MTP/API matrices.
 
 ## What “6 µs / 37 Gb/s” means
 
@@ -63,14 +132,23 @@ Link microbench: `tools/tp2` / `build-tp2/tp_comm_rdma_test --bench --hidden 122
 ## Quick start (benchmark, both ranks with `--tokens`)
 
 ```sh
+# Resolve the pack you want (or export MAYA_MODEL / MAYA_PACK)
+P=/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack   # default; or Maya-M/pack
+
 # Single-host reference
 MAYA_GLM_NO_MTP=1 STRATA_GLM_TIMING=1 ./build-hip/maya --glm-pack $P \
   --tokens 154822,25062,287,29905,371,25,7487,785,6722,315,9621,374 \
   --max-new 32 --greedy --max-context 4096
 
 # TP2 pair (both get the same --tokens; no control-channel mirror)
-bash tools/tp2/run_bench.sh
+bash tools/tp2/run_bench.sh                        # default Maya-S
+bash tools/tp2/run_bench.sh --model Maya-M         # any pack under MAYA_MODELS_DIR
+bash tools/tp2/run_bench.sh --pack "$P"
 ```
+
+`run_bench.sh` starts rank 0 on `strix-halo-1.local` via SSH (binary `/tmp/maya-tp2`) and rank 1
+locally, then **scps rank 0’s `--spec-follow-save` file** back before `greedy_parity.py`
+(compare on the rank that wrote the file — a stale local `r0.txt` produces a false FAIL).
 
 ## Production launch (serve mode)
 
@@ -85,6 +163,7 @@ bash tools/tp2/rank1.sh            # optional: --model Maya-M | --pack PATH | --
 # Rank 0 API server (strix-halo-1) — via SSH; server.py spawns the engine with --serve
 ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; setsid nohup bash tools/tp2/rank0.sh 18080 \
   > /tmp/tp2-rank0.log 2>&1 </dev/null &'
+# Pass the same model flags on rank 0 as on rank 1, e.g. --model Maya-M on both.
 
 # Smoke test
 curl -s http://192.168.1.22:18080/health
@@ -133,6 +212,12 @@ curl http://192.168.1.22:18080/health
 claim ok when TP2 cannot serve. Restart **both** ranks to clear it (`rank1.sh` then `rank0.sh`).
 
 Acceptance: `tools/tp2/acceptance.sh` (pair up, chat, kill rank1 → degraded, restart → recover).
+Select the model with env vars (the script does not take `--model`):
+
+```sh
+MAYA_MODEL=Maya-M bash tools/tp2/acceptance.sh
+MAYA_PACK=/path/to/pack MAYA_TP_MTP=1 bash tools/tp2/acceptance.sh
+```
 
 ### Opt-in MTP
 
@@ -145,6 +230,8 @@ Thinking-budget forces and client cancellation use this same round protocol. Bot
 The [warm resident-pair comparison](benchmarks/tp2-mtp-2026-10-30/RESULTS.md) measured
 38.255 ms/token without MTP versus 52.235 with MTP on a fixed 256-token continuation.
 Re-run with `.venv/bin/python tools/tp2/bench_mtp.py --output /tmp/mtp-comparison` (stops existing engines).
+Add `--model Maya-M` / `--pack PATH` (or `MAYA_MODEL` / `MAYA_PACK`) to target another pack; keep
+`--output` unique per run.
 
 Validate MTP correctness with:
 
@@ -152,7 +239,7 @@ Validate MTP correctness with:
 # Against a running MTP-enabled pair: 3 turns with reuse, cancellation, and small output limits
 .venv/bin/python tools/tp2/mtp_acceptance.py
 # Starts its own pair and checks peer death/restart with MTP enabled
-MAYA_TP_MTP=1 bash tools/tp2/acceptance.sh
+MAYA_TP_MTP=1 MAYA_MODEL=Maya-M bash tools/tp2/acceptance.sh
 ```
 
 A malformed or interrupted MTP frame stops the worker; rank 0 marks the pair down on decode failure.
@@ -169,6 +256,8 @@ To enable MTP with four drafts, run **on strix-halo-1**:
 
 ```sh
 /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --mtp --drafts 4
+# another pack:
+/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2
 ```
 
 For llama-swap, use these fields in the existing model entry (the live YAML is not changed automatically):
@@ -177,6 +266,10 @@ For llama-swap, use these fields in the existing model entry (the live YAML is n
 models:
   maya-glm5-tp2:
     cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --mtp --drafts 4
+    cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
+    proxy: http://127.0.0.1:${PORT}
+  maya-glm5-m-tp2:
+    cmd: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh run ${PORT} --model Maya-M --mtp --drafts 2
     cmdStop: /home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
     proxy: http://127.0.0.1:${PORT}
 ```
@@ -213,7 +306,7 @@ MTP verification currently uses greedy sampling under TP2.
 
 ## Performance reference (measured)
 
-Controlled bench (no-MTP, 32 tokens, same prompt, warm engine), 2026-10-29/30:
+Controlled bench (no-MTP, 32 tokens, same prompt, warm engine), 2026-10-29/30 — **Maya-S**:
 
 | Config | ms/tok | vs single |
 |---|---|---|
@@ -222,15 +315,19 @@ Controlled bench (no-MTP, 32 tokens, same prompt, warm engine), 2026-10-29/30:
 | TP2 full slice + AR (free greedy) | ~43 | +23% |
 | TP2 full slice + AR (spec-follow) | **41.1** | **+26%** |
 
-**Quality (2026-10-30):**
+**Quality (Maya-S, 2026-10-30):**
 - **Pair parity 100%** (rank0 vs rank1 free generation, 32/32).
 - **Spec-follow vs single-host continuation:** output stream 32/32 forced; **4 of 32** positions where TP2’s own greedy pick differs (near-ties / float reduction order) — same class as the earlier 31/32.
 
+**Maya-M** (`run_bench.sh --model Maya-M`, 2026-10-31): pair parity **32/32**, decode **42.57 / 42.83 ms/token**
+(r0/r1). Not an MTP or serve-API claim; single-host Maya-M on the same prompt streams experts from disk and is
+not a parity oracle.
+
 AR cost ≈ 5 ms/tok (90 exchanges × ~55 µs). Link is fine (6 µs RTT, 37 Gb/s at 1 MiB); blocking AR is host/driver-bound.
 
-End-to-end + microbench: `.venv/bin/python tools/calibrate_glm_tp.py`.
+End-to-end + microbench: `.venv/bin/python tools/calibrate_glm_tp.py --pack …`.
 
-**CI:** `check_hip_compat.py` + `serve` (464) + `tools` (614) green. Single-host with TP flags off is unchanged (mirroring and reuse gates are `tp_world>1` / serve-only).
+**CI:** `check_hip_compat.py` + `serve` (464) + `tools` (614+) green. Single-host with TP flags off is unchanged (mirroring and reuse gates are `tp_world>1` / serve-only).
 
 ## Monitoring
 

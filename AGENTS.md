@@ -100,6 +100,7 @@ Manual HIP configure example is in `docs/AMD_RDNA4.md`.
 5. **llama.cpp is pinned.** Do not casually change `LLAMA_CPP_COMMIT` in `setup.py` (also used by CI). ggml / MMQ live under `third_party/llama.cpp`; a GLM MMQ patch is applied from the pinned checkout.
 6. **Per-model engines, not one generic backend.** `maya` (GLM: `src/core`, `src/prefill`, …), `maya-ds4` (`src/ds4`), and `maya-mm3` (`src/mm3`) share kernels but not control flow. A change in one engine usually does not apply to the others. Server routing and templates differ per model family (DeepSeek: vendored `serve/ds41_encoding.py` + fixtures; others: Jinja).
 7. **Pack integrity.** The pack index next to model shards is hashed; engine refuses mismatched shards. Use `./maya.sh --repack` after intentional pack changes.
+8. **TP2 launchers take the model as input.** Do not hardcode Maya-S paths in `tools/tp2/*` or `tools/llama-swap/tp2.sh`. Use `tools/tp2/model_env.sh`: `--model NAME`/`MAYA_MODEL`, `--pack PATH`/`MAYA_PACK`, `--config PATH`/`MAYA_CONFIG` (and `MAYA_MODELS_DIR`). Pass the **same** selection to both ranks. Document new flags in `docs/TP2-RUN.md` “Choosing a model”. Example pack root: `/home/ugo/software/Maya-data/models/<Name>/pack`.
 
 ## PRs (from CONTRIBUTING.md)
 
@@ -117,6 +118,7 @@ Manual HIP configure example is in `docs/AMD_RDNA4.md`.
 - `CONTRIBUTING.md` — PR / bug / bench expectations  
 - `.github/workflows/tests.yml` — exact CI commands and gguf-py pin  
 - `docs/SETTINGS.md` — full `MAYA_*` / `STRATA_*` knob list  
+- `docs/TP2-RUN.md` — TP2 ops: model selection (`--model`/`--pack`), serve/bench examples  
 - `docs/SETUP.md` — install options, build failure fixes  
 - `docs/MODELS.md` — per-model files and engine options  
 - `docs/AMD_MAYA.md`, `docs/AMD_RDNA4.md` — HIP install and validation  

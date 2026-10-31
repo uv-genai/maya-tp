@@ -1276,11 +1276,24 @@ Engine options, in the config's `"args"`:
 
 ## GLM: two-host tensor parallel (TP2)
 
-Runs **GLM-5.3-Flash Maya-S** as a 2-way tensor-parallel job on two hosts (design: [TP2-DESIGN.md](TP2-DESIGN.md); ops: [TP2-RUN.md](TP2-RUN.md)).
+Runs **GLM-5.3-Flash** (any pack under `MAYA_MODELS_DIR`, validated Maya-S and a Maya-M pair bench) as a
+2-way tensor-parallel job on two hosts (design: [TP2-DESIGN.md](TP2-DESIGN.md); ops: [TP2-RUN.md](TP2-RUN.md)).
 Off unless `--tp-world-size 2` is set. The split is intra-expert (each rank holds half of every expert's `n_ff`);
 one all-reduce after the mixer and after the MoE block keeps both ranks identical. Wire format is **float32 partials**
 over RDMA WRITE (`QueuePartial` Stage/Wait/Add). Serve mode mirrors rank 0's model calls to rank 1 on the bootstrap
 TCP socket (`SendControl`/`RecvControl`); do **not** probe the bootstrap port with `/dev/tcp` (that steals rank 0's accept).
+
+**Launcher model selection** (scripts in `tools/tp2/`, not engine knobs — see
+[Choosing a model](TP2-RUN.md#choosing-a-model)):
+
+| Variable | Default | What it does |
+|---|---|---|
+| `MAYA_MODEL` | unset | model id under `MAYA_MODELS_DIR`; pack becomes `…/NAME/pack` (CLI: `--model`) |
+| `MAYA_PACK` | unset | explicit pack directory; wins over `MAYA_MODEL` (CLI: `--pack`) |
+| `MAYA_CONFIG` | model-derived / Maya-S JSON | base `maya-*.json` for serve rank scripts (CLI: `--config`) |
+| `MAYA_MODELS_DIR` | `/home/ugo/software/Maya-data/models` | root that `MAYA_MODEL` names are looked up under |
+
+Engine / transport variables:
 
 | Variable | Default | What it does |
 |---|---|---|
@@ -1306,7 +1319,8 @@ The prefill batch is capped to the transport's actual payload budget (3008 align
 and negotiated across ranks; layout retries and MTP scratch-overflow retries also require a shared decision.
 
 Engine flags: `--tp-world-size`, `--tp-rank`, `--tp-bootstrap-host`, `--tp-bootstrap-port`, `--tp-rdma-device`.
-Both ranks must agree on model pack and context. Under TP2 the simple decode loop is the default;
+Both ranks must agree on model pack and context (pass the same `--model` / `--pack` / `--config`, or the
+matching `MAYA_*` env, to every rank script). Under TP2 the simple decode loop is the default;
 MTP is opt-in, DFlash and multi-sequence decode remain gated. Single-conversation snapshot reuse is supported.
 After a protocol or RDMA failure restart both ranks; a worker exits rather than resuming a partial message.
 See [TP2-RUN.md](TP2-RUN.md) for bring-up.

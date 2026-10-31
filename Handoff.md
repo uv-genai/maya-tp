@@ -2,7 +2,7 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-10-31 · **v1.1.39 published** at `20ff03a` (CI41092302606 passed); #28 closed (§20).
-> #29 open: TP2 launchers take `--model`/`--pack` (§21); Maya-M needs `pack/` on both hosts before a live run.
+> #29 open: launchers take `--model`/`--pack` (§21); docs cover usage (TP2-RUN “Choosing a model”, README, AGENTS #8).
 > #22–#27 completed/closed. Review CI41088587233 and README CI41091273791 passed. v1.1.39 includes the fixes and Maya-TP identity.
 > Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** deployed identically to all three paths.
 > llama-swap daemon/config preserved. Published v1.1.38 remains at c322b3e and predates the post-release fixes.
@@ -143,21 +143,37 @@ docs/TP2-RUN.md                        ops runbook
 
 ## 9. How to run
 
+### Model selection (all launchers)
+
+Flags or env (resolver: `tools/tp2/model_env.sh`; details: `docs/TP2-RUN.md` “Choosing a model”):
+
+| Input | Meaning |
+| --- | --- |
+| `--model NAME` / `MAYA_MODEL` | `$MAYA_MODELS_DIR/NAME/pack` (default dir `/home/ugo/software/Maya-data/models`) |
+| `--pack PATH` / `MAYA_PACK` | explicit pack (wins over model) |
+| `--config PATH` / `MAYA_CONFIG` | base `maya-*.json` for serve scripts |
+
+Default pack remains Maya-S. Same flags/env on **both** ranks. `acceptance.sh` uses env only;
+`llama-swap/tp2.sh` forwards to both ranks. Maya-M is packed on both hosts (#29).
+
 ### Benchmark (pair, controlled)
 ```sh
-P=/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack
+bash tools/tp2/run_bench.sh                      # default Maya-S
+bash tools/tp2/run_bench.sh --model Maya-M       # or --pack PATH / MAYA_MODEL=…
+# explicit single-host reference:
+P=/home/ugo/software/Maya-data/models/Maya-M/pack
 TOKS=154822,25062,287,29905,371,25,7487,785,6722,315,9621,374
 MAYA_GLM_NO_MTP=1 STRATA_GLM_TIMING=1 ./build-hip/maya --glm-pack $P \
   --tokens $TOKS --max-new 32 --greedy --max-context 4096
-bash tools/tp2/run_bench.sh   # both ranks, parity check
 ```
-TP2+MTP variant: same but `MAYA_GLM_NO_MTP` **unset**, and **`MAYA_TP_MTP=1` on both CLI ranks**; rank 0 via `ssh strix-halo-1.local "/tmp/maya-tp2 --glm-pack $P --tokens $TOKS --max-new 32 --greedy --spec-follow-save /tmp/r0.txt --max-context 4096 --tp-world-size 2 --tp-rank 0 --tp-bootstrap-port 18515 --tp-rdma-device usb4_rdma5"`, rank 1 local with `--tp-rank 1 --tp-bootstrap-host strix-halo-1.local`.
+`run_bench.sh` scps rank0’s `--spec-follow-save` before parity (`36b38ef`). TP2+MTP variant: same as §13
+but pass `--model`/`--pack` if not Maya-S.
 
 ### Serve (rank 1 first, no `/dev/tcp` probe)
 ```sh
-bash tools/tp2/rank1.sh        # local; add env before it for the worker engine
+bash tools/tp2/rank1.sh --model Maya-M     # local; --pack/--config or MAYA_* also work
 ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; \
-  setsid nohup bash tools/tp2/rank0.sh 18080 >/tmp/tp2-r0.log 2>&1 </dev/null &'
+  setsid nohup bash tools/tp2/rank0.sh 18080 --model Maya-M >/tmp/tp2-r0.log 2>&1 </dev/null &'
 curl http://192.168.1.22:18080/health   # expect tp.peer=up
 ```
 Kill: `pkill -9 -x maya` locally; `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'`.

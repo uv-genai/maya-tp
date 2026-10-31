@@ -120,22 +120,36 @@ cmake --build build-hip --target maya -j"$(nproc)"
 
 The launchers in `tools/tp2/` currently use the development pair's presets:
 `strix-halo-1.local` is rank 0/API server, and `strix-halo-2.local` is rank 1/worker.
-Review their host/IP and path settings for your installation. Both hosts need a base
-`maya-<model>-hip.json` config pointing to their engine, model pack and tokenizer.
+Review their host/IP and path settings for your installation. Both hosts need the **same model pack**
+(and a base `maya-<model>-hip.json` for serve, or let the rank scripts rewrite the default config).
 
-Start the worker on rank 1, then the server on rank 0, with matching contexts:
+**Choose the model** on every launcher with `--model NAME` / `MAYA_MODEL` (under
+`MAYA_MODELS_DIR`, default `/home/ugo/software/Maya-data/models`), `--pack PATH` / `MAYA_PACK`,
+or `--config PATH` / `MAYA_CONFIG` for a full base JSON. Default remains Maya-S.
+
+Start the worker on rank 1, then the server on rank 0, with matching contexts and the **same model flags**:
 
 ```sh
 # On rank 1, in its checkout:
-MAYA_CONFIG=/path/to/maya-model-hip.json CONTEXT=32768 bash tools/tp2/rank1.sh
+CONTEXT=32768 bash tools/tp2/rank1.sh --model Maya-S-v2-IQ2_XXS
+# or: MAYA_PACK=/path/to/pack  /  --pack /path/to/pack
 
 # On rank 0, in its checkout:
+CONTEXT=32768 bash tools/tp2/rank0.sh 18080 --model Maya-S-v2-IQ2_XXS
+# explicit config still works:
 MAYA_CONFIG=/path/to/maya-model-hip.json CONTEXT=32768 bash tools/tp2/rank0.sh 18080
+```
+
+Controlled pair bench (parity + ms/token) without serve:
+
+```sh
+bash tools/tp2/run_bench.sh                    # default Maya-S
+bash tools/tp2/run_bench.sh --model Maya-M
 ```
 
 Check `http://strix-halo-1.local:18080/health` for `tp.peer: up`. The API is at
 `http://strix-halo-1.local:18080/v1`. After a peer or RDMA failure, restart both ranks.
-The [runbook](docs/TP2-RUN.md) covers configuration, health checks, logs and recovery.
+The [runbook](docs/TP2-RUN.md) covers model selection, configuration, health checks, logs and recovery.
 
 ### MTP and llama-swap
 
@@ -143,6 +157,7 @@ Run the wrapper **on rank 0** after adapting its host/path presets:
 
 ```sh
 ./tools/llama-swap/tp2.sh run 18080 --mtp --drafts 1 --context 32768
+./tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2 --context 32768
 ./tools/llama-swap/tp2.sh stop
 ```
 
@@ -151,6 +166,7 @@ with `proxy: http://127.0.0.1:${PORT}`. The wrapper launches the worker over SSH
 SSH access from rank 0 to rank 1 is required.
 
 `--no-mtp` selects ordinary decoding. `--drafts N` sets both count and capacity on both ranks.
+`--model` / `--pack` / `--config` select the pack and are forwarded to both ranks.
 These flags belong to the wrapper. Direct engine/rank launches enable MTP with
 `MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=N MAYA_GLM_MTP_DRAFT=N` on both hosts, with `MAYA_GLM_NO_MTP` unset.
 See [TP2 settings](docs/SETTINGS.md#glm-two-host-tensor-parallel-tp2) for runtime controls.

@@ -1,59 +1,38 @@
 # Handoff-Prompt — Maya TP2 restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §18, then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §18 and §21, then `AGENTS.md`.
 
-Project: **Maya-TP**, GLM-5.3-Flash/Maya-S TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
-GPU inference, RDMA tensor path only. Bootstrap/control/token metadata may use TCP.
+Project: **Maya-TP**, GLM-5.3-Flash TP2 across twin Strix Halo hosts (Maya-S default; Maya-M packed and
+pair-benched). HIP/ROCm **gfx1151 Linux only**; GPU inference, RDMA tensor path only.
+Bootstrap/control/token metadata may use TCP.
 Repository `uv-genai/maya-tp`, local branch main. No subagents unless explicitly authorized.
 
 ## Current state
 
-MTP review/fixes #22–#26 and README rebranding #27 are complete/closed, with CI passed.
-User now explicitly requested the next release: **v1.1.39**, tracked in #28 / Handoff §20.
-VERSION/CHANGELOG/README release metadata is prepared. Exact release commit, CI and annotated-tag/publication
-outcome are recorded in #28; check that issue before repeating release work. Publication is authorized.
-Source release with explicit notes, no binary assets; preserve the old v1.1.38 tag at c322b3e.
-No engine, deployment or live-config changes are needed for this metadata release.
-Test engines/server remain stopped, GPUs free, llama-swap daemon running.
+v1.1.39 is **published** (`20ff03a`, CI41092302606); #28 closed — do not republish. Do not repeat completed
+measurements or start a new release without an explicit request.
 
-v1.1.39 includes the post-v1.1.38 fixes:
-
-- #23 `dc4c484`: keep replicated NextN outputs local and use its full shared-expert width.
-- #24 `56b9755`: verifier includes both sliced shared-expert partials.
-- #26 `c8758cb`: ordinary token path reduces dense lead FFN partials before residual.
-- #25 `ec22f4d`: HIP RDNA GEMV handles padded window output strides.
+**#29 open — model-selectable TP2 launchers + Maya-M:**
+- All operational launchers take `--model NAME` / `--pack PATH` / `--config PATH` or `MAYA_MODEL` /
+  `MAYA_PACK` / `MAYA_CONFIG` (resolver `tools/tp2/model_env.sh`). Same selection on both ranks.
+- Docs updated: `docs/TP2-RUN.md` “Choosing a model”, README, MODELS, SETTINGS, Handoff §9, AGENTS.md #8,
+  CHANGELOG Unreleased.
+- Maya-M packed on **both** hosts; `run_bench.sh --model Maya-M` → **32/32 parity**, 42.57/42.83 ms/tok.
+- `run_bench.sh` scps rank0’s token save before parity (`36b38ef`).
+- Full MTP/API matrices still Maya-S-only; live llama-swap YAML still Maya-S entries.
 
 Current engine MD5 **`5dbc93560e0eb024dcbdc0d9eb60ea57`** matches local `build-hip/maya`, rank0
-`build-hip/maya` and `/tmp/maya-tp2`. Source fixes are committed/pushed. The final tooling/report commit and CI outcome are tracked in #22.
-Never rebuild on the remote dirty checkout.
+`build-hip/maya` and `/tmp/maya-tp2`. Never rebuild on the remote dirty checkout.
+Test engines/server stopped; GPUs free; llama-swap daemon running.
+
+v1.1.39 includes the post-v1.1.38 fixes: #23 `dc4c484`, #24 `56b9755`, #26 `c8758cb`, #25 `ec22f4d`.
 
 ## Conclusions / evidence
 
-Corrected natural TP2 workloads, common 256-token references, all raw picks agree (0/256), resident experts,
-zero measured disk/CPU expert work, balanced ABBA measurements with excluded warmups:
-
-| Workload | Drafts | Simple tok/s | MTP tok/s | Gain |
-| --- | ---: | ---: | ---: | ---: |
-| Technical | 1 | 25.82 | 28.60 | +10.79% |
-| Technical | 2 | 25.97 | 27.79 | +6.99% |
-| Technical | 3 | 25.95 | 24.78 | −4.53% |
-| Technical | 7 | 25.51 | 15.67 | −38.58% |
-| Code | 1 | 25.64 | 31.30 | +22.07% |
-| Code | 2 | 25.86 | 33.53 | +29.64% |
-
-One-host technical control gains 26–27%; TP2 accelerates ordinary decoding more than verification.
-Draft acceptance differs by workload (one draft: technical 70.5%, code 86.8%); wide rejected suffixes waste work.
-No evidence establishes a quantization contribution or a universal 30% gain. Defaults/YAML unchanged.
-Report/raw data: `docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md`.
-Old #14 and intermediate ablations predate numerical fixes; do not present them as current gains.
-Forced emitted IDs alone hid defects; benchmark now requires raw model-pick agreement by default.
-
-Required CPU gates pass: HIP map; 464 serve tests/11 skips; 625 tools tests/31 skips.
-Source CI41081377055 passes. Thirty-two new padded-output GPU parity cases plus existing MV suite pass.
-Simple/seven-draft API matrices pass 990/7290/14550-token prompts, reuse, stream DONE and peer health.
-MTP cancel/follow-up and limits1/2/3 pass; eight forced rank1-only retries coordinate; 94/94 round records match.
-CLI pair outputs 32/32 and captured hidden-state bytes match in both modes (32 simple rows, 1 initial MTP row).
-Seven-draft peer kill/recovery passes 8/8. Final tooling/report CI and issue closure are recorded in #22.
+Maya-S corrected MTP workloads (unchanged claims): technical +10.8% @1 draft, code +29.6% @2; report
+`docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md`. Do not reuse #14 numbers.
+Maya-M: pair bench only (above) — not an MTP speedup claim.
+CPU gates: HIP map; serve and tools suites green (629 tools tests at last run).
 
 ## Operations / constraints
 
@@ -62,19 +41,21 @@ Seven-draft peer kill/recovery passes 8/8. Final tooling/report CI and issue clo
 2. Kill remote server **before** engine to prevent respawn:
    `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'`.
    Local engine: `pkill -9 -x maya`. Never use `pkill -f server.py`.
-3. After every engine build, copy to BOTH rank0 binary paths above and verify all three hashes.
+3. After every engine build, copy to BOTH rank0 binary paths (`build-hip/maya` and `/tmp/maya-tp2`) and
+   verify all three hashes. `/tmp/maya-tp2` can disappear — redeploy if missing.
 4. Rank0 checkout is older `7ee8f27` with staged/unstaged work. Preserve it: no pull/reset/rebuild there.
-   Current authoritative source is this checkout/origin. Only runtime binaries were deployed remotely.
 5. Use `.venv/bin/python`, jq. Track each workstream through its own GitHub issue, comment at milestones,
    link commits `refs #N`, push only origin, and explicitly close or leave open. Keep Handoff current.
-6. Start rank1 locally before directly SSH-launching rank0. MTP env on both:
+6. Start rank1 locally before directly SSH-launching rank0. Pass **the same** `--model`/`--pack`/`--config`
+   (or `MAYA_*` env) to both ranks. MTP env on both:
    `MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=N MAYA_GLM_MTP_DRAFT=N`; unset MAYA_GLM_NO_MTP.
-   Simple: `MAYA_GLM_NO_MTP=1`. Match contexts (32768 for API tests). Diagnostic retry defaults off.
+   Simple: `MAYA_GLM_NO_MTP=1`. Match contexts (32768 for API tests).
    Never probe bootstrap 18515 with /dev/tcp; restart BOTH ranks after any poisoned communicator/peer failure.
 7. Stop test engines/server after finishing, leave llama-swap daemon/config alone. User's YAML entries:
    `maya-glm5-s-tp2` and `maya-glm5-s-tp2-mtp` (currently `--mtp --drafts 7`).
-8. #16 vision is deferred; #11 multi-sequence stays gated. `glm_rows.cu` needs its own shared-width/attention
-   audit before enabling it. #10 gather-based bit-exact reduction remains optional future work.
+8. #16 vision is deferred; #11 multi-sequence stays gated. #10 gather bit-exact reduction remains optional.
+9. Do not hardcode model paths in launch scripts (AGENTS.md convention 8). Document new flags in
+   `docs/TP2-RUN.md`.
 
-Check #28 for release CI/tag/publication status; finish any explicitly pending release step, then follow the next user request.
+Check #29 for remaining Maya-M work (serve/MTP matrices if requested), then follow the next user request.
 Do not repeat completed measurements or publish a new release automatically.
