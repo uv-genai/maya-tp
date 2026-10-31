@@ -1,10 +1,10 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-31 · **v1.1.39** release metadata prepared; tag/publication/CI outcome tracked in #28 (§20).
+> Last updated: 2026-10-31 · **v1.1.39 published** at `20ff03a` (CI41092302606 passed); #28 closed (§20).
 > #22–#27 completed/closed. Review CI41088587233 and README CI41091273791 passed. v1.1.39 includes the fixes and Maya-TP identity.
 > Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** deployed identically to all three paths.
-> Test engines/server stopped; llama-swap daemon/config preserved. Published v1.1.38 predates the post-release fixes.
+> llama-swap daemon/config preserved. Published v1.1.38 remains at c322b3e and predates the post-release fixes.
 
 ## 1. What we are building
 
@@ -38,7 +38,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | `origin` | `https://github.com/uv-genai/maya-tp.git` |
 | `upstream` | `https://github.com/mw00/project-maya.git` (read/merge only) |
 | `main` | tracks `origin/main` |
-| Release version | **v1.1.39** ([publication #28](https://github.com/uv-genai/maya-tp/issues/28)); previous v1.1.38 unchanged |
+| Release version | **v1.1.39** published from `20ff03a` ([#28](https://github.com/uv-genai/maya-tp/issues/28)); previous v1.1.38 unchanged |
 
 ## 4. Issue map
 
@@ -61,7 +61,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 25 | Padded outputs bypass HIP RDNA GEMV | fixed `ec22f4d`, GPU parity/microbench pass (§18) |
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
-| 28 | Release v1.1.39 | metadata prepared; tag/publication/CI disposition tracked in #28 (§20) |
+| 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -465,19 +465,20 @@ back to the pinned upstream README; CONTRIBUTING's benchmark link/methodology po
 Final commit/CI outcome and closure are recorded in issue #27; no new tag/release.
 
 
-## 20. v1.1.39 release (#28)
+## 20. v1.1.39 release (#28) — published
 
-User explicitly requested commit, tag, push and release after #27. This authorizes publication and
-supersedes the prior no-automatic-release instruction for this release only. VERSION is 1.1.39;
-CHANGELOG has dated notes covering all changes since v1.1.38: #23/#24/#26 numerical corrections,
-#25 padded-output HIP RDNA GEMV, #22 benchmark fidelity/results and #27 Maya-TP identity/credits.
-README version guidance updated. Release title: **v1.1.39 — Maya-TP correctness and performance**.
+User explicitly requested commit, tag, push and release after #27. VERSION is 1.1.39; CHANGELOG has
+dated notes covering all changes since v1.1.38: #23/#24/#26 numerical corrections, #25 padded-output
+HIP RDNA GEMV, #22 benchmark fidelity/results and #27 Maya-TP identity/credits.
 
-Publish a source release matching the prior format, with an annotated tag and explicit release notes;
-no binary assets. Release-commit CI must pass before publication. Verify the tag points to the release
-commit and GitHub reports public/latest/non-prerelease. Exact SHA, CI run and publication result are
-recorded in issue #28; check it before repeating release work. v1.1.38 stays unchanged.
+**Outcome:** release commit **`20ff03ad081decfe91d6456fcbfa7818779f9393`** on origin/main.
+Release-commit CPU CI [41092302606](https://github.com/uv-genai/maya-tp/actions/runs/41092302606)
+passed before tagging. Annotated tag **v1.1.39** resolves to that commit.
+[GitHub release](https://github.com/uv-genai/maya-tp/releases/tag/v1.1.39) is public, latest and
+non-prerelease, with explicit source notes and no binary assets. **v1.1.38 stays unchanged** at
+`c322b3edaf3380457ec98662a9d17c95ae415a22`. Issue #28 closed with the same outcome.
 
-Engine code was already built/deployed/validated in #22. This metadata-only release requires no new
-GPU run or engine build/deployment. Current functional binary remains 5dbc93560e0eb024dcbdc0d9eb60ea57
-on all three paths; test engines stopped, llama-swap daemon/config and remote dirty checkout preserved.
+Engine code was already built/deployed/validated in #22. Metadata-only release: no engine rebuild,
+GPU run, deployment or live-config change. Functional binary remains
+`5dbc93560e0eb024dcbdc0d9eb60ea57` on all three paths; llama-swap daemon/config and remote dirty
+checkout preserved. Do not republish; treat the tag as immutable.
