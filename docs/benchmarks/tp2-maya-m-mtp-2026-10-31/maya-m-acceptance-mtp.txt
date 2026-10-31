@@ -1,0 +1,15 @@
+=== TP2 acceptance (strix-halo-1.local:18080, mtp=1 drafts=7 cap=7 context=32768) ===
+--- 1. start pair ---
+  PASS: health peer up
+  PASS: status ok
+--- 2. chat ---
+  PASS: chat content
+--- 3. kill rank1 ---
+  PASS: chat fails cleanly
+  PASS: health degraded
+  PASS: peer down
+--- 4. restart both ---
+  PASS: recover peer up
+  PASS: chat after recover
+
+=== results: 8 passed, 0 failed ===

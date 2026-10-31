@@ -1,0 +1,34 @@
+Generating common reference with the simple TP2 loop...
+Starting resident pair with fixed reference; warmups first...
+warmup simple: 43.219 ms/tok, 23.14 tok/s, drafts=0/0
+warmup mtp   : 39.639 ms/tok, 25.23 tok/s, drafts=135/238
+warmup mtp   : 37.544 ms/tok, 26.64 tok/s, drafts=135/238
+warmup simple: 40.375 ms/tok, 24.77 tok/s, drafts=0/0
+measure simple: 39.857 ms/tok, 25.09 tok/s, drafts=0/0
+measure mtp   : 37.633 ms/tok, 26.57 tok/s, drafts=135/238
+measure mtp   : 37.379 ms/tok, 26.75 tok/s, drafts=135/238
+measure simple: 40.878 ms/tok, 24.46 tok/s, drafts=0/0
+measure simple: 41.360 ms/tok, 24.18 tok/s, drafts=0/0
+measure mtp   : 38.434 ms/tok, 26.02 tok/s, drafts=135/238
+measure mtp   : 41.071 ms/tok, 24.35 tok/s, drafts=135/238
+measure simple: 41.780 ms/tok, 23.93 tok/s, drafts=0/0
+{
+  "simple": {
+    "median_ms_per_token": 41.119140625,
+    "median_tokens_per_second": 24.31957440744787,
+    "min_ms_per_token": 39.85703125,
+    "max_ms_per_token": 41.780078125,
+    "mean_ms_per_token": 40.96884765625,
+    "stdev_ms_per_token": 0.8277647835254245
+  },
+  "mtp": {
+    "median_ms_per_token": 38.03359375,
+    "median_tokens_per_second": 26.292545652486492,
+    "min_ms_per_token": 37.378515625,
+    "max_ms_per_token": 41.070703125,
+    "mean_ms_per_token": 38.6291015625,
+    "stdev_ms_per_token": 1.6887760565249024
+  },
+  "mtp_latency_change_percent": -7.503918681423071,
+  "mtp_throughput_change_percent": 8.112688207382446
+}

@@ -20,13 +20,13 @@ Engines stopped after the run. Binary hashes rechecked.
 | Test | Result | Artifact |
 | --- | --- | --- |
 | MTP serve smoke (`draft_n > 0`) | PASS | — |
-| `mtp_acceptance.py` (3 turns + reuse, cancel/follow-up, limits 1/2/3, peer up) | **PASS** | `maya-m-mtp-acceptance.log` |
-| `regression_collectives.py --mode mtp` (990 / 7290 / 14550 prompts, cache reuse ≥7000, stream DONE, peer up) | **PASS** | `mtp-matrix.json`, `maya-m-mtp-matrix.log` |
-| `regression_collectives.py --mode simple` (same prompts, `draft_n==0`) | **PASS** | `simple-matrix.json`, `maya-m-simple-matrix.log` |
-| CLI pair parity simple (32 tokens) | **32/32** | `maya-m-cli-parity.log` |
-| CLI pair parity 7-draft MTP (32 tokens, `mtp=1` in INFO) | **32/32** | `maya-m-cli-parity.log` |
-| `acceptance.sh` MTP kill/recover (7 drafts) | **8 passed, 0 failed** | `maya-m-acceptance-mtp.log` |
-| `bench_mtp.py --model Maya-M --tokens 256 --runs 4 --drafts 2` | **PASS** (raw pick diffs **0**) | `bench-mtp-results.json`, `maya-m-bench-mtp.log` |
+| `mtp_acceptance.py` (3 turns + reuse, cancel/follow-up, limits 1/2/3, peer up) | **PASS** | `maya-m-mtp-acceptance.txt` |
+| `regression_collectives.py --mode mtp` (990 / 7290 / 14550 prompts, cache reuse ≥7000, stream DONE, peer up) | **PASS** | `mtp-matrix.json`, `maya-m-mtp-matrix.txt` |
+| `regression_collectives.py --mode simple` (same prompts, `draft_n==0`) | **PASS** | `simple-matrix.json`, `maya-m-simple-matrix.txt` |
+| CLI pair parity simple (32 tokens) | **32/32** | `maya-m-cli-parity.txt` |
+| CLI pair parity 7-draft MTP (32 tokens, `mtp=1` in INFO) | **32/32** | `maya-m-cli-parity.txt` |
+| `acceptance.sh` MTP kill/recover (7 drafts) | **8 passed, 0 failed** | `maya-m-acceptance-mtp.txt` |
+| `bench_mtp.py --model Maya-M --tokens 256 --runs 4 --drafts 2` | **PASS** (raw pick diffs **0**) | `bench-mtp-results.json`, `maya-m-bench-mtp.txt` |
 
 MTP matrix observed `draft_n` / accepted on the large cases: e.g. 990-prompt 144/41, 7290-prompt 68/20,
 14550-prompt 76/19. Reuse case cached **7289** tokens.

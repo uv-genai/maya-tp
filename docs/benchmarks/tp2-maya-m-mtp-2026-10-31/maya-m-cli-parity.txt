@@ -1,0 +1,5 @@
+tokens: a=32 b=32 compared=32 agree=32 (1.0000)
+OK: agreement 1.0000 >= 1.0
+simple parity exit=0
+tokens: a=32 b=32 compared=32 agree=32 (1.0000)
+OK: agreement 1.0000 >= 1.0
