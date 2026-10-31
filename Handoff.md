@@ -1,11 +1,10 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-31 · **v1.1.39 published** at `20ff03a` (CI41092302606 passed); #28 closed (§20).
-> #29: launchers take `--model`/`--pack` (§21); **Maya-S + Maya-M TP2/MTP validated**; docs updated.
-> #30 open: **Maya-L** same suite when packed on both hosts. #22–#27 closed.
-> Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** on all three paths.
-> llama-swap daemon/config preserved. Published v1.1.38 remains at c322b3e and predates the post-release fixes.
+> Last updated: 2026-10-31 · **v1.1.40 published** at `d9248e8` (CI41173208751 passed); #31 closed (§22).
+> **v1.1.39** remains `20ff03a`. #29 launchers + Maya-S/M TP2/MTP validated (§21); **#30 Maya-L next**.
+> Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** on all three paths (unchanged since v1.1.39).
+> llama-swap daemon/config preserved. v1.1.38 stays at c322b3e.
 
 ## 1. What we are building
 
@@ -39,7 +38,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | `origin` | `https://github.com/uv-genai/maya-tp.git` |
 | `upstream` | `https://github.com/mw00/project-maya.git` (read/merge only) |
 | `main` | tracks `origin/main` |
-| Release version | **v1.1.39** published from `20ff03a` ([#28](https://github.com/uv-genai/maya-tp/issues/28)); previous v1.1.38 unchanged |
+| Release version | **v1.1.40** published from `d9248e8` ([#31](https://github.com/uv-genai/maya-tp/issues/31)); previous v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e` |
 
 ## 4. Issue map
 
@@ -65,6 +64,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
 | 29 | Maya-M TP2 + model-selectable launchers | open; launchers parameterized; **Maya-M packed both hosts**; simple bench 32/32 @42.6–42.8 ms/tok; **full Maya-S MTP suite passed on Maya-M** (§21) |
 | 30 | Maya-L TP2 + MTP validation | **open (next)** — same suite as S/M when L is downloaded+packed on both hosts; README/MODELS/TP2-RUN say so |
+| 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -536,3 +536,18 @@ Cosmetic: `/health` `model_label` still “Maya-S” when only the pack is overr
 Engines stopped; issue thread #29. **Maya-L** is the next pack to validate — **issue #30**
 (same suite: `run_bench`, simple/MTP matrices, `mtp_acceptance`, CLI 32/32, kill/recover 8/8, `bench_mtp`).
 README / MODELS / TP2-RUN / CHANGELOG already state S+M validated and L pending #30.
+
+## 22. v1.1.40 release (#31)
+
+User explicitly requested tag and release with release notes. `VERSION` is 1.1.40; CHANGELOG dated section
+covers #29 launcher flags, `run_bench` parity fix, Maya-M pack/bench/MTP suite and S/M scope docs (Maya-L #30).
+
+**Outcome:** release commit **`d9248e8eb55210c5e0b0c425d0b098be7c2d0288`** on origin/main.
+Release-commit CI [41173208751](https://github.com/uv-genai/maya-tp/actions/runs/41173208751) passed before
+tagging. Annotated tag **v1.1.40** peels to that commit. GitHub release
+[v1.1.40](https://github.com/uv-genai/maya-tp/releases/tag/v1.1.40) is public, latest, non-prerelease, with
+explicit CHANGELOG-based notes and **no binary assets**. **v1.1.39** stays at `20ff03a`; **v1.1.38** at
+`c322b3e`. Issue #31 closed with the same outcome.
+
+Metadata/tooling only: no engine rebuild or deploy. Functional binary remains
+`5dbc93560e0eb024dcbdc0d9eb60ea57`. Do not republish; treat tags as immutable.

@@ -9,14 +9,14 @@ Repository `uv-genai/maya-tp`, local branch main. No subagents unless explicitly
 
 ## Current state
 
-v1.1.39 is **published** (`20ff03a`, CI41092302606); #28 closed — do not republish. Do not repeat completed
-measurements or start a new release without an explicit request.
+**v1.1.40 is published** (`d9248e8`, CI41173208751); #31 closed (Handoff §22) — do not republish.
+v1.1.39 remains `20ff03a`; v1.1.38 remains `c322b3e`. Do not repeat completed measurements or start a
+new release without an explicit request.
 
-**#29 open — model-selectable TP2 launchers + Maya-M:**
+**#29 — model-selectable TP2 launchers + Maya-M (open for leftover notes):**
 - All operational launchers take `--model NAME` / `--pack PATH` / `--config PATH` or `MAYA_MODEL` /
   `MAYA_PACK` / `MAYA_CONFIG` (resolver `tools/tp2/model_env.sh`). Same selection on both ranks.
-- Docs updated: `docs/TP2-RUN.md` “Choosing a model”, README, MODELS, SETTINGS, Handoff §9, AGENTS.md #8,
-  CHANGELOG Unreleased.
+- Docs: `docs/TP2-RUN.md` “Choosing a model”, README, MODELS, SETTINGS, Handoff §9, AGENTS.md #8.
 - Maya-M packed on **both** hosts; `run_bench.sh --model Maya-M` → **32/32 parity**, 42.57/42.83 ms/tok.
 - **Maya-M full MTP suite PASS** (same as Maya-S): `docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md`
   — API MTP/simple matrices, mtp_acceptance, CLI 32/32 both modes, kill/recover 8/8,
@@ -24,14 +24,11 @@ measurements or start a new release without an explicit request.
 - **Maya-S + Maya-M are the validated TP2/MTP models.** **#30 open for Maya-L** (same suite when
   packed on both hosts). README scope, MODELS, TP2-RUN, CHANGELOG updated accordingly.
 - `run_bench.sh` scps rank0’s token save before parity (`36b38ef`).
-- Docs cover model flags (TP2-RUN “Choosing a model”, README, MODELS, SETTINGS, AGENTS #8).
 - Live llama-swap YAML still Maya-S entries.
 
 Current engine MD5 **`5dbc93560e0eb024dcbdc0d9eb60ea57`** matches local `build-hip/maya`, rank0
 `build-hip/maya` and `/tmp/maya-tp2`. Never rebuild on the remote dirty checkout.
 Test engines/server stopped; GPUs free; llama-swap daemon running.
-
-v1.1.39 includes the post-v1.1.38 fixes: #23 `dc4c484`, #24 `56b9755`, #26 `c8758cb`, #25 `ec22f4d`.
 
 ## Conclusions / evidence
 
@@ -63,5 +60,6 @@ CPU gates: HIP map; serve and tools suites green (629 tools tests at last run).
 9. Do not hardcode model paths in launch scripts (AGENTS.md convention 8). Document new flags in
    `docs/TP2-RUN.md`.
 
-Check #29 for remaining Maya-M work (serve/MTP matrices if requested), then follow the next user request.
-Do not repeat completed measurements or publish a new release automatically.
+Check **#30** if the user wants Maya-L TP2/MTP validation (pack first, then the suite in the issue).
+Otherwise follow the next user request. Do not repeat completed measurements or publish a new release
+automatically.
