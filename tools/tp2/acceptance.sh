@@ -3,6 +3,7 @@
 #
 # Usage: tools/tp2/acceptance.sh [--serve-host HOST] [--port PORT]
 # Set MAYA_TP_MTP=1 to exercise opt-in MTP on the remote server as well.
+# Model selection: MAYA_MODEL / MAYA_PACK / MAYA_CONFIG (tools/tp2/model_env.sh).
 #
 # Run from rank 1 (strix-halo-2). Rank 0 is started via SSH.
 # Tests:
@@ -24,6 +25,10 @@ TP_CAP="${MAYA_GLM_MTP_DRAFT:-$TP_FIXED}"
 TP_CONTEXT="${CONTEXT:-32768}"
 [[ "$TP_FIXED" =~ ^[1-8]$ && "$TP_CAP" =~ ^[1-8]$ && "$TP_FIXED" -le "$TP_CAP" &&
    "$TP_CONTEXT" =~ ^[1-9][0-9]*$ ]] || { echo "invalid draft count/capacity or context" >&2; exit 2; }
+MODEL_ENV=()
+[ -n "${MAYA_CONFIG:-}" ] && MODEL_ENV+=("MAYA_CONFIG=$MAYA_CONFIG")
+[ -n "${MAYA_PACK:-}" ] && MODEL_ENV+=("MAYA_PACK=$MAYA_PACK")
+[ -n "${MAYA_MODEL:-}" ] && MODEL_ENV+=("MAYA_MODEL=$MAYA_MODEL")
 
 check() {
   local desc="$1" expected="$2" actual="$3"
@@ -49,12 +54,17 @@ start_pair() {
   pkill -9 -x maya 2>/dev/null || true
   sleep 1
   setsid nohup env MAYA_TP_MTP="$TP_MTP" MAYA_GLM_MTP_FIXED="$TP_FIXED" MAYA_GLM_MTP_DRAFT="$TP_CAP" \
-    CONTEXT="$TP_CONTEXT" bash tools/tp2/rank1.sh >/tmp/tp2-acc-r1.log 2>&1 </dev/null &
+    CONTEXT="$TP_CONTEXT" "${MODEL_ENV[@]+"${MODEL_ENV[@]}"}" \
+    bash tools/tp2/rank1.sh >/tmp/tp2-acc-r1.log 2>&1 </dev/null &
   disown
   sleep 1
   # Background only the server command: `cd ... && server &` leaves a subshell holding
   # SSH's stdout/stderr open for the server's lifetime, so the readiness loop never starts.
-  ssh -o BatchMode=yes "$HOST" "cd '$PWD' || exit; setsid nohup env MAYA_TP_MTP=$TP_MTP MAYA_GLM_MTP_FIXED=$TP_FIXED MAYA_GLM_MTP_DRAFT=$TP_CAP CONTEXT=$TP_CONTEXT bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null &"
+  REMOTE_ENV="MAYA_TP_MTP=$TP_MTP MAYA_GLM_MTP_FIXED=$TP_FIXED MAYA_GLM_MTP_DRAFT=$TP_CAP CONTEXT=$TP_CONTEXT"
+  for kv in ${MODEL_ENV[@]+"${MODEL_ENV[@]}"}; do
+    REMOTE_ENV="$REMOTE_ENV $(printf '%q' "$kv")"
+  done
+  ssh -o BatchMode=yes "$HOST" "cd '$PWD' || exit; setsid nohup env $REMOTE_ENV bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null &"
   # Cold disk-backed expert loading can exceed three minutes on rank 0.
   for i in $(seq 1 120); do
     if health | grep -q '"peer": "up"'; then return 0; fi

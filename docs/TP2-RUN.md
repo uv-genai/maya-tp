@@ -6,7 +6,8 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 ## Prerequisites
 
 - Both hosts: gfx1151, ROCm, `thunderbolt_ibverbs` loaded (`usb4_rdma5` up; `ibv_devices` shows it)
-- Same model pack on both hosts (`P=/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack`)
+- Same model pack on both hosts (default `P=/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack`;
+  any pack works — see **Choosing a model** below)
 - Engine built on **both** hosts with TP2:
   ```sh
   cmake -S . -B build-hip -DSTRATA_ENABLE_HIP=ON -DSTRATA_PREFILL_MMQ=ON -DSTRATA_ENABLE_TP2_RDMA=ON
@@ -15,6 +16,35 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 - SSH from rank 1 to rank 0 (`strix-halo-1.local`)
 
 **Roles:** rank 0 = API server (`strix-halo-1` / 192.168.1.22), rank 1 = worker (`strix-halo-2` / this host).
+
+## Choosing a model
+
+Launchers no longer hardcode Maya-S. Selection is by **model id** or **pack path**, via CLI or environment
+(`tools/tp2/model_env.sh`):
+
+| Input | Meaning |
+|---|---|
+| `--model NAME` / `MAYA_MODEL` | `$MAYA_MODELS_DIR/NAME/pack` (default dir `/home/ugo/software/Maya-data/models`) |
+| `--pack PATH` / `MAYA_PACK` | explicit pack directory |
+| `--config PATH` / `MAYA_CONFIG` | base `maya-*.json` (tokenizer, env, exe) |
+
+When only the model/pack changes and no `--config` is given, serve launchers start from the Maya-S JSON
+(or `maya-<model>-hip.json` if that file exists beside the repo root) and rewrite `--glm-pack` / tokenizer
+to the selected pack. Both hosts must have the same pack tree.
+
+```sh
+# Serve Maya-M (after the pack exists on both hosts)
+bash tools/tp2/rank1.sh --model Maya-M
+ssh strix-halo-1.local 'cd /home/ugo/software/project-maya && \
+  setsid nohup bash tools/tp2/rank0.sh 18080 --model Maya-M >/tmp/tp2-r0.log 2>&1 </dev/null &'
+
+# Pair bench / llama-swap wrapper
+bash tools/tp2/run_bench.sh --model Maya-M
+tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2
+```
+
+Maya-M GGUF shards may be present without a `pack/` directory; the engine needs the pack
+(`tools/iq_pack.py` / installer repack). Validation so far is Maya-S only.
 
 ## What “6 µs / 37 Gb/s” means
 
@@ -50,7 +80,7 @@ The engine already retries connect for `MAYA_TP_BOOTSTRAP_TIMEOUT` (default 120 
 
 ```sh
 # Rank 1 worker (strix-halo-2) — no --serve, no --tokens
-bash tools/tp2/rank1.sh
+bash tools/tp2/rank1.sh            # optional: --model Maya-M | --pack PATH | --config PATH
 
 # Rank 0 API server (strix-halo-1) — via SSH; server.py spawns the engine with --serve
 ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; setsid nohup bash tools/tp2/rank0.sh 18080 \
@@ -154,7 +184,8 @@ models:
 `--no-mtp` uses the simple loop; no flag preserves the default off (or `MAYA_TP_MTP` from the environment).
 `--drafts N` accepts 1–8, defaults to 2, and forwards both `MAYA_GLM_MTP_FIXED=N` and
 `MAYA_GLM_MTP_DRAFT=N` to both hosts. `--context N` also sets the same context on both ranks;
-otherwise the context comes from the base Maya JSON config. One sequence is used while #11 remains gated.
+otherwise the context comes from the base Maya JSON config. `--model NAME` / `--pack PATH` / `--config PATH`
+select the model pack (forwarded to both ranks). One sequence is used while #11 remains gated.
 
 For direct engine/manual rank launches, put these environment assignments on **both** ranks before the command:
 

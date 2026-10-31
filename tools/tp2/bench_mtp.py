@@ -23,7 +23,9 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 HOST = "strix-halo-1.local"
 PROMPT = "154822,25062,287,29905,371,25,7487,785,6722,315,9621,374"
-PACK = "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack"
+DEFAULT_PACK = "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack"
+MODELS_DIR = Path(os.environ.get("MAYA_MODELS_DIR", "/home/ugo/software/Maya-data/models"))
+PACK = DEFAULT_PACK
 # Explicitly neutralize inherited test/isolation settings on the remote host too.
 CLEAR = ("GLM_NO_MTP", "GLM_SPEC_FOLLOW", "GLM_SPEC_FOLLOW_SAVE", "GLM_TP_AR_TRACE",
          "GLM_MTP_TRACE", "GLM_MTP_FIXED", "GLM_MTP_DRAFT", "TP_TEST_WINDOW_RETRY",
@@ -163,7 +165,7 @@ class Pair:
 
 
 def main():
-    global PROMPT
+    global PROMPT, PACK
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--tokens", type=int, default=256)
@@ -176,7 +178,14 @@ def main():
     parser.add_argument("--max-pick-differences", type=int, default=0,
                         help="raw model-pick differences allowed against the forced reference (default: 0)")
     parser.add_argument("--single-host", action="store_true", help="local gfx1151 control without TP or RDMA")
+    parser.add_argument("--pack", type=Path, help="pack directory (default: MAYA_PACK or Maya-S-v2-IQ2_XXS)")
+    parser.add_argument("--model", help="model id under MAYA_MODELS_DIR (ignored when --pack is set)")
     args = parser.parse_args()
+    pack = args.pack or (Path(os.environ["MAYA_PACK"]) if os.environ.get("MAYA_PACK") else None)
+    if pack is None:
+        model = args.model or os.environ.get("MAYA_MODEL") or "Maya-S-v2-IQ2_XXS"
+        pack = MODELS_DIR / model / "pack"
+    PACK = str(pack)
     if args.prompt_file:
         ids = [int(x) for x in args.prompt_file.read_text().strip().split(",")]
         if not ids or min(ids) < 0:
@@ -188,6 +197,8 @@ def main():
         parser.error("--max-pick-differences must be nonnegative")
     if args.context <= args.tokens + len(PROMPT.split(",")) + 3:
         parser.error("--context must have room for the prompt, output and draft window")
+    if not Path(PACK).is_dir():
+        parser.error(f"pack not found: {PACK}")
     SETTINGS.update(MAYA_GLM_MTP_FIXED=str(args.drafts), MAYA_GLM_MTP_DRAFT=str(args.drafts))
     if args.window_profile:
         SETTINGS["MAYA_GLM_WIN_PROF"] = "1"

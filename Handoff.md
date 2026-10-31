@@ -62,6 +62,7 @@ Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (measured on **Maya-S** 
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
+| 29 | Maya-M TP2 + model-selectable launchers | open; launchers take `--model`/`MAYA_MODEL` or `--pack`/`MAYA_PACK` (§21); Maya-M shards present, pack/ still needed |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -482,3 +483,23 @@ Engine code was already built/deployed/validated in #22. Metadata-only release: 
 GPU run, deployment or live-config change. Functional binary remains
 `5dbc93560e0eb024dcbdc0d9eb60ea57` on all three paths; llama-swap daemon/config and remote dirty
 checkout preserved. Do not republish; treat the tag as immutable.
+
+## 21. #29 model-selectable TP2 launchers (Maya-M prep)
+
+Operational TP2 scripts no longer hardcode Maya-S. Shared resolver `tools/tp2/model_env.sh`:
+
+| Input | Meaning |
+| --- | --- |
+| `--model NAME` / `MAYA_MODEL` | `$MAYA_MODELS_DIR/NAME/pack` (default dir `/home/ugo/software/Maya-data/models`) |
+| `--pack PATH` / `MAYA_PACK` | explicit pack directory |
+| `--config PATH` / `MAYA_CONFIG` | base `maya-*.json` |
+
+Updated: `rank0.sh`/`rank1.sh`, `llama-swap/tp2.sh` (forwards to both ranks), `run_bench.sh`/`run_prof.sh`/`run_noar.sh`,
+`acceptance.sh`, `bench_mtp.py --pack/--model`. Serve launchers rewrite the base JSON’s `--glm-pack`/tokenizer
+when the model differs from the config’s pack. Docs: `docs/TP2-RUN.md` “Choosing a model”.
+Launcher unit tests extended; tools suite **629 tests / 31 skips** PASS; HIP map PASS.
+
+**Maya-M status:** GGUF shards exist on both hosts under `Maya-data/models/Maya-M/`; **no `pack/` yet**.
+Before a live Maya-M pair: pack on both hosts (installer/`iq_pack.py`), optional `maya-maya-m-hip.json`,
+then `run_bench.sh --model Maya-M` / rank scripts with `--model Maya-M`. Live llama-swap YAML untouched;
+a Maya-S TP2 pair was observed running at session start (user-owned; not stopped). No GPU run for this change.

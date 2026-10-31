@@ -1,8 +1,22 @@
 #!/bin/bash
 # Quick no-AR measurement: TP2 mixer slice without all-reduce.
+#
+# Usage: run_noar.sh [--model NAME | --pack PATH]
 set -e
 cd "$(dirname "$0")/../.."
-P=/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack
+# shellcheck source=model_env.sh
+source tools/tp2/model_env.sh
+
+while (( $# )); do
+  case "$1" in
+    --model) MAYA_MODEL="${2:?--model needs NAME}"; MAYA_PACK=""; shift 2 ;;
+    --pack) MAYA_PACK="${2:?--pack needs PATH}"; shift 2 ;;
+    *) echo "unexpected argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+P=$(maya_resolve_pack)
+[ -d "$P" ] || { echo "pack not found: $P" >&2; exit 1; }
 TOKS=154822,25062,287,29905,371,25,7487,785,6722,315,9621,374
 
 # clean up any stale rank 0
