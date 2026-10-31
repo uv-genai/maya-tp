@@ -123,6 +123,23 @@ with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump(sys.argv[1:],f)
         args = json.loads((self.root / 'result.json').read_text())
         self.assertEqual(args[-2:], ['--max-context','32768'])
 
+    def test_rank1_applies_config_engine_env_without_shell_evaluation(self):
+        config = json.loads(self.config.read_text())
+        tuning = '/calibration/a table.txt:/calibration/b.txt'
+        literal = 'line one\n$(touch should-not-exist) `false`'
+        config['env'] = dict(MAYA_GLM_PREFILL_SUB='1024', MAYA_HIPBLASLT_TUNING=tuning,
+                             STRATA_LITERAL=literal)
+        self.config.write_text(json.dumps(config))
+        engine = self.executable('engine', '''import os,json
+keys=('MAYA_GLM_PREFILL_SUB','MAYA_HIPBLASLT_TUNING','STRATA_LITERAL')
+with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump({k:os.environ.get(k) for k in keys},f)
+''')
+        r = self.run_script('tools/tp2/rank1.sh', ENGINE=str(engine), MAYA_GLM_PREFILL_SUB='256')
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        env = json.loads((self.root / 'result.json').read_text())
+        self.assertEqual(env, dict(MAYA_GLM_PREFILL_SUB='1024', MAYA_HIPBLASLT_TUNING=tuning,
+                                   STRATA_LITERAL=literal))
+
     def test_rank1_model_flag_overrides_pack(self):
         engine = self.executable('engine', '''import os,sys,json
 with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump(sys.argv[1:],f)

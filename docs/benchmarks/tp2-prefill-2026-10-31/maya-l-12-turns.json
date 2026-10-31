@@ -1,0 +1,458 @@
+[
+  {
+    "id": "chatcmpl-7b7a093f48fa4b43b78d943e",
+    "object": "chat.completion",
+    "created": 1793450671,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "RDMA collectives need matching tensor sizes",
+          "reasoning_content": "The user is asking about RDMA"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 33,
+      "completion_tokens": 16,
+      "total_tokens": 49,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 33,
+      "prompt_ms": 703.1,
+      "prompt_per_token_ms": 21.306,
+      "prompt_per_second": 46.9,
+      "predicted_n": 16,
+      "predicted_ms": 633.7,
+      "predicted_per_token_ms": 39.606,
+      "predicted_per_second": 25.2,
+      "draft_n": 12,
+      "draft_n_accepted": 9
+    }
+  },
+  {
+    "id": "chatcmpl-5aa24c2c030d43eaae234e1a",
+    "object": "chat.completion",
+    "created": 1793450673,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking about RDMA"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 67,
+      "completion_tokens": 16,
+      "total_tokens": 83,
+      "prompt_tokens_details": {
+        "cached_tokens": 32
+      }
+    },
+    "timings": {
+      "cache_n": 32,
+      "prompt_n": 35,
+      "prompt_ms": 757.1,
+      "prompt_per_token_ms": 21.631,
+      "prompt_per_second": 46.2,
+      "predicted_n": 16,
+      "predicted_ms": 815.3,
+      "predicted_per_token_ms": 50.956,
+      "predicted_per_second": 19.6,
+      "draft_n": 14,
+      "draft_n_accepted": 8
+    }
+  },
+  {
+    "id": "chatcmpl-24361686d0614f349d26052d",
+    "object": "chat.completion",
+    "created": 1793450674,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking again for one"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 101,
+      "completion_tokens": 16,
+      "total_tokens": 117,
+      "prompt_tokens_details": {
+        "cached_tokens": 66
+      }
+    },
+    "timings": {
+      "cache_n": 66,
+      "prompt_n": 35,
+      "prompt_ms": 671.1,
+      "prompt_per_token_ms": 19.174,
+      "prompt_per_second": 52.2,
+      "predicted_n": 16,
+      "predicted_ms": 768.2,
+      "predicted_per_token_ms": 48.013,
+      "predicted_per_second": 20.8,
+      "draft_n": 13,
+      "draft_n_accepted": 8
+    }
+  },
+  {
+    "id": "chatcmpl-dec9d7ffa6aa439c87b999e2",
+    "object": "chat.completion",
+    "created": 1793450676,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking a third time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 135,
+      "completion_tokens": 16,
+      "total_tokens": 151,
+      "prompt_tokens_details": {
+        "cached_tokens": 100
+      }
+    },
+    "timings": {
+      "cache_n": 100,
+      "prompt_n": 35,
+      "prompt_ms": 610.4,
+      "prompt_per_token_ms": 17.44,
+      "prompt_per_second": 57.3,
+      "predicted_n": 16,
+      "predicted_ms": 673.4,
+      "predicted_per_token_ms": 42.087,
+      "predicted_per_second": 23.8,
+      "draft_n": 11,
+      "draft_n_accepted": 9
+    }
+  },
+  {
+    "id": "chatcmpl-820213afdd414ba79539104a",
+    "object": "chat.completion",
+    "created": 1793450677,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking a fourth time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 169,
+      "completion_tokens": 16,
+      "total_tokens": 185,
+      "prompt_tokens_details": {
+        "cached_tokens": 134
+      }
+    },
+    "timings": {
+      "cache_n": 134,
+      "prompt_n": 35,
+      "prompt_ms": 685.6,
+      "prompt_per_token_ms": 19.589,
+      "prompt_per_second": 51.1,
+      "predicted_n": 16,
+      "predicted_ms": 580.6,
+      "predicted_per_token_ms": 36.288,
+      "predicted_per_second": 27.6,
+      "draft_n": 11,
+      "draft_n_accepted": 9
+    }
+  },
+  {
+    "id": "chatcmpl-945e2c5ffddc486f90019fae",
+    "object": "chat.completion",
+    "created": 1793450678,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking a fifth time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 203,
+      "completion_tokens": 16,
+      "total_tokens": 219,
+      "prompt_tokens_details": {
+        "cached_tokens": 168
+      }
+    },
+    "timings": {
+      "cache_n": 168,
+      "prompt_n": 35,
+      "prompt_ms": 673.0,
+      "prompt_per_token_ms": 19.229,
+      "prompt_per_second": 52.0,
+      "predicted_n": 16,
+      "predicted_ms": 489.2,
+      "predicted_per_token_ms": 30.575,
+      "predicted_per_second": 32.7,
+      "draft_n": 10,
+      "draft_n_accepted": 10
+    }
+  },
+  {
+    "id": "chatcmpl-da054203bafd4fe2a2bedcc3",
+    "object": "chat.completion",
+    "created": 1793450679,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking a sixth time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 237,
+      "completion_tokens": 16,
+      "total_tokens": 253,
+      "prompt_tokens_details": {
+        "cached_tokens": 202
+      }
+    },
+    "timings": {
+      "cache_n": 202,
+      "prompt_n": 35,
+      "prompt_ms": 602.8,
+      "prompt_per_token_ms": 17.223,
+      "prompt_per_second": 58.1,
+      "predicted_n": 16,
+      "predicted_ms": 444.5,
+      "predicted_per_token_ms": 27.781,
+      "predicted_per_second": 36.0,
+      "draft_n": 10,
+      "draft_n_accepted": 10
+    }
+  },
+  {
+    "id": "chatcmpl-ff8db2eebc944c8d9e2f42f7",
+    "object": "chat.completion",
+    "created": 1793450680,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking a seventh time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 271,
+      "completion_tokens": 16,
+      "total_tokens": 287,
+      "prompt_tokens_details": {
+        "cached_tokens": 236
+      }
+    },
+    "timings": {
+      "cache_n": 236,
+      "prompt_n": 35,
+      "prompt_ms": 612.5,
+      "prompt_per_token_ms": 17.5,
+      "prompt_per_second": 57.1,
+      "predicted_n": 16,
+      "predicted_ms": 447.3,
+      "predicted_per_token_ms": 27.956,
+      "predicted_per_second": 35.8,
+      "draft_n": 10,
+      "draft_n_accepted": 10
+    }
+  },
+  {
+    "id": "chatcmpl-bd5358f4ba1e49d7b9c87ffc",
+    "object": "chat.completion",
+    "created": 1793450682,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking an eighth time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 305,
+      "completion_tokens": 16,
+      "total_tokens": 321,
+      "prompt_tokens_details": {
+        "cached_tokens": 270
+      }
+    },
+    "timings": {
+      "cache_n": 270,
+      "prompt_n": 35,
+      "prompt_ms": 695.0,
+      "prompt_per_token_ms": 19.857,
+      "prompt_per_second": 50.4,
+      "predicted_n": 16,
+      "predicted_ms": 514.8,
+      "predicted_per_token_ms": 32.175,
+      "predicted_per_second": 31.1,
+      "draft_n": 11,
+      "draft_n_accepted": 9
+    }
+  },
+  {
+    "id": "chatcmpl-cfd715053cd1456d94b81320",
+    "object": "chat.completion",
+    "created": 1793450683,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking a ninth time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 339,
+      "completion_tokens": 16,
+      "total_tokens": 355,
+      "prompt_tokens_details": {
+        "cached_tokens": 304
+      }
+    },
+    "timings": {
+      "cache_n": 304,
+      "prompt_n": 35,
+      "prompt_ms": 619.2,
+      "prompt_per_token_ms": 17.691,
+      "prompt_per_second": 56.5,
+      "predicted_n": 16,
+      "predicted_ms": 523.1,
+      "predicted_per_token_ms": 32.694,
+      "predicted_per_second": 30.6,
+      "draft_n": 10,
+      "draft_n_accepted": 10
+    }
+  },
+  {
+    "id": "chatcmpl-6c8b6e0783c64a50a722a665",
+    "object": "chat.completion",
+    "created": 1793450684,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking a tenth time"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 373,
+      "completion_tokens": 16,
+      "total_tokens": 389,
+      "prompt_tokens_details": {
+        "cached_tokens": 338
+      }
+    },
+    "timings": {
+      "cache_n": 338,
+      "prompt_n": 35,
+      "prompt_ms": 603.2,
+      "prompt_per_token_ms": 17.234,
+      "prompt_per_second": 58.0,
+      "predicted_n": 16,
+      "predicted_ms": 534.3,
+      "predicted_per_token_ms": 33.394,
+      "predicted_per_second": 29.9,
+      "draft_n": 10,
+      "draft_n_accepted": 10
+    }
+  },
+  {
+    "id": "chatcmpl-8e1e8514b75b4c16a0af6829",
+    "object": "chat.completion",
+    "created": 1793450685,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "**Example:** In an all-reduce",
+          "reasoning_content": "The user is asking an eleventh"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 407,
+      "completion_tokens": 16,
+      "total_tokens": 423,
+      "prompt_tokens_details": {
+        "cached_tokens": 372
+      }
+    },
+    "timings": {
+      "cache_n": 372,
+      "prompt_n": 35,
+      "prompt_ms": 612.0,
+      "prompt_per_token_ms": 17.486,
+      "prompt_per_second": 57.2,
+      "predicted_n": 16,
+      "predicted_ms": 565.6,
+      "predicted_per_token_ms": 35.35,
+      "predicted_per_second": 28.3,
+      "draft_n": 11,
+      "draft_n_accepted": 9
+    }
+  }
+]

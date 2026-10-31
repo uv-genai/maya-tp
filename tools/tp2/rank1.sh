@@ -28,6 +28,16 @@ done
 MAYA_CONFIG=$(maya_resolve_config "$ROOT")
 [ -f "$MAYA_CONFIG" ] || { echo "config not found: $MAYA_CONFIG" >&2; exit 1; }
 
+# Apply the same engine settings as rank0's server.child_env. Without these,
+# the worker silently uses smaller prefill sub-batches and untuned GEMMs, so
+# rank0 waits for it at every mixer collective. NUL delimiters preserve values
+# containing spaces/newlines; never evaluate configuration values as shell code.
+while IFS= read -r -d '' setting; do
+  key="${setting%%=*}"
+  [[ "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] || { echo "invalid config env key: $key" >&2; exit 1; }
+  export "$setting"
+done < <(jq -j '(.env // {}) | to_entries[] | .key, "=", (.value | tostring), "\u0000"' "$MAYA_CONFIG")
+
 ENGINE="${ENGINE:-$ROOT/build-hip/maya}"
 BOOTSTRAP_HOST="${BOOTSTRAP_HOST:-192.168.1.22}"
 

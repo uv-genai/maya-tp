@@ -40,6 +40,14 @@ When only the model/pack changes and no `--config` is given, serve launchers sta
 rewrite `--glm-pack` (and `tokenizer` when set) to the selected pack. **Both hosts must have the same pack
 tree** (index, dense weights, tokenizer, and the GGUF shards beside `pack/`).
 
+Both serve rank scripts apply the base config's `env` to their engines, including prefill
+sub-batches and hipBLASLt tuning. Config entries override inherited values, as on the server.
+Keep those entries consistent on both hosts so a slower worker does not hold up every collective.
+The gfx1151 hipBLASLt 100401 table includes measured TP2 projection shapes. A controlled Maya-S
+comparison improved 1K/4K/8K prompt throughput by 32–37%; see the
+[prefill report](benchmarks/tp2-prefill-2026-10-31/RESULTS.md). Reproduce against an idle pair with
+`.venv/bin/python tools/tp2/bench_prefill.py --output /tmp/prefill-results.json`.
+
 ### Per-script reference
 
 | Script | Model flags | Notes |

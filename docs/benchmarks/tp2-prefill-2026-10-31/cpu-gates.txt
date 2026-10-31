@@ -1,0 +1,15 @@
+hip-map:
+hip_compat: every CUDA name the HIP build compiles has a mapping
+
+serve-tests:
+Ran 464 tests in 129.682s
+OK (skipped=11)
+
+tools-tests:
+Ran 630 tests in 16.424s
+OK (skipped=31)
+
+launcher-tests:
+Ran 11 tests in 0.648s
+OK
+
