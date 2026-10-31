@@ -4,16 +4,18 @@ Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §18, §21
 
 Project: **Maya-TP**, GLM-5.3-Flash TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
 GPU inference, RDMA tensor path only. Bootstrap/control/token metadata may use TCP.
-Repository `uv-genai/maya-tp`, local branch **release/v1.1.42**, based on prefill commit `9bc0ec9`.
+Repository `uv-genai/maya-tp`, local branch **main**, tracking origin/main, including prefill commit
+`9bc0ec9` (PR #34 merged as `b63f8af`) and release commit `6471995`.
 Rank0 is at `777cc92` with user-modified `maya.py` and two untracked Maya-L config backups; preserve them.
 No subagents unless explicitly authorized.
 
 ## Current state
 
-**v1.1.42 release explicitly authorized**, tracked in **#35** / Handoff §28. Both handoffs updated
-first. Integrate green PR #34 (`9bc0ec9`), commit/push release metadata, wait for release-commit CI,
-then create the annotated tag and publish a source release. Verify #35 for completion before resuming.
-**v1.1.41 published** (`a6d15a7`, CI41191735148); **#32 closed** (Handoff §24). Do **not** republish it.
+**v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
+Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.
+Both handoffs updated first; publication outcome recorded afterward. **#35** / Handoff §28 has the
+release audit. **Do not republish or move the tag.**
+Previous **v1.1.41** = `a6d15a7`, CI41191735148; #32 closed (§24).
 Older tags: v1.1.40 = `d9248e8`, v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e`.
 Do not repeat completed measurements or start a release without an explicit request.
 
@@ -47,7 +49,9 @@ Backups sit beside the YAML.
 **Binary:** `5a52cd27167523b6ea4b0f0bde93f503` on local `build-hip/maya`, rank0 `build-hip/maya`,
 and `/tmp/maya-tp2` (built with `STRATA_ENABLE_TP2_RDMA=ON`; installer always passes that flag now).
 
-**Engines:** test engines/server **stopped**; GPUs free; llama-swap daemon left alone.
+**Engines:** tests finished/stopped, then **user started Maya-M TP2 under llama-swap** during release
+preparation. At the read-only check: context 32768, rank0 API :5814 (dynamic), status ok / peer up,
+rank1 worker running locally. **Leave this user pair running.** Daemon/YAML untouched.
 **#33 gates:** HIP map + 464 serve / 11 skips + 630 tools / 31 skips PASS. No engine rebuild;
 rank1 launcher + hipBLASLt 100401 tuning table deployed to rank0 with matching SHA256s.
 Prefill commit **9bc0ec9**, [PR #34](https://github.com/uv-genai/maya-tp/pull/34); both CI runs
@@ -74,7 +78,7 @@ CPU gates green at last run (HIP map + serve + tools). CPU CI passed for release
 3. After every engine build, copy to **both** rank0 paths (`build-hip/maya` and `/tmp/maya-tp2`) and
    verify **three** hashes. `/tmp/maya-tp2` can disappear — redeploy if missing.
 4. Rank0 has user work (above), plus the deployed rank1 launcher and tuning table from #33. **No pull/reset/rebuild there.**
-   Local release source includes `9bc0ec9`; do not drop that work by resetting to an older main.
+   Local main includes `9bc0ec9` and v1.1.42 (`6471995`); authoritative source is origin/main.
    The binary is unchanged. Do not leave worktrees dirty without saying so.
 5. Use `.venv/bin/python`, jq. One issue per workstream on `uv-genai/maya-tp`; comment at milestones;
    `refs #N`; push only origin; close or leave open explicitly. Keep Handoff current.
@@ -82,7 +86,8 @@ CPU gates green at last run (HIP map + serve + tools). CPU CI passed for release
    `MAYA_*`) to both ranks. MTP: `MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=N MAYA_GLM_MTP_DRAFT=N`; unset
    `MAYA_GLM_NO_MTP`. Simple: `MAYA_GLM_NO_MTP=1`. Match contexts (32768 for API tests unless told).
    Never probe bootstrap 18515 with `/dev/tcp`. Restart **both** ranks after poisoned communicator.
-7. Stop test engines/server after finishing. Leave llama-swap **daemon and YAML** alone unless the user
+7. Stop only your own test engines/server after finishing; preserve the current user-started Maya-M pair.
+   Leave llama-swap **daemon and YAML** alone unless the user
    asks. Live model ids: `maya-glm5-{s,m,l}-tp2` and `-tp2-mtp`.
 8. #16 vision deferred; #11 multi gated (`glm_rows.cu` shared-width/attention audit first); #10 optional.
 9. Do not hardcode model paths in launch scripts (`AGENTS.md` convention 8).

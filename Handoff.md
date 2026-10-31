@@ -1,13 +1,14 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-31 · **v1.1.42 preparation authorized** — release #35 (§28).
-> Latest published: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
+> Last updated: 2026-10-31 · **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
+> Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
 > **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
 > Open perf: **#33** TP2 prefill — sliced GEMM calibration + rank1 config inheritance improve Maya-S
 > median prompt throughput **32–37%** at 1K/4K/8K (§27). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
-> unchanged on all three paths. Prefill commit `9bc0ec9`, PR #34 CI PASS; release branch
-> `release/v1.1.42`. Rank0 has user work (see §27); preserve it.
+> unchanged on all three paths. Prefill commit `9bc0ec9`, PR #34 merged as `b63f8af`; local **main**
+> tracks origin/main. Rank0 has user work (see §27); preserve it.
+> **User Maya-M TP2 pair running** at the release check (context 32768, healthy peer); leave it alone.
 > Llama-swap daemon + 6 maya YAML entries preserved (Maya-L `--context 524288`).
 
 ## 1. What we are building
@@ -43,7 +44,7 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | `origin` | `https://github.com/uv-genai/maya-tp.git` |
 | `upstream` | `https://github.com/mw00/project-maya.git` (read/merge only) |
 | `main` | tracks `origin/main` |
-| Release version | **v1.1.41** published from `a6d15a7` ([#32](https://github.com/uv-genai/maya-tp/issues/32)); previous v1.1.40 = `d9248e8`, v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e` |
+| Release version | **v1.1.42** published from `6471995` ([#35](https://github.com/uv-genai/maya-tp/issues/35)); previous v1.1.41 = `a6d15a7`, v1.1.40 = `d9248e8`, v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e` |
 
 ## 4. Issue map
 
@@ -72,7 +73,7 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 32 | Release v1.1.41 | published from `a6d15a7`; tag/CI/publication verified; closed (§24) |
 | 33 | TP2 prefill throughput | **open** — sliced GEMM tuning + rank1 config inheritance improve S 32–37% (§27); row cap/short-request overhead remain |
-| 35 | Release v1.1.42 | **in progress** — user authorized handoff updates, commit/push/tag and release; PR #34 has passed CI (§28) |
+| 35 | Release v1.1.42 | **published** — `6471995`, CI41203815519 PASS, annotated tag/public latest release verified (§28) |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -616,7 +617,7 @@ Saved matrices (S/M/L): ~1K often 55–65 tok/s (some M ~186); ≥7K ~90–260.
 “not implemented” in SETTINGS, with `MAYA_TP_OVERLAP`). Next: larger window / implement rows knob /
 overlap stage+AR; re-measure 1K/4K/8K with MTP 2 drafts.
 
-## 26. Session-end snapshot (for the next restart)
+## 26. Historical snapshot before #33 (superseded by §§27–28)
 
 - Trees: both hosts clean at `origin/main` (`e4c11c3` at handoff time; check `git log -1`).
 - VERSION **1.1.41**; releases through v1.1.41 published.
@@ -657,7 +658,7 @@ MD5s unchanged. Llama-swap daemon (rank0 pid 736) and YAML left alone. Source/re
 **`9bc0ec90ae66e501d597e661facc5a2ebc319711`**, [PR #34](https://github.com/uv-genai/maya-tp/pull/34).
 Both GitHub CI runs PASS: [push 41202760879](https://github.com/uv-genai/maya-tp/actions/runs/41202760879),
 [PR 41202777839](https://github.com/uv-genai/maya-tp/actions/runs/41202777839).
-User subsequently requested release v1.1.42; preparation is tracked in #35 / §28.
+User subsequently requested release v1.1.42; published outcome is in #35 / §28.
 
 The 3008-row cap and `MAYA_TP_PREFILL_ROWS` remain unchanged/unimplemented. Original user request-11
 9.6 tok/s is not reproduced by the controlled fresh-prompt benchmark; #33 stays open for that workload
@@ -665,18 +666,28 @@ and further short-request/window work. Rank0 launcher + tuning file deployed; th
 local files. Existing user edits preserved. Remote tree is intentionally dirty with those deployments
 beside the pre-existing `maya.py` edit/backups; no pull/reset was performed.
 
-## 28. v1.1.42 release (#35) — preparation authorized
+## 28. v1.1.42 release (#35) — published
 
 User explicitly requested updating **both handoff documents**, then committing, pushing, tagging and
 publishing. Release workstream: [#35](https://github.com/uv-genai/maya-tp/issues/35).
-PR #34 is mergeable and both CI runs passed at `9bc0ec9`. Release scope: integrate that work,
-VERSION/CHANGELOG/README metadata, and the final §27 results/operational state in these handoffs.
+Both handoffs were updated first. PR #34 merged as **`b63f8af381bca7b1228d0e954faacfd69bbe1aa5`**
+after both feature CI runs passed at `9bc0ec9`. VERSION/CHANGELOG/README record the scoped prefill
+gain, version-specific tuning and remaining limitations.
 
-Next: integrate PR #34 into origin/main, commit release metadata with `refs #35`, wait for
-release-commit CPU CI, create annotated **v1.1.42**, and publish a public/latest/non-prerelease
-source release with no binary assets. Record the exact commit, CI, tag and release outcome here
-and in #35 afterward. Do not close #33: cold Maya-L/request-11/row-cap work remains.
+**Outcome:** release commit **`64719953312df98c9fdf53a10198c106cb195345`** on origin/main (`refs #35; refs #33`).
+Release-commit CI [41203815519](https://github.com/uv-genai/maya-tp/actions/runs/41203815519) passed
+before tagging. Annotated **v1.1.42** peels to that commit locally and remotely. GitHub release
+[v1.1.42 — Faster TP2 prefill](https://github.com/uv-genai/maya-tp/releases/tag/v1.1.42) is public,
+latest, non-prerelease, published **2026-10-31 13:07:10 UTC**, **0 binary assets**, with explicit
+CHANGELOG-based notes. Older tags, including v1.1.41 at `a6d15a7`, are unchanged. Do not republish.
+Issue #35 tracks final verification; **#33 remains open** for cold Maya-L/request-11/row-cap work.
 
-No engine rebuild, binary redeploy or repeated GPU measurements needed. Binary remains
-`5a52cd27167523b6ea4b0f0bde93f503`; test engines/server remain stopped; preserve rank0's dirty
-checkout and llama-swap daemon/YAML. v1.1.41 and all older tags remain immutable.
+No engine rebuild, binary redeploy or repeated GPU measurements. Binary remains
+`5a52cd27167523b6ea4b0f0bde93f503`. Local checkout is **main**, tracking origin/main; the publication
+outcome in these handoffs is a documentation follow-up and does not move the release tag.
+
+**Current runtime differs from the completed test snapshot:** user started **Maya-M TP2** under
+llama-swap during release preparation. Read-only check: rank0 API **:5814** (dynamic), context **32768**,
+`status=ok`, `tp.world_size=2`, `peer=up`; rank1 worker running locally. **Do not stop/restart this user
+pair.** Daemon pid 736 and YAML unchanged. Rank0 remains at `777cc92` with user `maya.py` edit,
+two config backups, and the deliberately deployed #33 launcher/tuning file; no pull/reset/rebuild there.
