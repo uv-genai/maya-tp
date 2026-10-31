@@ -6,22 +6,37 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
-- **TP2 model selection** (#29): launch scripts no longer hardcode Maya-S. `rank0.sh`, `rank1.sh`,
-  `llama-swap/tp2.sh`, `run_bench.sh`, `run_prof.sh`, `run_noar.sh` accept `--model NAME` / `--pack PATH` /
-  `--config PATH`; the same choices work as `MAYA_MODEL` / `MAYA_PACK` / `MAYA_CONFIG` (root: `MAYA_MODELS_DIR`).
-  `acceptance.sh` and the llama-swap wrapper forward the selection to both ranks; `bench_mtp.py` takes
-  `--model`/`--pack`. Shared resolver: `tools/tp2/model_env.sh`. Runbook: [Choosing a model](docs/TP2-RUN.md#choosing-a-model).
-- **`run_bench.sh` parity fix** (#29): scp rank 0’s `--spec-follow-save` file before `greedy_parity.py`
-  (a stale local `r0.txt` reported a false mismatch).
-- **Maya-M packed and pair-benched** (#29): `Maya-M/pack` built on both hosts (`iq_pack.py --compat-bf16`);
-  `audit_split.py --world 2` all block-safe. Controlled `run_bench.sh --model Maya-M`: pair parity 32/32,
-  42.57 / 42.83 ms/token.
-- **Maya-M MTP validation** (#29): same suite as Maya-S — MTP and simple large-prompt API matrices,
-  `mtp_acceptance.py`, CLI 32/32 both modes, kill/recover 8/8, `bench_mtp` raw picks 0 and **+8.11%**
-  throughput at two drafts (41.12 → 38.03 ms/tok median on the 256-token reference). Report:
+## v1.1.40 - 2026-10-31
+
+Select any pack from the TP2 launchers, with Maya-M validated end-to-end for simple decode and MTP on the
+dual Strix Halo pair. No engine or kernel changes versus v1.1.39; tooling, docs and validation only.
+
+- **TP2 model selection** (#29): `rank0.sh`, `rank1.sh`, `llama-swap/tp2.sh`, `run_bench.sh`, `run_prof.sh`
+  and `run_noar.sh` accept `--model NAME`, `--pack PATH` or `--config PATH`. The same choices work as
+  `MAYA_MODEL` / `MAYA_PACK` / `MAYA_CONFIG` (model root: `MAYA_MODELS_DIR`, default
+  `/home/ugo/software/Maya-data/models`). `acceptance.sh` and the llama-swap wrapper forward the selection to
+  both ranks; `bench_mtp.py` takes `--model` / `--pack`. Shared resolver: `tools/tp2/model_env.sh`.
+  Runbook: [Choosing a model](docs/TP2-RUN.md#choosing-a-model).
+- **`run_bench.sh` parity fix** (#29): the harness now scp’s rank 0’s `--spec-follow-save` file before
+  `greedy_parity.py`. A stale local `r0.txt` could report a false mismatch after a successful pair run.
+- **Maya-M pack and controlled bench** (#29): `Maya-M/pack` built on both hosts (`iq_pack.py --compat-bf16`);
+  `audit_split.py --world 2` all splits block-safe. `run_bench.sh --model Maya-M`: pair parity **32/32**,
+  decode **42.57 / 42.83 ms/token** (rank0 / rank1).
+- **Maya-M MTP validation** (#29): same suite as Maya-S — simple and seven-draft MTP large-prompt API
+  matrices (990/7290/14550, cache reuse, stream DONE), `mtp_acceptance.py`, CLI pair parity **32/32** both
+  modes, MTP kill/recover **8/8**, and `bench_mtp.py` with **0** raw-pick differences. On the 256-token
+  common reference: simple median **41.12 ms/tok (24.32 tok/s)** vs two-draft MTP **38.03 (26.29)** →
+  **+8.11%** throughput. Report:
   [docs/benchmarks/tp2-maya-m-mtp-2026-10-31](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md).
-- **Scope: Maya-S and Maya-M validated for TP2 + MTP; Maya-L pending** (#30): README, `docs/MODELS.md`
-  and `docs/TP2-RUN.md` state both completed suites and link the open Maya-L tracking issue.
+- **Scope documentation**: README, `docs/MODELS.md` and `docs/TP2-RUN.md` state that **Maya-S and Maya-M**
+  are validated for TP2 + MTP, and that **Maya-L** is the next pack under test
+  ([issue #30](https://github.com/uv-genai/maya-tp/issues/30)). `docs/SETTINGS.md` documents the launcher
+  selection variables; `AGENTS.md` convention: do not hardcode model paths in launch scripts.
+
+Source release with no prebuilt binary assets. The engine binary is unchanged from v1.1.39
+(`5dbc93560e0eb024dcbdc0d9eb60ea57` when built from the corresponding sources). Pass the same
+`--model` / `--pack` / `--config` to both ranks. Maya-L remains unvalidated until #30 completes.
+MTP stays opt-in; live llama-swap YAML is unchanged.
 
 ## v1.1.39 - 2026-10-31
 
