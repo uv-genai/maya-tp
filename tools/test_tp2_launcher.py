@@ -27,7 +27,9 @@ class Tp2LauncherTests(unittest.TestCase):
         self.config = self.root / 'maya-maya-s-v2-iq2_xxs-hip.json'
         self.config.write_text(json.dumps(dict(
             args=['--glm-pack', '/model/pack', '--max-context', '32768'],
-            tokenizer='/model/pack/tokenizer')))
+            tokenizer='/model/pack/tokenizer',
+            log=str(self.root / 'maya-maya-s-v2-iq2_xxs-hip.log'),
+            installer=dict(quant='Maya-S-v2-IQ2_XXS'))))
         self.env = {k: v for k, v in os.environ.items() if not k.startswith(('MAYA_', 'STRATA_'))}
         self.env.update(PATH=str(self.bin) + os.pathsep + os.environ['PATH'],
                         TP_TEST_LOG=str(self.root / 'events.jsonl'), TP_TEST_RESULT=str(self.root / 'result.json'))
@@ -164,6 +166,9 @@ os.unlink(p)
         self.assertIn('--glm-pack', cfg['args'])
         self.assertEqual(cfg['args'][cfg['args'].index('--glm-pack') + 1], str(pack))
         self.assertEqual(cfg['tokenizer'], str(pack / 'tokenizer'))
+        # log / installer must follow the selected pack, not the Maya-S base config
+        self.assertEqual(cfg['log'], str(self.root / 'maya-maya-m-hip.log'))
+        self.assertEqual(cfg['installer']['quant'], 'Maya-M')
 
     def test_tp2_swap_forwards_model_to_both_ranks(self):
         self.stub_rank0()

@@ -55,14 +55,17 @@ maya_resolve_config() {
   fi
 }
 
-# Emit a config JSON on stdout with --glm-pack (and tokenizer when present) rewritten to $2.
+# Emit a config JSON on stdout with model identity rewritten for $2 (the pack path):
+#   --glm-pack, tokenizer, log (server tee path), installer.quant (health model_label).
+# Without a pack override the base config is unchanged.
 maya_config_with_pack() {
   local config="$1" pack="${2:-}"
   if [ -z "$pack" ]; then
     cat "$config"
     return 0
   fi
-  jq --arg pack "$pack" '
+  local root="${ROOT:-}"
+  jq --arg pack "$pack" --arg root "$root" '
     (.args // []) as $a
     | ($a | index("--glm-pack")) as $i
     | (if $i == null
@@ -70,5 +73,15 @@ maya_config_with_pack() {
        else .args = ($a | .[$i + 1] = $pack)
        end)
     | if (.tokenizer // "") != "" then .tokenizer = ($pack + "/tokenizer") else . end
+    | ($pack | split("/") | map(select(length > 0)) | .[-2] // "") as $model
+    | ($model | ascii_downcase) as $slug
+    | if $model != "" then
+        .log = (if $root != "" then $root else "" end)
+          + (if $root != "" then "/" else "" end)
+          + "maya-" + $slug + "-hip.log"
+        | if (.installer | type) == "object"
+          then .installer.quant = $model
+          else . end
+      else . end
   ' "$config"
 }
