@@ -2,6 +2,7 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-10-31 · **v1.1.39 published** at `20ff03a` (CI41092302606 passed); #28 closed (§20).
+> #29 open: TP2 launchers take `--model`/`--pack` (§21); Maya-M needs `pack/` on both hosts before a live run.
 > #22–#27 completed/closed. Review CI41088587233 and README CI41091273791 passed. v1.1.39 includes the fixes and Maya-TP identity.
 > Current binary **`5dbc93560e0eb024dcbdc0d9eb60ea57`** deployed identically to all three paths.
 > llama-swap daemon/config preserved. Published v1.1.38 remains at c322b3e and predates the post-release fixes.
