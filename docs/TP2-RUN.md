@@ -252,21 +252,16 @@ Restart both ranks after a protocol or RDMA failure.
 
 ### llama-swap on strix-halo-1
 
-The installed `~/.config/llama-swap/config.yaml` model **`maya-glm5-tp2`** uses
-`tools/llama-swap/tp2.sh run ${PORT}` and the matching `stop` command. The wrapper starts
+The installed `~/.config/llama-swap/config.yaml` (on **strix-halo-1**) uses
+`tools/llama-swap/tp2.sh run ${PORT} …` and the matching `stop` command. The wrapper starts
 `tools/tp2/rank1.sh` over SSH on strix-halo-2, then runs `tools/tp2/rank0.sh` locally in the foreground.
 `tools/tp2/tp2-swap.sh` delegates to this same wrapper.
 
-To enable MTP with four drafts, run **on strix-halo-1**:
+**Rank0 must have the model-aware launchers** (`tools/llama-swap/tp2.sh`, `tools/tp2/model_env.sh`,
+`rank0.sh`, `rank1.sh` from current main). Deploy by copying those files only — **never** `git pull` /
+reset the remote `7ee8f27` checkout. Without them, `tp2.sh` rejects `--model` with the old usage line.
 
-```sh
-/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --mtp --drafts 4
-# another pack:
-/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2
-```
-
-For llama-swap, use these fields in the existing model entry (the live YAML is not changed automatically;
-**as of v1.1.40 / 2026-10-31 the development rank0 config already contains**):
+Current live entries (2026-10-31, user-configured; backups beside the file):
 
 ```yaml
 models:
@@ -288,8 +283,13 @@ models:
     proxy: http://127.0.0.1:${PORT}
 ```
 
-`--model` is required for a non-default pack and is forwarded to both ranks. Both packs must already exist
-(`…/Maya-S-v2-IQ2_XXS/pack` and `…/Maya-M/pack`). llama-swap `--watch-config` reloads on edit.
+Both packs must exist on both hosts (`…/Maya-S-v2-IQ2_XXS/pack`, `…/Maya-M/pack`). `--watch-config`
+reloads on edit. Manual examples **on strix-halo-1**:
+
+```sh
+/home/ugo/software/project-maya/tools/llama-swap/tp2.sh run 18080 --model Maya-M --mtp --drafts 2
+/home/ugo/software/project-maya/tools/llama-swap/tp2.sh stop
+```
 
 `--no-mtp` uses the simple loop; no flag preserves the default off (or `MAYA_TP_MTP` from the environment).
 `--drafts N` accepts 1–8, defaults to 2, and forwards both `MAYA_GLM_MTP_FIXED=N` and
