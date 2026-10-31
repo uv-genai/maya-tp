@@ -40,5 +40,9 @@ echo "=== rank 0 output ==="
 wait $R0PID || true
 grep -E "timing|ms/token|error|Error|fail|pair|INFO|pack" /tmp/r0_log.txt | head -15
 
+# rank0 writes --spec-follow-save on the remote host; bring it back for parity.
+rm -f /tmp/r0.txt
+scp -q strix-halo-1.local:/tmp/r0.txt /tmp/r0.txt
+
 echo "=== pair parity ==="
 python tools/tp2/greedy_parity.py /tmp/r0.txt /tmp/r1.txt --min-agree 1.0 2>&1 || true
