@@ -2,7 +2,7 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.17)**, v1.1.37–41 accepted; v1.1.42 candidate #61/#62 under validation.
-> User authorized stopping the pair for validation. Candidate42 d8b4252a deployed/hash-matched all5paths, runtime d59ea06; HIP/host gates pass, CPU/GPU/live gates pending. Accepted41 main41327238265 PASS.
+> User authorized stopping the pair for validation. Fixed42 bc4e90a6/runtime837a679 all5paths matched; CPU/HIP/host/kernel gates pass. HOLD64 latency, fixed live batch19655 active (§29.17); no43. Accepted41 main41327238265 PASS.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -983,3 +983,7 @@ Next **#61 /upstream v1.1.42 cd48762b6d4888205c130238dbc0c7f7904993cf**,22commit
 ### 29.17 Active v1.1.42 semantic candidate (#61/#62)
 
 Review branch merge/upstream-v1.1.42 has an in-progress merge from cd48762. Retain idle gates with explicit TP worker/mid-MTP wake-up, alias exports mirrored in rank1, GLM monotonic auto-chunk search fix, telemetry/setup idle reductions, DS4 dense-memory guard and legacy-stream link calibration, MiniMax bad-router rejection. Defer all new vision enablement/lending/vendor patches to16 and same-host DS4 partial-read/multi-restore/lending/DMA changes. Keep all41 TP2/MTP/cancel/lifecycle/loop-limit safeguards, tuning, owned README/AGENTS/VERSION/pin. #62 explicitly rejects local-only GENI/VLEND/VRECLAIM/LOGP and media before state mutation/encoding; startup skips TP vision config. Focused tests initially found only an upstream source-count assumption (>30 MAYA settings; retained fork has29), corrected to test actual named settings and all discovered aliases. Full ordered CPU/build/live/perf/fidelity/CI/main gates pending; no43 before42 acceptance. Accepted41 a617 backups remain bothhosts. No active live batch/build yet.
+
+42 build milestone: runtime d59ea06 engine **d8b4252a17fc09623ef0677051ee1a47** matched all5paths. All3HIP/16host/196fused/MMQ/attention/396strictIQ pass. First CPU583server had2 fixture errors (excluded WINDOWS symbol); ba4c34e fixes mocks, focusedSampler pass, orderedCPU session85089 rerunning. **Active live session86028**, /tmp/maya-upstream-v42-batch.sh, output /tmp/maya-upstream-v42/. DraftPR63, no42acceptance/no43. Do not start concurrentGPU/build/deployment. Test-only/doc commits afterd59 do not change engine; remote review d59.
+
+42 HOLD #64: force-deep-idle1s/3000ms exposed23.683s MTP32 decode after14.55K prefill (initiald8 candidate), versus~60–66ms/token short probes. Initial port woke rank1 only at mirror/MTP; rank0 needed wake-up again after long prefill. Pre-fix logs/binary preserved, batch86028stopped. **837a679** wakes both lanes at mirrored-call/nested-MTP boundaries without wire changes; newengine **bc4e90a607b87fe609398fbdba0fb98c**. Active fixedbatch19655 same /tmp/maya-upstream-v42-batch.sh. Verify deployedfivehashes/GPUimageaudit completed before live. OrderedCPU583serve11skip/662tools33skip/HIPmap/Node PASS; no Python changes after those. No42acceptance/no43.

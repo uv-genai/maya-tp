@@ -15,13 +15,17 @@ Accepted37–41:
 
 - v1.1.41: #55 /PR58 /0fea27a, final39523ae CI41326842619/41326839560 and **main41327238265 PASS**. #55/#56/#57/#59 closed. Full report docs/upstream/v1.1.41.md and validation.json.
 
-**Active42 #61 /#62**: review branch merge/upstream-v1.1.42, runtime d59ea06, upstream cd48762 ancestor. All3 HIP builds/16 host gates pass; full ordered CPU/shared GPU/live/perf/fidelity gates pending. Candidate MD5 **d8b4252a17fc09623ef0677051ee1a47** matches all5paths; remote review d59ea06, protected canonical777cc92 unchanged. No42 acceptance/no43 yet. Report docs/upstream/v1.1.42.md.
+**Active42 HOLD #61 /PR63 /#62 /#64**. Review branch merge/upstream-v1.1.42, fixed runtime **837a679**, engine **bc4e90a607b87fe609398fbdba0fb98c** hash-matched all5paths; remote review837a679. Protected remote canonical777cc92 unchanged. Upstream cd48762 is an ancestor. No42 acceptance/no43; continue through46 after per-tag gates/mainCI.
 
-Retain idle gates with TP worker/nested-MTP wake-up, both-name alias parity across ranks, monotonic GLM auto-chunk search and applicable DS4/MM3 guards. Defer new vision/vendor/setup and same-host DS4 multi-GPU changes. #62 rejects local-only GENI/VLEND/VRECLAIM/LOGP/media before state changes and skips encoder startup for TP config; #16 remains deferred. All41 safeguards below preserved. RuntimeCI41329879097 pending.
+Initiald59/d8 candidate's exaggerated idle1s/3000ms test exposed23.683s MTP32 decode after14.55K prefill, versus60–66ms/token short prompts. **#64** fix wakes BOTH service lanes at mirrored model calls/nested-MTP frames; no wire change. Pre-fix logs /tmp/maya-upstream-v42/idle-before-fix, binary /tmp/maya-upstream-v42-before-idle-fix/maya BOTHhosts. Do not claim the default impact from exaggerated settings. Fixed837a679 GPU image identical to accepted41/d8, so completed kernel gates remain valid.
 
-Live batch prepared **/tmp/maya-upstream-v42-batch.sh**, outputs **/tmp/maya-upstream-v42/**. Before launching verify no active GPU/parity batch. Runs force-deep-idle S simple/MTP7 matrices, real lifecycle/media rejection with bogus encoder config proving no startup, true prefill cancel both modes, SCLI32/32, kill/recover8/8, direct command refusal followed by technical/code256 strict raw fidelity, candidate-first3-cycle prefill A/B versus saved41, M/L API/prefill/raw64. Keep raw failures/outliers and unchanged900s startup. Final/PR/mainCI before43; continue through46.
+**ACTIVE fixed live batch19655**: /tmp/maya-upstream-v42-batch.sh, output /tmp/maya-upstream-v42/. No concurrentGPU/build/deploy. Exact forced-idle S simple/MTP7 large/reuse/stream matrices, real startup/media/lifecycle guards, true prefillcancel both modes; CLI/recovery/strictS technical+code256 fidelity; candidate-first3-cycle prefill A/B vs saved41; M/LAPI/prefill/raw64. Keep failed/outlier data and900s startup bound. Check current outputs before resuming; batch86028 was terminated for64, do not rerun initial script blindly. No nexttag until all gates, finalCI/PR/mainCI.
 
-Completed41 batches15734/61183/96027 need no rerun without reason. Accepted41 baseline a617 remains BOTHhosts at /tmp/maya-upstream-v41-baseline/maya. No release/tag is authorized by integration.
+Ordered CPU583serve11skip/662tools33skip/HIPmap/actualNode PASS afterba4c34e adapted2upstream Windows mocks excluded from Linuxfork. Focused21 pass,3HIPengines/16host/196fused/MMQ/attention/396strictIQ pass. FailedinitialCPU fixture log retained. Final headCI still required.
+
+Retain idle/alias parity/monotonicGLMchunk/applicableDS4/MM3 guards. Defer newvision/vendor/setup and same-hostDS4 multi-GPU. #62 rejects GENI/VLEND/VRECLAIM/LOGP/media beforestate/encoding and skipsencoderstartup forTP config; initialliveguard withbogusencoder passed PIDs/peerunchanged andtextfollowup. #16 staysdeferred. All41cancel/lifecycle/totalbudget/tuning invariantsbelowpreserved.
+
+Accepted41 baselinea617 remains BOTHhosts at /tmp/maya-upstream-v41-baseline/maya. Completed41batches15734/61183/96027 need no rerun. No release/tag authorized by integration.
 
 ## Validated41 behavior
 
