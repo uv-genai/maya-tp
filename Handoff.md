@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.25):37–44 ACCEPTED; next45.
-> Engine6a2f/b398 unchanged and backed up BOTH hosts; no active batches. DS4 WMMA68 remains OPEN.
+> Last updated:2026-11-02 · Sequential integration (§29.26):37–44 accepted;45active #74.
+> Runtime remains exact44; functional DS4 tail backport deferred75. Batch2813 active; WMMA68 open.
 
 ## 1. What we are building
 
@@ -1055,3 +1055,9 @@ Branchmerge/upstream-v1.1.44 fromdffea08; upstream5d20b0e mergedadc54a8. Install
 PR73/ **842d6e67c11ed702d1c7f54d61b8eb69e5212ed6** afterfinal5e920c4 CI **41344769559/41344774298 PASS**; post-main **41345166897 PASS**. #72closedwithfinalcomment. Report docs/upstream/v1.1.44.md/validation.json accepted. Installer/catalog/docs/tests only:615runtimefiles/README/AGENTS/VERSION/pin/tuningexact43; engine6a2f/b398sameall5paths, savedBOTHhosts /tmp/maya-upstream-v44-baseline/maya.73focusedtests,HF18files×2revisions names/sizes/SHAexact,HIPmap/602serve11skip/679tools33skip,freshS MTP/reuse/spec1ordinary64budget/PIDs/peerPASS;64704EXIT0. Noactivebatches; bothengines/serverstopped. Reuse43fullGPU/strict/M-L/state/perfevidenceonlyforunchangedpaths. FullDS4WMMA68remainsOPEN/failing, no newquality/perfclaim. Remotereview5e920c4; protectedcanonical777userwork/backups/daemon175392/YAMLunchanged.
 
 Next45 **6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc** (2commits/3files), ownissue/branchfromupdatedmain; then46=3589d6f. Eachsemanticreview+affectedgates+finalheadCI+postmainCI before next. Continue through46. NumericVERSION1.1.42/legacyreleaseunchanged, futuretp-vtags,no release. Keep33/42/46/52/54/60/11/16/68open.
+
+### 29.26 Active v1.1.45 scoped semantic review (#74/#75)
+
+Upstream6ecbd3c merged6862700withALLruntimeexact44; onlyCHANGELOGfunctionaldecisionnote. Its c968b94autoNVIDIAoneGPUtailfixdepends ondeferredcopy_flush/strictboolrc_drain/rc_ticklentguard; retainedHIPautomaticpathisdisabledandourlegacydrain5sfallbackcannotacceptpartialrc_in_tailpatchsafely. Explicitfunctionaldeferral **#75OPEN** forHIPvalidation/completeport; donotclaim45crashfixactiveor32K/64K/128KDS4promptsvalidated. SeparateDS4WMMA68alsoOPEN. Dependencyproof/rawpatchunder docs/upstream/v1.1.45/.
+
+ACTIVE2813 /tmp/maya-upstream-v45-gates.sh orderedHIPmap/serve/tools thenfreshpairedS MTP/reuse/spec1API. Engine6a2f/b398unchanged; remote review6862700. PreserveallTP2/MTP/NextN/RDMA/cancel/lifecycle/wake/media/budget/tuningandownedREADME/AGENTS/VERSION/pin. Finalreport/headCI/PR/mainCI requiredbefore46. Protectedcanonical777userwork/daemon/YAMLunchanged. No44batchactive.
