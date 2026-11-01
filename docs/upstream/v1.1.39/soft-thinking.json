@@ -1,0 +1,33 @@
+{
+  "sentence_closures": [
+    {
+      "configured_tokens": 16,
+      "extra_tokens": 2
+    },
+    {
+      "configured_tokens": 16,
+      "extra_tokens": 24
+    }
+  ],
+  "responses": [
+    {
+      "finish": "stop",
+      "completion_tokens": 840,
+      "has_answer": true,
+      "has_reasoning": true
+    },
+    {
+      "finish": "stop",
+      "completion_tokens": 1412,
+      "has_answer": true,
+      "has_reasoning": true
+    },
+    {
+      "finish": "stop",
+      "completion_tokens": 2,
+      "has_answer": true,
+      "has_reasoning": false
+    }
+  ],
+  "follow_up_ok": true
+}

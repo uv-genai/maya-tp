@@ -1,0 +1,7 @@
+synthetic-Q2_0-GU-pass0: type=42 rows=7 experts=3 ref_rms=1.98041 rel_l2=0.00106754 max_abs/ref_rms=0.00380488 zero_row_max=0
+synthetic-Q2_0-down-pass0: type=42 rows=7 experts=3 ref_rms=2.10697 rel_l2=0.000617685 max_abs/ref_rms=0.00253579 zero_row_max=0
+synthetic-Q2_0-GU-pass1: type=42 rows=7 experts=3 ref_rms=1.98512 rel_l2=0.0011973 max_abs/ref_rms=0.00416652 zero_row_max=0
+synthetic-Q2_0-down-pass1: type=42 rows=7 experts=3 ref_rms=2.12958 rel_l2=0.000538054 max_abs/ref_rms=0.00216068 zero_row_max=0
+synthetic-Q2_0-GU-pass2: type=42 rows=5 experts=2 ref_rms=1.90121 rel_l2=0.00125928 max_abs/ref_rms=0.00443 zero_row_max=0
+synthetic-Q2_0-down-pass2: type=42 rows=5 experts=2 ref_rms=2.0192 rel_l2=0.000491596 max_abs/ref_rms=0.00196968 zero_row_max=0
+MMQ parity screen passed

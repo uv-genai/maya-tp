@@ -848,3 +848,16 @@ are opt-in until measured. Exclude funding, Intel guide, Windows telemetry/SDK/p
 CUDA-native architecture changes; README/AGENTS/VERSION remain ours. Import walker prevents directory
 symlink cycles. Focused CPU checks, full ordered gates, HIP builds and live S/M/L checkpoint pending.
 No v1.1.40 work before this checkpoint passes. No release/tag; future tags tp-v.
+
+29.8 progress:27fefcc candidate runtime, HIP test harness follow-upsf475729. Local542 serve/11skips,
+651tools/31,11budget tests, HIP map,3HIPengines,13host checks,196fused/MMQ/attention and actual gfx1151
+Lt primary/forced-fallback numerical+guard checks PASS. Code CI41305518760/41305514302 PASS.
+Candidate MD5 c3132ee406429195545f145e04e7aadd deployed/matched on all5canonical/reviewpaths.
+S MTP7 acceptance, MTP/simplelarge matrices,105matchedrounds/8asymmetricretries, CLI32/32 each PASS;
+CLI continuations matchv38. First math soft-close probes ended naturally, missing coverage; prose
+probes running. Kill/recover,rawpicks,prefillA/B,M/L gates pending. No nexttag yet.
+
+Real prose soft-close probes now PASS (16+2/16+24 tokens, answers840/1412 tokens plus follow-up).
+Remaining batch `/tmp/maya-upstream-v39-remaining.sh` runs kill/recovery,framed raw-pick benches,
+reversed3-cycle prefill A/B vs savedv38 (firstcyclewarmup),M/LAPI/prefill smoke andrawpicks.
+Evidencecheckpoint in docs/upstream/v1.1.39/. No nexttag until all gates and mainCI pass.

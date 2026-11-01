@@ -1,0 +1,41 @@
+{
+  "upstream_tag": "v1.1.39",
+  "upstream_commit": "376b4b87402bc992af7b4a8dec089ef7cba7801c",
+  "engine_source": "27fefccdb186e0355e592edce52da19654d797c9",
+  "hip_test_head": "f475729d86e6b1729cab1ac175cf9914b17e9471",
+  "engine_md5": "c3132ee406429195545f145e04e7aadd",
+  "local_cpu": {
+    "hip_map": "PASS",
+    "serve": {
+      "tests": 542,
+      "skips": 11,
+      "result": "PASS"
+    },
+    "tools": {
+      "tests": 651,
+      "skips": 31,
+      "result": "PASS"
+    },
+    "focused_thinking": 11,
+    "host_ctest": 13,
+    "engine_builds": [
+      "maya",
+      "maya-ds4",
+      "maya-mm3"
+    ],
+    "js_syntax": "PASS"
+  },
+  "code_ci": [
+    41305518760,
+    41305514302
+  ],
+  "pending": [
+    "peer_kill_recovery",
+    "framed_raw_pick_fidelity",
+    "controlled_prefill_ab",
+    "Maya-M",
+    "Maya-L",
+    "final_evidence_ci",
+    "merge_and_main_ci"
+  ]
+}

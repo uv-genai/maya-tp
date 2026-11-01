@@ -1,0 +1,31 @@
+Test project /home/ugo/software/project-maya-upstream-review/build-hip
+      Start   5: ds4_marks_test
+ 1/13 Test   #5: ds4_marks_test ...................   Passed    0.00 sec
+      Start   6: ds4_logprobs_test
+ 2/13 Test   #6: ds4_logprobs_test ................   Passed    0.01 sec
+      Start   8: tp_partition_test
+ 3/13 Test   #8: tp_partition_test ................   Passed    0.00 sec
+      Start   9: tp_collective_test
+ 4/13 Test   #9: tp_collective_test ...............   Passed    0.00 sec
+      Start  10: tp_context_test
+ 5/13 Test  #10: tp_context_test ..................   Passed    0.02 sec
+      Start  11: tp_slice_test
+ 6/13 Test  #11: tp_slice_test ....................   Passed    0.00 sec
+      Start  14: ds4_multi_attn_plan_test
+ 7/13 Test  #14: ds4_multi_attn_plan_test .........   Passed    0.07 sec
+      Start  15: ds4_prompt_mem_test
+ 8/13 Test  #15: ds4_prompt_mem_test ..............   Passed    0.00 sec
+      Start  16: hipblaslt_table_list_test
+ 9/13 Test  #16: hipblaslt_table_list_test ........   Passed    0.00 sec
+      Start  17: env_report_test
+10/13 Test  #17: env_report_test ..................   Passed    0.00 sec
+      Start  93: draft_policy_test
+11/13 Test  #93: draft_policy_test ................   Passed    0.00 sec
+      Start  94: draft_cost_test
+12/13 Test  #94: draft_cost_test ..................   Passed    0.02 sec
+      Start 112: ds4_store_test
+13/13 Test #112: ds4_store_test ...................   Passed    0.04 sec
+
+100% tests passed out of 13
+
+Total Test time (real) =   0.18 sec

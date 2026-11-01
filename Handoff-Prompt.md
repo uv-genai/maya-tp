@@ -41,13 +41,12 @@ in **#47 / PR #48 /f479b91**. Fixed **main CI41303961934 PASS**, plus both a6f1a
 Local current CPU gates **532 serve/11 skips**, **637 tools/31 skips**, HIP map PASS.
 
 **Active: #45 / upstream v1.1.39 `376b4b8`**,33 commits/48 files; candidate merge in progress in the isolated review worktree on
-`merge/upstream-v1.1.39`, based on b30514b. No candidate build/deployment yet. Preserve server fix #47 and all TP2/MTP invariants. #46 tracks the newly
+`merge/upstream-v1.1.39`, based on b30514b. Runtime source27fefcc built/deployed; MD5 c3132ee406429195545f145e04e7aadd matches both hosts. Preserve server fix #47 and all TP2/MTP invariants. #46 tracks the newly
 identified stream-ready contract mismatch with compact TP blobs: defer the entire streamed-fetch feature; preserve the buffered reader/header/kernels byte-for-byte. Preserve all-output-limit answer reserves,
 TP chunk/retry agreement, replicated NextN and measured100401 calibration priority. See Handoff
 §29.7. No v1.1.40 work until v1.1.39 checkpoint passes.
 
-Current engine **cff75b48a0f1e0b2d2355c73ce302d94** from accepted v1.1.38 is deployed/matched;
-engines/server stopped. Remote canonical user source/daemon/YAML preserved. Future fork tags use tp-v.
+Current candidate engine **c3132ee406429195545f145e04e7aadd** is deployed/matched; authorized test pairs run from the review worktrees. Remote canonical user source/daemon/YAML preserved. Future fork tags use tp-v.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.
@@ -87,7 +86,7 @@ Maya-L uses **`--context 524288`** (also in `maya-maya-l-hip.json`). Daemon `--w
 Backups sit beside the YAML.
 
 **Baseline binary:** `5a52cd27167523b6ea4b0f0bde93f503`, saved on both hosts. Current deployed
-engine is `cff75b48a0f1e0b2d2355c73ce302d94` (see active task above); TP2 RDMA is enabled.
+engine is `c3132ee406429195545f145e04e7aadd` (see active task above); TP2 RDMA is enabled.
 
 **Engines:** the old release-check Maya-M runtime is superseded by the authorized GPU window above.
 The subsequent Maya-L pair was stopped with explicit permission; candidate test pairs may be restarted.
@@ -136,3 +135,5 @@ CPU gates green at last run (HIP map + serve + tools). CPU CI passed for release
 Finish any explicitly pending release step only if asked, then follow the next user request.
 
 Accepted v1.1.38 cff75b48 binary is additionally saved on BOTH hosts at `/tmp/maya-upstream-v38-baseline/maya` for controlled v1.1.39 comparisons. Candidate retains MMQ ID padding, measured primary table priority, all-limit answer reserve with bounded sentence grace, and #47 failed-restart fix. New DS4 prefix/tail-auto/link rings stay opt-in. CPU/build/live gates pending; do not proceed to v1.1.40.
+
+#45 checkpoint progress: draft PR #49, code CI41305518760/41305514302 PASS atf475729 (test-only follow-ups; runtime27fefcc). Ordered542 serve/11skips,651tools/31,11budget,13host checks,3HIP engines,196fused/MMQ/attention/Lt primary+forced-fallback parity PASS. S MTP7 acceptance, MTP/simplelarge matrices,105rounds/8asymmetricretries,CLI32/32 each PASS; CLI exactlymatchesv38. Real sentence-close probes PASS at16+2/16+24 tokens with answer/resume/follow-up. Initial math probes only missed coverage and are preserved in /tmp. Remaining batch /tmp/maya-upstream-v39-remaining.sh: kill/recovery,2framedrawpick benches,prefillA/B vs38,M/LAPI+prefillsmoke/rawpicks. No v40 before39acceptance/mainCI. Evidence docs/upstream/v1.1.39/.

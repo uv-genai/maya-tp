@@ -1,0 +1,17 @@
+{
+  "rank0_rounds": 105,
+  "rank1_rounds": 105,
+  "all_round_tuples_match": true,
+  "rank1_retry_lines": [
+    "glm window TP: rank=1 p0=15 T=8 attempt=0 local-clash=1 retry=1",
+    "glm window TP: rank=1 p0=16 T=8 attempt=0 local-clash=1 retry=1",
+    "glm window TP: rank=1 p0=17 T=8 attempt=0 local-clash=1 retry=1",
+    "glm window TP: rank=1 p0=19 T=8 attempt=0 local-clash=1 retry=1",
+    "glm window TP: rank=1 p0=20 T=8 attempt=0 local-clash=1 retry=1",
+    "glm window TP: rank=1 p0=25 T=8 attempt=0 local-clash=1 retry=1",
+    "glm window TP: rank=1 p0=29 T=8 attempt=0 local-clash=1 retry=1",
+    "glm window TP: rank=1 p0=32 T=8 attempt=0 local-clash=1 retry=1"
+  ],
+  "asymmetric_retry_rounds": 8,
+  "retry_tuples_match": true
+}

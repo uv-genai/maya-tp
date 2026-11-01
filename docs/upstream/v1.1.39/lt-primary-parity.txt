@@ -1,0 +1,10 @@
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt solution=2540 dtype=f16 T=64 N=1024 K=4096 ldy=1024 beta=0 workspace=0
+prefill gemm: Lt solution=2540 dtype=f16 T=37 N=1024 K=4096 ldy=1024 beta=1 workspace=0
+prefill gemm: Lt solution=2542 dtype=f16 T=64 N=4096 K=1024 ldy=4096 beta=0 workspace=0
+prefill gemm: hipBLASLt summary launches=4 fallbacks=0 unique_fallback_shapes=0
+case dtype=f16 T=64 N=1024 K=4096 ldy=1024 output_offset=0 beta=0.0 relative_l2=1.27112751e-05 max_abs=8.58306885e-05 PASS
+case dtype=f16 T=64 N=1024 K=4096 ldy=1024 output_offset=0 beta=0.0 relative_l2=1.27112751e-05 max_abs=8.58306885e-05 PASS
+case dtype=f16 T=37 N=1024 K=4096 ldy=1024 output_offset=7 beta=1.0 relative_l2=1.24545283e-05 max_abs=8.10623169e-05 PASS
+case dtype=f16 T=64 N=4096 K=1024 ldy=4096 output_offset=0 beta=0.0 relative_l2=3.19418259e-06 max_abs=1.21593475e-05 PASS
