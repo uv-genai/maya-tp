@@ -1,0 +1,67 @@
+{
+  "source_engine_commit": "0892d7763131fca5c644067089e340906e20df34",
+  "candidate_merge_commit": "efa221a244eebd3ac71d881fe282e2bfae28d6c7",
+  "engine_md5": "6e59558bdd421fa521040263978b2bd6",
+  "baseline_md5": "5a52cd27167523b6ea4b0f0bde93f503",
+  "cpu": {
+    "hip_map": "PASS",
+    "serve": {
+      "tests": 530,
+      "skipped": 11,
+      "result": "PASS"
+    },
+    "tools": {
+      "tests": 637,
+      "skipped": 31,
+      "result": "PASS"
+    },
+    "focused_budget_tests": 6,
+    "cmake_host_tests": 11,
+    "all_hip_engines": "maya/maya-ds4/maya-mm3 PASS"
+  },
+  "gpu": {
+    "fused_parity_runs": 196,
+    "attention_parity": "PASS",
+    "maya_s_cli_simple": "32/32",
+    "maya_s_cli_mtp7": "32/32",
+    "mtp_acceptance": "PASS",
+    "large_prompt_matrices": "simple/MTP7 PASS",
+    "kill_recover": "8/8",
+    "benchmark_raw_pick_differences": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "maya_m_cli_simple": "32/32",
+    "maya_m_cli_mtp7": "32/32",
+    "maya_m_mtp2_acceptance_and_1k_4k_8k": "PASS",
+    "maya_l_mtp2_acceptance_and_1k_4k_8k": "PASS",
+    "maya_l_cli_simple": "32/32",
+    "maya_l_cli_mtp7": "32/32"
+  },
+  "test_environment_note": "Initial isolated tools rerun lacked gguf-py; rerun with STRATA_GGUF_PY pointing at the existing pinned canonical checkout passed all637 tests. No code or dependency pin changed.",
+  "cold_l_cli": {
+    "simple": {
+      "done": "DONE 32 12 134944.5 145798.6 length 0 0 0 7392 10416",
+      "stats": [
+        "glm stat: decode 4556.21 ms/tok (0.22 tok/s) | vram hit 70.97% | ram fetches 0.28/tok | disk 94.22 reads/tok in 32.59 waits/tok, 3847.51 ms/tok | promotions 70.38/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 11245.4 ms/tok | vram 2500/12096 ram 0/32",
+        "glm fast tiers CUDA0: vram hits 7392, ram fetches 9, disk reads 3351 (68.75% vram hit) | promotions 2378 (scratch 982) demotions 0 drops 0 prefetches 0 | disk waits 1085, 131464.8 ms"
+      ]
+    },
+    "mtp": {
+      "done": "DONE 32 12 126074.6 431633.0 length 22 55 0 20365 43448",
+      "stats": [
+        "glm stat: decode 13488.53 ms/tok (0.07 tok/s) | vram hit 46.87% | ram fetches 5.69/tok | disk 711.12 reads/tok in 160.84 waits/tok, 12327.79 ms/tok | promotions 35.88/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 10506.2 ms/tok | vram 1384/12384 ram 9/48",
+        "glm fast tiers CUDA0: vram hits 20365, ram fetches 182, disk reads 23092 (46.51% vram hit) | promotions 1274 (scratch 22145) demotions 0 drops 0 prefetches 0 | disk waits 5189, 399645.5 ms"
+      ]
+    }
+  },
+  "release_cli_comparison": "simple/MTP7 32/32 identical",
+  "prefill_warm_comparison": "prefill-warm-comparison.json",
+  "operations": "Engines/server stopped; candidate deployment hashes match; daemon/YAML and remote user source preserved"
+}

@@ -9,7 +9,7 @@
 > **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
 > Open perf: **#33** TP2 prefill — sliced GEMM calibration + rank1 config inheritance improve Maya-S
 > median prompt throughput **32–37%** at 1K/4K/8K (§27). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
-> unchanged on all three paths. Prefill commit `9bc0ec9`, PR #34 merged as `b63f8af`; local **main**
+> retained as the pre-integration baseline (§29). Prefill commit `9bc0ec9`, PR #34 merged as `b63f8af`; local **main**
 > tracks origin/main. Rank0 has user work (see §27); preserve it.
 > Historical release-check runtime below is superseded by §29's authorized test window.
 > Llama-swap daemon + 6 maya YAML entries preserved (Maya-L `--context 524288`).
@@ -71,12 +71,13 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 26 | Ordinary token dense lead FFN missing AR | fixed and validated `c8758cb`, raw picks 0/256 (§18) |
 | 27 | Maya-TP README identity, scope and upstream attribution | completed/closed at 427b5bb; CI41091273791 passed (§19) |
 | 28 | Release v1.1.39 | published from `20ff03a`; tag/CI/publication verified; closed (§20) |
-| 29 | Maya-M TP2 + model-selectable launchers | open (work done; close when agreed) — launchers parameterized; Maya-M packed + full suite PASS (§21) |
+| 29 | Maya-M TP2 + model-selectable launchers | **closed** — launchers parameterized; Maya-M packed + full suite PASS (§21); closure recorded during #37 |
 | 30 | Maya-L TP2 + MTP validation | **complete** — suite PASS, report `docs/benchmarks/tp2-maya-l-mtp-2026-10-31`; docs updated |
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 32 | Release v1.1.41 | published from `a6d15a7`; tag/CI/publication verified; closed (§24) |
 | 33 | TP2 prefill throughput | **open** — sliced GEMM tuning + rank1 config inheritance improve S 32–37% (§27); row cap/short-request overhead remain |
 | 35 | Release v1.1.42 | **published** — `6471995`, CI41203815519 PASS, annotated tag/public latest release verified (§28) |
+| 42 | TP2 CLI readiness after expert warmup | **open** — existing Maya-L warmup skew needs a peer-ready handshake; WARM=0 cold CLI is very slow; tracking only during #37 |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
@@ -709,6 +710,8 @@ Do not start v1.1.38 until v1.1.37 passes the full checkpoint. No fork release a
 fetch upstream tags into `upstream/v*`. The dashboard updater now accepts the fork prefix, preserves
 the exact git tag during update and compares/displays its numeric version. Legacy tags still work.
 Tests cover release discovery, numeric ordering and an actual fast-forward from a temporary origin.
+Legacy installs at v1.1.42 or earlier need one manual `git pull --ff-only` on a clean main checkout
+to acquire the prefix-aware updater; document this in the next release notes (docs/SETUP.md).
 
 Current user pair is **Maya-L**, context **524288**, rank0 API **:5812** (dynamic), rank1 local.
 User explicitly answered **"Hosts are free; you may stop the pair for validation"**. This authorizes
@@ -722,4 +725,43 @@ First-tag worktree `/home/ugo/software/project-maya-upstream-review` exists on b
 `merge/upstream-v1.1.37` locally, detached candidate on rank0. Merge commit **884a257**, draft PR **#38**;
 HIP host-test dependency fix **0892d77** under **#39**. HIP map, **527 serve / 11 skips**, **637 tools /
 31 skips**, six budget tests and 11 CMake host checks PASS; maya/maya-ds4 and HIP parity binaries
-built for gfx1151. GPU validation is starting. Later tags are unmerged; do not proceed until #37 passes.
+built for gfx1151. Shared fused-expert parity (196 runs) and attention parity PASS. Seven-draft
+MTP acceptance (reuse/cancel/limits, rank1-only forced retry), MTP and simple large-prompt matrices
+and CLI simple/MTP pair parity (32/32 each) PASS. All eight benchmark requests have zero raw-pick differences; kill/recover8/8 PASS. M/L API
+acceptance and1K/4K/8K smoke PASS; CLI simple/MTP7 pair parity32/32 each on both M and L.
+Combined530 serve/11 skips and637 tools/31 skips PASS; both efa221a CI runs PASS. Saved-release
+CLI/prefill comparison is running before final evidence/CI and acceptance.
+Later tags remain unmerged; do not proceed until the complete #37 checkpoint passes.
+
+
+### 29.1 Naming and issue maintenance
+
+#40 completed in `dd8e483`, PR #41 merged as `988f834`; both CI runs passed. The future release
+prefix is `tp-v`; no release/tag was created. #29 is now closed: its launchers and complete Maya-M
+validation were already finished, with evidence in §21. This does not substitute for current-tag tests.
+
+#42 tracks the pre-existing paired CLI warmup skew (§23). The existing WARM=0 workaround avoids
+first-collective poisoning but makes cold Maya-L CLI validation disk-bound (simple CLI32/32 PASS:
+134.9 s prompt +145.8 s decode). Seven-draft MTP also exercises global scratch retry/replay under
+cold I/O. No transport/control/default change in this upstream checkpoint; #42 stays open separately.
+
+### 29.2 v1.1.37 validation complete — final evidence/CI pending
+
+All S/M/L CLI simple and MTP7 pairs32/32; S MTP/simple large-prompt matrices, acceptance,105/105
+wire records,8 asymmetric retries, kill/recover8/8 PASS. M/L normal two-draft API acceptance and
+1K/4K/8K smoke PASS. Six budget tests,530 serve/11 skips,637 tools/31 skips, HIP map,11 host tests,
+all three HIP engine builds,196 fused parity and attention parity PASS. Source controls/launchers/
+calibration remain fork-identical; AGENTS adds only user tp-v policy. Evidence docs/upstream/v1.1.37/.
+
+Saved release vs candidate CLI: both modes32/32 identical. Prefill A/B has cold-copy outliers on both
+engines; reversed warmup+two-cycle comparison yields1K/4K/8K throughput deltas **+0.66/−1.77/−0.73%**;
+all9 paired messages/usage identical (initial6/6 also). No material warm regression observed in this
+small check; #33 remains open for cold/API-request11/row-cap work. No general speedup claim.
+
+Both GPUs free; canonical deployed MD5 remains6e59558bdd421fa521040263978b2bd6 on all three paths.
+Engine built0892d77; combined sourceefa221a CI41296064467/41296070808 PASS. Final evidence commit
+must pass CI, then merge PR #38 with a merge commit (retain upstream ancestry). Do not start38 yet.
+Remote canonical source remains777cc92/user edits; new server tested in isolated worktree. At task
+end preserve a coherent deployed pair/source state; do not leave an unvalidated old-server/new-engine
+combination after later tags. No pull/reset/rebuild of the remote user checkout; baseline binaries
+remain available for restoration while validated new builds stay in the review worktrees.

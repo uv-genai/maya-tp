@@ -1,0 +1,41 @@
+{
+  "server": "candidate server for both arms; compare saved release vs candidate engine only",
+  "engine_baseline_md5": "5a52cd27167523b6ea4b0f0bde93f503",
+  "engine_candidate_md5": "6e59558bdd421fa521040263978b2bd6",
+  "context": 32768,
+  "mtp_drafts_fixed_and_capacity": 2,
+  "fresh_prompts": true,
+  "samples_per_length": 2,
+  "messages_equal": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "rows": [
+    {
+      "repeats": 960,
+      "prompt_tokens": 990,
+      "baseline_median_ms": 6131.75,
+      "candidate_median_ms": 4425.9,
+      "throughput_change_percent": 38.542443344856416
+    },
+    {
+      "repeats": 4032,
+      "prompt_tokens": 4062,
+      "baseline_median_ms": 12074.95,
+      "candidate_median_ms": 14817.05,
+      "throughput_change_percent": -18.50638284948758
+    },
+    {
+      "repeats": 8128,
+      "prompt_tokens": 8158,
+      "baseline_median_ms": 23061.9,
+      "candidate_median_ms": 23855.550000000003,
+      "throughput_change_percent": -3.3268987719838883
+    }
+  ],
+  "caution": "Small regression check, not a new general speedup claim. Loads excluded; preserve raw timings and inspect I/O if a material slowdown appears."
+}

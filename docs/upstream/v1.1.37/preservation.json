@@ -1,0 +1,77 @@
+{
+  "base": "b30b340",
+  "candidate": "efa221a",
+  "intentional_difference": "AGENTS.md adds user-requested tp-v release policy only (PR #41)",
+  "files": {
+    "README.md": {
+      "base_blob": "7ba343524bb18980d2fca52d1b9395b7d9ce45c8",
+      "candidate_blob": "7ba343524bb18980d2fca52d1b9395b7d9ce45c8",
+      "identical": true
+    },
+    "AGENTS.md": {
+      "base_blob": "daeed39f3de014bc4cde18419dc35c4bd5b99531",
+      "candidate_blob": "0fd81b1ad40b728e2afe1ad76bfc37bdf2ccc181",
+      "identical": false
+    },
+    "tools/tp2/rank1.sh": {
+      "base_blob": "d53637bcb0e53de733215bed062e693dd380ab1d",
+      "candidate_blob": "d53637bcb0e53de733215bed062e693dd380ab1d",
+      "identical": true
+    },
+    "tools/tp2/rank0.sh": {
+      "base_blob": "7ca543b09524ae118bbbb98e7650f6e0f3d086d2",
+      "candidate_blob": "7ca543b09524ae118bbbb98e7650f6e0f3d086d2",
+      "identical": true
+    },
+    "tools/tp2/model_env.sh": {
+      "base_blob": "8cf8bb701ab35fe5837049f04d52d17d622ef05d",
+      "candidate_blob": "8cf8bb701ab35fe5837049f04d52d17d622ef05d",
+      "identical": true
+    },
+    "tools/hip/gfx1151-glm-hipblaslt-100401.txt": {
+      "base_blob": "523c608746b11b28230e09d827f32b2c7b35abbd",
+      "candidate_blob": "523c608746b11b28230e09d827f32b2c7b35abbd",
+      "identical": true
+    },
+    "src/program/generate.cpp": {
+      "base_blob": "5f1895c5e6b8d1ef27bd07a3829a95a2380ef96b",
+      "candidate_blob": "5f1895c5e6b8d1ef27bd07a3829a95a2380ef96b",
+      "identical": true
+    },
+    "src/core/glm_prefill.cu": {
+      "base_blob": "926c5cf1d78ff0b5df33f1fd4be0e9bd78fd19d2",
+      "candidate_blob": "926c5cf1d78ff0b5df33f1fd4be0e9bd78fd19d2",
+      "identical": true
+    },
+    "src/core/glm_mtp.cu": {
+      "base_blob": "da1a6796e18128f4d61e5cf48ecca6b957a6b3c1",
+      "candidate_blob": "da1a6796e18128f4d61e5cf48ecca6b957a6b3c1",
+      "identical": true
+    },
+    "src/core/glm_window.cu": {
+      "base_blob": "2b3efcd4a66b828389195eea3032cba195e197e7",
+      "candidate_blob": "2b3efcd4a66b828389195eea3032cba195e197e7",
+      "identical": true
+    },
+    "src/core/glm_rows.cu": {
+      "base_blob": "7562cba949df409e558bd1efa5838d4a14522951",
+      "candidate_blob": "7562cba949df409e558bd1efa5838d4a14522951",
+      "identical": true
+    },
+    "src/core/glm_fast_path.cu": {
+      "base_blob": "e5330675d88700f8699c66652f37f913fc51c9ab",
+      "candidate_blob": "e5330675d88700f8699c66652f37f913fc51c9ab",
+      "identical": true
+    },
+    "src/core/tp_context.cu": {
+      "base_blob": "9faf7e3cc4a3149118caa9def679717785100f18",
+      "candidate_blob": "9faf7e3cc4a3149118caa9def679717785100f18",
+      "identical": true
+    },
+    "src/net/verbs.cpp": {
+      "base_blob": "2878ee13b2d482d6022af3a219c983abc75cf315",
+      "candidate_blob": "2878ee13b2d482d6022af3a219c983abc75cf315",
+      "identical": true
+    }
+  }
+}

@@ -6,6 +6,13 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.37 integration** (#37): shared gfx1151 fused-expert and draft-policy updates,
+  server streaming/tool-safe loop guard and DeepSeek API/UI improvements. Preserve our TP2/MTP
+  protocol, HIP/RDMA installer flags, model-selectable launchers and measured prefill calibration.
+  Fork thinking-budget answer reserves remain effective for all output limits; upstream's policy
+  change for limits above 1024 is intentionally not adopted. Fork release numbering/history and
+  owned documentation are retained. Per-tag review and validation: `docs/upstream/`.
+
 ## v1.1.42 - 2026-10-31
 
 Faster TP2 prefill on the dual gfx1151 pair through worker configuration and measured projection tuning.

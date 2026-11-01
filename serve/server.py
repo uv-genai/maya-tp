@@ -31,6 +31,7 @@ import hmac
 import codecs
 import itertools
 import json
+import math
 import os
 import queue
 import re
@@ -150,18 +151,27 @@ class Engine(Protocol):
     def generate(self, ids: list[int], max_new: int, sampling: dict, cancel: threading.Event) -> Iterator[int]: ...
 
 
+PEAK_MIN_TOKENS = 32   # the Monitor's peak decode speed: answers this long or longer (a few tokens' speed says little)
+
+
 class MockEngine:
     """Replays a scripted completion (text) as token ids, one per step, then the end-of-turn token.  Given a list of
     scripts, each request gets the next one and the last one repeats (a tool call, then the answer after it)."""
 
-    def __init__(self, tokenizer, script: str | list[str], max_context: int = 32768, delay_s: float = 0.0):
+    def __init__(self, tokenizer, script: str | list[str], max_context: int = 32768, delay_s: float = 0.0,
+                 tok_s: float | None = None):
         self.tok, self.max_context, self.delay = tokenizer, max_context, delay_s
+        # tok_s: it writes at about that speed and reports its clock as the engine's DONE does (the Monitor's speeds;
+        # `--engine mock` takes MAYA_MOCK_TOK_S)
+        self.tok_s = tok_s
         end = tokenizer.encode(IM_END, parse_special=True)
         self.scripts = [tokenizer.encode(x, parse_special=True) + end for x in ([script] if isinstance(script, str)
                                                                                  else script)]
-        self.script, self.turns = self.scripts[0], 0
+        self.script, self.turns, self._runs = self.scripts[0], 0, 0
         self.last_prompt: list[int] = []
-        self.info = {"logit_bias": 1}   # it samples nothing, so every request's bias is as good as applied
+        # it samples nothing, so every request's bias is as good as applied; and a scripted token is certain: logprob 0,
+        # the only token its row has (logprobs)
+        self.info = {"logit_bias": 1, "logprobs": TOP_LOGPROBS_MAX}
 
     def generate(self, ids, max_new, sampling, cancel, embeddings=None):
         self.last_prompt = list(ids)
@@ -169,11 +179,22 @@ class MockEngine:
         if len(self.scripts) > 1:
             self.script = self.scripts[min(self.turns, len(self.scripts) - 1)]
             self.turns += 1
-        for t in self.script[:max_new]:
+        n_top = logprobs_asked(sampling)
+        t0, steps = time.time(), self.script[:max_new]
+        self._runs += 1
+        for i, t in enumerate(steps):
             if cancel.is_set():
                 return
             if self.delay:
                 time.sleep(self.delay)
+            if self.tok_s:
+                time.sleep((0.8 + 0.4 * ((t * 7919 + self._runs * 104729) % 101) / 100) / self.tok_s)   # (uneven)
+                if i == len(steps) - 1:                 # (its DONE, before the last token: the server stops there)
+                    self.last = {"generated": i + 1, "decode_ms": (time.time() - t0) * 1000,
+                                 "prompt_ms": len(ids) * 0.5, "reused": 0}
+            if n_top is not None:
+                t = LpToken(t)
+                t.lp = (0.0, [(int(t), 0.0)] if n_top > 0 else [])
             yield t
 
 
@@ -336,6 +357,98 @@ NONFINITE = "non-finite"
 
 # what Service._sliced yields when the loop guard ends an answer (a loop that came back): run() ends it, "stop"
 LOOP_STOP = object()
+# ... and the answer it gets when that happens before any answer text (never a silent end after the thinking)
+LOOP_STOP_NOTE = "(The answer was stopped: the model kept repeating itself.)"
+
+# ---- log-probabilities (OpenAI's `logprobs` / `top_logprobs`; the DeepSeek engine's GEN logprobs=<n> and LP lines).
+# The engine reports, for each token it writes, the token's logprob and its row's n most likely, from the model's
+# softmax after the request's penalties, at temperature 1 and before top_k / top_p / min_p (OpenAI's convention: the
+# same numbers whatever the request's temperature).  Only a request that asks gets them; an engine that does not say
+# INFO logprobs=<n> is refused with a 400.
+TOP_LOGPROBS_MAX = 20
+LOGPROB_FLOOR = -9999.0           # OpenAI's logprob for a token the model gives no chance (-inf is no JSON number)
+
+
+def logprobs_of(req: dict | None) -> int | None:
+    """The engine's logprobs=<n> for a request (n alternatives a token, 0..20), None when it does not ask.
+    OpenAI's chat completions: "logprobs": true asks, "top_logprobs" (0..20, 0 when absent) says how many alternatives;
+    top_logprobs without logprobs true, or a value of the wrong type, is a 400 (ValueError) naming the field.  (The
+    Responses API's include / top_logprobs arrive here in this form: serve/responses.py's normalize_request.)"""
+    lp, top = (req or {}).get("logprobs"), (req or {}).get("top_logprobs")
+    if lp is not None and not isinstance(lp, bool):
+        raise ValueError("logprobs: true or false")
+    if isinstance(top, str) and re.fullmatch(r"\s*\d+\s*", top):
+        top = int(top)
+    if top is not None:
+        if isinstance(top, bool) or not isinstance(top, int) or not 0 <= top <= TOP_LOGPROBS_MAX:
+            raise ValueError(f"top_logprobs: an integer from 0 to {TOP_LOGPROBS_MAX}")
+        if lp is not True:
+            raise ValueError("top_logprobs: it needs \"logprobs\": true")
+    return (top or 0) if lp is True else None
+
+
+def logprobs_asked(req: dict | None) -> int | None:
+    """logprobs_of() for a request already checked (Service.check_request): None for one it would refuse."""
+    try:
+        return logprobs_of(req)
+    except ValueError:
+        return None
+
+
+class LpToken(int):
+    """A token id from an engine asked for logprobs: the id itself, as every token goes through the server (the stop
+    ids, the loop guard, fair slices), with its LP line's figures in `lp` - (its logprob, [(id, logprob), ...] its
+    row's most likely, most likely first) - or None when the engine wrote none for it."""
+    lp = None
+
+
+def parse_lp(fields: list[str]):
+    """An LP line's fields after its tag (`LP [<rid>]`): `<id> <logprob> <id>:<logprob> ...` -> (id, logprob,
+    [(id, logprob), ...]); None for a line that does not read (cut short)."""
+    try:
+        top = []
+        for f in fields[2:]:
+            i, _, v = f.partition(":")
+            top.append((int(i), float(v)))
+        return int(fields[0]), float(fields[1]), top
+    except (IndexError, ValueError):
+        return None
+
+
+def lp_attach(tok: LpToken, fields: list[str]) -> LpToken:
+    """The token's LP line (its fields after the tag) into tok.lp, when the line is that token's."""
+    got = parse_lp(fields)
+    if got is not None and got[0] == int(tok):
+        tok.lp = (got[1], got[2])
+    return tok
+
+
+def token_piece(tok, t: int) -> bytes:
+    """One token's bytes (a logprobs entry's `bytes`): the tokenizer's own, else its decode; b"" for an id it lacks."""
+    try:
+        if hasattr(tok, "token_bytes"):
+            return tok.token_bytes(int(t))
+        return tok.decode([int(t)]).encode("utf-8")
+    except (IndexError, KeyError, ValueError):
+        return b""
+
+
+def logprob_entry(tok, t, n_top: int) -> dict | None:
+    """OpenAI's logprobs entry for token t - {token, logprob, bytes, top_logprobs: [{token, logprob, bytes}, ...]} -
+    from its LP line (LpToken.lp; at most n_top alternatives); None for a token without one (the loop guard's own
+    end of thinking).  A token split inside a UTF-8 character has the replacement character in `token` and its own
+    bytes in `bytes`, as OpenAI's do."""
+    lp = getattr(t, "lp", None)
+    if lp is None:
+        return None
+
+    def piece(i, v):
+        b = token_piece(tok, i)
+        return {"token": b.decode("utf-8", "replace"), "logprob": v if math.isfinite(v) else LOGPROB_FLOOR,
+                "bytes": list(b)}
+    e = piece(int(t), lp[0])
+    e["top_logprobs"] = [piece(i, v) for i, v in lp[1][:n_top]]
+    return e
 
 
 def loop_guard_setting(cfg: dict | None, env=None) -> bool:
@@ -495,6 +608,60 @@ STALL_GPU_BUSY = 5.0        # a GPU busier than this (%, NVML) is work
 def engine_frozen(base: tuple[float, int], now: tuple[float, int], window_s: float) -> bool:
     """True when two (CPU seconds, disk bytes) samples of the engine process, window_s apart, show no work between."""
     return (now[0] - base[0]) <= max(0.5, STALL_CPU_SHARE * window_s) and (now[1] - base[1]) <= STALL_IO_EPS_B
+
+
+# MAYA_DS4_RESTORE_POINTS (4): the DeepSeek engine keeps restore points where a later prompt is likely to leave this
+# one - its GEN line carries marks=<pos>,... and shared=<pos> - besides the end of the last prompt, the position before
+# it and the anchor it keeps anyway.  N (1-16) turns them on, and is also the engine's cap a conversation (it reads the
+# same setting); 0: no keys, every GEN line as before.  MAYA_DS4_RESTORE_TAIL (512): how far before the
+# prompt's end the tail point sits (0: none).
+RESTORE_LEAST = 1024        # no point before this many tokens: such a start is read again in about the time a point costs
+
+
+def restore_point_settings(env=None) -> tuple[bool, int]:
+    """(on, tail) from MAYA_DS4_RESTORE_POINTS and MAYA_DS4_RESTORE_TAIL (as the code reads them: maya_names)."""
+    env = os.environ if env is None else env
+
+    def whole(name, default):
+        try:
+            return max(0, int(str(env.get(maya_names.read_as(name), default)).strip()))
+        except ValueError:
+            return default
+    return whole("MAYA_DS4_RESTORE_POINTS", 4) > 0, whole("MAYA_DS4_RESTORE_TAIL", 512)
+
+
+def deepseek_restore_points(ids, user_id, system_id=None, tail=512, least=RESTORE_LEAST) -> dict:
+    """Where the DeepSeek engine keeps restore points for this prompt -> {"marks": [pos, ...], "shared": pos} (either
+    may be missing; {}: none).  From the prompt's ids as the template wrote them: a turn opens with its role's special
+    token (<｜User｜>, a tool result's turn too; <｜System｜> for a system message after the first user turn), and text
+    inside a message never encodes to one (render_ids), so the positions are the template's own.
+
+    - the start of the last user turn: its last message edited, or sent again after another answer, goes back there;
+    - `tail` tokens before the end, when the last turn is longer than that: a new question after the same long document
+      in the same message;
+    - "shared": the end of the system prompt and its tools (the first user turn): another conversation behind the same
+      start goes back there, and the engine gives that point up last.
+    Positions under `least` are left out: a start that short is read again in about the time a point costs."""
+    if user_id is None or len(ids) < 2:
+        return {}
+    first = last = None
+    for i, t in enumerate(ids):
+        if t == user_id:
+            first = i if first is None else first
+            last = i
+        elif t == system_id and first is not None:
+            last = i
+    marks, out = [], {}
+    if first is not None and first >= least:
+        out["shared"] = first
+    if last is not None and last >= least and last != first:
+        marks.append(last)
+    t = len(ids) - tail
+    if tail > 0 and t >= least and (last is None or t > last):
+        marks.append(t)
+    if marks:
+        out["marks"] = sorted(marks)
+    return out
 
 
 def narrate_start(log_path: str, offset: int, args: list, done: threading.Event, heartbeat=20.0) -> None:
@@ -700,10 +867,10 @@ class StrataEngine:
         if part:
             self.vram = [part if v.get("dev") == part["dev"] else v for v in self.vram]
 
-    _TAGGED = ("T ", "PP ", "DONE ", "ERR ")
+    _TAGGED = ("T ", "LP ", "PP ", "DONE ", "ERR ")
 
     def _route(self, line: str) -> bool:
-        """Several conversations at once: a request's own lines (T / PP / DONE / ERR <rid> ...) go to its queue, the
+        """Several conversations at once: a request's own lines (T / LP / PP / DONE / ERR <rid> ...) go to its queue, the
         engine's (STAT, NOTE) are handled here; True when the line was taken."""
         if line.startswith(self._TAGGED):
             f = line.split(None, 2)
@@ -713,7 +880,7 @@ class StrataEngine:
                 if q is not None:
                     q.put(line)
                     return True
-                return line.startswith(("T ", "PP ", "DONE "))   # a request already gone: dropped
+                return line.startswith(("T ", "LP ", "PP ", "DONE "))   # a request already gone: dropped
             return False
         if line.startswith("STAT "):
             self._parse_stat(line)
@@ -922,7 +1089,7 @@ class StrataEngine:
             # sampler key goes (with only a config's top_p the engine took its sampled path: not deterministic) - but
             # the penalties do: they change the logits greedy picks from (#273: a greedy answer's loops)
             return (" temperature=0" + penalty_keys + think + tune_keys + StrataEngine.projection_key(sampling) +
-                    bias_key)
+                    bias_key + StrataEngine.restore_keys(sampling) + StrataEngine.logprob_key(sampling))
         if isinstance(t, (int, float)) and float(t) > 0.0:
             keys += f" temperature={float(t)!r}"
         tp = sampling.get("top_p")
@@ -940,7 +1107,8 @@ class StrataEngine:
         if isinstance(seed, int) and seed > 0:
             keys += f" seed={seed}"
         keys += think + tune_keys
-        return keys + StrataEngine.projection_key(sampling) + bias_key
+        return (keys + StrataEngine.projection_key(sampling) + bias_key + StrataEngine.restore_keys(sampling) +
+                StrataEngine.logprob_key(sampling))
 
     @staticmethod
     def penalty_keys(sampling: dict) -> str:
@@ -975,6 +1143,26 @@ class StrataEngine:
         return keys
 
     @staticmethod
+    def restore_keys(sampling: dict) -> str:
+        """`marks=<pos>,...` and `shared=<pos>`: the DeepSeek engine's restore points for this prompt (Service.run puts
+        them in `_restore` with MAYA_DS4_RESTORE_POINTS; no other engine gets them).  "" without: the line as before."""
+        pts = sampling.get("_restore")
+        if not isinstance(pts, dict):
+            return ""
+        marks = [p for p in pts.get("marks") or () if isinstance(p, int) and not isinstance(p, bool) and p > 0]
+        shared = pts.get("shared")
+        return ((" marks=" + ",".join(str(p) for p in marks) if marks else "") +
+                (f" shared={shared}" if isinstance(shared, int) and not isinstance(shared, bool) and shared > 0
+                 else ""))
+
+    @staticmethod
+    def logprob_key(sampling: dict) -> str:
+        """`logprobs=<n>`: an LP line after each of the request's T lines, n alternatives in each (OpenAI's logprobs /
+        top_logprobs, checked by the handler: logprobs_of).  "" when the request does not ask: the line as before."""
+        n = logprobs_asked(sampling)
+        return f" logprobs={n}" if n is not None else ""
+
+    @staticmethod
     def projection_key(sampling: dict) -> str:
         """`cvec=0|1`: the experimental-speed-projection control vector for this request, when the engine was
         started with one (--control-vector-scaled; an engine without one ignores the key).  Absent = on."""
@@ -1000,11 +1188,17 @@ class StrataEngine:
             raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})") from None
         done = False
         heard, stall = time.monotonic(), {}               # the last line's time; the stall watchdog's samples
+        # logprobs: a token is held until its LP line, which the engine writes right after its T line (an engine that
+        # writes none for it: the token goes on at the next other line, without them)
+        want_lp, lp_wait = logprobs_asked(sampling) is not None, None
         try:
             while True:
                 try:
                     line = self.lines.get(timeout=10)
                 except queue.Empty:
+                    if lp_wait is not None:
+                        t, lp_wait = lp_wait, None
+                        yield t
                     if cancel.is_set():
                         return
                     if ENGINE_STALL_S > 0:
@@ -1020,10 +1214,20 @@ class StrataEngine:
                     raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})")
                 heard = time.monotonic()
                 stall.clear()
+                if lp_wait is not None and not line.startswith("LP "):
+                    t, lp_wait = lp_wait, None
+                    yield t
                 if line.startswith("T "):
                     if cancel.is_set():
                         return
-                    yield int(line[2:])
+                    if want_lp:
+                        lp_wait = LpToken(int(line[2:]))
+                    else:
+                        yield int(line[2:])
+                elif line.startswith("LP "):
+                    if lp_wait is not None:
+                        t, lp_wait = lp_attach(lp_wait, line.split()[1:]), None
+                        yield t
                 elif line.startswith("PP "):
                     f = line.split()
                     if len(f) >= 3 and f[1].isdigit() and f[2].isdigit():
@@ -1156,10 +1360,14 @@ class StrataEngine:
             # how long a wait before the checks (the engine-wide stall watchdog, this request's own quiet): 10 s, or
             # less when STRATA_REQUEST_QUIET_S is set low (so a test - or a tuned server - sees it in its own time)
             poll_s = 10.0 if REQUEST_QUIET_S <= 0 else min(10.0, max(0.2, REQUEST_QUIET_S / 2))
+            want_lp, lp_wait = logprobs_asked(sampling) is not None, None   # (as generate(): a token waits for its LP)
             while True:
                 try:
                     line = q.get(timeout=poll_s)
                 except queue.Empty:
+                    if lp_wait is not None:
+                        t, lp_wait = lp_wait, None
+                        yield t
                     if cancel.is_set():
                         return
                     if ENGINE_STALL_S > 0:
@@ -1191,10 +1399,20 @@ class StrataEngine:
                 heard = time.monotonic()
                 stall.clear()
                 f = line.split()
+                if lp_wait is not None and not line.startswith("LP "):
+                    t, lp_wait = lp_wait, None
+                    yield t
                 if line.startswith("T "):
                     if cancel.is_set():
                         return
-                    yield int(f[2])
+                    if want_lp:
+                        lp_wait = LpToken(int(f[2]))
+                    else:
+                        yield int(f[2])
+                elif line.startswith("LP "):
+                    if lp_wait is not None:
+                        t, lp_wait = lp_attach(lp_wait, f[2:]), None
+                        yield t
                 elif line.startswith("PP "):
                     if len(f) >= 4 and f[2].isdigit() and f[3].isdigit():
                         self.progress = (int(f[2]), int(f[3]),
@@ -1756,7 +1974,8 @@ class Service:
         self.history = collections.deque(maxlen=500)    # the last finished requests, newest last (GET /metrics)
         # since the server started (the Monitor's totals, issue #35)
         self.totals = {"since": time.time(), "requests": 0, "prompt_tokens": 0, "reused": 0, "output_tokens": 0,
-                       "prompt_ms": 0.0, "decode_ms": 0.0}
+                       "prompt_ms": 0.0, "decode_ms": 0.0,
+                       "peak_decode": None}   # the fastest answer's decode: {tok_s, tokens, time} (PEAK_MIN_TOKENS+)
         # the loop guard (serve/loop_guard.py; MAYA_LOOP_GUARD=0 / "loop_guard": false: off) and what it did since
         # the server started: loops seen, and how each was broken (the Monitor's totals, /metrics, Prometheus)
         self.loop_guard = True
@@ -1795,6 +2014,9 @@ class Service:
                             _special_ids("<｜end▁of▁sentence｜>") + _special_ids("<｜User｜>") +
                             # MiniMax-M3.1 with [e~[ (and would start the next turn with ]~b])
                             _special_ids("[e~[") + _special_ids("]~b]"))
+        # DeepSeek's turn openers: where its last user turn starts and its system prompt ends (MAYA_DS4_RESTORE_POINTS)
+        self.ds_user_id = (_special_ids("<｜User｜>") or [None])[0]
+        self.ds_system_id = (_special_ids("<｜System｜>") or [None])[0]
         # ... and a model that spells a role marker out of ordinary pieces ('<|', 'user', '|>') has ended its turn just
         # the same: the text stops there.  Only markers that are special tokens in this vocabulary count.
         self.stop_texts = [s for s in ("<|user|>", "<|observation|>", "<|endoftext|>", "<｜end▁of▁sentence｜>", "<｜User｜>",
@@ -1819,6 +2041,15 @@ class Service:
             raise ValueError("logit_bias: this engine does not apply token biases - update Maya (./maya.sh --setup)")
         if "logit_bias" in req:
             req["logit_bias"] = bias
+        # logprobs need an engine that writes them (INFO logprobs=<n>: the DeepSeek engine); another would answer
+        # without them, which a client that asked could not tell from a bug
+        n = logprobs_of(req)
+        if isinstance(req.get("top_logprobs"), str):
+            req["top_logprobs"] = n
+        top = (getattr(self.engine, "info", None) or {}).get("logprobs")
+        if n is not None and not (isinstance(top, int) and top >= n):
+            raise ValueError("logprobs: this model's engine does not report token log-probabilities (the DeepSeek "
+                             "engine does - update Maya (./maya.sh --setup) if it is that one)")
 
     def render_ids(self, messages, tools, kwargs, suffix="") -> list[int]:
         """The template rendered for `messages` and `tools` (+ `suffix`, text the server appends to the prompt) and
@@ -2126,7 +2357,9 @@ class Service:
         out = models.listing(self.models_root(), self.config_path)
         out.update(restarts=bool(os.environ.get("MAYA_RESTART_ON_UPDATE")),
                    running=Path(self.config_path).name if self.config_path else None,
-                   restarting=getattr(self, "model_restart", None))
+                   restarting=getattr(self, "model_restart", None),
+                   deleted=getattr(self, "deleted", None),          # (the model running before, deleted at this start)
+                   leftovers=models.leftovers(self.models_root()))
         return out
 
     def _model_path(self, name) -> Path:
@@ -2189,6 +2422,80 @@ class Service:
         print(f"[maya] {p.name} is the model to start" + (": Maya starts again with it" if restarts else
               " next (a start without --config picks it)"), flush=True)
         return {"to": p.name, "model": cfg.get("model_name") or "", "restarts": restarts}
+
+    def delete_model(self, name, files: bool = False, dry_run: bool = False, then=None) -> dict:
+        """The Models page's Delete: the config `name` off the list (models.delete), with `files` what its setup
+        downloaded for it as well.  Not while Maya starts again.  The model running: Maya switches to `then` first, and
+        the next server deletes it (models.DELETE_FILE) once the engine that ran from it is gone.  dry_run: what would
+        go (models.delete_plan), nothing deleted."""
+        p = self._model_path(name)
+        running = self._is_running(p)
+        if getattr(self, "model_restart", None):
+            raise ValueError("Maya is starting again; try again when it is done")
+        if dry_run:
+            return {"file": p.name, "running": running, **models.delete_plan(self.models_root(), p)}
+        if running:
+            return self._delete_running(p, files, then)
+        out = models.delete(self.models_root(), p, bool(files))
+        print(f"[maya] {p.name} deleted" + (f", and its files ({out['freed'] / 2**30:.1f} GB)" if files else
+              " (its files stay)") + "".join(f"; {n} drafts with MTP now (its DFlash2 drafter was deleted)"
+                                             for n in out["drafter_users"]), flush=True)
+        return out
+
+    def _delete_running(self, p: Path, files: bool, then) -> dict:
+        if not then:
+            raise ValueError(f"{p.name} is the model running now: pick the model Maya switches to first")
+        if not os.environ.get("MAYA_RESTART_ON_UPDATE"):
+            raise ValueError("this server was not started by maya.sh or START-MAYA.bat, so it cannot switch to another "
+                             f"model by itself: start another model, then delete {p.name}")
+        if files:                                        # (checked now: the next server only reports)
+            plan = models.delete_plan(self.models_root(), p)
+            if not plan["ok"]:
+                raise ValueError(plan["why"])
+        cfg = models.read(p)                             # (its name, for the page once the config is gone)
+        note = self.models_root() / models.DELETE_FILE
+        note.write_text(json.dumps({"config": str(p.resolve()), "files": bool(files), "time": time.time(),
+                                    "model": cfg.get("model_name") or "", "quant": models.quant_label(cfg, p)}),
+                        encoding="utf-8")
+        try:
+            out = self.switch_model(then)                # (its checks: not this one, can start, not busy)
+        except BaseException:
+            note.unlink(missing_ok=True)
+            raise
+        print(f"[maya] {p.name} is deleted once {out['to']} runs" + (", with its files" if files else ""), flush=True)
+        return {"deleting": p.name, "to": out["to"], "files": bool(files), "restarts": True}
+
+    def finish_delete(self):
+        """The model that ran before this start, deleted now that another one runs (the Models page deleted the
+        running one: its note, models.DELETE_FILE, read once).  self.deleted says how it went, for the page."""
+        note_path = self.models_root() / models.DELETE_FILE
+        try:
+            note = json.loads(note_path.read_text(encoding="utf-8"))
+            note_path.unlink()
+        except (OSError, ValueError):
+            return
+        p = Path(str(note.get("config") or ""))
+        if time.time() - float(note.get("time") or 0) > 900 or not p.is_file() or p.parent != self.models_root():
+            return                                       # (stale, gone already, or not one of these configs)
+        if self._is_running(p):                          # (the switch did not happen: it runs again)
+            self.deleted = {"file": p.name, "error": "it is the model running now", "time": time.time()}
+            print(f"[maya] {p.name} not deleted: it is the model running now", flush=True)
+            return
+        try:
+            out = models.delete(self.models_root(), p, bool(note.get("files")))
+        except (OSError, ValueError) as e:
+            self.deleted = {"file": p.name, "error": str(e), "time": time.time()}
+            print(f"[maya] {p.name} not deleted: {e}", flush=True)
+            return
+        self.deleted = {**out, "model": note.get("model") or "", "quant": note.get("quant") or "", "time": time.time()}
+        print(f"[maya] {p.name} deleted" + (f", and its files ({out['freed'] / 2**30:.1f} GB)" if out["files"] else
+              " (its files stay)"), flush=True)
+
+    def delete_leftover(self, path) -> dict:
+        """The Models page's files no model uses: one deleted (models.delete_leftover)."""
+        out = models.delete_leftover(self.models_root(), path)
+        print(f"[maya] {out['deleted']} deleted ({out['freed'] / 2**30:.1f} GB): no model here used it", flush=True)
+        return out
 
     def _restart_into(self, p: Path, why: str):
         _, port = getattr(self, "listen", None) or ("127.0.0.1", None)
@@ -2449,6 +2756,9 @@ class Service:
             ("llamacpp:requests_processing", "gauge", "Requests running", max(active, int(bool(s.get("busy"))))),
             ("llamacpp:requests_deferred", "gauge", "Requests waiting their turn", s.get("queued") or 0),
             ("maya:requests_total", "counter", "Requests finished", t["requests"]),
+            ("maya:decode_peak_tokens_seconds", "gauge",
+             f"The fastest answer's generation throughput in tokens/s ({PEAK_MIN_TOKENS} tokens or more)",
+             (t.get("peak_decode") or {}).get("tok_s") or 0),
             ("maya:engine_alive", "gauge", "1 while the engine process runs",
              int(self.engine.alive()) if hasattr(self.engine, "alive") else 1),
             ("maya:loop_guard_detected_total", "counter", "Loops the loop guard saw in answers", guard["detected"]),
@@ -2790,6 +3100,12 @@ class Service:
         own = (sampling or {}).get("loop_guard")
         return own if isinstance(own, bool) else bool(self.loop_guard)
 
+    def _guard_piece(self):
+        """The text of a token for the loop guard's tool-call markers: incremental (a character split across tokens
+        whole), and a tokenizer without bytes decodes the token alone (no decode of the whole answer a token)."""
+        d = Detokenizer(self.tok)
+        return d.push if d.inc is not None else (lambda t: self.tok.decode([t]))
+
     def _loop_noted(self, act, written: int):
         """A loop the guard broke: a line in the server window, and the Monitor's count."""
         print(f"[maya] loop guard: {act.describe()}"
@@ -2811,9 +3127,9 @@ class Service:
         whether this request holds the FIFO now.  Not for image prompts: their state is never kept in a slot.
 
         With the loop guard (`guard`, serve/loop_guard.py) every id goes through it and the caller gets only what
-        lies before the tail it holds back (what could still be a loop's repeats).  A loop restarts the engine the
-        same way, at once and still holding the FIFO: prompt + what is kept (the repeats dropped; after a second
-        loop in the thinking, the model's end-of-thinking token too) with a short repetition penalty, which a call
+        lies before the short tail it holds back (what could still be a loop's repeats, at most HOLD_MAX tokens).  A
+        loop restarts the engine the same way, at once and still holding the FIFO: prompt + what is kept (the repeats
+        not sent yet dropped; after a third loop in the thinking, the model's end-of-thinking token too) with a short repetition penalty, which a call
         of its own ends and the request's own sampling follows; or the answer ends there (LOOP_STOP).  Until then the
         engine calls and their sampling are the ones without it."""
         produced, cur, left, smp = [], list(ids), max_new, sampling
@@ -2864,7 +3180,7 @@ class Service:
                 if fresh is not None and fresh is not last0:
                     segments.append(fresh)
             if act is not None:                         # a loop: what is kept, then on from there - or the end
-                del produced[max(sent, len(produced) - act.drop):]   # (what was sent stays: the hold-back covers it)
+                del produced[max(sent, len(produced) - act.drop):]   # (what was sent stays sent: only the held tail goes)
                 if act.kind == loop_guard.CLOSE_THINKING:
                     produced.append(guard.think_end)
                 guard.resume(produced, act)
@@ -2960,6 +3276,28 @@ class Service:
         timings, before = None, None                    # this request's timings; the engine's `last` before it
         raw_ids = []                                    # every generated id (STRATA_DEBUG: dump raw model text)
         guards = []                                     # this request's loop guard (the Monitor's row says what it did)
+        # logprobs (a request that asks): each token's entry waits in lp_wait until text goes out, then rides with the
+        # first text event (content or reasoning) after it.  The tokens of a tool call and of the end of the thinking
+        # (a feed that leaves the reasoning: what waits then and is not the reasoning's last text) are none of the text
+        # and are dropped, as are those of a stop string that ends the answer with no text before it (with text before
+        # it, they go with that text); the end-of-turn token is never one (it ends the answer before its entry)
+        n_top, lp_wait = logprobs_asked(sampling), []
+
+        def with_lp(evs, was):
+            if n_top is not None:
+                crossed = was == "reasoning" and parser.state != "reasoning"
+                for ev in evs:
+                    if ev.kind in ("content", "reasoning") and ev.text:
+                        if crossed and ev.kind == "content":
+                            lp_wait.clear()
+                            crossed = False
+                        ev.logprobs = list(lp_wait)
+                        lp_wait.clear()
+                    elif ev.kind in ("tool_start", "tool_args", "tool_call"):
+                        lp_wait.clear()
+                if crossed:
+                    lp_wait.clear()
+            return evs
         emb = getattr(self.embeddings, "path", None)
         # Identity token: only a DONE line replaces engine.last, so a request that died, errored or was
         # disconnected must not have the PREVIOUS request's decode figures recorded as its own.
@@ -3014,14 +3352,24 @@ class Service:
                     think_budget = max(1, min(think_budget, int(max_new) - reserve - 1))
                 if in_think:
                     sampling = {**(sampling or {}), "_think_budget": think_budget, "_think_end": self.think_end_id}
+                # MAYA_DS4_RESTORE_POINTS: where the DeepSeek engine keeps restore points for this prompt (never a
+                # client's own `_restore`; not with pictures, whose spans the engine reads whole)
+                if sampling and "_restore" in sampling:
+                    sampling = {k: v for k, v in sampling.items() if k != "_restore"}
+                on, tail = restore_point_settings()
+                if on and not emb and getattr(self.template, "deepseek", False):
+                    pts = deepseek_restore_points(ids, self.ds_user_id, self.ds_system_id, tail)
+                    if pts:
+                        sampling = {**(sampling or {}), "_restore": pts}
 
                 def attempts():
                     """The engine's tokens.  When its numbers went non-finite (a NaN or an infinity in a route: the
                     engine's ERR says "non-finite") before the first token, the engine has dropped that conversation's
                     state and the request runs once more, its prompt read from token 0."""
                     for again in (False, True):
-                        guard = loop_guard.LoopGuard(self.think_end_id, parser.state == "reasoning") \
-                            if guard_on else None       # (serve/loop_guard.py; a fresh one for a run again)
+                        guard = loop_guard.ToolSafeGuard(self.think_end_id, parser.state == "reasoning",
+                                                         piece=self._guard_piece()) \
+                            if guard_on else None       # (serve/loop_guard.py; a fresh one for a run again; leaves tool calls alone)
                         guards[:] = [guard] if guard is not None else []
                         sliced, got = self._sliced(ids, max_new, sampling, cancel, emb, hold, stat, guard), 0
                         try:
@@ -3038,6 +3386,7 @@ class Service:
                             sliced.close()
                 guard_on = self._loop_guard_on(sampling)
                 gen = attempts()
+                said = bool(pre_events)                 # any answer (text or a call) went out yet
                 for ev in pre_events:                   # a required call's opening (prepare put it in the prompt)
                     yield "event", ev
                 try:
@@ -3050,6 +3399,13 @@ class Service:
                             continue
                         if t is LOOP_STOP:              # the loop guard ended the answer (a loop that persisted)
                             finish = "stop"
+                            if held:
+                                for ev in parser.feed(held):
+                                    said = said or ev.kind != "reasoning"
+                                    yield "event", ev
+                                held = ""
+                            if not said:                # (a model with no end-of-thinking token, still thinking)
+                                yield "event", Event("content", LOOP_STOP_NOTE)
                             break
                         n += 1
                         if my_first is None:
@@ -3066,6 +3422,10 @@ class Service:
                         if parser.state == "reasoning":
                             reasoning_tokens += 1
                         raw_ids.append(t)
+                        if n_top is not None:
+                            e = logprob_entry(self.tok, t, n_top)
+                            if e is not None:
+                                lp_wait.append(e)
                         text, stopped = detok.push(t), False
                         stops = self.stop_texts + (client_stops if parser.state != "reasoning" else [])
                         if stops:
@@ -3074,15 +3434,19 @@ class Service:
                             if hits:
                                 cut, s = min(hits)
                                 text, held, stopped = held[:cut], "", True
+                                if not text:
+                                    lp_wait.clear()   # (the marker's own tokens: no text of the answer)
                                 matched = s if s in client_stops and s not in self.stop_texts else None
                             else:               # keep back the longest tail that could still grow into a marker
                                 k = max((j for s in stops for j in range(1, len(s))
                                          if held.endswith(s[:j])), default=0)
                                 text, held = held[:len(held) - k], held[len(held) - k:]
-                        evs = parser.feed(text)
+                        was = parser.state
+                        evs = with_lp(parser.feed(text), was)
                         self._note(n, evs, stat)
                         last_print = self._progress(last_print)
                         for ev in evs:
+                            said = said or ev.kind != "reasoning"
                             yield "event", ev
                             if single_tool and ev.kind == "tool_call" and ev.complete:
                                 stopped = True
@@ -3091,7 +3455,8 @@ class Service:
                             finish = "stop"
                             break
                     if held:                    # the run ended on what only looked like a marker's start
-                        for ev in parser.feed(held):
+                        was = parser.state
+                        for ev in with_lp(parser.feed(held), was):
                             yield "event", ev
                         held = ""
                     if cancel.is_set():
@@ -3111,7 +3476,8 @@ class Service:
                         print(f"[maya] the engine's numbers went non-finite after {n} tokens ({e}): the answer ends "
                               "there", flush=True)
                         if held:
-                            for ev in parser.feed(held):
+                            was = parser.state
+                            for ev in with_lp(parser.feed(held), was):
                                 yield "event", ev
                             held = ""
                     else:
@@ -3140,7 +3506,7 @@ class Service:
                     started = my_started
                     loaded = str((getattr(self.engine, "info", {}) or {}).get("cvec", 0)) not in ("0", "", "None")
                     hit_rate = round(last["hits"] / last["lookups"], 3) if last.get("lookups") else None
-                    self.history.append({
+                    row = {
                         "projection": (sampling or {}).get("experimental_speed_projection") is not False
                         if loaded else None,
                         "time": started, "duration_s": round(time.time() - started, 1), "finish": finish,
@@ -3153,8 +3519,13 @@ class Service:
                         "decode_tok_s": round(last["generated"] / (last["decode_ms"] / 1000), 1)
                         if n and last.get("generated") and last.get("decode_ms") else None,
                         "hit_rate": hit_rate,
-                        "loop_guard": guards[0].summary() if guards and guards[0].events else None})
+                        "loop_guard": guards[0].summary() if guards and guards[0].events else None}
+                    self.history.append(row)
                     t = self.totals
+                    peak = t.get("peak_decode")
+                    if row["decode_tok_s"] and n >= PEAK_MIN_TOKENS and \
+                            (peak is None or row["decode_tok_s"] > peak["tok_s"]):
+                        t["peak_decode"] = {"tok_s": row["decode_tok_s"], "tokens": n, "time": started}
                     t["requests"] += 1
                     t["prompt_tokens"] += len(ids)
                     t["reused"] += last.get("reused") or 0
@@ -3187,7 +3558,8 @@ class Service:
                 self.status["busy"] = self.active > 0
             if book is not None and self.savings is not None:
                 self.savings.add(*book)
-        for ev in parser.finish():
+        was = parser.state
+        for ev in with_lp(parser.finish(), was):
             yield "event", ev
         yield "done", {"finish": finish, "completion_tokens": n, "reasoning_tokens": reasoning_tokens,
                        "reused": (timings or {}).get("cache_n", 0),
@@ -3373,7 +3745,19 @@ def openai_chunks(svc: Service, req: dict, ids, thinking, tools, max_new, cancel
     # response_format json_object / json_schema: the answer is held and its JSON sent alone at the end (Strata #762)
     rf = req.get("response_format")
     json_mode = isinstance(rf, dict) and rf.get("type") in ("json_object", "json_schema")
-    held = []
+    held, held_lp = [], []
+    # logprobs (a request that asks): a text chunk's choice carries its tokens' entries - OpenAI's `content` for the
+    # answer, and `reasoning_content` (as the delta's field of that name) for the reasoning
+    want_lp = logprobs_asked(req) is not None
+
+    def text_chunk(delta, entries, key="content"):
+        c = chunk(delta)
+        if want_lp:
+            lp = {"content": [], "refusal": None}
+            lp[key] = list(entries or [])
+            c["choices"][0]["logprobs"] = lp
+        return c
+
     for kind, x in run if run is not None else svc.run(ids, thinking, tools, max_new, req, cancel):
         # ^ kind "ping": x carries the prompt's progress (total, cache, processed, time_ms) while the engine reads,
         #   or None while this request just waits (queued again, an MCP round's engine work)
@@ -3391,12 +3775,13 @@ def openai_chunks(svc: Service, req: dict, ids, thinking, tools, max_new, cancel
         elif kind == "event":
             ev: Event = x
             if ev.kind == "reasoning" and ev.text:
-                yield chunk({"reasoning_content": ev.text})
+                yield text_chunk({"reasoning_content": ev.text}, ev.logprobs, "reasoning_content")
             elif ev.kind == "content" and ev.text:
                 if json_mode:
                     held.append(ev.text)
+                    held_lp += ev.logprobs or []
                     continue
-                yield chunk({"content": ev.text})
+                yield text_chunk({"content": ev.text}, ev.logprobs)
             elif ev.kind == "tool_start":
                 streamed[ev.call.id] = calls
                 calls += 1
@@ -3410,7 +3795,7 @@ def openai_chunks(svc: Service, req: dict, ids, thinking, tools, max_new, cancel
                 calls += 1
         else:
             if held:
-                yield chunk({"content": json_from_text("".join(held))})
+                yield text_chunk({"content": json_from_text("".join(held))}, held_lp)
             finish = "tool_calls" if calls and x["finish"] == "stop" else {"cancel": "stop"}.get(x["finish"], x["finish"])
             last = chunk({}, finish)
             pt = x.get("prompt_tokens", len(ids))     # after MCP rounds: the last round's prompt
@@ -3538,13 +3923,19 @@ def jobs_put(job: StreamJob) -> None:
         JOBS[job.id] = job
 
 
-def openai_collect(chunks) -> dict:
+def openai_collect(chunks, logprobs: bool = False) -> dict:
+    """The chunks as one chat.completion; `logprobs` (the request asked): the choice's logprobs, every text chunk's
+    entries in order - OpenAI's `content`, and `reasoning_content` when there was reasoning."""
     content, reasoning, by_index, last, mcp = [], [], {}, None, []
+    lp_content, lp_reasoning = [], []
     for c in chunks:
         if c is None or c.get("prompt_progress"):  # a heartbeat, a prompt-progress chunk: not answer content
             continue
         if c.get("strata_mcp"):
             mcp.append(c["strata_mcp"])
+        lp = c["choices"][0].get("logprobs") or {}
+        lp_content += lp.get("content") or []
+        lp_reasoning += lp.get("reasoning_content") or []
         d = c["choices"][0]["delta"]
         content.append(d.get("content") or "")
         reasoning.append(d.get("reasoning_content") or "")
@@ -3569,6 +3960,9 @@ def openai_collect(chunks) -> dict:
     out = {"id": last["id"], "object": "chat.completion", "created": last["created"], "model": last["model"],
            "choices": [{"index": 0, "message": msg, "finish_reason": last["choices"][0]["finish_reason"]}],
            "usage": last["usage"]}
+    if logprobs:
+        out["choices"][0]["logprobs"] = {"content": lp_content, "refusal": None,
+                                         **({"reasoning_content": lp_reasoning} if lp_reasoning else {})}
     if last.get("timings"):
         out["timings"] = last["timings"]
     return out
@@ -4123,7 +4517,7 @@ def make_handler(svc: Service):
                 if path == "/api/update":
                     self._update()
                     return
-                if path in ("/api/models/settings", "/api/models/switch"):
+                if path in ("/api/models/settings", "/api/models/switch", "/api/models/delete", "/api/models/leftovers"):
                     self._models(path.rsplit("/", 1)[1])
                     return
                 if path == "/api/savings/reset":
@@ -4273,12 +4667,18 @@ def make_handler(svc: Service):
                     raise ValueError("the request body must be a JSON object")
                 if what == "switch":
                     out = svc.switch_model(req.get("file"))
+                elif what == "delete":
+                    out = svc.delete_model(req.get("file"), bool(req.get("files")), bool(req.get("dry_run")),
+                                           req.get("then"))
+                elif what == "leftovers":
+                    out = svc.delete_leftover(req.get("path"))
                 else:
                     out = svc.model_settings(req.get("file"), req.get("settings") or {}, bool(req.get("dry_run")))
             except (TypeError, ValueError, OSError) as e:
                 self._json(400, {"error": {"type": "invalid_request_error", "message": str(e)}})
                 return
-            self._json(200 if what == "settings" and req.get("dry_run") else 202, out)
+            self._json(200 if what in ("delete", "leftovers") and not out.get("deleting")
+                       or (what == "settings" and req.get("dry_run")) else 202, out)
 
         def _update(self):
             # It replaces the server's files and restarts it for every client: only the app's own page
@@ -4425,7 +4825,7 @@ def make_handler(svc: Service):
                                {t["name"] for t in extra}) if use_mcp else None
             chunks = openai_chunks(svc, req, ids, thinking, tools, max_new, cancel, run=run)
             if not req.get("stream"):
-                return self._json(200, openai_collect(chunks))
+                return self._json(200, openai_collect(chunks, logprobs=logprobs_asked(req) is not None))
             if req.get("strata_resume") is True:
                 # the web app: the answer runs on if the connection drops; the page reconnects to it by id
                 first = next(chunks)
@@ -4563,7 +4963,8 @@ class Server(ThreadingHTTPServer):
 
 SERVER_ENV = ("STRATA_ENGINE_STALL_S", "STRATA_REQUEST_QUIET_S", "STRATA_DRAIN_S", "STRATA_HTTP_BACKLOG",
               "STRATA_MAX_BODY_MIB", "STRATA_FAIR_SLICE_S", "STRATA_DS4_KEEP_THINKING",
-              "STRATA_SERVER_LOG", "STRATA_GLM_THINK_RESERVE", "STRATA_LOOP_GUARD") + RESPONSE_ENV_KEYS
+              "STRATA_SERVER_LOG", "STRATA_GLM_THINK_RESERVE", "STRATA_LOOP_GUARD") + RESPONSE_ENV_KEYS + \
+    tuple(maya_names.read_as(k) for k in ("MAYA_DS4_RESTORE_POINTS", "MAYA_DS4_RESTORE_TAIL"))
 
 
 def apply_server_env(cfg: dict) -> None:
@@ -5013,7 +5414,8 @@ def main() -> int:
                 vision = Vision(dict(vcfg, gpu=False), log=vlog, env=venv)
     else:
         engine, vision, sampling_defaults = MockEngine(tok, a.script or [
-            "Thinking about it.</think>\n\nHello from the mock engine."]), None, {}
+            "Thinking about it.</think>\n\nHello from the mock engine."],
+            tok_s=float(os.environ.get("MAYA_MOCK_TOK_S") or 0) or None), None, {}
     # the model's own chat template (exported with its tokenizer), else the original model's.  A GLM-5.3-Flash pack's
     # copy is the one its GGUF carried (August's): the template zai-org publishes now renders the same prompts and
     # matches tool results to their calls without nested loops (zai-org/GLM-5.3-Flash PR #63: 100 parallel calls
@@ -5066,6 +5468,7 @@ def main() -> int:
         svc.config_path = str(Path(a.config).resolve())  # a context change from the dashboard is saved there
         p = Path(svc.config_path)                        # the tokens it serves, and what its API would have charged
         svc.savings = savings.Ledger(p.parent / savings.FILE, p.name, svc.model, models.quant_label(cfg, p))
+        threading.Thread(target=svc.finish_delete, daemon=True).start()   # (the model before, if the page deleted it)
     args = [str(x) for x in cfg.get("args") or []]
     if "--glm-pack" in args[:-1]:                       # the model's folder: the pack's parent holds its GGUF files
         svc.model_dir = Path(args[args.index("--glm-pack") + 1]).resolve().parent

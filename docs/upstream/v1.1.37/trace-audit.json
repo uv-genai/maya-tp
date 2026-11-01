@@ -1,0 +1,52 @@
+{
+  "candidate_mtp_rounds": 105,
+  "matching_contiguous_rank0_positions": [
+    9
+  ],
+  "rank0_total_rounds_across_sessions": 130,
+  "rank0_clean_local_retry_records": 8,
+  "rank1_forced_local_retry_records": 8,
+  "distinct_matching_retry_positions": 8,
+  "first_matching_retry_positions": [
+    [
+      "15",
+      "8",
+      "0"
+    ],
+    [
+      "16",
+      "8",
+      "0"
+    ],
+    [
+      "17",
+      "8",
+      "0"
+    ],
+    [
+      "19",
+      "8",
+      "0"
+    ],
+    [
+      "20",
+      "8",
+      "0"
+    ],
+    [
+      "25",
+      "8",
+      "0"
+    ],
+    [
+      "29",
+      "8",
+      "0"
+    ],
+    [
+      "32",
+      "8",
+      "0"
+    ]
+  ]
+}
