@@ -1885,6 +1885,17 @@ def engine_args(cfg: dict) -> list[str]:
     return args
 
 
+def vision_config(cfg: dict):
+    """Choose the encoder before measurement/start; the engine takes the last repeated CLI option."""
+    vcfg = cfg.get("vision") or None
+    args = engine_args(cfg)
+    world = next((args[i + 1] for i in range(len(args) - 2, -1, -1) if args[i] == "--tp-world-size"), "1")
+    if vcfg and int(world) > 1:
+        print("[maya] TP2 images: OFF until RDMA embedding synchronization is implemented", flush=True)
+        return None
+    return vcfg
+
+
 def child_env(cfg: dict) -> dict:
     """The engine's environment: the CUDA libraries setup installed (pip's nvidia packages, or the toolkit that
     compiled it) first on the library search path."""
@@ -5817,10 +5828,7 @@ def main() -> int:
             pretty = ", ".join(f"{k}={v}" for k, v in sampling_defaults.items())
             print(f"[maya] sampling defaults from the {'config' if 'sampling' in cfg else 'model'}: {pretty}",
                   flush=True)
-        vcfg = cfg.get("vision") or None
-        if vcfg and int(models.flag(engine_args(cfg), "--tp-world-size", "1")) > 1:
-            print("[maya] TP2 images: OFF until RDMA embedding synchronization is implemented", flush=True)
-            vcfg = None  # No encoder measurement/start or one-rank expert-cache lending.
+        vcfg = vision_config(cfg)  # No one-rank encoder measurement/start or expert-cache lending.
         vlog = (open(cfg["log"], "a", encoding="utf-8") if cfg.get("log") else None) if vcfg else None
         venv = dict(env)
         if vcfg and vcfg.get("gpu") and gpu_list(cfg) and cfg.get("backend") != "hip":

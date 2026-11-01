@@ -4,7 +4,7 @@ import unittest
 from unittest import mock
 
 from serve.frontend import ChatTemplate
-from serve.server import ByteTokenizer, MockEngine, Service
+from serve.server import ByteTokenizer, MockEngine, Service, vision_config
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -27,3 +27,17 @@ class MediaBoundary(unittest.TestCase):
         ids, _, n = svc.prepare([{"role": "user", "content": "hello"}], [], {}, max_new=8)
         self.assertTrue(ids)
         self.assertEqual(n, 8)
+
+
+class EncoderStartupBoundary(unittest.TestCase):
+    def test_last_world_option_controls_encoder_without_changing_config(self):
+        import copy
+        vision = {"exe": "/missing/must-not-start", "gpu": True}
+        for args, paired in (([], False), (["--tp-world-size", "2"], True),
+                             (["--tp-world-size", "1", "--tp-world-size", "2"], True),
+                             (["--tp-world-size", "2", "--tp-world-size", "1"], False)):
+            with self.subTest(args=args):
+                cfg = {"args": args, "vision": vision}
+                before = copy.deepcopy(cfg)
+                self.assertIs(vision_config(cfg), None if paired else vision)
+                self.assertEqual(cfg, before)
