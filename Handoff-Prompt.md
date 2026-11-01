@@ -4,13 +4,15 @@ Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,
 
 ## Active43 update
 
-42 remains accepted. **43 is now in progress: #65/#66/#67/#69, branch merge/upstream-v1.1.43.** Engine source6a2fbe1, MD5b398d4a0711430edd6a28b95264c7293, all5paths matched. Remote review6a2fbe1. CPU602serve11skip/676tools33skip/HIPmap/Node,3HIP/17host/affectedEngram0fail pass. Small-context normal/forced probes46313 exited0. #66 context-note bounds, #67 collapse config aliases and #69 unsupported MTP-bias rejection are fixed but open until acceptance.
+42 remains accepted. **43 is now in progress: #65/#66/#67/#69/#71, branch merge/upstream-v1.1.43.** Engine source6a2fbe1, MD5b398d4a0711430edd6a28b95264c7293, all5paths matched. Remote review6a2fbe1. CPU602serve11skip/676tools33skip/HIPmap/Node,3HIP/17host/affectedEngram0fail pass. Small-context normal/forced probes46313 exited0. #66 context-note bounds, #67 collapse config aliases and #69 unsupported MTP-bias rejection are fixed but open until acceptance.
 
-**ACTIVE GPU batch8965** `/tmp/maya-upstream-v43-batch.sh`, outputs `/tmp/maya-upstream-v43/`: S state/cancel, long-loop prefix/cache A/B, CLI/recovery,16strictframed Sraw records and prefillAB vs saved42. No concurrentGPU/build/deploy. Inspect outputs before resuming; do not rerun completed gates. All43 final evidence/headCI/PR/mainCI still pending; no44.
+**ACTIVE remaining-gates batch13476** `/tmp/maya-upstream-v43-finish.sh`, outputs `/tmp/maya-upstream-v43/`: ordered CPU after harness fix71, corrected strict S technical/code reference gates, then prefill A/B vs42. Prior8965 STOPPED130 after a real harness framing failure: merged stderr fragment spliced inside DONE; engine finished/raw0 but parser missed completion. Separate stdout/stderr readers+queues/logs fix it, proven by real-OS-pipe regression (pre-fix2errors→pass). Engine remains6a2fbe1/b398. Failed raw run is preserved under bench-technical-interleaved. No concurrentGPU/build/deploy.
+
+Completed Sstate/cancel/lifecycle/media/idle,133matchedrounds/8asymmetricretries, CLI32/32bothmodes/ranksexact42, recovery8/8. Long-loop JSON0vs32000 cache A/B passes: followcache0→20020; prefill61761.3→1141.8ms in the syntheticfixture only. #33remainsopen. Final evidence/headCI/PR70/mainCI still pending; no44.
 
 **#68 remains OPEN:** full DS4 GPU suite fails packed-KV WMMA stress. Independentlybuilt accepted42 control reproduces both failures:3alternating KVruns/arm counts[1,2,1] vs[1,1,2]. WMMAfunction source unchanged. Engram-only decoder checks pass; full suite is not passing. Never relax/omit the recorded exception. Control source/build `/home/ugo/software/project-maya-v42-ds4-control`; raw /tmp/maya-upstream-v43/wmma-ab. GLM's GPUimage is identical42, so42M/L/math evidence is reusable only where execution is unchanged; server paths need liveS/CPU coverage.
 
-Initial live bias fixture failed to force EOS because pre-existing TP MTP ignored bias; raw failure kept. New guard rejects before state changes; spec1 ordinary bias still works. Forced-follow variant tests EOS branches separately and must not count as raw-pick fidelity. See docs/upstream/v1.1.43.md. Supersede the next43/not-started wording below with this active update.
+Initial live bias fixture failed to force EOS because pre-existing TP MTP ignored bias; raw failure kept. New guard rejects before state changes; spec1 ordinary bias still works. Forced-follow variant tests EOS branches separately and must not count as raw-pick fidelity. See docs/upstream/v1.1.43.md.
 
 ## Objective and checkpoint
 
@@ -18,9 +20,9 @@ Integrate upstream **v1.1.37–v1.1.46 one tag at a time**. Review semantically,
 
 **37–42 are accepted.** Latest42: #61 /PR63, merge **b1867c8bfa0e7576754208abb9f2ff66303af1b3**. Final head **aad4e031b174fb931e081c2ef15d4986359a725b**, CI **41334558152/41334563528 PASS**; post-merge **main41334938602 PASS**. #61/#62/#64 closed. Evidence: `docs/upstream/v1.1.42.md` and its `validation.json`. Earlier accepted checkpoints have their own reports;41main41327238265 passed.
 
-**Next is43 acdab34bd58eec957715392a1d822777c3c579c3** (18commits/41files). Open its own issue, branch `merge/upstream-v1.1.43` from updated `origin/main`, and merge only after semantic review. Then44=5d20b0e,45=6ecbd3c,46=3589d6f, each with its own issue, validation, final CI and post-main CI. No43 source candidate has been prepared yet.
+**43 is active under #65 / draft PR70**, upstream acdab34bd58eec957715392a1d822777c3c579c3. The active update above is the current state; §§29.19–29.20 in Handoff.md are historical. Next after acceptance/mainCI:44=5d20b0e,45=6ecbd3c,46=3589d6f, each with its own issue, semantic review and validation before proceeding.
 
-No active GPU/server/test batches. Completed42 batches19655 and26121 need no rerun without a new reason. Engine source **837a679**, binary **bc4e90a607b87fe609398fbdba0fb98c**, matched all5paths and saved on BOTH hosts at `/tmp/maya-upstream-v42-baseline/maya`. Python startup policy456b4a5; remote review remains456. Protected remote canonical source777cc92 is unchanged.
+Accepted42 engine837a679/bc4e90a607b87fe609398fbdba0fb98c is saved on BOTH hosts at `/tmp/maya-upstream-v42-baseline/maya`. Candidate43 engine6a2fbe1/b398d4a0711430edd6a28b95264c7293 is deployed for validation. Protected remote canonical source777cc92 is unchanged.
 
 Future fork release tags use **`tp-vMAJOR.MINOR.PATCH`**; keep VERSION numeric and legacy tags immutable. Integration does not authorize a release. Published legacy v1.1.42 at6471995 remains unchanged; older updaters need one clean manual pull for prefix support.
 
