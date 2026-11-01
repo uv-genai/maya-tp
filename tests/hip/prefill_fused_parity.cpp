@@ -74,7 +74,7 @@ double run(ggml_type gu_type, ggml_type d_type, float limit = 1.25f, double mmq_
         fill(weights.data() + e * stride + geo.down_off, d_type, E, FF, rng);
     }
     const std::vector<int> bounds{A, A+1, A+66, A+66, A+R};
-    std::vector<int> src(R), ident(A+R);
+    std::vector<int> src(R), ident(A+R+mq::IDS_PAD);
     std::iota(ident.begin(), ident.end(), 0);
     for (int r = 0; r < R; ++r) src[r] = (37*r + 11) % R;
     std::vector<float> x((size_t) R * E);
