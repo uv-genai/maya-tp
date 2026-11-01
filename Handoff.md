@@ -835,3 +835,16 @@ Next #45: upstream v1.1.39 `376b4b8` (33 commits/48 files). Still review only, n
 but upstream streams every job's bit before that full gather finishes. Keep TP streaming gated off
 and preserve buffered defaults pending gfx1151 validation. Preserve answer reserve, chunk/retry
 agreement, NextN widths and #33 primary calibration priority. No v1.1.40 work yet.
+
+### 29.8 v1.1.39 semantic candidate (#45)
+
+Review branch `merge/upstream-v1.1.39`, based on b30514b; merge in progress, not accepted/deployed.
+Accepted v1.1.38 cff75b48 binary saved on BOTH hosts at `/tmp/maya-upstream-v38-baseline/maya`.
+Defer upstream streamed expert fetch as a whole (#46): host reader/header/GPU fetch kernels remain
+byte-identical; setting MAYA_GLM_STREAM_FETCH does nothing. Keep MMQ ID padding and ordered Lt fallback,
+our primary100401 tuning first. Preserve answer reserve for ALL limits; sentence grace fits within it.
+Retain #47 restart fix, TP mirror/MTP wire/NextN/AR/chunk/retry gates. DS4 prefix, tail-auto and link rings
+are opt-in until measured. Exclude funding, Intel guide, Windows telemetry/SDK/pinning extensions and
+CUDA-native architecture changes; README/AGENTS/VERSION remain ours. Import walker prevents directory
+symlink cycles. Focused CPU checks, full ordered gates, HIP builds and live S/M/L checkpoint pending.
+No v1.1.40 work before this checkpoint passes. No release/tag; future tags tp-v.

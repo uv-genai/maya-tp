@@ -11,7 +11,7 @@ No subagents unless explicitly authorized.
 
 ## Current state
 
-**Active task: sequential upstream integration** (#36 audit complete; #37 accepted; #43 next tag). User requests upstream
+**Active task: sequential upstream integration** (#36 audit complete; #37 accepted; #45 active). User requests upstream
 v1.1.37 through v1.1.46 merged one at a time, each fully validated before the next. Common upstream
 base is v1.1.36 `f031a23`; use namespaced `upstream/v1.1.N` tags (fork tag names collide). See Handoff
 §29 and `docs/upstream/INTEGRATION-2026-11-01.md`. Preserve fork-owned README.md/AGENTS.md through
@@ -40,11 +40,9 @@ in **#47 / PR #48 /f479b91**. Fixed **main CI41303961934 PASS**, plus both a6f1a
 41303387525/41303664047. #43/#47 closed; do not skip this historical failure or repeat the fix.
 Local current CPU gates **532 serve/11 skips**, **637 tools/31 skips**, HIP map PASS.
 
-**Active: #45 / upstream v1.1.39 `376b4b8`**,33 commits/48 files; no candidate merge yet. The review
-worktree is currently on `fix/failed-engine-restart` and should branch from updated origin/main for
-`merge/upstream-v1.1.39`. Preserve server fix #47 and all TP2/MTP invariants. #46 tracks the newly
-identified stream-ready contract mismatch with compact TP blobs: gate streamed fetch off under TP2
-and preserve buffered defaults until validated on gfx1151. Preserve all-output-limit answer reserves,
+**Active: #45 / upstream v1.1.39 `376b4b8`**,33 commits/48 files; candidate merge in progress in the isolated review worktree on
+`merge/upstream-v1.1.39`, based on b30514b. No candidate build/deployment yet. Preserve server fix #47 and all TP2/MTP invariants. #46 tracks the newly
+identified stream-ready contract mismatch with compact TP blobs: defer the entire streamed-fetch feature; preserve the buffered reader/header/kernels byte-for-byte. Preserve all-output-limit answer reserves,
 TP chunk/retry agreement, replicated NextN and measured100401 calibration priority. See Handoff
 §29.7. No v1.1.40 work until v1.1.39 checkpoint passes.
 
@@ -89,7 +87,7 @@ Maya-L uses **`--context 524288`** (also in `maya-maya-l-hip.json`). Daemon `--w
 Backups sit beside the YAML.
 
 **Baseline binary:** `5a52cd27167523b6ea4b0f0bde93f503`, saved on both hosts. Current deployed
-candidate is `6e59558bdd421fa521040263978b2bd6` (see active task above); TP2 RDMA is enabled.
+engine is `cff75b48a0f1e0b2d2355c73ce302d94` (see active task above); TP2 RDMA is enabled.
 
 **Engines:** the old release-check Maya-M runtime is superseded by the authorized GPU window above.
 The subsequent Maya-L pair was stopped with explicit permission; candidate test pairs may be restarted.
@@ -136,3 +134,5 @@ CPU gates green at last run (HIP map + serve + tools). CPU CI passed for release
 10. **Prefill performance (#33)** is the open perf topic — not decode. Quote stage lines if diagnosing.
 
 Finish any explicitly pending release step only if asked, then follow the next user request.
+
+Accepted v1.1.38 cff75b48 binary is additionally saved on BOTH hosts at `/tmp/maya-upstream-v38-baseline/maya` for controlled v1.1.39 comparisons. Candidate retains MMQ ID padding, measured primary table priority, all-limit answer reserve with bounded sentence grace, and #47 failed-restart fix. New DS4 prefix/tail-auto/link rings stay opt-in. CPU/build/live gates pending; do not proceed to v1.1.40.

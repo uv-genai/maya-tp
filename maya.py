@@ -77,6 +77,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE / "tools"))
 import setup as S  # noqa: E402  Strata's installer: PC checks, pip, llama.cpp, downloads (nothing runs on import)
 from setup import ask, fail, ok, run, say, step, warn  # noqa: E402
+import maya_import as MI  # noqa: E402  --import-model: model files downloaded some other way, found by size + sha256
 import maya_names as N  # noqa: E402  the settings' names users see (MAYA_*) and the older ones the code reads
 import maya_quants as Q  # noqa: E402  the quants' names users see (MiniMax M3.1 · Maya-XS) and the older ones as aliases
 import calibrate_glm as CAL  # noqa: E402  the CPU lane's tuning for this PC (./maya.sh --calibrate)
@@ -612,6 +613,16 @@ MM3_TESTED_CONTEXT = 262144                        # (past it: not run end to en
 # bytes BF16, 128 + 4 INT8 / FP8, 64 + 8 FP4); "K,V" mixes add K's half and V's half
 MM3_KV_BYTES = {"bf16": 122880, "int8": 63360, "fp8": 63360, "fp4": 34560}
 MM3_KV_FORMAT = "int8"                             # the format the engine uses when the config names none
+# VRAM a context takes with KV streaming: the ring of each layer's newest K / V (MM3_KV_RING positions, any context
+# past it) and every position's indexer key (60 layers x 128 dims in BF16) - the share of it that grows with the
+# context is bounded where it would push experts out of VRAM (mm3_context_limit: as Qwen's, 12% of the VRAM, 6% on a
+# PC that reads experts from the SSD)
+MM3_KV_RING = 32768
+MM3_INDEX_BYTES = 60 * 128 * 2
+# Windows on an APU (Strix Halo): the GPU's carve-out holds the model, and the pinned KV cache is GPU-visible RAM, which
+# Windows caps at half of the RAM it has (its "shared GPU memory") - the cache takes at most three quarters of that, the
+# rest left to the engine's other host buffers (#663: a 31.7 GB Radeon 8065S PC halved its decode with 256K's 15.5 GB)
+MM3_WIN_APU_KV_SHARE = 0.5 * 0.75
 # --parallel above 1: no KV streaming, every conversation's whole cache in VRAM (~61 KB a position with INT8) - the setup
 # recommends the context at which the caches take at most this share of the GPUs' memory, the rest left to the dense
 # weights and the expert pool (the engine shortens a context that does not fit, with a NOTE)
@@ -1925,14 +1936,16 @@ def build_step(a, pc, llama: Path, target: str = "maya") -> dict:
 
 
 def refresh_engine(cfg: dict) -> None:
-    """At a start: the engine's source changed since it was compiled (a git pull) - compile what changed."""
+    """At a start: the engine's source changed since it was compiled (a git pull) - compile what changed.  Also when
+    the stamp has this source but not this target: another model's start compiled only its own engine after the pull
+    (the targets share one stamp), so this one is still the old build."""
     meta = read_json(STAMP)
     exe = Path(cfg["exe"]).resolve()
     target = "maya-ds4" if exe == DS4_EXE.resolve() else "maya-mm3" if exe == MM3_EXE.resolve() else "maya"
     if not meta or exe not in (EXE.resolve(), DS4_EXE.resolve(), MM3_EXE.resolve()):
         return
     src = S.source_hash(S.ENGINE_SOURCES)
-    if meta.get("src") == src:
+    if meta.get("src") == src and target in (meta.get("targets") or ["maya"]):
         return
     if cfg.get("backend") == "hip":
         root = Path(meta.get("rocm") or "/opt/rocm")
@@ -2112,6 +2125,134 @@ def sha256_checked(path: Path, want) -> bool:
     return True
 
 
+def import_catalog(models: Path) -> list:
+    """Every published model file Maya's setup would put under the models folder, for --import-model: {"label": the
+    model's folder, "rel": the file's place, "size": its published size (None for a GGUF the table lists by sha256
+    only), "sha": the accepted sha256 values}, with the layout the setup downloads into."""
+    import contextlib
+    import io
+    cat = []
+
+    def add(label: str, base: str, names: dict, sizes: dict | None = None):
+        for name, sha in names.items():
+            cat.append({"label": label, "rel": f"{base}/{name}", "size": (sizes or {}).get(name),
+                        "sha": [x.lower() for x in ([sha] if isinstance(sha, str) else sha)]})
+
+    def entry(label: str, base: str, m: dict):
+        if m.get("files"):
+            add(label, base, m["sha256"], m["files"])
+        else:                                          # (a GLM GGUF: shards, the sha256 per name)
+            add(label, base, {n: m["sha256"][n] for n in shard_names(m) if n in m["sha256"]})
+
+    for quant, m in MODELS.items():
+        entry(quant, quant, m)
+        v = m.get("vision")
+        if v:
+            add(quant, f"{quant}/{v['folder']}", v["sha256"])
+    cat.append({"label": "GLM-5.3-Flash-DFlash2", "rel": f"GLM-5.3-Flash-DFlash2/{DFLASH['file']}",
+                "size": DFLASH["bytes"], "sha": [DFLASH["sha256"].lower()]})
+    quiet = contextlib.redirect_stdout(io.StringIO())
+
+    def tolerant(make, *args):                         # (a manifest that is not published yet: fail() exits)
+        try:
+            with quiet:
+                return make(*args)
+        except (SystemExit, OSError, KeyError, ValueError):
+            return None
+    nsa = argparse.Namespace(model_dir=None)
+    for quant in DS4_QUANTS:
+        m = tolerant(ds4_gguf_model, quant)
+        if m and m.get("files"):
+            d = ds4_dir(nsa, models, {}, quant)
+            entry(d.relative_to(models).as_posix(), d.relative_to(models).as_posix(), m)
+    for spec in DS4_EXL3.values():
+        files = (read_json(spec["manifest"]).get("files") or {})
+        base = spec["dir"]
+        if files:
+            add(base, base, {k: v[1] for k, v in files.items()}, {k: v[0] for k, v in files.items()})
+    vision = tolerant(ds4_vision_model)
+    if vision:
+        entry(f"{DS4}-GGUF/vision", f"{DS4}-GGUF/vision", vision)
+    mm = tolerant(mm3_models)
+    if mm:
+        entry(MM3_DIR, MM3_DIR, mm[0])
+        entry(f"{MM3_DIR}/dspark", f"{MM3_DIR}/{mm[1]['folder']}", mm[1])
+    for quant, shown in MM3_QUANTS.items():
+        m = tolerant(mm3_gguf_entry, quant) if quant != "exl3" else None
+        if m and m.get("files") and all(m["sha256"].values()):
+            entry(shown, shown, m)
+    q = tolerant(qwen_entry)
+    if q:
+        entry(QWEN, QWEN, q)
+    return cat
+
+
+def import_model(a, folder: str) -> int:
+    """--import-model <folder>: find the published model files in a folder by their size and sha256 (whatever the
+    downloader named them, in whatever subfolders, also a Hugging Face cache's blobs/snapshots), and move them (same
+    drive) or copy them (another drive: --copy) into the models folder's layout; then print what was found, what
+    is missing and what did not match.  Nothing that did not match is touched; nothing is deleted."""
+    src = Path(folder).expanduser().resolve()
+    if not src.is_dir():
+        fail(f"{folder} is not a folder", f"{ME} --import-model <the folder with the downloaded files>")
+    have = configs()
+    inst = (read_json(have[0]).get("installer") or {}) if have else {}
+    models = (Path(a.models_dir).expanduser().resolve() if a.models_dir else
+              Path(inst["models_dir"]) if inst.get("models_dir") else
+              Path(inst["data_dir"]) / "models" if inst.get("data_dir") else ROOT.parent / "Maya-data" / "models")
+    cat = import_catalog(models)
+    say(f"  Looking in {src} for Maya's model files (by size and sha256, not by name); they go to {models}")
+    got = MI.find(src, cat, progress=say)
+    placed, shared = MI.choose(got["found"])
+    if not placed and not shared:
+        warn("none of the files there is one of Maya's published model files")
+    for path, _, size, hits in placed:
+        say(f"  found  {path.name}  ({size / 1e9:.2f} GB)  ->  {hits[0]['rel']}" +
+            (f" (+{len(hits) - 1} more places)" if len(hits) > 1 else ""))
+    for path, labels in shared:
+        say(f"  shared {path.name}: used by several models ({', '.join(labels[:3])}, ...) and none of them is in this "
+            "folder - left where it is (the setup downloads it with the model)")
+    have_lines, missing_lines = MI.report_lines(cat, placed, models)
+    for label, absent in missing_lines:
+        if absent:
+            say(f"  missing for {label}: " + ", ".join(absent[:6]) + (f" and {len(absent) - 6} more" if len(absent) > 6 else ""))
+        else:
+            say(f"  {label}: every file is here")
+    skipped = [(p, s) for p, s in got["unmatched"] if s >= (1 << 20)]
+    if skipped:
+        say(f"  {len(skipped)} file(s) there did not match any published file and are left alone"
+            + (" (a download that is not finished, another version, or another model):" if len(skipped) <= 20 else
+               " - the first 20:"))
+        for p, s in skipped[:20]:
+            say(f"      {p}  ({s / 1e9:.2f} GB)" if s >= 1e8 else f"      {p}  ({s / 1e6:.1f} MB)")
+    if not placed:
+        return 1
+    anchor = next(p for p in [models, *models.parents] if p.exists())
+    apart = [p for p, r, _, _ in placed if not MI.same_drive(r, anchor) or os.path.abspath(p) != str(r)]
+    copy = bool(a.copy)
+    if apart and not copy:
+        say()
+        say(f"  {len(apart)} file(s) are on another drive than {models} (or are links into a cache): they can only be "
+            "copied - the original stays where it is, so the space is used twice.")
+        copy = ask("  Copy them? (y/n)", ["y", "n"], "n", a.yes) == "y"
+    elif not (a.yes or a.copy):
+        say()
+        if ask(f"  Move {len(placed)} file(s) into {models}? (y/n)", ["y", "n"], "y", False) != "y":
+            say("  Nothing was moved.")
+            return 0
+    moved = copied = 0
+    skipped_now = []
+    for path, real, size, hits in placed:
+        r = MI.place(path, real, size, hits, models, copy, say)
+        moved, copied = moved + r["moved"], copied + r["copied"]
+        skipped_now += r["skipped"]
+    for line in skipped_now:
+        warn(line)
+    ok(f"{moved} file(s) moved, {copied} copied into {models}; they are recorded as verified (no second check)")
+    say(f"  Now run {ME} --setup and pick the model (or {ME} --setup --model <name>): the files are used where they are.")
+    return 0
+
+
 def file_url(m: dict, name: str) -> str:
     """A download's file on Hugging Face: from the model's repo, or the one its "sources" names for it (DeepSeek's
     Engram tables: DeepSeek's base repo)."""
@@ -2272,6 +2413,8 @@ def offer_download(a, quant: str, d: Path, shards: list, m: dict | None = None) 
     else:
         say("  You can also run them yourself (or download the files any other way into that folder, or pass")
         say(f"  --gguf-dir <folder with the files>), then run {ME} again.")
+    say(f"  Files you downloaded with another program, under any names: {ME} --import-model <their folder> finds them")
+    say("  by size and sha256 and moves them into place.")
     if not curl:
         warn("curl is not installed" + ("" if WIN else " (sudo apt-get install -y curl)") + ": if you say yes, the "
              "same URLs are downloaded with Python instead (also resumable)")
@@ -2792,12 +2935,17 @@ def write_config(a, pc, meta, pack: Path, quant: str, ctx: int, models: Path, vi
             hip_env.update({"STRATA_GLM_PREFILL_SUB": "1024", "STRATA_GLM_PREFILL_MB": "4096"})
         # Pass every available version per architecture: the engine's existing header guard selects the
         # table matching each card and its installed hipBLASLt, or keeps plain hipBLAS when none matches.
+        # A version can have more than one table (<version>.txt, then <version>-b.txt, ...: builds of one hipBLASLt
+        # version that number their solutions differently); the engine takes, per shape, the first one its build
+        # accepts, so each version's own file comes first.
         tables = []
         for arch in dict.fromkeys(g.get("arch", "") for g in gpus):
-            found = sorted((ROOT / "tools" / "hip").glob(f"{arch}-glm-hipblaslt-*.txt"))
+            found = sorted((ROOT / "tools" / "hip").glob(f"{arch}-glm-hipblaslt-*.txt"),
+                           key=lambda p: (p.stem.split("-")[3], p.stem))
             tables.extend(str(path) for path in found)
         if tables:
-            hip_env["STRATA_HIPBLASLT_TUNING"] = ":".join(tables)
+            # the OS's path-list separator: a ':' would also split a Windows drive letter (C:\...)
+            hip_env["STRATA_HIPBLASLT_TUNING"] = os.pathsep.join(tables)
         env = {**hip_env, **env}
     if env:
         cfg["env"] = env
@@ -3817,7 +3965,7 @@ def after_server(rc: int, a) -> int:
 # ------------------------------------------------------------------------------------------------ the report
 # the engine log's lines that tell where the time goes: how the model was split across VRAM / RAM / the SSD, the
 # prompt path's chunks, and the per-token breakdown ("glm stat": VRAM hits, RAM fetches, disk reads, CPU lane)
-REPORT_LINES = re.compile(r"glm fast:|glm prefill: (?:CUDA|HIP)|glm split|glm stat|glm slots|glm prefill: \d|ERR|error|failed|"
+REPORT_LINES = re.compile(r"glm fast:|glm prefill: (?:CUDA|HIP)|glm split|glm stat|glm slots|glm vram|ds4 serve: prompt read|glm prefill: \d|ERR|error|failed|"
                           r"out of memory|"
                           # maya-ds4's placement and speed lines (issue #416), not its loading progress
                           r"^ds4: (?!copying experts |experts \d+ / |loading \d)|^ds4 (?:slots|cache):|^maya-ds4:|"
@@ -5058,28 +5206,65 @@ def mm3_kv_gb(ctx: int, fmt: str) -> float:
     return ctx * (half(k) + half(v or k)) / 2**30
 
 
-def mm3_recommended_context(vram: float, ram: float, fmt: str, need: float = MM3_MEMORY_GB, parallel: int = 1) -> int:
-    """The context the setup recommends on this PC: the largest (up to MM3_TESTED_CONTEXT) whose KV cache fits in
-    what VRAM + RAM hold beyond the model (need: MM3_MEMORY_GB, a GGUF quant's own) - so the cache does not push experts
-    out of RAM - else the smallest; MM3_DEFAULT_CONTEXT when the RAM could not be read.  parallel: --parallel's
-    conversations (above 1: no KV streaming - each conversation's whole cache in VRAM, MM3_PARALLEL_VRAM_SHARE)."""
+def mm3_kv_vram_gb(ctx: int, fmt: str) -> float:
+    """GB of VRAM the KV cache takes at a context with KV streaming: the ring of the newest positions, the index keys."""
+    return mm3_kv_gb(min(ctx, MM3_KV_RING), fmt) + ctx * MM3_INDEX_BYTES / 2**30
+
+
+def apu_kind(gpus: list) -> str | None:
+    """"win" / "linux" when the GPUs include a unified-memory APU (hip_unified_memory: Strix Halo) on Windows / Linux,
+    else None.  Windows gives it a fixed carve-out (its VRAM) beside the RAM it counts; Linux's engine draws the GPU's
+    memory from the RAM, so there VRAM and RAM are one memory."""
+    if not any(hip_unified_memory(g) for g in gpus or []):
+        return None
+    return "win" if WIN else "linux"
+
+
+def mm3_context_limit(ctx: int, vram: float, ram: float, fmt: str, need: float = MM3_MEMORY_GB,
+                      apu: str | None = None) -> str | None:
+    """Why a context's KV cache (streamed: all of it pinned in RAM, a ring and the index keys in VRAM) would cost speed
+    on this PC, None when it does not: "ram" - the pinned cache does not fit in the RAM the model leaves (a VRAM that has
+    room beyond the model does not hold it: the cache is in RAM); "shared" - a Windows APU, the cache past what Windows
+    maps for the GPU (MM3_WIN_APU_KV_SHARE of the RAM); "vram" - what the context adds in VRAM pushes experts out of it
+    beyond the share Qwen's context keeps (12% of the VRAM, 6% when VRAM + RAM do not hold the model; not on a Linux
+    APU, where the GPU's memory is the RAM)."""
+    kv = mm3_kv_gb(ctx, fmt)
+    if kv > ram - max(0.0, need - vram):
+        return "ram"
+    if apu == "win" and kv > MM3_WIN_APU_KV_SHARE * ram:
+        return "shared"
+    grown = mm3_kv_vram_gb(ctx, fmt) - mm3_kv_vram_gb(MM3_CONTEXTS[0], fmt)
+    if apu != "linux" and need + mm3_kv_vram_gb(ctx, fmt) > vram and \
+            grown > (0.06 if vram + ram < need else 0.12) * vram:
+        return "vram"
+    return None
+
+
+def mm3_recommended_context(vram: float, ram: float, fmt: str, need: float = MM3_MEMORY_GB, parallel: int = 1,
+                            apu: str | None = None) -> int:
+    """The context the setup recommends on this PC: the largest (up to MM3_TESTED_CONTEXT) whose KV cache costs no
+    speed here (mm3_context_limit: it fits in the RAM the model leaves - need: MM3_MEMORY_GB, a GGUF quant's own -, on a
+    Windows APU in what Windows maps for the GPU, and pushes no more experts out of VRAM than Qwen's) - else the
+    smallest; MM3_DEFAULT_CONTEXT when the RAM could not be read.  parallel: --parallel's conversations (above 1: no KV
+    streaming - each conversation's whole cache in VRAM, MM3_PARALLEL_VRAM_SHARE).  apu: apu_kind(the GPUs)."""
     n = max(1, int(parallel or 1))
     if n > 1:
         fits = [c for c in MM3_CONTEXTS if c <= MM3_TESTED_CONTEXT and n * mm3_kv_gb(c, fmt) <= vram * MM3_PARALLEL_VRAM_SHARE]
         return max(fits) if fits else MM3_CONTEXTS[0]
     if ram <= 0:
         return MM3_DEFAULT_CONTEXT
-    spare = vram + ram - need
-    fits = [c for c in MM3_CONTEXTS if c <= MM3_TESTED_CONTEXT and mm3_kv_gb(c, fmt) <= spare]
+    fits = [c for c in MM3_CONTEXTS if c <= MM3_TESTED_CONTEXT and mm3_context_limit(c, vram, ram, fmt, need, apu) is None]
     return max(fits) if fits else MM3_CONTEXTS[0]
 
 
 def mm3_context_notes(ctx: int, vram: float, ram: float, fmt: str, need: float = MM3_MEMORY_GB,
-                      parallel: int = 1) -> None:
+                      parallel: int = 1, apu: str | None = None) -> None:
     """What a context costs here, and the warnings (as the dashboard's): past what was run end to end, a cache that
-    takes RAM the experts need.  With --parallel above 1 the caches are in VRAM, a whole context each."""
+    costs speed here (mm3_context_limit).  With --parallel above 1 the caches are in VRAM, a whole context each."""
     n = max(1, int(parallel or 1))
-    kv, spare = mm3_kv_gb(ctx, fmt), vram + ram - need
+    kv = mm3_kv_gb(ctx, fmt)
+    why = mm3_context_limit(ctx, vram, ram, fmt, need, apu) if n == 1 and ram > 0 else None
+    rec = context_label(mm3_recommended_context(vram, ram, fmt, need, n, apu))
     if n > 1:
         ok(f"{n} conversations at once (--parallel): each its own KV cache of about {kv:.1f} GB ({fmt.upper()}), "
            f"{n * kv:.1f} GB of VRAM in all - no KV streaming and no DSpark while it is above 1")
@@ -5092,11 +5277,18 @@ def mm3_context_notes(ctx: int, vram: float, ram: float, fmt: str, need: float =
         if n * kv > vram * MM3_PARALLEL_VRAM_SHARE:
             warn(f"{vram:.0f} GB of VRAM: {n} caches of a {context_label(ctx)} context leave fewer experts in VRAM "
                  "(answers slower), and the engine shortens the context where they do not fit - "
-                 f"{context_label(mm3_recommended_context(vram, ram, fmt, need, n))} fits this PC for {n}")
-    elif kv > max(0.0, spare):
+                 f"{rec} fits this PC for {n}")
+    elif why == "ram":
         warn(f"{vram:.0f} GB of VRAM and {ram:.0f} GB of RAM: with a {context_label(ctx)} context's cache, fewer "
-             "experts stay in RAM (answers slower) and the engine may not start - "
-             f"{context_label(mm3_recommended_context(vram, ram, fmt, need))} fits this PC")
+             f"experts stay in RAM (answers slower) and the engine may not start - {rec} fits this PC")
+    elif why == "shared":
+        warn(f"{ram:.0f} GB of RAM beside the GPU's {vram:.0f} GB: a {context_label(ctx)} context's {kv:.0f} GB cache "
+             "fills the RAM Windows lets the GPU use (answers slower) - "
+             f"{rec} fits this PC")
+    elif why == "vram":
+        warn(f"{vram:.0f} GB of VRAM: a {context_label(ctx)} context's index keys "
+             f"({mm3_kv_vram_gb(ctx, fmt):.1f} GB in VRAM) leave fewer experts there (answers slower) - {rec} "
+             "keeps more of them")
 
 
 def mm3_models() -> tuple:
@@ -5497,11 +5689,12 @@ def set_up_mm3(a, prev: dict) -> Path | None:
     ok(f"files: {name}" + (" (Maya's quant)" if gguf else " (your EXL3 folder)" if own else " (Mia-AiLab's EXL3 quant)"))
     fmt = mm3_kv_format(prev_args)                     # (a setup again keeps the config's --kv-cache)
     par = getattr(a, "parallel", None) or int(flag_value(prev_args, "--parallel") or 1)   # (--parallel: kept)
-    rec = mm3_recommended_context(vram, total, fmt, need, par)
+    apu = apu_kind(pc["gpus"])
+    rec = mm3_recommended_context(vram, total, fmt, need, par, apu)
     ctx = choose_context(a, prev_ctx, MM3_CONTEXTS, rec)
     ok(f"context: {ctx} tokens" + (" (recommended for this PC's memory)" if ctx == rec else "") +
        (f", for each of {par} conversations at once (--parallel)" if par > 1 else ""))
-    mm3_context_notes(ctx, vram, total, fmt, need, par)
+    mm3_context_notes(ctx, vram, total, fmt, need, par, apu)
     models = (Path(a.models_dir).expanduser().resolve() if a.models_dir else
               Path(inst["models_dir"]) if inst.get("models_dir") else ROOT.parent / "Maya-data" / "models")
     d = mm3_dir(a, models, prev, quant)
@@ -5876,6 +6069,13 @@ def main() -> int:
                     help="take the recommended answers (the model download still needs --download-model)")
     ap.add_argument("--plain", action="store_true",
                     help="the setup in plain text, the answers typed (not on the setup's own screen)")
+    ap.add_argument("--import-model", metavar="FOLDER",
+                    help="use model files downloaded some other way (a download manager, a copy from another PC, a "
+                         "Hugging Face cache): finds Maya's published files in FOLDER by size and sha256 (any names, "
+                         "any subfolders) and moves them into the models folder, or copies them with --copy when "
+                         "they are on another drive")
+    ap.add_argument("--copy", action="store_true",
+                    help="with --import-model: copy files that cannot be moved (another drive); the originals stay")
     ap.add_argument("--download-model", action="store_true",
                     help="download the model without asking (the commands and the size are still printed)")
     ap.add_argument("--model", metavar="MODEL",
@@ -5990,6 +6190,8 @@ def main() -> int:
     say(f"Project Maya v{version} - GLM-5.3-Flash, {DS4} or {MM3} on your own GPU(s).")
     if a.report:
         return report(version, a.backend, a.config)
+    if a.import_model:
+        return import_model(a, a.import_model)
     if a.bench:
         have = [a.config] if a.config is not None else configs()
         if a.backend:

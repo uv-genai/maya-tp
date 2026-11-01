@@ -183,6 +183,8 @@ These settings change what the engine chooses (put them in the config with `--en
 | `MAYA_LOOP_GUARD` | on | the server, every model: an answer that falls into a loop (one block of tokens repeated back to back) is caught as it starts and steered out of it - see [The loop guard](#the-loop-guard). `0` = off (as `"loop_guard": false` in the config) |
 | `MAYA_VIDEO_MAX_FRAMES` | 240 | the server (GLM): the most frames a video may give (read at 4 a second, so 240 = a minute); a longer video is refused before it is decoded, with its length in the message. Every frame takes an image's share of the context. Videos need ffmpeg and ffprobe installed |
 
+When a configured `thinking_budget` is below the output limit’s reserved ceiling and `max_tokens > 1024`, reasoning may finish its sentence or line within up to 512 extra tokens. Grace uses at most half the room below that ceiling; the answer reserve and closing-token allowance still apply to every output limit.
+
 **The expert profile** (`data/expert-profile-glm.bin`). At start the engine fills VRAM with the experts a profile ranks
 first. That profile ranks every (layer, expert) pair, and its order also decides how many VRAM slots each layer
 gets - except the MTP draft layer on a split, which runs on every drafted token and so keeps at least an equal share
@@ -620,8 +622,6 @@ experts left in the files); all 101 GB of copies pinned in 3.3 s.
 | `DS4_STREAM_SLOTS` | 16 | a verify window's streamed experts at most, a layer (1-16) |
 | `DS4_LAND` | on with one NVIDIA GPU (Linux or Windows) where experts stream | `0`: a streamed expert does not stay in VRAM, and a GGUF gets no recent slots |
 | `DS4_RECENT` | 32 (a GGUF: with `DS4_LAND`) | the recent slots a layer (VRAM slots taken from the profile's coldest experts) |
-| `MAYA_DS4_PIN_BY_NEED` | off (0); on for Windows' one-GPU path | where the system cannot lock every expert copied into RAM for the GPU (Windows locks about half the RAM): `1` pins them a layer at a time, the layers whose copies the routing profile uses most first, until a pin fails or `MAYA_DS4_PIN_GB` is reached; the GPU pulls those in place, the rest go through the staging. Without it a pin that fails leaves every copy to the staging (an RTX 3090, Maya-XS, 101 GB of copies held to 50 GB pinned: decode 16.3 -> 20.3 tokens/s; all of them pinned: 29.0). A GPU that does not address registered memory at its host address (Windows' WDDM) takes its mapped address, with one GPU |
-| `MAYA_DS4_PIN_GB` | 0 (no cap) | with `MAYA_DS4_PIN_BY_NEED`: pin at most this many GB of the copies |
 
 The engine's decode summary (`streamed to the GPU: N`) and the `pcie=` key of its STAT lines (experts a token
 streamed) show it at work; the start's log prints each format's times and how many of a token's experts it streams.
@@ -676,7 +676,7 @@ below that prompts run in windows of 16. The log says which.
 | --- | --- | --- |
 | `MAYA_DS4_PROMPT_PICK` | the timing pick | `length`: the chunked pass from 96 tokens, windows of 16 below; `length:N`: from N tokens (opt-in until measured) |
 | `MAYA_DS4_PROMPT_WARM` | on | `0`: the first chunked prompt pays the GEMM library's start, as before |
-| `DS4_RING_MB` | 400 | the prompt path's staging ring a GPU (MB); `auto`: from each GPU's VRAM room for experts at load, 64 MB a GB of it, 400-1200 MB - more of a prompt's likely experts queued early where the GPUs cannot hold them, for that much VRAM less for experts (opt-in until measured) |
+| `DS4_RING_MB` | 400 | the prompt path's staging ring a GPU (MB). `link` (opt-in): sized at load from the GPU's measured host link - batches (a quarter of the ring each) of about 10 ms of it, at least one expert, at most the 400 MB it was before and 1/16 of the GPU's VRAM room for experts, so a slow link (PCIe Gen2 x4) waits less for each batch and a fast one keeps 400 MB (the log's `prompt ring` line); `auto`: from each GPU's VRAM room for experts at load, 64 MB a GB of it, 400-1200 MB - more of a prompt's likely experts queued early where the GPUs cannot hold them, for that much VRAM less for experts (opt-in until measured) |
 | `MAYA_DS4_SETTLE_MS` | 0 (off) | after a chunked prompt, the expert cache learns from the prompt's picks (as it does from windows) and moves the hottest of them into VRAM in rounds of its usual swap rule, for at most this many ms, so the decode that follows finds them on the card; the first answer token comes that much later. Placement only, as the cache's own moves (opt-in until measured) |
 
 ## DeepSeek: choosing the drafter GPU group (experimental)
@@ -1399,7 +1399,12 @@ keep the state at three more places of each prompt it reads:
 
 - the start of the last user turn (a tool result's turn too): an edited or retried last message reads only itself;
 - 512 tokens before the prompt's end, when the last turn is longer than that: a new question after the same document,
-  in the same message, reads those 512 tokens and itself;
+  in the same message, reads those 512 tokens and itself. The read stops there, so those tokens are a run of their own;
+  where most experts are not in VRAM that short run costs nearly a whole pass over them, on the CPU lane or lent to the
+  GPU's prompt path (#668: a ~20K-token prompt read ~13% slower on one GPU with 91% of the experts on the CPU lane; one
+  V100 with 12% of the experts in VRAM: ~11%). With `MAYA_DS4_RESTORE_TAIL_AUTO=1` (default off pending gfx1151 validation), the engine measures it on the reads that keep
+  the point - the time an expert pick takes in that run against the rest of the read - and leaves the point out while
+  it costs more than reading those tokens again; one read in 32 still keeps it, to measure again;
 - the end of the system prompt and its tools (the first user turn), given up last: another conversation behind the same
   start reads only its own part.
 
@@ -1419,6 +1424,26 @@ the first read of the chat 16.7 -> 17.7 s.
 | --- | --- | --- |
 | `MAYA_DS4_RESTORE_POINTS` | 4 | `N` (1-16): the server asks for the points, and the engine keeps up to N a conversation besides its three - the least recently used gives way, the shared start last - in RAM, in every conversation it holds and in every kept conversation's slot; `0`: no GEN line carries them, the engine as before |
 | `MAYA_DS4_RESTORE_TAIL` | 512 | how many tokens before the prompt's end the tail point sits; `0`: no tail point |
+| `MAYA_DS4_RESTORE_TAIL_AUTO` | 0 | the engine leaves the tail point out where it measured its cost higher than reading its tokens again (above); `0`: kept on every read, as before |
+
+### New conversations behind the same system prompt and tools
+
+Opt in with `MAYA_DS4_PREFIX_KEEP=2` (default 0 pending gfx1151 validation). The point at the end of the system prompt and its tools also serves conversations that start later: when a prompt read
+from token 0 reaches it, the engine keeps a copy of the state there apart from the conversation (its compressed KV,
+rings and partial groups, in RAM). A new conversation that starts with the same system prompt and tools - after an
+unrelated chat, in another `--parallel` conversation, with or without `MAYA_DS4_SLOT_KEEP` - takes it back and reads
+only its own part. It is the state a read of the same prompt from token 0 keeps at that point (that read also stops
+there), so the rest is read from the same state a cold read reaches. The state is small (V4.1's compressed KV: about
+20 MB for an 11K-token system prompt with 12 tools). Agent clients that open a new conversation for every task or
+sub-agent gain the most: on one V100, a new conversation behind an 11.3K-token system prompt and tools had its first
+token about 19x sooner after an unrelated conversation, and about 25x sooner with `--parallel 2` while another
+conversation was answering.
+
+| Setting | Default | |
+| --- | --- | --- |
+| `MAYA_DS4_PREFIX_KEEP` | 0 | how many system-prompt starts are kept, the least recently used giving way; `0`: none |
+| `MAYA_DS4_PREFIX_GB` | 2 | their RAM at most (a start bigger than this is not kept) |
+| `MAYA_DS4_PREFIX_MIN` | 1024 | the shortest start kept, in tokens |
 
 ## DeepSeek: tensor parallel groups of 3 with a GGUF pack (experimental)
 
@@ -1676,3 +1701,7 @@ matching `MAYA_*` env, to every rank script). Under TP2 the simple decode loop i
 MTP is opt-in, DFlash and multi-sequence decode remain gated. Single-conversation snapshot reuse is supported.
 After a protocol or RDMA failure restart both ranks; a worker exits rather than resuming a partial message.
 See [TP2-RUN.md](TP2-RUN.md) for bring-up.
+
+### Upstream streamed expert fetch
+
+Streamed expert fetch from upstream v1.1.39 is deferred in Maya-TP (#46). The existing compact TP2 reader publishes a full blob only after all reads finish; upstream chunk-ready flags do not describe that layout. `MAYA_GLM_STREAM_FETCH` has no effect in this fork.

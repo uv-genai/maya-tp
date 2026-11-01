@@ -117,7 +117,7 @@ Windows, large-image limits, and multiple-image workloads were not tested here.
 `--gpus 0,1` splits the layers across two supported cards, as on NVIDIA: each card caches the experts of its own
 half, and the second half also runs the model's MTP block, which drafts the next token so both cards stay busy. Setup
 puts the card with more VRAM first (it takes the bigger first half), leaves the split point to the engine, and writes
-one hipBLASLt table per architecture (`MAYA_HIPBLASLT_TUNING` takes a `:`-separated list; each card uses the table
+one hipBLASLt table per architecture (`MAYA_HIPBLASLT_TUNING` takes a path list, `:`-separated on Linux and `;` on Windows; each card uses the table
 for its own architecture). A discrete GPU paired with a unified-memory APU puts the discrete GPU first and loads the
 parts sequentially (`MAYA_GLM_PARALLEL_LOAD=0`), so the APU sizes its pool after the first part pins its RAM tier.
 The two cards may be different architectures. The split passes one small host-memory hop
@@ -276,7 +276,10 @@ sub-batches. Two settings matter on AMD:
   `tools/hip/tune_hipblaslt` (`tools/hip/<arch>-glm-hipblaslt-<version>.txt`).
   Setup writes it when a table for the card exists. The engine accepts a table
   only for its own architecture and hipBLASLt version; otherwise, and for shapes
-  without a row, it keeps plain hipBLAS. The tuner's absolute-error gate now
+  without a row, it keeps plain hipBLAS. Builds of one hipBLASLt version can
+  number their solutions differently, so a version may have more than one table
+  (`<version>.txt`, `<version>-b.txt`): the engine keeps every matching table
+  and takes, per shape, the first whose solution its hipBLASLt accepts. The tuner's absolute-error gate now
   scales with `sqrt(K / 4096)`, so long-K projections are no longer rejected.
 
 Measured prompt speed, GLM-5.3-Flash Maya-S-v2 IQ2_XXS, ROCm 7.2:

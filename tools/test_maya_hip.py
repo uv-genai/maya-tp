@@ -87,7 +87,7 @@ class HipSetupTests(unittest.TestCase):
         self.assertEqual(cfg["gpu"], [1, 0])
         self.assertNotIn("STRATA_GLM_SPLIT", cfg["env"])
         self.assertEqual(cfg["env"]["STRATA_HIPBLASLT_TUNING"],
-                         f"{tables / 'gfx1201-glm-hipblaslt-100202.txt'}:{tables / 'gfx1100-glm-hipblaslt-100202.txt'}")
+                         f"{tables / 'gfx1201-glm-hipblaslt-100202.txt'}{os.pathsep}{tables / 'gfx1100-glm-hipblaslt-100202.txt'}")
 
     def test_config_selects_hip_and_preserves_user_tuning(self):
         pc = maya.check_pc(self.a)
@@ -108,6 +108,8 @@ class HipSetupTests(unittest.TestCase):
         (tables / "gfx1100-glm-hipblaslt-100202.txt").write_text("STRATA_HIPBLASLT_TUNING_V1 gfx1100 100202\n")
         (tables / "gfx1201-glm-hipblaslt-100202.txt").write_text("STRATA_HIPBLASLT_TUNING_V1 gfx1201 100202\n")
         (tables / "gfx1100-glm-hipblaslt-100401.txt").write_text("STRATA_HIPBLASLT_TUNING_V1 gfx1100 100401\n")
+        # a second table for one version (another build's solution numbers) comes after that version's own file
+        (tables / "gfx1100-glm-hipblaslt-100401-b.txt").write_text("STRATA_HIPBLASLT_TUNING_V1 gfx1100 100401\n")
         pc = maya.check_pc(self.a)
         self.a.env = ["STRATA_GLM_PREFILL_SUB=512"]
         p = maya.write_config(self.a, pc, {"lib_dirs": [str(self.rocm / "lib")]},
@@ -118,14 +120,30 @@ class HipSetupTests(unittest.TestCase):
         self.assertEqual(env["STRATA_GLM_PREFILL_MB"], "4096")
         self.assertEqual(env["STRATA_GLM_RESERVE_MB"], "3072")
         self.assertEqual(env["STRATA_GLM_RAM_HEADROOM_GB"], "16")
-        self.assertEqual(env["STRATA_HIPBLASLT_TUNING"].split(":"),
+        self.assertEqual(env["STRATA_HIPBLASLT_TUNING"].split(os.pathsep),
                          [str(tables / "gfx1100-glm-hipblaslt-100202.txt"),
-                          str(tables / "gfx1100-glm-hipblaslt-100401.txt")])
+                          str(tables / "gfx1100-glm-hipblaslt-100401.txt"),
+                          str(tables / "gfx1100-glm-hipblaslt-100401-b.txt")])
         # Keep the runtime's exact-version choice; an explicit operator table still wins.
         self.a.env.append("STRATA_HIPBLASLT_TUNING=/selected/table.txt")
         p = maya.write_config(self.a, pc, {"lib_dirs": [str(self.rocm / "lib")]},
                               self.root / "pack", "test", 8192, self.root / "data", None)
         self.assertEqual(maya.read_json(p)["env"]["STRATA_HIPBLASLT_TUNING"], "/selected/table.txt")
+
+    def test_tuning_table_list_uses_the_os_path_separator(self):
+        # Windows joins with ';': a ':' would also split the drive letter of C:\... (the engine then opened \...)
+        tables = self.root / "tools/hip"
+        tables.mkdir(parents=True)
+        for v in ("100202", "100401"):
+            (tables / f"gfx1100-glm-hipblaslt-{v}.txt").write_text(f"STRATA_HIPBLASLT_TUNING_V1 gfx1100 {v}\n")
+        pc = maya.check_pc(self.a)
+        for sep in (";", ":"):
+            with self.subTest(sep=sep), patch.object(maya.os, "pathsep", sep):
+                p = maya.write_config(self.a, pc, {"lib_dirs": [str(self.rocm / "lib")]},
+                                      self.root / "pack", "test", 8192, self.root / "data", None)
+                self.assertEqual(maya.read_json(p)["env"]["STRATA_HIPBLASLT_TUNING"],
+                                 sep.join(str(tables / f"gfx1100-glm-hipblaslt-{v}.txt")
+                                          for v in ("100202", "100401")))
 
     def test_gpus_with_an_apu_use_discrete_first_and_sequential_loading(self):
         self.gpus.append({"index": 3, "arch": "gfx1151", "vendor": "amd", "name": "Radeon 8060S", "vram_gb": 112})
@@ -206,6 +224,32 @@ class HipSetupTests(unittest.TestCase):
         self.assertIn("-DCMAKE_HIP_ARCHITECTURES=gfx1100", conf)     # the chosen card's (#255)
         self.assertEqual(env["ROCM_PATH"], str(self.rocm))
         self.assertEqual(meta["backend"], "hip")
+
+    def test_refresh_compiles_a_target_the_new_source_has_not_built(self):
+        # #664: after a git pull, starting GLM compiled build-hip/maya and stamped the new source with targets
+        # ["maya"]; the DeepSeek setup's next start found that source in the stamp and ran the old maya-ds4.
+        build = self.root / "build-hip"
+        build.mkdir()
+        (self.root / "llama/ggml").mkdir(parents=True)
+        (self.root / "llama/ggml/CMakeLists.txt").touch()
+        stamp = {"backend": "hip", "src": "new-sha", "archs": ["gfx1151"], "rocm": str(self.rocm),
+                 "llama": str(self.root / "llama"), "targets": ["maya"]}
+        cfg = {"exe": str(build / "maya-ds4"), "backend": "hip", "gpu": [0]}
+        with patch.object(maya, "EXE", build / "maya"), patch.object(maya, "DS4_EXE", build / "maya-ds4"), \
+                patch.object(maya, "MM3_EXE", build / "maya-mm3"), \
+                patch.object(maya, "STAMP", build / "MAYA-BUILD.json"), \
+                patch.object(maya.S, "source_hash", return_value="new-sha"), \
+                patch.object(maya, "hip_clang", return_value=self.rocm / "llvm/bin/clang++"), \
+                patch.object(maya, "compile_engine_hip") as compile_hip:
+            maya.STAMP.write_text(json.dumps(stamp))
+            maya.refresh_engine(cfg)
+            compile_hip.assert_called_once()
+            self.assertEqual(compile_hip.call_args.kwargs["target"], "maya-ds4")
+            compile_hip.reset_mock()
+            stamp["targets"] = ["maya", "maya-ds4"]
+            maya.STAMP.write_text(json.dumps(stamp))
+            maya.refresh_engine(cfg)                    # compiled from this source already: nothing to do
+            compile_hip.assert_not_called()
 
     def test_hip_skips_vision_without_downloading(self):
         with patch.object(maya.S, "download", side_effect=AssertionError("no vision downloads")):
