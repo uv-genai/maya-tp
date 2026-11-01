@@ -1,0 +1,45 @@
+{
+  "base": "cb86c4c",
+  "head": "a27591ba2f76769f9e6780200de92ebeeab3ea73",
+  "paths": {
+    "README.md": {
+      "unchanged": true
+    },
+    "AGENTS.md": {
+      "unchanged": true
+    },
+    "CMakeLists.txt": {
+      "unchanged": true
+    },
+    "cmake/hip_backend.cmake": {
+      "unchanged": true
+    },
+    "src/core": {
+      "unchanged": true
+    },
+    "src/program": {
+      "unchanged": true
+    },
+    "src/kernels": {
+      "unchanged": true
+    },
+    "src/prefill": {
+      "unchanged": true
+    },
+    "include": {
+      "unchanged": true
+    },
+    "src/net": {
+      "unchanged": true
+    },
+    "tools/tp2": {
+      "unchanged": true
+    },
+    "tools/llama-swap/tp2.sh": {
+      "unchanged": true
+    },
+    "tools/hip/gfx1151-glm-hipblaslt-100401.txt": {
+      "unchanged": true
+    }
+  }
+}

@@ -894,3 +894,19 @@ Future same-pack/same-prompt benches may use `--reference` with strict ordinary 
 checks, avoiding a second cold startup while proving agreement with accepted outputs. S256-token
 references remain in docs/benchmarks/tp2-mtp-review-2026-10-30/. Investigate any difference; never
 weaken the fidelity gate to hide it. No release/tag created; future fork tags tp-v.
+
+### 29.10 v1.1.40 semantic candidate (#50)
+
+Review branch merge/upstream-v1.1.40 fromcb86c4c; merge in progress. Exclude all Metal/macOS
+source/build/workflow/setup/telemetry/fixtures/docs. README/AGENTS/CMake/launchers and GLM/TP/RDMA/MTP/
+primary tuning unchanged; accepted39c3132ee4 engine retained. New server/context/monitor/UI fixes,
+request socket timeout (300s per operation, not thinking deadline), Origin/stream errors/update-lock
+and installer download recovery retained. DS4 tail heuristic remains opt-in off, corrected to wall
+time per token.13 focused socket/config/long-answer/Origin/concurrent-update/prefixed-tag tests PASS.
+OrderedCPU/build/host/Node/liveS API gates pending; no v41 before40acceptance/mainCI. Reuse39S/M/L
+kernel/CLI/fidelity/performance evidence where source/binary/defaults are unchanged.
+
+#50 update: first builds relinked GLM via archive parent-GGML metadata (#52); fresh binary8facc62c09b1138b6787beda7d2f371d deployed on all5paths, GPUfatbin identical to39. ELF inspection rewrote inspected copies; local39backup restored from untouchedpeer and candidate relinked before GPUtests. Original c31339baseline preserved bothhosts.
+Initial551serve/11skips+653tools/31,all3HIPbuilds/DS4host/JS PASS, de0795f CI41313615184/41313611278 PASS. LiveMTP7 acceptance+large matrix PASS. Probe then found pre-existing empty Models catalog (#54), not inference failure. More critical #53 guards uncoordinated context/model restart underTP2;5focusedtests PASS, oldsetter202 failure reproduced. Updated fullCPU/liveS rejection+simple/fidelity gates pending; no41 yet.
+
+#50 runtime gates complete:554serve/11skips+653tools/31/HIPmap/3HIPtargets/DS4host/Node/JS PASS. InitialMTP7 acceptance+large matrix and guardedSource simple matrix PASS;109/37matchedrounds,8asymmetricretries each. Real#53 rejection400 preserves bothPIDs/context32768/peer, then MTPstream97chunks;77metrics samples69generating andOrigin403/actualcontext1M PASS. Models fixture used only in runtime/tmp and removed; default emptycatalog#54 remains. Technical/code256 ordinary/MTP16/16 raw-pick0. Fresh8facc62c binary all5paths verified;39c313backupbothhosts verified after inspection recovery. Engines/server stopped. Final evidence/mainCI pending; no41 yet.

@@ -34,6 +34,7 @@ import json
 import math
 import os
 import queue
+import socket
 import re
 import subprocess
 import struct
@@ -113,13 +114,9 @@ def nvml_pids(pid: int | None, listed: set) -> set:
         return {pid}
 
 
-CONTEXT_MIN = 4096          # the dashboard's Context size: the smallest it offers ...
-CONTEXT_FALLBACK_MAX = 262144   # ... and the largest when the model file does not say what it was trained for
-# the largest context the dashboard offers without an "untested" warning, by engine: maya-ds4 its model's own 1M; the
-# GLM engine's 256K, and maya-mm3's 256K (MiniMax-M3.1 is offered up to its 1M; past 256K it has not been run end to
-# end yet)
-CONTEXT_TESTED = {"ds4": 1048576, "mm3": 262144}
-CONTEXT_TESTED_DEFAULT = 262144
+# the dashboard's Context size range (serve/models.py: the Models page's Engine settings offer the same one)
+CONTEXT_MIN, CONTEXT_FALLBACK_MAX = models.CONTEXT_MIN, models.CONTEXT_FALLBACK_MAX
+CONTEXT_TESTED, CONTEXT_TESTED_DEFAULT = models.CONTEXT_TESTED, models.CONTEXT_TESTED_DEFAULT
 # the engine log's lines a report carries (maya.py's --report reads the same ones)
 REPORT_LINES = re.compile(r"glm fast:|glm prefill: (?:CUDA|HIP)|glm split|glm stat|glm slots|glm vram|ds4 serve: prompt read|glm prefill: \d|ERR|error|"
                           r"failed|out of memory|WARNING", re.I)
@@ -1849,37 +1846,8 @@ def vision_footprint(vcfg: dict, env: dict, cache_file: Path, gpu: int) -> tuple
     return None
 
 
-def trained_context(model_dir) -> int | None:
-    """The context the model was trained for (`<arch>.context_length` in its first GGUF's header; GLM-5.3-Flash:
-    1,048,576): the top of the dashboard's Context size.  None when there is no readable GGUF."""
-    try:
-        sys.path.insert(0, str(ROOT / "tools"))
-        from gguf_reader import GGUFFile
-        shards = sorted(Path(model_dir).glob("*-00001-of-*.gguf")) or sorted(Path(model_dir).glob("*.gguf"))
-        if not shards:
-            return None
-        md = GGUFFile(shards[0]).metadata
-        n = md.get(f"{md.get('general.architecture', '')}.context_length")
-        return int(n) if isinstance(n, int) and n > 0 else None
-    except Exception:  # noqa: BLE001 - a header it can't read: the fallback range
-        return None
-
-
-def trained_context_ds4(pack) -> int | None:
-    """DeepSeek's and MiniMax's: the context its pack says the model was trained for (ds4.txt's / mm3.txt's
-    max_position_embeddings, from the model's config.json or a GGUF's context_length; V4.1-Flash and M3.1-Flash:
-    1,048,576, their native reach), the top of the dashboard's Context size.  None when the pack does not say."""
-    for name in ("ds4.txt", "mm3.txt"):
-        try:
-            with open(Path(pack) / name, encoding="utf-8", errors="replace") as f:
-                for line in f:
-                    k, _, v = line.strip().partition(" ")
-                    if k == "max_position_embeddings":
-                        n = int(v.split()[0])
-                        return n if n > 0 else None
-        except (OSError, ValueError, IndexError):
-            continue
-    return None
+trained_context = models.trained_context            # (the context a model was trained for: serve/models.py)
+trained_context_ds4 = models.trained_context_ds4
 
 
 def gpu_list(cfg: dict) -> list[int]:
@@ -1907,7 +1875,7 @@ def child_env(cfg: dict) -> dict:
     env = dict(os.environ)
     if gpu_list(cfg) and cfg.get("backend") == "hip":   # AMD: numbered as HIP numbers them (setup's KFD order)
         env["HIP_VISIBLE_DEVICES"] = ",".join(str(i) for i in gpu_list(cfg))
-    elif gpu_list(cfg):                              # issue #51: the GPU(s) to run on, numbered as nvidia-smi does; CUDA's
+    elif gpu_list(cfg):   # issue #51: the GPU(s) to run on, numbered as nvidia-smi does; CUDA's
         env["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"      # own default order (fastest first) can number the cards otherwise
         env["CUDA_VISIBLE_DEVICES"] = ",".join(str(i) for i in gpu_list(cfg))
     for k, v in (cfg.get("env") or {}).items():      # engine settings the config carries (AMD: the GEMM tuning table)
@@ -2240,10 +2208,21 @@ class Service:
         with self.status_lock:
             return bool(self.reload) and self.reload.get("state") in ("waiting", "running")
 
+    def paired_restart_reason(self) -> str | None:
+        if int((getattr(self.engine, "info", {}) or {}).get("tp_world", 1) or 1) > 1:
+            return ("TP2 changes require restarting both ranks together. "
+                    "Use the pair launcher's matching --context or --model options.")
+        return None
+
+    def _require_single_rank_restart(self):
+        reason = self.paired_restart_reason()
+        if reason:
+            raise ValueError(reason)
+
     def context_limits(self) -> dict:
         """The dashboard's Context size: the range it offers and the engine's measured cost of the current one."""
         info = dict(getattr(self.engine, "info", {}) or {})
-        top = self.trained_context or CONTEXT_FALLBACK_MAX
+        rng = models.context_range(self.trained_context, self.engine.max_context, str(info.get("engine_kind") or ""))
         with self.status_lock:
             reload = dict(self.reload) if self.reload else None
         # a streamed cache's RAM (KV streaming: maya-mm3's VRAM lines' kv_ram - every position's K / V in pinned RAM,
@@ -2257,9 +2236,9 @@ class Service:
                 ram = {"ram_gb": round(vm.total / 2**30, 1), "ram_free_gb": round(vm.available / 2**30, 1)}
             except Exception:  # noqa: BLE001 - psutil is optional: no RAM figures, no RAM warning
                 pass
-        return {"context": self.engine.max_context, "min": CONTEXT_MIN, "max": max(top, self.engine.max_context),
-                "trained": self.trained_context,
-                "tested": CONTEXT_TESTED.get(str(info.get("engine_kind") or ""), CONTEXT_TESTED_DEFAULT),
+        reason = self.paired_restart_reason()
+        return {"context": self.engine.max_context, **rng,
+                "reload_supported": reason is None, "reload_reason": reason,
                 "kv_gb": info.get("kv_gb"), "kv_ctx": info.get("kv_ctx"),
                 "kv_resident": info.get("kv_resident") or 0,
                 "kv_ram_gb": round(kv_ram / 2**30, 3) if kv_ram else None, **ram,
@@ -2270,6 +2249,7 @@ class Service:
         """Reload the engine with an n-token context (the dashboard's Context size), on a thread: after the request in
         flight; new requests get a 503 meanwhile.  A start that fails (the context does not fit) puts the old one back;
         a good one is saved into the run config, so the next start keeps it."""
+        self._require_single_rank_restart()
         lim = self.context_limits()
         if not lim["min"] <= n <= lim["max"]:
             raise ValueError(f"the context must be between {lim['min']} and {lim['max']} tokens")
@@ -2430,6 +2410,7 @@ class Service:
         return bool(self.config_path) and p.resolve() == Path(self.config_path).resolve()
 
     def _restart_busy(self):
+        self._require_single_rank_restart()
         if getattr(self, "model_restart", None) or getattr(self, "port_restart", None):
             raise ValueError("Maya is already starting again")
         if self.reloading() or self.updater.busy():
@@ -2499,6 +2480,7 @@ class Service:
         return out
 
     def _delete_running(self, p: Path, files: bool, then) -> dict:
+        self._require_single_rank_restart()
         if not then:
             raise ValueError(f"{p.name} is the model running now: pick the model Maya switches to first")
         if not os.environ.get("MAYA_RESTART_ON_UPDATE"):
@@ -2670,12 +2652,24 @@ class Service:
         return any(isinstance(u, (int, float)) and u > STALL_GPU_BUSY for u in utils)
 
     def _tok_s(self):
-        """tok/s over the last RATE_WINDOW_S seconds, summed over the requests decoding now.  0.0 while none is."""
+        """tok/s over the last RATE_WINDOW_S seconds, summed over the requests decoding now.  0.0 while none is.
+        Every reading is also the Monitor's live Decode figure, so one above the peak decode becomes the peak."""
         with self.status_lock:
             if not self.status.get("busy"):
                 return 0.0
             now = time.time()
-            return sum(r.tok_s(now) for r in self.current_requests)
+            rate = sum(r.tok_s(now) for r in self.current_requests)
+            n = sum((r.samples[-1] if r.samples else r.base or (0, 0))[1] for r in self.current_requests)
+            self._note_peak(rate, n, now)
+            return rate
+
+    def _note_peak(self, tok_s, tokens, when):
+        """The Monitor's peak decode (status_lock held): the highest decode rate it has shown - a running answer's live
+        rate or a finished answer's - rounded as shown (0.1 tok/s), once the answers hold PEAK_MIN_TOKENS tokens."""
+        tok_s = round(tok_s or 0.0, 1)
+        peak = self.totals.get("peak_decode")
+        if tok_s > 0 and tokens >= PEAK_MIN_TOKENS and (peak is None or tok_s > peak["tok_s"]):
+            self.totals["peak_decode"] = {"tok_s": tok_s, "tokens": tokens, "time": when}
 
     def _tok_s_mean(self):
         """The whole-request mean since the first token (the old formula), kept so the two can be compared."""
@@ -2695,6 +2689,7 @@ class Service:
     def metrics(self, all_requests=False) -> dict:
         """GET /metrics: what the Monitor tab shows - the engine's facts, what it is doing, the last requests, and
         the hardware (with a minute of history per series)."""
+        rate = self._tok_s()                            # (first: a live rate above the peak is the peak in `totals`)
         with self.status_lock:
             s = dict(self.status)
             answering = self.latest_request in self.current_requests
@@ -2718,7 +2713,7 @@ class Service:
                 "prompt_read": None, "prompt_total": None, "generated": s.get("generated") if s.get("busy") else None,
                 "max_tokens": s.get("max_tokens") if s.get("busy") else None,
                 "elapsed_s": round(now - s["started"], 1) if s.get("busy") and s.get("started") else None,
-                "tok_s": round(self._tok_s(), 1) if state == "generating" else None,
+                "tok_s": round(rate, 1) if state == "generating" else None,
                 "tok_s_mean": round(self._tok_s_mean(), 1) if state == "generating" else None,
                 "prefill_tok_s_mean": getattr(self.engine, "prefill_tok_s_mean", None) if s.get("busy") else None,
                 "tok_s_window_s": RATE_WINDOW_S if state == "generating" else None}
@@ -3631,10 +3626,7 @@ class Service:
                         "loop_guard": guards[0].summary() if guards and guards[0].events else None}
                     self.history.append(row)
                     t = self.totals
-                    peak = t.get("peak_decode")
-                    if row["decode_tok_s"] and n >= PEAK_MIN_TOKENS and \
-                            (peak is None or row["decode_tok_s"] > peak["tok_s"]):
-                        t["peak_decode"] = {"tok_s": row["decode_tok_s"], "tokens": n, "time": started}
+                    self._note_peak(row["decode_tok_s"], n, started)
                     t["requests"] += 1
                     t["prompt_tokens"] += len(ids)
                     t["reused"] += last.get("reused") or 0
@@ -4183,6 +4175,17 @@ def _backlog() -> int:
         return 256
 
 
+def request_timeout() -> float:
+    """Seconds one socket read or write may wait (a client that sends half a request and nothing more must not hold a
+    thread for ever): 300 by default, MAYA_REQUEST_TIMEOUT_S changes it.  Per operation: a long answer that writes
+    nothing while it thinks is not cut."""
+    try:
+        s = float(os.environ.get("STRATA_REQUEST_TIMEOUT_S", "0"))
+    except ValueError:
+        s = 0.0
+    return s if math.isfinite(s) and s > 0 else 300.0
+
+
 def body_limit() -> int:
     """The most a request body may hold, in bytes (it is read into memory): 256 MiB, a million-token conversation with
     room to spare; STRATA_MAX_BODY_MIB changes it.  A larger one is answered 413 before it is read (Strata #893)."""
@@ -4225,6 +4228,7 @@ def make_handler(svc: Service):
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.0"                       # SSE ends by closing the connection
         answer_started = False                              # a malformed request's 400 only replaces an answer not begun
+        timeout = request_timeout()
 
         def log_message(self, fmt, *args):
             pass
@@ -4426,6 +4430,8 @@ def make_handler(svc: Service):
             self._json(200, out)
 
         def do_DELETE(self):
+            if self._foreign_page():
+                return
             if self.path.split("?")[0].startswith("/v1/responses/"):
                 self._response_resource(delete=True)
             elif self._authorized():
@@ -4615,8 +4621,27 @@ def make_handler(svc: Service):
             else:
                 self._json(404, {"error": {"message": "not found"}})
 
+        def _foreign_page(self) -> bool:
+            """A browser page on another site (its Origin neither this server nor in cors_origins): it can post a
+            text/plain body with no CORS preflight (CSRF), so it is refused before anything runs.  curl and the SDKs
+            send no Origin."""
+            origin = self.headers.get("Origin")
+            if not origin or origin.split("://", 1)[-1] == self.headers.get("Host", "") or self._cors_allow():
+                return False
+            self._json(403, {"error": {"type": "permission_error", "message": "requests from other web pages are "
+                                       "refused (the config's cors_origins lists the pages allowed)"}})
+            return True
+
+        def _fail(self, code, kind, message):
+            """An error as JSON, while nothing was sent; once an answer has begun (a stream), only the log has it."""
+            if self.answer_started:
+                print(f"[maya] request failed mid-answer: {message}", file=sys.stderr, flush=True)
+                self.close_connection = True
+                return
+            self._json(code, {"error": {"type": kind, "message": message}})
+
         def do_POST(self):
-            if not self._authorized():
+            if not self._authorized() or self._foreign_page():
                 return
             path = self.path.split("?")[0].rstrip("/")   # issue #55: Claude Code posts /v1/messages?beta=true
             try:
@@ -4697,19 +4722,20 @@ def make_handler(svc: Service):
                 else:
                     self._json(404, {"error": {"message": "not found"}})
             except BadBody as e:
-                self._json(e.status, {"error": {"type": "invalid_request_error", "message": str(e)}})
+                self._fail(e.status, "invalid_request_error", str(e))
             except (JobError, StoreBusy) as e:
-                self._json(getattr(e, "status", 503), {"error": {"type": "server_error", "message": str(e)}})
+                self._fail(getattr(e, "status", 503), "server_error", str(e))
             except ValueError as e:                          # (a ContextOverflow with its code: #432)
-                self._json(400, error_body(e))
-            except EngineDied as e:                          # before the answer started (not streamed)
-                self._json(503, {"error": {"type": "server_error", "message": f"{e}; the next request restarts it"}})
+                if self.answer_started:
+                    self._fail(400, "invalid_request_error", str(e))
+                else:
+                    self._json(400, error_body(e))
+            except EngineDied as e:
+                self._fail(503, "server_error", f"{e}; the next request restarts it")
             except (KeyError, TypeError, AttributeError, IndexError) as e:
                 # a field of the wrong shape (Strata: a 400 with the traceback in the log, not a dropped connection)
                 traceback.print_exc()
-                if not self.answer_started:
-                    self._json(400, {"error": {"type": "invalid_request_error",
-                                               "message": f"malformed request ({type(e).__name__}: {e})"}})
+                self._fail(400, "invalid_request_error", f"malformed request ({type(e).__name__}: {e})")
 
         def _props(self):
             model = parse_qs(urlsplit(self.path).query).get("model", [svc.model])[0]
@@ -5083,7 +5109,7 @@ class Server(ThreadingHTTPServer):
 
 
 SERVER_ENV = ("STRATA_ENGINE_STALL_S", "STRATA_REQUEST_QUIET_S", "STRATA_DRAIN_S", "STRATA_HTTP_BACKLOG",
-              "STRATA_MAX_BODY_MIB", "STRATA_FAIR_SLICE_S", "STRATA_DS4_KEEP_THINKING",
+              "STRATA_MAX_BODY_MIB", "STRATA_REQUEST_TIMEOUT_S", "STRATA_FAIR_SLICE_S", "STRATA_DS4_KEEP_THINKING",
               "STRATA_SERVER_LOG", "STRATA_GLM_THINK_RESERVE", "STRATA_LOOP_GUARD") + RESPONSE_ENV_KEYS + \
     tuple(maya_names.read_as(k) for k in ("MAYA_DS4_RESTORE_POINTS", "MAYA_DS4_RESTORE_TAIL"))
 
