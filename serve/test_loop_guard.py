@@ -880,6 +880,22 @@ class ToolBlock(unittest.TestCase):
         svc.prepare(msgs, tools, kw, 100, guard=False)
         self.assertIsNone(kw["_blocked"])
 
+    def test_steering_respects_total_output_limit(self):
+        from serve.frontend import openai_to_messages
+        for blocked in (False, True):
+            text = call_text(NMCLI[0]) if blocked else "Done."
+            for extra in (-1, 0, 1):
+                with self.subTest(blocked=blocked, extra=extra):
+                    eng = ScriptEngine(Tok(), text)
+                    svc = Server().service(eng)
+                    msgs, tools, kw = openai_to_messages(agent(*(NMCLI,) * (5 if blocked else 4)))
+                    limit = len(eng.scripts[0]) + len(eng.end) + extra
+                    ids, thinking, _ = svc.prepare(msgs, tools, kw, limit)
+                    done = [x for k, x in svc.run(ids, thinking, tools, limit,
+                            {"_blocked": kw.get("_blocked")}, threading.Event()) if k == "done"][-1]
+                    self.assertLessEqual(eng.made, limit)
+                    self.assertLessEqual(done["completion_tokens"], limit)
+
 
 class Collapse(unittest.TestCase):
     """A conversation that repeats itself: the prompt leaves out what the model already wrote (GLM-5.3 had "Hmm -

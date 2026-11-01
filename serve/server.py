@@ -3644,8 +3644,8 @@ class Service:
                             sliced.close()
                 def segments():
                     """attempts(), and after a blocked call (seg["next"]) the engine again on that prompt."""
-                    while True:
-                        yield from attempts(seg["prompt"], max(1, max_new - n))
+                    while n < max_new:
+                        yield from attempts(seg["prompt"], max_new - n)
                         if seg["next"] is None or cancel.is_set() or self.stopping:
                             return
                         seg["prompt"], seg["next"], seg["ids"] = seg["next"], None, []
