@@ -2219,7 +2219,11 @@ static int glm_pack_generate(const Options& o) {
                 model.prefill_progress = [&](int64_t done, int64_t total) {
                     (void) total;
                     pp_line(base + (size_t) done);
-                    return !read_stopped();
+                    // A TP worker executes the entire mirrored call. Rank 0 must finish the same
+                    // chunk collectives before honoring STOP; the call-boundary check below then
+                    // cancels and mirrors reset while both ranks are idle. A local early return
+                    // here would leave rank 1 inside a collective from the abandoned call.
+                    return tp2 || !read_stopped();
                 };
                 // Mirror immediately before the collective: rank 1 prefills the same part.
                 if (!tp_send_vec(kTpMirrorPrefill, part, prompt[end])) {
