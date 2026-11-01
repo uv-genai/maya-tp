@@ -1,14 +1,17 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-31 · **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
+> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, first tag #37 / draft PR #38.
+> User authorized stopping the pair for validation. Candidate binaries deployed; live TP2/MTP checks in progress.
+> Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
+> **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
 > **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
 > Open perf: **#33** TP2 prefill — sliced GEMM calibration + rank1 config inheritance improve Maya-S
 > median prompt throughput **32–37%** at 1K/4K/8K (§27). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
 > unchanged on all three paths. Prefill commit `9bc0ec9`, PR #34 merged as `b63f8af`; local **main**
 > tracks origin/main. Rank0 has user work (see §27); preserve it.
-> **User Maya-M TP2 pair running** at the release check (context 32768, healthy peer); leave it alone.
+> Historical release-check runtime below is superseded by §29's authorized test window.
 > Llama-swap daemon + 6 maya YAML entries preserved (Maya-L `--context 524288`).
 
 ## 1. What we are building
@@ -701,16 +704,32 @@ ten tags through v1.1.46, fetched as **upstream/v1.1.N** to preserve our collidi
 Inventory/guard decisions: `docs/upstream/INTEGRATION-2026-11-01.md` and its JSON commit/file audit.
 Do not start v1.1.38 until v1.1.37 passes the full checkpoint. No fork release authorized in this task.
 
+**User tag naming requirement (#40):** future fork releases use **`tp-vMAJOR.MINOR.PATCH`**
+(e.g. `tp-v1.1.43`), while `VERSION` remains numeric. Keep published legacy `v*` tags immutable;
+fetch upstream tags into `upstream/v*`. The dashboard updater now accepts the fork prefix, preserves
+the exact git tag during update and compares/displays its numeric version. Legacy tags still work.
+Tests cover release discovery, numeric ordering and an actual fast-forward from a temporary origin.
+
 Current user pair is **Maya-L**, context **524288**, rank0 API **:5812** (dynamic), rank1 local.
-It remains running while reviewing/CPU checking; async host-availability clarification is pending
-before GPU validation. Rank0 dirty user checkout remains protected; daemon/YAML untouched.
+User explicitly answered **"Hosts are free; you may stop the pair for validation"**. This authorizes
+stopping the pair for per-tag validation throughout this task; do not ask again. Pair stopped safely
+(server before engine), baseline binaries preserved under `/tmp/maya-upstream-baseline-2026-11-01/`
+on both hosts. Candidate `maya` MD5 **6e59558bdd421fa521040263978b2bd6** deployed to all three
+canonical paths and hash-verified for v1.1.37 tests. Daemon/YAML untouched; rank0 dirty user checkout
+still protected (no pull/reset/rebuild).
 
-### 29.1 First tag candidate (#37)
+First-tag worktree `/home/ugo/software/project-maya-upstream-review` exists on both hosts; branch
+`merge/upstream-v1.1.37` locally, detached candidate on rank0. Merge commit **884a257**, draft PR **#38**;
+HIP host-test dependency fix **0892d77** under **#39**. HIP map, **527 serve / 11 skips**, **637 tools /
+31 skips**, six budget tests and 11 CMake host checks PASS; maya/maya-ds4 and HIP parity binaries
+built for gfx1151. Shared fused-expert parity (196 runs) and attention parity PASS. Seven-draft
+MTP acceptance (reuse/cancel/limits, rank1-only forced retry), MTP and simple large-prompt matrices
+and CLI simple/MTP pair parity (32/32 each) PASS. Raw-pick benchmark and M/L checks are in progress.
+Later tags remain unmerged; do not proceed until the complete #37 checkpoint passes.
 
-Isolated worktree `/home/ugo/software/project-maya-upstream-review`, branch `merge/upstream-v1.1.37`.
-Upstream v1.1.37 merged there only; VERSION/changelog remain fork-owned. README/AGENTS, GLM control
-flow, TP2/RDMA code, launchers and #33 calibration byte-identical at this first checkpoint.
-Deliberately preserve our all-output-limit thinking answer reserve (reject upstream's tiny-limit-only
-policy); focused HTTP adapter tests 6 PASS, HIP map PASS. Full CPU suites/configured gfx1151 HIP
-candidate build in progress; evidence `/tmp/maya-upstream-v37/`, review `docs/upstream/v1.1.37.md`.
-User Maya-L pair remains active; no candidate deployed. GPU validation window still pending.
+
+### 29.1 Naming and issue maintenance
+
+#40 completed in `dd8e483`, PR #41 merged as `988f834`; both CI runs passed. The future release
+prefix is `tp-v`; no release/tag was created. #29 is now closed: its launchers and complete Maya-M
+validation were already finished, with evidence in §21. This does not substitute for current-tag tests.

@@ -21,7 +21,7 @@ RESTART_EXIT = 76                   # ... the dashboard saved a new port: start 
 SUPERVISED = "MAYA_RESTART_ON_UPDATE"   # set by maya.py for the server it starts: it starts it again after an update
 CHECK_EVERY = 6 * 3600
 RETRY_AFTER = 10 * 60               # GitHub not reached: ask again after this
-TAG = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
+TAG = re.compile(r"^(?:tp-v|v)?(\d+)\.(\d+)\.(\d+)$")
 
 
 def vtuple(v):
@@ -90,9 +90,10 @@ class Updater:
             with urllib.request.urlopen(req, timeout=8) as r:
                 rel = json.loads(r.read().decode("utf-8"))
             tag = str(rel.get("tag_name") or "")
-            if not vtuple(tag):
+            version = vtuple(tag)
+            if not version:
                 raise ValueError(f"the latest release's tag is not a version ({tag[:40]!r})")
-            self.latest = {"version": tag.lstrip("v"), "tag": tag, "url": rel.get("html_url"),
+            self.latest = {"version": ".".join(str(n) for n in version), "tag": tag, "url": rel.get("html_url"),
                            "summary": summary(rel.get("body") or ""), "published": rel.get("published_at"),
                            "repo": repo}
             self.error = None

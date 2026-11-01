@@ -6,6 +6,8 @@ git "origin" with two releases, nothing from the network.
 """
 from __future__ import annotations
 
+import io
+import json
 import os
 import shutil
 import subprocess
@@ -34,6 +36,25 @@ class Pieces(unittest.TestCase):
         self.assertGreater(U.vtuple("v1.0.10"), U.vtuple("1.0.9"))     # numbers, not text
         self.assertIsNone(U.vtuple("--upload-pack=x"))                  # never handed to git
         self.assertIsNone(U.vtuple(None))
+
+    def test_tp_release_versions(self):
+        self.assertEqual(U.vtuple("tp-v1.1.43"), (1, 1, 43))
+        self.assertGreater(U.vtuple("tp-v1.1.43"), U.vtuple("v1.1.42"))
+        for tag in ("upstream/v1.1.43", "tp-v1.1.43-rc1", "tp-v1.1.43;echo x", "tp-v1.1.43/other"):
+            self.assertIsNone(U.vtuple(tag), tag)
+
+    def test_prefixed_release_keeps_git_tag_and_numeric_display_version(self):
+        u = U.Updater("1.1.42")
+        release = {"tag_name": "tp-v1.1.43", "html_url": "https://example.test/tp-v1.1.43",
+                   "body": "Faster TP2 prefill.", "published_at": "2026-11-01T00:00:00Z"}
+        with mock.patch.object(U, "origin_repo", return_value="uv-genai/maya-tp"), \
+                mock.patch.object(U.urllib.request, "urlopen",
+                                  return_value=io.BytesIO(json.dumps(release).encode())):
+            info = u.check(force=True)
+        self.assertIsNone(info["error"])
+        self.assertTrue(info["newer"])
+        self.assertEqual(u.latest["tag"], "tp-v1.1.43")
+        self.assertEqual(u.latest["version"], "1.1.43")
 
     def test_summary_is_the_first_sentence(self):
         notes = "**Maya-L is out: the closest to FP8.**\nUpdate: `git pull`\n\n## What's new\n- a"
@@ -108,6 +129,17 @@ class Updating(unittest.TestCase):
         self.assertTrue(info["can_update"], info["blocker"])
         svc, ex = self.run_update()
         self.assertEqual((self.clone / "VERSION").read_text().strip(), "1.0.1")
+        svc.close_for_restart.assert_called_once()
+        ex.assert_called_once_with(U.UPDATE_EXIT)
+
+    def test_update_moves_to_prefixed_tag(self):
+        sh(self.tmp / "src", "tag", "-a", "tp-v1.0.1", "-m", "Maya-TP 1.0.1")
+        self.u.latest = {"version": "1.0.1", "tag": "tp-v1.0.1", "url": None, "summary": ""}
+        svc, ex = self.run_update()
+        self.assertEqual((self.clone / "VERSION").read_text().strip(), "1.0.1")
+        head = U.git(self.clone, "rev-parse", "HEAD").stdout.strip()
+        tagged = U.git(self.clone, "rev-parse", "tp-v1.0.1^{commit}").stdout.strip()
+        self.assertEqual(head, tagged)
         svc.close_for_restart.assert_called_once()
         ex.assert_called_once_with(U.UPDATE_EXIT)
 

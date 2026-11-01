@@ -17,9 +17,18 @@ base is v1.1.36 `f031a23`; use namespaced `upstream/v1.1.N` tags (fork tag names
 §29 and `docs/upstream/INTEGRATION-2026-11-01.md`. Preserve fork-owned README.md/AGENTS.md through
 semantic review, all TP2/MTP invariants and #33 tuning. No new fork release requested.
 
+**Tag naming (#40):** all future fork releases use **`tp-vMAJOR.MINOR.PATCH`**; `VERSION` stays
+numeric. Existing published `v*` tags stay immutable. Upstream tags stay under `upstream/v*` locally.
+The updater accepts both the new prefix and legacy tags. Do not publish a release just for a merge.
+
 Current user pair is **Maya-L at context 524288**, rank0 API :5812 (dynamic), rank1 local. It has
-not been stopped. Host availability for GPU validation was asked asynchronously; keep independent
-review/CPU work moving, but do not stop the user pair without resolving that constraint.
+now been stopped **with explicit user authorization**: "Hosts are free; you may stop the pair for
+validation". This authorization persists for the per-tag tests; do not ask again. Baseline binaries
+saved on both hosts in `/tmp/maya-upstream-baseline-2026-11-01/`. Candidate v1.1.37 engine MD5
+**6e59558bdd421fa521040263978b2bd6** is deployed/hash-verified at all three canonical paths.
+Isolated worktree `/home/ugo/software/project-maya-upstream-review` on both hosts; candidate commits
+**884a257 + 0892d77**, draft **PR #38**, host-test wiring fix **#39**. CPU gates and HIP builds pass;
+GPU validation is starting. Do not start the next tag until #37 passes.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.
@@ -56,12 +65,12 @@ six entries `maya-glm5-{s,m,l}-tp2` and `-tp2-mtp` with explicit `--model`; draf
 Maya-L uses **`--context 524288`** (also in `maya-maya-l-hip.json`). Daemon `--watch-config` running.
 Backups sit beside the YAML.
 
-**Binary:** `5a52cd27167523b6ea4b0f0bde93f503` on local `build-hip/maya`, rank0 `build-hip/maya`,
-and `/tmp/maya-tp2` (built with `STRATA_ENABLE_TP2_RDMA=ON`; installer always passes that flag now).
+**Baseline binary:** `5a52cd27167523b6ea4b0f0bde93f503`, saved on both hosts. Current deployed
+candidate is `6e59558bdd421fa521040263978b2bd6` (see active task above); TP2 RDMA is enabled.
 
-**Engines:** tests finished/stopped, then **user started Maya-M TP2 under llama-swap** during release
-preparation. At the read-only check: context 32768, rank0 API :5814 (dynamic), status ok / peer up,
-rank1 worker running locally. **Leave this user pair running.** Daemon/YAML untouched.
+**Engines:** the old release-check Maya-M runtime is superseded by the authorized GPU window above.
+The subsequent Maya-L pair was stopped with explicit permission; candidate test pairs may be restarted.
+Daemon/YAML untouched.
 **#33 gates:** HIP map + 464 serve / 11 skips + 630 tools / 31 skips PASS. No engine rebuild;
 rank1 launcher + hipBLASLt 100401 tuning table deployed to rank0 with matching SHA256s.
 Prefill commit **9bc0ec9**, [PR #34](https://github.com/uv-genai/maya-tp/pull/34); both CI runs
@@ -89,14 +98,14 @@ CPU gates green at last run (HIP map + serve + tools). CPU CI passed for release
    verify **three** hashes. `/tmp/maya-tp2` can disappear — redeploy if missing.
 4. Rank0 has user work (above), plus the deployed rank1 launcher and tuning table from #33. **No pull/reset/rebuild there.**
    Local main includes `9bc0ec9` and v1.1.42 (`6471995`); authoritative source is origin/main.
-   The binary is unchanged. Do not leave worktrees dirty without saying so.
+   Candidate binaries are deployed as recorded above. Do not leave worktrees dirty without saying so.
 5. Use `.venv/bin/python`, jq. One issue per workstream on `uv-genai/maya-tp`; comment at milestones;
    `refs #N`; push only origin; close or leave open explicitly. Keep Handoff current.
 6. Start rank1 locally before SSH-launching rank0. Pass the **same** `--model`/`--pack`/`--config` (or
    `MAYA_*`) to both ranks. MTP: `MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=N MAYA_GLM_MTP_DRAFT=N`; unset
    `MAYA_GLM_NO_MTP`. Simple: `MAYA_GLM_NO_MTP=1`. Match contexts (32768 for API tests unless told).
    Never probe bootstrap 18515 with `/dev/tcp`. Restart **both** ranks after poisoned communicator.
-7. Stop only your own test engines/server after finishing; preserve the current user-started Maya-M pair.
+7. Stop your test engines/server after finishing; the user authorized stopping the previous pair.
    Leave llama-swap **daemon and YAML** alone unless the user
    asks. Live model ids: `maya-glm5-{s,m,l}-tp2` and `-tp2-mtp`.
 8. #16 vision deferred; #11 multi gated (`glm_rows.cu` shared-width/attention audit first); #10 optional.
