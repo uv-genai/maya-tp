@@ -466,7 +466,6 @@ class Gguf(unittest.TestCase):
             self.assertIn("/resolve/8a6ec9cf118e785a362ea94ee123c61c70553be6/%s/" % maya.DS4_QUANTS[q],
                           maya.file_url(m, sorted(m["files"])[0]))
             self.assertEqual(maya.Q.shown("deepseek", q), "DeepSeek V4.1 · " + maya.DS4_QUANTS[q])
-        self.assertEqual(maya.ds4_gguf_model("gguf-q8")["revision"], "c991b28e7c109eed10a55075ddb46f830b5b3059")
         rows = []
 
         def pick(title, intro, opts, default, yes, *x):
@@ -475,14 +474,35 @@ class Gguf(unittest.TestCase):
         with patch.object(maya.S, "gpus", return_value=[{"arch": 86}]), patch.object(maya, "choose", pick), \
                 patch.object(maya.S, "UI", None):
             maya.choose_ds4_quant(args(), {})
-            self.assertFalse(any(x in r for r in rows for x in ("UD-IQ1", "UD-IQ2", "UD-IQ3_XXS", "UD-Q2", "UD-Q3")), rows)
-            self.assertEqual(sum("UD-IQ3_S" in r for r in rows), 1)   # (UD-IQ3_S: the one that is listed)
+            self.assertFalse(any(x in r for r in rows for x in ("UD-IQ1_S", "UD-IQ2", "UD-IQ3_XXS", "UD-Q2", "UD-Q3")), rows)
+            self.assertEqual(sum("UD-IQ3_S" in r for r in rows), 1)   # (UD-IQ3_S and UD-IQ1_M: the listed ones)
+            self.assertEqual(sum("UD-IQ1_M" in r for r in rows), 1)
             rows.clear()
             self.assertEqual(maya.choose_ds4_quant(args(), {"installer": {"ds4_quant": "gguf-iq1_s"}}), "gguf-iq1_s")
             self.assertTrue(any(r.startswith("DeepSeek V4.1 · UD-IQ1_S (233 GB)") for r in rows), rows)
             rows.clear()
             self.assertEqual(maya.choose_ds4_quant(args(ds4_quant="gguf-iq2_xxs"), {}), "gguf-iq2_xxs")
             self.assertEqual(rows, [])
+
+    def test_iq1_m_listed(self):
+        """UD-IQ1_M is a listed choice before UD-IQ3_S, on its own facts (no comparison with Maya-XS)."""
+        rows = []
+
+        def pick(title, intro, opts, default, yes, *x):
+            rows.extend((o[0], o[2]) for o in opts)
+            return default
+        pub = lambda k: k in ("maya-s", "maya-xs")  # noqa: E731
+        with patch.object(maya.S, "gpus", return_value=[{"arch": 86}]), patch.object(maya, "choose", pick), \
+                patch.object(maya.S, "UI", None), patch.object(maya, "ds4_maya_published", pub):
+            maya.choose_ds4_quant(args(), {})
+        names = [r[0] for r in rows]
+        i = next(j for j, n in enumerate(names) if "UD-IQ1_M" in n)
+        self.assertIn("UD-IQ3_S", names[i + 1])
+        self.assertIn("(250 GB)", names[i])
+        for part in ("KLD 0.198", "90.3%", "140 GB", "110 GB", "150 GB"):
+            self.assertIn(part, rows[i][1])
+        self.assertNotIn("better", rows[i][1])
+
 
     def test_iq3_s_listed(self):
         """UD-IQ3_S is a listed choice, between Maya-S and the Q8, with its quality and the memory it wants; the other six
@@ -620,6 +640,37 @@ class Gguf(unittest.TestCase):
                     with patch.object(maya.shutil, "disk_usage", return_value=SimpleNamespace(free=1e9)), \
                             self.assertRaises(SystemExit):
                         maya.share_file(src, root / "d" / "t.gguf")
+
+    def test_q8_q4_on_the_current_revision_unchanged(self):
+        """UD-Q8_K_XL and UD-Q4_K_XL are pinned to the same revision as the other UD quants (8a6ec9cf); every file's
+        name, size and sha256 is the one pinned before at c991b28e (checked against the Hub), and a folder that holds
+        them whole is valid under either revision - an install made earlier downloads nothing again."""
+        want = {"gguf-q8": "530007912f9637438fff4e34791c9a792ae2436b5a16913f5837e6e63e356573",
+                "gguf-q4": "f339e525a29bd127db40eddb2d215a7d7d1ce10fdc8793eb90c20d4821b8f299"}
+        man = json.loads(maya.DS4_GGUF_MANIFEST.read_text(encoding="utf-8"))
+        for q, digest in want.items():
+            m = maya.ds4_gguf_model(q)
+            self.assertEqual(m["revision"], "8a6ec9cf118e785a362ea94ee123c61c70553be6")
+            files = man["quants"][maya.DS4_QUANTS[q]]["files"]
+            self.assertEqual(hashlib.sha256("\n".join("%s %d %s" % (k, v[0], v[1]) for k, v in sorted(files.items()))
+                                            .encode()).hexdigest(), digest)
+            tmp = Path(tempfile.mkdtemp())
+            d = tmp / maya.DS4_QUANTS[q]
+            d.mkdir()
+            small = json.loads(json.dumps(man))
+            for i, k in enumerate(sorted(small["quants"][maya.DS4_QUANTS[q]]["files"])):
+                small["quants"][maya.DS4_QUANTS[q]]["files"][k][0] = i + 1
+            for rev in ("c991b28e7c109eed10a55075ddb46f830b5b3059", "8a6ec9cf118e785a362ea94ee123c61c70553be6"):
+                small["revision"] = rev                       # (the folder was filled under the old revision)
+                p = tmp / "download_gguf.json"
+                p.write_text(json.dumps(small), encoding="utf-8")
+                with patch.object(maya, "DS4_GGUF_MANIFEST", p):
+                    mm = maya.ds4_gguf_model(q)
+                    self.assertEqual(mm["revision"], rev)
+                    for i, n in enumerate(sorted(mm["files"])):
+                        (d / n).write_bytes(b"x" * (i + 1))
+                    self.assertEqual([n for n in mm["files"] if maya.file_incomplete(mm, d / n)], [])
+                    self.assertIsNone(maya.ds4_earlier(mm, d))
 
     def test_earlier_layout_pinned(self):
         """unsloth's layout before its 2026-10-19 re-shard: 10 shards at dc788bdb, each with its size and sha256."""

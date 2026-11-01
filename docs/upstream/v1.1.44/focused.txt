@@ -1,0 +1,178 @@
+test_choice_folder_and_name (tools.test_setup_ds4.Abliterated.test_choice_folder_and_name) ... /home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_download_sends_the_token (tools.test_setup_ds4.Abliterated.test_download_sends_the_token)
+curl gets the token as a header read from a file (-H @file) only the user can read, removed after. ...   0.0 / 0.0 GB (100%) · 0 MB/s · 0 files at once   
+ok
+test_engram_linked_from_a_maya_quant (tools.test_setup_ds4.Abliterated.test_engram_linked_from_a_maya_quant)
+Maya's Q6_K tables for an orcarouter version: hard-linked from a Maya quant beside it (no second copy), the ... ok
+test_free_space_counts_the_tables_when_needed (tools.test_setup_ds4.Abliterated.test_free_space_counts_the_tables_when_needed)
+The model step's free-space check adds the n-gram tables the setup downloads after it (also_gb) - only when ... 
+  [X]  not enough free space in /tmp/tmpt6tat3fc/Mix-128G: about 278 GB are needed (the model, the tables + its pack)
+       free some space, or put the model on another drive: ./maya.sh --setup --models-dir /path/on/nvme
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+ok
+test_manifest_and_urls (tools.test_setup_ds4.Abliterated.test_manifest_and_urls) ... ok
+test_no_token_stops_before_downloading (tools.test_setup_ds4.Abliterated.test_no_token_stops_before_downloading) ... 
+  [X]  orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF is gated and no Hugging Face token was found
+       accept its terms at https://huggingface.co/orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF, then set HF_TOKEN (a read token from https://huggingface.co/settings/tokens) or run `hf auth login`, and run ./maya.sh again
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+ok
+test_token (tools.test_setup_ds4.Abliterated.test_token) ... ok
+test_busy_gpus (tools.test_setup_ds4.Calibrate.test_busy_gpus) ... ok
+test_failed_keeps_the_config (tools.test_setup_ds4.Calibrate.test_failed_keeps_the_config) ... ok
+test_fallback_grouping_saved_and_shown_in_summary (tools.test_setup_ds4.Calibrate.test_fallback_grouping_saved_and_shown_in_summary) ... ok
+test_result_saved (tools.test_setup_ds4.Calibrate.test_result_saved) ... ok
+test_a_tuning_for_other_gpus_does_not_hold_the_tp (tools.test_setup_ds4.Config.test_a_tuning_for_other_gpus_does_not_hold_the_tp) ... ok
+test_again_keeps_what_it_does_not_ask (tools.test_setup_ds4.Config.test_again_keeps_what_it_does_not_ask) ... ok
+test_fresh (tools.test_setup_ds4.Config.test_fresh) ... ok
+test_gguf_config (tools.test_setup_ds4.Config.test_gguf_config) ... ok
+test_hip_reserve (tools.test_setup_ds4.Config.test_hip_reserve) ... ok
+test_the_config_befores_own_wins (tools.test_setup_ds4.Config.test_the_config_befores_own_wins) ... ok
+test_tp_follows_the_gpus_chosen_now (tools.test_setup_ds4.Config.test_tp_follows_the_gpus_chosen_now)
+#436: a config for two GPUs set up again for one - --tp 2 kept made the engine fail later ... ok
+test_tuned_before_is_used (tools.test_setup_ds4.Config.test_tuned_before_is_used) ... ok
+test_up_to_the_models_own (tools.test_setup_ds4.Contexts.test_up_to_the_models_own)
+The setup offers DeepSeek's contexts up to the model's own 1M (its max_position_embeddings), the menu in K or M. ... ok
+test_a_file_that_never_arrives_stops_the_setup (tools.test_setup_ds4.Download.test_a_file_that_never_arrives_stops_the_setup) ... 
+
+  [X]  the download of m-00000.gguf keeps stopping without progress (curl: (37) Could not open file /tmp/tmpvlkjuxk5/nothing-here.gguf)
+       check the connection, then run ./maya.sh --download-model again: it continues where it stopped
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+ok
+test_resumes_each_file_from_its_size (tools.test_setup_ds4.Download.test_resumes_each_file_from_its_size) ...   0.0 / 0.0 GB (100%) · 1 MB/s · 0 files at once   
+ok
+test_choice (tools.test_setup_ds4.Drafting.test_choice) ... ok
+test_deepseek_kept_as_chosen (tools.test_setup_ds4.Drafting.test_deepseek_kept_as_chosen) ... ok
+test_glm_kept_as_chosen (tools.test_setup_ds4.Drafting.test_glm_kept_as_chosen) ... ok
+test_default_is_the_model_before (tools.test_setup_ds4.Family.test_default_is_the_model_before) ... ok
+test_options_pick_the_model (tools.test_setup_ds4.Family.test_options_pick_the_model) ... 
+  Which model to set up:
+  1) GLM-5.3-Flash
+  2) DeepSeek-V4.1-Flash-1017   (experimental)
+  3) MiniMax-M3.1-Flash   (new)
+  4) Qwen-3.8-Flash-Next (CYBER-FROST) · Q5_K_M (113 GB)   (new)
+ok
+test_choice_and_folder (tools.test_setup_ds4.Gguf.test_choice_and_folder) ... ok
+test_earlier_layout_pinned (tools.test_setup_ds4.Gguf.test_earlier_layout_pinned)
+unsloth's layout before its 2026-10-19 re-shard: 10 shards at dc788bdb, each with its size and sha256. ... ok
+test_earlier_layout_used_when_whole (tools.test_setup_ds4.Gguf.test_earlier_layout_used_when_whole)
+A folder that holds unsloth's earlier layout whole is used as it is (nothing downloaded again); not whole, ... ok
+test_free_space_per_disk (tools.test_setup_ds4.Gguf.test_free_space_per_disk)
+A shard that is a link to another disk is counted against that disk, not the model folder's. ... 
+  [X]  not enough free space in /tmp/tmpmwa9qi8t/other: about 23 GB of the model are linked into it from /tmp/tmpmwa9qi8t/m
+       free some space there, or link the files to another drive
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+  [X]  not enough free space in /tmp/tmpmwa9qi8t/m: about 13 GB are needed (the model + its pack)
+       free some space, or put the model on another drive: ./maya.sh --setup --models-dir /path/on/nvme
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+ok
+test_gguf_config_with_the_vision_tower (tools.test_setup_ds4.Gguf.test_gguf_config_with_the_vision_tower) ... /home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_iq1_m_listed (tools.test_setup_ds4.Gguf.test_iq1_m_listed)
+UD-IQ1_M is a listed choice before UD-IQ3_S, on its own facts (no comparison with Maya-XS). ... ok
+test_iq3_s_listed (tools.test_setup_ds4.Gguf.test_iq3_s_listed)
+UD-IQ3_S is a listed choice, between Maya-S and the Q8, with its quality and the memory it wants; the other six ... ok
+test_manifest_and_urls (tools.test_setup_ds4.Gguf.test_manifest_and_urls) ... ok
+test_q4_is_chosen_by_hand_not_listed (tools.test_setup_ds4.Gguf.test_q4_is_chosen_by_hand_not_listed)
+v1.1.34: unsloth's UD-Q4_K_XL is not in the setup's list (maya.DS4_BY_HAND); --ds4-quant gguf-q4 takes it as ... ok
+test_q8_q4_on_the_current_revision_unchanged (tools.test_setup_ds4.Gguf.test_q8_q4_on_the_current_revision_unchanged)
+UD-Q8_K_XL and UD-Q4_K_XL are pinned to the same revision as the other UD quants (8a6ec9cf); every file's ... ok
+test_share_file_fallbacks (tools.test_setup_ds4.Gguf.test_share_file_fallbacks)
+The one copy: a hard link, else a symbolic link, else a copy (with room for it); a file there already stays. ... ok
+test_shared_tables_maya_after_unsloth (tools.test_setup_ds4.Gguf.test_shared_tables_maya_after_unsloth)
+Maya-XS set up where UD-IQ3_S's table shard is whole (size and sha256): its pair of shards is left out and ... ok
+test_shared_tables_unsloth_after_maya (tools.test_setup_ds4.Gguf.test_shared_tables_unsloth_after_maya)
+UD-IQ3_S set up where Maya's Q6_K pair is whole (size and sha256): its table shard is left out and the pair is ... ok
+test_ud_quants (tools.test_setup_ds4.Gguf.test_ud_quants)
+unsloth's smaller UD quants (its re-upload of 2026-10-28): each pinned to that revision with every shard's size ... ok
+test_every_file_pinned (tools.test_setup_ds4.Manifest.test_every_file_pinned) ... ok
+test_urls (tools.test_setup_ds4.Manifest.test_urls) ... ok
+test_drafter_from_mayas_repo_once_pinned (tools.test_setup_ds4.MayaQuants.test_drafter_from_mayas_repo_once_pinned) ... ok
+test_maya_s_one_split (tools.test_setup_ds4.MayaQuants.test_maya_s_one_split)
+Maya-S is one GGUF split of 6 shards with its Engram tables (Q6_K, shards 5 and 6), from Maya's repo. ... ok
+test_not_offered_before_they_are_published (tools.test_setup_ds4.MayaQuants.test_not_offered_before_they_are_published) ... 
+  [X]  DeepSeek-V4.1-Flash-1017 Maya-S is not published yet
+       set up unsloth's GGUF meanwhile: ./maya.sh --setup --model DeepSeek-V4.1-Flash-1017 --ds4-quant gguf-q8
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+ok
+test_pack_follows_the_engram_folder (tools.test_setup_ds4.MayaQuants.test_pack_follows_the_engram_folder)
+The pack indexes the files and the Engram folder the setup picked (--shards, --engram), and is built again ... ok
+test_pinned_maya_s (tools.test_setup_ds4.MayaQuants.test_pinned_maya_s) ... ok
+test_published (tools.test_setup_ds4.MayaQuants.test_published) ... ok
+test_v1116_install_kept (tools.test_setup_ds4.MayaQuants.test_v1116_install_kept)
+v1.1.16's Maya-S with its Engram shard whole: used as it is, nothing downloaded again - whichever layout of ... ok
+test_v1116_install_kept_by_the_setup (tools.test_setup_ds4.MayaQuants.test_v1116_install_kept_by_the_setup)
+set_up_ds4 with v1.1.16's Maya-S whole: no download, the pack indexes its 4 shards and Engram/ (--shards, ... ok
+test_v1116_layout_pinned (tools.test_setup_ds4.MayaQuants.test_v1116_layout_pinned)
+v1.1.16's Maya-S (4 shards at 26c6aea) and unsloth's MXFP8 Engram shard beside it, in either of its ... ok
+test_engram_linked (tools.test_setup_ds4.Quant35.test_engram_linked) ... ok
+test_every_file_pinned (tools.test_setup_ds4.Quant35.test_every_file_pinned) ... ok
+test_exl3_on_amd_experimental (tools.test_setup_ds4.Quant35.test_exl3_on_amd_experimental)
+AMD: the EXL3 quants go on to the AMD PC check with an experimental warning (as GLM's and MiniMax's EXL3 ... ok
+test_offered_only_where_exl3_runs (tools.test_setup_ds4.Quant35.test_offered_only_where_exl3_runs)
+--ds4-quant exl3-3.5, or the menu's row - on NVIDIA compute capability 7.0+ (not a PC whose GPUs are all ... ok
+test_own_folder_and_config (tools.test_setup_ds4.Quant35.test_own_folder_and_config) ... /home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_config (tools.test_setup_ds4.Rename.test_config) ... ok
+test_programs_and_stamp (tools.test_setup_ds4.Rename.test_programs_and_stamp) ... ok
+test_server_command (tools.test_setup_ds4.Start.test_server_command) ... ok
+test_leaves_a_learned_one_and_an_explicit_one (tools.test_setup_ds4.StartingProfile.test_leaves_a_learned_one_and_an_explicit_one) ... ok
+test_make_and_compare (tools.test_setup_ds4.StartingProfile.test_make_and_compare) ... ok
+test_only_the_packs_geometry (tools.test_setup_ds4.StartingProfile.test_only_the_packs_geometry) ... ok
+test_seeds_a_pack_without_one (tools.test_setup_ds4.StartingProfile.test_seeds_a_pack_without_one) ... ok
+test_already_there (tools.test_setup_ds4.Vision.test_already_there) ... ok
+test_failed_markers_keep_the_shard_and_read_text (tools.test_setup_ds4.Vision.test_failed_markers_keep_the_shard_and_read_text) ... ok
+test_folder_is_shared_by_the_quants (tools.test_setup_ds4.Vision.test_folder_is_shared_by_the_quants) ... ok
+test_made_then_the_shard_is_removed (tools.test_setup_ds4.Vision.test_made_then_the_shard_is_removed) ... ok
+test_manifest (tools.test_setup_ds4.Vision.test_manifest) ... ok
+test_no_vision_downloads_nothing (tools.test_setup_ds4.Vision.test_no_vision_downloads_nothing) ... ok
+test_not_downloaded (tools.test_setup_ds4.Vision.test_not_downloaded) ... ok
+test_pack_rebuilt_when_the_tower_arrives (tools.test_setup_ds4.Vision.test_pack_rebuilt_when_the_tower_arrives) ... ok
+test_ud_quants_take_the_mmproj (tools.test_setup_ds4.Vision.test_ud_quants_take_the_mmproj)
+unsloth's UD quants: its mmproj-BF16.gguf (pinned in "vision" / "mmproj"), packed by vision_pack.py --mmproj ... ok
+
+----------------------------------------------------------------------
+Ran 73 tests in 3.215s
+
+OK

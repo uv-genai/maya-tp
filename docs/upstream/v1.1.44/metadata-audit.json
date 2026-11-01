@@ -1,0 +1,30 @@
+[
+  {
+    "revision": "c991b28e7c109eed10a55075ddb46f830b5b3059",
+    "quant": "UD-Q8_K_XL",
+    "files": 9,
+    "all_sizes_sha256_equal_manifest": true,
+    "url": "https://huggingface.co/api/models/unsloth/DeepSeek-V4.1-Flash-1017-GGUF/tree/c991b28e7c109eed10a55075ddb46f830b5b3059/UD-Q8_K_XL?recursive=false&expand=false"
+  },
+  {
+    "revision": "c991b28e7c109eed10a55075ddb46f830b5b3059",
+    "quant": "UD-Q4_K_XL",
+    "files": 9,
+    "all_sizes_sha256_equal_manifest": true,
+    "url": "https://huggingface.co/api/models/unsloth/DeepSeek-V4.1-Flash-1017-GGUF/tree/c991b28e7c109eed10a55075ddb46f830b5b3059/UD-Q4_K_XL?recursive=false&expand=false"
+  },
+  {
+    "revision": "8a6ec9cf118e785a362ea94ee123c61c70553be6",
+    "quant": "UD-Q8_K_XL",
+    "files": 9,
+    "all_sizes_sha256_equal_manifest": true,
+    "url": "https://huggingface.co/api/models/unsloth/DeepSeek-V4.1-Flash-1017-GGUF/tree/8a6ec9cf118e785a362ea94ee123c61c70553be6/UD-Q8_K_XL?recursive=false&expand=false"
+  },
+  {
+    "revision": "8a6ec9cf118e785a362ea94ee123c61c70553be6",
+    "quant": "UD-Q4_K_XL",
+    "files": 9,
+    "all_sizes_sha256_equal_manifest": true,
+    "url": "https://huggingface.co/api/models/unsloth/DeepSeek-V4.1-Flash-1017-GGUF/tree/8a6ec9cf118e785a362ea94ee123c61c70553be6/UD-Q4_K_XL?recursive=false&expand=false"
+  }
+]

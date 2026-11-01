@@ -1,0 +1,5 @@
+b398d4a0711430edd6a28b95264c7293  build-hip/maya
+b398d4a0711430edd6a28b95264c7293  /home/ugo/software/project-maya/build-hip/maya
+b398d4a0711430edd6a28b95264c7293  /home/ugo/software/project-maya-upstream-review/build-hip/maya
+b398d4a0711430edd6a28b95264c7293  /home/ugo/software/project-maya/build-hip/maya
+b398d4a0711430edd6a28b95264c7293  /tmp/maya-tp2
