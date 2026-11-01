@@ -1,90 +1,77 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §§18,21,23,27–29 and the latest §29.11), then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and **latest §29.15**, then `AGENTS.md`.
 
-Maya-TP runs GLM-5.3-Flash across two Strix Halo hosts. **HIP/ROCm gfx1151 Linux only**, GPU inference, **RDMA tensors only**; sockets carry bootstrap/control/token metadata. No new backend abstractions or CUDA/NVIDIA work. No subagents unless explicitly authorized.
+## Task and current checkpoint
 
-## Active task
+Integrate upstream **v1.1.37–v1.1.46 one at a time**. Validate each checkpoint and its post-merge main CI before starting the next. Preserve TP2/MTP; merge owned README/AGENTS/docs semantically. The audit is #36 /`docs/upstream/INTEGRATION-2026-11-01.md`; official tags are `upstream/v*`.
 
-Integrate upstream **v1.1.37–v1.1.46 one at a time**, verifying each checkpoint and post-merge main CI before the next. Preserve TP2/MTP and semantically merge fork-owned README/AGENTS/docs. Audit: #36 /`docs/upstream/INTEGRATION-2026-11-01.md`. Tags are fetched as `upstream/v1.1.N`, never over fork tags.
+Accepted37–40:
 
-Accepted:
+-37: #37 /PR38 /7ea9d71, full S/M/L gates; report `docs/upstream/v1.1.37.md`.
+-38: #43 /PR44 /ad96053. Its post-main failure was fixed separately by #47 /PR48 /f479b91; fixed main41303961934 passed. Preserve failed-start liveness; do not retry away that historical failure.
+-39: #45 /PR49 /d2708b2; main41311902227 passed; report `docs/upstream/v1.1.39.md`.
+-40: #50 /PR51 /0a10f5c; main41316911427 passed. Preserve #53's paired context/current-model lifecycle guard.
 
-- **v1.1.37:** #37 /PR #38 /`7ea9d71`; evidence `docs/upstream/v1.1.37.md`. Full S/M/L API/CLI, parity, retries, kill/recover and controlled prefill passed.
-- **v1.1.38:** #43 /PR #44 /`ad96053`; evidence `docs/upstream/v1.1.38.md`. Its real post-merge CI failure was fixed separately by #47 /PR #48 /`f479b91`, fixed main CI41303961934 PASS. Preserve that failed-start liveness fix; do not retry away the historical failure.
-- **v1.1.39:** #45 /PR #49 /`d2708b2`; final b6483f2 CI41310209384/41310204043 and **main41311902227 PASS**. #45 closed. Evidence `docs/upstream/v1.1.39.md` and adjacent directory.
+**Active41: #55 /PR58, upstream171077787036ccc2784250ca644760f654e8d4a3. Runtime validation is complete; final CI/merge/main CI remain.** Review branch `merge/upstream-v1.1.41`, evidence head7ab98c8, runtime32650e8, engine **a6170c07503e139d73789184d9a93971**. Report and results: `docs/upstream/v1.1.41.md` and adjacent `validation.json`. Reconcile the latest main handoff into the review branch, require CI on its final head, merge with ancestry preserved, then require main CI before42. The earlier7ab98c8 runs were41326427259/41326422499; inspect actual status.
 
-**Active: #55 / upstream v1.1.41 `171077787036ccc2784250ca644760f654e8d4a3`**,50 commits/82 files. Candidate PR #58, source c127dec; see Handoff §29.12. Live validation is running. Review worktree branch `merge/upstream-v1.1.41` from updated origin/main. Audit new GLM snapshot/reuse/cancel/state/routing, pool size classes and tuned defaults against all TP2/MTP invariants. Keep #53 context/current-model restart guard, #46 stream deferral, all-limit answer reserve/#47 fix, replicated NextN/shared/dense widths/ARs, canonical MTP wire/global retries/chunks and measured primary100401 tuning/config inheritance. Exclude unsupported backends/platforms; no v1.1.42 work before41acceptance/mainCI.
+There are **no active GPU/test batches**. Sessions15734,61183,96027 completed. All five engine copies match a617; engines/server are stopped. Do not rerun completed gates without a reason. No42 source work has begun. Continue through46, not partial completion.
 
-v39 retains MMQ row-ID padding, ordered Lt fallback with measured primary first, bounded sentence-end thinking closure inside the answer reserve, cancel draining, malformed-call recovery and installer fixes. Streamed fetch is **deferred entirely** (#46); buffered reader/header/GPU fetch kernels are byte-identical, even with `MAYA_GLM_STREAM_FETCH=1`. DS4 prefix/tail-auto/link-sized rings stay opt-in. Multi/vision remain gated.
+## Validated41 behavior
 
-**v1.1.40 accepted:** #50 /PR #51 /0a10f5c. Final f1799ad CI41316570180/41316566065 and **main41316911427 PASS**; #50/#53 closed. Evidence docs/upstream/v1.1.40.md. All Metal/macOS additions excluded.554serve/11skips,653tools/31,HIPmap/3HIPbuilds/DS4host/Node/JS pass; S MTP7/simple matrices,109/37matchedrounds/8asymmetricretries each,16framed256-token raw-pick0 and real context/Origin/metrics/guard checks pass.
+Ordered HIP map,580server tests/11skips,654tools/31skips passed. Three gfx1151 HIP engines build;15host checks,396strict IQ cases,196fused cases, MMQ/attention, CPU exact rows with PDEP0/1 and compact1024 widths, EXL3 tiers and actual Node monitor checks passed.
 
-Keep #53's `paired_restart_reason` / `_require_single_rank_restart`, context `reload_supported` / `reload_reason` and read-only UI. TP2 context/current-model lifecycle changes must fail before rank0-only restart/config mutation; live rejection preserved both PIDs/context/peer and subsequent inference. Use paired launcher options to change context/model.
+Simple/MTP7 matrices at990/7290/14550 tokens, large reuse/streaming, thinking/output limits and generation cancellation passed. True partial-prefill disconnect/cache0 retry/follow-up passed in BOTH modes. Lifecycle rejections preserved PIDs/context/peer. CLI32/32 in both modes matches accepted39/40; peer recovery8/8. Default135round records and8asymmetric retries match; snapshot mode103rounds and8asymmetric plus1natural both-rank clash also match. All64candidate framed records have zero raw-pick differences: Sdefault16+routeopt16,M8,L8,Lrepeat8,snapshot-own8. Saved40 compatibility8also passed.
 
-## Current hosts / binaries
+Keep these safeguards in later merges:
 
-User explicitly authorized: **“Hosts are free; you may stop the pair for validation.”** This persists throughout per-tag tests; do not ask again. The earlier user Maya-L context524288 pair was stopped under this authorization.
+- **#59 /32650e8:** rank0 must finish the entire mirrored prefill call before honoring STOP/reset. Initial candidate13a failed with poisoned collectives because rank1 continued the abandoned call. Single-host early cancellation remains. The durable live regression is `tools/tp2/prefill_cancel.py`; pre-fix logs are archived. The host-only fix preserves the GPU image.
+- **#56:** reject load/unload/idle/dead-engine single-rank restarts before mutation. Preserve #53's context/current-model guards; relaunch both ranks with the pair launcher.
+- **#57:** internal loop-guard continuations share the TOTAL client output budget. Pre-fix10>9/134>133 failures are retained; both paths and adjacent boundaries pass after the fix.
+- Route rank/fast and SNAP_GEN remain opt-in/off. KEEP_CANCELLED remains off and single-host-only; TP2 always resets both ranks. Preserve canonical MTP inputs/accept/continuation/abort wire, global retry/chunk agreement, replicated NextN/full shared widths, trunk ARs and measured primary100401 tuning/config inheritance.
+- **#46:** streamed fetch is deferred entirely. Buffered reader/header/fetch kernels remain; even `MAYA_GLM_STREAM_FETCH=1` does nothing. Do not reimport fragments. DS4 prefix/tail/link-ring settings remain opt-in. Unsupported platforms, new same-host peer/helper/drafter placement and unmeasured lazy/fair-copy additions were excluded.
 
-You are **strix-halo-2 (rank1)**. SSH **only `strix-halo-1.local` (rank0)**; never nested SSH or invoke the llama-swap wrapper via SSH. Both review worktrees exist. Remote canonical `/home/ugo/software/project-maya` stays at **777cc92**, with user-modified `maya.py`, two Maya-L config backups and deliberate #33 launcher/tuning deployments. **No pull/reset/rebuild there; preserve user work.** Local canonical main tracks origin/main.
+Prefill vs40: all9messages/usage equal; warm throughput+0.57/−0.97/−1.84% at1K/4K/8K. No material regression or new gain claim. **#33 stays open** for cold/long-context/request11 at9.6tok/s and the~3008-row cap/unimplemented `MAYA_TP_PREFILL_ROWS`. Preserve #34's worker config inheritance and18calibration rows, which improve S32–37%.
 
-Current accepted40 engine MD5 **8facc62c09b1138b6787beda7d2f371d**, build sourcede0795f (GLM source unchanged from27fefcc), server guard a27591b, matched on local canonical/review, rank0 canonical/review and `/tmp/maya-tp2`. Test engines/server stopped. Llama-swap daemon **175392** and YAML untouched (six model entries, two drafts on MTP, L context524288).
+**#60 stays OPEN:** initial L64 MTP76.23/77.20ms/token; controlled accepted40 gave71.02then35.34; repeated candidate gave37.06/37.65, within historical34.82–37.65. Acceptance36/52 and raw picks agree. No persistent candidate regression reproduced; no aggregate speedup claim. Startup rank0/rank1 seconds: initial649/249,40=414/33,repeated617/159, within the unchanged900s bound. The integration hold is cleared subject to final CI, but transient drafting/host-wait variability is not fixed. Raw arms and phase times are committed.
 
-Baselines on BOTH hosts:
+## Hosts and operations
 
-- Original released engine **5a52cd27167523b6ea4b0f0bde93f503**: `/tmp/maya-upstream-baseline-2026-11-01/`.
-- Accepted38 **cff75b48a0f1e0b2d2355c73ce302d94**: `/tmp/maya-upstream-v38-baseline/maya`.
-- Accepted39 **c3132ee406429195545f145e04e7aadd**: `/tmp/maya-upstream-v39-baseline/maya`.
-- Accepted40 **8facc62c09b1138b6787beda7d2f371d**: `/tmp/maya-upstream-v40-baseline/maya`.
+**HIP/ROCm gfx1151 Linux only. RDMA tensors only; TCP carries bootstrap/control/token metadata.** No new backend/NVIDIA work. No subagents unless explicitly authorized.
 
-At task end leave a coherent source/binary pair; do not leave an unvalidated old-server/new-engine combination after later protocol changes. Restoring original canonical binaries is available while retaining validated builds in review worktrees. Never overwrite remote user source to accomplish deployment.
+User authorization persists: **“Hosts are free; you may stop the pair for validation.”** Do not ask again. This machine is **strix-halo-2 rank1**; SSH only to **strix-halo-1.local rank0**. Never nested SSH or invoke the llama-swap wrapper over SSH.
 
-## Latest validation / reusable evidence
+Remote canonical `/home/ugo/software/project-maya` stays777cc92 with user `maya.py` edits, two L-config backups and #33 launcher/tuning deployments. **No pull/reset/rebuild there.** Preserve daemon175392 and its six-entry YAML. Use the isolated `/home/ugo/software/project-maya-upstream-review` worktrees on both hosts; remote review runtime source is32650e8.
 
-v39: HIP map, **542 serve/11 skips**, **651 tools/31 skips**,11 budget tests,13 host CTest checks, all three gfx1151 HIP engines,196 fused cases, MMQ/attention and real calibrated/forced-fallback GEMM checks PASS. S MTP7/simple large-prompt matrices,105 matching round tuples/8 asymmetric retries,CLI32/32 both modes matchingv38, real sentence-close resume and kill/recover8/8 PASS. S/M/L API/prefill and32 framed ordinary/MTP records all raw-pick0.
+Stop rank0 server BEFORE its engine:
 
-Controlled S prefill vs38: nine paired messages/usage equal, one warmup cycle then two measured cycles; throughput **−0.01/+0.18/−1.21%** at1K/4K/8K. No material warm regression/new speed claim. M startup32/375s and L806/49s on the same candidate are retained cold-I/O outliers, not new speed claims. L's ordinary reference completed within the existing900s harness limit; the prepared longer-timeout wrapper was never used.
+```sh
+ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'
+pkill -9 -x maya
+```
 
-Same-pack/same-prompt benches can use existing `bench_mtp.py --reference` with strict **ordinary and MTP raw-pick0** checks. This proves agreement with the accepted trajectory while avoiding a redundant cold reference startup. Investigate any difference; never weaken the gate or treat forced IDs alone as parity.
+Never broad `pkill -f server.py` or `/dev/tcp` bootstrap probes. Start rank1 first, then rank0 via a fully redirected direct SSH command. Restart BOTH after poisoned communication. After every build deploy/hash-check local canonical/review, remote canonical/review and rank0 `/tmp/maya-tp2`.
 
-- S256 references/prompts: `docs/benchmarks/tp2-mtp-review-2026-10-30/`.
-- M/L64 references: `docs/upstream/v1.1.39/{Maya-M,Maya-L}/reference.txt`.
-- Temp live harness: `/tmp/maya-upstream-live.py`; CLI: `/tmp/maya-upstream-cli.py`.
-- Completed v39 batch: `/tmp/maya-upstream-v39-remaining.sh`, outputs `/tmp/maya-upstream-v39/`. Do not rerun completed gates without reason. Update output paths/config logs per new tag.
+Backups on BOTH hosts:
 
-## Open issues
+- Original5a52cd27167523b6ea4b0f0bde93f503: `/tmp/maya-upstream-baseline-2026-11-01/`.
+- Accepted38cff75b48: `/tmp/maya-upstream-v38-baseline/maya`.
+- Accepted39c3132ee4: `/tmp/maya-upstream-v39-baseline/maya`.
+- Accepted40=8facc62c: `/tmp/maya-upstream-v40-baseline/maya`.
+- Candidate41a617: `/tmp/maya-upstream-v41-candidate/maya`.
 
-- **#33 prefill:** measured rank1 config inheritance +18 sliced GEMM rows improve S32–37%. Preserve `9bc0ec9` /PR #34 /`b63f8af`. Cold/long-context L and exact request11 at9.6tok/s remain unresolved; ~3008-row RDMA cap and unimplemented `MAYA_TP_PREFILL_ROWS` remain. Copy-lane spans include idle mixer windows; do not repeat the old “90% copying” interpretation.
-- **#42 CLI warmup readiness:** pre-existing rank0/rank1 warm skew poisons the first collective. L paired CLI needs `STRATA_GLM_WARM=0` on both ranks and is slow; no fix yet.
-- **#52:** archive GGML metadata inherits enclosing Maya git ID; harmless relinks change host binary hashes. GPU image was unchanged39→40; inspect sections READ-ONLY (readelf offsets/Path.read_bytes), never objcopy in place. Inspection copies were rewritten, then baseline restored from untouched peer and candidate freshly relinked/hashed before any GPUtests. #52 remains a separate future fix; pin unchanged.
-- **#54:** transient rank0 config hides Models catalog; pre-existing, not fixed. Live range probe used a removed temporary config fixture; user configs untouched.
-- **#46:** future chunk-aware compact TP streamed-fetch port; complete deferral is not implementation.
-- **#11:** multi remains gated; full-width shared FFs bug in `glm_rows.cu` remains.
-- **#16:** vision deferred; HIP vision alone does not supply RDMA embedding synchronization.
-- #1 umbrella, #10 optional remain open. #29 M launcher work, #43/#45 integration and #47 restart fix are closed.
+Save an accepted41 baseline before42 builds. At the end of the FULL task leave a coherent production source/binary pair; restoring original canonical binaries is available while final validated builds remain in the review worktrees. Never overwrite remote user source/YAML to deploy.
 
-## Operations
+## Tools and remaining work
 
-1. Stop rank0 server **before** engine: `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'`. Local `pkill -9 -x maya`. Never broad `pkill -f server.py`.
-2. After every engine build, deploy to both rank0 paths (`build-hip/maya`, `/tmp/maya-tp2`) and review copy, then verify hashes. Start rank1 locally before rank0 via direct SSH scripts. Never probe18515 with `/dev/tcp`. Restart both after a poisoned communicator.
-3. Same model/pack/config on both ranks: `--model`/`--pack`/`--config` or `MAYA_MODEL`/`MAYA_PACK`/`MAYA_CONFIG`; resolver `tools/tp2/model_env.sh`. No hardcoded S-only launchers.
-4. MTP: `MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=N MAYA_GLM_MTP_DRAFT=N`, unset `MAYA_GLM_NO_MTP`. Simple: `MAYA_GLM_NO_MTP=1`. Match contexts (32768 for API checks unless specified).
-5. `.venv/bin/python`; in review tools set `STRATA_GGUF_PY=/home/ugo/software/project-maya/third_party/llama.cpp/gguf-py`. Pinned llama.cpp is3cf03257f219afbe7334045ff7c6a06ac68c627d; do not change the pin.
-6. Build in the isolated review tree: HIP ON, CUDA OFF, MMQ ON, TP2_RDMA ON, gfx1151, `/opt/rocm/lib/llvm/bin/clang++`; use canonical pinned llama.cpp via `STRATA_GGML_DIR`. Ordered CPU gates are in AGENTS.md.
-7. Track each workstream on `uv-genai/maya-tp`, milestone comments, issue-linked commits/PRs. Push **origin only**. Keep Handoff current. Stop test engines/server after checks; preserve daemon/YAML.
+Use `.venv/bin/python`. In review set `STRATA_GGUF_PY=/home/ugo/software/project-maya/third_party/llama.cpp/gguf-py`. The llama.cpp pin is3cf03257f219afbe7334045ff7c6a06ac68c627d. Ordered gates: HIP map→server discovery with `-t .`→tools. Isolated build: gfx1151,HIP ON,CUDA OFF,MMQ ON,TP2_RDMA ON; tests as needed; compiler `/opt/rocm/lib/llvm/bin/clang++`, `STRATA_GGML_DIR` points to canonical pinned llama.cpp.
 
-## Releases / tag naming
+Helpers: `/tmp/maya-upstream-live.py`, `/tmp/maya-upstream-cli.py`. Completed41 batch: `/tmp/maya-upstream-v41-batch.sh`; output `/tmp/maya-upstream-v41/`. Use the same model/pack/config on both ranks through `tools/tp2/model_env.sh`. MTP uses `MAYA_TP_MTP=1` and BOTH `MAYA_GLM_MTP_FIXED=N`/`MAYA_GLM_MTP_DRAFT=N`; simple uses `MAYA_GLM_NO_MTP=1`. L CLI needs `STRATA_GLM_WARM=0` (#42, no readiness-handshake fix).
 
-Future fork release tags are **`tp-vMAJOR.MINOR.PATCH`** (#40); keep VERSION numeric. Existing legacy `v*` tags are immutable; upstream tags stay `upstream/v*`. Updater accepts both. Legacy v1.1.42 installs need one manual clean-main `git pull --ff-only` to acquire prefix support; mention in next release notes. **Merging tags does not authorize a new release.**
+Common references are reusable only with identical pack/prompt/token count and zero ordinary AND MTP raw-pick differences. S256: `docs/benchmarks/tp2-mtp-review-2026-10-30/`; M/L64: `docs/upstream/v1.1.39/{Maya-M,Maya-L}/reference.txt`. Investigate differences; never weaken the gate or use forced IDs alone. Snapshot mode has its own ordinary reference and completed fidelity evidence in41.
 
-Published v1.1.42 is **64719953312df98c9fdf53a10198c106cb195345**, CI41203815519, public/latest source release with0 assets; #35 /Handoff §28. Do not republish/move. Earlier v1.1.41=a6d15a7, v1.1.40=d9248e8, v1.1.39=20ff03a, v1.1.38=c322b3e remain unchanged.
+#52: archive GGML metadata inherits parent git ID and can cause harmless host relinks. Inspect GPU sections READ-ONLY via readelf offsets and Path.read_bytes; NEVER objcopy in place. #54: transient rank0 config still hides the Models catalog. #11multi/#16vision stay gated; upstream HIP vision does not implement TP2 RDMA embedding synchronization.
 
-Latest accepted checkpoint remains40. Active #55 candidate binary13a7d73bd0ae4eac59b4c5c705595beb matches all5paths; accepted40 backup8facc remains bothhosts. Batch /tmp/maya-upstream-v41-batch.sh (session61826) is running, outputs /tmp/maya-upstream-v41; inspect progress before any new test process. Full CPU/kernel gates pass; live/evidence/final CI/mainCI pending. #56 lifecycle guard and #57 loop-budget fix are included, open pending acceptance. No42 source work. See §29.12 for current operations; earlier stopped/binary40 text above is the accepted historical checkpoint.
+After41 final/main CI: close55/56/57/59 with final comments; keep33/42/46/52/54/60/11/16 open; update accepted-state handoff/report and save both41 baselines. Then open the42 issue and begin its semantic review. Continue sequentially through46.
 
-**LATEST HOLD (§29.13):** candidate13a7d73b FAILED true prefill-cancel/retry with poisoned collectives (#59). Both ranks stopped; do not trust old batch session61826. Fix32650e8 building in session95200. Inspect build/deploy state before testing. Durable regression tools/tp2/prefill_cancel.py must pass simple+MTP after both ranks finish each mirrored call before STOP/reset. Earlier oversized/missing-progress fixtures were harness coverage problems; the corrected probe exposed a real bug and is preserved. No41 acceptance/no42 yet.
-
-**Current fixed test run:**32650e8 built, binarya6170c07503e139d73789184d9a93971 matches5paths, GPUimageunchanged. Batch **session15734** running fixed-default thenfixed-snap-gen; MTP7matrix/lifecycle/partial-prefillcancel/cache0retry+followup PASS,135matchingrounds/8asymretries. SimplematrixPASS,cancelpending. Inspect /tmp/maya-upstream-v41/state-summary.txt and batch-fixed.txt before any new GPU actions. CLI/killrecover/rawpicks/A-B/M-L gates then follow serially. HEAD1bffc8c docs/evidence93eaf5f, code32650e8. Tag41 stillunaccepted; no42. Earlier reject13a/hold is retained as failurehistory.
-
-Latest progress: Sstate/cancel/simple+MTP7/SNAP_GEN1,CLI32/32,killrecover8/8,32frameddefault+routeopt records0 andprefillA/B9/9 outputsPASS (+0.57/-0.97/-1.84%,nonewspeedclaim). MAPI/prefill/raw8PASS; LAPI/prefillPASS,Lrawstillwarminginbatch15734. Afterbatchsuccess manually run snapshot own-reference technical256 benchmark via /tmp/maya-upstream-v41-snap-bench.py (NO --reference), then final HIP-only IQtest registration/compile. Do not run concurrent GPU work. Reviewhead093d205; runtime32650e8/binarya617 unchanged. Currentcanonicalhandoff§29.13 has exact pending commands/state. No41acceptance/no42yet.
-
-**LATEST HOLD (§29.14):** allS/M/Lrawcorrectnesspassed,butL64MTPslow76.72ms/token vsold36.23 (drafting102–112msvs8,acceptanceidentical). #60requirescontrolledA/Bbefore41acceptance. ACTIVE **session61183**, /tmp/maya-upstream-v41-l-ab.sh, outputs l-mtp-ab/. Testbinariesaretemporarilybaseline40 **8facc** thencandidate41 **a617**; EXITtraprestorescandidate. CandidatebackupBOTHhosts /tmp/maya-upstream-v41-candidate/maya. InspectstatusbeforeanyGPU/build/deploy; no concurrentpair. Batch15734completed. OptionalSNAPownbenchmarkstillpending. No41acceptance/no42.
+Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`**, with numeric VERSION. Legacy published `v*` tags are immutable; upstream tags stay `upstream/v*`. Publishedv1.1.42=64719953312df98c9fdf53a10198c106cb195345(public/latest,0assets). Integration alone does not authorize a release. Legacy updaters throughv42 need one manual clean-main pull for prefix support; mention it in the next release notes.

@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37–40 accepted; v1.1.41 review #55 next.
-> User authorized stopping the pair for validation. Accepted v1.1.40 binaries deployed; test engines stopped; next checkpoint #55.
+> Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.15)**, v1.1.37–40 accepted; v1.1.41 #55 runtime complete, final CI/merge/main CI pending.
+> User authorized stopping the pair for validation. Fixed candidate41 a617 deployed/hash-matched all5paths; test engines/server stopped. No42 before41 acceptance/main CI.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -961,3 +961,13 @@ Batch15734 finished successfully: allS/M/L correctness, including32S+8M+8L stric
 **ACTIVE A/B session61183**, script /tmp/maya-upstream-v41-l-ab.sh, output /tmp/maya-upstream-v41/l-mtp-ab/. Unmodified bench_mtp.py L64/runs2/drafts2/sameaccepted39reference. Deploys savedaccepted40 **8facc** to both review/canonical andrank0/tmp/maya-tp2 forbaseline arm, thenfixedcandidate41 **a617**. Actualperarmhashes recorded. Candidatea617 savedBOTHhosts **/tmp/maya-upstream-v41-candidate/maya**. EXITtrap restoresalltestcopies toa617evenonfailure. Inspectactivearm/filesbeforeanynewGPU/build/deploy action; do not startconcurrentpair. Historicaltimingaloneisnotcausal; comparecontrolledarms, then investigate draftingifregressionreproduces. Allordinary/MTPrawpickchecks staystrictzero. Originalbaselines through40/usercanonical777cc92edits/daemon175392/YAML preserved.
 
 After resolving60, own-reference SNAP_GENtechnical256 via /tmp/maya-upstream-v41-snap-bench.py (NO --reference), finalHIPIQtest registration/build/parity aftertest-only8db5689, finalsourceevidence/CI/PRmerge/mainCI. Reviewhead093d205 (enginecode32650e8). M/Ldata/lateA-B/snapshotdata stillneed durablecopy/finalreport. No release;futuretagstp-v.
+
+### 29.15 v1.1.41 runtime complete — final CI/merge/main pending
+
+All live runs finished; **no active GPU/test batch**. Candidate **a6170c07503e139d73789184d9a93971**, runtime32650e8, matched localreview/canonical, remotereview/canonical,/tmp/maya-tp2. Review branch merge/upstream-v1.1.41 head **7ab98c8** /PR58. Final evidence/report docs/upstream/v1.1.41.md + directory/validation.json. Code includes56/57/59 fixes; those issues stayopen untilacceptance. Final7ab98c8 CI41326427259/41326422499 running, then finalheadCI/PRmerge/postmainCI required. No42sourcework yet.
+
+580serve11skip/654tools31skip/HIPmap/3HIPengines/15host/196fused/MMQ/attention/CPUexactrows/PDEP0/1/EXL3/Node pass. New HIP-only IQtarget registration rebuilt,396strictcasesPASS, enginehashunchanged. Default/SNAP_GEN state suites, true prefillcancel/cache0retry/followup bothsimple+MTP7, lifecycle400withoutPIDmutation, CLI32/32each matchingaccepted39/40, killrecover8/8 allPASS. Default135roundtuples/8asym retries; SNAP103rounds/8asym+1naturalbothrankclash allmatched. **64candidate framed records raw-pick0**: Sdefault16+routeopt16,M8,L8,Lrepeat8,SNAPown8. Saved40 compatibility8also0. Snapshot benchmark generated its own ordinaryreference and provedordinary/MTPrawpicks, no forced-ID-only claim.
+
+Prefill vs40all9messages/usageequal; warmthroughput+0.57/-0.97/-1.84% at990/4062/8158, no newgainclaim. #33 staysopen. #60controlledLtimingholdcleared forintegration: initial41MTP76.23/77.20, saved40**71.02/35.34**, repeated41**37.06/37.65**ms/token, allrawpicks/acceptanceidentical. Candidate returnedtohistorical34.82–37.65range; accepted40also hastransient. **Keep60open** forvariability/rootcause; do not claimfixedornewMTPgain. StartupR0/R1initial649/249,old40=414/33,repeated41=617/159seconds, allwithinunchanged900s. Rawarmsandphasebreakdownscommitted. A/Bsession61183andSNAP96027 completed; candidate restored allpaths, noactiveruns.
+
+Next: reconcile this final livehandoff into review (docs only), update PR58 finalvalidationbody, finalCI, ancestry-preservingmerge, mainCI. Then close55/56/57/59withfinalcomments, updateaccepted41handoff/report andsavea617baselineBOTHhosts beforeopening42issue. Open33/42/46/52/54/60/11/16remain. Originalbaseline5a52,38cff,39c313,40=8facc andunacceptedcandidatebackup /tmp/maya-upstream-v41-candidate/maya(a617) preservedbothhosts. Remotecanonical777cc92/userwork/daemon175392/YAMLuntouched. No release/tag publication.
