@@ -1,0 +1,39 @@
+    void one_gpu_path() {
+        bool one = false;
+        const char* why = "off (v1.1.27's path: not NVIDIA + one GPU)";
+#if !defined(STRATA_USE_HIP)
+        one = devs.size() == 1 && groups.size() == 1 && groups[0].mem.size() == 1 && helper_id < 0;
+        if (one) {
+            cudaDeviceProp pr{};
+            one = cudaGetDeviceProperties(&pr, devs[0].id) == cudaSuccess && pr.integrated == 0;
+            if (!one) (void) cudaGetLastError();
+        }
+        if (one) {
+            why = "on for now (NVIDIA, one GPU: kept if the PCIe lane's plan streams experts from RAM)";
+            const std::string lf = lane_file();
+            if (lane_env_off()) {
+                one = false;
+                why = "off (v1.1.27's path: DS4_STREAM=0, nothing streams)";
+            } else if (std::getenv("DS4_STREAM_FORCE") == nullptr && !lf.empty() &&
+                       pcie::cal_get(lf, lane_dev_key(0) + " | lane") == "off") {
+                one = false;
+                why = "off (v1.1.27's path: this GPU's PCIe lane streamed nothing at an earlier start - lane-times.txt "
+                      "in the pack; delete it to measure again)";
+            }
+        }
+#endif
+        ln_one = one;
+        one_auto = one;
+        const int w = env_tri("DS4_STREAM_WIN"), d = env_tri("DS4_LAND");
+        ln_win = w < 0 ? one : w != 0;
+        ln_land = d < 0 ? one : d != 0;
+        const int r1 = env_tri("DS4_IQ1S_ROWS");   // (1: IQ1_S own multi-token rows off the one-GPU path too)
+        gg::iq_cpu_iq1s_rows(r1 < 0 ? one : r1 != 0);
+        if (pk.gguf)
+            std::fprintf(stderr, "ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): %s%s%s\n", why,
+                         w >= 0 ? (w ? ", DS4_STREAM_WIN=1" : ", DS4_STREAM_WIN=0") : "",
+                         d >= 0 ? (d ? ", DS4_LAND=1" : ", DS4_LAND=0") : "");
+    }
+    // after the PCIe lane's timing (lane_setup): the one-GPU path on by default stays on only if some layer streams
+    // CPU-lane experts; else v1.1.27's path for the run - the copies' pins given back (the VRAM it placed experts
+    // around stays as placed until the next start, which the times file then starts on v1.1.27's path)

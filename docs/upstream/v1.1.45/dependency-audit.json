@@ -1,0 +1,17 @@
+{
+  "upstream_commit": "c968b94",
+  "issue": 75,
+  "decision": "defer complete functional backport; no partial conditions imported",
+  "fork": {
+    "automatic_one_gpu_path_disabled_on_HIP": true,
+    "copy_flush": false,
+    "rc_drain": "legacy no-argument API with5s fallback",
+    "rc_tick_lent_guard": false
+  },
+  "upstream": {
+    "copy_flush": true,
+    "rc_drain": "bool for_lend API waits through timeout during lending",
+    "rc_tick_lent_guard": true
+  },
+  "note": "The exact upstream automatic NVIDIA scenario does not run on HIP. Explicit/other HIP recent-slot configurations need investigation; no HIP safety fix or long-prompt stability claim."
+}

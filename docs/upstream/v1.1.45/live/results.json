@@ -1,0 +1,141 @@
+{
+  "responses": [
+    {
+      "id": "chatcmpl-82419cfdf67041b79fdb941d",
+      "object": "chat.completion",
+      "created": 1793564413,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "RDMA (Remote Direct Memory Access) allows one machine to read or write memory on another machine directly over the network, bypassing the remote CPU and its operating",
+            "reasoning_content": "The user is asking about RDMA (Remote Direct Memory Access) and how it carries tensor partitions. This is a technical question about distributed deep learning / distributed"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 24,
+        "completion_tokens": 64,
+        "total_tokens": 88,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 24,
+        "prompt_ms": 903.8,
+        "prompt_per_token_ms": 37.658,
+        "prompt_per_second": 26.6,
+        "predicted_n": 64,
+        "predicted_ms": 2603.9,
+        "predicted_per_token_ms": 40.686,
+        "predicted_per_second": 24.6,
+        "draft_n": 56,
+        "draft_n_accepted": 34
+      }
+    },
+    {
+      "id": "chatcmpl-9de374e7da2d4e8fb91d2f16",
+      "object": "chat.completion",
+      "created": 1793564417,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "RDMA lets one machine read or write memory on another machine directly over the network, bypassing the remote CPU and OS. In distributed training, this means tensor",
+            "reasoning_content": "The user asked me to explain how RDMA carries tensor partitions in three paragraphs, and I started responding but the response got cut off. Now they're asking"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 97,
+        "completion_tokens": 64,
+        "total_tokens": 161,
+        "prompt_tokens_details": {
+          "cached_tokens": 23
+        }
+      },
+      "timings": {
+        "cache_n": 23,
+        "prompt_n": 74,
+        "prompt_ms": 805.4,
+        "prompt_per_token_ms": 10.884,
+        "prompt_per_second": 91.9,
+        "predicted_n": 64,
+        "predicted_ms": 2037.6,
+        "predicted_per_token_ms": 31.837,
+        "predicted_per_second": 31.4,
+        "draft_n": 47,
+        "draft_n_accepted": 39
+      }
+    },
+    {
+      "id": "chatcmpl-9b5318a9a31c41dba88be9eb",
+      "object": "chat.completion",
+      "created": 1793564420,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "RDMA lets one machine read or write memory on another machine directly over the network, bypassing the remote CPU and OS. In distributed training, this means tensor",
+            "reasoning_content": "The user asked me to explain how RDMA carries tensor partitions in three paragraphs, and I started responding but the response got cut off. Now they're asking"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 97,
+        "completion_tokens": 64,
+        "total_tokens": 161,
+        "prompt_tokens_details": {
+          "cached_tokens": 96
+        }
+      },
+      "timings": {
+        "cache_n": 96,
+        "prompt_n": 1,
+        "prompt_ms": 39.1,
+        "prompt_per_token_ms": 39.1,
+        "prompt_per_second": 25.6,
+        "predicted_n": 64,
+        "predicted_ms": 2530.7,
+        "predicted_per_token_ms": 39.542,
+        "predicted_per_second": 25.3,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      }
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  },
+  "pids_unchanged": true
+}
