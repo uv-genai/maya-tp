@@ -1,0 +1,1 @@
+ds4_chunk_policy_test: aliases, bounds, architecture and270848 plan properties passed

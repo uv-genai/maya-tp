@@ -1,0 +1,17 @@
+[
+  {
+    "path": "/tmp/maya-upstream-v46-baseline/maya-ds4",
+    "binary_md5": "cd177432d1fb647c99b7a83a3f209196",
+    "gpu_image_sha256": "92096f8e43afcbe13fbd89b0c3157ea61d20973d02a99e84ef58f84c3f7c3a50"
+  },
+  {
+    "path": "build-hip/maya-ds4",
+    "binary_md5": "51749e860763aea34847b183de95a933",
+    "gpu_image_sha256": "92096f8e43afcbe13fbd89b0c3157ea61d20973d02a99e84ef58f84c3f7c3a50"
+  },
+  {
+    "path": "build-hip/maya",
+    "binary_md5": "b398d4a0711430edd6a28b95264c7293",
+    "gpu_image_sha256": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+  }
+]

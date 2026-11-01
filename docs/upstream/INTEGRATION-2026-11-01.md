@@ -24,7 +24,7 @@ The updater accepts both fork-prefixed and legacy tags; merging an upstream tag 
 | v1.1.43 | `acdab34bd58eec957715392a1d822777c3c579c3` | 18 / 41 | #65 accepted; PR70 /c2ff719, final/main CI PASS; #66/#67/#69/#71 fixed, pre-existing DS4 #68 open |
 | v1.1.44 | `5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b` | 4 / 6 | #72 accepted; PR73 /842d6e6, final/main CI PASS; runtime exact43, metadata verified |
 | v1.1.45 | `6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc` | 2 / 3 | #74 scoped review accepted; PR76 /2df9e26, final/main CI PASS; functional DS4 fix deferred #75 |
-| v1.1.46 | `3589d6f12a3f77e813b184b51a586f8fc3de2185` | 5 / 8 | queued |
+| v1.1.46 | `3589d6f12a3f77e813b184b51a586f8fc3de2185` | 5 / 8 | #77 active; CPU/HIP/host pass, live22871; boundaries #78/#80 fixed, cap-default measurement #79 deferred |
 
 ## Preservation and validation decisions
 

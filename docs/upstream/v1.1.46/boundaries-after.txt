@@ -1,0 +1,7 @@
+test_long_text_parts_keep_the_cached_prefix (serve.test_loop_guard.Collapse.test_long_text_parts_keep_the_cached_prefix) ... ok
+test_unclosed_parameter_keeps_the_malformed_stream_contract (serve.test_tools.GlmCalls.test_unclosed_parameter_keeps_the_malformed_stream_contract) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.009s
+
+OK
