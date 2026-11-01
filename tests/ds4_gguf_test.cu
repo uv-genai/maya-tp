@@ -3029,6 +3029,17 @@ int main(int argc, char** argv) {
         bench_cpu(argc >= 3 ? std::atoi(argv[2]) : 1);
         return 0;
     }
+    if (argc >= 2 && std::strcmp(argv[1], "--engram") == 0) {
+        // The changed table decoders, against ggml; the full suite still runs packed-KV stress separately (#68).
+        test_engram_q6k(s);
+        test_engram_iq4nl(s);
+        test_engram_q5k(s);
+        test_q5k_host();
+        test_q6k_host();
+        CU(cudaStreamSynchronize(s));
+        std::printf("%s (%d failed)\n", g_fail ? "FAILED" : "ALL OK", g_fail);
+        return g_fail ? 1 : 0;
+    }
     if (argc >= 2 && std::strcmp(argv[1], "--q8k") == 0) {   // the low-bit activations' Q8_K rounding (DS4_IQ_Q8K)
         test_q8k(s);
         std::printf("%s (%d failed)\n", g_fail ? "FAILED" : "ALL OK", g_fail);
