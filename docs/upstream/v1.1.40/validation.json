@@ -1,0 +1,37 @@
+{
+  "upstream_commit": "cbaaec5d70fde2730e251dec6b418e4b454c01bd",
+  "engine_build_source": "de0795f7aac8",
+  "server_source": "a27591ba2f76769f9e6780200de92ebeeab3ea73",
+  "binary_md5": "8facc62c09b1138b6787beda7d2f371d",
+  "hip_map": "PASS",
+  "serve_tests": 554,
+  "serve_skips": 11,
+  "tools_tests": 653,
+  "tools_skips": 31,
+  "builds": [
+    "maya",
+    "maya-ds4",
+    "maya-mm3"
+  ],
+  "changed_host_test": "ds4_marks_test PASS",
+  "js_syntax": "PASS",
+  "focused_guard_and_page_tests": 5,
+  "guarded_code_ci": [
+    41315518523,
+    41315513298
+  ],
+  "reuse": "Accepted39 S/M/L core/kernel/CLI/performance evidence; unchanged executed GLM/TP/RDMA/MTP source, defaults, tuning and full GPU image. Fresh relink validated by S API and strict raw picks.",
+  "known_open_issues": [
+    33,
+    42,
+    11,
+    16,
+    46,
+    52,
+    54
+  ],
+  "pending": [
+    "final_evidence_ci",
+    "merge_and_main_ci"
+  ]
+}

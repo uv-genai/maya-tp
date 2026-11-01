@@ -129,6 +129,17 @@ Maya-S raw MTP data remains in [tp2-mtp-review](benchmarks/tp2-mtp-review-2026-1
 On Maya-L, rank0’s cold expert warm can exceed rank1’s by minutes — for **paired CLI** decode set
 `STRATA_GLM_WARM=0` on both ranks (or wait out the warm); serve mode is unaffected.
 
+## Changing the context or active model
+
+The dashboard shows the running TP2 context as read-only. Its context API and active-model restart
+controls reject changes that would restart only rank 0. A pair needs matching context/model selection
+and a coordinated restart of both ranks (#53).
+
+Stop both ranks, then relaunch with the same `CONTEXT` and model/pack/config selection on both rank
+scripts, or use the rank-0 pair wrapper's `--context` / `--model` options above. The guard does not
+change ordinary single-host reloads. The transient TP2 config's empty Models catalog is tracked
+separately in #54; it does not affect API inference.
+
 ## What “6 µs / 37 Gb/s” means
 
 Do **not** compare AR latency to the link microbench without reading gufo’s Thunderbolt doc:

@@ -1,0 +1,14 @@
+{
+  "technical": {
+    "tokens": 256,
+    "records": 8,
+    "raw_pick_differences": 0,
+    "reference_source": "/home/ugo/software/project-maya-upstream-review/docs/benchmarks/tp2-mtp-review-2026-10-30/tp2-technical-reference.txt"
+  },
+  "code": {
+    "tokens": 256,
+    "records": 8,
+    "raw_pick_differences": 0,
+    "reference_source": "/home/ugo/software/project-maya-upstream-review/docs/benchmarks/tp2-mtp-review-2026-10-30/tp2-code-reference.txt"
+  }
+}

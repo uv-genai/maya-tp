@@ -1,0 +1,16 @@
+[
+  {
+    "phase": "initial-mtp-matrix",
+    "rounds": 109,
+    "round_tuples_match": true,
+    "asymmetric_retry_rounds": 8,
+    "retry_tuples_match": true
+  },
+  {
+    "phase": "guarded-boundary",
+    "rounds": 37,
+    "round_tuples_match": true,
+    "asymmetric_retry_rounds": 8,
+    "retry_tuples_match": true
+  }
+]

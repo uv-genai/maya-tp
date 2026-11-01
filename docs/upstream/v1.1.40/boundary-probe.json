@@ -1,0 +1,191 @@
+{
+  "context": {
+    "context": 32768,
+    "min": 4096,
+    "max": 1048576,
+    "trained": 1048576,
+    "tested": 262144,
+    "reload_supported": false,
+    "reload_reason": "TP2 changes require restarting both ranks together. Use the pair launcher's matching --context or --model options.",
+    "kv_gb": 0.59,
+    "kv_ctx": 32768,
+    "kv_resident": 0,
+    "kv_ram_gb": null,
+    "vram_gb": "42.5",
+    "vram_slots": 12384,
+    "reload": null,
+    "load_s": 21.5
+  },
+  "models_fixture": {
+    "models": [
+      {
+        "file": "maya-validation-context.json",
+        "path": "/tmp/maya-tp2-rank0-YnLKBf/maya-validation-context.json",
+        "model": "glm-5.3-flash",
+        "family": "glm",
+        "quant": "Maya-S",
+        "backend": "hip",
+        "written": "2026-10-29 09:58",
+        "used": 1793542945.819279,
+        "running": false,
+        "port": 8080,
+        "script": null,
+        "folder": "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS",
+        "size": 97412701850,
+        "ok": true,
+        "missing": null,
+        "settings": {
+          "context": 32768,
+          "gpus": [
+            0
+          ],
+          "env": {
+            "MAYA_GLM_RESERVE_MB": "1024",
+            "MAYA_GLM_RAM_HEADROOM_GB": "16",
+            "MAYA_GLM_SPLIT": "0",
+            "MAYA_GLM_PREFILL_SUB": "1024",
+            "MAYA_GLM_PREFILL_MB": "6144",
+            "MAYA_HIPBLASLT_TUNING": "/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100202.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401-b.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100500.txt"
+          },
+          "images": false,
+          "reserve_mib": null,
+          "parallel": 1,
+          "draft": "mtp",
+          "expert_cache": null,
+          "prefill": null,
+          "kv_streaming": true,
+          "kv_resident": null
+        },
+        "setup": {
+          "context": 32768,
+          "gpus": [
+            0
+          ],
+          "env": {
+            "MAYA_GLM_RESERVE_MB": "1024",
+            "MAYA_GLM_RAM_HEADROOM_GB": "16",
+            "MAYA_GLM_SPLIT": "0",
+            "MAYA_GLM_PREFILL_SUB": "1024",
+            "MAYA_GLM_PREFILL_MB": "6144",
+            "MAYA_HIPBLASLT_TUNING": "/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100202.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401-b.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100500.txt"
+          },
+          "images": false,
+          "reserve_mib": null,
+          "parallel": 1,
+          "draft": "mtp",
+          "expert_cache": null,
+          "prefill": null,
+          "kv_streaming": true,
+          "kv_resident": null
+        },
+        "choices": {
+          "draft": [
+            "mtp"
+          ],
+          "images": false
+        },
+        "command": {
+          "exe": "maya",
+          "args": [
+            "--glm-pack",
+            "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack",
+            "--max-context",
+            "32768",
+            "--expert-cache",
+            "auto",
+            "--prefill",
+            "auto",
+            "--kv-streaming",
+            "on",
+            "--expert-profile",
+            "/home/ugo/software/project-maya/data/expert-profile-glm.bin",
+            "--tp-world-size",
+            "2",
+            "--tp-rank",
+            "0",
+            "--tp-bootstrap-port",
+            "18515",
+            "--tp-rdma-device",
+            "usb4_rdma5",
+            "--parallel",
+            "1",
+            "--max-context",
+            "32768"
+          ],
+          "env": {
+            "MAYA_GLM_RESERVE_MB": "1024",
+            "MAYA_GLM_RAM_HEADROOM_GB": "16",
+            "MAYA_GLM_SPLIT": "0",
+            "MAYA_GLM_PREFILL_SUB": "1024",
+            "MAYA_GLM_PREFILL_MB": "6144",
+            "MAYA_HIPBLASLT_TUNING": "/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100202.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401-b.txt:/home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100500.txt"
+          }
+        },
+        "contexts": [
+          8192,
+          32768,
+          65536,
+          131072
+        ],
+        "context_range": {
+          "min": 4096,
+          "max": 1048576,
+          "trained": 1048576,
+          "tested": 262144
+        }
+      }
+    ],
+    "gpus": [
+      {
+        "index": 0,
+        "name": "AMD Radeon (gfx1151)",
+        "vram_gb": 2.0
+      }
+    ],
+    "contexts": [
+      8192,
+      32768,
+      65536,
+      131072
+    ],
+    "restarts": false,
+    "running": "rank0.json",
+    "restarting": null,
+    "deleted": null,
+    "leftovers": {
+      "folders": [
+        "/home/ugo/software/Maya-data/models"
+      ],
+      "items": [
+        {
+          "path": "/home/ugo/software/Maya-data/models/Maya-L",
+          "name": "Maya-L",
+          "bytes": 157270854515,
+          "folder": true,
+          "pack": true,
+          "hub": false,
+          "modified": 1793430578.2222283
+        },
+        {
+          "path": "/home/ugo/software/Maya-data/models/Maya-M",
+          "name": "Maya-M",
+          "bytes": 116955203309,
+          "folder": true,
+          "pack": true,
+          "hub": false,
+          "modified": 1793417503.1880438
+        }
+      ],
+      "bytes": 274226057824
+    }
+  },
+  "default_catalog_count": 0,
+  "catalog_root_issue": 54,
+  "context_change_status": 400,
+  "pids_unchanged": true,
+  "foreign_origin_status": 403,
+  "same_origin_stream_chunks": 97,
+  "metrics_samples": 77,
+  "metrics_generating_samples": 69,
+  "peer_up": true
+}
