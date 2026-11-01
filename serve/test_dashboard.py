@@ -91,14 +91,14 @@ class Dashboard(unittest.TestCase):
         self.engine.info = {"tp_world": 2, "tp_rank": 0}
         self.svc.model_management = True
         before = self.cfg.read_bytes()
-        with mock.patch.object(self.engine, "close") as close, mock.patch.object(self.engine, "restart") as restart:
+        with mock.patch.object(self.engine, "close", create=True) as close, mock.patch.object(self.engine, "restart", create=True) as restart:
             for op in ("load", "unload"):
                 code, _, raw = self.req("POST", "/models/" + op, {"model": self.svc.model})
                 self.assertEqual(code, 400, raw)
                 self.assertIn("both ranks", json.loads(raw)["error"]["message"])
             with self.assertRaisesRegex(ValueError, "both ranks"):
                 self.svc.unload(idle_for=1)
-            with mock.patch.object(self.engine, "alive", return_value=False):
+            with mock.patch.object(self.engine, "alive", return_value=False, create=True):
                 with self.assertRaisesRegex(ValueError, "both ranks"):
                     self.svc.ensure_engine()
         close.assert_not_called()
