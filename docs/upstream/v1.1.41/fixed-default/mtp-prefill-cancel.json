@@ -1,0 +1,107 @@
+{
+  "progress_at_disconnect": {
+    "total": 18033,
+    "cache": 0,
+    "processed": 7104,
+    "time_ms": 19874
+  },
+  "retry_cached": 0,
+  "retry": {
+    "id": "chatcmpl-033708cd51bf4e75ba1e6cd6",
+    "object": "chat.completion",
+    "created": 1793546202,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "The document consists solely",
+          "reasoning_content": "The user has"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 18033,
+      "completion_tokens": 8,
+      "total_tokens": 18041,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 18033,
+      "prompt_ms": 51478.5,
+      "prompt_per_token_ms": 2.855,
+      "prompt_per_second": 350.3,
+      "predicted_n": 8,
+      "predicted_ms": 588.8,
+      "predicted_per_token_ms": 73.6,
+      "predicted_per_second": 13.6,
+      "draft_n": 13,
+      "draft_n_accepted": 3
+    }
+  },
+  "followup": {
+    "id": "chatcmpl-8260d2ca54d442e989e4b519",
+    "object": "chat.completion",
+    "created": 1793546269,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "RDMA (Remote Direct Memory Access) is a networking technology that allows one computer",
+          "reasoning_content": "The user wants one sentence about RDMA (Remote Direct Memory Access). This"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 19,
+      "completion_tokens": 32,
+      "total_tokens": 51,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 19,
+      "prompt_ms": 436.6,
+      "prompt_per_token_ms": 22.979,
+      "prompt_per_second": 43.5,
+      "predicted_n": 32,
+      "predicted_ms": 1532.3,
+      "predicted_per_token_ms": 47.884,
+      "predicted_per_second": 20.9,
+      "draft_n": 67,
+      "draft_n_accepted": 20
+    }
+  },
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  }
+}

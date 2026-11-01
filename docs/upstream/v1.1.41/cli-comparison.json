@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "simple",
+    "tokens": 32,
+    "matches_accepted39_40_trajectory": true
+  },
+  {
+    "mode": "mtp",
+    "tokens": 32,
+    "matches_accepted39_40_trajectory": true
+  }
+]

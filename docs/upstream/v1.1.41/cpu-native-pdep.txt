@@ -1,0 +1,35 @@
+native_rows_exact_test: AVX-512BW yes, AVX2 yes
+  avx512  q4_K      2244 results, 0 differ from ggml-cpu's dot
+  avx2    q4_K      2244 results, 0 differ from ggml-cpu's dot
+  avx512  q5_K      2244 results, 0 differ from ggml-cpu's dot
+  avx2    q5_K      2244 results, 0 differ from ggml-cpu's dot
+  avx512  iq2_xxs   2244 results, 0 differ from ggml-cpu's dot
+  avx2    iq2_xxs   2244 results, 0 differ from ggml-cpu's dot
+  avx512-1t iq2_xxs   2244 results, 0 differ from ggml-cpu's dot
+  avx512  iq2_xs    2244 results, 0 differ from ggml-cpu's dot
+  avx2    iq2_xs    2244 results, 0 differ from ggml-cpu's dot
+  avx2-1t iq2_xs    2244 results, 0 differ from ggml-cpu's dot
+  avx512  iq3_xxs   2244 results, 0 differ from ggml-cpu's dot
+  avx2    iq3_xxs   2244 results, 0 differ from ggml-cpu's dot
+  avx2-1t iq3_xxs   2244 results, 0 differ from ggml-cpu's dot
+  avx512  iq3_s     2244 results, 0 differ from ggml-cpu's dot
+  avx2    iq3_s     2244 results, 0 differ from ggml-cpu's dot
+  avx2-1t iq3_s     2244 results, 0 differ from ggml-cpu's dot
+  avx512  iq2_s     2244 results, 0 differ from ggml-cpu's dot
+  avx2    iq2_s     2244 results, 0 differ from ggml-cpu's dot
+  avx512  iq4_xs    2244 results, 0 differ from ggml-cpu's dot
+  avx2    iq4_xs    2244 results, 0 differ from ggml-cpu's dot
+  avx2    iq1_m     6732 results, 0 differ from ggml-cpu's dot
+  avx2-1t iq1_m     6732 results, 0 differ from ggml-cpu's dot
+  IQ1_M tiny activations: 11220 results, 0 differ from ggml
+  IQ1_M int16 worst case: 16 runs, 0 differ from ggml
+  split   q4_K     window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   q5_K     window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   iq2_xxs  window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   iq2_xs   window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   iq3_xxs  window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   iq3_s    window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   iq2_s    window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   iq4_xs   window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+  split   iq1_m    window of 6 vs one token at a time: gate/up identical, down identical (multi-token rows on)
+native_rows_exact_test: all identical

@@ -1,0 +1,177 @@
+exl3_cpu_bench: this CPU's lane runs the avx512vnni tier; 16 hardware threads
+HOT  K1 scalar  1 token  1 thread:    853.7 M weights/s (  853.7 M weight-tokens/s), 29.480 ms an expert-token
+HOT  K1 scalar  2 tokens 1 thread:    438.3 M weights/s (  876.6 M weight-tokens/s), 28.708 ms an expert-token
+HOT  K1 scalar  4 tokens 1 thread:    199.5 M weights/s (  798.2 M weight-tokens/s), 31.529 ms an expert-token
+HOT  K1 scalar  8 tokens 1 thread:     99.9 M weights/s (  799.6 M weight-tokens/s), 31.475 ms an expert-token
+HOT  K1 avx2    1 token  1 thread:  15148.5 M weights/s (15148.5 M weight-tokens/s), 1.661 ms an expert-token
+HOT  K1 avx2    2 tokens 1 thread:  12187.8 M weights/s (24375.6 M weight-tokens/s), 1.032 ms an expert-token
+HOT  K1 avx2    4 tokens 1 thread:   8133.4 M weights/s (32533.5 M weight-tokens/s), 0.774 ms an expert-token
+HOT  K1 avx2    8 tokens 1 thread:   4891.8 M weights/s (39134.5 M weight-tokens/s), 0.643 ms an expert-token
+HOT  K1 avx512  1 token  1 thread:  24323.2 M weights/s (24323.2 M weight-tokens/s), 1.035 ms an expert-token
+HOT  K1 avx512  2 tokens 1 thread:  18371.1 M weights/s (36742.1 M weight-tokens/s), 0.685 ms an expert-token
+HOT  K1 avx512  4 tokens 1 thread:  13793.4 M weights/s (55173.7 M weight-tokens/s), 0.456 ms an expert-token
+HOT  K1 avx512  8 tokens 1 thread:   8675.4 M weights/s (69403.0 M weight-tokens/s), 0.363 ms an expert-token
+HOT  K1 avx512vnni  1 token  1 thread:  25297.6 M weights/s (25297.6 M weight-tokens/s), 0.995 ms an expert-token
+HOT  K1 avx512vnni  2 tokens 1 thread:  20874.8 M weights/s (41749.6 M weight-tokens/s), 0.603 ms an expert-token
+HOT  K1 avx512vnni  4 tokens 1 thread:  15013.4 M weights/s (60053.5 M weight-tokens/s), 0.419 ms an expert-token
+HOT  K1 avx512vnni  8 tokens 1 thread:   9558.9 M weights/s (76470.9 M weight-tokens/s), 0.329 ms an expert-token
+HOT  K1.5 scalar  1 token  1 thread:    876.6 M weights/s (  876.6 M weight-tokens/s), 28.707 ms an expert-token
+HOT  K1.5 scalar  2 tokens 1 thread:    427.8 M weights/s (  855.6 M weight-tokens/s), 29.413 ms an expert-token
+HOT  K1.5 scalar  4 tokens 1 thread:    201.1 M weights/s (  804.3 M weight-tokens/s), 31.289 ms an expert-token
+HOT  K1.5 scalar  8 tokens 1 thread:     99.6 M weights/s (  796.8 M weight-tokens/s), 31.584 ms an expert-token
+HOT  K1.5 avx2    1 token  1 thread:  13532.2 M weights/s (13532.2 M weight-tokens/s), 1.860 ms an expert-token
+HOT  K1.5 avx2    2 tokens 1 thread:  11160.8 M weights/s (22321.5 M weight-tokens/s), 1.127 ms an expert-token
+HOT  K1.5 avx2    4 tokens 1 thread:   7622.4 M weights/s (30489.7 M weight-tokens/s), 0.825 ms an expert-token
+HOT  K1.5 avx2    8 tokens 1 thread:   4749.3 M weights/s (37994.6 M weight-tokens/s), 0.662 ms an expert-token
+HOT  K1.5 avx512  1 token  1 thread:  23452.6 M weights/s (23452.6 M weight-tokens/s), 1.073 ms an expert-token
+HOT  K1.5 avx512  2 tokens 1 thread:  18628.7 M weights/s (37257.4 M weight-tokens/s), 0.675 ms an expert-token
+HOT  K1.5 avx512  4 tokens 1 thread:  13633.7 M weights/s (54534.9 M weight-tokens/s), 0.461 ms an expert-token
+HOT  K1.5 avx512  8 tokens 1 thread:   8604.9 M weights/s (68839.1 M weight-tokens/s), 0.366 ms an expert-token
+HOT  K1.5 avx512vnni  1 token  1 thread:  24704.7 M weights/s (24704.7 M weight-tokens/s), 1.019 ms an expert-token
+HOT  K1.5 avx512vnni  2 tokens 1 thread:  20576.1 M weights/s (41152.1 M weight-tokens/s), 0.612 ms an expert-token
+HOT  K1.5 avx512vnni  4 tokens 1 thread:  14801.7 M weights/s (59206.9 M weight-tokens/s), 0.425 ms an expert-token
+HOT  K1.5 avx512vnni  8 tokens 1 thread:   9356.7 M weights/s (74853.5 M weight-tokens/s), 0.336 ms an expert-token
+HOT  K2 scalar  1 token  1 thread:    868.6 M weights/s (  868.6 M weight-tokens/s), 28.972 ms an expert-token
+HOT  K2 scalar  2 tokens 1 thread:    424.9 M weights/s (  849.9 M weight-tokens/s), 29.611 ms an expert-token
+HOT  K2 scalar  4 tokens 1 thread:    205.0 M weights/s (  820.0 M weight-tokens/s), 30.691 ms an expert-token
+HOT  K2 scalar  8 tokens 1 thread:    101.8 M weights/s (  814.5 M weight-tokens/s), 30.899 ms an expert-token
+HOT  K2 avx2    1 token  1 thread:  14849.5 M weights/s (14849.5 M weight-tokens/s), 1.695 ms an expert-token
+HOT  K2 avx2    2 tokens 1 thread:  12027.6 M weights/s (24055.3 M weight-tokens/s), 1.046 ms an expert-token
+HOT  K2 avx2    4 tokens 1 thread:   8119.4 M weights/s (32477.7 M weight-tokens/s), 0.775 ms an expert-token
+HOT  K2 avx2    8 tokens 1 thread:   4844.3 M weights/s (38754.0 M weight-tokens/s), 0.649 ms an expert-token
+HOT  K2 avx512  1 token  1 thread:  24265.0 M weights/s (24265.0 M weight-tokens/s), 1.037 ms an expert-token
+HOT  K2 avx512  2 tokens 1 thread:  19072.9 M weights/s (38145.9 M weight-tokens/s), 0.660 ms an expert-token
+HOT  K2 avx512  4 tokens 1 thread:  13571.5 M weights/s (54285.9 M weight-tokens/s), 0.464 ms an expert-token
+HOT  K2 avx512  8 tokens 1 thread:   8688.4 M weights/s (69507.0 M weight-tokens/s), 0.362 ms an expert-token
+HOT  K2 avx512vnni  1 token  1 thread:  25448.7 M weights/s (25448.7 M weight-tokens/s), 0.989 ms an expert-token
+HOT  K2 avx512vnni  2 tokens 1 thread:  21534.8 M weights/s (43069.6 M weight-tokens/s), 0.584 ms an expert-token
+HOT  K2 avx512vnni  4 tokens 1 thread:  15210.7 M weights/s (60842.7 M weight-tokens/s), 0.414 ms an expert-token
+HOT  K2 avx512vnni  8 tokens 1 thread:   9484.7 M weights/s (75877.4 M weight-tokens/s), 0.332 ms an expert-token
+HOT  K2.5 scalar  1 token  1 thread:    866.9 M weights/s (  866.9 M weight-tokens/s), 29.029 ms an expert-token
+HOT  K2.5 scalar  2 tokens 1 thread:    424.3 M weights/s (  848.7 M weight-tokens/s), 29.652 ms an expert-token
+HOT  K2.5 scalar  4 tokens 1 thread:    221.1 M weights/s (  884.5 M weight-tokens/s), 28.451 ms an expert-token
+HOT  K2.5 scalar  8 tokens 1 thread:    106.5 M weights/s (  852.4 M weight-tokens/s), 29.524 ms an expert-token
+HOT  K2.5 avx2    1 token  1 thread:  13406.6 M weights/s (13406.6 M weight-tokens/s), 1.877 ms an expert-token
+HOT  K2.5 avx2    2 tokens 1 thread:  10768.5 M weights/s (21537.0 M weight-tokens/s), 1.168 ms an expert-token
+HOT  K2.5 avx2    4 tokens 1 thread:   7767.5 M weights/s (31069.8 M weight-tokens/s), 0.810 ms an expert-token
+HOT  K2.5 avx2    8 tokens 1 thread:   4712.0 M weights/s (37696.0 M weight-tokens/s), 0.668 ms an expert-token
+HOT  K2.5 avx512  1 token  1 thread:  22345.6 M weights/s (22345.6 M weight-tokens/s), 1.126 ms an expert-token
+HOT  K2.5 avx512  2 tokens 1 thread:  17340.6 M weights/s (34681.1 M weight-tokens/s), 0.726 ms an expert-token
+HOT  K2.5 avx512  4 tokens 1 thread:  13116.7 M weights/s (52466.7 M weight-tokens/s), 0.480 ms an expert-token
+HOT  K2.5 avx512  8 tokens 1 thread:   8525.6 M weights/s (68205.1 M weight-tokens/s), 0.369 ms an expert-token
+HOT  K2.5 avx512vnni  1 token  1 thread:  24082.3 M weights/s (24082.3 M weight-tokens/s), 1.045 ms an expert-token
+HOT  K2.5 avx512vnni  2 tokens 1 thread:  20274.8 M weights/s (40549.5 M weight-tokens/s), 0.621 ms an expert-token
+HOT  K2.5 avx512vnni  4 tokens 1 thread:  14874.0 M weights/s (59496.0 M weight-tokens/s), 0.423 ms an expert-token
+HOT  K2.5 avx512vnni  8 tokens 1 thread:   9557.7 M weights/s (76461.8 M weight-tokens/s), 0.329 ms an expert-token
+HOT  K3 scalar  1 token  1 thread:    878.5 M weights/s (  878.5 M weight-tokens/s), 28.647 ms an expert-token
+HOT  K3 scalar  2 tokens 1 thread:    435.7 M weights/s (  871.3 M weight-tokens/s), 28.882 ms an expert-token
+HOT  K3 scalar  4 tokens 1 thread:    216.2 M weights/s (  864.6 M weight-tokens/s), 29.106 ms an expert-token
+HOT  K3 scalar  8 tokens 1 thread:    107.3 M weights/s (  858.3 M weight-tokens/s), 29.322 ms an expert-token
+HOT  K3 avx2    1 token  1 thread:  14893.7 M weights/s (14893.7 M weight-tokens/s), 1.690 ms an expert-token
+HOT  K3 avx2    2 tokens 1 thread:  12383.9 M weights/s (24767.9 M weight-tokens/s), 1.016 ms an expert-token
+HOT  K3 avx2    4 tokens 1 thread:   8434.9 M weights/s (33739.6 M weight-tokens/s), 0.746 ms an expert-token
+HOT  K3 avx2    8 tokens 1 thread:   4983.9 M weights/s (39871.4 M weight-tokens/s), 0.631 ms an expert-token
+HOT  K3 avx512  1 token  1 thread:  24440.0 M weights/s (24440.0 M weight-tokens/s), 1.030 ms an expert-token
+HOT  K3 avx512  2 tokens 1 thread:  19449.1 M weights/s (38898.2 M weight-tokens/s), 0.647 ms an expert-token
+HOT  K3 avx512  4 tokens 1 thread:  14121.7 M weights/s (56486.7 M weight-tokens/s), 0.446 ms an expert-token
+HOT  K3 avx512  8 tokens 1 thread:   8925.8 M weights/s (71406.2 M weight-tokens/s), 0.352 ms an expert-token
+HOT  K3 avx512vnni  1 token  1 thread:  24871.0 M weights/s (24871.0 M weight-tokens/s), 1.012 ms an expert-token
+HOT  K3 avx512vnni  2 tokens 1 thread:  21012.9 M weights/s (42025.9 M weight-tokens/s), 0.599 ms an expert-token
+HOT  K3 avx512vnni  4 tokens 1 thread:  15018.9 M weights/s (60075.4 M weight-tokens/s), 0.419 ms an expert-token
+HOT  K3 avx512vnni  8 tokens 1 thread:   9709.3 M weights/s (77674.7 M weight-tokens/s), 0.324 ms an expert-token
+HOT  K3.5 scalar  1 token  1 thread:    881.5 M weights/s (  881.5 M weight-tokens/s), 28.548 ms an expert-token
+HOT  K3.5 scalar  2 tokens 1 thread:    437.1 M weights/s (  874.2 M weight-tokens/s), 28.788 ms an expert-token
+HOT  K3.5 scalar  4 tokens 1 thread:    216.7 M weights/s (  866.8 M weight-tokens/s), 29.031 ms an expert-token
+HOT  K3.5 scalar  8 tokens 1 thread:    107.5 M weights/s (  860.2 M weight-tokens/s), 29.256 ms an expert-token
+HOT  K3.5 avx2    1 token  1 thread:  13429.7 M weights/s (13429.7 M weight-tokens/s), 1.874 ms an expert-token
+HOT  K3.5 avx2    2 tokens 1 thread:  11572.2 M weights/s (23144.4 M weight-tokens/s), 1.087 ms an expert-token
+HOT  K3.5 avx2    4 tokens 1 thread:   8027.8 M weights/s (32111.2 M weight-tokens/s), 0.784 ms an expert-token
+HOT  K3.5 avx2    8 tokens 1 thread:   4839.8 M weights/s (38718.7 M weight-tokens/s), 0.650 ms an expert-token
+HOT  K3.5 avx512  1 token  1 thread:  24771.9 M weights/s (24771.9 M weight-tokens/s), 1.016 ms an expert-token
+HOT  K3.5 avx512  2 tokens 1 thread:  19529.6 M weights/s (39059.2 M weight-tokens/s), 0.644 ms an expert-token
+HOT  K3.5 avx512  4 tokens 1 thread:  14441.9 M weights/s (57767.5 M weight-tokens/s), 0.436 ms an expert-token
+HOT  K3.5 avx512  8 tokens 1 thread:   9025.8 M weights/s (72206.7 M weight-tokens/s), 0.349 ms an expert-token
+HOT  K3.5 avx512vnni  1 token  1 thread:  25576.3 M weights/s (25576.3 M weight-tokens/s), 0.984 ms an expert-token
+HOT  K3.5 avx512vnni  2 tokens 1 thread:  21614.8 M weights/s (43229.6 M weight-tokens/s), 0.582 ms an expert-token
+HOT  K3.5 avx512vnni  4 tokens 1 thread:  15485.2 M weights/s (61940.9 M weight-tokens/s), 0.406 ms an expert-token
+HOT  K3.5 avx512vnni  8 tokens 1 thread:   9757.1 M weights/s (78056.7 M weight-tokens/s), 0.322 ms an expert-token
+HOT  K4 scalar  1 token  1 thread:    884.9 M weights/s (  884.9 M weight-tokens/s), 28.439 ms an expert-token
+HOT  K4 scalar  2 tokens 1 thread:    440.9 M weights/s (  881.7 M weight-tokens/s), 28.541 ms an expert-token
+HOT  K4 scalar  4 tokens 1 thread:    218.8 M weights/s (  875.3 M weight-tokens/s), 28.752 ms an expert-token
+HOT  K4 scalar  8 tokens 1 thread:    109.1 M weights/s (  873.0 M weight-tokens/s), 28.828 ms an expert-token
+HOT  K4 avx2    1 token  1 thread:  14983.6 M weights/s (14983.6 M weight-tokens/s), 1.680 ms an expert-token
+HOT  K4 avx2    2 tokens 1 thread:  12190.7 M weights/s (24381.4 M weight-tokens/s), 1.032 ms an expert-token
+HOT  K4 avx2    4 tokens 1 thread:   8509.2 M weights/s (34036.9 M weight-tokens/s), 0.739 ms an expert-token
+HOT  K4 avx2    8 tokens 1 thread:   5013.5 M weights/s (40108.3 M weight-tokens/s), 0.627 ms an expert-token
+HOT  K4 avx512  1 token  1 thread:  25089.8 M weights/s (25089.8 M weight-tokens/s), 1.003 ms an expert-token
+HOT  K4 avx512  2 tokens 1 thread:  18514.4 M weights/s (37028.7 M weight-tokens/s), 0.680 ms an expert-token
+HOT  K4 avx512  4 tokens 1 thread:  14824.6 M weights/s (59298.3 M weight-tokens/s), 0.424 ms an expert-token
+HOT  K4 avx512  8 tokens 1 thread:   9142.3 M weights/s (73138.3 M weight-tokens/s), 0.344 ms an expert-token
+HOT  K4 avx512vnni  1 token  1 thread:  26204.4 M weights/s (26204.4 M weight-tokens/s), 0.960 ms an expert-token
+HOT  K4 avx512vnni  2 tokens 1 thread:  20474.1 M weights/s (40948.3 M weight-tokens/s), 0.615 ms an expert-token
+HOT  K4 avx512vnni  4 tokens 1 thread:  16155.3 M weights/s (64621.3 M weight-tokens/s), 0.389 ms an expert-token
+HOT  K4 avx512vnni  8 tokens 1 thread:   9972.0 M weights/s (79776.0 M weight-tokens/s), 0.315 ms an expert-token
+HOT  K5 scalar  1 token  1 thread:    881.9 M weights/s (  881.9 M weight-tokens/s), 28.537 ms an expert-token
+HOT  K5 scalar  2 tokens 1 thread:    437.3 M weights/s (  874.5 M weight-tokens/s), 28.777 ms an expert-token
+HOT  K5 scalar  4 tokens 1 thread:    216.5 M weights/s (  866.1 M weight-tokens/s), 29.057 ms an expert-token
+HOT  K5 scalar  8 tokens 1 thread:    107.8 M weights/s (  862.5 M weight-tokens/s), 29.176 ms an expert-token
+HOT  K5 avx2    1 token  1 thread:  13942.9 M weights/s (13942.9 M weight-tokens/s), 1.805 ms an expert-token
+HOT  K5 avx2    2 tokens 1 thread:  11828.3 M weights/s (23656.6 M weight-tokens/s), 1.064 ms an expert-token
+HOT  K5 avx2    4 tokens 1 thread:   8034.8 M weights/s (32139.3 M weight-tokens/s), 0.783 ms an expert-token
+HOT  K5 avx2    8 tokens 1 thread:   4738.3 M weights/s (37906.6 M weight-tokens/s), 0.664 ms an expert-token
+HOT  K5 avx512  1 token  1 thread:  19781.3 M weights/s (19781.3 M weight-tokens/s), 1.272 ms an expert-token
+HOT  K5 avx512  2 tokens 1 thread:  16162.3 M weights/s (32324.7 M weight-tokens/s), 0.779 ms an expert-token
+HOT  K5 avx512  4 tokens 1 thread:  12622.7 M weights/s (50490.6 M weight-tokens/s), 0.498 ms an expert-token
+HOT  K5 avx512  8 tokens 1 thread:   9073.4 M weights/s (72587.5 M weight-tokens/s), 0.347 ms an expert-token
+HOT  K5 avx512vnni  1 token  1 thread:  20240.3 M weights/s (20240.3 M weight-tokens/s), 1.243 ms an expert-token
+HOT  K5 avx512vnni  2 tokens 1 thread:  17569.2 M weights/s (35138.5 M weight-tokens/s), 0.716 ms an expert-token
+HOT  K5 avx512vnni  4 tokens 1 thread:  13401.3 M weights/s (53605.2 M weight-tokens/s), 0.469 ms an expert-token
+HOT  K5 avx512vnni  8 tokens 1 thread:   8689.5 M weights/s (69516.1 M weight-tokens/s), 0.362 ms an expert-token
+HOT  K6 scalar  1 token  1 thread:    878.9 M weights/s (  878.9 M weight-tokens/s), 28.634 ms an expert-token
+HOT  K6 scalar  2 tokens 1 thread:    432.4 M weights/s (  864.8 M weight-tokens/s), 29.101 ms an expert-token
+HOT  K6 scalar  4 tokens 1 thread:    211.7 M weights/s (  847.0 M weight-tokens/s), 29.713 ms an expert-token
+HOT  K6 scalar  8 tokens 1 thread:    105.9 M weights/s (  847.2 M weight-tokens/s), 29.704 ms an expert-token
+HOT  K6 avx2    1 token  1 thread:  11518.6 M weights/s (11518.6 M weight-tokens/s), 2.185 ms an expert-token
+HOT  K6 avx2    2 tokens 1 thread:  10093.3 M weights/s (20186.6 M weight-tokens/s), 1.247 ms an expert-token
+HOT  K6 avx2    4 tokens 1 thread:   6800.0 M weights/s (27199.9 M weight-tokens/s), 0.925 ms an expert-token
+HOT  K6 avx2    8 tokens 1 thread:   4232.6 M weights/s (33860.7 M weight-tokens/s), 0.743 ms an expert-token
+HOT  K6 avx512  1 token  1 thread:  19088.6 M weights/s (19088.6 M weight-tokens/s), 1.318 ms an expert-token
+HOT  K6 avx512  2 tokens 1 thread:  15197.8 M weights/s (30395.6 M weight-tokens/s), 0.828 ms an expert-token
+HOT  K6 avx512  4 tokens 1 thread:  11721.0 M weights/s (46884.1 M weight-tokens/s), 0.537 ms an expert-token
+HOT  K6 avx512  8 tokens 1 thread:   7978.5 M weights/s (63828.2 M weight-tokens/s), 0.394 ms an expert-token
+HOT  K6 avx512vnni  1 token  1 thread:  19959.0 M weights/s (19959.0 M weight-tokens/s), 1.261 ms an expert-token
+HOT  K6 avx512vnni  2 tokens 1 thread:  16377.4 M weights/s (32754.8 M weight-tokens/s), 0.768 ms an expert-token
+HOT  K6 avx512vnni  4 tokens 1 thread:  12744.3 M weights/s (50977.2 M weight-tokens/s), 0.494 ms an expert-token
+HOT  K6 avx512vnni  8 tokens 1 thread:   8462.5 M weights/s (67700.2 M weight-tokens/s), 0.372 ms an expert-token
+HOT  K7 scalar  1 token  1 thread:    877.2 M weights/s (  877.2 M weight-tokens/s), 28.688 ms an expert-token
+HOT  K7 scalar  2 tokens 1 thread:    430.7 M weights/s (  861.4 M weight-tokens/s), 29.216 ms an expert-token
+HOT  K7 scalar  4 tokens 1 thread:    211.4 M weights/s (  845.7 M weight-tokens/s), 29.756 ms an expert-token
+HOT  K7 scalar  8 tokens 1 thread:    105.3 M weights/s (  842.4 M weight-tokens/s), 29.875 ms an expert-token
+HOT  K7 avx2    1 token  1 thread:  12297.2 M weights/s (12297.2 M weight-tokens/s), 2.046 ms an expert-token
+HOT  K7 avx2    2 tokens 1 thread:  10738.9 M weights/s (21477.8 M weight-tokens/s), 1.172 ms an expert-token
+HOT  K7 avx2    4 tokens 1 thread:   7460.8 M weights/s (29843.3 M weight-tokens/s), 0.843 ms an expert-token
+HOT  K7 avx2    8 tokens 1 thread:   4525.0 M weights/s (36199.8 M weight-tokens/s), 0.695 ms an expert-token
+HOT  K7 avx512  1 token  1 thread:  19709.6 M weights/s (19709.6 M weight-tokens/s), 1.277 ms an expert-token
+HOT  K7 avx512  2 tokens 1 thread:  15847.2 M weights/s (31694.4 M weight-tokens/s), 0.794 ms an expert-token
+HOT  K7 avx512  4 tokens 1 thread:  12442.4 M weights/s (49769.5 M weight-tokens/s), 0.506 ms an expert-token
+HOT  K7 avx512  8 tokens 1 thread:   8115.2 M weights/s (64921.7 M weight-tokens/s), 0.388 ms an expert-token
+HOT  K7 avx512vnni  1 token  1 thread:  20672.4 M weights/s (20672.4 M weight-tokens/s), 1.217 ms an expert-token
+HOT  K7 avx512vnni  2 tokens 1 thread:  17196.3 M weights/s (34392.6 M weight-tokens/s), 0.732 ms an expert-token
+HOT  K7 avx512vnni  4 tokens 1 thread:  13018.0 M weights/s (52072.1 M weight-tokens/s), 0.483 ms an expert-token
+HOT  K7 avx512vnni  8 tokens 1 thread:   8643.1 M weights/s (69145.1 M weight-tokens/s), 0.364 ms an expert-token
+HOT  K8 scalar  1 token  1 thread:    886.9 M weights/s (  886.9 M weight-tokens/s), 28.374 ms an expert-token
+HOT  K8 scalar  2 tokens 1 thread:    438.3 M weights/s (  876.6 M weight-tokens/s), 28.710 ms an expert-token
+HOT  K8 scalar  4 tokens 1 thread:    214.2 M weights/s (  856.9 M weight-tokens/s), 29.368 ms an expert-token
+HOT  K8 scalar  8 tokens 1 thread:    107.2 M weights/s (  857.6 M weight-tokens/s), 29.343 ms an expert-token
+HOT  K8 avx2    1 token  1 thread:  15026.4 M weights/s (15026.4 M weight-tokens/s), 1.675 ms an expert-token
+HOT  K8 avx2    2 tokens 1 thread:  12037.1 M weights/s (24074.1 M weight-tokens/s), 1.045 ms an expert-token
+HOT  K8 avx2    4 tokens 1 thread:   8004.3 M weights/s (32017.3 M weight-tokens/s), 0.786 ms an expert-token
+HOT  K8 avx2    8 tokens 1 thread:   4693.5 M weights/s (37548.3 M weight-tokens/s), 0.670 ms an expert-token
+HOT  K8 avx512  1 token  1 thread:  21288.8 M weights/s (21288.8 M weight-tokens/s), 1.182 ms an expert-token
+HOT  K8 avx512  2 tokens 1 thread:  17370.5 M weights/s (34741.0 M weight-tokens/s), 0.724 ms an expert-token
+HOT  K8 avx512  4 tokens 1 thread:  13347.3 M weights/s (53389.1 M weight-tokens/s), 0.471 ms an expert-token
+HOT  K8 avx512  8 tokens 1 thread:   8640.1 M weights/s (69121.0 M weight-tokens/s), 0.364 ms an expert-token
+HOT  K8 avx512vnni  1 token  1 thread:  22627.5 M weights/s (22627.5 M weight-tokens/s), 1.112 ms an expert-token
+HOT  K8 avx512vnni  2 tokens 1 thread:  19030.1 M weights/s (38060.2 M weight-tokens/s), 0.661 ms an expert-token
+HOT  K8 avx512vnni  4 tokens 1 thread:  14476.7 M weights/s (57906.8 M weight-tokens/s), 0.435 ms an expert-token
+HOT  K8 avx512vnni  8 tokens 1 thread:   9309.5 M weights/s (74476.0 M weight-tokens/s), 0.338 ms an expert-token

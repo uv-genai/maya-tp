@@ -1,0 +1,73 @@
+{
+  "accepted": false,
+  "upstream": "171077787036ccc2784250ca644760f654e8d4a3",
+  "runtime_source": "32650e88e98041d06fef2309d60a58e60d9e5397",
+  "binary_md5": "a6170c07503e139d73789184d9a93971",
+  "cpu": {
+    "hip_mapping": "pass",
+    "serve": {
+      "tests": 580,
+      "skips": 11
+    },
+    "tools": {
+      "tests": 654,
+      "skips": 31
+    },
+    "host_checks": 15
+  },
+  "gpu": {
+    "targets": [
+      "maya",
+      "maya-ds4",
+      "maya-mm3"
+    ],
+    "arch": "gfx1151",
+    "iq_strict_cases": 396,
+    "fused_cases": 196,
+    "mmq_attention": "pass"
+  },
+  "live": {
+    "large_prompt_modes": [
+      "simple",
+      "mtp7"
+    ],
+    "prefill_cancel_modes": [
+      "simple",
+      "mtp7"
+    ],
+    "context_load_unload_rejected_before_mutation": true,
+    "snapshot_mode_state": "pass",
+    "cli_pair_tokens_each": 32,
+    "peer_recovery_passes": 8,
+    "default_rounds_match": 135,
+    "snapshot_rounds_match": 103,
+    "asymmetric_retries_each": 8,
+    "snapshot_extra_both_rank_retry": 1
+  },
+  "candidate_framed_records": 64,
+  "candidate_raw_pick_differences": 0,
+  "baseline40_compatibility_records": 8,
+  "prefill_A_B": {
+    "paired_messages_usage_equal": 9,
+    "warm_throughput_delta_percent": [
+      0.5684928623,
+      -0.9716039596,
+      -1.8449721265
+    ]
+  },
+  "open_issues": [
+    33,
+    42,
+    46,
+    52,
+    54,
+    60,
+    11,
+    16
+  ],
+  "pending": [
+    "final evidence CI",
+    "PR58 merge",
+    "post-merge main CI"
+  ]
+}

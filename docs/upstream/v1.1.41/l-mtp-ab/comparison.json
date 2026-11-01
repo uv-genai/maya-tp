@@ -1,0 +1,198 @@
+{
+  "arms": [
+    {
+      "arm": "initial41",
+      "binary_md5": "a6170c07503e139d73789184d9a93971",
+      "summary": {
+        "simple": {
+          "median_ms_per_token": 42.921875,
+          "median_tokens_per_second": 23.298143429195488,
+          "min_ms_per_token": 42.2171875,
+          "max_ms_per_token": 43.6265625,
+          "mean_ms_per_token": 42.921875,
+          "stdev_ms_per_token": 0.9965786197347885
+        },
+        "mtp": {
+          "median_ms_per_token": 76.715625,
+          "median_tokens_per_second": 13.035154181433052,
+          "min_ms_per_token": 76.234375,
+          "max_ms_per_token": 77.196875,
+          "mean_ms_per_token": 76.715625,
+          "stdev_ms_per_token": 0.680590276892056
+        },
+        "mtp_latency_change_percent": 78.73316345103748,
+        "mtp_throughput_change_percent": -44.05067416188032
+      },
+      "measured": [
+        {
+          "mode": "simple",
+          "ms_per_token": 43.6265625,
+          "accepted_drafts": 0,
+          "drafts": 0,
+          "phase_lines": []
+        },
+        {
+          "mode": "mtp",
+          "ms_per_token": 76.234375,
+          "accepted_drafts": 36,
+          "drafts": 52,
+          "phase_lines": [
+            "glm mtp: a drafting round's host time - drafts 102.31 ms, verify 83.48 ms, commit + cache 0.05 ms (26 rounds)",
+            "glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head"
+          ]
+        },
+        {
+          "mode": "mtp",
+          "ms_per_token": 77.196875,
+          "accepted_drafts": 36,
+          "drafts": 52,
+          "phase_lines": [
+            "glm mtp: a drafting round's host time - drafts 111.80 ms, verify 76.49 ms, commit + cache 0.05 ms (26 rounds)",
+            "glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head"
+          ]
+        },
+        {
+          "mode": "simple",
+          "ms_per_token": 42.2171875,
+          "accepted_drafts": 0,
+          "drafts": 0,
+          "phase_lines": []
+        }
+      ],
+      "startup": {
+        "0": 649,
+        "1": 249
+      }
+    },
+    {
+      "arm": "baseline40",
+      "binary_md5": "8facc62c09b1138b6787beda7d2f371d",
+      "summary": {
+        "simple": {
+          "median_ms_per_token": 41.34375,
+          "median_tokens_per_second": 24.18745275888133,
+          "min_ms_per_token": 40.59375,
+          "max_ms_per_token": 42.09375,
+          "mean_ms_per_token": 41.34375,
+          "stdev_ms_per_token": 1.0606601717798212
+        },
+        "mtp": {
+          "median_ms_per_token": 53.18125,
+          "median_tokens_per_second": 18.803619696791632,
+          "min_ms_per_token": 35.340625,
+          "max_ms_per_token": 71.021875,
+          "mean_ms_per_token": 53.18125,
+          "stdev_ms_per_token": 25.230453836212494
+        },
+        "mtp_latency_change_percent": 28.631897203325774,
+        "mtp_throughput_change_percent": -22.258784816077092
+      },
+      "measured": [
+        {
+          "mode": "simple",
+          "ms_per_token": 42.09375,
+          "accepted_drafts": 0,
+          "drafts": 0,
+          "phase_lines": []
+        },
+        {
+          "mode": "mtp",
+          "ms_per_token": 71.021875,
+          "accepted_drafts": 36,
+          "drafts": 52,
+          "phase_lines": [
+            "glm mtp: a drafting round's host time - drafts 43.42 ms, verify 129.73 ms, commit + cache 0.07 ms (26 rounds)",
+            "glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head"
+          ]
+        },
+        {
+          "mode": "mtp",
+          "ms_per_token": 35.340625,
+          "accepted_drafts": 36,
+          "drafts": 52,
+          "phase_lines": [
+            "glm mtp: a drafting round's host time - drafts 8.03 ms, verify 77.31 ms, commit + cache 0.06 ms (26 rounds)",
+            "glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head"
+          ]
+        },
+        {
+          "mode": "simple",
+          "ms_per_token": 40.59375,
+          "accepted_drafts": 0,
+          "drafts": 0,
+          "phase_lines": []
+        }
+      ],
+      "startup": {
+        "0": 414,
+        "1": 33
+      }
+    },
+    {
+      "arm": "candidate41",
+      "binary_md5": "a6170c07503e139d73789184d9a93971",
+      "summary": {
+        "simple": {
+          "median_ms_per_token": 41.8984375,
+          "median_tokens_per_second": 23.86723848592206,
+          "min_ms_per_token": 41.6671875,
+          "max_ms_per_token": 42.1296875,
+          "mean_ms_per_token": 41.8984375,
+          "stdev_ms_per_token": 0.32703688629878225
+        },
+        "mtp": {
+          "median_ms_per_token": 37.353906249999994,
+          "median_tokens_per_second": 26.77096187229415,
+          "min_ms_per_token": 37.05625,
+          "max_ms_per_token": 37.6515625,
+          "mean_ms_per_token": 37.353906249999994,
+          "stdev_ms_per_token": 0.4209495056751156
+        },
+        "mtp_latency_change_percent": -10.84654111504756,
+        "mtp_throughput_change_percent": 12.166147282119933
+      },
+      "measured": [
+        {
+          "mode": "simple",
+          "ms_per_token": 42.1296875,
+          "accepted_drafts": 0,
+          "drafts": 0,
+          "phase_lines": []
+        },
+        {
+          "mode": "mtp",
+          "ms_per_token": 37.05625,
+          "accepted_drafts": 36,
+          "drafts": 52,
+          "phase_lines": [
+            "glm mtp: a drafting round's host time - drafts 8.02 ms, verify 81.56 ms, commit + cache 0.05 ms (26 rounds)",
+            "glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head"
+          ]
+        },
+        {
+          "mode": "mtp",
+          "ms_per_token": 37.6515625,
+          "accepted_drafts": 36,
+          "drafts": 52,
+          "phase_lines": [
+            "glm mtp: a drafting round's host time - drafts 8.02 ms, verify 83.00 ms, commit + cache 0.06 ms (26 rounds)",
+            "glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head"
+          ]
+        },
+        {
+          "mode": "simple",
+          "ms_per_token": 41.6671875,
+          "accepted_drafts": 0,
+          "drafts": 0,
+          "phase_lines": []
+        }
+      ],
+      "startup": {
+        "0": 617,
+        "1": 159
+      }
+    }
+  ],
+  "all_raw_picks_match": true,
+  "causality": "No persistent candidate slowdown reproduced. Accepted40 also had a transient slow sample; candidate repeat returned to historical accepted range. Keep issue60 open for transient host/wait variability; no speedup claim."
+}

@@ -397,3 +397,9 @@ ssh strix-halo-1.local '/tmp/tp_comm_rdma_test --rank 0 --bootstrap-port 18515 \
 ```
 
 `--hidden 12288` = Maya decode AR (48 KiB/row). `--hidden 2560` = gufo Flash-Next geometry.
+
+### Cancelling a prompt and changing the pair
+
+A TP2 prompt cancellation completes the current mirrored prefill call on both ranks before resetting them. The client can disconnect immediately; the server drains that call before admitting another request. This can take as long as the current call, and avoids leaving one rank inside abandoned collectives. Cancelled-checkpoint restoration remains single-host-only, even with `MAYA_GLM_KEEP_CANCELLED=1`. Live regression: `tools/tp2/prefill_cancel.py` (both simple and MTP).
+
+Model load/unload, idle unload and automatic dead-engine restart are guarded under TP2, like context/current-model changes. Stop and relaunch both ranks with matching model/context options through the pair launcher. The single-host lifecycle APIs retain their normal behavior.

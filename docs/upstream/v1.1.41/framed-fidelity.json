@@ -1,0 +1,58 @@
+{
+  "records": [
+    {
+      "case": "bench-technical",
+      "requests": 8,
+      "all_raw_picks_match": true,
+      "settings": {
+        "MAYA_TP_MTP": "1",
+        "MAYA_GLM_MTP_FIXED": "2",
+        "MAYA_GLM_LOOP_THINK": "0",
+        "MAYA_GLM_LOOP_ANSWER": "0",
+        "MAYA_GLM_MTP_DRAFT": "2"
+      }
+    },
+    {
+      "case": "routes-technical",
+      "requests": 8,
+      "all_raw_picks_match": true,
+      "settings": {
+        "MAYA_TP_MTP": "1",
+        "MAYA_GLM_MTP_FIXED": "2",
+        "MAYA_GLM_LOOP_THINK": "0",
+        "MAYA_GLM_LOOP_ANSWER": "0",
+        "MAYA_GLM_ROUTE_FAST": "1",
+        "MAYA_GLM_ROUTE_RANK": "1",
+        "MAYA_GLM_MTP_DRAFT": "2"
+      }
+    },
+    {
+      "case": "bench-code",
+      "requests": 8,
+      "all_raw_picks_match": true,
+      "settings": {
+        "MAYA_TP_MTP": "1",
+        "MAYA_GLM_MTP_FIXED": "2",
+        "MAYA_GLM_LOOP_THINK": "0",
+        "MAYA_GLM_LOOP_ANSWER": "0",
+        "MAYA_GLM_MTP_DRAFT": "2"
+      }
+    },
+    {
+      "case": "routes-code",
+      "requests": 8,
+      "all_raw_picks_match": true,
+      "settings": {
+        "MAYA_TP_MTP": "1",
+        "MAYA_GLM_MTP_FIXED": "2",
+        "MAYA_GLM_LOOP_THINK": "0",
+        "MAYA_GLM_LOOP_ANSWER": "0",
+        "MAYA_GLM_ROUTE_FAST": "1",
+        "MAYA_GLM_ROUTE_RANK": "1",
+        "MAYA_GLM_MTP_DRAFT": "2"
+      }
+    }
+  ],
+  "total_requests": 32,
+  "raw_pick_differences": 0
+}

@@ -1,0 +1,75 @@
+test_a_continue_hears_what_is_blocked (serve.test_loop_guard.ToolBlock.test_a_continue_hears_what_is_blocked) ... [maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+ok
+test_again_and_again_it_is_steered_never_stopped (serve.test_loop_guard.ToolBlock.test_again_and_again_it_is_steered_never_stopped) ... [maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (2. time in this answer), not run - a note, the thinking steered away and on
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (3. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 516 tokens in 0 s (79674.9 tok/s) (stop, cancel=False)
+ok
+test_blocked_then_moves_on (serve.test_loop_guard.ToolBlock.test_blocked_then_moves_on) ... [maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 318 tokens in 0 s (74142.3 tok/s) (stop, cancel=False)
+ok
+test_it_does_not_end_its_turn_with_nothing (serve.test_loop_guard.ToolBlock.test_it_does_not_end_its_turn_with_nothing) ... [maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('OK — the loop guard is right. Stop repeating identical greps. Break out: use wha'): kept going (1. time in this answer)
+[maya] done: 225 tokens in 0 s (82982.2 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('What I found: - Finding 0: the operator claim at step 0 is read-only, so the byt'): kept going (1. time in this answer)
+[maya] loop guard: the model would end its turn with nothing ('What I found: - Result 0: the operator claim at step 0 is read-only, so the byte'): kept going (2. time in this answer)
+[maya] done: 1444 tokens in 0 s (41304.7 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('What I found: - Finding 0: the operator claim at step 0 is read-only, so the byt'): kept going (1. time in this answer)
+[maya] done: 618 tokens in 0 s (48902.8 tok/s) (stop, cancel=False)
+[maya] done: 9 tokens in 0 s (63913.2 tok/s) (stop, cancel=False)
+ok
+test_notes_differ_and_when_it_blocks (serve.test_loop_guard.ToolBlock.test_notes_differ_and_when_it_blocks) ... ok
+test_steering_respects_total_output_limit (serve.test_loop_guard.ToolBlock.test_steering_respects_total_output_limit) ... [maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 8 tokens in 0 s (59918.6 tok/s) (length, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('Done.'): kept going (1. time in this answer)
+[maya] done: 9 tokens in 0 s (46603.4 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('Done.'): kept going (1. time in this answer)
+[maya] done: 10 tokens in 0 s (18139.7 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] done: 132 tokens in 0 s (92298.6 tok/s) (length, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 133 tokens in 0 s (79024.9 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 134 tokens in 0 s (71362.7 tok/s) (stop, cancel=False)
+ok
+test_what_is_not_blocked (serve.test_loop_guard.ToolBlock.test_what_is_not_blocked) ... [maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 133 tokens in 0 s (91105.5 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] done: 104 tokens in 0 s (94305.5 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] done: 222 tokens in 0 s (69826.1 tok/s) (stop, cancel=False)
+ok
+test_tp2_load_unload_and_dead_restart_preserve_pair (serve.test_dashboard.Dashboard.test_tp2_load_unload_and_dead_restart_preserve_pair) ... /home/ugo/software/project-maya-upstream-review/serve/telemetry.py:668: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/telemetry.py:651: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.985s
+
+OK

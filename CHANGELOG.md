@@ -6,6 +6,8 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.41 integration** (#55): retain applicable gfx1151 kernels/CPU rows, parser/loop, model-context and timing fixes with conservative TP2 defaults. Finish each mirrored prefill call before cancellation/reset (#59), reject unpaired load/unload/automatic restarts (#56), and bound loop-guard continuations by the client output limit (#57). Preserve NextN/MTP/RDMA/tuning and owned docs; unsupported platforms/local multi-GPU additions are excluded. S/M/L fidelity and state gates pass; no new performance claim, transient Maya-L timing remains tracked in #60.
+
 - **Upstream v1.1.40 integration** (#50): context/dashboard controls, HTTP request handling and update serialization, download recovery, and the opt-in DeepSeek tail-cost estimate. Exclude the Metal backend; preserve GLM TP2/MTP engine, tuning and owned docs.
 
 - Integrate upstream v1.1.39 with TP2/MTP preservation (refs #45): MMQ row-ID padding, ordered hipBLASLt table fallback, bounded sentence-end thinking closure and cancel draining. Keep measured tuning first, answer reserves for every output limit and existing defaults. Streamed expert fetch is deferred pending a compact TP2 reader port (#46).

@@ -772,6 +772,7 @@ class PrometheusMetrics(unittest.TestCase):
         tok = ByteTokenizer()
         eng = MockEngine(tok, "</think>\n\nok", max_context=CTX)
         eng.stat = {"tok_s": 21.5, "vram_hit": 0.95, "promo": "x", "time": 1.0,
+                    "draft_rounds": 12, "draft_ms": 123.5, "verify_ms": 456.75,
                     "eg_cache_rows": 10, "eg_cache_cap": 100, "eg_cache_row_bytes": 264,
                     "eg_lookup_rows": 20, "eg_lookup_hits": 15, "eg_lookup_reads": 5}
         svc = Service(eng, tok, ChatTemplate(ROOT / "serve/chat_template.jinja"))
@@ -791,6 +792,9 @@ class PrometheusMetrics(unittest.TestCase):
             self.assertGreater(int(lines["llamacpp:tokens_predicted_total"]), 0)
             self.assertEqual(lines["llamacpp:requests_deferred"], "0")
             self.assertEqual((lines["maya:engine_tok_s"], lines["maya:engine_vram_hit"]), ("21.5", "0.95"))
+            for key, value in (("draft_rounds", "12"), ("draft_ms", "123.5"), ("verify_ms", "456.75")):
+                self.assertEqual(lines["maya:engine_" + key], value)
+                self.assertIn("# TYPE maya:engine_" + key + " gauge", text)
             self.assertNotIn("maya:engine_promo", lines)          # not a number: left out
             self.assertEqual((lines["maya:engine_eg_cache_rows"], lines["maya:engine_eg_cache_cap"],
                               lines["maya:engine_eg_cache_row_bytes"]), ("10", "100", "264"))
@@ -1651,6 +1655,8 @@ class WebApp(unittest.TestCase):
                     self.assertEqual(model["id"], svc.model)
                     self.assertEqual(model["status"]["value"], "loaded")
                     self.assertEqual(model["meta"]["n_ctx"], 262144)
+                    self.assertEqual(model["context_length"], 262144)
+                    self.assertNotIn("max_output_tokens", model)
                     self.assertEqual(model["architecture"]["input_modalities"],
                                      ["text", "image"] if vision else ["text"])
                 code, _, body = self.get("/props?model=" + svc.model + "&autoload=false")
@@ -2153,6 +2159,102 @@ class IdleUnload(unittest.TestCase):
         self.assertEqual((self.engine.restarts, self.engine.running, self.svc.unloaded), (1, True, False))
 
 
+class ModelManagement(unittest.TestCase):
+    """#678: llama.cpp's /models/load, /models/unload and /models/sse (Open WebUI's Models page), off unless
+    "model_management" is on; #677: /status obeys the API key, and a request while the engine starts gets a 503."""
+
+    def setUp(self):
+        self.tok = ByteTokenizer()
+        self.engine = LifecycleEngine(self.tok, "</think>\n\nok", max_context=CTX)
+        self.svc = Service(self.engine, self.tok, ChatTemplate(ROOT / "serve/chat_template.jinja"))
+        self.httpd = serve(self.svc, port=0)
+        self.port = self.httpd.server_address[1]
+
+    def tearDown(self):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+
+    def call(self, method, path, body=None, key=None):
+        req = urllib.request.Request(f"http://127.0.0.1:{self.port}{path}", None if body is None else json.dumps(body).encode(),
+                                     {"Content-Type": "application/json", **({"Authorization": "Bearer " + key} if key else {})},
+                                     method=method)
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return r.status, json.loads(r.read() or b"{}")
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read() or b"{}")
+
+    def first_event(self, key=None):
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        try:
+            conn.request("GET", "/models/sse", headers={"Authorization": "Bearer " + key} if key else {})
+            r = conn.getresponse()
+            if r.status != 200:
+                return r.status, None
+            while True:
+                line = r.fp.readline()
+                if line.startswith(b"data:"):
+                    return r.status, json.loads(line[5:])
+        finally:
+            conn.close()
+
+    def test_off_unless_the_config_turns_it_on(self):
+        for method, path in (("POST", "/models/load"), ("POST", "/models/unload"), ("GET", "/models/sse")):
+            self.assertEqual(self.call(method, path, {} if method == "POST" else None)[0], 404, path)
+        self.assertEqual((self.engine.closes, self.engine.restarts), (0, 0))
+        from serve.server import model_management_setting
+        self.assertFalse(model_management_setting({}, env={}))
+        self.assertTrue(model_management_setting({"model_management": True}, env={}))
+        self.assertFalse(model_management_setting({"model_management": True}, env={"MAYA_MODEL_MANAGEMENT": "0"}))
+        self.assertTrue(model_management_setting({}, env={"MAYA_MODEL_MANAGEMENT": "on"}))
+
+    def test_unload_load_and_the_state_stream(self):
+        self.svc.model_management = True
+        code, out = self.call("POST", "/models/load", {})                      # (already loaded: nothing starts)
+        self.assertEqual((code, out["status"]["value"], self.engine.restarts), (200, "loaded", 0))
+        self.assertEqual(self.call("POST", "/models/load", {"model": "other"})[0], 404)
+        self.assertEqual(self.first_event()[1]["data"][0]["status"]["value"], "loaded")
+        code, out = self.call("POST", "/models/unload", {})
+        self.assertEqual((code, out["status"]["value"], self.engine.running, self.svc.unloaded), (200, "unloaded", False, True))
+        self.assertEqual(self.first_event()[1]["data"][0]["status"]["value"], "unloaded")
+        code, out = self.call("POST", "/models/load", {"model": self.svc.model})
+        self.assertEqual((code, out["status"]["value"], self.engine.restarts, self.engine.running), (200, "loaded", 1, True))
+        self.assertEqual(self.first_event()[1]["data"][0]["status"]["value"], "loaded")
+
+    def test_unload_waits_for_a_running_request(self):
+        self.svc.model_management = True
+        self.assertTrue(self.svc.fifo.acquire(blocking=False))      # (a request holds the engine)
+        try:
+            self.assertEqual(self.call("POST", "/models/unload", {})[0], 409)
+        finally:
+            self.svc.fifo.release()
+        self.assertTrue(self.engine.running)
+
+    def test_the_api_key_guards_them_and_status(self):
+        self.svc.model_management = True
+        self.svc.api_key = "secret"
+        for method, path in (("POST", "/models/load"), ("POST", "/models/unload"), ("GET", "/models/sse"), ("GET", "/status")):
+            self.assertEqual(self.call(method, path, {} if method == "POST" else None)[0], 401, path)
+            self.assertEqual(self.call(method, path, {} if method == "POST" else None, key="wrong")[0], 401, path)
+        self.assertEqual(self.first_event()[0], 401)
+        self.assertEqual(self.engine.closes, 0)
+        code, out = self.call("GET", "/status", key="secret")
+        self.assertEqual(code, 200)
+        self.assertIn("busy", out)
+        self.assertEqual(self.first_event("secret")[0], 200)
+        self.svc.api_key = ""
+        self.assertEqual(self.call("GET", "/status")[0], 200)          # (no key set: open, as before)
+
+    def test_a_request_while_the_engine_starts_gets_a_retryable_503(self):
+        body = {"model": "m", "messages": [{"role": "user", "content": "hi"}], "max_tokens": 8}
+        self.engine.max_context = 0                                     # (a start in progress: no READY yet)
+        code, out = self.call("POST", "/v1/chat/completions", body)
+        self.assertEqual(code, 503)
+        self.assertIn("starting", out["error"]["message"])
+        self.engine.max_context = CTX
+        self.assertEqual(self.call("POST", "/v1/chat/completions", body)[0], 200)
+
+
 class HeldEngine(MockEngine):
     """The first request holds the engine until `release` is set (heartbeats meanwhile); the others answer at once."""
     def __init__(self, *a, **k):
@@ -2544,6 +2646,75 @@ class MalformedToolCallAnswers(unittest.TestCase):
         self.assertNotIn("error", out)
         self.assertIn("Let me write it.", msg.get("content") or "")
         self.assertEqual([c["function"]["name"] for c in msg.get("tool_calls") or []], ["write"])
+
+
+@unittest.skipUnless(os.name == "posix", "the fake engine uses a script with a shebang")
+class StatsAfterConsumerStops(unittest.TestCase):
+    """An EOS/budget/cancel closes the token consumer before final STAT and DONE are read."""
+
+    def test_final_stats_are_kept_and_next_request_is_clean(self):
+        import tempfile
+        script = r'''import sys
+print("READY 4096 stop", flush=True)
+first = True
+for line in sys.stdin:
+    if not line.startswith("GEN"):
+        continue
+    print("STAT tok_s=10 cpu_read_proxy=4 rng_begin=0 rng_end=1", flush=True)
+    print("T 66", flush=True)
+    if first:
+        assert sys.stdin.readline().strip() == "STOP"
+        first = False
+    print("STAT tok_s=30 cpu_read_proxy=99 rng_begin=0 rng_end=9", flush=True)
+    print("DONE 1 3 1.0 1.0 stop 0 0 0 0 0", flush=True)
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            exe = Path(directory) / "engine"
+            exe.write_text(f"#!{sys.executable}\n" + script)
+            exe.chmod(0o755)
+            engine = StrataEngine(str(exe), [])
+            try:
+                tokens = engine.generate([1, 2, 3], 16, {}, threading.Event())
+                self.assertEqual(next(tokens), 66)
+                self.assertEqual(engine.stat["tok_s"], 10)
+                tokens.close()  # the frontend found EOS, reached its budget, or was cancelled
+                self.assertEqual(engine.stat["tok_s"], 30)
+                self.assertEqual(engine.stat["cpu_read_proxy"], 99)
+                self.assertEqual(engine.stat["rng_end"], 9)
+                self.assertEqual(engine.last["finish"], "stop")
+                following = engine.generate([1, 2, 4], 16, {}, threading.Event())
+                self.assertEqual([t for t in following if t is not None], [66])
+                self.assertEqual(engine.stat["cpu_read_proxy"], 99)
+            finally:
+                engine.proc.kill()
+                engine.proc.wait()
+
+
+class NoDelayStreaming(unittest.TestCase):
+    """Streamed replies are flush-per-token small frames; without TCP_NODELAY, Nagle + delayed ACK
+    can hold a frame ~40 ms on the LAN to LiteLLM.  _sse (every streaming path goes through it) sets it."""
+
+    def test_sse_sets_tcp_nodelay(self):
+        import socket
+
+        from serve.server import make_handler
+        listener = socket.socket()
+        listener.bind(("127.0.0.1", 0))
+        listener.listen(1)
+        client = socket.create_connection(listener.getsockname())
+        conn, _ = listener.accept()
+        try:
+            handler_cls = make_handler(None)
+            handler = handler_cls.__new__(handler_cls)
+            handler.connection = conn
+            handler.send_response = lambda *a, **k: None
+            handler.send_header = lambda *a, **k: None
+            handler.end_headers = lambda *a, **k: None
+            self.assertEqual(conn.getsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY), 0)
+            handler._sse()
+            self.assertEqual(conn.getsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY), 1)
+        finally:
+            conn.close(), client.close(), listener.close()
 
 
 if __name__ == "__main__":

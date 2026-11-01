@@ -328,8 +328,21 @@ class DraftChoice(unittest.TestCase):
         self.assertEqual(self.choose({"draft": "mtp"}, draft="dflash2"), "dflash2")
 
     def test_amd_keeps_mtp_without_asking(self):
+        rx = {"arch": "gfx1201", "name": "Radeon RX 9070 XT", "vram_gb": 16}
+        halo = {"arch": "gfx1151", "name": "Radeon 8060S", "vram_gb": 108}
         with patch.object(maya, "choose", side_effect=AssertionError("asked")):
             self.assertEqual(self.choose({"draft": "dflash2"}, pc={"backend": "hip"}, yes=False), "mtp")
+            self.assertEqual(self.choose({"draft": "dflash2"}, pc={"backend": "hip", "gpus": [rx]}, yes=False), "mtp")
+            # a discrete card beside the APU: the window would span two GPUs, not measured on AMD
+            self.assertEqual(self.choose({"draft": "dflash2"}, pc={"backend": "hip", "gpus": [rx, halo]}, yes=False),
+                             "mtp")
+        self.assertEqual(self.choose({}, pc={"backend": "hip", "gpus": [rx]}, draft="dflash2"), "dflash2")
+
+    def test_ryzen_apu_keeps_the_validated_mtp_choice(self):
+        pc = {"backend": "hip", "archs": ["gfx1151"], "gpus": [{"arch": "gfx1151", "name": "Radeon 8060S"}]}
+        with patch.object(maya, "choose", side_effect=AssertionError("asked")):
+            self.assertEqual(self.choose({"draft": "dflash2"}, pc=pc, yes=False), "mtp")
+        self.assertEqual(self.choose({}, pc=pc, draft="dflash2"), "dflash2")
 
     def test_gpus_before_sm80_keep_mtp_without_asking(self):
         with patch.object(maya, "choose", side_effect=AssertionError("asked")):

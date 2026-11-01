@@ -86,6 +86,26 @@ class Dashboard(unittest.TestCase):
         self.assertEqual(self.engine.max_context, 32768)
         self.assertEqual(self.cfg.read_bytes(), before)
 
+    def test_tp2_load_unload_and_dead_restart_preserve_pair(self):
+        from unittest import mock
+        self.engine.info = {"tp_world": 2, "tp_rank": 0}
+        self.svc.model_management = True
+        before = self.cfg.read_bytes()
+        with mock.patch.object(self.engine, "close", create=True) as close, mock.patch.object(self.engine, "restart", create=True) as restart:
+            for op in ("load", "unload"):
+                code, _, raw = self.req("POST", "/models/" + op, {"model": self.svc.model})
+                self.assertEqual(code, 400, raw)
+                self.assertIn("both ranks", json.loads(raw)["error"]["message"])
+            with self.assertRaisesRegex(ValueError, "both ranks"):
+                self.svc.unload(idle_for=1)
+            with mock.patch.object(self.engine, "alive", return_value=False, create=True):
+                with self.assertRaisesRegex(ValueError, "both ranks"):
+                    self.svc.ensure_engine()
+        close.assert_not_called()
+        restart.assert_not_called()
+        self.assertFalse(self.svc.unloaded)
+        self.assertEqual(self.cfg.read_bytes(), before)
+
     def test_tp2_running_model_settings_are_not_saved(self):
         from unittest import mock
         self.engine.info = {"tp_world": 2, "tp_rank": 0}
@@ -358,6 +378,29 @@ class GpuMap(unittest.TestCase):
         self.assertEqual(self.r["pool"], 15536793108)
         self.assertIsNone(self.gm.parse("INFO context=32768"))
         self.assertEqual(self.gm.pci_key("00000000:0A:00.0"), "0000:0a:00")
+
+    def test_helper_pool_is_accounted_separately_from_drafter_and_rest(self):
+        helper = 20_000_000_000
+        r = self.gm.parse(f"VRAM dev=2 pci=0000:0f:00.0 total={32 * GB} free={5 * GB} "
+                          f"weights=0 kv=0 act=0 drafter={4 * GB} pool=0 helper={helper} slots=0 layers=-1--1")
+        (g,) = self.gm.view([r], [], engine_pid=100)
+        self.assertEqual(g["parts"]["helper"], helper)
+        self.assertEqual(g["parts"]["drafter"], 4 * GB)
+        self.assertEqual(g["parts"]["rest"], 23 * GB - helper)
+        self.assertIsNone(g["layers"])
+        self.assertEqual(sum(g["parts"].values()) + g["free"], g["total"])
+        merged = self.gm.merge([r, dict(dev=2, helper=1024, free=5 * GB)])
+        self.assertEqual(merged[0]["helper"], helper + 1024)
+
+    def test_helper_pool_and_primary_pool_on_one_card_do_not_overlap(self):
+        r = dict(self.r, helper=2 * GB)
+        engine = sum(r[k] for k in ("weights", "kv", "act", "drafter", "window", "pool", "helper"))
+        card = dict(self.card(engine + GB, {100: engine + GB}), total=32 * GB)
+        (g,) = self.gm.view([r], [card], engine_pid=100)
+        self.assertEqual(g["parts"]["helper"], 2 * GB)
+        self.assertEqual(g["parts"]["pool"], r["pool"])
+        self.assertEqual(g["parts"]["rest"], GB)
+        self.assertEqual(sum(g["parts"].values()) + g["free"], g["total"])
 
     def test_nvml_tells_the_engine_from_other_programs(self):
         engine = sum(self.r[k] for k in ("weights", "kv", "act", "drafter", "window", "pool"))

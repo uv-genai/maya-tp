@@ -1,0 +1,26 @@
+{
+  "baseline": "daa8f29",
+  "unchanged_paths": [
+    "README.md",
+    "AGENTS.md",
+    "VERSION",
+    "setup.py",
+    ".github/workflows/tests.yml",
+    "cmake/hip_backend.cmake",
+    "src/core/glm_mtp.cu",
+    "src/core/glm_mtp_rows.cu",
+    "src/core/glm_window.cu",
+    "src/core/glm_rows.cu",
+    "src/core/glm_prefill.cu",
+    "src/net",
+    "include/strata/net",
+    "tools/tp2/rank0.sh",
+    "tools/tp2/rank1.sh",
+    "tools/tp2/model_env.sh",
+    "tools/llama-swap",
+    "tools/hip/gfx1151-glm-hipblaslt-100401.txt"
+  ],
+  "streamed_fetch_deferred": true,
+  "TP2_vision_and_multi_gated": true,
+  "NextN_widths_and_MTP_wire_preserved": true
+}

@@ -1,0 +1,27 @@
+READY mtp {"status": "ok", "max_context": 32768, "model": "glm-5.3-flash", "max_text_file": 524288, "model_label": "GLM-5.3 \u00b7 Maya-S", "images": false, "api_key": false, "defaults": {"temperature": 1.0, "top_p": 0.95, "reasoning_effort": "max"}, "version": "1.1.42", "mcp_tools": false, "unloaded": false, "tp": {"world_size": 2, "rank": 0, "peer": "up"}}
+Traceback (most recent call last):
+  File "/tmp/maya-upstream-v41-state.py", line 50, in <module>
+    m.start('mtp');prefill_cancel()
+                   ~~~~~~~~~~~~~~^^
+  File "/tmp/maya-upstream-v41-state.py", line 42, in prefill_cancel
+    with req('/v1/chat/completions',{**body,'stream':False}) as r:out=json.load(r)
+         ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/maya-upstream-v41-state.py", line 7, in req
+    return urllib.request.urlopen(q,timeout=600)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 187, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 493, in open
+    response = meth(req, response)
+  File "/usr/lib/python3.14/urllib/request.py", line 602, in http_response
+    response = self.parent.error(
+        'http', request, response, code, msg, hdrs)
+  File "/usr/lib/python3.14/urllib/request.py", line 531, in error
+    return self._call_chain(*args)
+           ~~~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 464, in _call_chain
+    result = func(*args)
+  File "/usr/lib/python3.14/urllib/request.py", line 611, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 400: Bad Request

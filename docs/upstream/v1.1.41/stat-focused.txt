@@ -1,0 +1,12 @@
+test_final_stats_are_kept_and_next_request_is_clean (serve.test_server.StatsAfterConsumerStops.test_final_stats_are_kept_and_next_request_is_clean) ... /usr/lib/python3.14/unittest/case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.007s
+
+OK
