@@ -1,0 +1,183 @@
+{
+  "eos_id": 154820,
+  "context": 4096,
+  "forced_follow": false,
+  "cases": [
+    {
+      "mode": "mtp",
+      "prompt_tokens": 4020,
+      "target": 4020,
+      "response": {
+        "rejected": {
+          "error": {
+            "type": "invalid_request_error",
+            "message": "TP2 MTP does not support logit_bias; use spec=1 for ordinary decoding"
+          }
+        },
+        "status": 400
+      },
+      "followup": {
+        "id": "chatcmpl-a1b8febcc1a94a8daebe7fc1",
+        "object": "chat.completion",
+        "created": 1793560084,
+        "model": "glm-5.3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "RDMA (Remote Direct Memory Access) is a networking technology that allows one machine to read from or write directly into the memory of another machine over the network,",
+              "reasoning_content": "The user is asking me to write three paragraphs explaining how RDMA (Remote Direct Memory Access) transports tensor slices. This is a technical topic at the intersection"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 23,
+          "completion_tokens": 64,
+          "total_tokens": 87,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 23,
+          "prompt_ms": 587.9,
+          "prompt_per_token_ms": 25.561,
+          "prompt_per_second": 39.1,
+          "predicted_n": 64,
+          "predicted_ms": 2184.4,
+          "predicted_per_token_ms": 34.131,
+          "predicted_per_second": 29.3,
+          "draft_n": 52,
+          "draft_n_accepted": 37
+        }
+      },
+      "health": {
+        "status": "ok",
+        "max_context": 4096,
+        "model": "glm-5.3-flash",
+        "max_text_file": 524288,
+        "model_label": "GLM-5.3 \u00b7 Maya-S",
+        "images": false,
+        "api_key": false,
+        "defaults": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "reasoning_effort": "max"
+        },
+        "version": "1.1.42",
+        "mcp_tools": false,
+        "unloaded": false,
+        "tp": {
+          "world_size": 2,
+          "rank": 0,
+          "peer": "up"
+        }
+      }
+    },
+    {
+      "mode": "simple",
+      "prompt_tokens": 4020,
+      "target": 4020,
+      "response": {
+        "id": "chatcmpl-b3988639d6224a3f8435162c",
+        "object": "chat.completion",
+        "created": 1793560087,
+        "model": "glm-5.3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": null
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 4020,
+          "completion_tokens": 1,
+          "total_tokens": 4021,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 4020,
+          "prompt_ms": 13310.8,
+          "prompt_per_token_ms": 3.311,
+          "prompt_per_second": 302.0,
+          "predicted_n": 1,
+          "predicted_ms": 0.8,
+          "predicted_per_token_ms": 0.8,
+          "predicted_per_second": 1250.0,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        }
+      },
+      "followup": {
+        "id": "chatcmpl-bc81622d9aa1415a9d93f498",
+        "object": "chat.completion",
+        "created": 1793560100,
+        "model": "glm-5.3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "RDMA (Remote Direct Memory Access) transports tensor slices by enabling one machine to read from or write to another machine's memory directly, bypassing the operating system",
+              "reasoning_content": "The user is asking me to write three paragraphs explaining how RDMA (Remote Direct Memory Access) transports tensor slices. This is a technical topic at the intersection"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 23,
+          "completion_tokens": 64,
+          "total_tokens": 87,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 23,
+          "prompt_ms": 545.6,
+          "prompt_per_token_ms": 23.722,
+          "prompt_per_second": 42.2,
+          "predicted_n": 64,
+          "predicted_ms": 2355.8,
+          "predicted_per_token_ms": 36.809,
+          "predicted_per_second": 27.2,
+          "draft_n": 54,
+          "draft_n_accepted": 35
+        }
+      },
+      "health": {
+        "status": "ok",
+        "max_context": 4096,
+        "model": "glm-5.3-flash",
+        "max_text_file": 524288,
+        "model_label": "GLM-5.3 \u00b7 Maya-S",
+        "images": false,
+        "api_key": false,
+        "defaults": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "reasoning_effort": "max"
+        },
+        "version": "1.1.42",
+        "mcp_tools": false,
+        "unloaded": false,
+        "tp": {
+          "world_size": 2,
+          "rank": 0,
+          "peer": "up"
+        }
+      }
+    }
+  ]
+}

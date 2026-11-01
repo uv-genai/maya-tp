@@ -371,6 +371,15 @@ THINK_TINY_LIMIT = 1024
 # closes it at the first boundary past the budget, and the engine's own close (its think_budget) only comes this many
 # tokens later, for reasoning with no boundary at all. Grace stays inside the answer reserve for every output limit.
 THINK_GRACE = 512
+# A model that writes the server's own markers inside its thinking (it quotes them while it works on them) ends the
+# engine there: the engine stops at its end-of-sequence token, the server at its stop markers - and the agent dies
+# mid-thinking.  Inside the thinking such a marker is the model's text, not the turn's end: the server skips it, and
+# at the engine's own EOS token it goes on from the quote with this note as the server's (Service.run), at most
+# THINK_RESTARTS times.  The answer's own markers still end the turn, in the answer.
+THINK_RESTARTS = 2
+THINK_NOTE = ("[The server's note, not the user: your thinking was cut off there - an end-of-turn marker written "
+              "inside the thinking is a quote, not the turn's end. Do not stop: go on with the thinking, right where "
+              "it stopped.]")
 _THINK_BOUNDARY = re.compile(r"(?:\n|(?<![\d.])[.!?][\"')\]]*|[。！？])[ \t]*$")
 
 
@@ -1918,6 +1927,7 @@ class ByteTokenizer:
     """Tiny stand-in tokenizer for tests without the pack: one id per UTF-8 byte, specials as ids >= 256."""
     SPECIALS = ["<|im_start|>", "<|im_end|>", "<|endoftext|>", "<|vision_start|>", "<|image_pad|>", "<|vision_end|>"]
     special_tokens = {s: 256 + k for k, s in enumerate(SPECIALS)}
+    special_ids = {"eos": 256 + 1}         # (its <|im_end|>: the engine's own end of a turn, as the packs' eos is theirs)
 
     def encode(self, text, parse_special=False, plain=()):
         out, i = [], 0
@@ -1962,12 +1972,42 @@ class Detokenizer:
         return delta
 
 
+def speculation_modes(info: dict, dspark=None, lookup=None) -> list:
+    """The drafters an engine runs with, for the Monitor's Speculation: DSpark (DeepSeek's server says, MiniMax's engine
+    itself), DFlash2 or MTP (GLM's INFO dflash= / mtp=: its DFlash decode takes the request first, else MTP; CYBER-FROST's
+    mtp=) and the prompt lookup (CYBER-FROST's INFO lookup=, DeepSeek's --suffix-draft).  Empty: drafting is off."""
+    def on(v):
+        try:
+            return float(v) > 0
+        except (TypeError, ValueError):
+            return False
+    modes = []
+    ds = dspark if dspark is not None else info.get("dspark")
+    if on(ds):
+        modes.append("DSpark")
+    if on(info.get("dflash")):
+        modes.append("DFlash2")
+    elif on(info.get("mtp")):
+        modes.append("MTP")
+    lk = lookup if lookup is not None else info.get("lookup")
+    if on(lk):
+        modes.append("Lookup")
+    return modes
+
+
+def request_spec_off(sampling) -> bool:
+    """A request that switches drafting off for itself (the GLM engine's spec=1: the plain token loop)."""
+    tune = (sampling or {}).get("strata_tune")
+    return isinstance(tune, dict) and tune.get("spec") == 1 and not isinstance(tune.get("spec"), bool)
+
+
 class RequestStat:
     """One request's live figures: when its first answer token came (None while it reads the prompt) and its
     (time, generated) samples over RATE_WINDOW_S for the live decode rate."""
 
     def __init__(self):
         self.first_token = None
+        self.spec_off = False                           # it asked for no drafting (spec=1)
         self.base = None                                # (time, generated) at the window's start: the rate counts from it
         self.samples = collections.deque(maxlen=4096)   # the samples inside the window, oldest first
 
@@ -2042,6 +2082,7 @@ class Service:
         self.model_dir = None                            # the model's folder (free disk on the dashboard)
         self.model_label = None                          # what runs, as users see it: "MiniMax M3.1 · Maya-XS"
         self.trained_context = None                      # what the model was trained for (its GGUF): the slider's top
+        self.lookup = None                               # DeepSeek's prompt lookup (--suffix-draft above 0); the others' INFO says
         self.dspark = None                               # DeepSeek's: drafts with its DSpark blocks (its engine's INFO
         #                                                  does not say: the config's --dspark and the pack's drafter)
         self.reload = None                               # a context change: {state, from, to, started, error}
@@ -2080,6 +2121,12 @@ class Service:
         # (MiniMax-M3.1 closes its reasoning with </mm:think>; its vocabulary may hold a plain "</think>" too)
         end = _special_ids("</mm:think>") if getattr(template, "minimax", False) else _special_ids("</think>")
         self.think_end_id = end[0] if end else None
+        # the tokens the engine itself ends a request at, whatever the server does (see THINK_RESTARTS): a pack
+        # tokenizer that names its "eos" (DeepSeek's, MiniMax's: their engines' --eos default) ends there only; the
+        # GLM/Qwen engine ends at every turn-end token of its vocabulary (GLM: <|endoftext|>, <|user|>,
+        # <|observation|>), and its tokenizer names them by their GGUF keys - all of stop_ids then
+        sid = getattr(tokenizer, "special_ids", None) or {}
+        self.eos_ids = {sid["eos"]} if isinstance(sid.get("eos"), int) else set(self.stop_ids)
         # the special literals that stay text inside a message (frontend.mark_literals): every one the vocabulary has
         self.literals = literal_tags(getattr(tokenizer, "special_tokens", None))
 
@@ -2738,6 +2785,7 @@ class Service:
             guard = dict(self.loop_guard_counts, on=bool(self.loop_guard))   # (what the loop guard did since start)
             active = self.active
             writing = len(self.current_requests)        # (of the active ones, those past their prompt)
+            spec_off = bool(self.current_requests) and all(r.spec_off for r in self.current_requests)
         now = time.time()
         progress = getattr(self.engine, "progress", None)
         if s.get("busy") and not answering:
@@ -2747,7 +2795,7 @@ class Service:
         else:
             state = "unloaded" if self.unloaded else "idle"
         live = {"state": state, "queued": s.get("queued", 0), "active": active,   # (answering at once: --parallel)
-                "writing": writing,
+                "writing": writing, "spec_off": spec_off,   # (the request(s) running asked for no drafting)
                 "phase": s.get("phase") if s.get("busy") else None,
                 "prompt_tokens": s.get("prompt_tokens") if s.get("busy") else None,
                 "prompt_read": None, "prompt_total": None, "generated": s.get("generated") if s.get("busy") else None,
@@ -2766,6 +2814,8 @@ class Service:
                   **dict(getattr(self.engine, "info", {}) or {}), "maya_version": MAYA_VERSION,
                   "trained_context": self.trained_context,
                   **({"dspark": self.dspark} if self.dspark is not None else {})}
+        # the drafters on (empty: drafting is off): the Monitor's Speculation says "off", or the draft acceptance
+        engine["speculation"] = speculation_modes(engine, lookup=self.lookup)
         with self.status_lock:
             reload = dict(self.reload) if self.reload else None
         tel = self.telemetry.snapshot() if getattr(self, "telemetry", None) else {"now": {}, "history": {}, "static": {}}
@@ -3088,7 +3138,14 @@ class Service:
                                       f"({len(ids)} tokens) + max tokens ({max_new}) exceeds the context; requests "
                                       "are never truncated")
             max_new = max(1, room)          # --fit-max-tokens: a shorter completion beats a 400
-        return ids, kwargs.get("enable_thinking", True) is not False, max_new
+        thinking = kwargs.get("enable_thinking", True) is not False
+        if thinking and self.think_end_id is not None:
+            # (the engine ends at its EOS token: a marker the model quotes inside its thinking would end the turn
+            # there - run() goes on from the quote with THINK_NOTE, if the template opens the next thinking)
+            resume = self._keep_suffix(tools, kwargs, THINK_NOTE)
+            if resume is not None and resume[1]:
+                given["_think_resume"] = resume
+        return ids, thinking, max_new
 
     def count_tokens(self, req: dict) -> dict:
         """POST /api/tokens: how many tokens this chat request's prompt takes - the same template, thinking level,
@@ -3270,24 +3327,30 @@ class Service:
                         f.rstrip().endswith("<think>"))
         return out
 
-    def _keep_suffix(self, tools, kwargs):
+    def _keep_suffix(self, tools, kwargs, note=loop_guard.KEEP_NOTE):
         """(ids, thinks): the prompt that follows the model's own last words when it would end its turn short in a
         conversation that repeats itself (loop_guard.stops_short) - the template's turn end, a user message
-        loop_guard.KEEP_NOTE and the next assistant turn's opening (`thinks`: an open thinking block).  None for a
-        template that does not render a turn as a prefix of the next."""
+        `note` (default loop_guard.KEEP_NOTE) and the next assistant turn's opening (`thinks`: an open thinking
+        block).  None for a template that does not render a turn as a prefix of the next."""
         mark = "\u2063keep\u2063"                  # (the model's words, wherever the template puts them)
         head = [{"role": "user", "content": "."}, {"role": "assistant", "content": mark}]
         try:
             p = self.template.render(head, tools=tools, **{**kwargs, "add_generation_prompt": False})
-            f = self.template.render(head + [{"role": "user", "content": loop_guard.KEEP_NOTE}], tools=tools, **kwargs)
+            f = self.template.render(head + [{"role": "user", "content": note}], tools=tools, **kwargs)
         except Exception:
             return None
         if kwargs.get("enable_thinking") is False and f.endswith("<think>"):
             f += "</think>"
-        if not f.startswith(p) or mark not in p:
+        if mark not in p or mark not in f:          # (the template keeps the assistant's words in the next turn)
             return None
-        return (self.tok.encode(p[p.rindex(mark) + len(mark):] + f[len(p):], parse_special=True),
-                f.rstrip().endswith("<think>"))
+        # what follows the model's own last words: the template's turn end, the note, the next assistant opening.
+        # (Not "p's tail plus f past p": a template may render the assistant turn it ends differently from the one
+        # before a user message - DeepSeek with no tools opens the current thinking with <think> and the earlier one
+        # without, so p is not a prefix of f there; f's own copy of the words is the same position in both.)
+        tail = f[f.rindex(mark) + len(mark):]
+        if not tail:
+            return None
+        return (self.tok.encode(tail, parse_special=True), f.rstrip().endswith("<think>"))
 
     def _collapse(self, messages):
         """A conversation that carries a loop across turns (loop_guard.collapse): its prompt without what the model
@@ -3514,9 +3577,12 @@ class Service:
             sampling = {**defaults, **req_values}
         responses = (sampling or {}).get("_responses") is True
         single_tool = responses and (sampling or {}).get("parallel_tool_calls") is False
-        def new_parser():
-            return OutputParser(thinking=thinking, tools=tools, stream_tools=True,
-                                dsml=getattr(self.template, "deepseek", False),
+        def new_parser(in_thinking=None):
+            # (in_thinking: the segment's prompt already closed the thinking - see keep, below - so its first token
+            # is the answer's, not the reasoning's)
+            return OutputParser(thinking=thinking if in_thinking is None else thinking and in_thinking, tools=tools,
+                                stream_tools=True, dsml=getattr(self.template, "deepseek", False),
+                                token_only_end=getattr(self.template, "deepseek", False) and self.think_end_id is not None,
                                 minimax=getattr(self.template, "minimax", False),
                                 strict_tools=responses, single_tool=single_tool)
         parser = new_parser()
@@ -3526,6 +3592,8 @@ class Service:
         # it takes (only max_tokens ends it, as any answer)
         blocked = dict((sampling or {}).get("_blocked") or {})
         keep = blocked.pop("_keep", None)           # (ids, thinks, seen): the answer may not end the turn short
+        think_resume = (sampling or {}).get("_think_resume")   # (ids, thinks): a quoted marker inside the thinking
+        think_restarts = 0                          # times the thinking was resumed in this answer
         said = []                                   # this engine call's text for the user (stops_short)
         kept = 0                                    # times it was kept going in this answer
         called = False                              # it wrote a tool call (then its turn does not end here)
@@ -3571,6 +3639,7 @@ class Service:
         engine_last0 = getattr(self.engine, "last", None)
         counted, my_started, my_first, queued = False, time.time(), None, False
         stat = RequestStat()                            # this request's live figures
+        stat.spec_off = request_spec_off(sampling)
         with self.status_lock:
             self.status["queued"] += 1
             queued = True                               # counted as waiting until its turn comes (below, or in finally)
@@ -3665,9 +3734,17 @@ class Service:
                         finally:
                             sliced.close()
                 def segments():
-                    """attempts(), and after a blocked call (seg["next"]) the engine again on that prompt."""
+                    """attempts(), and after a blocked call (seg["next"]) the engine again on that prompt.  That prompt
+                    also holds the server's own tokens (the call's result or KEEP_NOTE, a steer), which max_new - n
+                    does not count: the context's room caps it too (with an unlimited max_new, prepare's room, the
+                    engine rejected prompt + max_new + CTX_SLACK > context)."""
+                    nonlocal finish
                     while n < max_new:
-                        yield from attempts(seg["prompt"], max_new - n)
+                        room = self.engine.max_context - CTX_SLACK - len(seg["prompt"])
+                        if room <= 0:
+                            finish = "length"  # Server notes cannot justify an oversized internal GEN (#66).
+                            return
+                        yield from attempts(seg["prompt"], min(max_new - n, room))
                         if seg["next"] is None or cancel.is_set() or self.stopping:
                             return
                         seg["prompt"], seg["next"], seg["ids"] = seg["next"], None, []
@@ -3715,29 +3792,65 @@ class Service:
                         n += 1
                         if my_first is None:
                             my_first = time.time()
-                        if in_think and t == self.think_end_id:
+                        raw_ids.append(t)
+                        end_think = bool(in_think and t == self.think_end_id)
+                        if end_think:
                             in_think = False
                             if n == think_budget + 1:
                                 print(f"[maya] thinking reached its budget ({think_budget} tokens"
                                       f"{f', {soft} + {think_budget - soft} without a sentence end' if soft else ''})"
                                       ": closed, answering", flush=True)
-                        if t in self.stop_ids:
+                        text, stopped = detok.push(t), False
+                        if end_think and parser.token_only_end:
+                            text = ""            # (the token's own text: the reasoning ends at the token, the tag is no one's text)
+                        if t in self.stop_ids and parser.state == "reasoning" and not answered and not called \
+                                and not pending:
+                            # a marker inside the thinking is the model's own text - it quotes the server's own markers
+                            # while it works on them - not the turn's end: skip its token and go on.  At the engine's own
+                            # EOS token the engine ends there, though: then the server goes on from the quote with a note
+                            # as the server's (the thinking continues; the answer's own markers still end the turn, the
+                            # answer's)
+                            if t not in self.eos_ids:
+                                continue
+                            if think_resume is None or think_restarts >= THINK_RESTARTS:
+                                finish = "stop"
+                                break
+                            think_restarts += 1
+                            print(f"[maya] thinking: an end-of-turn marker inside it is a quote - going on with the "
+                                  f"thinking ({think_restarts}. of {THINK_RESTARTS})", flush=True)
+                            ids_k, thinks = think_resume
+                            steer = self.tok.encode(loop_guard.keep_steer(think_restarts)) if thinks else []
+                            seg["next"] = list(seg["prompt"]) + seg["ids"] + ids_k + steer
+                            parser, detok, held, said[:] = new_parser(thinks), Detokenizer(self.tok), "", []
+                            in_think = thinks and bool(thinking) and self.think_end_id is not None \
+                                and self.think_budget > 0
+                            continue
+                        # a marker the model wrote as its answer's text - quoted, in a code fence, a tool call's body - is
+                        # not the turn's end (the stream's own parser has the same rule for calls)
+                        quoted = t in self.stop_ids and t not in self.eos_ids and (
+                            parser.call_opened or CALL_START in held + text or parser.in_code_after(held + text))
+                        if t in self.stop_ids and not quoted:
                             finish = "stop"
-                            raw_ids.append(t)
                             key = blocked_call() if blocked else None
-                            if key is None and keep is not None and not called and \
-                                    (kept < loop_guard.KEEP_MIN or loop_guard.stops_short("".join(said), keep[2])):
-                                # it would end the turn in a conversation that repeats itself: the first KEEP_MIN
-                                # times, and whenever with nothing new (talk about its loop, a line, what it said
-                                # before), it goes on
+                            if key is None and keep is not None and not called and kept < loop_guard.KEEP_MAX and \
+                                    (not answered or loop_guard.stops_short("".join(said), keep[2])):
+                                # it would end the turn in a conversation that repeats itself: with nothing at all,
+                                # or with nothing new (talk about its loop, what it said before), it goes on - the
+                                # note answered, never thought about: an answer that already went out keeps its
+                                # reasoning closed (the continuation opens none: #640's thinking, retracted)
                                 kept += 1
                                 self._kept_going(kept, "".join(said))
                                 ids_k, thinks, _ = keep
+                                if answered and thinks and self.think_end_id is not None:
+                                    ids_k, thinks = [*ids_k, self.think_end_id], False
+                                    sampling = {k: v for k, v in (sampling or {}).items()
+                                                if k not in ("_think_budget", "_think_soft", "_think_end")}
                                 steer = self.tok.encode(loop_guard.keep_steer(kept)) if thinks else []
                                 seg["next"] = list(seg["prompt"]) + seg["ids"] + ids_k + steer
                                 sampling = loop_guard.block_sampling(sampling, kept)
-                                parser, detok, held, said[:] = new_parser(), Detokenizer(self.tok), "", []
-                                in_think = bool(thinking) and self.think_end_id is not None and self.think_budget > 0
+                                parser, detok, held, said[:] = new_parser(thinks), Detokenizer(self.tok), "", []
+                                in_think = thinks and bool(thinking) and self.think_end_id is not None \
+                                    and self.think_budget > 0
                                 continue
                             if key is None:
                                 break
@@ -3758,19 +3871,28 @@ class Service:
                         seg["ids"].append(t)
                         if parser.state == "reasoning":
                             reasoning_tokens += 1
-                        raw_ids.append(t)
                         if n_top is not None:
                             e = logprob_entry(self.tok, t, n_top)
                             if e is not None:
                                 lp_wait.append(e)
-                        text, stopped = detok.push(t), False
-                        stops = self.stop_texts + (client_stops if parser.state != "reasoning" else [])
-                        if stops:
+                        stops = (self.stop_texts + client_stops) if parser.state != "reasoning" else []
+                        if quoted:
+                            held = ""           # (its own token is a marker's whole text: not a marker's start)
+                        elif stops:
                             held += text
                             hits = [(i, s) for s, i in ((s, held.find(s)) for s in stops) if i >= 0]
                             if hits:
                                 cut, s = min(hits)
-                                text, held, stopped = held[:cut], "", True
+                                # a marker the model wrote as its text - quoted, in a code fence, a template's docs -
+                                # is not the marker: an answer about this very server's markers would end the turn there
+                                # (the stream's own parser has the same rule).  The scan keeps the text
+                                # and looks for a real one, on the next piece.  A client's own stop string stops
+                                # wherever it is, as the API says (a closing fence, a newline in code).
+                                if s not in client_stops and (parser.in_code_after(held[:cut]) or parser.call_opened
+                                                              or CALL_START in held[:cut]):
+                                    text, held, stopped = held, "", False
+                                else:
+                                    text, held, stopped = held[:cut], "", True
                                 if not text:
                                     lp_wait.clear()   # (the marker's own tokens: no text of the answer)
                                 matched = s if s in client_stops and s not in self.stop_texts else None
@@ -3779,7 +3901,8 @@ class Service:
                                          if held.endswith(s[:j])), default=0)
                                 text, held = held[:len(held) - k], held[len(held) - k:]
                         was = parser.state
-                        evs = with_lp(parser.feed(text), was)
+                        evs = with_lp(parser.close_reasoning() if end_think and parser.token_only_end
+                                      else parser.feed(text), was)
                         self._say_malformed(parser)
                         self._note(n, evs, stat)
                         last_print = self._progress(last_print)
@@ -3866,6 +3989,9 @@ class Service:
                         "decode_tok_s": round(last["generated"] / (last["decode_ms"] / 1000), 1)
                         if n and last.get("generated") and last.get("decode_ms") else None,
                         "hit_rate": hit_rate,
+                        # the drafts offered and kept (the engine's DONE line; None: it reported none)
+                        "drafts_offered": last.get("drafts_offered"), "drafts_accepted": last.get("drafts_accepted"),
+                        "spec_off": stat.spec_off,
                         "loop_guard": guards[0].summary() if guards and guards[0].events else None}
                     self.history.append(row)
                     t = self.totals
@@ -4048,6 +4174,7 @@ def run_with_mcp(svc: Service, hub, messages, tools, kw, ids, thinking, max_new,
         sampling = {k: v for k, v in (sampling or {}).items() if k != "_prefill"}
         ids, thinking, max_new = svc.prepare(messages, tools, kw, max_req, guard=svc._loop_guard_on(sampling))
         sampling["_blocked"] = kw.get("_blocked")
+        sampling["_think_resume"] = kw.get("_think_resume")
     yield "done", {**done, "completion_tokens": total, "prompt_tokens": len(ids)}
 
 
@@ -5260,6 +5387,7 @@ def make_handler(svc: Service):
                 if kw.get("_prefill"):
                     sampling["_prefill"] = kw["_prefill"]
                 sampling["_blocked"] = kw.get("_blocked")
+                sampling["_think_resume"] = kw.get("_think_resume")
                 effective = {**svc.sampling_defaults, **svc.shared, **sampling}
                 config = {**req, **{k: effective[k] for k in ("temperature", "top_p") if k in effective}}
                 run = svc.run(ids, thinking, tools, max_new, sampling, cancel)
@@ -5294,6 +5422,7 @@ def make_handler(svc: Service):
             if kw.get("_prefill"):                             # a required tool call starts the answer
                 req = {**req, "_prefill": kw["_prefill"]}
             req = {**req, "_blocked": kw.get("_blocked")}      # calls the loop guard blocks (Service.prepare)
+            req = {**req, "_think_resume": kw.get("_think_resume")}
             _debug_req("openai", req, messages, tools, max_new, thinking, len(ids))
             cancel = threading.Event()
             if not (req.get("stream") and req.get("strata_resume") is True):   # (the web app's runs on, by design)
@@ -5388,6 +5517,7 @@ def make_handler(svc: Service):
             if kw.get("_prefill"):                             # a required tool call starts the answer
                 req = {**req, "_prefill": kw["_prefill"]}
             req = {**req, "_blocked": kw.get("_blocked")}      # calls the loop guard blocks (Service.prepare)
+            req = {**req, "_think_resume": kw.get("_think_resume")}
             _debug_req("anthropic", req, messages, tools, max_new, thinking, len(ids))
             cancel = threading.Event()
             watch_client(self, cancel)
@@ -5441,7 +5571,8 @@ class Server(ThreadingHTTPServer):
 
 SERVER_ENV = ("STRATA_ENGINE_STALL_S", "STRATA_REQUEST_QUIET_S", "STRATA_DRAIN_S", "STRATA_HTTP_BACKLOG",
               "STRATA_MAX_BODY_MIB", "STRATA_REQUEST_TIMEOUT_S", "STRATA_FAIR_SLICE_S", "STRATA_DS4_KEEP_THINKING",
-              "STRATA_SERVER_LOG", "STRATA_GLM_THINK_RESERVE", "STRATA_LOOP_GUARD", "STRATA_QUEUE_PING_S",
+              "STRATA_SERVER_LOG", "STRATA_GLM_THINK_RESERVE", "STRATA_LOOP_GUARD", "STRATA_LOOP_GUARD_COLLAPSE_MAX",
+              "STRATA_QUEUE_PING_S",
               "STRATA_UPDATE_CHECK", "STRATA_PACK_TEMPLATE") + RESPONSE_ENV_KEYS + \
     tuple(maya_names.read_as(k) for k in ("MAYA_DS4_RESTORE_POINTS", "MAYA_DS4_RESTORE_TAIL"))
 
@@ -5963,6 +6094,10 @@ def main() -> int:
         #  has them; MiniMax's says so itself, INFO dspark=)
         if models.family(cfg) == "deepseek":
             svc.dspark = models.flag(args, "--dspark", "on") not in ("off", "none") and models.ds4_has_drafter(cfg)
+            try:
+                svc.lookup = int(models.flag(args, "--suffix-draft", "3")) > 0
+            except ValueError:
+                svc.lookup = True
     if a.config:                                        # the Chat settings shared with other apps, from last time
         svc.shared_path = str(Path(a.config).with_suffix("")) + ".shared-settings.json"
         try:

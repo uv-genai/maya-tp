@@ -1,0 +1,3269 @@
+glm settings from the environment: MAYA_GLM_LOOP_ANSWER=0, MAYA_GLM_LOOP_THINK=0, MAYA_GLM_MTP_DRAFT=2, MAYA_GLM_MTP_FIXED=2
+INFO tp_world=2 tp_rank=0 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[0,1024)
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 32768 tokens (--prefill auto, up to 32768; mixer sub-batches of 256), borrowing 7747 MB of the expert pool while a prompt runs (activations 7015, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.54 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.17, activations 0.07, other (context, MTP, scratch, prompt path) 10.44
+glm fast: CUDA0 unified memory: MemAvailable 110.70 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 0 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 4 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 6 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 9 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 11 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 13 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 16 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 19 s)
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 22 s)
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 24 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 24 s (1.93 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+INFO context=4096 kv=fp16 kv_resident=0 expert_slots=12384 expert_cache_mib=43551 engine_kind=glm-fast experts=12096 vram_slots=12384 vram_gb=42.5 ram_slots=48 ram_gb=0.2 mtp=1 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+VRAM dev=0 pci=0000:c5:00.0 total=129922760704 free=65105539072 weights=7362064384 kv=183402496 kv_ram=0 act=75340376 drafter=181694720 window=1230979072 pool=45667100160 tail=8245448640 borrow=8123034112 vision=0 slots=12384 ctx=4096 layers=0-45
+glm follow: every request decodes the 256 tokens of /tmp/bench-technical-reference.txt (MAYA_GLM_SPEC_FOLLOW)
+READY 4096 stop pause
+maya serve: CUDA0: 62089 MiB of VRAM free with everything loaded
+maya generate: glm5-next serve (M3.1): GEN <max_new> [keys] <ids>, GENI <max_new> [keys] <embeddings> <ids>; QUIT to end
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 58 experts more lent for it)
+glm prefill: CUDA0 chunk 1/1, 63 tokens, wall 883 ms | the copy lane 787 ms: copies 94 (1.6 GB/s), ring wait 267, gaps 2, mixer windows 424 | lead 91, tail 5 | pcie 0.15 GB (ram 0.04, disk 0.11) + 3.60 GB vram | experts: staged 1132, resident 9912 (17383 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 38.1/4.2 ms max/min
+PP 63 64 914.5 68.9 0
+glm prefill: 63 tokens in 885.6 ms (14.06 ms/token, 71 tok/s), 1 chunk of 64 tokens | CUDA0 883 ms
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+PP 64 64 963.2 66.4 0
+glm vram: prompt 64 tokens read in 1.0 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.5 after
+T 785
+T 1196
+T 6801
+T 264
+T 11918
+T 10911
+T 16134
+T 18173
+STAT tok_s=13.74 ms_tok=72.80 vram_hit=0.9970 ram_fetch=0.000 disk=0.875 promo=0.875 vram_used=12347 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 7653
+T 6223
+T 11
+T 70837
+T 18392
+T 11
+T 922
+T 269
+STAT tok_s=17.92 ms_tok=55.79 vram_hit=0.9966 ram_fetch=0.000 disk=1.062 promo=1.062 vram_used=12357 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 6237
+T 11
+T 7901
+T 17957
+T 11
+T 60178
+T 11
+T 13342
+STAT tok_s=20.12 ms_tok=49.70 vram_hit=0.9975 ram_fetch=0.000 disk=0.792 promo=0.792 vram_used=12359 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11
+T 448
+T 10290
+T 323
+T 6559
+T 63482
+T 11
+T 518
+STAT tok_s=21.28 ms_tok=47.00 vram_hit=0.9978 ram_fetch=0.000 disk=0.719 promo=0.719 vram_used=12363 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 3245
+T 8062
+T 42399
+T 13
+T 9641
+T 264
+T 17400
+T 11
+STAT tok_s=22.17 ms_tok=45.11 vram_hit=0.9981 ram_fetch=0.000 disk=0.625 promo=0.625 vram_used=12365 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 1632
+T 12
+T 61779
+T 4226
+T 13
+T 154842
+T 2
+T 7292
+STAT tok_s=22.79 ms_tok=43.87 vram_hit=0.9982 ram_fetch=0.000 disk=0.583 promo=0.583 vram_used=12368 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 46804
+T 304
+T 43703
+T 14905
+T 11948
+T 8140
+T 3660
+T 5930
+STAT tok_s=23.18 ms_tok=43.14 vram_hit=0.9982 ram_fetch=0.000 disk=0.607 promo=0.607 vram_used=12374 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 271
+T 565
+T 576
+T 90675
+T 22024
+T 271
+T 12314
+T 46400
+STAT tok_s=23.56 ms_tok=42.44 vram_hit=0.9984 ram_fetch=0.000 disk=0.531 promo=0.531 vram_used=12374 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 12164
+T 979
+T 264
+T 4237
+T 1849
+T 40245
+T 1119
+T 1378
+STAT tok_s=23.80 ms_tok=42.02 vram_hit=0.9985 ram_fetch=0.000 disk=0.486 promo=0.486 vram_used=12375 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 476
+T 803
+T 5203
+T 315
+T 7798
+T 429
+T 646
+T 902
+STAT tok_s=24.06 ms_tok=41.57 vram_hit=0.9987 ram_fetch=0.000 disk=0.438 promo=0.438 vram_used=12375 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 5021
+T 18997
+T 448
+T 1817
+T 1008
+T 11
+T 1496
+T 3498
+STAT tok_s=24.28 ms_tok=41.19 vram_hit=0.9988 ram_fetch=0.000 disk=0.398 promo=0.398 vram_used=12375 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 1449
+T 2436
+T 1231
+T 2058
+T 387
+T 13666
+T 323
+T 9311
+STAT tok_s=24.44 ms_tok=40.92 vram_hit=0.9989 ram_fetch=0.000 disk=0.375 promo=0.375 vram_used=12376 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 13
+T 576
+T 26229
+T 21517
+T 1588
+T 374
+T 279
+T 26020
+STAT tok_s=24.17 ms_tok=41.38 vram_hit=0.9989 ram_fetch=0.000 disk=0.356 promo=0.356 vram_used=12377 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 57421
+T 25
+T 2337
+T 264
+T 16641
+T 11
+T 264
+T 1849
+STAT tok_s=24.32 ms_tok=41.12 vram_hit=0.9990 ram_fetch=0.000 disk=0.330 promo=0.330 vram_used=12377 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 4157
+T 24233
+T 15428
+T 2176
+T 28040
+T 320
+T 28910
+T 6604
+STAT tok_s=24.47 ms_tok=40.87 vram_hit=0.9991 ram_fetch=0.000 disk=0.308 promo=0.308 vram_used=12377 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 15622
+T 279
+T 1852
+T 11
+T 1429
+T 3213
+T 13905
+T 8
+STAT tok_s=24.59 ms_tok=40.67 vram_hit=0.9991 ram_fetch=0.000 disk=0.289 promo=0.289 vram_used=12377 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 323
+T 18020
+T 320
+T 28910
+T 1681
+T 21141
+T 264
+T 2033
+STAT tok_s=24.70 ms_tok=40.48 vram_hit=0.9992 ram_fetch=0.000 disk=0.279 promo=0.279 vram_used=12378 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 568
+T 8703
+T 46400
+T 525
+T 82328
+T 304
+T 894
+T 1849
+STAT tok_s=24.51 ms_tok=40.80 vram_hit=0.9992 ram_fetch=0.000 disk=0.271 promo=0.271 vram_used=12379 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 55412
+T 5248
+T 12639
+T 11
+T 821
+T 84736
+T 11
+T 476
+STAT tok_s=24.61 ms_tok=40.63 vram_hit=0.9992 ram_fetch=0.000 disk=0.257 promo=0.257 vram_used=12379 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 44773
+T 13595
+T 11
+T 24129
+T 1969
+T 10274
+T 353
+T 258
+STAT tok_s=24.42 ms_tok=40.94 vram_hit=0.9992 ram_fetch=0.000 disk=0.256 promo=0.256 vram_used=12381 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11906
+T 9
+T 1246
+T 279
+T 1849
+T 686
+T 35514
+T 979
+STAT tok_s=24.52 ms_tok=40.78 vram_hit=0.9993 ram_fetch=0.000 disk=0.250 promo=0.250 vram_used=12382 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 279
+T 3922
+T 14515
+T 13
+T 576
+T 24382
+T 5486
+T 304
+STAT tok_s=24.60 ms_tok=40.65 vram_hit=0.9993 ram_fetch=0.000 disk=0.239 promo=0.239 vram_used=12382 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 6481
+T 5942
+T 2293
+T 2591
+T 553
+T 18452
+T 723
+T 11
+STAT tok_s=24.68 ms_tok=40.52 vram_hit=0.9993 ram_fetch=0.000 disk=0.228 promo=0.228 vram_used=12382 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 69797
+T 436
+T 5980
+T 31673
+T 1075
+T 11897
+T 1194
+T 323
+STAT tok_s=24.73 ms_tok=40.44 vram_hit=0.9993 ram_fetch=0.000 disk=0.224 promo=0.224 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 33764
+T 64034
+T 3506
+T 11
+T 56641
+T 11
+T 1842
+T 4385
+STAT tok_s=24.59 ms_tok=40.66 vram_hit=0.9994 ram_fetch=0.000 disk=0.215 promo=0.215 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11
+T 323
+T 40633
+T 76616
+T 53972
+T 311
+T 62112
+T 28040
+STAT tok_s=24.67 ms_tok=40.54 vram_hit=0.9994 ram_fetch=0.000 disk=0.207 promo=0.207 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 323
+T 27047
+T 18020
+T 25
+T 7798
+T 389
+T 279
+T 22532
+STAT tok_s=24.74 ms_tok=40.43 vram_hit=0.9994 ram_fetch=0.000 disk=0.199 promo=0.199 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 3108
+T 315
+T 264
+T 16641
+T 24990
+T 311
+T 8682
+T 13905
+STAT tok_s=24.80 ms_tok=40.33 vram_hit=0.9994 ram_fetch=0.000 disk=0.192 promo=0.192 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 320
+T 437
+T 3545
+T 15792
+T 8
+T 4751
+T 1091
+T 5214
+STAT tok_s=24.85 ms_tok=40.23 vram_hit=0.9994 ram_fetch=0.000 disk=0.185 promo=0.185 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 36157
+T 15760
+T 1584
+T 13
+T 1096
+T 374
+T 7025
+T 2598
+STAT tok_s=24.91 ms_tok=40.14 vram_hit=0.9995 ram_fetch=0.000 disk=0.179 promo=0.179 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 330
+T 7123
+T 1
+T 7709
+T 13
+T 576
+T 10550
+T 11
+STAT tok_s=24.96 ms_tok=40.06 vram_hit=0.9995 ram_fetch=0.000 disk=0.173 promo=0.173 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 37743
+T 1870
+T 553
+T 5942
+T 1075
+T 80582
+T 304
+T 1181
+STAT tok_s=25.01 ms_tok=39.99 vram_hit=0.9995 ram_fetch=0.000 disk=0.168 promo=0.168 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+DONE 256 64 963.2 10236.3 length 0 0 0 85637 85680
+glm stat: decode 39.99 ms/tok (25.01 tok/s) | vram hit 99.95% | ram fetches 0.00/tok | disk 0.17 reads/tok in 0.14 waits/tok, 0.48 ms/tok | promotions 0.17/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 15.1 ms/tok | vram 12383/12384 ram 0/48
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+PP 64 64 39.7 25.2 63
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+T 785
+glm mtp TP: rank=0 n=2 p0=64 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1196
+T 6801
+T 264
+glm mtp TP: rank=0 after-commit p0=64 keep=3
+glm mtp TP: rank=0 round-end p0=64 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=67 produced=4
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11918
+T 10911
+T 16134
+glm mtp TP: rank=0 after-commit p0=67 keep=3
+glm mtp TP: rank=0 round-end p0=67 produced=7 keep=3
+glm mtp TP: rank=0 n=2 p0=70 produced=7
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 18173
+STAT tok_s=36.91 ms_tok=27.09 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=4 draft_off=4
+T 7653
+glm mtp TP: rank=0 after-commit p0=70 keep=2
+glm mtp TP: rank=0 round-end p0=70 produced=9 keep=2
+glm mtp TP: rank=0 n=2 p0=72 produced=9
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6223
+T 11
+T 70837
+glm mtp TP: rank=0 after-commit p0=72 keep=3
+glm mtp TP: rank=0 round-end p0=72 produced=12 keep=3
+glm mtp TP: rank=0 n=2 p0=75 produced=12
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 18392
+T 11
+T 922
+glm mtp TP: rank=0 after-commit p0=75 keep=3
+glm mtp TP: rank=0 round-end p0=75 produced=15 keep=3
+glm mtp TP: rank=0 n=2 p0=78 produced=15
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 269
+STAT tok_s=25.12 ms_tok=39.81 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=9 draft_off=10
+glm mtp TP: rank=0 after-commit p0=78 keep=1
+glm mtp TP: rank=0 round-end p0=78 produced=16 keep=1
+glm mtp TP: rank=0 n=2 p0=79 produced=16
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6237
+T 11
+T 7901
+glm mtp TP: rank=0 after-commit p0=79 keep=3
+glm mtp TP: rank=0 round-end p0=79 produced=19 keep=3
+glm mtp TP: rank=0 n=2 p0=82 produced=19
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 17957
+T 11
+T 60178
+glm mtp TP: rank=0 after-commit p0=82 keep=3
+glm mtp TP: rank=0 round-end p0=82 produced=22 keep=3
+glm mtp TP: rank=0 n=2 p0=85 produced=22
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 13342
+STAT tok_s=26.91 ms_tok=37.16 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=13 draft_off=16
+T 11
+glm mtp TP: rank=0 after-commit p0=85 keep=3
+glm mtp TP: rank=0 round-end p0=85 produced=25 keep=3
+glm mtp TP: rank=0 n=2 p0=88 produced=25
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 448
+T 10290
+glm mtp TP: rank=0 after-commit p0=88 keep=2
+glm mtp TP: rank=0 round-end p0=88 produced=27 keep=2
+glm mtp TP: rank=0 n=2 p0=90 produced=27
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 323
+T 6559
+T 63482
+glm mtp TP: rank=0 after-commit p0=90 keep=3
+glm mtp TP: rank=0 round-end p0=90 produced=30 keep=3
+glm mtp TP: rank=0 n=2 p0=93 produced=30
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 518
+STAT tok_s=28.66 ms_tok=34.89 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=18 draft_off=22
+T 3245
+glm mtp TP: rank=0 after-commit p0=93 keep=3
+glm mtp TP: rank=0 round-end p0=93 produced=33 keep=3
+glm mtp TP: rank=0 n=2 p0=96 produced=33
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8062
+T 42399
+T 13
+glm mtp TP: rank=0 after-commit p0=96 keep=3
+glm mtp TP: rank=0 round-end p0=96 produced=36 keep=3
+glm mtp TP: rank=0 n=2 p0=99 produced=36
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 9641
+glm mtp TP: rank=0 after-commit p0=99 keep=1
+glm mtp TP: rank=0 round-end p0=99 produced=37 keep=1
+glm mtp TP: rank=0 n=2 p0=100 produced=37
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 17400
+glm mtp TP: rank=0 after-commit p0=100 keep=2
+glm mtp TP: rank=0 round-end p0=100 produced=39 keep=2
+glm mtp TP: rank=0 n=2 p0=102 produced=39
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+STAT tok_s=28.32 ms_tok=35.31 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=23 draft_off=30
+T 1632
+T 12
+glm mtp TP: rank=0 after-commit p0=102 keep=3
+glm mtp TP: rank=0 round-end p0=102 produced=42 keep=3
+glm mtp TP: rank=0 n=2 p0=105 produced=42
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 61779
+T 4226
+T 13
+glm mtp TP: rank=0 after-commit p0=105 keep=3
+glm mtp TP: rank=0 round-end p0=105 produced=45 keep=3
+glm mtp TP: rank=0 n=2 p0=108 produced=45
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 154842
+glm mtp TP: rank=0 after-commit p0=108 keep=1
+glm mtp TP: rank=0 round-end p0=108 produced=46 keep=1
+glm mtp TP: rank=0 n=2 p0=109 produced=46
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2
+T 7292
+STAT tok_s=29.39 ms_tok=34.02 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=27 draft_off=36
+glm mtp TP: rank=0 after-commit p0=109 keep=2
+glm mtp TP: rank=0 round-end p0=109 produced=48 keep=2
+glm mtp TP: rank=0 n=2 p0=111 produced=48
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 46804
+T 304
+T 43703
+glm mtp TP: rank=0 after-commit p0=111 keep=3
+glm mtp TP: rank=0 round-end p0=111 produced=51 keep=3
+glm mtp TP: rank=0 n=2 p0=114 produced=51
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 14905
+T 11948
+T 8140
+glm mtp TP: rank=0 after-commit p0=114 keep=3
+glm mtp TP: rank=0 round-end p0=114 produced=54 keep=3
+glm mtp TP: rank=0 n=2 p0=117 produced=54
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3660
+T 5930
+STAT tok_s=29.99 ms_tok=33.35 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=32 draft_off=42
+T 271
+glm mtp TP: rank=0 after-commit p0=117 keep=3
+glm mtp TP: rank=0 round-end p0=117 produced=57 keep=3
+glm mtp TP: rank=0 n=2 p0=120 produced=57
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 565
+glm mtp TP: rank=0 after-commit p0=120 keep=1
+glm mtp TP: rank=0 round-end p0=120 produced=58 keep=1
+glm mtp TP: rank=0 n=2 p0=121 produced=58
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+glm mtp TP: rank=0 after-commit p0=121 keep=1
+glm mtp TP: rank=0 round-end p0=121 produced=59 keep=1
+glm mtp TP: rank=0 n=2 p0=122 produced=59
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 90675
+glm mtp TP: rank=0 after-commit p0=122 keep=1
+glm mtp TP: rank=0 round-end p0=122 produced=60 keep=1
+glm mtp TP: rank=0 n=2 p0=123 produced=60
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 22024
+T 271
+glm mtp TP: rank=0 after-commit p0=123 keep=2
+glm mtp TP: rank=0 round-end p0=123 produced=62 keep=2
+glm mtp TP: rank=0 n=2 p0=125 produced=62
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 12314
+T 46400
+STAT tok_s=28.22 ms_tok=35.43 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=35 draft_off=52
+T 12164
+glm mtp TP: rank=0 after-commit p0=125 keep=3
+glm mtp TP: rank=0 round-end p0=125 produced=65 keep=3
+glm mtp TP: rank=0 n=2 p0=128 produced=65
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 979
+T 264
+T 4237
+glm mtp TP: rank=0 after-commit p0=128 keep=3
+glm mtp TP: rank=0 round-end p0=128 produced=68 keep=3
+glm mtp TP: rank=0 n=2 p0=131 produced=68
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+T 40245
+glm mtp TP: rank=0 after-commit p0=131 keep=2
+glm mtp TP: rank=0 round-end p0=131 produced=70 keep=2
+glm mtp TP: rank=0 n=2 p0=133 produced=70
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1119
+T 1378
+STAT tok_s=28.88 ms_tok=34.63 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=40 draft_off=58
+glm mtp TP: rank=0 after-commit p0=133 keep=2
+glm mtp TP: rank=0 round-end p0=133 produced=72 keep=2
+glm mtp TP: rank=0 n=2 p0=135 produced=72
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 476
+T 803
+T 5203
+glm mtp TP: rank=0 after-commit p0=135 keep=3
+glm mtp TP: rank=0 round-end p0=135 produced=75 keep=3
+glm mtp TP: rank=0 n=2 p0=138 produced=75
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 315
+glm mtp TP: rank=0 after-commit p0=138 keep=1
+glm mtp TP: rank=0 round-end p0=138 produced=76 keep=1
+glm mtp TP: rank=0 n=2 p0=139 produced=76
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7798
+T 429
+T 646
+glm mtp TP: rank=0 after-commit p0=139 keep=3
+glm mtp TP: rank=0 round-end p0=139 produced=79 keep=3
+glm mtp TP: rank=0 n=2 p0=142 produced=79
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 902
+STAT tok_s=28.61 ms_tok=34.96 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=45 draft_off=66
+T 5021
+T 18997
+glm mtp TP: rank=0 after-commit p0=142 keep=3
+glm mtp TP: rank=0 round-end p0=142 produced=82 keep=3
+glm mtp TP: rank=0 n=2 p0=145 produced=82
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 448
+T 1817
+T 1008
+glm mtp TP: rank=0 after-commit p0=145 keep=3
+glm mtp TP: rank=0 round-end p0=145 produced=85 keep=3
+glm mtp TP: rank=0 n=2 p0=148 produced=85
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 1496
+glm mtp TP: rank=0 after-commit p0=148 keep=2
+glm mtp TP: rank=0 round-end p0=148 produced=87 keep=2
+glm mtp TP: rank=0 n=2 p0=150 produced=87
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3498
+STAT tok_s=28.95 ms_tok=34.54 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=50 draft_off=72
+T 1449
+glm mtp TP: rank=0 after-commit p0=150 keep=2
+glm mtp TP: rank=0 round-end p0=150 produced=89 keep=2
+glm mtp TP: rank=0 n=2 p0=152 produced=89
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2436
+T 1231
+glm mtp TP: rank=0 after-commit p0=152 keep=2
+glm mtp TP: rank=0 round-end p0=152 produced=91 keep=2
+glm mtp TP: rank=0 n=2 p0=154 produced=91
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2058
+T 387
+T 13666
+glm mtp TP: rank=0 after-commit p0=154 keep=3
+glm mtp TP: rank=0 round-end p0=154 produced=94 keep=3
+glm mtp TP: rank=0 n=2 p0=157 produced=94
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 323
+T 9311
+STAT tok_s=29.30 ms_tok=34.12 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=54 draft_off=78
+T 13
+glm mtp TP: rank=0 after-commit p0=157 keep=3
+glm mtp TP: rank=0 round-end p0=157 produced=97 keep=3
+glm mtp TP: rank=0 n=2 p0=160 produced=97
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+glm mtp TP: rank=0 after-commit p0=160 keep=1
+glm mtp TP: rank=0 round-end p0=160 produced=98 keep=1
+glm mtp TP: rank=0 n=2 p0=161 produced=98
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 26229
+glm mtp TP: rank=0 after-commit p0=161 keep=1
+glm mtp TP: rank=0 round-end p0=161 produced=99 keep=1
+glm mtp TP: rank=0 n=2 p0=162 produced=99
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 21517
+glm mtp TP: rank=0 after-commit p0=162 keep=1
+glm mtp TP: rank=0 round-end p0=162 produced=100 keep=1
+glm mtp TP: rank=0 n=2 p0=163 produced=100
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1588
+glm mtp TP: rank=0 after-commit p0=163 keep=1
+glm mtp TP: rank=0 round-end p0=163 produced=101 keep=1
+glm mtp TP: rank=0 n=2 p0=164 produced=101
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 374
+T 279
+T 26020
+STAT tok_s=28.37 ms_tok=35.25 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=56 draft_off=88
+glm mtp TP: rank=0 after-commit p0=164 keep=3
+glm mtp TP: rank=0 round-end p0=164 produced=104 keep=3
+glm mtp TP: rank=0 n=2 p0=167 produced=104
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 57421
+T 25
+T 2337
+glm mtp TP: rank=0 after-commit p0=167 keep=3
+glm mtp TP: rank=0 round-end p0=167 produced=107 keep=3
+glm mtp TP: rank=0 n=2 p0=170 produced=107
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 16641
+glm mtp TP: rank=0 after-commit p0=170 keep=2
+glm mtp TP: rank=0 round-end p0=170 produced=109 keep=2
+glm mtp TP: rank=0 n=2 p0=172 produced=109
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 264
+glm mtp TP: rank=0 after-commit p0=172 keep=2
+glm mtp TP: rank=0 round-end p0=172 produced=111 keep=2
+glm mtp TP: rank=0 n=2 p0=174 produced=111
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+STAT tok_s=28.20 ms_tok=35.46 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=62 draft_off=96
+T 4157
+glm mtp TP: rank=0 after-commit p0=174 keep=2
+glm mtp TP: rank=0 round-end p0=174 produced=113 keep=2
+glm mtp TP: rank=0 n=2 p0=176 produced=113
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24233
+T 15428
+glm mtp TP: rank=0 after-commit p0=176 keep=2
+glm mtp TP: rank=0 round-end p0=176 produced=115 keep=2
+glm mtp TP: rank=0 n=2 p0=178 produced=115
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2176
+T 28040
+T 320
+glm mtp TP: rank=0 after-commit p0=178 keep=3
+glm mtp TP: rank=0 round-end p0=178 produced=118 keep=3
+glm mtp TP: rank=0 n=2 p0=181 produced=118
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 28910
+glm mtp TP: rank=0 after-commit p0=181 keep=1
+glm mtp TP: rank=0 round-end p0=181 produced=119 keep=1
+glm mtp TP: rank=0 n=2 p0=182 produced=119
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6604
+STAT tok_s=24.50 ms_tok=40.82 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=66 draft_off=104
+glm mtp TP: rank=0 after-commit p0=182 keep=1
+glm mtp TP: rank=0 round-end p0=182 produced=120 keep=1
+glm mtp TP: rank=0 n=2 p0=183 produced=120
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 15622
+T 279
+glm mtp TP: rank=0 after-commit p0=183 keep=2
+glm mtp TP: rank=0 round-end p0=183 produced=122 keep=2
+glm mtp TP: rank=0 n=2 p0=185 produced=122
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1852
+T 11
+glm mtp TP: rank=0 after-commit p0=185 keep=2
+glm mtp TP: rank=0 round-end p0=185 produced=124 keep=2
+glm mtp TP: rank=0 n=2 p0=187 produced=124
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1429
+glm mtp TP: rank=0 after-commit p0=187 keep=1
+glm mtp TP: rank=0 round-end p0=187 produced=125 keep=1
+glm mtp TP: rank=0 n=2 p0=188 produced=125
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3213
+T 13905
+glm mtp TP: rank=0 after-commit p0=188 keep=2
+glm mtp TP: rank=0 round-end p0=188 produced=127 keep=2
+glm mtp TP: rank=0 n=2 p0=190 produced=127
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8
+STAT tok_s=24.29 ms_tok=41.16 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=69 draft_off=114
+T 323
+T 18020
+glm mtp TP: rank=0 after-commit p0=190 keep=3
+glm mtp TP: rank=0 round-end p0=190 produced=130 keep=3
+glm mtp TP: rank=0 n=2 p0=193 produced=130
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 320
+T 28910
+glm mtp TP: rank=0 after-commit p0=193 keep=2
+glm mtp TP: rank=0 round-end p0=193 produced=132 keep=2
+glm mtp TP: rank=0 n=2 p0=195 produced=132
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1681
+T 21141
+glm mtp TP: rank=0 after-commit p0=195 keep=2
+glm mtp TP: rank=0 round-end p0=195 produced=134 keep=2
+glm mtp TP: rank=0 n=2 p0=197 produced=134
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 2033
+STAT tok_s=24.77 ms_tok=40.37 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=73 draft_off=120
+T 568
+glm mtp TP: rank=0 after-commit p0=197 keep=3
+glm mtp TP: rank=0 round-end p0=197 produced=137 keep=3
+glm mtp TP: rank=0 n=2 p0=200 produced=137
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8703
+glm mtp TP: rank=0 after-commit p0=200 keep=1
+glm mtp TP: rank=0 round-end p0=200 produced=138 keep=1
+glm mtp TP: rank=0 n=2 p0=201 produced=138
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 46400
+glm mtp TP: rank=0 after-commit p0=201 keep=1
+glm mtp TP: rank=0 round-end p0=201 produced=139 keep=1
+glm mtp TP: rank=0 n=2 p0=202 produced=139
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 525
+T 82328
+T 304
+glm mtp TP: rank=0 after-commit p0=202 keep=3
+glm mtp TP: rank=0 round-end p0=202 produced=142 keep=3
+glm mtp TP: rank=0 n=2 p0=205 produced=142
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 894
+glm mtp TP: rank=0 after-commit p0=205 keep=1
+glm mtp TP: rank=0 round-end p0=205 produced=143 keep=1
+glm mtp TP: rank=0 n=2 p0=206 produced=143
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+STAT tok_s=24.57 ms_tok=40.70 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=77 draft_off=130
+glm mtp TP: rank=0 after-commit p0=206 keep=1
+glm mtp TP: rank=0 round-end p0=206 produced=144 keep=1
+glm mtp TP: rank=0 n=2 p0=207 produced=144
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 55412
+glm mtp TP: rank=0 after-commit p0=207 keep=1
+glm mtp TP: rank=0 round-end p0=207 produced=145 keep=1
+glm mtp TP: rank=0 n=2 p0=208 produced=145
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5248
+glm mtp TP: rank=0 after-commit p0=208 keep=1
+glm mtp TP: rank=0 round-end p0=208 produced=146 keep=1
+glm mtp TP: rank=0 n=2 p0=209 produced=146
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 12639
+T 11
+T 821
+glm mtp TP: rank=0 after-commit p0=209 keep=3
+glm mtp TP: rank=0 round-end p0=209 produced=149 keep=3
+glm mtp TP: rank=0 n=2 p0=212 produced=149
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 84736
+glm mtp TP: rank=0 after-commit p0=212 keep=1
+glm mtp TP: rank=0 round-end p0=212 produced=150 keep=1
+glm mtp TP: rank=0 n=2 p0=213 produced=150
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 476
+STAT tok_s=24.37 ms_tok=41.03 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=79 draft_off=140
+T 44773
+glm mtp TP: rank=0 after-commit p0=213 keep=3
+glm mtp TP: rank=0 round-end p0=213 produced=153 keep=3
+glm mtp TP: rank=0 n=2 p0=216 produced=153
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13595
+T 11
+T 24129
+glm mtp TP: rank=0 after-commit p0=216 keep=3
+glm mtp TP: rank=0 round-end p0=216 produced=156 keep=3
+glm mtp TP: rank=0 n=2 p0=219 produced=156
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1969
+T 10274
+glm mtp TP: rank=0 after-commit p0=219 keep=2
+glm mtp TP: rank=0 round-end p0=219 produced=158 keep=2
+glm mtp TP: rank=0 n=2 p0=221 produced=158
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 353
+glm mtp TP: rank=0 after-commit p0=221 keep=1
+glm mtp TP: rank=0 round-end p0=221 produced=159 keep=1
+glm mtp TP: rank=0 n=2 p0=222 produced=159
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 258
+STAT tok_s=24.48 ms_tok=40.86 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=84 draft_off=148
+glm mtp TP: rank=0 after-commit p0=222 keep=1
+glm mtp TP: rank=0 round-end p0=222 produced=160 keep=1
+glm mtp TP: rank=0 n=2 p0=223 produced=160
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11906
+T 9
+T 1246
+glm mtp TP: rank=0 after-commit p0=223 keep=3
+glm mtp TP: rank=0 round-end p0=223 produced=163 keep=3
+glm mtp TP: rank=0 n=2 p0=226 produced=163
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 279
+T 1849
+T 686
+glm mtp TP: rank=0 after-commit p0=226 keep=3
+glm mtp TP: rank=0 round-end p0=226 produced=166 keep=3
+glm mtp TP: rank=0 n=2 p0=229 produced=166
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 35514
+T 979
+STAT tok_s=24.84 ms_tok=40.26 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=88 draft_off=154
+T 279
+glm mtp TP: rank=0 after-commit p0=229 keep=3
+glm mtp TP: rank=0 round-end p0=229 produced=169 keep=3
+glm mtp TP: rank=0 n=2 p0=232 produced=169
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3922
+glm mtp TP: rank=0 after-commit p0=232 keep=1
+glm mtp TP: rank=0 round-end p0=232 produced=170 keep=1
+glm mtp TP: rank=0 n=2 p0=233 produced=170
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 14515
+glm mtp TP: rank=0 after-commit p0=233 keep=1
+glm mtp TP: rank=0 round-end p0=233 produced=171 keep=1
+glm mtp TP: rank=0 n=2 p0=234 produced=171
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13
+T 576
+glm mtp TP: rank=0 after-commit p0=234 keep=2
+glm mtp TP: rank=0 round-end p0=234 produced=173 keep=2
+glm mtp TP: rank=0 n=2 p0=236 produced=173
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24382
+glm mtp TP: rank=0 after-commit p0=236 keep=1
+glm mtp TP: rank=0 round-end p0=236 produced=174 keep=1
+glm mtp TP: rank=0 n=2 p0=237 produced=174
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5486
+T 304
+STAT tok_s=24.61 ms_tok=40.63 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=91 draft_off=164
+glm mtp TP: rank=0 after-commit p0=237 keep=2
+glm mtp TP: rank=0 round-end p0=237 produced=176 keep=2
+glm mtp TP: rank=0 n=2 p0=239 produced=176
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6481
+T 5942
+T 2293
+glm mtp TP: rank=0 after-commit p0=239 keep=3
+glm mtp TP: rank=0 round-end p0=239 produced=179 keep=3
+glm mtp TP: rank=0 n=2 p0=242 produced=179
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2591
+glm mtp TP: rank=0 after-commit p0=242 keep=1
+glm mtp TP: rank=0 round-end p0=242 produced=180 keep=1
+glm mtp TP: rank=0 n=2 p0=243 produced=180
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 553
+T 18452
+glm mtp TP: rank=0 after-commit p0=243 keep=2
+glm mtp TP: rank=0 round-end p0=243 produced=182 keep=2
+glm mtp TP: rank=0 n=2 p0=245 produced=182
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 723
+T 11
+STAT tok_s=24.67 ms_tok=40.54 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=95 draft_off=172
+T 69797
+glm mtp TP: rank=0 after-commit p0=245 keep=3
+glm mtp TP: rank=0 round-end p0=245 produced=185 keep=3
+glm mtp TP: rank=0 n=2 p0=248 produced=185
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 436
+T 5980
+glm mtp TP: rank=0 after-commit p0=248 keep=2
+glm mtp TP: rank=0 round-end p0=248 produced=187 keep=2
+glm mtp TP: rank=0 n=2 p0=250 produced=187
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 31673
+glm mtp TP: rank=0 after-commit p0=250 keep=1
+glm mtp TP: rank=0 round-end p0=250 produced=188 keep=1
+glm mtp TP: rank=0 n=2 p0=251 produced=188
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1075
+T 11897
+glm mtp TP: rank=0 after-commit p0=251 keep=2
+glm mtp TP: rank=0 round-end p0=251 produced=190 keep=2
+glm mtp TP: rank=0 n=2 p0=253 produced=190
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1194
+T 323
+STAT tok_s=24.73 ms_tok=40.43 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=99 draft_off=180
+glm mtp TP: rank=0 after-commit p0=253 keep=2
+glm mtp TP: rank=0 round-end p0=253 produced=192 keep=2
+glm mtp TP: rank=0 n=2 p0=255 produced=192
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 33764
+T 64034
+T 3506
+glm mtp TP: rank=0 after-commit p0=255 keep=3
+glm mtp TP: rank=0 round-end p0=255 produced=195 keep=3
+glm mtp TP: rank=0 n=2 p0=258 produced=195
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 56641
+glm mtp TP: rank=0 after-commit p0=258 keep=2
+glm mtp TP: rank=0 round-end p0=258 produced=197 keep=2
+glm mtp TP: rank=0 n=2 p0=260 produced=197
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 1842
+glm mtp TP: rank=0 after-commit p0=260 keep=2
+glm mtp TP: rank=0 round-end p0=260 produced=199 keep=2
+glm mtp TP: rank=0 n=2 p0=262 produced=199
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 4385
+STAT tok_s=24.78 ms_tok=40.35 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=104 draft_off=188
+T 11
+T 323
+glm mtp TP: rank=0 after-commit p0=262 keep=3
+glm mtp TP: rank=0 round-end p0=262 produced=202 keep=3
+glm mtp TP: rank=0 n=2 p0=265 produced=202
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 40633
+T 76616
+T 53972
+glm mtp TP: rank=0 after-commit p0=265 keep=3
+glm mtp TP: rank=0 round-end p0=265 produced=205 keep=3
+glm mtp TP: rank=0 n=2 p0=268 produced=205
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 311
+T 62112
+glm mtp TP: rank=0 after-commit p0=268 keep=2
+glm mtp TP: rank=0 round-end p0=268 produced=207 keep=2
+glm mtp TP: rank=0 n=2 p0=270 produced=207
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 28040
+STAT tok_s=25.06 ms_tok=39.90 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=109 draft_off=194
+T 323
+glm mtp TP: rank=0 after-commit p0=270 keep=2
+glm mtp TP: rank=0 round-end p0=270 produced=209 keep=2
+glm mtp TP: rank=0 n=2 p0=272 produced=209
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 27047
+T 18020
+T 25
+glm mtp TP: rank=0 after-commit p0=272 keep=3
+glm mtp TP: rank=0 round-end p0=272 produced=212 keep=3
+glm mtp TP: rank=0 n=2 p0=275 produced=212
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7798
+glm mtp TP: rank=0 after-commit p0=275 keep=1
+glm mtp TP: rank=0 round-end p0=275 produced=213 keep=1
+glm mtp TP: rank=0 n=2 p0=276 produced=213
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 389
+glm mtp TP: rank=0 after-commit p0=276 keep=1
+glm mtp TP: rank=0 round-end p0=276 produced=214 keep=1
+glm mtp TP: rank=0 n=2 p0=277 produced=214
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 279
+T 22532
+STAT tok_s=25.10 ms_tok=39.84 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=112 draft_off=202
+T 3108
+glm mtp TP: rank=0 after-commit p0=277 keep=3
+glm mtp TP: rank=0 round-end p0=277 produced=217 keep=3
+glm mtp TP: rank=0 n=2 p0=280 produced=217
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 315
+T 264
+T 16641
+glm mtp TP: rank=0 after-commit p0=280 keep=3
+glm mtp TP: rank=0 round-end p0=280 produced=220 keep=3
+glm mtp TP: rank=0 n=2 p0=283 produced=220
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24990
+T 311
+T 8682
+glm mtp TP: rank=0 after-commit p0=283 keep=3
+glm mtp TP: rank=0 round-end p0=283 produced=223 keep=3
+glm mtp TP: rank=0 n=2 p0=286 produced=223
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13905
+STAT tok_s=25.38 ms_tok=39.41 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=118 draft_off=208
+T 320
+glm mtp TP: rank=0 after-commit p0=286 keep=2
+glm mtp TP: rank=0 round-end p0=286 produced=225 keep=2
+glm mtp TP: rank=0 n=2 p0=288 produced=225
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 437
+glm mtp TP: rank=0 after-commit p0=288 keep=1
+glm mtp TP: rank=0 round-end p0=288 produced=226 keep=1
+glm mtp TP: rank=0 n=2 p0=289 produced=226
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3545
+glm mtp TP: rank=0 after-commit p0=289 keep=1
+glm mtp TP: rank=0 round-end p0=289 produced=227 keep=1
+glm mtp TP: rank=0 n=2 p0=290 produced=227
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 15792
+T 8
+T 4751
+glm mtp TP: rank=0 after-commit p0=290 keep=3
+glm mtp TP: rank=0 round-end p0=290 produced=230 keep=3
+glm mtp TP: rank=0 n=2 p0=293 produced=230
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1091
+T 5214
+STAT tok_s=25.40 ms_tok=39.38 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=121 draft_off=216
+glm mtp TP: rank=0 after-commit p0=293 keep=2
+glm mtp TP: rank=0 round-end p0=293 produced=232 keep=2
+glm mtp TP: rank=0 n=2 p0=295 produced=232
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 36157
+T 15760
+glm mtp TP: rank=0 after-commit p0=295 keep=2
+glm mtp TP: rank=0 round-end p0=295 produced=234 keep=2
+glm mtp TP: rank=0 n=2 p0=297 produced=234
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1584
+T 13
+T 1096
+glm mtp TP: rank=0 after-commit p0=297 keep=3
+glm mtp TP: rank=0 round-end p0=297 produced=237 keep=3
+glm mtp TP: rank=0 n=2 p0=300 produced=237
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 374
+T 7025
+glm mtp TP: rank=0 after-commit p0=300 keep=2
+glm mtp TP: rank=0 round-end p0=300 produced=239 keep=2
+glm mtp TP: rank=0 n=2 p0=302 produced=239
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2598
+STAT tok_s=25.40 ms_tok=39.37 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12383 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=126 draft_off=224
+T 330
+glm mtp TP: rank=0 after-commit p0=302 keep=2
+glm mtp TP: rank=0 round-end p0=302 produced=241 keep=2
+glm mtp TP: rank=0 n=2 p0=304 produced=241
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7123
+glm mtp TP: rank=0 after-commit p0=304 keep=1
+glm mtp TP: rank=0 round-end p0=304 produced=242 keep=1
+glm mtp TP: rank=0 n=2 p0=305 produced=242
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1
+glm mtp TP: rank=0 after-commit p0=305 keep=1
+glm mtp TP: rank=0 round-end p0=305 produced=243 keep=1
+glm mtp TP: rank=0 n=2 p0=306 produced=243
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7709
+T 13
+glm mtp TP: rank=0 after-commit p0=306 keep=2
+glm mtp TP: rank=0 round-end p0=306 produced=245 keep=2
+glm mtp TP: rank=0 n=2 p0=308 produced=245
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+T 10550
+T 11
+STAT tok_s=25.40 ms_tok=39.36 vram_hit=1.0000 ram_fetch=0.000 disk=0.004 promo=0.004 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=128 draft_off=232
+glm mtp TP: rank=0 after-commit p0=308 keep=3
+glm mtp TP: rank=0 round-end p0=308 produced=248 keep=3
+glm mtp TP: rank=0 n=2 p0=311 produced=248
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 37743
+T 1870
+T 553
+glm mtp TP: rank=0 after-commit p0=311 keep=3
+glm mtp TP: rank=0 round-end p0=311 produced=251 keep=3
+glm mtp TP: rank=0 n=2 p0=314 produced=251
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5942
+glm mtp TP: rank=0 after-commit p0=314 keep=1
+glm mtp TP: rank=0 round-end p0=314 produced=252 keep=1
+glm mtp TP: rank=0 n=2 p0=315 produced=252
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1075
+T 80582
+glm mtp TP: rank=0 after-commit p0=315 keep=2
+glm mtp TP: rank=0 round-end p0=315 produced=254 keep=2
+glm mtp TP: rank=0 n=1 p0=317 produced=254
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+T 304
+glm mtp TP: rank=0 after-commit p0=317 keep=1
+glm mtp TP: rank=0 round-end p0=317 produced=255 keep=1
+glm mtp TP: rank=0 n=0 p0=318 produced=255
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+T 1181
+STAT tok_s=25.39 ms_tok=39.38 vram_hit=1.0000 ram_fetch=0.000 disk=0.004 promo=0.004 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=133 draft_off=241
+DONE 256 64 39.7 10081.3 length 133 241 63 123895 123896
+glm mtp TP: rank=0 round-end p0=318 produced=256 keep=1
+glm mtp: a drafting round's host time - drafts 13.82 ms, verify 69.10 ms, commit + cache 0.07 ms (121 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 256 emitted tokens outside it, 0 of 121 drafting rounds on the whole head
+glm mtp: 122 rounds, 2.10 tokens a round | rounds by draft length 0:1 1:1 2:120
+glm stat: decode 39.38 ms/tok (25.39 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.02 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12384/12384 ram 0/48
+glm spec: 133 of 241 drafts accepted (55.2%)
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+PP 64 64 38.7 25.8 63
+T 785
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm mtp TP: rank=0 n=2 p0=64 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1196
+T 6801
+T 264
+glm mtp TP: rank=0 after-commit p0=64 keep=3
+glm mtp TP: rank=0 round-end p0=64 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=67 produced=4
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11918
+T 10911
+T 16134
+glm mtp TP: rank=0 after-commit p0=67 keep=3
+glm mtp TP: rank=0 round-end p0=67 produced=7 keep=3
+glm mtp TP: rank=0 n=2 p0=70 produced=7
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 18173
+STAT tok_s=37.17 ms_tok=26.90 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=4 draft_off=4
+T 7653
+glm mtp TP: rank=0 after-commit p0=70 keep=2
+glm mtp TP: rank=0 round-end p0=70 produced=9 keep=2
+glm mtp TP: rank=0 n=2 p0=72 produced=9
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6223
+T 11
+T 70837
+glm mtp TP: rank=0 after-commit p0=72 keep=3
+glm mtp TP: rank=0 round-end p0=72 produced=12 keep=3
+glm mtp TP: rank=0 n=2 p0=75 produced=12
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 18392
+T 11
+T 922
+glm mtp TP: rank=0 after-commit p0=75 keep=3
+glm mtp TP: rank=0 round-end p0=75 produced=15 keep=3
+glm mtp TP: rank=0 n=2 p0=78 produced=15
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 269
+STAT tok_s=36.72 ms_tok=27.23 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=9 draft_off=10
+glm mtp TP: rank=0 after-commit p0=78 keep=1
+glm mtp TP: rank=0 round-end p0=78 produced=16 keep=1
+glm mtp TP: rank=0 n=2 p0=79 produced=16
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6237
+T 11
+T 7901
+glm mtp TP: rank=0 after-commit p0=79 keep=3
+glm mtp TP: rank=0 round-end p0=79 produced=19 keep=3
+glm mtp TP: rank=0 n=2 p0=82 produced=19
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 17957
+T 11
+T 60178
+glm mtp TP: rank=0 after-commit p0=82 keep=3
+glm mtp TP: rank=0 round-end p0=82 produced=22 keep=3
+glm mtp TP: rank=0 n=2 p0=85 produced=22
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 13342
+STAT tok_s=36.63 ms_tok=27.30 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=13 draft_off=16
+T 11
+glm mtp TP: rank=0 after-commit p0=85 keep=3
+glm mtp TP: rank=0 round-end p0=85 produced=25 keep=3
+glm mtp TP: rank=0 n=2 p0=88 produced=25
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 448
+T 10290
+glm mtp TP: rank=0 after-commit p0=88 keep=2
+glm mtp TP: rank=0 round-end p0=88 produced=27 keep=2
+glm mtp TP: rank=0 n=2 p0=90 produced=27
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 323
+T 6559
+T 63482
+glm mtp TP: rank=0 after-commit p0=90 keep=3
+glm mtp TP: rank=0 round-end p0=90 produced=30 keep=3
+glm mtp TP: rank=0 n=2 p0=93 produced=30
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 518
+STAT tok_s=36.50 ms_tok=27.40 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=18 draft_off=22
+T 3245
+glm mtp TP: rank=0 after-commit p0=93 keep=3
+glm mtp TP: rank=0 round-end p0=93 produced=33 keep=3
+glm mtp TP: rank=0 n=2 p0=96 produced=33
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8062
+T 42399
+T 13
+glm mtp TP: rank=0 after-commit p0=96 keep=3
+glm mtp TP: rank=0 round-end p0=96 produced=36 keep=3
+glm mtp TP: rank=0 n=2 p0=99 produced=36
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 9641
+glm mtp TP: rank=0 after-commit p0=99 keep=1
+glm mtp TP: rank=0 round-end p0=99 produced=37 keep=1
+glm mtp TP: rank=0 n=2 p0=100 produced=37
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 17400
+glm mtp TP: rank=0 after-commit p0=100 keep=2
+glm mtp TP: rank=0 round-end p0=100 produced=39 keep=2
+glm mtp TP: rank=0 n=2 p0=102 produced=39
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+STAT tok_s=34.34 ms_tok=29.12 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=23 draft_off=30
+T 1632
+T 12
+glm mtp TP: rank=0 after-commit p0=102 keep=3
+glm mtp TP: rank=0 round-end p0=102 produced=42 keep=3
+glm mtp TP: rank=0 n=2 p0=105 produced=42
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 61779
+T 4226
+T 13
+glm mtp TP: rank=0 after-commit p0=105 keep=3
+glm mtp TP: rank=0 round-end p0=105 produced=45 keep=3
+glm mtp TP: rank=0 n=2 p0=108 produced=45
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 154842
+glm mtp TP: rank=0 after-commit p0=108 keep=1
+glm mtp TP: rank=0 round-end p0=108 produced=46 keep=1
+glm mtp TP: rank=0 n=2 p0=109 produced=46
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2
+T 7292
+STAT tok_s=34.62 ms_tok=28.88 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=27 draft_off=36
+glm mtp TP: rank=0 after-commit p0=109 keep=2
+glm mtp TP: rank=0 round-end p0=109 produced=48 keep=2
+glm mtp TP: rank=0 n=2 p0=111 produced=48
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 46804
+T 304
+T 43703
+glm mtp TP: rank=0 after-commit p0=111 keep=3
+glm mtp TP: rank=0 round-end p0=111 produced=51 keep=3
+glm mtp TP: rank=0 n=2 p0=114 produced=51
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 14905
+T 11948
+T 8140
+glm mtp TP: rank=0 after-commit p0=114 keep=3
+glm mtp TP: rank=0 round-end p0=114 produced=54 keep=3
+glm mtp TP: rank=0 n=2 p0=117 produced=54
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3660
+T 5930
+STAT tok_s=34.91 ms_tok=28.65 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=32 draft_off=42
+T 271
+glm mtp TP: rank=0 after-commit p0=117 keep=3
+glm mtp TP: rank=0 round-end p0=117 produced=57 keep=3
+glm mtp TP: rank=0 n=2 p0=120 produced=57
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 565
+glm mtp TP: rank=0 after-commit p0=120 keep=1
+glm mtp TP: rank=0 round-end p0=120 produced=58 keep=1
+glm mtp TP: rank=0 n=2 p0=121 produced=58
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+glm mtp TP: rank=0 after-commit p0=121 keep=1
+glm mtp TP: rank=0 round-end p0=121 produced=59 keep=1
+glm mtp TP: rank=0 n=2 p0=122 produced=59
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 90675
+glm mtp TP: rank=0 after-commit p0=122 keep=1
+glm mtp TP: rank=0 round-end p0=122 produced=60 keep=1
+glm mtp TP: rank=0 n=2 p0=123 produced=60
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 22024
+T 271
+glm mtp TP: rank=0 after-commit p0=123 keep=2
+glm mtp TP: rank=0 round-end p0=123 produced=62 keep=2
+glm mtp TP: rank=0 n=2 p0=125 produced=62
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 12314
+T 46400
+STAT tok_s=32.42 ms_tok=30.84 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=35 draft_off=52
+T 12164
+glm mtp TP: rank=0 after-commit p0=125 keep=3
+glm mtp TP: rank=0 round-end p0=125 produced=65 keep=3
+glm mtp TP: rank=0 n=2 p0=128 produced=65
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 979
+T 264
+T 4237
+glm mtp TP: rank=0 after-commit p0=128 keep=3
+glm mtp TP: rank=0 round-end p0=128 produced=68 keep=3
+glm mtp TP: rank=0 n=2 p0=131 produced=68
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+T 40245
+glm mtp TP: rank=0 after-commit p0=131 keep=2
+glm mtp TP: rank=0 round-end p0=131 produced=70 keep=2
+glm mtp TP: rank=0 n=2 p0=133 produced=70
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1119
+T 1378
+STAT tok_s=32.79 ms_tok=30.50 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=40 draft_off=58
+glm mtp TP: rank=0 after-commit p0=133 keep=2
+glm mtp TP: rank=0 round-end p0=133 produced=72 keep=2
+glm mtp TP: rank=0 n=2 p0=135 produced=72
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 476
+T 803
+T 5203
+glm mtp TP: rank=0 after-commit p0=135 keep=3
+glm mtp TP: rank=0 round-end p0=135 produced=75 keep=3
+glm mtp TP: rank=0 n=2 p0=138 produced=75
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 315
+glm mtp TP: rank=0 after-commit p0=138 keep=1
+glm mtp TP: rank=0 round-end p0=138 produced=76 keep=1
+glm mtp TP: rank=0 n=2 p0=139 produced=76
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7798
+T 429
+T 646
+glm mtp TP: rank=0 after-commit p0=139 keep=3
+glm mtp TP: rank=0 round-end p0=139 produced=79 keep=3
+glm mtp TP: rank=0 n=2 p0=142 produced=79
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 902
+STAT tok_s=32.30 ms_tok=30.96 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=45 draft_off=66
+T 5021
+T 18997
+glm mtp TP: rank=0 after-commit p0=142 keep=3
+glm mtp TP: rank=0 round-end p0=142 produced=82 keep=3
+glm mtp TP: rank=0 n=2 p0=145 produced=82
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 448
+T 1817
+T 1008
+glm mtp TP: rank=0 after-commit p0=145 keep=3
+glm mtp TP: rank=0 round-end p0=145 produced=85 keep=3
+glm mtp TP: rank=0 n=2 p0=148 produced=85
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 1496
+glm mtp TP: rank=0 after-commit p0=148 keep=2
+glm mtp TP: rank=0 round-end p0=148 produced=87 keep=2
+glm mtp TP: rank=0 n=2 p0=150 produced=87
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3498
+STAT tok_s=32.75 ms_tok=30.53 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=50 draft_off=72
+T 1449
+glm mtp TP: rank=0 after-commit p0=150 keep=2
+glm mtp TP: rank=0 round-end p0=150 produced=89 keep=2
+glm mtp TP: rank=0 n=2 p0=152 produced=89
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2436
+T 1231
+glm mtp TP: rank=0 after-commit p0=152 keep=2
+glm mtp TP: rank=0 round-end p0=152 produced=91 keep=2
+glm mtp TP: rank=0 n=2 p0=154 produced=91
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2058
+T 387
+T 13666
+glm mtp TP: rank=0 after-commit p0=154 keep=3
+glm mtp TP: rank=0 round-end p0=154 produced=94 keep=3
+glm mtp TP: rank=0 n=2 p0=157 produced=94
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 323
+T 9311
+STAT tok_s=33.10 ms_tok=30.21 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=54 draft_off=78
+T 13
+glm mtp TP: rank=0 after-commit p0=157 keep=3
+glm mtp TP: rank=0 round-end p0=157 produced=97 keep=3
+glm mtp TP: rank=0 n=2 p0=160 produced=97
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+glm mtp TP: rank=0 after-commit p0=160 keep=1
+glm mtp TP: rank=0 round-end p0=160 produced=98 keep=1
+glm mtp TP: rank=0 n=2 p0=161 produced=98
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 26229
+glm mtp TP: rank=0 after-commit p0=161 keep=1
+glm mtp TP: rank=0 round-end p0=161 produced=99 keep=1
+glm mtp TP: rank=0 n=2 p0=162 produced=99
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 21517
+glm mtp TP: rank=0 after-commit p0=162 keep=1
+glm mtp TP: rank=0 round-end p0=162 produced=100 keep=1
+glm mtp TP: rank=0 n=2 p0=163 produced=100
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1588
+glm mtp TP: rank=0 after-commit p0=163 keep=1
+glm mtp TP: rank=0 round-end p0=163 produced=101 keep=1
+glm mtp TP: rank=0 n=2 p0=164 produced=101
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 374
+T 279
+T 26020
+STAT tok_s=31.94 ms_tok=31.31 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=56 draft_off=88
+glm mtp TP: rank=0 after-commit p0=164 keep=3
+glm mtp TP: rank=0 round-end p0=164 produced=104 keep=3
+glm mtp TP: rank=0 n=2 p0=167 produced=104
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 57421
+T 25
+T 2337
+glm mtp TP: rank=0 after-commit p0=167 keep=3
+glm mtp TP: rank=0 round-end p0=167 produced=107 keep=3
+glm mtp TP: rank=0 n=2 p0=170 produced=107
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 16641
+glm mtp TP: rank=0 after-commit p0=170 keep=2
+glm mtp TP: rank=0 round-end p0=170 produced=109 keep=2
+glm mtp TP: rank=0 n=2 p0=172 produced=109
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 264
+glm mtp TP: rank=0 after-commit p0=172 keep=2
+glm mtp TP: rank=0 round-end p0=172 produced=111 keep=2
+glm mtp TP: rank=0 n=2 p0=174 produced=111
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+STAT tok_s=30.33 ms_tok=32.97 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=62 draft_off=96
+T 4157
+glm mtp TP: rank=0 after-commit p0=174 keep=2
+glm mtp TP: rank=0 round-end p0=174 produced=113 keep=2
+glm mtp TP: rank=0 n=2 p0=176 produced=113
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24233
+T 15428
+glm mtp TP: rank=0 after-commit p0=176 keep=2
+glm mtp TP: rank=0 round-end p0=176 produced=115 keep=2
+glm mtp TP: rank=0 n=2 p0=178 produced=115
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2176
+T 28040
+T 320
+glm mtp TP: rank=0 after-commit p0=178 keep=3
+glm mtp TP: rank=0 round-end p0=178 produced=118 keep=3
+glm mtp TP: rank=0 n=2 p0=181 produced=118
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 28910
+glm mtp TP: rank=0 after-commit p0=181 keep=1
+glm mtp TP: rank=0 round-end p0=181 produced=119 keep=1
+glm mtp TP: rank=0 n=2 p0=182 produced=119
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6604
+STAT tok_s=29.99 ms_tok=33.34 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=66 draft_off=104
+glm mtp TP: rank=0 after-commit p0=182 keep=1
+glm mtp TP: rank=0 round-end p0=182 produced=120 keep=1
+glm mtp TP: rank=0 n=2 p0=183 produced=120
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 15622
+T 279
+glm mtp TP: rank=0 after-commit p0=183 keep=2
+glm mtp TP: rank=0 round-end p0=183 produced=122 keep=2
+glm mtp TP: rank=0 n=2 p0=185 produced=122
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1852
+T 11
+glm mtp TP: rank=0 after-commit p0=185 keep=2
+glm mtp TP: rank=0 round-end p0=185 produced=124 keep=2
+glm mtp TP: rank=0 n=2 p0=187 produced=124
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1429
+glm mtp TP: rank=0 after-commit p0=187 keep=1
+glm mtp TP: rank=0 round-end p0=187 produced=125 keep=1
+glm mtp TP: rank=0 n=2 p0=188 produced=125
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3213
+T 13905
+glm mtp TP: rank=0 after-commit p0=188 keep=2
+glm mtp TP: rank=0 round-end p0=188 produced=127 keep=2
+glm mtp TP: rank=0 n=2 p0=190 produced=127
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8
+STAT tok_s=29.13 ms_tok=34.33 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=69 draft_off=114
+T 323
+T 18020
+glm mtp TP: rank=0 after-commit p0=190 keep=3
+glm mtp TP: rank=0 round-end p0=190 produced=130 keep=3
+glm mtp TP: rank=0 n=2 p0=193 produced=130
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 320
+T 28910
+glm mtp TP: rank=0 after-commit p0=193 keep=2
+glm mtp TP: rank=0 round-end p0=193 produced=132 keep=2
+glm mtp TP: rank=0 n=2 p0=195 produced=132
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1681
+T 21141
+glm mtp TP: rank=0 after-commit p0=195 keep=2
+glm mtp TP: rank=0 round-end p0=195 produced=134 keep=2
+glm mtp TP: rank=0 n=2 p0=197 produced=134
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 2033
+STAT tok_s=29.43 ms_tok=33.98 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=73 draft_off=120
+T 568
+glm mtp TP: rank=0 after-commit p0=197 keep=3
+glm mtp TP: rank=0 round-end p0=197 produced=137 keep=3
+glm mtp TP: rank=0 n=2 p0=200 produced=137
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8703
+glm mtp TP: rank=0 after-commit p0=200 keep=1
+glm mtp TP: rank=0 round-end p0=200 produced=138 keep=1
+glm mtp TP: rank=0 n=2 p0=201 produced=138
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 46400
+glm mtp TP: rank=0 after-commit p0=201 keep=1
+glm mtp TP: rank=0 round-end p0=201 produced=139 keep=1
+glm mtp TP: rank=0 n=2 p0=202 produced=139
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 525
+T 82328
+T 304
+glm mtp TP: rank=0 after-commit p0=202 keep=3
+glm mtp TP: rank=0 round-end p0=202 produced=142 keep=3
+glm mtp TP: rank=0 n=2 p0=205 produced=142
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 894
+glm mtp TP: rank=0 after-commit p0=205 keep=1
+glm mtp TP: rank=0 round-end p0=205 produced=143 keep=1
+glm mtp TP: rank=0 n=2 p0=206 produced=143
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+STAT tok_s=28.81 ms_tok=34.71 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=77 draft_off=130
+glm mtp TP: rank=0 after-commit p0=206 keep=1
+glm mtp TP: rank=0 round-end p0=206 produced=144 keep=1
+glm mtp TP: rank=0 n=2 p0=207 produced=144
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 55412
+glm mtp TP: rank=0 after-commit p0=207 keep=1
+glm mtp TP: rank=0 round-end p0=207 produced=145 keep=1
+glm mtp TP: rank=0 n=2 p0=208 produced=145
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5248
+glm mtp TP: rank=0 after-commit p0=208 keep=1
+glm mtp TP: rank=0 round-end p0=208 produced=146 keep=1
+glm mtp TP: rank=0 n=2 p0=209 produced=146
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 12639
+T 11
+T 821
+glm mtp TP: rank=0 after-commit p0=209 keep=3
+glm mtp TP: rank=0 round-end p0=209 produced=149 keep=3
+glm mtp TP: rank=0 n=2 p0=212 produced=149
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 84736
+glm mtp TP: rank=0 after-commit p0=212 keep=1
+glm mtp TP: rank=0 round-end p0=212 produced=150 keep=1
+glm mtp TP: rank=0 n=2 p0=213 produced=150
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 476
+STAT tok_s=28.37 ms_tok=35.25 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=79 draft_off=140
+T 44773
+glm mtp TP: rank=0 after-commit p0=213 keep=3
+glm mtp TP: rank=0 round-end p0=213 produced=153 keep=3
+glm mtp TP: rank=0 n=2 p0=216 produced=153
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13595
+T 11
+T 24129
+glm mtp TP: rank=0 after-commit p0=216 keep=3
+glm mtp TP: rank=0 round-end p0=216 produced=156 keep=3
+glm mtp TP: rank=0 n=2 p0=219 produced=156
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1969
+T 10274
+glm mtp TP: rank=0 after-commit p0=219 keep=2
+glm mtp TP: rank=0 round-end p0=219 produced=158 keep=2
+glm mtp TP: rank=0 n=2 p0=221 produced=158
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 353
+glm mtp TP: rank=0 after-commit p0=221 keep=1
+glm mtp TP: rank=0 round-end p0=221 produced=159 keep=1
+glm mtp TP: rank=0 n=2 p0=222 produced=159
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 258
+STAT tok_s=28.29 ms_tok=35.35 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=84 draft_off=148
+glm mtp TP: rank=0 after-commit p0=222 keep=1
+glm mtp TP: rank=0 round-end p0=222 produced=160 keep=1
+glm mtp TP: rank=0 n=2 p0=223 produced=160
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11906
+T 9
+T 1246
+glm mtp TP: rank=0 after-commit p0=223 keep=3
+glm mtp TP: rank=0 round-end p0=223 produced=163 keep=3
+glm mtp TP: rank=0 n=2 p0=226 produced=163
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 279
+T 1849
+T 686
+glm mtp TP: rank=0 after-commit p0=226 keep=3
+glm mtp TP: rank=0 round-end p0=226 produced=166 keep=3
+glm mtp TP: rank=0 n=2 p0=229 produced=166
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 35514
+T 979
+STAT tok_s=28.61 ms_tok=34.95 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=88 draft_off=154
+T 279
+glm mtp TP: rank=0 after-commit p0=229 keep=3
+glm mtp TP: rank=0 round-end p0=229 produced=169 keep=3
+glm mtp TP: rank=0 n=2 p0=232 produced=169
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3922
+glm mtp TP: rank=0 after-commit p0=232 keep=1
+glm mtp TP: rank=0 round-end p0=232 produced=170 keep=1
+glm mtp TP: rank=0 n=2 p0=233 produced=170
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 14515
+glm mtp TP: rank=0 after-commit p0=233 keep=1
+glm mtp TP: rank=0 round-end p0=233 produced=171 keep=1
+glm mtp TP: rank=0 n=2 p0=234 produced=171
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13
+T 576
+glm mtp TP: rank=0 after-commit p0=234 keep=2
+glm mtp TP: rank=0 round-end p0=234 produced=173 keep=2
+glm mtp TP: rank=0 n=2 p0=236 produced=173
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24382
+glm mtp TP: rank=0 after-commit p0=236 keep=1
+glm mtp TP: rank=0 round-end p0=236 produced=174 keep=1
+glm mtp TP: rank=0 n=2 p0=237 produced=174
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5486
+T 304
+STAT tok_s=28.17 ms_tok=35.49 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=91 draft_off=164
+glm mtp TP: rank=0 after-commit p0=237 keep=2
+glm mtp TP: rank=0 round-end p0=237 produced=176 keep=2
+glm mtp TP: rank=0 n=2 p0=239 produced=176
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6481
+T 5942
+T 2293
+glm mtp TP: rank=0 after-commit p0=239 keep=3
+glm mtp TP: rank=0 round-end p0=239 produced=179 keep=3
+glm mtp TP: rank=0 n=2 p0=242 produced=179
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2591
+glm mtp TP: rank=0 after-commit p0=242 keep=1
+glm mtp TP: rank=0 round-end p0=242 produced=180 keep=1
+glm mtp TP: rank=0 n=2 p0=243 produced=180
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 553
+T 18452
+glm mtp TP: rank=0 after-commit p0=243 keep=2
+glm mtp TP: rank=0 round-end p0=243 produced=182 keep=2
+glm mtp TP: rank=0 n=2 p0=245 produced=182
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 723
+T 11
+STAT tok_s=28.14 ms_tok=35.53 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=95 draft_off=172
+T 69797
+glm mtp TP: rank=0 after-commit p0=245 keep=3
+glm mtp TP: rank=0 round-end p0=245 produced=185 keep=3
+glm mtp TP: rank=0 n=2 p0=248 produced=185
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 436
+T 5980
+glm mtp TP: rank=0 after-commit p0=248 keep=2
+glm mtp TP: rank=0 round-end p0=248 produced=187 keep=2
+glm mtp TP: rank=0 n=2 p0=250 produced=187
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 31673
+glm mtp TP: rank=0 after-commit p0=250 keep=1
+glm mtp TP: rank=0 round-end p0=250 produced=188 keep=1
+glm mtp TP: rank=0 n=2 p0=251 produced=188
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1075
+T 11897
+glm mtp TP: rank=0 after-commit p0=251 keep=2
+glm mtp TP: rank=0 round-end p0=251 produced=190 keep=2
+glm mtp TP: rank=0 n=2 p0=253 produced=190
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1194
+T 323
+STAT tok_s=28.10 ms_tok=35.59 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=99 draft_off=180
+glm mtp TP: rank=0 after-commit p0=253 keep=2
+glm mtp TP: rank=0 round-end p0=253 produced=192 keep=2
+glm mtp TP: rank=0 n=2 p0=255 produced=192
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 33764
+T 64034
+T 3506
+glm mtp TP: rank=0 after-commit p0=255 keep=3
+glm mtp TP: rank=0 round-end p0=255 produced=195 keep=3
+glm mtp TP: rank=0 n=2 p0=258 produced=195
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 56641
+glm mtp TP: rank=0 after-commit p0=258 keep=2
+glm mtp TP: rank=0 round-end p0=258 produced=197 keep=2
+glm mtp TP: rank=0 n=2 p0=260 produced=197
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 1842
+glm mtp TP: rank=0 after-commit p0=260 keep=2
+glm mtp TP: rank=0 round-end p0=260 produced=199 keep=2
+glm mtp TP: rank=0 n=2 p0=262 produced=199
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 4385
+STAT tok_s=28.06 ms_tok=35.64 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=104 draft_off=188
+T 11
+T 323
+glm mtp TP: rank=0 after-commit p0=262 keep=3
+glm mtp TP: rank=0 round-end p0=262 produced=202 keep=3
+glm mtp TP: rank=0 n=2 p0=265 produced=202
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 40633
+T 76616
+T 53972
+glm mtp TP: rank=0 after-commit p0=265 keep=3
+glm mtp TP: rank=0 round-end p0=265 produced=205 keep=3
+glm mtp TP: rank=0 n=2 p0=268 produced=205
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 311
+T 62112
+glm mtp TP: rank=0 after-commit p0=268 keep=2
+glm mtp TP: rank=0 round-end p0=268 produced=207 keep=2
+glm mtp TP: rank=0 n=2 p0=270 produced=207
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 28040
+STAT tok_s=28.31 ms_tok=35.32 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=109 draft_off=194
+T 323
+glm mtp TP: rank=0 after-commit p0=270 keep=2
+glm mtp TP: rank=0 round-end p0=270 produced=209 keep=2
+glm mtp TP: rank=0 n=2 p0=272 produced=209
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 27047
+T 18020
+T 25
+glm mtp TP: rank=0 after-commit p0=272 keep=3
+glm mtp TP: rank=0 round-end p0=272 produced=212 keep=3
+glm mtp TP: rank=0 n=2 p0=275 produced=212
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7798
+glm mtp TP: rank=0 after-commit p0=275 keep=1
+glm mtp TP: rank=0 round-end p0=275 produced=213 keep=1
+glm mtp TP: rank=0 n=2 p0=276 produced=213
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 389
+glm mtp TP: rank=0 after-commit p0=276 keep=1
+glm mtp TP: rank=0 round-end p0=276 produced=214 keep=1
+glm mtp TP: rank=0 n=2 p0=277 produced=214
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 279
+T 22532
+STAT tok_s=28.29 ms_tok=35.35 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=112 draft_off=202
+T 3108
+glm mtp TP: rank=0 after-commit p0=277 keep=3
+glm mtp TP: rank=0 round-end p0=277 produced=217 keep=3
+glm mtp TP: rank=0 n=2 p0=280 produced=217
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 315
+T 264
+T 16641
+glm mtp TP: rank=0 after-commit p0=280 keep=3
+glm mtp TP: rank=0 round-end p0=280 produced=220 keep=3
+glm mtp TP: rank=0 n=2 p0=283 produced=220
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24990
+T 311
+T 8682
+glm mtp TP: rank=0 after-commit p0=283 keep=3
+glm mtp TP: rank=0 round-end p0=283 produced=223 keep=3
+glm mtp TP: rank=0 n=2 p0=286 produced=223
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13905
+STAT tok_s=28.56 ms_tok=35.02 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=118 draft_off=208
+T 320
+glm mtp TP: rank=0 after-commit p0=286 keep=2
+glm mtp TP: rank=0 round-end p0=286 produced=225 keep=2
+glm mtp TP: rank=0 n=2 p0=288 produced=225
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 437
+glm mtp TP: rank=0 after-commit p0=288 keep=1
+glm mtp TP: rank=0 round-end p0=288 produced=226 keep=1
+glm mtp TP: rank=0 n=2 p0=289 produced=226
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3545
+glm mtp TP: rank=0 after-commit p0=289 keep=1
+glm mtp TP: rank=0 round-end p0=289 produced=227 keep=1
+glm mtp TP: rank=0 n=2 p0=290 produced=227
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 15792
+T 8
+T 4751
+glm mtp TP: rank=0 after-commit p0=290 keep=3
+glm mtp TP: rank=0 round-end p0=290 produced=230 keep=3
+glm mtp TP: rank=0 n=2 p0=293 produced=230
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1091
+T 5214
+STAT tok_s=28.54 ms_tok=35.03 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=121 draft_off=216
+glm mtp TP: rank=0 after-commit p0=293 keep=2
+glm mtp TP: rank=0 round-end p0=293 produced=232 keep=2
+glm mtp TP: rank=0 n=2 p0=295 produced=232
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 36157
+T 15760
+glm mtp TP: rank=0 after-commit p0=295 keep=2
+glm mtp TP: rank=0 round-end p0=295 produced=234 keep=2
+glm mtp TP: rank=0 n=2 p0=297 produced=234
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1584
+T 13
+T 1096
+glm mtp TP: rank=0 after-commit p0=297 keep=3
+glm mtp TP: rank=0 round-end p0=297 produced=237 keep=3
+glm mtp TP: rank=0 n=2 p0=300 produced=237
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 374
+T 7025
+glm mtp TP: rank=0 after-commit p0=300 keep=2
+glm mtp TP: rank=0 round-end p0=300 produced=239 keep=2
+glm mtp TP: rank=0 n=2 p0=302 produced=239
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2598
+STAT tok_s=28.50 ms_tok=35.09 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=126 draft_off=224
+T 330
+glm mtp TP: rank=0 after-commit p0=302 keep=2
+glm mtp TP: rank=0 round-end p0=302 produced=241 keep=2
+glm mtp TP: rank=0 n=2 p0=304 produced=241
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7123
+glm mtp TP: rank=0 after-commit p0=304 keep=1
+glm mtp TP: rank=0 round-end p0=304 produced=242 keep=1
+glm mtp TP: rank=0 n=2 p0=305 produced=242
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1
+glm mtp TP: rank=0 after-commit p0=305 keep=1
+glm mtp TP: rank=0 round-end p0=305 produced=243 keep=1
+glm mtp TP: rank=0 n=2 p0=306 produced=243
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7709
+T 13
+glm mtp TP: rank=0 after-commit p0=306 keep=2
+glm mtp TP: rank=0 round-end p0=306 produced=245 keep=2
+glm mtp TP: rank=0 n=2 p0=308 produced=245
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+T 10550
+T 11
+STAT tok_s=28.48 ms_tok=35.12 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=128 draft_off=232
+glm mtp TP: rank=0 after-commit p0=308 keep=3
+glm mtp TP: rank=0 round-end p0=308 produced=248 keep=3
+glm mtp TP: rank=0 n=2 p0=311 produced=248
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 37743
+T 1870
+T 553
+glm mtp TP: rank=0 after-commit p0=311 keep=3
+glm mtp TP: rank=0 round-end p0=311 produced=251 keep=3
+glm mtp TP: rank=0 n=2 p0=314 produced=251
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5942
+glm mtp TP: rank=0 after-commit p0=314 keep=1
+glm mtp TP: rank=0 round-end p0=314 produced=252 keep=1
+glm mtp TP: rank=0 n=2 p0=315 produced=252
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1075
+T 80582
+glm mtp TP: rank=0 after-commit p0=315 keep=2
+glm mtp TP: rank=0 round-end p0=315 produced=254 keep=2
+glm mtp TP: rank=0 n=1 p0=317 produced=254
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+T 304
+glm mtp TP: rank=0 after-commit p0=317 keep=1
+glm mtp TP: rank=0 round-end p0=317 produced=255 keep=1
+glm mtp TP: rank=0 n=0 p0=318 produced=255
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+T 1181
+STAT tok_s=28.39 ms_tok=35.23 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=133 draft_off=241
+glm mtp TP: rank=0 round-end p0=318 produced=256 keep=1
+DONE 256 64 38.7 9018.3 length 133 241 63 123896 123896
+glm mtp: a drafting round's host time - drafts 8.45 ms, verify 65.69 ms, commit + cache 0.06 ms (121 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 256 emitted tokens outside it, 0 of 121 drafting rounds on the whole head
+glm mtp: 122 rounds, 2.10 tokens a round | rounds by draft length 0:1 1:1 2:120
+glm stat: decode 35.23 ms/tok (28.39 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12384/12384 ram 0/48
+glm spec: 133 of 241 drafts accepted (55.2%)
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+PP 64 64 39.2 25.5 63
+T 785
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+T 1196
+T 6801
+T 264
+T 11918
+T 10911
+T 16134
+T 18173
+STAT tok_s=30.15 ms_tok=33.17 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 7653
+T 6223
+T 11
+T 70837
+T 18392
+T 11
+T 922
+T 269
+STAT tok_s=28.39 ms_tok=35.23 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 6237
+T 11
+T 7901
+T 17957
+T 11
+T 60178
+T 11
+T 13342
+STAT tok_s=27.85 ms_tok=35.91 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11
+T 448
+T 10290
+T 323
+T 6559
+T 63482
+T 11
+T 518
+STAT tok_s=27.54 ms_tok=36.30 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 3245
+T 8062
+T 42399
+T 13
+T 9641
+T 264
+T 17400
+T 11
+STAT tok_s=26.03 ms_tok=38.41 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 1632
+T 12
+T 61779
+T 4226
+T 13
+T 154842
+T 2
+T 7292
+STAT tok_s=26.08 ms_tok=38.34 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 46804
+T 304
+T 43703
+T 14905
+T 11948
+T 8140
+T 3660
+T 5930
+STAT tok_s=26.17 ms_tok=38.21 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 271
+T 565
+T 576
+T 90675
+T 22024
+T 271
+T 12314
+T 46400
+STAT tok_s=26.24 ms_tok=38.11 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 12164
+T 979
+T 264
+T 4237
+T 1849
+T 40245
+T 1119
+T 1378
+STAT tok_s=26.28 ms_tok=38.04 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 476
+T 803
+T 5203
+T 315
+T 7798
+T 429
+T 646
+T 902
+STAT tok_s=25.72 ms_tok=38.88 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 5021
+T 18997
+T 448
+T 1817
+T 1008
+T 11
+T 1496
+T 3498
+STAT tok_s=25.80 ms_tok=38.77 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 1449
+T 2436
+T 1231
+T 2058
+T 387
+T 13666
+T 323
+T 9311
+STAT tok_s=25.87 ms_tok=38.65 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 13
+T 576
+T 26229
+T 21517
+T 1588
+T 374
+T 279
+T 26020
+STAT tok_s=25.95 ms_tok=38.54 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 57421
+T 25
+T 2337
+T 264
+T 16641
+T 11
+T 264
+T 1849
+STAT tok_s=25.57 ms_tok=39.11 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 4157
+T 24233
+T 15428
+T 2176
+T 28040
+T 320
+T 28910
+T 6604
+STAT tok_s=25.64 ms_tok=39.00 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 15622
+T 279
+T 1852
+T 11
+T 1429
+T 3213
+T 13905
+T 8
+STAT tok_s=25.31 ms_tok=39.51 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 323
+T 18020
+T 320
+T 28910
+T 1681
+T 21141
+T 264
+T 2033
+STAT tok_s=25.37 ms_tok=39.41 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 568
+T 8703
+T 46400
+T 525
+T 82328
+T 304
+T 894
+T 1849
+STAT tok_s=25.43 ms_tok=39.33 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 55412
+T 5248
+T 12639
+T 11
+T 821
+T 84736
+T 11
+T 476
+STAT tok_s=25.45 ms_tok=39.29 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 44773
+T 13595
+T 11
+T 24129
+T 1969
+T 10274
+T 353
+T 258
+STAT tok_s=25.49 ms_tok=39.23 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11906
+T 9
+T 1246
+T 279
+T 1849
+T 686
+T 35514
+T 979
+STAT tok_s=25.54 ms_tok=39.15 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 279
+T 3922
+T 14515
+T 13
+T 576
+T 24382
+T 5486
+T 304
+STAT tok_s=25.58 ms_tok=39.09 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 6481
+T 5942
+T 2293
+T 2591
+T 553
+T 18452
+T 723
+T 11
+STAT tok_s=25.60 ms_tok=39.07 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 69797
+T 436
+T 5980
+T 31673
+T 1075
+T 11897
+T 1194
+T 323
+STAT tok_s=25.64 ms_tok=39.01 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 33764
+T 64034
+T 3506
+T 11
+T 56641
+T 11
+T 1842
+T 4385
+STAT tok_s=25.68 ms_tok=38.94 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11
+T 323
+T 40633
+T 76616
+T 53972
+T 311
+T 62112
+T 28040
+STAT tok_s=25.71 ms_tok=38.89 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 323
+T 27047
+T 18020
+T 25
+T 7798
+T 389
+T 279
+T 22532
+STAT tok_s=25.75 ms_tok=38.84 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 3108
+T 315
+T 264
+T 16641
+T 24990
+T 311
+T 8682
+T 13905
+STAT tok_s=25.78 ms_tok=38.79 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 320
+T 437
+T 3545
+T 15792
+T 8
+T 4751
+T 1091
+T 5214
+STAT tok_s=25.61 ms_tok=39.05 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 36157
+T 15760
+T 1584
+T 13
+T 1096
+T 374
+T 7025
+T 2598
+STAT tok_s=25.64 ms_tok=39.00 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 330
+T 7123
+T 1
+T 7709
+T 13
+T 576
+T 10550
+T 11
+STAT tok_s=25.67 ms_tok=38.96 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 37743
+T 1870
+T 553
+T 5942
+T 1075
+T 80582
+T 304
+T 1181
+STAT tok_s=25.69 ms_tok=38.92 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+DONE 256 64 39.2 9963.7 length 0 0 63 85680 85680
+glm stat: decode 38.92 ms/tok (25.69 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12384/12384 ram 0/48
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+PP 64 64 38.0 26.3 63
+T 785
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+T 1196
+T 6801
+T 264
+T 11918
+T 10911
+T 16134
+T 18173
+STAT tok_s=30.49 ms_tok=32.80 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 7653
+T 6223
+T 11
+T 70837
+T 18392
+T 11
+T 922
+T 269
+STAT tok_s=25.29 ms_tok=39.54 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 6237
+T 11
+T 7901
+T 17957
+T 11
+T 60178
+T 11
+T 13342
+STAT tok_s=25.73 ms_tok=38.86 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11
+T 448
+T 10290
+T 323
+T 6559
+T 63482
+T 11
+T 518
+STAT tok_s=25.98 ms_tok=38.49 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 3245
+T 8062
+T 42399
+T 13
+T 9641
+T 264
+T 17400
+T 11
+STAT tok_s=23.84 ms_tok=41.95 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 1632
+T 12
+T 61779
+T 4226
+T 13
+T 154842
+T 2
+T 7292
+STAT tok_s=24.26 ms_tok=41.22 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 46804
+T 304
+T 43703
+T 14905
+T 11948
+T 8140
+T 3660
+T 5930
+STAT tok_s=24.59 ms_tok=40.66 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 271
+T 565
+T 576
+T 90675
+T 22024
+T 271
+T 12314
+T 46400
+STAT tok_s=24.84 ms_tok=40.26 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 12164
+T 979
+T 264
+T 4237
+T 1849
+T 40245
+T 1119
+T 1378
+STAT tok_s=25.03 ms_tok=39.96 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 476
+T 803
+T 5203
+T 315
+T 7798
+T 429
+T 646
+T 902
+STAT tok_s=25.17 ms_tok=39.73 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 5021
+T 18997
+T 448
+T 1817
+T 1008
+T 11
+T 1496
+T 3498
+STAT tok_s=25.30 ms_tok=39.52 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 1449
+T 2436
+T 1231
+T 2058
+T 387
+T 13666
+T 323
+T 9311
+STAT tok_s=24.89 ms_tok=40.18 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 13
+T 576
+T 26229
+T 21517
+T 1588
+T 374
+T 279
+T 26020
+STAT tok_s=25.01 ms_tok=39.99 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 57421
+T 25
+T 2337
+T 264
+T 16641
+T 11
+T 264
+T 1849
+STAT tok_s=25.10 ms_tok=39.84 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 4157
+T 24233
+T 15428
+T 2176
+T 28040
+T 320
+T 28910
+T 6604
+STAT tok_s=25.20 ms_tok=39.68 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 15622
+T 279
+T 1852
+T 11
+T 1429
+T 3213
+T 13905
+T 8
+STAT tok_s=25.28 ms_tok=39.56 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 323
+T 18020
+T 320
+T 28910
+T 1681
+T 21141
+T 264
+T 2033
+STAT tok_s=25.36 ms_tok=39.43 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 568
+T 8703
+T 46400
+T 525
+T 82328
+T 304
+T 894
+T 1849
+STAT tok_s=25.43 ms_tok=39.33 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 55412
+T 5248
+T 12639
+T 11
+T 821
+T 84736
+T 11
+T 476
+STAT tok_s=25.49 ms_tok=39.23 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 44773
+T 13595
+T 11
+T 24129
+T 1969
+T 10274
+T 353
+T 258
+STAT tok_s=25.54 ms_tok=39.15 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11906
+T 9
+T 1246
+T 279
+T 1849
+T 686
+T 35514
+T 979
+STAT tok_s=25.60 ms_tok=39.07 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 279
+T 3922
+T 14515
+T 13
+T 576
+T 24382
+T 5486
+T 304
+STAT tok_s=25.64 ms_tok=39.01 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 6481
+T 5942
+T 2293
+T 2591
+T 553
+T 18452
+T 723
+T 11
+STAT tok_s=25.67 ms_tok=38.95 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 69797
+T 436
+T 5980
+T 31673
+T 1075
+T 11897
+T 1194
+T 323
+STAT tok_s=25.69 ms_tok=38.93 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 33764
+T 64034
+T 3506
+T 11
+T 56641
+T 11
+T 1842
+T 4385
+STAT tok_s=25.48 ms_tok=39.25 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 11
+T 323
+T 40633
+T 76616
+T 53972
+T 311
+T 62112
+T 28040
+STAT tok_s=25.30 ms_tok=39.52 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 323
+T 27047
+T 18020
+T 25
+T 7798
+T 389
+T 279
+T 22532
+STAT tok_s=24.92 ms_tok=40.13 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 3108
+T 315
+T 264
+T 16641
+T 24990
+T 311
+T 8682
+T 13905
+STAT tok_s=24.98 ms_tok=40.03 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 320
+T 437
+T 3545
+T 15792
+T 8
+T 4751
+T 1091
+T 5214
+STAT tok_s=25.04 ms_tok=39.94 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 36157
+T 15760
+T 1584
+T 13
+T 1096
+T 374
+T 7025
+T 2598
+STAT tok_s=25.09 ms_tok=39.85 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 330
+T 7123
+T 1
+T 7709
+T 13
+T 576
+T 10550
+T 11
+STAT tok_s=25.14 ms_tok=39.77 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+T 37743
+T 1870
+T 553
+T 5942
+T 1075
+T 80582
+T 304
+T 1181
+STAT tok_s=25.19 ms_tok=39.69 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=0 draft_off=0
+DONE 256 64 38.0 10161.6 length 0 0 63 85680 85680
+glm stat: decode 39.69 ms/tok (25.19 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12384/12384 ram 0/48
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+PP 64 64 37.9 26.4 63
+T 785
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm mtp TP: rank=0 n=2 p0=64 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1196
+T 6801
+T 264
+glm mtp TP: rank=0 after-commit p0=64 keep=3
+glm mtp TP: rank=0 round-end p0=64 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=67 produced=4
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11918
+T 10911
+T 16134
+glm mtp TP: rank=0 after-commit p0=67 keep=3
+glm mtp TP: rank=0 round-end p0=67 produced=7 keep=3
+glm mtp TP: rank=0 n=2 p0=70 produced=7
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 18173
+STAT tok_s=39.20 ms_tok=25.51 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=4 draft_off=4
+T 7653
+glm mtp TP: rank=0 after-commit p0=70 keep=2
+glm mtp TP: rank=0 round-end p0=70 produced=9 keep=2
+glm mtp TP: rank=0 n=2 p0=72 produced=9
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6223
+T 11
+T 70837
+glm mtp TP: rank=0 after-commit p0=72 keep=3
+glm mtp TP: rank=0 round-end p0=72 produced=12 keep=3
+glm mtp TP: rank=0 n=2 p0=75 produced=12
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 18392
+T 11
+T 922
+glm mtp TP: rank=0 after-commit p0=75 keep=3
+glm mtp TP: rank=0 round-end p0=75 produced=15 keep=3
+glm mtp TP: rank=0 n=2 p0=78 produced=15
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 269
+STAT tok_s=38.67 ms_tok=25.86 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=9 draft_off=10
+glm mtp TP: rank=0 after-commit p0=78 keep=1
+glm mtp TP: rank=0 round-end p0=78 produced=16 keep=1
+glm mtp TP: rank=0 n=2 p0=79 produced=16
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6237
+T 11
+T 7901
+glm mtp TP: rank=0 after-commit p0=79 keep=3
+glm mtp TP: rank=0 round-end p0=79 produced=19 keep=3
+glm mtp TP: rank=0 n=2 p0=82 produced=19
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 17957
+T 11
+T 60178
+glm mtp TP: rank=0 after-commit p0=82 keep=3
+glm mtp TP: rank=0 round-end p0=82 produced=22 keep=3
+glm mtp TP: rank=0 n=2 p0=85 produced=22
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 13342
+STAT tok_s=38.31 ms_tok=26.10 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=13 draft_off=16
+T 11
+glm mtp TP: rank=0 after-commit p0=85 keep=3
+glm mtp TP: rank=0 round-end p0=85 produced=25 keep=3
+glm mtp TP: rank=0 n=2 p0=88 produced=25
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 448
+T 10290
+glm mtp TP: rank=0 after-commit p0=88 keep=2
+glm mtp TP: rank=0 round-end p0=88 produced=27 keep=2
+glm mtp TP: rank=0 n=2 p0=90 produced=27
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 323
+T 6559
+T 63482
+glm mtp TP: rank=0 after-commit p0=90 keep=3
+glm mtp TP: rank=0 round-end p0=90 produced=30 keep=3
+glm mtp TP: rank=0 n=2 p0=93 produced=30
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 518
+STAT tok_s=38.24 ms_tok=26.15 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=18 draft_off=22
+T 3245
+glm mtp TP: rank=0 after-commit p0=93 keep=3
+glm mtp TP: rank=0 round-end p0=93 produced=33 keep=3
+glm mtp TP: rank=0 n=2 p0=96 produced=33
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8062
+T 42399
+T 13
+glm mtp TP: rank=0 after-commit p0=96 keep=3
+glm mtp TP: rank=0 round-end p0=96 produced=36 keep=3
+glm mtp TP: rank=0 n=2 p0=99 produced=36
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 9641
+glm mtp TP: rank=0 after-commit p0=99 keep=1
+glm mtp TP: rank=0 round-end p0=99 produced=37 keep=1
+glm mtp TP: rank=0 n=2 p0=100 produced=37
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 17400
+glm mtp TP: rank=0 after-commit p0=100 keep=2
+glm mtp TP: rank=0 round-end p0=100 produced=39 keep=2
+glm mtp TP: rank=0 n=2 p0=102 produced=39
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+STAT tok_s=35.63 ms_tok=28.07 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=23 draft_off=30
+T 1632
+T 12
+glm mtp TP: rank=0 after-commit p0=102 keep=3
+glm mtp TP: rank=0 round-end p0=102 produced=42 keep=3
+glm mtp TP: rank=0 n=2 p0=105 produced=42
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 61779
+T 4226
+T 13
+glm mtp TP: rank=0 after-commit p0=105 keep=3
+glm mtp TP: rank=0 round-end p0=105 produced=45 keep=3
+glm mtp TP: rank=0 n=2 p0=108 produced=45
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 154842
+glm mtp TP: rank=0 after-commit p0=108 keep=1
+glm mtp TP: rank=0 round-end p0=108 produced=46 keep=1
+glm mtp TP: rank=0 n=2 p0=109 produced=46
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2
+T 7292
+STAT tok_s=36.04 ms_tok=27.75 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=27 draft_off=36
+glm mtp TP: rank=0 after-commit p0=109 keep=2
+glm mtp TP: rank=0 round-end p0=109 produced=48 keep=2
+glm mtp TP: rank=0 n=2 p0=111 produced=48
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 46804
+T 304
+T 43703
+glm mtp TP: rank=0 after-commit p0=111 keep=3
+glm mtp TP: rank=0 round-end p0=111 produced=51 keep=3
+glm mtp TP: rank=0 n=2 p0=114 produced=51
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 14905
+T 11948
+T 8140
+glm mtp TP: rank=0 after-commit p0=114 keep=3
+glm mtp TP: rank=0 round-end p0=114 produced=54 keep=3
+glm mtp TP: rank=0 n=2 p0=117 produced=54
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3660
+T 5930
+STAT tok_s=36.24 ms_tok=27.59 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=32 draft_off=42
+T 271
+glm mtp TP: rank=0 after-commit p0=117 keep=3
+glm mtp TP: rank=0 round-end p0=117 produced=57 keep=3
+glm mtp TP: rank=0 n=2 p0=120 produced=57
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 565
+glm mtp TP: rank=0 after-commit p0=120 keep=1
+glm mtp TP: rank=0 round-end p0=120 produced=58 keep=1
+glm mtp TP: rank=0 n=2 p0=121 produced=58
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+glm mtp TP: rank=0 after-commit p0=121 keep=1
+glm mtp TP: rank=0 round-end p0=121 produced=59 keep=1
+glm mtp TP: rank=0 n=2 p0=122 produced=59
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 90675
+glm mtp TP: rank=0 after-commit p0=122 keep=1
+glm mtp TP: rank=0 round-end p0=122 produced=60 keep=1
+glm mtp TP: rank=0 n=2 p0=123 produced=60
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 22024
+T 271
+glm mtp TP: rank=0 after-commit p0=123 keep=2
+glm mtp TP: rank=0 round-end p0=123 produced=62 keep=2
+glm mtp TP: rank=0 n=2 p0=125 produced=62
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 12314
+T 46400
+STAT tok_s=33.66 ms_tok=29.71 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=35 draft_off=52
+T 12164
+glm mtp TP: rank=0 after-commit p0=125 keep=3
+glm mtp TP: rank=0 round-end p0=125 produced=65 keep=3
+glm mtp TP: rank=0 n=2 p0=128 produced=65
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 979
+T 264
+T 4237
+glm mtp TP: rank=0 after-commit p0=128 keep=3
+glm mtp TP: rank=0 round-end p0=128 produced=68 keep=3
+glm mtp TP: rank=0 n=2 p0=131 produced=68
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+T 40245
+glm mtp TP: rank=0 after-commit p0=131 keep=2
+glm mtp TP: rank=0 round-end p0=131 produced=70 keep=2
+glm mtp TP: rank=0 n=2 p0=133 produced=70
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1119
+T 1378
+STAT tok_s=34.13 ms_tok=29.30 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=40 draft_off=58
+glm mtp TP: rank=0 after-commit p0=133 keep=2
+glm mtp TP: rank=0 round-end p0=133 produced=72 keep=2
+glm mtp TP: rank=0 n=2 p0=135 produced=72
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 476
+T 803
+T 5203
+glm mtp TP: rank=0 after-commit p0=135 keep=3
+glm mtp TP: rank=0 round-end p0=135 produced=75 keep=3
+glm mtp TP: rank=0 n=2 p0=138 produced=75
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 315
+glm mtp TP: rank=0 after-commit p0=138 keep=1
+glm mtp TP: rank=0 round-end p0=138 produced=76 keep=1
+glm mtp TP: rank=0 n=2 p0=139 produced=76
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7798
+T 429
+T 646
+glm mtp TP: rank=0 after-commit p0=139 keep=3
+glm mtp TP: rank=0 round-end p0=139 produced=79 keep=3
+glm mtp TP: rank=0 n=2 p0=142 produced=79
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 902
+STAT tok_s=33.46 ms_tok=29.89 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=45 draft_off=66
+T 5021
+T 18997
+glm mtp TP: rank=0 after-commit p0=142 keep=3
+glm mtp TP: rank=0 round-end p0=142 produced=82 keep=3
+glm mtp TP: rank=0 n=2 p0=145 produced=82
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 448
+T 1817
+T 1008
+glm mtp TP: rank=0 after-commit p0=145 keep=3
+glm mtp TP: rank=0 round-end p0=145 produced=85 keep=3
+glm mtp TP: rank=0 n=2 p0=148 produced=85
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 1496
+glm mtp TP: rank=0 after-commit p0=148 keep=2
+glm mtp TP: rank=0 round-end p0=148 produced=87 keep=2
+glm mtp TP: rank=0 n=2 p0=150 produced=87
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3498
+STAT tok_s=33.83 ms_tok=29.56 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=50 draft_off=72
+T 1449
+glm mtp TP: rank=0 after-commit p0=150 keep=2
+glm mtp TP: rank=0 round-end p0=150 produced=89 keep=2
+glm mtp TP: rank=0 n=2 p0=152 produced=89
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2436
+T 1231
+glm mtp TP: rank=0 after-commit p0=152 keep=2
+glm mtp TP: rank=0 round-end p0=152 produced=91 keep=2
+glm mtp TP: rank=0 n=2 p0=154 produced=91
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2058
+T 387
+T 13666
+glm mtp TP: rank=0 after-commit p0=154 keep=3
+glm mtp TP: rank=0 round-end p0=154 produced=94 keep=3
+glm mtp TP: rank=0 n=2 p0=157 produced=94
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 323
+T 9311
+STAT tok_s=34.11 ms_tok=29.32 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=54 draft_off=78
+T 13
+glm mtp TP: rank=0 after-commit p0=157 keep=3
+glm mtp TP: rank=0 round-end p0=157 produced=97 keep=3
+glm mtp TP: rank=0 n=2 p0=160 produced=97
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+glm mtp TP: rank=0 after-commit p0=160 keep=1
+glm mtp TP: rank=0 round-end p0=160 produced=98 keep=1
+glm mtp TP: rank=0 n=2 p0=161 produced=98
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 26229
+glm mtp TP: rank=0 after-commit p0=161 keep=1
+glm mtp TP: rank=0 round-end p0=161 produced=99 keep=1
+glm mtp TP: rank=0 n=2 p0=162 produced=99
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 21517
+glm mtp TP: rank=0 after-commit p0=162 keep=1
+glm mtp TP: rank=0 round-end p0=162 produced=100 keep=1
+glm mtp TP: rank=0 n=2 p0=163 produced=100
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1588
+glm mtp TP: rank=0 after-commit p0=163 keep=1
+glm mtp TP: rank=0 round-end p0=163 produced=101 keep=1
+glm mtp TP: rank=0 n=2 p0=164 produced=101
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 374
+T 279
+T 26020
+STAT tok_s=32.79 ms_tok=30.50 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=56 draft_off=88
+glm mtp TP: rank=0 after-commit p0=164 keep=3
+glm mtp TP: rank=0 round-end p0=164 produced=104 keep=3
+glm mtp TP: rank=0 n=2 p0=167 produced=104
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 57421
+T 25
+T 2337
+glm mtp TP: rank=0 after-commit p0=167 keep=3
+glm mtp TP: rank=0 round-end p0=167 produced=107 keep=3
+glm mtp TP: rank=0 n=2 p0=170 produced=107
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 16641
+glm mtp TP: rank=0 after-commit p0=170 keep=2
+glm mtp TP: rank=0 round-end p0=170 produced=109 keep=2
+glm mtp TP: rank=0 n=2 p0=172 produced=109
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 264
+glm mtp TP: rank=0 after-commit p0=172 keep=2
+glm mtp TP: rank=0 round-end p0=172 produced=111 keep=2
+glm mtp TP: rank=0 n=2 p0=174 produced=111
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+STAT tok_s=32.41 ms_tok=30.85 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=62 draft_off=96
+T 4157
+glm mtp TP: rank=0 after-commit p0=174 keep=2
+glm mtp TP: rank=0 round-end p0=174 produced=113 keep=2
+glm mtp TP: rank=0 n=2 p0=176 produced=113
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24233
+T 15428
+glm mtp TP: rank=0 after-commit p0=176 keep=2
+glm mtp TP: rank=0 round-end p0=176 produced=115 keep=2
+glm mtp TP: rank=0 n=2 p0=178 produced=115
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2176
+T 28040
+T 320
+glm mtp TP: rank=0 after-commit p0=178 keep=3
+glm mtp TP: rank=0 round-end p0=178 produced=118 keep=3
+glm mtp TP: rank=0 n=2 p0=181 produced=118
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 28910
+glm mtp TP: rank=0 after-commit p0=181 keep=1
+glm mtp TP: rank=0 round-end p0=181 produced=119 keep=1
+glm mtp TP: rank=0 n=2 p0=182 produced=119
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6604
+STAT tok_s=32.09 ms_tok=31.16 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=66 draft_off=104
+glm mtp TP: rank=0 after-commit p0=182 keep=1
+glm mtp TP: rank=0 round-end p0=182 produced=120 keep=1
+glm mtp TP: rank=0 n=2 p0=183 produced=120
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 15622
+T 279
+glm mtp TP: rank=0 after-commit p0=183 keep=2
+glm mtp TP: rank=0 round-end p0=183 produced=122 keep=2
+glm mtp TP: rank=0 n=2 p0=185 produced=122
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1852
+T 11
+glm mtp TP: rank=0 after-commit p0=185 keep=2
+glm mtp TP: rank=0 round-end p0=185 produced=124 keep=2
+glm mtp TP: rank=0 n=2 p0=187 produced=124
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1429
+glm mtp TP: rank=0 after-commit p0=187 keep=1
+glm mtp TP: rank=0 round-end p0=187 produced=125 keep=1
+glm mtp TP: rank=0 n=2 p0=188 produced=125
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3213
+T 13905
+glm mtp TP: rank=0 after-commit p0=188 keep=2
+glm mtp TP: rank=0 round-end p0=188 produced=127 keep=2
+glm mtp TP: rank=0 n=2 p0=190 produced=127
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8
+STAT tok_s=31.22 ms_tok=32.03 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=69 draft_off=114
+T 323
+T 18020
+glm mtp TP: rank=0 after-commit p0=190 keep=3
+glm mtp TP: rank=0 round-end p0=190 produced=130 keep=3
+glm mtp TP: rank=0 n=2 p0=193 produced=130
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 320
+T 28910
+glm mtp TP: rank=0 after-commit p0=193 keep=2
+glm mtp TP: rank=0 round-end p0=193 produced=132 keep=2
+glm mtp TP: rank=0 n=2 p0=195 produced=132
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1681
+T 21141
+glm mtp TP: rank=0 after-commit p0=195 keep=2
+glm mtp TP: rank=0 round-end p0=195 produced=134 keep=2
+glm mtp TP: rank=0 n=2 p0=197 produced=134
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 264
+T 2033
+STAT tok_s=31.54 ms_tok=31.71 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=73 draft_off=120
+T 568
+glm mtp TP: rank=0 after-commit p0=197 keep=3
+glm mtp TP: rank=0 round-end p0=197 produced=137 keep=3
+glm mtp TP: rank=0 n=2 p0=200 produced=137
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 8703
+glm mtp TP: rank=0 after-commit p0=200 keep=1
+glm mtp TP: rank=0 round-end p0=200 produced=138 keep=1
+glm mtp TP: rank=0 n=2 p0=201 produced=138
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 46400
+glm mtp TP: rank=0 after-commit p0=201 keep=1
+glm mtp TP: rank=0 round-end p0=201 produced=139 keep=1
+glm mtp TP: rank=0 n=2 p0=202 produced=139
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 525
+T 82328
+T 304
+glm mtp TP: rank=0 after-commit p0=202 keep=3
+glm mtp TP: rank=0 round-end p0=202 produced=142 keep=3
+glm mtp TP: rank=0 n=2 p0=205 produced=142
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 894
+glm mtp TP: rank=0 after-commit p0=205 keep=1
+glm mtp TP: rank=0 round-end p0=205 produced=143 keep=1
+glm mtp TP: rank=0 n=2 p0=206 produced=143
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1849
+STAT tok_s=30.40 ms_tok=32.89 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=77 draft_off=130
+glm mtp TP: rank=0 after-commit p0=206 keep=1
+glm mtp TP: rank=0 round-end p0=206 produced=144 keep=1
+glm mtp TP: rank=0 n=2 p0=207 produced=144
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 55412
+glm mtp TP: rank=0 after-commit p0=207 keep=1
+glm mtp TP: rank=0 round-end p0=207 produced=145 keep=1
+glm mtp TP: rank=0 n=2 p0=208 produced=145
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5248
+glm mtp TP: rank=0 after-commit p0=208 keep=1
+glm mtp TP: rank=0 round-end p0=208 produced=146 keep=1
+glm mtp TP: rank=0 n=2 p0=209 produced=146
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 12639
+T 11
+T 821
+glm mtp TP: rank=0 after-commit p0=209 keep=3
+glm mtp TP: rank=0 round-end p0=209 produced=149 keep=3
+glm mtp TP: rank=0 n=2 p0=212 produced=149
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 84736
+glm mtp TP: rank=0 after-commit p0=212 keep=1
+glm mtp TP: rank=0 round-end p0=212 produced=150 keep=1
+glm mtp TP: rank=0 n=2 p0=213 produced=150
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 476
+STAT tok_s=29.86 ms_tok=33.49 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=79 draft_off=140
+T 44773
+glm mtp TP: rank=0 after-commit p0=213 keep=3
+glm mtp TP: rank=0 round-end p0=213 produced=153 keep=3
+glm mtp TP: rank=0 n=2 p0=216 produced=153
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13595
+T 11
+T 24129
+glm mtp TP: rank=0 after-commit p0=216 keep=3
+glm mtp TP: rank=0 round-end p0=216 produced=156 keep=3
+glm mtp TP: rank=0 n=2 p0=219 produced=156
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1969
+T 10274
+glm mtp TP: rank=0 after-commit p0=219 keep=2
+glm mtp TP: rank=0 round-end p0=219 produced=158 keep=2
+glm mtp TP: rank=0 n=2 p0=221 produced=158
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 353
+glm mtp TP: rank=0 after-commit p0=221 keep=1
+glm mtp TP: rank=0 round-end p0=221 produced=159 keep=1
+glm mtp TP: rank=0 n=2 p0=222 produced=159
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 258
+STAT tok_s=29.78 ms_tok=33.58 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=84 draft_off=148
+glm mtp TP: rank=0 after-commit p0=222 keep=1
+glm mtp TP: rank=0 round-end p0=222 produced=160 keep=1
+glm mtp TP: rank=0 n=2 p0=223 produced=160
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11906
+T 9
+T 1246
+glm mtp TP: rank=0 after-commit p0=223 keep=3
+glm mtp TP: rank=0 round-end p0=223 produced=163 keep=3
+glm mtp TP: rank=0 n=2 p0=226 produced=163
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 279
+T 1849
+T 686
+glm mtp TP: rank=0 after-commit p0=226 keep=3
+glm mtp TP: rank=0 round-end p0=226 produced=166 keep=3
+glm mtp TP: rank=0 n=2 p0=229 produced=166
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 35514
+T 979
+STAT tok_s=30.10 ms_tok=33.22 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=88 draft_off=154
+T 279
+glm mtp TP: rank=0 after-commit p0=229 keep=3
+glm mtp TP: rank=0 round-end p0=229 produced=169 keep=3
+glm mtp TP: rank=0 n=2 p0=232 produced=169
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3922
+glm mtp TP: rank=0 after-commit p0=232 keep=1
+glm mtp TP: rank=0 round-end p0=232 produced=170 keep=1
+glm mtp TP: rank=0 n=2 p0=233 produced=170
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 14515
+glm mtp TP: rank=0 after-commit p0=233 keep=1
+glm mtp TP: rank=0 round-end p0=233 produced=171 keep=1
+glm mtp TP: rank=0 n=2 p0=234 produced=171
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13
+T 576
+glm mtp TP: rank=0 after-commit p0=234 keep=2
+glm mtp TP: rank=0 round-end p0=234 produced=173 keep=2
+glm mtp TP: rank=0 n=2 p0=236 produced=173
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24382
+glm mtp TP: rank=0 after-commit p0=236 keep=1
+glm mtp TP: rank=0 round-end p0=236 produced=174 keep=1
+glm mtp TP: rank=0 n=2 p0=237 produced=174
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5486
+T 304
+STAT tok_s=29.64 ms_tok=33.74 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=91 draft_off=164
+glm mtp TP: rank=0 after-commit p0=237 keep=2
+glm mtp TP: rank=0 round-end p0=237 produced=176 keep=2
+glm mtp TP: rank=0 n=2 p0=239 produced=176
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 6481
+T 5942
+T 2293
+glm mtp TP: rank=0 after-commit p0=239 keep=3
+glm mtp TP: rank=0 round-end p0=239 produced=179 keep=3
+glm mtp TP: rank=0 n=2 p0=242 produced=179
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2591
+glm mtp TP: rank=0 after-commit p0=242 keep=1
+glm mtp TP: rank=0 round-end p0=242 produced=180 keep=1
+glm mtp TP: rank=0 n=2 p0=243 produced=180
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 553
+T 18452
+glm mtp TP: rank=0 after-commit p0=243 keep=2
+glm mtp TP: rank=0 round-end p0=243 produced=182 keep=2
+glm mtp TP: rank=0 n=2 p0=245 produced=182
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 723
+T 11
+STAT tok_s=29.55 ms_tok=33.84 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=95 draft_off=172
+T 69797
+glm mtp TP: rank=0 after-commit p0=245 keep=3
+glm mtp TP: rank=0 round-end p0=245 produced=185 keep=3
+glm mtp TP: rank=0 n=2 p0=248 produced=185
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 436
+T 5980
+glm mtp TP: rank=0 after-commit p0=248 keep=2
+glm mtp TP: rank=0 round-end p0=248 produced=187 keep=2
+glm mtp TP: rank=0 n=2 p0=250 produced=187
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 31673
+glm mtp TP: rank=0 after-commit p0=250 keep=1
+glm mtp TP: rank=0 round-end p0=250 produced=188 keep=1
+glm mtp TP: rank=0 n=2 p0=251 produced=188
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1075
+T 11897
+glm mtp TP: rank=0 after-commit p0=251 keep=2
+glm mtp TP: rank=0 round-end p0=251 produced=190 keep=2
+glm mtp TP: rank=0 n=2 p0=253 produced=190
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1194
+T 323
+STAT tok_s=29.50 ms_tok=33.90 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=99 draft_off=180
+glm mtp TP: rank=0 after-commit p0=253 keep=2
+glm mtp TP: rank=0 round-end p0=253 produced=192 keep=2
+glm mtp TP: rank=0 n=2 p0=255 produced=192
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 33764
+T 64034
+T 3506
+glm mtp TP: rank=0 after-commit p0=255 keep=3
+glm mtp TP: rank=0 round-end p0=255 produced=195 keep=3
+glm mtp TP: rank=0 n=2 p0=258 produced=195
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 56641
+glm mtp TP: rank=0 after-commit p0=258 keep=2
+glm mtp TP: rank=0 round-end p0=258 produced=197 keep=2
+glm mtp TP: rank=0 n=2 p0=260 produced=197
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 11
+T 1842
+glm mtp TP: rank=0 after-commit p0=260 keep=2
+glm mtp TP: rank=0 round-end p0=260 produced=199 keep=2
+glm mtp TP: rank=0 n=2 p0=262 produced=199
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 4385
+STAT tok_s=29.43 ms_tok=33.98 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=104 draft_off=188
+T 11
+T 323
+glm mtp TP: rank=0 after-commit p0=262 keep=3
+glm mtp TP: rank=0 round-end p0=262 produced=202 keep=3
+glm mtp TP: rank=0 n=2 p0=265 produced=202
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 40633
+T 76616
+T 53972
+glm mtp TP: rank=0 after-commit p0=265 keep=3
+glm mtp TP: rank=0 round-end p0=265 produced=205 keep=3
+glm mtp TP: rank=0 n=2 p0=268 produced=205
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 311
+T 62112
+glm mtp TP: rank=0 after-commit p0=268 keep=2
+glm mtp TP: rank=0 round-end p0=268 produced=207 keep=2
+glm mtp TP: rank=0 n=2 p0=270 produced=207
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 28040
+STAT tok_s=29.68 ms_tok=33.69 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=109 draft_off=194
+T 323
+glm mtp TP: rank=0 after-commit p0=270 keep=2
+glm mtp TP: rank=0 round-end p0=270 produced=209 keep=2
+glm mtp TP: rank=0 n=2 p0=272 produced=209
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 27047
+T 18020
+T 25
+glm mtp TP: rank=0 after-commit p0=272 keep=3
+glm mtp TP: rank=0 round-end p0=272 produced=212 keep=3
+glm mtp TP: rank=0 n=2 p0=275 produced=212
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7798
+glm mtp TP: rank=0 after-commit p0=275 keep=1
+glm mtp TP: rank=0 round-end p0=275 produced=213 keep=1
+glm mtp TP: rank=0 n=2 p0=276 produced=213
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 389
+glm mtp TP: rank=0 after-commit p0=276 keep=1
+glm mtp TP: rank=0 round-end p0=276 produced=214 keep=1
+glm mtp TP: rank=0 n=2 p0=277 produced=214
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 279
+T 22532
+STAT tok_s=29.62 ms_tok=33.76 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=112 draft_off=202
+T 3108
+glm mtp TP: rank=0 after-commit p0=277 keep=3
+glm mtp TP: rank=0 round-end p0=277 produced=217 keep=3
+glm mtp TP: rank=0 n=2 p0=280 produced=217
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 315
+T 264
+T 16641
+glm mtp TP: rank=0 after-commit p0=280 keep=3
+glm mtp TP: rank=0 round-end p0=280 produced=220 keep=3
+glm mtp TP: rank=0 n=2 p0=283 produced=220
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 24990
+T 311
+T 8682
+glm mtp TP: rank=0 after-commit p0=283 keep=3
+glm mtp TP: rank=0 round-end p0=283 produced=223 keep=3
+glm mtp TP: rank=0 n=2 p0=286 produced=223
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 13905
+STAT tok_s=29.85 ms_tok=33.50 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=118 draft_off=208
+T 320
+glm mtp TP: rank=0 after-commit p0=286 keep=2
+glm mtp TP: rank=0 round-end p0=286 produced=225 keep=2
+glm mtp TP: rank=0 n=2 p0=288 produced=225
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 437
+glm mtp TP: rank=0 after-commit p0=288 keep=1
+glm mtp TP: rank=0 round-end p0=288 produced=226 keep=1
+glm mtp TP: rank=0 n=2 p0=289 produced=226
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 3545
+glm mtp TP: rank=0 after-commit p0=289 keep=1
+glm mtp TP: rank=0 round-end p0=289 produced=227 keep=1
+glm mtp TP: rank=0 n=2 p0=290 produced=227
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 15792
+T 8
+T 4751
+glm mtp TP: rank=0 after-commit p0=290 keep=3
+glm mtp TP: rank=0 round-end p0=290 produced=230 keep=3
+glm mtp TP: rank=0 n=2 p0=293 produced=230
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1091
+T 5214
+STAT tok_s=29.79 ms_tok=33.57 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=121 draft_off=216
+glm mtp TP: rank=0 after-commit p0=293 keep=2
+glm mtp TP: rank=0 round-end p0=293 produced=232 keep=2
+glm mtp TP: rank=0 n=2 p0=295 produced=232
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 36157
+T 15760
+glm mtp TP: rank=0 after-commit p0=295 keep=2
+glm mtp TP: rank=0 round-end p0=295 produced=234 keep=2
+glm mtp TP: rank=0 n=2 p0=297 produced=234
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1584
+T 13
+T 1096
+glm mtp TP: rank=0 after-commit p0=297 keep=3
+glm mtp TP: rank=0 round-end p0=297 produced=237 keep=3
+glm mtp TP: rank=0 n=2 p0=300 produced=237
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 374
+T 7025
+glm mtp TP: rank=0 after-commit p0=300 keep=2
+glm mtp TP: rank=0 round-end p0=300 produced=239 keep=2
+glm mtp TP: rank=0 n=2 p0=302 produced=239
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 2598
+STAT tok_s=29.72 ms_tok=33.65 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=126 draft_off=224
+T 330
+glm mtp TP: rank=0 after-commit p0=302 keep=2
+glm mtp TP: rank=0 round-end p0=302 produced=241 keep=2
+glm mtp TP: rank=0 n=2 p0=304 produced=241
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7123
+glm mtp TP: rank=0 after-commit p0=304 keep=1
+glm mtp TP: rank=0 round-end p0=304 produced=242 keep=1
+glm mtp TP: rank=0 n=2 p0=305 produced=242
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1
+glm mtp TP: rank=0 after-commit p0=305 keep=1
+glm mtp TP: rank=0 round-end p0=305 produced=243 keep=1
+glm mtp TP: rank=0 n=2 p0=306 produced=243
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 7709
+T 13
+glm mtp TP: rank=0 after-commit p0=306 keep=2
+glm mtp TP: rank=0 round-end p0=306 produced=245 keep=2
+glm mtp TP: rank=0 n=2 p0=308 produced=245
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 576
+T 10550
+T 11
+STAT tok_s=29.65 ms_tok=33.72 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=128 draft_off=232
+glm mtp TP: rank=0 after-commit p0=308 keep=3
+glm mtp TP: rank=0 round-end p0=308 produced=248 keep=3
+glm mtp TP: rank=0 n=2 p0=311 produced=248
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 37743
+T 1870
+T 553
+glm mtp TP: rank=0 after-commit p0=311 keep=3
+glm mtp TP: rank=0 round-end p0=311 produced=251 keep=3
+glm mtp TP: rank=0 n=2 p0=314 produced=251
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 5942
+glm mtp TP: rank=0 after-commit p0=314 keep=1
+glm mtp TP: rank=0 round-end p0=314 produced=252 keep=1
+glm mtp TP: rank=0 n=2 p0=315 produced=252
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+T 1075
+T 80582
+glm mtp TP: rank=0 after-commit p0=315 keep=2
+glm mtp TP: rank=0 round-end p0=315 produced=254 keep=2
+glm mtp TP: rank=0 n=1 p0=317 produced=254
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+T 304
+glm mtp TP: rank=0 after-commit p0=317 keep=1
+glm mtp TP: rank=0 round-end p0=317 produced=255 keep=1
+glm mtp TP: rank=0 n=0 p0=318 produced=255
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+T 1181
+STAT tok_s=29.52 ms_tok=33.87 vram_hit=1.0000 ram_fetch=0.000 disk=0.000 promo=0.000 vram_used=12384 vram_slots=12384 ram_used=0 ram_slots=48 ram_gb=0.2 vram_gb=42.5 disk_gb=0.0 draft_acc=133 draft_off=241
+glm mtp TP: rank=0 round-end p0=318 produced=256 keep=1
+glm mtp: a drafting round's host time - drafts 8.41 ms, verify 62.86 ms, commit + cache 0.05 ms (121 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 256 emitted tokens outside it, 0 of 121 drafting rounds on the whole hDONE 256 64 37.9 8671.1 length 133 241 63 123896 123896
+ead
+glm mtp: 122 rounds, 2.10 tokens a round | rounds by draft length 0:1 1:1 2:120
+glm stat: decode 33.87 ms/tok (29.52 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12384/12384 ram 0/48
+glm spec: 133 of 241 drafts accepted (55.2%)
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm spec: 723 speculative positions, 55.2% accepted

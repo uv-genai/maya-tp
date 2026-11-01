@@ -1,0 +1,389 @@
+[
+  {
+    "trial": 0,
+    "repeats": 960,
+    "wall_s": 8.03689836896956,
+    "response": {
+      "id": "chatcmpl-2847c5c9e33146c192daec29",
+      "object": "chat.completion",
+      "created": 1793561897,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 990,
+        "completion_tokens": 8,
+        "total_tokens": 998,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 990,
+        "prompt_ms": 7460.4,
+        "prompt_per_token_ms": 7.536,
+        "prompt_per_second": 132.7,
+        "predicted_n": 8,
+        "predicted_ms": 558.4,
+        "predicted_per_token_ms": 69.8,
+        "predicted_per_second": 14.3,
+        "draft_n": 5,
+        "draft_n_accepted": 4
+      }
+    }
+  },
+  {
+    "trial": 1,
+    "repeats": 4032,
+    "wall_s": 19.28105145099107,
+    "response": {
+      "id": "chatcmpl-2328fd8a657944b98d6093fb",
+      "object": "chat.completion",
+      "created": 1793561906,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 4062,
+        "completion_tokens": 8,
+        "total_tokens": 4070,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 4062,
+        "prompt_ms": 18926.3,
+        "prompt_per_token_ms": 4.659,
+        "prompt_per_second": 214.6,
+        "predicted_n": 8,
+        "predicted_ms": 345.5,
+        "predicted_per_token_ms": 43.188,
+        "predicted_per_second": 23.2,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    }
+  },
+  {
+    "trial": 2,
+    "repeats": 8128,
+    "wall_s": 23.99275574204512,
+    "response": {
+      "id": "chatcmpl-e388b9c462584c10a25050b3",
+      "object": "chat.completion",
+      "created": 1793561925,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 8158,
+        "completion_tokens": 8,
+        "total_tokens": 8166,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 8158,
+        "prompt_ms": 23644.3,
+        "prompt_per_token_ms": 2.898,
+        "prompt_per_second": 345.0,
+        "predicted_n": 8,
+        "predicted_ms": 337.6,
+        "predicted_per_token_ms": 42.2,
+        "predicted_per_second": 23.7,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    }
+  },
+  {
+    "trial": 3,
+    "repeats": 960,
+    "wall_s": 3.9973690980114043,
+    "response": {
+      "id": "chatcmpl-63016fcaf684459aaf912537",
+      "object": "chat.completion",
+      "created": 1793561949,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 990,
+        "completion_tokens": 8,
+        "total_tokens": 998,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 990,
+        "prompt_ms": 3642.3,
+        "prompt_per_token_ms": 3.679,
+        "prompt_per_second": 271.8,
+        "predicted_n": 8,
+        "predicted_ms": 347.4,
+        "predicted_per_token_ms": 43.425,
+        "predicted_per_second": 23.0,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    }
+  },
+  {
+    "trial": 4,
+    "repeats": 4032,
+    "wall_s": 12.851599422981963,
+    "response": {
+      "id": "chatcmpl-b7dac83050524842a1d5c46f",
+      "object": "chat.completion",
+      "created": 1793561953,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 4062,
+        "completion_tokens": 8,
+        "total_tokens": 4070,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 4062,
+        "prompt_ms": 12493.9,
+        "prompt_per_token_ms": 3.076,
+        "prompt_per_second": 325.1,
+        "predicted_n": 8,
+        "predicted_ms": 349.0,
+        "predicted_per_token_ms": 43.625,
+        "predicted_per_second": 22.9,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    }
+  },
+  {
+    "trial": 5,
+    "repeats": 8128,
+    "wall_s": 23.7985876200255,
+    "response": {
+      "id": "chatcmpl-6ae01d6c83b54a26aa98eae4",
+      "object": "chat.completion",
+      "created": 1793561966,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 8158,
+        "completion_tokens": 8,
+        "total_tokens": 8166,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 8158,
+        "prompt_ms": 23541.9,
+        "prompt_per_token_ms": 2.886,
+        "prompt_per_second": 346.5,
+        "predicted_n": 8,
+        "predicted_ms": 246.0,
+        "predicted_per_token_ms": 30.75,
+        "predicted_per_second": 32.5,
+        "draft_n": 5,
+        "draft_n_accepted": 4
+      }
+    }
+  },
+  {
+    "trial": 6,
+    "repeats": 960,
+    "wall_s": 3.949030759977177,
+    "response": {
+      "id": "chatcmpl-ec3aaf031809439eb02b6571",
+      "object": "chat.completion",
+      "created": 1793561989,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 990,
+        "completion_tokens": 8,
+        "total_tokens": 998,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 990,
+        "prompt_ms": 3642.6,
+        "prompt_per_token_ms": 3.679,
+        "prompt_per_second": 271.8,
+        "predicted_n": 8,
+        "predicted_ms": 299.2,
+        "predicted_per_token_ms": 37.4,
+        "predicted_per_second": 26.7,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    }
+  },
+  {
+    "trial": 7,
+    "repeats": 4032,
+    "wall_s": 12.66190994810313,
+    "response": {
+      "id": "chatcmpl-67daaa2bc65b4582a548a31a",
+      "object": "chat.completion",
+      "created": 1793561993,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 4062,
+        "completion_tokens": 8,
+        "total_tokens": 4070,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 4062,
+        "prompt_ms": 12339.2,
+        "prompt_per_token_ms": 3.038,
+        "prompt_per_second": 329.2,
+        "predicted_n": 8,
+        "predicted_ms": 313.9,
+        "predicted_per_token_ms": 39.237,
+        "predicted_per_second": 25.5,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    }
+  },
+  {
+    "trial": 8,
+    "repeats": 8128,
+    "wall_s": 24.03283433499746,
+    "response": {
+      "id": "chatcmpl-e1aca5abf8f54e4bb03cb844",
+      "object": "chat.completion",
+      "created": 1793562006,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Why Network Frames",
+            "reasoning_content": "The user is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 8158,
+        "completion_tokens": 8,
+        "total_tokens": 8166,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 8158,
+        "prompt_ms": 23676.0,
+        "prompt_per_token_ms": 2.902,
+        "prompt_per_second": 344.6,
+        "predicted_n": 8,
+        "predicted_ms": 346.7,
+        "predicted_per_token_ms": 43.337,
+        "predicted_per_second": 23.1,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    }
+  }
+]

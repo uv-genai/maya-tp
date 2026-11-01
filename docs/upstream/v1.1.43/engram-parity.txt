@@ -1,0 +1,6 @@
+Engram Q6_K rows = ggml's, bit for bit       ok
+Engram IQ4_NL rows = ggml's, bit for bit             ok
+Engram Q5_K rows = ggml's, bit for bit               ok
+Q5_K embedding (host) = ggml's, bit for bit          ok
+Q6_K embedding (host) = ggml's, bit for bit          ok
+ALL OK (0 failed)

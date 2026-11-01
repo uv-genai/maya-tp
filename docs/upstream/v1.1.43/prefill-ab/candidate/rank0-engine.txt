@@ -1,0 +1,350 @@
+[maya] sampling defaults from the config: temperature=1.0, top_p=0.95
+loading the model (the first start takes a minute or two) ...
+[maya] starting the engine: reading the model's weights ...
+glm settings from the environment: MAYA_GLM_MTP_DRAFT=2, MAYA_GLM_MTP_FIXED=2, MAYA_GLM_PREFILL_MB=6144, MAYA_GLM_PREFILL_SUB=1024, MAYA_GLM_RAM_HEADROOM_GB=16, MAYA_GLM_RESERVE_MB=1024, MAYA_GLM_SPLIT=0
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 25088 tokens (--prefill auto, up to 32768; mixer sub-batches of 1024), borrowing 6103 MB of the expert pool while a prompt runs (activations 5371, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.83 of 121.00 GB in use - dense weights 6.86, state/KV (32768 ctx) 0.59, activations 0.07, other (context, MTP, scratch, prompt path) 10.32
+glm fast: CUDA0 unified memory: MemAvailable 110.32 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: the expert profile /home/ugo/software/project-maya/data/expert-profile-glm.bin ranks 13248 (layer, expert) pairs
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 1 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 2 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 3 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 5 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 6 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 7 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 11 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 14 s)
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 17 s)
+[maya] still starting (20 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 19 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 19 s (2.42 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+maya serve: CUDA0: 61783 MiB of VRAM free with everything loaded
+maya generate: glm5-next serve (M3.1): GEN <max_new> [keys] <ids>, GENI <max_new> [keys] <embeddings> <ids>; QUIT to end
+[maya] thinking level when a request names none: max
+[maya] thinking budget: 32768 tokens (then the answer)
+ready: http://127.0.0.1:18080/v1  (OpenAI: /v1/chat/completions, /v1/responses, Anthropic: /v1/messages, context 32768 tokens)
+       open http://127.0.0.1:18080/ in a browser to chat; close this window to stop the model
+       from other devices: http://192.168.1.22:18080/   (API: http://192.168.1.22:18080/v1)
+       WARNING: no API key - anyone on your network can use this model. Add "api_key": "..." to the config (clients send it as their API key; the web page asks for it)
+glm prefill TP: rank=0 chunk=1024 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 394 experts more lent for it)
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=977 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 977,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 977 tokens, wall 6256 ms | the copy lane 5952 ms: copies 3297 (0.1 GB/s), ring wait 844, gaps 2, mixer windows 1810 | lead 277, tail 27 | pcie 0.37 GB (ram 0.02, disk 0.35) + 2.83 GB vram | experts: staged 969, resident 10374 (258047 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 1098.4/2.9 ms max/min
+glm prefill: 977 tokens in 6263.4 ms (6.41 ms/token, 156 tok/s), 1 chunk of 1024 tokens | CUDA0 6256 ms
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=12 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 12,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 1070 ms | the copy lane 1034 ms: copies 733 (0.2 GB/s), ring wait 0, gaps 0, mixer windows 300 | lead 32, tail 4 | pcie 0.14 GB (ram 0.02, disk 0.12) + 0.26 GB vram | experts: staged 119, resident 10374 (3875 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 193.3/0.0 ms max/min
+glm prefill: 12 tokens in 1070.8 ms (89.23 ms/token, 11 tok/s), 1 chunk of 64 tokens | CUDA0 1070 ms
+[maya] reading the prompt: 989 of 990 tokens, 7 s so far
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+glm vram: prompt 990 tokens read in 7.5 s; VRAM free CUDA0 60.3 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=990 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=990 keep=3
+glm mtp TP: rank=0 round-end p0=990 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=993 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=993 keep=2
+glm mtp TP: rank=0 round-end p0=993 produced=6 keep=2
+glm mtp TP: rank=0 n=1 p0=995 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=995 keep=2
+glm mtp TP: rank=0 round-end p0=995 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.32 ms, verify 178.61 ms, commit + cache 0.13 ms (3 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 3 drafting rounds on the whole head
+glm mtp: 3 rounds, 2.67 tokens a round | rounds by draft length 1:1 2:2
+glm stat: decode 69.80 ms/tok (14.33 tok/s) | vram hit 98.94% | ram fetches 0.00/tok | disk 3.62 reads/tok in 3.12 waits/tok, 41.90 ms/tok | promotions 3.62/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 7.5 ms/tok | vram 12044/12384 ram 0/48
+glm spec: 4 of 5 drafts accepted (80.0%)
+[maya] done: 8 tokens in 8 s (14.3 tok/s) (length, cancel=False), expert cache 98.9% hit
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=1024 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 1024,8192,1536)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=960 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 960,8192,1536)
+[maya] reading the prompt: 4,062 tokens, 10 s so far
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 15172 ms | the copy lane 14520 ms: copies 7404 (0.1 GB/s), ring wait 1444, gaps 2, mixer windows 5670 | lead 567, tail 84 | pcie 0.63 GB (ram 0.03, disk 0.60) + 2.68 GB vram | experts: staged 1001, resident 10374 (813162 rows), prestaged 7, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 1510.7/34.8 ms max/min
+[maya] reading the prompt: 3,008 of 4,062 tokens, 15 s so far
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=17 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 17,8192,1536)
+glm prefill: CUDA0 chunk 2/2, 1041 tokens, wall 3302 ms | the copy lane 3009 ms: copies 77 (1.9 GB/s), ring wait 379, gaps 1, mixer windows 2552 | lead 251, tail 42 | pcie 0.15 GB (ram 0.00, disk 0.14) + 1.42 GB vram | experts: staged 476, resident 10374 (293755 rows), prestaged 6, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 24.1/0.2 ms max/min
+glm prefill: 4049 tokens in 18489.3 ms (4.57 ms/token, 219 tok/s), 2 chunks of 3008 tokens | CUDA0 18474 ms
+glm slots: saved a 4049-token conversation (its system prompt, for other chats that start with it) (0.13 GB in 0.0 s); 1 kept, 0.13 GB
+[maya] sessions: saved a 4049-token conversation (its system prompt, for other chats that start with it) (0.13 GB in 0.0 s); 1 kept, 0.13 GB
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 361 ms | the copy lane 323 ms: copies 17 (5.8 GB/s), ring wait 0, gaps 0, mixer windows 306 | lead 33, tail 4 | pcie 0.10 GB (ram 0.00, disk 0.10) + 0.26 GB vram | experts: staged 107, resident 10374 (3893 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.6/0.0 ms max/min
+glm prefill: 12 tokens in 360.8 ms (30.07 ms/token, 33 tok/s), 1 chunk of 64 tokens | CUDA0 361 ms
+[maya] reading the prompt: 4,061 of 4,062 tokens, 19 s so far
+glm dsa scores: CUDA0 on the original kernels
+glm vram: prompt 4062 tokens read in 18.9 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=4062 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4062 keep=3
+glm mtp TP: rank=0 round-end p0=4062 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=4065 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4065 keep=1
+glm mtp TP: rank=0 round-end p0=4065 produced=5 keep=1
+glm mtp TP: rank=0 n=2 p0=4066 produced=5
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4066 keep=1
+glm mtp TP: rank=0 round-end p0=4066 produced=6 keep=1
+glm mtp TP: rank=0 n=1 p0=4067 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=4067 keep=2
+glm mtp TP: rank=0 round-end p0=4067 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.76 ms, verify 78.48 ms, commit + cache 0.08 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+glm mtp: 4 rounds, 2.00 tokens a round | rounds by draft length 1:1 2:3
+glm stat: decode 43.19 ms/tok (23.15 tok/s) | vram hit 99.52% | ram fetches 0.00/tok | disk 2.25 reads/tok in 1.62 waits/tok, 0.44 ms/tok | promotions 2.12/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 4.7 ms/tok | vram 11852/12384 ram 0/48
+glm spec: 3 of 7 drafts accepted (42.9%)
+[maya] done: 8 tokens in 19 s (23.2 tok/s) (length, cancel=False), expert cache 99.5% hit
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/3, 3008 tokens, wall 8618 ms | the copy lane 7970 ms: copies 542 (1.2 GB/s), ring wait 1606, gaps 2, mixer windows 5820 | lead 563, tail 85 | pcie 0.64 GB (ram 0.02, disk 0.62) + 2.63 GB vram | experts: staged 990, resident 10374 (827280 rows), prestaged 10, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 178.7/6.3 ms max/min
+[maya] reading the prompt: 3,008 of 8,158 tokens, 9 s so far
+glm prefill: CUDA0 chunk 2/3, 3008 tokens, wall 8387 ms | the copy lane 7662 ms: copies 108 (1.6 GB/s), ring wait 1010, gaps 1, mixer windows 6542 | lead 611, tail 114 | pcie 0.18 GB (ram 0.00, disk 0.18) + 1.74 GB vram | experts: staged 585, resident 10374 (854842 rows), prestaged 5, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 51.3/0.2 ms max/min
+[maya] reading the prompt: 6,016 of 8,158 tokens, 17 s so far
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=81 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 81,8192,1536)
+glm prefill: CUDA0 chunk 3/3, 2129 tokens, wall 6120 ms | the copy lane 5576 ms: copies 72 (1.7 GB/s), ring wait 240, gaps 1, mixer windows 5263 | lead 464, tail 80 | pcie 0.12 GB (ram 0.00, disk 0.12) + 1.00 GB vram | experts: staged 341, resident 10374 (617305 rows), prestaged 4, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 27.9/0.1 ms max/min
+glm prefill: 8145 tokens in 23152.6 ms (2.84 ms/token, 352 tok/s), 3 chunks of 3008 tokens | CUDA0 23124 ms
+glm slots: saved a 8145-token conversation (its system prompt, for other chats that start with it) (0.19 GB in 0.1 s); 2 kept, 0.32 GB
+[maya] sessions: saved a 8145-token conversation (its system prompt, for other chats that start with it) (0.19 GB in 0.1 s); 2 kept, 0.32 GB
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 370 ms | the copy lane 334 ms: copies 28 (3.9 GB/s), ring wait 0, gaps 0, mixer windows 306 | lead 32, tail 4 | pcie 0.11 GB (ram 0.02, disk 0.09) + 0.26 GB vram | experts: staged 110, resident 10374 (3895 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 14.3/0.0 ms max/min
+glm prefill: 12 tokens in 370.4 ms (30.87 ms/token, 32 tok/s), 1 chunk of 64 tokens | CUDA0 370 ms
+[maya] reading the prompt: 8,157 of 8,158 tokens, 24 s so far
+glm vram: prompt 8158 tokens read in 23.6 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=8158 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8158 keep=3
+glm mtp TP: rank=0 round-end p0=8158 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=8161 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8161 keep=1
+glm mtp TP: rank=0 round-end p0=8161 produced=5 keep=1
+glm mtp TP: rank=0 n=2 p0=8162 produced=5
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8162 keep=1
+glm mtp TP: rank=0 round-end p0=8162 produced=6 keep=1
+glm mtp TP: rank=0 n=1 p0=8163 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=8163 keep=2
+glm mtp TP: rank=0 round-end p0=8163 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.68 ms, verify 76.59 ms, commit + cache 0.06 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+glm mtp: 4 rounds, 2.00 tokens a round | rounds by draft length 1:1 2:3
+glm stat: decode 42.20 ms/tok (23.70 tok/s) | vram hit 99.89% | ram fetches 0.00/tok | disk 0.50 reads/tok in 0.50 waits/tok, 0.12 ms/tok | promotions 0.50/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 2.9 ms/tok | vram 11839/12384 ram 0/48
+glm spec: 3 of 7 drafts accepted (42.9%)
+[maya] done: 8 tokens in 24 s (23.7 tok/s) (length, cancel=False), expert cache 99.9% hit
+glm prefill TP: rank=0 chunk=1024 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 977 tokens, wall 3225 ms | the copy lane 3010 ms: copies 142 (4.4 GB/s), ring wait 870, gaps 1, mixer windows 1996 | lead 186, tail 30 | pcie 0.62 GB (ram 0.02, disk 0.60) + 2.58 GB vram | experts: staged 969, resident 10374 (269905 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 38.4/2.5 ms max/min
+glm prefill: 977 tokens in 3230.3 ms (3.31 ms/token, 302 tok/s), 1 chunk of 1024 tokens | CUDA0 3225 ms
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 362 ms | the copy lane 324 ms: copies 16 (6.0 GB/s), ring wait 0, gaps 0, mixer windows 307 | lead 34, tail 5 | pcie 0.10 GB (ram 0.00, disk 0.10) + 0.25 GB vram | experts: staged 103, resident 10374 (3897 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 3.1/0.0 ms max/min
+glm prefill: 12 tokens in 362.5 ms (30.21 ms/token, 33 tok/s), 1 chunk of 64 tokens | CUDA0 362 ms
+[maya] reading the prompt: 989 of 990 tokens, 4 s so far
+glm vram: prompt 990 tokens read in 3.6 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=990 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=990 keep=3
+glm mtp TP: rank=0 round-end p0=990 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=993 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=993 keep=1
+glm mtp TP: rank=0 round-end p0=993 produced=5 keep=1
+glm mtp TP: rank=0 n=2 p0=994 produced=5
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=994 keep=1
+glm mtp TP: rank=0 round-end p0=994 produced=6 keep=1
+glm mtp TP: rank=0 n=1 p0=995 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=995 keep=2
+glm mtp TP: rank=0 round-end p0=995 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.21 ms, verify 79.52 ms, commit + cache 0.07 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+glm mtp: 4 rounds, 2.00 tokens a round | rounds by draft length 1:1 2:3
+glm stat: decode 43.43 ms/tok (23.03 tok/s) | vram hit 99.55% | ram fetches 0.00/tok | disk 2.12 reads/tok in 1.88 waits/tok, 4.18 ms/tok | promotions 2.12/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.7 ms/tok | vram 11853/12384 ram 0/48
+glm spec: 3 of 7 drafts accepted (42.9%)
+[maya] done: 8 tokens in 4 s (23.0 tok/s) (length, cancel=False), expert cache 99.5% hit
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8580 ms | the copy lane 7934 ms: copies 311 (2.0 GB/s), ring wait 1595, gaps 2, mixer windows 6026 | lead 560, tail 86 | pcie 0.63 GB (ram 0.02, disk 0.61) + 2.68 GB vram | experts: staged 1003, resident 10374 (816607 rows), prestaged 9, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 93.4/5.9 ms max/min
+[maya] reading the prompt: 3,008 of 4,062 tokens, 9 s so far
+glm prefill: CUDA0 chunk 2/2, 1041 tokens, wall 3419 ms | the copy lane 3125 ms: copies 69 (2.5 GB/s), ring wait 370, gaps 1, mixer windows 2684 | lead 254, tail 41 | pcie 0.17 GB (ram 0.00, disk 0.17) + 1.37 GB vram | experts: staged 469, resident 10374 (292915 rows), prestaged 4, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 25.4/0.2 ms max/min
+glm prefill: 4049 tokens in 12013.8 ms (2.97 ms/token, 337 tok/s), 2 chunks of 3008 tokens | CUDA0 11999 ms
+glm slots: saved a 4049-token conversation (its system prompt, for other chats that start with it) (0.13 GB in 0.0 s); 3 kept, 0.45 GB
+[maya] sessions: saved a 4049-token conversation (its system prompt, for other chats that start with it) (0.13 GB in 0.0 s); 3 kept, 0.45 GB
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 410 ms | the copy lane 373 ms: copies 72 (1.4 GB/s), ring wait 0, gaps 0, mixer windows 301 | lead 33, tail 4 | pcie 0.10 GB (ram 0.01, disk 0.10) + 0.26 GB vram | experts: staged 109, resident 10374 (3890 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 36.3/0.0 ms max/min
+glm prefill: 12 tokens in 410.7 ms (34.22 ms/token, 29 tok/s), 1 chunk of 64 tokens | CUDA0 410 ms
+[maya] reading the prompt: 4,061 of 4,062 tokens, 12 s so far
+glm vram: prompt 4062 tokens read in 12.5 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=4062 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4062 keep=3
+glm mtp TP: rank=0 round-end p0=4062 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=4065 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4065 keep=1
+glm mtp TP: rank=0 round-end p0=4065 produced=5 keep=1
+glm mtp TP: rank=0 n=2 p0=4066 produced=5
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4066 keep=1
+glm mtp TP: rank=0 round-end p0=4066 produced=6 keep=1
+glm mtp TP: rank=0 n=1 p0=4067 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=4067 keep=2
+glm mtp TP: rank=0 round-end p0=4067 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.72 ms, verify 79.42 ms, commit + cache 0.06 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+glm mtp: 4 rounds, 2.00 tokens a round | rounds by draft length 1:1 2:3
+glm stat: decode 43.63 ms/tok (22.92 tok/s) | vram hit 99.97% | ram fetches 0.00/tok | disk 0.12 reads/tok in 0.12 waits/tok, 0.03 ms/tok | promotions 0.12/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.1 ms/tok | vram 11836/12384 ram 0/48
+glm spec: 3 of 7 drafts accepted (42.9%)
+[maya] done: 8 tokens in 13 s (22.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/3, 3008 tokens, wall 8619 ms | the copy lane 7977 ms: copies 307 (2.1 GB/s), ring wait 1611, gaps 2, mixer windows 6058 | lead 558, tail 84 | pcie 0.65 GB (ram 0.02, disk 0.63) + 2.66 GB vram | experts: staged 1002, resident 10374 (824954 rows), prestaged 3, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 131.4/6.0 ms max/min
+[maya] reading the prompt: 3,008 of 8,158 tokens, 9 s so far
+glm prefill: CUDA0 chunk 2/3, 3008 tokens, wall 8397 ms | the copy lane 7669 ms: copies 107 (1.5 GB/s), ring wait 942, gaps 1, mixer windows 6619 | lead 612, tail 116 | pcie 0.16 GB (ram 0.00, disk 0.16) + 1.59 GB vram | experts: staged 534, resident 10374 (853443 rows), prestaged 4, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 50.2/0.2 ms max/min
+[maya] reading the prompt: 6,016 of 8,158 tokens, 17 s so far
+glm prefill: CUDA0 chunk 3/3, 2129 tokens, wall 5977 ms | the copy lane 5430 ms: copies 65 (1.8 GB/s), ring wait 204, gaps 0, mixer windows 5161 | lead 467, tail 80 | pcie 0.12 GB (ram 0.00, disk 0.12) + 0.92 GB vram | experts: staged 317, resident 10374 (608269 rows), prestaged 3, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 25.5/0.1 ms max/min
+glm prefill: 8145 tokens in 23022.1 ms (2.83 ms/token, 354 tok/s), 3 chunks of 3008 tokens | CUDA0 22993 ms
+glm slots: saved a 8145-token conversation (its system prompt, for other chats that start with it) (0.19 GB in 0.1 s); 4 kept, 0.64 GB
+[maya] sessions: saved a 8145-token conversation (its system prompt, for other chats that start with it) (0.19 GB in 0.1 s); 4 kept, 0.64 GB
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 357 ms | the copy lane 321 ms: copies 16 (6.5 GB/s), ring wait 0, gaps 0, mixer windows 304 | lead 32, tail 5 | pcie 0.11 GB (ram 0.00, disk 0.11) + 0.25 GB vram | experts: staged 106, resident 10374 (3895 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.7/0.0 ms max/min
+glm prefill: 12 tokens in 357.5 ms (29.79 ms/token, 34 tok/s), 1 chunk of 64 tokens | CUDA0 357 ms
+[maya] reading the prompt: 8,157 of 8,158 tokens, 24 s so far
+glm vram: prompt 8158 tokens read in 23.5 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=8158 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8158 keep=3
+glm mtp TP: rank=0 round-end p0=8158 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=8161 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8161 keep=2
+glm mtp TP: rank=0 round-end p0=8161 produced=6 keep=2
+glm mtp TP: rank=0 n=1 p0=8163 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=8163 keep=2
+glm mtp TP: rank=0 round-end p0=8163 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.77 ms, verify 74.09 ms, commit + cache 0.08 ms (3 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 3 drafting rounds on the whole head
+glm mtp: 3 rounds, 2.67 tokens a round | rounds by draft length 1:1 2:2
+glm stat: decode 30.75 ms/tok (32.52 tok/s) | vram hit 99.96% | ram fetches 0.00/tok | disk 0.12 reads/tok in 0.12 waits/tok, 0.03 ms/tok | promotions 0.12/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 2.9 ms/tok | vram 11836/12384 ram 0/48
+glm spec: 4 of 5 drafts accepted (80.0%)
+[maya] done: 8 tokens in 24 s (32.5 tok/s) (length, cancel=False), expert cache 100.0% hit
+glm prefill TP: rank=0 chunk=1024 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 977 tokens, wall 3219 ms | the copy lane 3006 ms: copies 98 (6.2 GB/s), ring wait 884, gaps 1, mixer windows 2023 | lead 182, tail 31 | pcie 0.60 GB (ram 0.03, disk 0.58) + 2.65 GB vram | experts: staged 985, resident 10374 (266324 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 35.9/2.3 ms max/min
+glm prefill: 977 tokens in 3224.3 ms (3.30 ms/token, 303 tok/s), 1 chunk of 1024 tokens | CUDA0 3219 ms
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 368 ms | the copy lane 331 ms: copies 17 (5.8 GB/s), ring wait 0, gaps 0, mixer windows 314 | lead 33, tail 4 | pcie 0.10 GB (ram 0.00, disk 0.10) + 0.26 GB vram | experts: staged 108, resident 10374 (3896 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 3.1/0.0 ms max/min
+glm prefill: 12 tokens in 368.3 ms (30.69 ms/token, 33 tok/s), 1 chunk of 64 tokens | CUDA0 368 ms
+[maya] reading the prompt: 989 of 990 tokens, 4 s so far
+glm vram: prompt 990 tokens read in 3.6 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=990 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=990 keep=3
+glm mtp TP: rank=0 round-end p0=990 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=993 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=993 keep=1
+glm mtp TP: rank=0 round-end p0=993 produced=5 keep=1
+glm mtp TP: rank=0 n=2 p0=994 produced=5
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=994 keep=1
+glm mtp TP: rank=0 round-end p0=994 produced=6 keep=1
+glm mtp TP: rank=0 n=1 p0=995 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=995 keep=2
+glm mtp TP: rank=0 round-end p0=995 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.27 ms, verify 67.40 ms, commit + cache 0.06 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+glm mtp: 4 rounds, 2.00 tokens a round | rounds by draft length 1:1 2:3
+glm stat: decode 37.40 ms/tok (26.74 tok/s) | vram hit 99.97% | ram fetches 0.00/tok | disk 0.12 reads/tok in 0.12 waits/tok, 0.03 ms/tok | promotions 0.12/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.7 ms/tok | vram 11837/12384 ram 0/48
+glm spec: 3 of 7 drafts accepted (42.9%)
+[maya] done: 8 tokens in 4 s (26.7 tok/s) (length, cancel=False), expert cache 100.0% hit
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8473 ms | the copy lane 7826 ms: copies 313 (2.0 GB/s), ring wait 1568, gaps 2, mixer windows 5943 | lead 562, tail 86 | pcie 0.63 GB (ram 0.02, disk 0.61) + 2.63 GB vram | experts: staged 987, resident 10374 (816279 rows), prestaged 3, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 107.3/5.7 ms max/min
+[maya] reading the prompt: 3,008 of 4,062 tokens, 8 s so far
+glm prefill: CUDA0 chunk 2/2, 1041 tokens, wall 3407 ms | the copy lane 3112 ms: copies 69 (2.3 GB/s), ring wait 341, gaps 1, mixer windows 2702 | lead 253, tail 42 | pcie 0.16 GB (ram 0.01, disk 0.15) + 1.36 GB vram | experts: staged 462, resident 10374 (291845 rows), prestaged 2, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 25.1/0.3 ms max/min
+glm prefill: 4049 tokens in 11895.5 ms (2.94 ms/token, 340 tok/s), 2 chunks of 3008 tokens | CUDA0 11880 ms
+glm slots: saved a 4049-token conversation (its system prompt, for other chats that start with it) (0.13 GB in 0.0 s); 4 kept, 0.64 GB
+[maya] sessions: saved a 4049-token conversation (its system prompt, for other chats that start with it) (0.13 GB in 0.0 s); 4 kept, 0.64 GB
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 361 ms | the copy lane 325 ms: copies 16 (6.2 GB/s), ring wait 0, gaps 0, mixer windows 308 | lead 31, tail 5 | pcie 0.10 GB (ram 0.00, disk 0.10) + 0.25 GB vram | experts: staged 107, resident 10374 (3898 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.5/0.0 ms max/min
+glm prefill: 12 tokens in 361.0 ms (30.09 ms/token, 33 tok/s), 1 chunk of 64 tokens | CUDA0 361 ms
+[maya] reading the prompt: 4,061 of 4,062 tokens, 12 s so far
+glm vram: prompt 4062 tokens read in 12.3 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=4062 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4062 keep=3
+glm mtp TP: rank=0 round-end p0=4062 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=4065 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4065 keep=1
+glm mtp TP: rank=0 round-end p0=4065 produced=5 keep=1
+glm mtp TP: rank=0 n=2 p0=4066 produced=5
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=4066 keep=1
+glm mtp TP: rank=0 round-end p0=4066 produced=6 keep=1
+glm mtp TP: rank=0 n=1 p0=4067 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=4067 keep=2
+glm mtp TP: rank=0 round-end p0=4067 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.81 ms, verify 70.53 ms, commit + cache 0.07 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+glm mtp: 4 rounds, 2.00 tokens a round | rounds by draft length 1:1 2:3
+glm stat: decode 39.23 ms/tok (25.49 tok/s) | vram hit 99.95% | ram fetches 0.00/tok | disk 0.25 reads/tok in 0.12 waits/tok, 0.04 ms/tok | promotions 0.25/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.0 ms/tok | vram 11837/12384 ram 0/48
+glm spec: 3 of 7 drafts accepted (42.9%)
+[maya] done: 8 tokens in 13 s (25.5 tok/s) (length, cancel=False), expert cache 99.9% hit
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/3, 3008 tokens, wall 8429 ms | the copy lane 7791 ms: copies 196 (3.3 GB/s), ring wait 1571, gaps 2, mixer windows 6022 | lead 557, tail 82 | pcie 0.65 GB (ram 0.02, disk 0.63) + 2.65 GB vram | experts: staged 999, resident 10374 (828217 rows), prestaged 1, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 56.6/5.7 ms max/min
+[maya] reading the prompt: 3,008 of 8,158 tokens, 8 s so far
+glm prefill: CUDA0 chunk 2/3, 3008 tokens, wall 8426 ms | the copy lane 7698 ms: copies 107 (1.6 GB/s), ring wait 1075, gaps 1, mixer windows 6514 | lead 613, tail 115 | pcie 0.17 GB (ram 0.00, disk 0.17) + 1.81 GB vram | experts: staged 601, resident 10374 (859574 rows), prestaged 1, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 50.4/0.2 ms max/min
+[maya] reading the prompt: 6,016 of 8,158 tokens, 17 s so far
+glm prefill: CUDA0 chunk 3/3, 2129 tokens, wall 6219 ms | the copy lane 5671 ms: copies 77 (1.8 GB/s), ring wait 384, gaps 1, mixer windows 5210 | lead 466, tail 82 | pcie 0.14 GB (ram 0.00, disk 0.14) + 1.22 GB vram | experts: staged 414, resident 10374 (620164 rows), prestaged 1, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 32.9/0.1 ms max/min
+glm prefill: 8145 tokens in 23102.8 ms (2.84 ms/token, 353 tok/s), 3 chunks of 3008 tokens | CUDA0 23074 ms
+glm slots: saved a 8145-token conversation (its system prompt, for other chats that start with it) (0.19 GB in 0.1 s); 4 kept, 0.64 GB
+[maya] sessions: saved a 8145-token conversation (its system prompt, for other chats that start with it) (0.19 GB in 0.1 s); 4 kept, 0.64 GB
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 373 ms | the copy lane 337 ms: copies 35 (3.1 GB/s), ring wait 0, gaps 0, mixer windows 302 | lead 31, tail 4 | pcie 0.11 GB (ram 0.00, disk 0.11) + 0.25 GB vram | experts: staged 108, resident 10374 (3902 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 18.7/0.0 ms max/min
+glm prefill: 12 tokens in 373.3 ms (31.11 ms/token, 32 tok/s), 1 chunk of 64 tokens | CUDA0 373 ms
+[maya] reading the prompt: 8,157 of 8,158 tokens, 24 s so far
+glm vram: prompt 8158 tokens read in 23.7 s; VRAM free CUDA0 60.1 of 121.0 GB before, 60.1 after
+glm mtp TP: rank=0 n=2 p0=8158 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8158 keep=3
+glm mtp TP: rank=0 round-end p0=8158 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=8161 produced=4
+[maya] thinking reached its budget (3 tokens): closed, answering
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8161 keep=1
+glm mtp TP: rank=0 round-end p0=8161 produced=5 keep=1
+glm mtp TP: rank=0 n=2 p0=8162 produced=5
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=8162 keep=1
+glm mtp TP: rank=0 round-end p0=8162 produced=6 keep=1
+glm mtp TP: rank=0 n=1 p0=8163 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=8163 keep=2
+glm mtp TP: rank=0 round-end p0=8163 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.77 ms, verify 78.79 ms, commit + cache 0.06 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+glm mtp: 4 rounds, 2.00 tokens a round | rounds by draft length 1:1 2:3
+glm stat: decode 43.34 ms/tok (23.07 tok/s) | vram hit 99.92% | ram fetches 0.00/tok | disk 0.38 reads/tok in 0.38 waits/tok, 0.09 ms/tok | promotions 0.38/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 2.9 ms/tok | vram 11838/12384 ram 0/48
+glm spec: 3 of 7 drafts accepted (42.9%)
+[maya] done: 8 tokens in 24 s (23.1 tok/s) (length, cancel=False), expert cache 99.9% hit

@@ -207,3 +207,9 @@ lines back after it.
   Select wheel versions that match your toolkit. This include layout was checked with CUDA 13.3,
   `nvidia-cuda-profiler-api==13.3.27` and `nvidia-nvtx==13.3.29`; other CUDA major versions can use a different
   layout. Use the same `CPATH` when rebuilding after an update. No shared toolkit files need changing.
+
+## Unattended starts and calibration
+
+A start without a terminal on stdin, under systemd, or with `--yes` skips automatic speed/prefill calibration. Saved calibration remains effective; a missing calibration uses defaults and prints the command to measure later. Interactive starts keep their existing behavior. The skipped start does not write a replacement calibration to the config.
+
+TP2 still requires both ranks to be launched with matching model/pack/config and context through the pair launcher. A standalone service restart cannot coordinate the pair; the existing paired lifecycle guards remain in effect. See [TP2 operations](TP2-RUN.md).

@@ -1,0 +1,9 @@
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 133 tokens in 0 s (93379.7 tok/s) (length, cancel=False)
+CONTEXT {"outcome": "success", "calls": 1, "done": [{"finish": "length", "completion_tokens": 133, "reasoning_tokens": 1, "reused": 0, "timings": null, "stop_sequence": null}]}
+CONFIG {"server_value": "0", "collapses": true}
+SHELL {"collapses": true}

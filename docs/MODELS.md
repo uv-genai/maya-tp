@@ -173,3 +173,5 @@ These also run on Maya:
 | --- | ---: | --- | --- |
 | [EXL3 3.05 bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/3.05bpw) by turboderp | 125.3 GB | in the setup: `--model EXL3-3.05bpw` | experimental; NVIDIA, and AMD |
 | [EXL3 4.05 bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/4.05bpw) by turboderp | 165.2 GB | in the setup: `--model EXL3-4.05bpw` | experimental; NVIDIA, and AMD |
+
+The DeepSeek installer also recognizes the pinned smaller unsloth UD quants, including `--ds4-quant gguf-iq3_s`. Q5_K Engram tables and GGUF type43 format checks are supported. Compatible Q6_K n-gram tables may be shared between Maya and UD-IQ3_S only after size and SHA256 verification, avoiding a second table download. These additions do not enable GLM TP2 vision or change the default TP2 model.

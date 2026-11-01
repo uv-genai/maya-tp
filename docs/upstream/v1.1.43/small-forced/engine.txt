@@ -1,0 +1,115 @@
+[maya] sampling defaults from the config: temperature=1.0, top_p=0.95
+loading the model (the first start takes a minute or two) ...
+[maya] starting the engine: reading the model's weights ...
+glm settings from the environment: MAYA_GLM_MTP_DRAFT=2, MAYA_GLM_MTP_FIXED=2, MAYA_GLM_PREFILL_MB=6144, MAYA_GLM_PREFILL_SUB=1024, MAYA_GLM_RAM_HEADROOM_GB=16, MAYA_GLM_RESERVE_MB=1024, MAYA_GLM_SPEC_FOLLOW=/tmp/maya-upstream-v43/small-forced/eos-ids.txt, MAYA_GLM_SPLIT=0
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 25088 tokens (--prefill auto, up to 32768; mixer sub-batches of 1024), borrowing 6103 MB of the expert pool while a prompt runs (activations 5371, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.42 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.17, activations 0.07, other (context, MTP, scratch, prompt path) 10.32
+glm fast: CUDA0 unified memory: MemAvailable 110.72 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: the expert profile /home/ugo/software/project-maya/data/expert-profile-glm.bin ranks 13248 (layer, expert) pairs
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 1 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 2 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 4 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 6 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 8 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 10 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 12 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 14 s)
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 17 s)
+[maya] still starting (20 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 19 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 19 s (2.44 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+glm follow: every request decodes the 1 tokens of /tmp/maya-upstream-v43/small-forced/eos-ids.txt (MAYA_GLM_SPEC_FOLLOW)
+maya serve: CUDA0: 62209 MiB of VRAM free with everything loaded
+maya generate: glm5-next serve (M3.1): GEN <max_new> [keys] <ids>, GENI <max_new> [keys] <embeddings> <ids>; QUIT to end
+[maya] thinking level when a request names none: max
+[maya] thinking budget: 32768 tokens (then the answer)
+ready: http://127.0.0.1:18080/v1  (OpenAI: /v1/chat/completions, /v1/responses, Anthropic: /v1/messages, context 4096 tokens)
+       open http://127.0.0.1:18080/ in a browser to chat; close this window to stop the model
+       from other devices: http://192.168.1.22:18080/   (API: http://192.168.1.22:18080/v1)
+       WARNING: no API key - anyone on your network can use this model. Add "api_key": "..." to the config (clients send it as their API key; the web page asks for it)
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 573 experts more lent for it)
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=1024 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 1024,8192,1536)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=960 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 960,8192,1536)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8825 ms | the copy lane 8075 ms: copies 978 (0.5 GB/s), ring wait 1382, gaps 2, mixer windows 5713 | lead 661, tail 88 | pcie 0.51 GB (ram 0.00, disk 0.51) + 2.65 GB vram | experts: staged 958, resident 10374 (816724 rows), prestaged 32, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 120.7/23.6 ms max/min
+[maya] reading the prompt: 3,008 of 4,020 tokens, 9 s so far
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=1011 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 1011,8192,1536)
+glm prefill: CUDA0 chunk 2/2, 1011 tokens, wall 3068 ms | the copy lane 2808 ms: copies 146 (1.1 GB/s), ring wait 166, gaps 1, mixer windows 2495 | lead 218, tail 42 | pcie 0.15 GB (ram 0.01, disk 0.15) + 1.07 GB vram | experts: staged 372, resident 10374 (285554 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 111.1/0.1 ms max/min
+glm prefill: 4019 tokens in 11910.1 ms (2.96 ms/token, 337 tok/s), 2 chunks of 3008 tokens | CUDA0 11893 ms
+[maya] reading the prompt: 4,019 of 4,020 tokens, 12 s so far
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm dsa scores: CUDA0 on the original kernels
+glm mla split attention: CUDA0 on the original kernels
+glm vram: prompt 4020 tokens read in 12.2 s; VRAM free CUDA0 60.8 of 121.0 GB before, 60.6 after
+glm stat: decode 0.06 ms/tok (16142.31 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.0 ms/tok | vram 11816/12384 ram 7/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (1. of 2)
+[maya] done: 1 tokens in 12 s (10000.0 tok/s) (length, cancel=False)
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=22 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 22,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 22 tokens, wall 534 ms | the copy lane 470 ms: copies 129 (3.1 GB/s), ring wait 1, gaps 0, mixer windows 340 | lead 58, tail 6 | pcie 0.40 GB (ram 0.03, disk 0.37) + 0.38 GB vram | experts: staged 233, resident 10374 (7050 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 79.4/0.0 ms max/min
+glm prefill: 22 tokens in 534.1 ms (24.28 ms/token, 41 tok/s), 1 chunk of 64 tokens | CUDA0 534 ms
+glm vram: prompt 23 tokens read in 0.6 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.6 after
+glm stat: decode 0.03 ms/tok (31241.21 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 25.0 ms/tok | vram 11824/12384 ram 3/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (1. of 2)
+glm prefill TP: rank=0 chunk=128 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=76 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 76,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 76 tokens, wall 818 ms | the copy lane 760 ms: copies 104 (6.5 GB/s), ring wait 45, gaps 1, mixer windows 610 | lead 47, tail 11 | pcie 0.68 GB (ram 0.04, disk 0.64) + 0.90 GB vram | experts: staged 473, resident 10374 (24188 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 41.0/0.2 ms max/min
+glm prefill: 76 tokens in 818.6 ms (10.77 ms/token, 93 tok/s), 1 chunk of 128 tokens | CUDA0 818 ms
+[maya] reading the prompt: 98 of 99 tokens, 1 s so far
+glm vram: prompt 77 tokens read in 0.9 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.6 after
+glm stat: decode 0.03 ms/tok (30884.22 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 8.7 ms/tok | vram 11829/12384 ram 3/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (2. of 2)
+glm prefill TP: rank=0 chunk=128 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=72 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 72,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 72 tokens, wall 761 ms | the copy lane 710 ms: copies 93 (8.4 GB/s), ring wait 103, gaps 1, mixer windows 514 | lead 44, tail 7 | pcie 0.77 GB (ram 0.01, disk 0.76) + 1.01 GB vram | experts: staged 535, resident 10374 (22676 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 26.4/0.3 ms max/min
+glm prefill: 72 tokens in 761.6 ms (10.58 ms/token, 95 tok/s), 1 chunk of 128 tokens | CUDA0 761 ms
+glm vram: prompt 73 tokens read in 0.8 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.6 after
+glm stat: decode 0.04 ms/tok (22624.95 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 4.7 ms/tok | vram 11831/12384 ram 3/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] done: 3 tokens in 2 s (1.2 tok/s) (stop, cancel=False)
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8451 ms | the copy lane 7804 ms: copies 248 (2.1 GB/s), ring wait 1467, gaps 2, mixer windows 6087 | lead 559, tail 88 | pcie 0.51 GB (ram 0.01, disk 0.50) + 2.69 GB vram | experts: staged 970, resident 10374 (813579 rows), prestaged 4, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 112.2/3.3 ms max/min
+[maya] reading the prompt: 3,008 of 4,020 tokens, 8 s so far
+glm prefill: CUDA0 chunk 2/2, 1011 tokens, wall 2961 ms | the copy lane 2705 ms: copies 34 (4.4 GB/s), ring wait 122, gaps 1, mixer windows 2548 | lead 215, tail 41 | pcie 0.15 GB (ram 0.01, disk 0.14) + 1.03 GB vram | experts: staged 359, resident 10374 (286408 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 19.0/0.2 ms max/min
+glm prefill: 4019 tokens in 11428.7 ms (2.84 ms/token, 352 tok/s), 2 chunks of 3008 tokens | CUDA0 11413 ms
+[maya] reading the prompt: 4,019 of 4,020 tokens, 11 s so far
+glm vram: prompt 4020 tokens read in 11.5 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.6 after
+glm stat: decode 0.01 ms/tok (102354.15 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 2.9 ms/tok | vram 11811/12384 ram 2/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (1. of 2)
+[maya] done: 1 tokens in 11 s (0.0 tok/s) (length, cancel=False)
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 22 tokens, wall 442 ms | the copy lane 405 ms: copies 53 (7.2 GB/s), ring wait 0, gaps 0, mixer windows 351 | lead 32, tail 6 | pcie 0.38 GB (ram 0.02, disk 0.37) + 0.39 GB vram | experts: staged 233, resident 10374 (7053 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 11.5/0.0 ms max/min
+glm prefill: 22 tokens in 442.7 ms (20.12 ms/token, 50 tok/s), 1 chunk of 64 tokens | CUDA0 442 ms
+glm vram: prompt 23 tokens read in 0.5 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.6 after
+glm stat: decode 0.03 ms/tok (31153.62 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 21.0 ms/tok | vram 11823/12384 ram 2/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (1. of 2)
+glm prefill TP: rank=0 chunk=128 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 76 tokens, wall 786 ms | the copy lane 730 ms: copies 61 (11.1 GB/s), ring wait 38, gaps 1, mixer windows 629 | lead 47, tail 10 | pcie 0.67 GB (ram 0.04, disk 0.64) + 0.89 GB vram | experts: staged 467, resident 10374 (24175 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 11.4/0.2 ms max/min
+glm prefill: 76 tokens in 786.8 ms (10.35 ms/token, 97 tok/s), 1 chunk of 128 tokens | CUDA0 786 ms
+[maya] reading the prompt: 98 of 99 tokens, 1 s so far
+glm vram: prompt 77 tokens read in 0.8 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.6 after
+glm stat: decode 0.03 ms/tok (32766.47 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 8.4 ms/tok | vram 11823/12384 ram 2/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (2. of 2)
+glm prefill TP: rank=0 chunk=128 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 72 tokens, wall 736 ms | the copy lane 680 ms: copies 68 (11.6 GB/s), ring wait 72, gaps 1, mixer windows 539 | lead 45, tail 10 | pcie 0.79 GB (ram 0.02, disk 0.76) + 0.96 GB vram | experts: staged 524, resident 10374 (22732 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 11.1/0.3 ms max/min
+glm prefill: 72 tokens in 736.2 ms (10.22 ms/token, 98 tok/s), 1 chunk of 128 tokens | CUDA0 736 ms
+glm vram: prompt 73 tokens read in 0.8 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.6 after
+glm stat: decode 0.03 ms/tok (28819.27 tok/s) | vram hit 0.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 4.5 ms/tok | vram 11823/12384 ram 2/48
+glm follow: 1 tokens of the continuation decoded, 1 of them differ from the model's own pick
+[maya] done: 3 tokens in 2 s (1.2 tok/s) (stop, cancel=False)

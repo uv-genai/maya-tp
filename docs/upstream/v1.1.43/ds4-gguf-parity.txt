@@ -1,0 +1,762 @@
+kv pack: compressed KV (FP4 + E4M3 / 16)     ok    16385 rows x 512, 0 of 8389120 values differ (first at 0), 288 B a row vs 1024
+kv pack: index keys (FP4 + 2^k / 32)         ok    16385 rows x 128, 0 of 2097280 values differ (first at 0), 80 B a row vs 256
+kv pack: finish leaves its input             ok    33556480 bytes identical
+kv pack: window ring (FP8 + 2^k / 32)        ok    4194304 values, 0 differ through the ring, 0 from the finish's packing; 528 B a row vs 1024
+kv pack: window ring rollback                ok    67584 bytes identical
+kv pack: sparse attention, 1 query           ok    identical every way; BF16 rows 82.2 us a call, packed 86.5 (decoded once a query 87.9, staged 190.5)
+kv pack: sparse attention, 2 queries         ok    identical every way; BF16 rows 114.0 us a call, packed 123.9 (decoded once a query 129.4, staged 242.2)
+kv pack: sparse attention, 4 queries         ok    identical every way; BF16 rows 212.0 us a call, packed 218.8 (decoded once a query 221.6, staged 340.9)
+kv pack: sparse attention, 8 queries         ok    identical every way; BF16 rows 373.6 us a call, packed 515.4 (decoded once a query 392.4, staged 513.4)
+kv pack: sparse attention, 16 queries             ok    matrix cores: finite 1, max_abs 8.09e+01, rel 4.10e-06, worst/rms 1.76e-03, 188.0 us a call
+kv pack: sparse attention, 16 queries        ok    identical every way; BF16 rows 537.1 us a call, packed 643.8 (decoded once a query 561.4, staged 641.8)
+kv pack: sparse attention, a chunk slab of 16     ok    matrix cores: finite 1, max_abs 8.09e+01, rel 4.10e-06, worst/rms 1.76e-03, 266.6 us a call
+kv pack: sparse attention, a chunk slab of 16 ok    identical every way; BF16 rows 831.9 us a call, packed 1177.5 (decoded once a query 882.3, staged 1177.6)
+kv pack: sparse attention, a chunk slab of 256    FAIL  matrix cores: finite 1, max_abs 1.21e+04, rel 2.20e-04, worst/rms 2.71e-01, 3578.0 us a call
+kv pack: sparse attention, a chunk slab of 256 ok    identical every way; BF16 rows 13409.3 us a call, packed 14477.6 (decoded once a query 14463.3, staged 14426.9)
+kv pack: WMMA partial tiles / empty rows T=16 H=16 ok   finite 1 max_abs 1.98e-05 rel 1.11e-05 worst/rms 2.46e-03
+  WMMA worst index 99344 token 12 head 2 dim 16 query_mag 1000 ref 0.646452367 got 0.646472216
+kv pack: WMMA partial tiles / empty rows T=16 H=32 ok   finite 1 max_abs 2.51e-05 rel 1.28e-05 worst/rms 3.29e-03
+  WMMA worst index 197968 token 12 head 2 dim 336 query_mag 1000 ref 0.553246439 got 0.553271532
+kv pack: WMMA partial tiles / empty rows T=16 H=64 FAIL finite 0 max_abs 4.17e-05 rel -nan worst/rms 5.79e-03
+  WMMA worst index 435472 token 13 head 18 dim 272 query_mag 1000 ref 0.622890592 got 0.622848868
+  WMMA head 0 rel 8.411425e-08 max_abs 5.587935e-09 worst/rms 3.948503e-06
+  WMMA head 1 rel 9.020608e-08 max_abs 3.725290e-09 worst/rms 2.667486e-06
+  WMMA head 2 rel 1.511523e-05 max_abs 2.139807e-05 worst/rms 7.808443e-04
+  WMMA head 3 rel 0.000000e+00 max_abs 0.000000e+00 worst/rms 0.000000e+00
+  WMMA head 4 rel 1.080105e-06 max_abs 5.587935e-08 worst/rms 3.891424e-05
+  WMMA head 5 rel 1.338508e-06 max_abs 7.450581e-08 worst/rms 5.332674e-05
+  WMMA head 6 rel 1.307314e-06 max_abs 7.264316e-08 worst/rms 5.351469e-05
+  WMMA head 7 rel 1.300011e-06 max_abs 5.587935e-08 worst/rms 3.971286e-05
+  WMMA head 8 rel 1.328080e-06 max_abs 8.195639e-08 worst/rms 6.020103e-05
+  WMMA head 9 rel 1.088690e-06 max_abs 5.960464e-08 worst/rms 4.319648e-05
+  WMMA head 10 rel 1.211208e-06 max_abs 5.401671e-08 worst/rms 3.825549e-05
+  WMMA head 11 rel 1.000406e-06 max_abs 5.587935e-08 worst/rms 4.109629e-05
+  WMMA head 12 rel 1.306638e-06 max_abs 7.823110e-08 worst/rms 5.660797e-05
+  WMMA head 13 rel 1.351315e-06 max_abs 7.636845e-08 worst/rms 5.647136e-05
+  WMMA head 14 rel 1.183014e-06 max_abs 5.587935e-08 worst/rms 3.995332e-05
+  WMMA head 15 rel 1.523523e-06 max_abs 6.332994e-08 worst/rms 4.603578e-05
+  WMMA head 16 rel 8.510866e-08 max_abs 5.587935e-09 worst/rms 4.003593e-06
+  WMMA head 17 rel 7.616625e-08 max_abs 3.725290e-09 worst/rms 2.732966e-06
+  WMMA head 18 rel 2.374000e-05 max_abs 4.172325e-05 worst/rms 1.518904e-03
+  WMMA head 19 rel 0.000000e+00 max_abs 0.000000e+00 worst/rms 0.000000e+00
+  WMMA head 20 rel 1.284177e-06 max_abs 8.754432e-08 worst/rms 6.100066e-05
+  WMMA head 21 rel 1.131671e-06 max_abs 5.215406e-08 worst/rms 3.773938e-05
+  WMMA head 22 rel 1.737804e-06 max_abs 9.685755e-08 worst/rms 6.896447e-05
+  WMMA head 23 rel 1.342368e-06 max_abs 6.519258e-08 worst/rms 4.615061e-05
+  WMMA head 24 rel 1.135869e-06 max_abs 7.823110e-08 worst/rms 5.731282e-05
+  WMMA head 25 rel 1.489172e-06 max_abs 1.005828e-07 worst/rms 7.192624e-05
+  WMMA head 26 rel 1.244991e-06 max_abs 5.774200e-08 worst/rms 4.121945e-05
+  WMMA head 27 rel 1.503852e-06 max_abs 8.009374e-08 worst/rms 5.771490e-05
+  WMMA head 28 rel 1.196919e-06 max_abs 7.078052e-08 worst/rms 5.048400e-05
+  WMMA head 29 rel 1.296257e-06 max_abs 8.754432e-08 worst/rms 6.512774e-05
+  WMMA head 30 rel 1.734250e-06 max_abs 9.685755e-08 worst/rms 6.833921e-05
+  WMMA head 31 rel 1.234315e-06 max_abs 7.636845e-08 worst/rms 5.703402e-05
+  WMMA head 32 rel 7.551484e-08 max_abs 3.725290e-09 worst/rms 2.668483e-06
+  WMMA head 33 rel 8.340906e-08 max_abs 5.587935e-09 worst/rms 3.964048e-06
+  WMMA head 34 rel 1.379362e-05 max_abs 2.597272e-05 worst/rms 8.873118e-04
+  WMMA head 35 rel 0.000000e+00 max_abs 0.000000e+00 worst/rms 0.000000e+00
+  WMMA head 36 rel 1.024688e-06 max_abs 5.029142e-08 worst/rms 3.504229e-05
+  WMMA head 37 rel 1.237577e-06 max_abs 5.215406e-08 worst/rms 3.825199e-05
+  WMMA head 38 rel 1.281550e-06 max_abs 7.078052e-08 worst/rms 4.997342e-05
+  WMMA head 39 rel 1.231335e-06 max_abs 7.264316e-08 worst/rms 5.178255e-05
+  WMMA head 40 rel 1.085415e-06 max_abs 5.029142e-08 worst/rms 3.764196e-05
+  WMMA head 41 rel 1.422925e-06 max_abs 7.450581e-08 worst/rms 5.292355e-05
+  WMMA head 42 rel 1.662589e-06 max_abs 7.823110e-08 worst/rms 5.541973e-05
+  WMMA head 43 rel 1.134015e-06 max_abs 6.519258e-08 worst/rms 4.631554e-05
+  WMMA head 44 rel 1.215878e-06 max_abs 5.960464e-08 worst/rms 4.239177e-05
+  WMMA head 45 rel 1.722705e-06 max_abs 9.313226e-08 worst/rms 6.664387e-05
+  WMMA head 46 rel 1.284548e-06 max_abs 5.960464e-08 worst/rms 4.244742e-05
+  WMMA head 47 rel 1.511478e-06 max_abs 8.754432e-08 worst/rms 6.178517e-05
+  WMMA head 48 rel 7.858516e-08 max_abs 3.725290e-09 worst/rms 2.782121e-06
+  WMMA head 49 rel 7.955142e-08 max_abs 3.725290e-09 worst/rms 2.712125e-06
+  WMMA head 50 rel 1.215744e-05 max_abs 2.247095e-05 worst/rms 7.679862e-04
+  WMMA head 51 rel 0.000000e+00 max_abs 0.000000e+00 worst/rms 0.000000e+00
+  WMMA head 52 rel 1.351281e-06 max_abs 8.754432e-08 worst/rms 6.105216e-05
+  WMMA head 53 rel 1.537793e-06 max_abs 8.195639e-08 worst/rms 6.055051e-05
+  WMMA head 54 rel 1.483339e-06 max_abs 7.823110e-08 worst/rms 5.534288e-05
+  WMMA head 55 rel 1.499255e-06 max_abs 8.381903e-08 worst/rms 5.909320e-05
+  WMMA head 56 rel 1.591621e-06 max_abs 9.313226e-08 worst/rms 6.612591e-05
+  WMMA head 57 rel 1.268921e-06 max_abs 8.754432e-08 worst/rms 6.481726e-05
+  WMMA head 58 rel 1.494608e-06 max_abs 9.313226e-08 worst/rms 6.560024e-05
+  WMMA head 59 rel -nan max_abs 6.146729e-08 worst/rms 4.372838e-05
+  WMMA head 60 rel 9.716176e-07 max_abs 5.401671e-08 worst/rms 3.836774e-05
+  WMMA head 61 rel 1.019474e-06 max_abs 5.587935e-08 worst/rms 4.125493e-05
+  WMMA head 62 rel 1.097301e-06 max_abs 9.126961e-08 worst/rms 6.560880e-05
+  WMMA head 63 rel 1.613269e-06 max_abs 8.568168e-08 worst/rms 6.191370e-05
+kv pack: WMMA position 0 ratio 0       T=256 H=64 ok   finite 1 max_abs 5.13e-05 rel 9.28e-06 worst/rms 5.41e-03
+  WMMA worst index 6898768 token 210 head 34 dim 80 query_mag 1000 ref 0.447526544 got 0.447577864
+kv pack: WMMA position 0 ratio 1       T=256 H=64 ok   finite 1 max_abs 6.28e-05 rel 1.23e-05 worst/rms 6.40e-03
+  WMMA worst index 8078608 token 246 head 34 dim 272 query_mag 1000 ref 0.521783531 got 0.521720707
+kv pack: WMMA position 0 ratio 2       T=256 H=64 ok   finite 1 max_abs 6.50e-05 rel 1.16e-05 worst/rms 6.69e-03
+  WMMA worst index 4678752 token 142 head 50 dim 96 query_mag 1000 ref 0.459387153 got 0.459322125
+kv pack: WMMA position 0 ratio 4       T=256 H=64 ok   finite 1 max_abs 7.52e-05 rel 1.03e-05 worst/rms 7.75e-03
+  WMMA worst index 6259792 token 191 head 2 dim 80 query_mag 1000 ref 0.573801994 got 0.573877215
+kv pack: WMMA position 0 ratio 128     T=256 H=64 ok   finite 1 max_abs 5.79e-05 rel 9.24e-06 worst/rms 6.05e-03
+  WMMA worst index 7603392 token 232 head 2 dim 192 query_mag 1000 ref 0.46230042 got 0.462242514
+kv pack: WMMA position 8192 ratio 0    T=256 H=64 ok   finite 1 max_abs 5.52e-05 rel 1.06e-05 worst/rms 5.36e-03
+  WMMA worst index 6710288 token 204 head 50 dim 16 query_mag 1000 ref 0.406435937 got 0.406380743
+kv pack: WMMA position 8192 ratio 1    T=256 H=64 ok   finite 1 max_abs 6.91e-05 rel 1.56e-05 worst/rms 6.62e-03
+  WMMA worst index 5850128 token 178 head 34 dim 16 query_mag 1000 ref 0.35670948 got 0.356778532
+kv pack: WMMA position 8192 ratio 2    T=256 H=64 ok   finite 1 max_abs 5.49e-05 rel 1.48e-05 worst/rms 5.32e-03
+  WMMA worst index 2024528 token 61 head 50 dim 80 query_mag 1000 ref 0.424153119 got 0.424208045
+kv pack: WMMA position 8192 ratio 4    T=256 H=64 ok   finite 1 max_abs 6.83e-05 rel 1.68e-05 worst/rms 6.56e-03
+  WMMA worst index 7955504 token 242 head 50 dim 48 query_mag 1000 ref 0.503533065 got 0.503601372
+kv pack: WMMA position 8192 ratio 128  T=256 H=64 ok   finite 1 max_abs 6.91e-05 rel 1.13e-05 worst/rms 6.68e-03
+  WMMA worst index 7767536 token 237 head 2 dim 496 query_mag 1000 ref 0.324387938 got 0.324318886
+kv pack: WMMA position 32768 ratio 0   T=256 H=64 ok   finite 1 max_abs 6.09e-05 rel 1.06e-05 worst/rms 5.94e-03
+  WMMA worst index 5751824 token 175 head 34 dim 16 query_mag 1000 ref 0.433550477 got 0.433489561
+kv pack: WMMA position 32768 ratio 1   T=256 H=64 ok   finite 1 max_abs 5.22e-05 rel 1.50e-05 worst/rms 4.99e-03
+  WMMA worst index 7308512 token 223 head 2 dim 224 query_mag 1000 ref 0.465404272 got 0.465352029
+kv pack: WMMA position 32768 ratio 2   T=256 H=64 ok   finite 1 max_abs 5.48e-05 rel 1.57e-05 worst/rms 5.26e-03
+  WMMA worst index 6153568 token 187 head 50 dim 352 query_mag 1000 ref 0.419880688 got 0.419935524
+kv pack: WMMA position 32768 ratio 4   T=256 H=64 ok   finite 1 max_abs 6.29e-05 rel 1.56e-05 worst/rms 6.06e-03
+  WMMA worst index 2131040 token 65 head 2 dim 96 query_mag 1000 ref 0.551125824 got 0.551188767
+kv pack: WMMA position 32768 ratio 128 T=256 H=64 ok   finite 1 max_abs 5.24e-05 rel 1.53e-05 worst/rms 5.04e-03
+  WMMA worst index 3081344 token 94 head 2 dim 128 query_mag 1000 ref 0.357161194 got 0.357213587
+kv pack: WMMA position 65536 ratio 0   T=256 H=64 ok   finite 1 max_abs 7.34e-05 rel 9.29e-06 worst/rms 7.09e-03
+  WMMA worst index 6407440 token 195 head 34 dim 272 query_mag 1000 ref 0.589719534 got 0.589792907
+kv pack: WMMA position 65536 ratio 1   T=256 H=64 ok   finite 1 max_abs 6.16e-05 rel 1.54e-05 worst/rms 5.89e-03
+  WMMA worst index 5940496 token 181 head 18 dim 272 query_mag 1000 ref 0.706042588 got 0.706104219
+kv pack: WMMA position 65536 ratio 2   T=256 H=64 ok   finite 1 max_abs 5.14e-05 rel 1.59e-05 worst/rms 4.92e-03
+  WMMA worst index 5301376 token 161 head 50 dim 128 query_mag 1000 ref 0.65375495 got 0.65370357
+kv pack: WMMA position 65536 ratio 4   T=256 H=64 ok   finite 1 max_abs 8.08e-05 rel 1.70e-05 worst/rms 7.83e-03
+  WMMA worst index 222256 token 6 head 50 dim 48 query_mag 1000 ref 0.511941612 got 0.511860788
+kv pack: WMMA position 65536 ratio 128 T=256 H=64 ok   finite 1 max_abs 6.14e-05 rel 1.66e-05 worst/rms 5.85e-03
+  WMMA worst index 4039728 token 123 head 18 dim 48 query_mag 1000 ref 0.457529008 got 0.457590431
+kv pack: WMMA position 122880 ratio 0  T=256 H=64 ok   finite 1 max_abs 8.20e-05 rel 1.10e-05 worst/rms 8.01e-03
+  WMMA worst index 4588816 token 140 head 2 dim 272 query_mag 1000 ref 0.540871799 got 0.540953815
+kv pack: WMMA position 122880 ratio 1  T=256 H=64 ok   finite 1 max_abs 7.49e-05 rel 1.53e-05 worst/rms 7.12e-03
+  WMMA worst index 7439456 token 227 head 2 dim 96 query_mag 1000 ref 0.584101796 got 0.58417666
+kv pack: WMMA position 122880 ratio 2  T=256 H=64 ok   finite 1 max_abs 7.21e-05 rel 1.65e-05 worst/rms 6.89e-03
+  WMMA worst index 812080 token 24 head 50 dim 48 query_mag 1000 ref 0.604969621 got 0.605041683
+kv pack: WMMA position 122880 ratio 4  T=256 H=64 ok   finite 1 max_abs 6.46e-05 rel 1.69e-05 worst/rms 6.21e-03
+  WMMA worst index 730448 token 22 head 18 dim 336 query_mag 1000 ref 0.5309515 got 0.530886948
+kv pack: WMMA position 122880 ratio 128 T=256 H=64 ok   finite 1 max_abs 6.51e-05 rel 1.61e-05 worst/rms 6.17e-03
+  WMMA worst index 2114656 token 64 head 34 dim 96 query_mag 1000 ref 0.495904893 got 0.495969981
+kv pack: WMMA offset slab / partial rows T=17 H=64 ok   finite 1 max_abs 6.01e-06 rel 1.51e-06 worst/rms 7.21e-04
+  WMMA worst index 410848 token 12 head 34 dim 224 query_mag 1000 ref 0.185831517 got 0.185837522
+kv pack: index scores                        ok    263184 bytes identical
+kv pack: index score time                          BF16 keys 157.2 us a call, packed 165.4 us
+router rows, 2 tokens vs a launch a token     ok      0 of 768 logits differ
+router rows, 37 tokens vs a launch a token     ok      0 of 14208 logits differ
+router rows, 300 tokens vs a launch a token     ok      0 of 115200 logits differ
+mv BF16, 1 activations                       ok    max rel err 1.11e-07 (at 27: 0.459601 vs 0.459601)
+mv BF16, 1 activations, unaligned            ok    max rel err 1.67e-07 (at 406: -0.368915 vs -0.368915)
+mv BF16, 3 activations                       ok    max rel err 1.49e-07 (at 633: -0.286035 vs -0.286035)
+  ... one activation alone, bit for bit      ok
+mv BF16, 3 activations, unaligned            ok    max rel err 1.50e-07 (at 553: -0.213246 vs -0.213246)
+  ... one activation alone, bit for bit      ok
+mv BF16, 16 activations                      ok    max rel err 1.16e-07 (at 4749: -0.542097 vs -0.542097)
+  ... one activation alone, bit for bit      ok
+mv BF16, 16 activations, unaligned           ok    max rel err 1.31e-07 (at 7693: 1.29149 vs 1.29149)
+  ... one activation alone, bit for bit      ok
+mv MXFP4, 1 activations                      ok    max rel err 1.19e-07 (at 20: -8.59824 vs -8.59824)
+mv MXFP4, 1 activations, unaligned           ok    max rel err 2.19e-07 (at 327: 1.62648 vs 1.62648)
+mv MXFP4, 3 activations                      ok    max rel err 1.79e-07 (at 1140: 9.05901 vs 9.05901)
+  ... one activation alone, bit for bit      ok
+mv MXFP4, 3 activations, unaligned           ok    max rel err 1.47e-07 (at 91: 6.04388 vs 6.04388)
+  ... one activation alone, bit for bit      ok
+mv MXFP4, 16 activations                     ok    max rel err 1.66e-07 (at 666: 2.8722 vs 2.87219)
+  ... one activation alone, bit for bit      ok
+mv MXFP4, 16 activations, unaligned          ok    max rel err 1.32e-07 (at 7127: -8.98505 vs -8.98505)
+  ... one activation alone, bit for bit      ok
+mv Q8_0, 1 activations                       ok    max rel err 1.00e-07 (at 230: 4.62385 vs 4.62385)
+mv Q8_0, 1 activations, unaligned            ok    max rel err 1.05e-07 (at 189: -3.96027 vs -3.96028)
+mv Q8_0, 3 activations                       ok    max rel err 1.10e-07 (at 1319: -2.39568 vs -2.39568)
+  ... one activation alone, bit for bit      ok
+mv Q8_0, 3 activations, unaligned            ok    max rel err 7.86e-08 (at 874: -4.03039 vs -4.03039)
+  ... one activation alone, bit for bit      ok
+mv Q8_0, 16 activations                      ok    max rel err 1.26e-07 (at 3538: -5.44834 vs -5.44834)
+  ... one activation alone, bit for bit      ok
+mv Q8_0, 16 activations, unaligned           ok    max rel err 1.15e-07 (at 1426: 4.90704 vs 4.90705)
+  ... one activation alone, bit for bit      ok
+rows BF16 -> F16 (a view)                    ok    max rel err 0.00e+00 (at 0: -0.519531 vs -0.519531)
+rows Q8_0 -> F16 (a view)                    ok    max rel err 3.20e-04 (at 189: 0.280762 vs 0.280884)
+Engram Q6_K rows = ggml's, bit for bit       ok
+Engram IQ4_NL rows = ggml's, bit for bit             ok
+Engram Q5_K rows = ggml's, bit for bit               ok
+Q5_K embedding (host) = ggml's, bit for bit          ok
+Q6_K embedding (host) = ggml's, bit for bit          ok
+token experts (D 512, F 256)                 ok    max rel err 1.22e-07 (at 1836: 95.1359 vs 95.1359)
+window experts (T 5)                         ok    max rel err 1.22e-07 (at 1836: 95.1359 vs 95.1359)
+  ... bit for bit the token path's           ok
+  set gate/up, 100 rows, F16 rows given       ok    (bit for bit the F32 rows')
+set gate/up (F16 h), 100 rows, 100 light     ok    max rel err 3.09e-04 (at 14309: -82.75 vs -82.7809)
+set down, 100 rows, 100 light                ok    max rel err 8.80e-08 (at 1511: 356.302 vs 356.302)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+set gate/up (F16 h), 200 rows, 67 light      ok    max rel err 5.63e-04 (at 30867: -77.875 vs -77.9313)
+set down, 200 rows, 67 light                 ok    max rel err 7.52e-07 (at 51552: 306.055 vs 306.055)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+set gate/up (F16 h), 400 rows, 0 light       ok    max rel err 5.20e-04 (at 40781: -71.6875 vs -71.6355)
+set down, 400 rows, 0 light                  ok    max rel err 7.43e-07 (at 120591: -290.55 vs -290.55)
+CPU lane rows                                ok    max rel err 1.49e-07 (at 205: 1.42196 vs 1.42196)
+CPU int8 quant (gate's k)                    ok    vector = scalar = bands = q8_round
+CPU int8 rows gate scalar n=1                ok    max rel err 9.53e-08 (at 1: 11.1874 vs 11.1874)
+CPU int8 rows gate scalar n=2                ok    max rel err 9.12e-08 (at 1: 11.1874 vs 11.1874)
+CPU int8 rows gate scalar n=3                ok    max rel err 8.48e-08 (at 1: 11.1874 vs 11.1874)
+CPU int8 rows gate scalar n=8                ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+CPU int8 rows gate scalar n=9                ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+CPU int8 rows gate avx2 n=1                  ok    max rel err 9.53e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx2 n=1                ok    bit-identical to the scalar tier
+CPU int8 rows gate avx2 n=2                  ok    max rel err 9.12e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx2 n=2                ok    bit-identical to the scalar tier
+CPU int8 rows gate avx2 n=3                  ok    max rel err 8.48e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx2 n=3                ok    bit-identical to the scalar tier
+CPU int8 rows gate avx2 n=8                  ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avx2 n=8                ok    bit-identical to the scalar tier
+CPU int8 rows gate avx2 n=9                  ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avx2 n=9                ok    bit-identical to the scalar tier
+CPU int8 rows gate avxvnni n=1               ok    max rel err 9.53e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avxvnni n=1             ok    bit-identical to the scalar tier
+CPU int8 rows gate avxvnni n=2               ok    max rel err 9.12e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avxvnni n=2             ok    bit-identical to the scalar tier
+CPU int8 rows gate avxvnni n=3               ok    max rel err 8.48e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avxvnni n=3             ok    bit-identical to the scalar tier
+CPU int8 rows gate avxvnni n=8               ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avxvnni n=8             ok    bit-identical to the scalar tier
+CPU int8 rows gate avxvnni n=9               ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avxvnni n=9             ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512 n=1                ok    max rel err 9.53e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx512 n=1              ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512 n=2                ok    max rel err 9.12e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx512 n=2              ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512 n=3                ok    max rel err 8.48e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx512 n=3              ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512 n=8                ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avx512 n=8              ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512 n=9                ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avx512 n=9              ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512vnni n=1            ok    max rel err 9.53e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx512vnni n=1          ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512vnni n=2            ok    max rel err 9.12e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx512vnni n=2          ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512vnni n=3            ok    max rel err 8.48e-08 (at 1: 11.1874 vs 11.1874)
+  CPU int8 rows gate avx512vnni n=3          ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512vnni n=8            ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avx512vnni n=8          ok    bit-identical to the scalar tier
+CPU int8 rows gate avx512vnni n=9            ok    max rel err 9.51e-08 (at 199: -16.4613 vs -16.4613)
+  CPU int8 rows gate avx512vnni n=9          ok    bit-identical to the scalar tier
+CPU int8 quant (down's k)                    ok    vector = scalar = bands = q8_round
+CPU int8 rows down scalar n=1                ok    max rel err 9.48e-08 (at 25: 0.23209 vs 0.23209)
+CPU int8 rows down scalar n=2                ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+CPU int8 rows down scalar n=3                ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+CPU int8 rows down scalar n=8                ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+CPU int8 rows down scalar n=9                ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+CPU int8 rows down avx2 n=1                  ok    max rel err 9.48e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx2 n=1                ok    bit-identical to the scalar tier
+CPU int8 rows down avx2 n=2                  ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx2 n=2                ok    bit-identical to the scalar tier
+CPU int8 rows down avx2 n=3                  ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx2 n=3                ok    bit-identical to the scalar tier
+CPU int8 rows down avx2 n=8                  ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx2 n=8                ok    bit-identical to the scalar tier
+CPU int8 rows down avx2 n=9                  ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx2 n=9                ok    bit-identical to the scalar tier
+CPU int8 rows down avxvnni n=1               ok    max rel err 9.48e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avxvnni n=1             ok    bit-identical to the scalar tier
+CPU int8 rows down avxvnni n=2               ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avxvnni n=2             ok    bit-identical to the scalar tier
+CPU int8 rows down avxvnni n=3               ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avxvnni n=3             ok    bit-identical to the scalar tier
+CPU int8 rows down avxvnni n=8               ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avxvnni n=8             ok    bit-identical to the scalar tier
+CPU int8 rows down avxvnni n=9               ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avxvnni n=9             ok    bit-identical to the scalar tier
+CPU int8 rows down avx512 n=1                ok    max rel err 9.48e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512 n=1              ok    bit-identical to the scalar tier
+CPU int8 rows down avx512 n=2                ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512 n=2              ok    bit-identical to the scalar tier
+CPU int8 rows down avx512 n=3                ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512 n=3              ok    bit-identical to the scalar tier
+CPU int8 rows down avx512 n=8                ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512 n=8              ok    bit-identical to the scalar tier
+CPU int8 rows down avx512 n=9                ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512 n=9              ok    bit-identical to the scalar tier
+CPU int8 rows down avx512vnni n=1            ok    max rel err 9.48e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512vnni n=1          ok    bit-identical to the scalar tier
+CPU int8 rows down avx512vnni n=2            ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512vnni n=2          ok    bit-identical to the scalar tier
+CPU int8 rows down avx512vnni n=3            ok    max rel err 9.00e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512vnni n=3          ok    bit-identical to the scalar tier
+CPU int8 rows down avx512vnni n=8            ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512vnni n=8          ok    bit-identical to the scalar tier
+CPU int8 rows down avx512vnni n=9            ok    max rel err 7.97e-08 (at 25: 0.23209 vs 0.23209)
+  CPU int8 rows down avx512vnni n=9          ok    bit-identical to the scalar tier
+CPU int8 rows: this CPU's tier avx512vnni
+decode IQ2_XXS = ggml's dequantize_row       ok    81920 values, kernels and tiles
+decode IQ2_S = ggml's dequantize_row         ok    81920 values, kernels and tiles
+decode IQ3_XXS = ggml's dequantize_row       ok    81920 values, kernels and tiles
+decode IQ3_S = ggml's dequantize_row         ok    81920 values, kernels and tiles
+decode IQ4_XS = ggml's dequantize_row        ok    81920 values, kernels and tiles
+decode Q2_K = ggml's dequantize_row          ok    81920 values, kernels and tiles
+decode Q3_K = ggml's dequantize_row          ok    81920 values, kernels and tiles
+decode Q4_K = ggml's dequantize_row          ok    81920 values, kernels and tiles
+decode IQ1_S = ggml's dequantize_row         ok    81920 values, kernels and tiles
+decode IQ1_M = ggml's dequantize_row         ok    81920 values, kernels and tiles
+decode IQ1_M = ggml's dequantize_row         ok    81920 values, kernels and tiles
+decode IQ4_NL = ggml's dequantize_row        ok    81920 values, kernels and tiles
+decode IQ2_XS = ggml's dequantize_row        ok    81920 values, kernels and tiles
+decode Q5_K = ggml's dequantize_row          ok    81920 values, kernels and tiles
+decode Q6_K = ggml's dequantize_row          ok    81920 values, kernels and tiles
+rows IQ2_XXS = ggml's (kernels, tiles, f16_rows)     ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ2_S = ggml's (kernels, tiles, f16_rows)       ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ3_XXS = ggml's (kernels, tiles, f16_rows)     ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ3_S = ggml's (kernels, tiles, f16_rows)       ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ4_XS = ggml's (kernels, tiles, f16_rows)      ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows Q2_K = ggml's (kernels, tiles, f16_rows)        ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows Q3_K = ggml's (kernels, tiles, f16_rows)        ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows Q4_K = ggml's (kernels, tiles, f16_rows)        ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ1_S = ggml's (kernels, tiles, f16_rows)       ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ1_M = ggml's (kernels, tiles, f16_rows)       ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ4_NL = ggml's (kernels, tiles, f16_rows)      ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows IQ2_XS = ggml's (kernels, tiles, f16_rows)      ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows Q5_K = ggml's (kernels, tiles, f16_rows)        ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+rows Q6_K = ggml's (kernels, tiles, f16_rows)        ok    49152 values: kernels 0, tiles 0, f16_rows 0 differ
+mv IQ2_XXS, 1 activations                    ok    max rel err 1.05e-07 (at 10: 2.20728 vs 2.20728)
+mv IQ2_XXS, 3 activations                    ok    max rel err 7.32e-08 (at 314: 1.19398 vs 1.19398)
+mv IQ2_XXS, 16 activations                   ok    max rel err 8.33e-08 (at 60: -2.43457 vs -2.43457)
+mv IQ2_S, 1 activations                      ok    max rel err 9.55e-08 (at 27: 1.9364 vs 1.9364)
+mv IQ2_S, 3 activations                      ok    max rel err 8.17e-08 (at 216: 1.98859 vs 1.98859)
+mv IQ2_S, 16 activations                     ok    max rel err 1.06e-07 (at 674: -2.52486 vs -2.52486)
+mv IQ3_XXS, 1 activations                    ok    max rel err 9.73e-08 (at 30: 3.1228 vs 3.1228)
+mv IQ3_XXS, 3 activations                    ok    max rel err 8.24e-08 (at 153: -4.61264 vs -4.61264)
+mv IQ3_XXS, 16 activations                   ok    max rel err 1.08e-07 (at 1241: 8.10217 vs 8.10217)
+mv IQ3_S, 1 activations                      ok    max rel err 1.04e-07 (at 66: -2.08159 vs -2.08159)
+mv IQ3_S, 3 activations                      ok    max rel err 8.78e-08 (at 141: 0.368697 vs 0.368697)
+mv IQ3_S, 16 activations                     ok    max rel err 8.65e-08 (at 1431: 4.65778 vs 4.65778)
+mv IQ4_XS, 1 activations                     ok    max rel err 6.63e-08 (at 43: -23.3041 vs -23.3041)
+mv IQ4_XS, 3 activations                     ok    max rel err 6.97e-08 (at 49: -47.4064 vs -47.4064)
+mv IQ4_XS, 16 activations                    ok    max rel err 1.02e-07 (at 1976: 58.3888 vs 58.3888)
+mv Q2_K, 1 activations                       ok    max rel err 7.97e-08 (at 40: -0.175111 vs -0.175111)
+mv Q2_K, 3 activations                       ok    max rel err 9.59e-08 (at 186: -0.509451 vs -0.509451)
+mv Q2_K, 16 activations                      ok    max rel err 7.81e-08 (at 1967: -0.659416 vs -0.659416)
+mv Q3_K, 1 activations                       ok    max rel err 6.85e-08 (at 29: -0.383474 vs -0.383474)
+mv Q3_K, 3 activations                       ok    max rel err 8.73e-08 (at 312: -1.06534 vs -1.06534)
+mv Q3_K, 16 activations                      ok    max rel err 8.81e-08 (at 1045: -1.5977 vs -1.5977)
+mv Q4_K, 1 activations                       ok    max rel err 1.08e-07 (at 86: 8.56201 vs 8.56201)
+mv Q4_K, 3 activations                       ok    max rel err 7.81e-08 (at 213: -13.1927 vs -13.1927)
+mv Q4_K, 16 activations                      ok    max rel err 1.02e-07 (at 1224: 5.68138 vs 5.68138)
+mv IQ1_S, 1 activations                      ok    max rel err 7.39e-08 (at 66: 0.116838 vs 0.116838)
+mv IQ1_S, 3 activations                      ok    max rel err 9.21e-08 (at 367: 0.123081 vs 0.123082)
+mv IQ1_S, 16 activations                     ok    max rel err 8.87e-08 (at 991: -0.25886 vs -0.25886)
+mv IQ1_M, 1 activations                      ok    max rel err 9.20e-08 (at 20: 0.173099 vs 0.173099)
+mv IQ1_M, 3 activations                      ok    max rel err 1.02e-07 (at 40: -0.234249 vs -0.234249)
+mv IQ1_M, 16 activations                     ok    max rel err 9.56e-08 (at 1798: -0.41849 vs -0.41849)
+mv IQ4_NL, 1 activations                     ok    max rel err 6.63e-08 (at 84: -1.34775 vs -1.34775)
+mv IQ4_NL, 3 activations                     ok    max rel err 1.01e-07 (at 334: -2.54541 vs -2.54541)
+mv IQ4_NL, 16 activations                    ok    max rel err 1.16e-07 (at 1308: -2.08275 vs -2.08275)
+mv IQ2_XS, 1 activations                     ok    max rel err 8.84e-08 (at 82: -1.08396 vs -1.08396)
+mv IQ2_XS, 3 activations                     ok    max rel err 8.87e-08 (at 248: 2.26258 vs 2.26258)
+mv IQ2_XS, 16 activations                    ok    max rel err 1.01e-07 (at 1720: -2.51158 vs -2.51158)
+mv Q5_K, 1 activations                       ok    max rel err 1.19e-07 (at 46: 12.4406 vs 12.4406)
+mv Q5_K,ds4: CUDA0 Q8 batch check: 8 jobs (k 32 .. 5120, rows 1 .. 16, strided, one input read with two k, two jobs sharing a rounding): 50976 int8 and 1593 scales the per-job launches' bit for bit, every guard intact (DS4_Q8_CHECK)
+ 3 activations                       ok    max rel err 8.35e-08 (at 164: -21.3087 vs -21.3087)
+mv Q5_K, 16 activations                      ok    max rel err 1.19e-07 (at 1667: -40.6055 vs -40.6055)
+mv Q6_K, 1 activations                       ok    max rel err 1.04e-07 (at 118: -44.3482 vs -44.3482)
+mv Q6_K, 3 activations                       ok    max rel err 9.90e-08 (at 58: 33.0247 vs 33.0247)
+mv Q6_K, 16 activations                      ok    max rel err 8.68e-08 (at 266: 32.9228 vs 32.9228)
+mv rows BF16: each of 2 / 4 / 8 / 16 alone, bit for bit      ok
+mv rows MXFP4: each of 2 / 4 / 8 / 16 alone, bit for bit     ok
+mv rows Q8_0: each of 2 / 4 / 8 / 16 alone, bit for bit      ok
+mv rows IQ2_XXS: each of 2 / 4 / 8 / 16 alone, bit for bit   ok
+mv rows IQ2_S: each of 2 / 4 / 8 / 16 alone, bit for bit     ok
+mv rows IQ3_XXS: each of 2 / 4 / 8 / 16 alone, bit for bit   ok
+mv rows IQ3_S: each of 2 / 4 / 8 / 16 alone, bit for bit     ok
+mv rows IQ4_XS: each of 2 / 4 / 8 / 16 alone, bit for bit    ok
+mv rows Q2_K: each of 2 / 4 / 8 / 16 alone, bit for bit      ok
+mv rows Q3_K: each of 2 / 4 / 8 / 16 alone, bit for bit      ok
+mv rows Q4_K: each of 2 / 4 / 8 / 16 alone, bit for bit      ok
+mv rows IQ1_S: each of 2 / 4 / 8 / 16 alone, bit for bit     ok
+mv rows IQ1_M: each of 2 / 4 / 8 / 16 alone, bit for bit     ok
+mv rows IQ4_NL: each of 2 / 4 / 8 / 16 alone, bit for bit    ok
+mv rows IQ2_XS: each of 2 / 4 / 8 / 16 alone, bit for bit    ok
+mv rows Q5_K: each of 2 / 4 / 8 / 16 alone, bit for bit      ok
+mv rows Q6_K: each of 2 / 4 / 8 / 16 alone, bit for bit      ok
+mv int8 inputs: one launch, each its own = per job   ok
+mv int8 inputs: a launch a job, shared = per job     ok
+mv int8 inputs: one launch, shared (the default) = per job ok
+q8_batch_check (DS4_Q8_CHECK)                        ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 1, 1 rounds, random    ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 1, 1 rounds, edges     ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 1, 20 rounds, random   ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 1, 20 rounds, edges    ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 3, 1 rounds, random    ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 3, 1 rounds, edges     ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 3, 20 rounds, random   ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 3, 20 rounds, edges    ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 16, 1 rounds, random   ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 16, 1 rounds, edges    ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 16, 20 rounds, random  ok
+hc_mix_split = hc_mix + hc_split: hc 4, T 16, 20 rounds, edges   ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 1, 1 rounds, random    ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 1, 1 rounds, edges     ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 1, 20 rounds, random   ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 1, 20 rounds, edges    ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 3, 1 rounds, random    ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 3, 1 rounds, edges     ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 3, 20 rounds, random   ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 3, 20 rounds, edges    ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 16, 1 rounds, random   ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 16, 1 rounds, edges    ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 16, 20 rounds, random  ok
+hc_mix_split = hc_mix + hc_split: hc 2, T 16, 20 rounds, edges   ok
+head Q8_0, 16 rows: 8 a pass = 4 = 1                 ok
+head Q8_0, 5 rows: 8 a pass = 4 = 1                  ok
+head BF16, 16 rows: 8 a pass = 4 = 1                 ok
+head BF16, 5 rows: 8 a pass = 4 = 1                  ok
+head Q6_K, 16 rows: 8 a pass = 4 = 1                 ok
+head Q6_K, 5 rows: 8 a pass = 4 = 1                  ok
+markov bias, Q8_0 head                       ok    max rel err 6.73e-08 (at 2116: -0.639577 vs -0.639577)
+  ... minus the F16 head's: the rounding's   ok    max rel err 3.37e-05 (at 3434: 0.00193411 vs 0.00193422)
+markov_share_q8's shares = markov_add_q8's rows      ok
+IQ2_XXS/IQ3_XXS token experts (D 512, F 256) ok    max rel err 1.27e-07 (at 1105: -11.7469 vs -11.7469)
+  ... their h (gate / up, swiglu)            ok    max rel err 8.98e-08 (at 1843: -11.301 vs -11.301)
+  window experts (T 4)                       ok    max rel err 1.27e-07 (at 1105: -11.7469 vs -11.7469)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 1.67e-04 (at 18338: 8.69531 vs 8.69152)
+  set down, 90 rows, 90 light                ok    max rel err 6.66e-08 (at 40140: 27.6721 vs 27.6721)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 30 light    ok    max rel err 4.64e-04 (at 32090: -19.2344 vs -19.2465)
+  set down, 200 rows, 30 light               ok    max rel err 2.99e-04 (at 4193: 36.0167 vs 36.0293)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 4.70e-04 (at 88993: -23.875 vs -23.8881)
+  set down, 400 rows, 0 light                ok    max rel err 3.37e-04 (at 44346: -36.9486 vs -36.9321)
+  CPU lane gate/up (q8_K)                    ok    max rel err 6.65e-08 (at 19: 9.89515 vs 9.89515)
+  CPU lane down (q8_K)                       ok    max rel err 1.10e-07 (at 660: 18.4175 vs 18.4175)
+IQ2_S/IQ3_S token experts (D 512, F 256)     ok    max rel err 1.46e-07 (at 925: -8.45671 vs -8.45671)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.23e-07 (at 947: 11.1267 vs 11.1267)
+  window experts (T 4)                       ok    max rel err 1.46e-07 (at 925: -8.45671 vs -8.45671)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 2.62e-04 (at 2429: 19.3438 vs 19.3497)
+  set down, 90 rows, 90 light                ok    max rel err 1.01e-07 (at 36832: -25.5352 vs -25.5352)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 16 light    ok    max rel err 3.80e-04 (at 33111: 9.44531 vs 9.4349)
+  set down, 200 rows, 16 light               ok    max rel err 2.46e-04 (at 56967: 7.75844 vs 7.77189)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 4.91e-04 (at 8625: 18.8594 vs 18.8483)
+  set down, 400 rows, 0 light                ok    max rel err 2.42e-04 (at 106631: 4.62318 vs 4.6349)
+  CPU lane gate/up (q8_K)                    ok    max rel err 2.14e-07 (at 179: 11.1267 vs 11.1267)
+  CPU lane down (q8_K)                       ok    max rel err 7.43e-08 (at 8: -19.1346 vs -19.1346)
+IQ3_XXS/IQ3_S token experts (D 512, F 256)   ok    max rel err 1.26e-07 (at 653: -83.4544 vs -83.4544)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.20e-07 (at 3430: 78.4047 vs 78.4047)
+  window experts (T 4)                       ok    max rel err 1.26e-07 (at 653: -83.4544 vs -83.4544)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.12e-04 (at 2539: -73.3125 vs -73.3437)
+  set down, 90 rows, 90 light                ok    max rel err 6.73e-08 (at 12663: 164.493 vs 164.493)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 29 light    ok    max rel err 6.22e-04 (at 21337: -75.3125 vs -75.3747)
+  set down, 200 rows, 29 light               ok    max rel err 2.42e-04 (at 99791: 224.538 vs 224.46)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 5.94e-04 (at 92872: 37.7188 vs 37.7781)
+  set down, 400 rows, 0 light                ok    max rel err 2.77e-04 (at 22269: -233.447 vs -233.358)
+  CPU lane gate/up (q8_K)                    ok    max rel err 7.57e-08 (at 339: -43.7162 vs -43.7162)
+  CPU lane down (q8_K)                       ok    max rel err 7.09e-08 (at 793: -64.0919 vs -64.0919)
+IQ4_XS/Q4_K token experts (D 512, F 256)     ok    max rel err 1.21e-07 (at 1093: -719.443 vs -719.442)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.19e-06 (at 1926: 63.8875 vs 63.8876)
+  window experts (T 4)                       ok    max rel err 1.21e-07 (at 1093: -719.443 vs -719.442)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.12e-04 (at 2233: 75.5 vs 75.5312)
+  set down, 90 rows, 90 light                ok    max rel err 9.06e-08 (at 36694: 2813.05 vs 2813.05)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 24 light    ok    max rel err 4.47e-03 (at 19166: 21.6875 vs 21.2406)
+  set down, 200 rows, 24 light               ok    max rel err 2.36e-04 (at 26469: 1688.5 vs 1689.55)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 4.27e-03 (at 73639: -83.875 vs -84.302)
+  set down, 400 rows, 0 light                ok    max rel err 2.27e-04 (at 29140: 1548.58 vs 1549.41)
+  CPU lane gate/up (q8_K)                    ok    max rel err 7.92e-07 (at 425: -33.6277 vs -33.6278)
+  CPU lane down (q8_K)                       ok    max rel err 1.26e-07 (at 1299: 3449.33 vs 3449.33)
+Q2_K/Q3_K token experts (D 512, F 256)       ok    max rel err 6.98e-08 (at 708: 0.209704 vs 0.209704)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.41e-07 (at 4564: -0.563108 vs -0.563108)
+  window experts (T 4)                       ok    max rel err 6.98e-08 (at 708: 0.209704 vs 0.209704)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.44e-04 (at 3220: 1.02051 vs 1.02098)
+  set down, 90 rows, 90 light                ok    max rel err 7.16e-08 (at 6391: -1.34943 vs -1.34943)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 0 light     ok    max rel err 4.73e-04 (at 12995: 1.07422 vs 1.075)
+  set down, 200 rows, 0 light                ok    max rel err 2.14e-04 (at 296: -0.705198 vs -0.704821)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 4.78e-04 (at 44576: 1.08496 vs 1.08428)
+  set down, 400 rows, 0 light                ok    max rel err 2.33e-04 (at 52853: 0.539248 vs 0.539649)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.21e-07 (at 504: -0.411635 vs -0.411635)
+  CPU lane down (q8_K)                       ok    max rel err 7.11e-08 (at 1018: 0.232856 vs 0.232856)
+Q4_K/IQ4_XS token experts (D 512, F 256)     ok    max rel err 9.49e-08 (at 1756: -2126.43 vs -2126.43)
+  ... their h (gate / up, swiglu)            ok    max rel err 2.30e-07 (at 977: -55.7608 vs -55.7608)
+  window experts (T 4)                       ok    max rel err 9.49e-08 (at 1756: -2126.43 vs -2126.43)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.12e-04 (at 5271: 73.9375 vs 73.9063)
+  set down, 90 rows, 90 light                ok    max rel err 6.97e-08 (at 10639: 9975.13 vs 9975.13)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 58 light    ok    max rel err 1.11e-03 (at 25308: 72.375 vs 72.486)
+  set down, 200 rows, 58 light               ok    max rel err 2.45e-04 (at 45493: 1625.23 vs 1629.69)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 1.09e-03 (at 76143: 65.9375 vs 66.0466)
+  set down, 400 rows, 0 light                ok    max rel err 3.74e-04 (at 137381: -745.597 vs -739.754)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.57e-07 (at 449: 78.972 vs 78.972)
+  CPU lane down (q8_K)                       ok    max rel err 7.59e-08 (at 717: 4649.72 vs 4649.72)
+Q3_K/Q2_K token experts (D 512, F 256)       ok    max rel err 1.05e-07 (at 257: -0.75646 vs -0.75646)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.14e-07 (at 2790: 5.89124 vs 5.89124)
+  window experts (T 4)                       ok    max rel err 1.05e-07 (at 257: -0.75646 vs -0.75646)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 2.38e-04 (at 6578: -11.4922 vs -11.4889)
+  set down, 90 rows, 90 light                ok    max rel err 1.07e-07 (at 14019: -2.26854 vs -2.26854)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 27 light    ok    max rel err 4.19e-04 (at 15978: -11.7109 vs -11.717)
+  set down, 200 rows, 27 light               ok    max rel err 2.36e-04 (at 97394: -0.294872 vs -0.295642)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 3.07e-04 (at 65585: 8.1875 vs 8.19289)
+  set down, 400 rows, 0 light                ok    max rel err 2.90e-04 (at 152544: -0.639066 vs -0.638295)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.64e-07 (at 251: 3.73322 vs 3.73322)
+  CPU lane down (q8_K)                       ok    max rel err 7.52e-08 (at 1147: 0.707766 vs 0.707766)
+IQ3_S/IQ2_XXS token experts (D 512, F 256)   ok    max rel err 1.36e-07 (at 261: -13.8345 vs -13.8345)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.95e-07 (at 3157: 75.6375 vs 75.6375)
+  window experts (T 4)                       ok    max rel err 1.36e-07 (at 261: -13.8345 vs -13.8345)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 73 light     ok    max rel err 5.18e-04 (at 19276: 66.25 vs 66.1982)
+  set down, 90 rows, 73 light                ok    max rel err 2.04e-04 (at 45364: -20.7798 vs -20.7585)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 78 light    ok    max rel err 5.67e-04 (at 7025: -56.625 vs -56.6817)
+  set down, 200 rows, 78 light               ok    max rel err 2.79e-04 (at 12113: 95.5504 vs 95.5208)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 6.90e-04 (at 73194: 55.0312 vs 54.9623)
+  set down, 400 rows, 0 light                ok    max rel err 2.58e-04 (at 141586: 8.24694 vs 8.21796)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.16e-07 (at 86: -40.0305 vs -40.0306)
+  CPU lane down (q8_K)                       ok    max rel err 6.62e-08 (at 1004: -66.0851 vs -66.085)
+IQ3_S/IQ2_S token experts (D 512, F 256)     ok    max rel err 1.33e-07 (at 621: -16.1686 vs -16.1686)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.69e-07 (at 4451: 51.1289 vs 51.1289)
+  window experts (T 4)                       ok    max rel err 1.33e-07 (at 621: -16.1686 vs -16.1686)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 2.99e-04 (at 797: -68.8125 vs -68.8421)
+  set down, 90 rows, 90 light                ok    max rel err 9.67e-08 (at 5587: -85.2619 vs -85.2619)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 27 light    ok    max rel err 6.00e-04 (at 44331: -69.875 vs -69.935)
+  set down, 200 rows, 27 light               ok    max rel err 2.26e-04 (at 1: -2.51402 vs -2.48721)
+  set gate/up, 400 rows, F16 rows gds4: CPU lane iq1_m rows: AVX-512
+iven       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 5.27e-04 (at 26992: -66.25 vs -66.1973)
+  set down, 400 rows, 0 light                ok    max rel err 2.05e-04 (at 135629: -48.2818 vs -48.253)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.06e-07 (at 487: 68.1406 vs 68.1406)
+  CPU lane down (q8_K)                       ok    max rel err 5.70e-08 (at 968: -89.3955 vs -89.3955)
+IQ1_S/IQ1_M token experts (D 512, F 256)     ok    max rel err 7.55e-08 (at 700: -0.130667 vs -0.130667)
+  ... their h (gate / up, swiglu)            ok    max rel err 8.70e-08 (at 2916: -0.139606 vs -0.139606)
+  window experts (T 4)                       ok    max rel err 7.55e-08 (at 700: -0.130667 vs -0.130667)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 2.66e-04 (at 12955: -0.127075 vs -0.127018)
+  set down, 90 rows, 90 light                ok    max rel err 9.84e-08 (at 14515: -0.0117042 vs -0.0117042)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 0 light     ok    max rel err 4.12e-04 (at 28206: 0.140747 vs 0.140847)
+  set down, 200 rows, 0 light                ok    max rel err 2.47e-04 (at 934: -0.00851841 vs -0.00851075)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 5.62e-04 (at 44911: -0.166138 vs -0.16599)
+  set down, 400 rows, 0 light                ok    max rel err 2.48e-04 (at 64830: 0.0140926 vs 0.014085)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.36e-07 (at 19: 0.144828 vs 0.144828)
+  CPU lane down (q8_K)                       ok    max rel err 9.72e-08 (at 760: 0.0158469 vs 0.0158469)
+IQ1_M/IQ1_S token experts (D 512, F 256)     ok    max rel err 8.74e-08 (at 933: -0.152178 vs -0.152178)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.72e-07 (at 1566: 0.208608 vs 0.208608)
+  window experts (T 4)                       ok    max rel err 8.74e-08 (at 933: -0.152178 vs -0.152178)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.06e-04 (at 8299: -0.17749 vs -0.177551)
+  set down, 90 rows, 90 light                ok    max rel err 1.25e-07 (at 25342: 0.0169177 vs 0.0169177)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 23 light    ok    max rel err 7.76e-04 (at 20935: 0.140015 vs 0.140182)
+  set down, 200 rows, 23 light               ok    max rel err 2.68e-04 (at 90198: 0.0104619 vs 0.010454)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 6.33e-04 (at 12309: -0.266113 vs -0.266282)
+  set down, 400 rows, 0 light                ok    max rel err 2.27e-04 (at 4681: 0.0144565 vs 0.0144642)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.41e-07 (at 304: -0.177104 vs -0.177104)
+  CPU lane down (q8_K)                       ok    max rel err 7.90e-08 (at 947: -0.0078946 vs -0.0078946)
+IQ1_M/IQ2_XXS token experts (D 512, F 256)   ok    max rel err 4.95e-08 (at 1011: -0.12763 vs -0.12763)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.07e-07 (at 2553: -0.149089 vs -0.149089)
+  window experts (T 4)                       ok    max rel err 4.95e-08 (at 1011: -0.12763 vs -0.12763)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 4.21e-04 (at 18409: 0.266846 vs 0.266733)
+  set down, 90 rows, 90 light                ok    max rel err 1.35e-07 (at 12391: 0.0948083 vs 0.0948083)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 37 light    ok    max rel err 4.62e-04 (at 38015: -0.127075 vs -0.127167)
+  set down, 200 rows, 37 light               ok    max rel err 2.30e-04 (at 24396: -0.0345463 vs -0.0345916)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 3.63e-04 (at 38829: -0.254395 vs -0.254263)
+  set down, 400 rows, 0 light                ok    max rel err 2.18e-04 (at 26436: 0.108142 vs 0.108199)
+  CPU lane gate/up (q8_K)                    ok    max rel err 9.43e-08 (at 216: -0.0539318 vs -0.0539318)
+  CPU lane down (q8_K)                       ok    max rel err 6.29e-08 (at 1468: 0.0895406 vs 0.0895406)
+IQ3_XXS/MXFP4 token experts (D 512, F 256)   ok    max rel err 1.18e-07 (at 1024: -67.5736 vs -67.5736)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.10e-07 (at 3284: 36.7185 vs 36.7186)
+  window experts (T 4)                       ok    max rel err 1.18e-07 (at 1024: -67.5736 vs -67.5736)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.06e-04 (at 22785: -65.3125 vs -65.3431)
+  set down, 90 rows, 90 light                ok    max rel err 9.02e-08 (at 16588: 220.598 vs 220.598)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 43 light    ok    max rel err 5.92e-04 (at 47235: -56.6875 vs -56.6283)
+  set down, 200 rows, 43 light               ok    max rel err 5.99e-07 (at 42544: -149.102 vs -149.102)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 5.04e-04 (at 361: 47.2188 vs 47.2691)
+  set down, 400 rows, 0 light                ok    max rel err 7.37e-07 (at 54291: -270.987 vs -270.987)
+  CPU lane                                   skip  (an MXFP4 role: the engine's cpu_experts_both, DS4_LANE_CHECK)
+MXFP4/IQ3_S token experts (D 512, F 256)     ok    max rel err 1.58e-07 (at 659: 93.1568 vs 93.1568)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.43e-07 (at 2122: 64.7138 vs 64.7138)
+  window experts (T 4)                       ok    max rel err 1.58e-07 (at 659: 93.1568 vs 93.1568)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.09e-04 (at 19119: 66.75 vs 66.7809)
+  set down, 90 rows, 90 light                ok    max rel err 9.78e-08 (at 25616: 314.398 vs 314.398)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 43 light    ok    max rel err 4.71e-04 (at 2702: -52.3438 vs -52.2966)
+  set down, 200 rows, 43 light               ok    max rel err 2.14e-04 (at 54749: 155.236 vs 155.321)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 5.02e-04 (at 83774: -80.375 vs -80.4252)
+  set down, 400 rows, 0 light                ok    max rel err 2.83e-04 (at 178023: 230.122 vs 230.014)
+  CPU lane                                   skip  (an MXFP4 role: the engine's cpu_experts_both, DS4_LANE_CHECK)
+IQ2_S/MXFP4 token experts (D 512, F 256)     ok    max rel err 1.26e-07 (at 208: 9.57722 vs 9.57722)
+  ... their h (gate / up, swiglu)            ok    max rel err 6.72e-08 (at 2446: -6.86248 vs -6.86248)
+  window experts (T 4)                       ok    max rel err 1.26e-07 (at 208: 9.57722 vs 9.57722)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 2.93e-04 (at 10622: -25.8281 vs -25.8357)
+  set down, 90 rows, 90 light                ok    max rel err 1.07e-07 (at 43831: -57.7071 vs -57.7071)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 0 light     ok    max rel err 5.01e-04 (at 46206: 10.8203 vs 10.8103)
+  set down, 200 rows, 0 light                ok    max rel err 5.79e-07 (at 93799: 36.2322 vs 36.2322)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 4.17e-04 (at 39264: -18.8281 vs -18.8163)
+  set down, 400 rows, 0 light                ok    max rel err 6.18e-07 (at 193829: 34.9899 vs 34.99)
+  CPU lane                                   skip  (an MXFP4 role: the engine's cpu_experts_both, DS4_LANE_CHECK)
+IQ4_NL/IQ4_NL token experts (D 512, F 256)   ok    max rel err 9.76e-08 (at 1994: -4.84378 vs -4.84378)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.47e-07 (at 5356: 13.2602 vs 13.2602)
+  window experts (T 4)                       ok    max rel err 9.76e-08 (at 1994: -4.84378 vs -4.84378)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 72 light     ok    max rel err 4.47e-04 (at 9258: 33 vs 32.9853)
+  set down, 90 rows, 72 light                ok    max rel err 2.20e-04 (at 10669: -13.8097 vs -13.8148)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 38 light    ok    max rel err 4.20e-04 (at 26892: -43.1875 vs -43.1694)
+  set down, 200 rows, 38 light               ok    max rel err 2.34e-04 (at 53855: 12.8116 vs 12.8182)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 3.23e-04 (at 59370: -36.8125 vs -36.8244)
+  set down, 400 rows, 0 light                ok    max rel err 2.57e-04 (at 139496: -3.43613 vs -3.42855)
+  CPU lane gate/up (q8_0)                    ok    max rel err 9.07e-08 (at 428: 8.29565 vs 8.29565)
+  CPU lane down (q8_0)                       ok    max rel err 7.89e-08 (at 1005: -7.67123 vs -7.67123)
+IQ4_NL/IQ2_S token experts (D 512, F 256)    ok    max rel err 9.27e-08 (at 1902: -5.14909 vs -5.14909)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.19e-07 (at 3240: -10.4771 vs -10.4771)
+  window experts (T 4)                       ok    max rel err 9.27e-08 (at 1902: -5.14909 vs -5.14909)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 3.05e-04 (at 2778: 17.1094 vs 17.1171)
+  set down, 90 rows, 90 light                ok    max rel err 7.79e-08 (at 40978: -20.2692 vs -20.2692)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 16 light    ok    max rel err 5.36e-04 (at 36046: -16.4375 vs -16.4202)
+  set down, 200 rows, 16 light               ok    max rel err 2.26e-04 (at 78233: -4.38377 vs -4.37685)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 4.65e-04 (at 35979: 18.9219 vs 18.9072)
+  set down, 400 rows, 0 light                ok    max rel err 2.23e-04 (at 7773: -14.0595 vs -14.0534)
+  CPU lane gate/up (q8_0)                    ok    max rel err 1.25e-07 (at 613: -16.3237 vs -16.3237)
+  CPU lane down (q8_K)                       ok    max rel err 7.23e-08 (at 461: -21.9961 vs -21.9961)
+IQ1_M/IQ4_NL token experts (D 512, F 256)    ok    max rel err 7.22e-08 (at 659: -0.149644 vs -0.149644)
+  ... their h (gate / up, swiglu)            ok    max rel err 1.64e-07 (at 1050: 0.177775 vs 0.177775)
+  window experts (T 4)                       ok    max rel err 7.22e-08 (at 659: -0.149644 vs -0.149644)
+  ... bit for bit the token path's           ok
+  set gate/up, 90 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 90 rows, 90 light     ok    max rel err 2.27e-04 (at 1296: -0.149536 vs -0.149592)
+  set down, 90 rows, 90 light                ok    max rel err 1.03e-07 (at 38570: -0.131201 vs -0.131201)
+  set gate/up, 200 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 200 rows, 30 light    ok    max rel err 4.42e-04 (at 16752: 0.158081 vs 0.158218)
+  set down, 200 rows, 30 light               ok    max rel err 2.24e-04 (at 36132: -0.0129642 vs -0.0129093)
+  set gate/up, 400 rows, F16 rows given       ok    (bit for bit the F32 rows')
+  set gate/up (F16 h), 400 rows, 0 light     ok    max rel err 5.76e-04 (at 24853: -0.15979 vs -0.159642)
+  set down, 400 rows, 0 light                ok    max rel err 2.90e-04 (at 145665: -0.0569865 vs -0.0569192)
+  CPU lane gate/up (q8_K)                    ok    max rel err 1.26e-07 (at 299: 0.0931665 vs 0.0931665)
+  CPU lane down (q8_0)                       ok    max rel err 1.13e-07 (at 292: 0.104932 vs 0.104932)
+persistent grids IQ1_M/IQ1_S (D 1024, F 512)         skip  (not on this platform)
+persistent grids IQ1_S/IQ1_M (D 1024, F 512)         skip  (not on this platform)
+persistent grids IQ2_S/IQ1_M (D 1024, F 512)         skip  (not on this platform)
+persistent grids IQ1_M/IQ2_S (D 1024, F 512)         skip  (not on this platform)
+persistent grids IQ2_S/MXFP4 (D 1024, F 512)         skip  (not on this platform)
+persistent grids IQ1_M/IQ1_S (D 5120, F 2304)        skip  (not on this platform)
+lane: MXFP4, 3 of 6 streamed                 ok    bit for bit all in VRAM
+lane: MXFP4, none streamed                   ok    bit for bit all in VRAM
+lane: MXFP4, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: MXFP4, none streamed (read in place)   ok    bit for bit all in VRAM
+lane: IQ2_XXS/IQ3_XXS, 3 of 6 streamed       ok    bit for bit all in VRAM
+lane: IQ2_XXS/IQ3_XXS, none streamed         ok    bit for bit all in VRAM
+lane: IQ2_XXS/IQ3_XXS, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ2_XXS/IQ3_XXS, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ2_S/IQ3_S, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: IQ2_S/IQ3_S, none streamed             ok    bit for bit all in VRAM
+lane: IQ2_S/IQ3_S, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ2_S/IQ3_S, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_XXS/IQ3_S, 3 of 6 streamed         ok    bit for bit all in VRAM
+lane: IQ3_XXS/IQ3_S, none streamed           ok    bit for bit all in VRAM
+lane: IQ3_XXS/IQ3_S, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_XXS/IQ3_S, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ4_XS/Q4_K, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: IQ4_XS/Q4_K, none streamed             ok    bit for bit all in VRAM
+lane: IQ4_XS/Q4_K, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ4_XS/Q4_K, none streamed (read in place) ok    bit for bit all in VRAM
+lane: Q2_K/Q3_K, 3 of 6 streamed             ok    bit for bit all in VRAM
+lane: Q2_K/Q3_K, none streamed               ok    bit for bit all in VRAM
+lane: Q2_K/Q3_K, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: Q2_K/Q3_K, none streamed (read in place) ok    bit for bit all in VRAM
+lane: Q4_K/IQ4_XS, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: Q4_K/IQ4_XS, none streamed             ok    bit for bit all in VRAM
+lane: Q4_K/IQ4_XS, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: Q4_K/IQ4_XS, none streamed (read in place) ok    bit for bit all in VRAM
+lane: Q3_K/Q2_K, 3 of 6 streamed             ok    bit for bit all in VRAM
+lane: Q3_K/Q2_K, none streamed               ok    bit for bit all in VRAM
+lane: Q3_K/Q2_K, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: Q3_K/Q2_K, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_XXS, 3 of 6 streamed         ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_XXS, none streamed           ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_XXS, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_XXS, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_S, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_S, none streamed             ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_S, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_S/IQ2_S, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_S/IQ1_M, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: IQ1_S/IQ1_M, none streamed             ok    bit for bit all in VRAM
+lane: IQ1_S/IQ1_M, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_S/IQ1_M, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_M/IQ1_S, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: IQ1_M/IQ1_S, none streamed             ok    bit for bit all in VRAM
+lane: IQ1_M/IQ1_S, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_M/IQ1_S, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_M/IQ2_XXS, 3 of 6 streamed         ok    bit for bit all in VRAM
+lane: IQ1_M/IQ2_XXS, none streamed           ok    bit for bit all in VRAM
+lane: IQ1_M/IQ2_XXS, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_M/IQ2_XXS, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_XXS/MXFP4, 3 of 6 streamed         ok    bit for bit all in VRAM
+lane: IQ3_XXS/MXFP4, none streamed           ok    bit for bit all in VRAM
+lane: IQ3_XXS/MXFP4, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ3_XXS/MXFP4, none streamed (read in place) ok    bit for bit all in VRAM
+lane: MXFP4/IQ3_S, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: MXFP4/IQ3_S, none streamed             ok    bit for bit all in VRAM
+lane: MXFP4/IQ3_S, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: MXFP4/IQ3_S, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ2_S/MXFP4, 3 of 6 streamed           ok    bit for bit all in VRAM
+lane: IQ2_S/MXFP4, none streamed             ok    bit for bit all in VRAM
+lane: IQ2_S/MXFP4, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ2_S/MXFP4, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ4_NL, 3 of 6 streamed         ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ4_NL, none streamed           ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ4_NL, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ4_NL, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ2_S, 3 of 6 streamed          ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ2_S, none streamed            ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ2_S, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ4_NL/IQ2_S, none streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_M/IQ4_NL, 3 of 6 streamed          ok    bit for bit all in VRAM
+lane: IQ1_M/IQ4_NL, none streamed            ok    bit for bit all in VRAM
+lane: IQ1_M/IQ4_NL, 3 of 6 streamed (read in place) ok    bit for bit all in VRAM
+lane: IQ1_M/IQ4_NL, none streamed (read in place) ok    bit for bit all in VRAM
+FAILED (2 failed)

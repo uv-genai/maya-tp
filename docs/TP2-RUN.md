@@ -409,3 +409,11 @@ Model load/unload, idle unload and automatic dead-engine restart are guarded und
 TP2 refuses images/videos before encoding or lending the expert cache. Direct `GENI`, `VLEND`, `VRECLAIM` and `LOGP` commands are rejected before state changes because no paired operation exists. A vision config is ignored for a TP2 launch, keeping text inference available without starting an encoder. RDMA embedding synchronization remains deferred in #16.
 
 To stress idle wake-up (#64), configure BOTH ranks with `MAYA_GLM_SERVICE_IDLE_MS=10`, `MAYA_GLM_SERVICE_DEEP_S=1`, `MAYA_GLM_SERVICE_DEEP_MS=3000`, then run `tools/tp2/regression_collectives.py --mode mtp --idle-seconds 3 --max-long-decode-ratio 4 --output /tmp/idle-wake.json`. The optional bound rejects repeated deep-sleep delays in decode after the long prefill; prefill time is excluded. Restore normal settings afterward. The regression keeps the ordinary correctness/reuse/stream/peer checks.
+
+## Continuation boundary probes
+
+On a matching4096-context pair with MTP enabled, `tools/tp2/continuation_boundaries.py --eos-id ID --output PATH` verifies unsupported MTP-bias rejection, supported simple-loop EOS continuation at the context boundary, and normal MTP follow-up. Use the EOS id from the selected pack. Its `--forced-follow` mode requires the explicit EOS follow-token diagnostic on both ranks and tests MTP/simple continuation branches; forced-token results are not numerical-fidelity evidence.
+
+TP2 MTP currently enforces greedy verification and rejects nonempty `logit_bias` (#69). For ordinary decoding with bias, use `strata_tune: {"spec": 1}`. No MTP sampling algorithm was changed.
+
+For long-loop cache validation on a fresh matching32768-context pair, run `tools/tp2/long_loop_reuse.py` with `--expect-preserved` at the default collapse limit32000, or `--expect-collapsed` with config limit0. Synthetic tool history is input data; no tool executes. Keep separate output paths for both arms.

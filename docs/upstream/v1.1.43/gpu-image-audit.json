@@ -1,0 +1,12 @@
+[
+  {
+    "path": "/tmp/maya-upstream-v42-baseline/maya",
+    "binary_md5": "bc4e90a607b87fe609398fbdba0fb98c",
+    "gpu_image_sha256": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+  },
+  {
+    "path": "build-hip/maya",
+    "binary_md5": "b398d4a0711430edd6a28b95264c7293",
+    "gpu_image_sha256": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+  }
+]

@@ -1,0 +1,125 @@
+{
+  "baseline": "b1867c8",
+  "unchanged_files": [
+    {
+      "file": "README.md",
+      "sha256": "41ac6e4fd6352ecbddc2eabccfd69f0d119d4ac1810e133aaceadd2d6bf4118f",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "AGENTS.md",
+      "sha256": "7213be74212a213c9136ac0547996d5cd8d32f4a5c9aac2ba4d7a3b20e3ad67f",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "VERSION",
+      "sha256": "9f97fc6b97adfd411f3ad8a83cb01eb17351ccc1bfdf584e93563b309c365e4c",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "setup.py",
+      "sha256": "20bcf7da4024e278a7078b85f3a260dce7b64f82015e9afa867822ebb1aeda54",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "cmake/hip_backend.cmake",
+      "sha256": "3f7b533aef79451c23589b678aacd0f9d7d8533a962f01b196fb049c754518f4",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/core/glm_model.cu",
+      "sha256": "ec3db8d02df17c220ae93bf69eb71bf5954c999b85a6dfc5706e7a1d65ecf468",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/core/glm_window.cu",
+      "sha256": "713cf578e69b9d54134978d199f75dcaf987d5e75e8f0dad8efa64352f65ad41",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/core/glm_rows.cu",
+      "sha256": "223f7b6e25cae4b4e8b8a9e17a7daaa1be1daf4b192f112c750cd2094d53c353",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/core/glm_mtp.cu",
+      "sha256": "8d15bede26c9471fa3cdd877a807ebeb64a297cf52a1b6c9bc8f382ca1448483",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "include/strata/core/tp_partition.hpp",
+      "sha256": "9662f2d1869cbd2e559f1f2e6f0aa5a67564195b8434af9bf8b59877c92f23df",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "include/strata/core/tp_context.hpp",
+      "sha256": "e408ab339d537b312db003efaf48182308426bd1f2e3be392d88e16b2b3fa8da",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "include/strata/core/expert_cache.hpp",
+      "sha256": "85ced9aac7635decc0766c42b92c001c557a83c61943eb272adb9dd05bd17fd1",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/core/expert_cache.cpp",
+      "sha256": "f8bbe8008771391274a2b1e12424fb4dde894514290d2655c78f38165520b325",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "include/strata/core/mtp.hpp",
+      "sha256": "6d2541ab93d2adb0c1c0694da26cb47c10f6517975b1f5faf0ec7c269a01f6cb",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/core/mtp.cpp",
+      "sha256": "25f0b9046ce1ccce4c0978445ff09dd4864ca25b2948942cd5bba112174359cc",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/net/verbs.cpp",
+      "sha256": "1afa0be374695fb4d38e173082f3b33522c7cfa1fe1e910b5a9dfacfae59c3dc",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/net/tp_kernels.cu",
+      "sha256": "f8c0258afe46e95a43bd87dfb9fd1bc7eecd09da790cde87eedcd6ea563dcf9b",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "tools/tp2/model_env.sh",
+      "sha256": "f3680e9a6f675cec3fe8d7f1bf5194a8bf989a33d23f7fbee7f254f96fb99337",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "tools/tp2/rank0.sh",
+      "sha256": "395f1dd52d3c1f70134b0b462484debe49cd15b976b031eaa238011ccc1262d6",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "tools/hip/gfx1151-glm-hipblaslt-100401.txt",
+      "sha256": "fb0f97b615ccc728d51027f168e3787672057bb3fc674f5c460da68627ba5887",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "tools/tp2/rank1.sh",
+      "sha256": "5fcb9b5fd5df242f455720d7c67c3033113c7e72b2f38c6555df1da05c3f7135",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "src/core/glm_mtp_rows.cu",
+      "sha256": "a0845ec61acf10e62a8bac5350780c5d1a90c5f8042abd3b73e9d0ac57fe3804",
+      "unchanged_from_accepted42": true
+    },
+    {
+      "file": "include/strata/core/mtp_rows.hpp",
+      "sha256": "dc0a782b34e65e23a50512778f3ac140bf29e0e73d5283482d65145c911e1e39",
+      "unchanged_from_accepted42": true
+    }
+  ],
+  "source_guards": {
+    "tp_cancel_finishes_entire_prefill": true,
+    "continuations_total_budget": true,
+    "tp_bias_guard": true
+  }
+}

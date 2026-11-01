@@ -1,0 +1,236 @@
+{
+  "accepted": false,
+  "upstream": "acdab34bd58eec957715392a1d822777c3c579c3",
+  "runtime_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
+  "binary_md5": "b398d4a0711430edd6a28b95264c7293",
+  "cpu": {
+    "hip_mapping": "pass",
+    "serve": {
+      "tests": 602,
+      "skips": 11
+    },
+    "tools": {
+      "tests": 677,
+      "skips": 33
+    },
+    "host_checks": 17,
+    "node": "pass"
+  },
+  "gpu": {
+    "targets": [
+      "maya",
+      "maya-ds4",
+      "maya-mm3"
+    ],
+    "arch": "gfx1151",
+    "affected_engram": "pass",
+    "full_ds4_suite": "FAIL: pre-existing WMMA issue68 reproduced on accepted42 control; not fixed",
+    "glm_gpu_image_identical_accepted42": true,
+    "gpu_image_sha256": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+  },
+  "new_continuation_boundaries": {
+    "normal": "pass",
+    "forced_eos": "pass; branch coverage only, not fidelity",
+    "mtp_bias_guard": "pass"
+  },
+  "state": {
+    "matched_rounds": 133,
+    "matched_window_attempts": 8,
+    "asymmetric_retries": 8,
+    "rank0_segment_start_line": 10,
+    "segmentation": "rank0 log appends across engine restarts; keep full raw log and audit from last startup header",
+    "long_decode": {
+      "mtp": {
+        "short_ms_per_token": 491.19375,
+        "long_ms_per_token": 74.784375,
+        "ratio": 0.1522502576630912,
+        "maximum_ratio": 4
+      },
+      "simple": {
+        "short_ms_per_token": 41.6390625,
+        "long_ms_per_token": 43.475,
+        "ratio": 1.0440917107583774,
+        "maximum_ratio": 4
+      }
+    },
+    "prefill_cancel_modes": [
+      "mtp",
+      "simple"
+    ],
+    "both_peer_up": true
+  },
+  "reused_evidence": {
+    "from": "accepted42",
+    "scope": "Identical GLM math kernels, M/L strict raw reference paths; new server behavior covered CPU and live S boundaries/state",
+    "not_claimed": "No fresh43 M/L cold-start or performance measurements"
+  },
+  "open_issues": [
+    68,
+    33,
+    42,
+    46,
+    52,
+    54,
+    60,
+    11,
+    16
+  ],
+  "pending": [
+    "final head CI",
+    "merge",
+    "post-main CI"
+  ],
+  "long_loop_A_B": {
+    "first_semantic_message_usage_equal": true,
+    "normalization": "Only server-allocated random tool-call IDs; raw original messages retained",
+    "policies": [
+      {
+        "policy": "collapse",
+        "initial_tokens": 20021,
+        "follow_cached": 0,
+        "collapsed": 1,
+        "follow_prompt_tokens": 20042,
+        "prompt_ms": 61761.3,
+        "completion_tokens": 8
+      },
+      {
+        "policy": "keep",
+        "initial_tokens": 20021,
+        "follow_cached": 20020,
+        "collapsed": 0,
+        "follow_prompt_tokens": 20128,
+        "prompt_ms": 1141.8,
+        "completion_tokens": 8
+      }
+    ],
+    "speed_ratio": 54.091171833946404,
+    "scope": "Synthetic long repeating tool history only, not general prefill throughput"
+  },
+  "cli_tokens_each_rank_each_mode": 32,
+  "benchmark_framing": {
+    "issue": 71,
+    "regression": "real OS pipes with fragmented diagnostics, early/late footer and two sequential requests",
+    "before": "2 errors",
+    "after": "pass",
+    "engine_changed": false
+  },
+  "peer_recovery_passes": 8,
+  "candidate_framed_records": 16,
+  "candidate_raw_pick_differences": 0,
+  "prefill_A_B": {
+    "baseline_md5": "bc4e90a607b87fe609398fbdba0fb98c",
+    "candidate_md5": "b398d4a0711430edd6a28b95264c7293",
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "warmup": "first full1K/4K/8K cycle retained in raw data and excluded from medians",
+    "pairs": [
+      {
+        "trial": 0,
+        "prompt_tokens": 990,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 1,
+        "prompt_tokens": 4062,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 2,
+        "prompt_tokens": 8158,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 3,
+        "prompt_tokens": 990,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 4,
+        "prompt_tokens": 4062,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 5,
+        "prompt_tokens": 8158,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 6,
+        "prompt_tokens": 990,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 7,
+        "prompt_tokens": 4062,
+        "messages_equal": true,
+        "usage_equal": true
+      },
+      {
+        "trial": 8,
+        "prompt_tokens": 8158,
+        "messages_equal": true,
+        "usage_equal": true
+      }
+    ],
+    "summary": [
+      {
+        "repeats": 960,
+        "warm_samples_per_arm": 2,
+        "baseline_prompt_ms": 3676.8,
+        "candidate_prompt_ms": 3642.45,
+        "throughput_delta_percent": 0.9430465757937823,
+        "baseline_samples_ms": [
+          3744.8,
+          3608.8
+        ],
+        "candidate_samples_ms": [
+          3642.3,
+          3642.6
+        ]
+      },
+      {
+        "repeats": 4032,
+        "warm_samples_per_arm": 2,
+        "baseline_prompt_ms": 12371.6,
+        "candidate_prompt_ms": 12416.55,
+        "throughput_delta_percent": -0.3620168243191446,
+        "baseline_samples_ms": [
+          12283.2,
+          12460.0
+        ],
+        "candidate_samples_ms": [
+          12493.9,
+          12339.2
+        ]
+      },
+      {
+        "repeats": 8128,
+        "warm_samples_per_arm": 2,
+        "baseline_prompt_ms": 23520.75,
+        "candidate_prompt_ms": 23608.95,
+        "throughput_delta_percent": -0.3735871353872211,
+        "baseline_samples_ms": [
+          23640.7,
+          23400.8
+        ],
+        "candidate_samples_ms": [
+          23541.9,
+          23676.0
+        ]
+      }
+    ]
+  },
+  "live_executable_proof": [
+    "prefill-ab/process-candidate.json",
+    "prefill-ab/process-baseline.json"
+  ]
+}

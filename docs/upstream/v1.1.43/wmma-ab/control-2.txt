@@ -1,0 +1,76 @@
+kv pack: compressed KV (FP4 + E4M3 / 16)     ok    16385 rows x 512, 0 of 8389120 values differ (first at 0), 288 B a row vs 1024
+kv pack: index keys (FP4 + 2^k / 32)         ok    16385 rows x 128, 0 of 2097280 values differ (first at 0), 80 B a row vs 256
+kv pack: finish leaves its input             ok    33556480 bytes identical
+kv pack: window ring (FP8 + 2^k / 32)        ok    4194304 values, 0 differ through the ring, 0 from the finish's packing; 528 B a row vs 1024
+kv pack: window ring rollback                ok    67584 bytes identical
+kv pack: sparse attention, 1 query           ok    identical every way; BF16 rows 78.8 us a call, packed 87.9 (decoded once a query 87.8, staged 189.3)
+kv pack: sparse attention, 2 queries         ok    identical every way; BF16 rows 114.6 us a call, packed 123.0 (decoded once a query 122.9, staged 243.3)
+kv pack: sparse attention, 4 queries         ok    identical every way; BF16 rows 211.8 us a call, packed 221.1 (decoded once a query 218.7, staged 341.2)
+kv pack: sparse attention, 8 queries         ok    identical every way; BF16 rows 373.7 us a call, packed 515.5 (decoded once a query 393.7, staged 515.6)
+kv pack: sparse attention, 16 queries             ok    matrix cores: finite 1, max_abs 8.09e+01, rel 4.10e-06, worst/rms 1.76e-03, 197.4 us a call
+kv pack: sparse attention, 16 queries        ok    identical every way; BF16 rows 540.3 us a call, packed 643.0 (decoded once a query 564.0, staged 644.2)
+kv pack: sparse attention, a chunk slab of 16     ok    matrix cores: finite 1, max_abs 8.09e+01, rel 4.10e-06, worst/rms 1.76e-03, 274.3 us a call
+kv pack: sparse attention, a chunk slab of 16 ok    identical every way; BF16 rows 844.5 us a call, packed 1179.8 (decoded once a query 881.1, staged 1181.4)
+kv pack: sparse attention, a chunk slab of 256    FAIL  matrix cores: finite 1, max_abs 1.21e+04, rel 2.20e-04, worst/rms 2.71e-01, 3467.4 us a call
+kv pack: sparse attention, a chunk slab of 256 ok    identical every way; BF16 rows 13863.9 us a call, packed 14482.4 (decoded once a query 14454.7, staged 14437.3)
+kv pack: WMMA partial tiles / empty rows T=16 H=16 ok   finite 1 max_abs 1.98e-05 rel 1.11e-05 worst/rms 2.46e-03
+  WMMA worst index 99344 token 12 head 2 dim 16 query_mag 1000 ref 0.646452367 got 0.646472216
+kv pack: WMMA partial tiles / empty rows T=16 H=32 ok   finite 1 max_abs 2.51e-05 rel 1.28e-05 worst/rms 3.29e-03
+  WMMA worst index 197968 token 12 head 2 dim 336 query_mag 1000 ref 0.553246439 got 0.553271532
+kv pack: WMMA partial tiles / empty rows T=16 H=64 ok   finite 1 max_abs 4.17e-05 rel 1.63e-05 worst/rms 5.79e-03
+  WMMA worst index 435472 token 13 head 18 dim 272 query_mag 1000 ref 0.622890592 got 0.622848868
+kv pack: WMMA position 0 ratio 0       T=256 H=64 ok   finite 1 max_abs 5.13e-05 rel 9.28e-06 worst/rms 5.41e-03
+  WMMA worst index 6898768 token 210 head 34 dim 80 query_mag 1000 ref 0.447526544 got 0.447577864
+kv pack: WMMA position 0 ratio 1       T=256 H=64 ok   finite 1 max_abs 6.28e-05 rel 1.23e-05 worst/rms 6.40e-03
+  WMMA worst index 8078608 token 246 head 34 dim 272 query_mag 1000 ref 0.521783531 got 0.521720707
+kv pack: WMMA position 0 ratio 2       T=256 H=64 ok   finite 1 max_abs 6.50e-05 rel 1.16e-05 worst/rms 6.69e-03
+  WMMA worst index 4678752 token 142 head 50 dim 96 query_mag 1000 ref 0.459387153 got 0.459322125
+kv pack: WMMA position 0 ratio 4       T=256 H=64 ok   finite 1 max_abs 7.52e-05 rel 1.03e-05 worst/rms 7.75e-03
+  WMMA worst index 6259792 token 191 head 2 dim 80 query_mag 1000 ref 0.573801994 got 0.573877215
+kv pack: WMMA position 0 ratio 128     T=256 H=64 ok   finite 1 max_abs 5.79e-05 rel 9.24e-06 worst/rms 6.05e-03
+  WMMA worst index 7603392 token 232 head 2 dim 192 query_mag 1000 ref 0.46230042 got 0.462242514
+kv pack: WMMA position 8192 ratio 0    T=256 H=64 ok   finite 1 max_abs 5.52e-05 rel 1.06e-05 worst/rms 5.36e-03
+  WMMA worst index 6710288 token 204 head 50 dim 16 query_mag 1000 ref 0.406435937 got 0.406380743
+kv pack: WMMA position 8192 ratio 1    T=256 H=64 ok   finite 1 max_abs 6.91e-05 rel 1.56e-05 worst/rms 6.62e-03
+  WMMA worst index 5850128 token 178 head 34 dim 16 query_mag 1000 ref 0.35670948 got 0.356778532
+kv pack: WMMA position 8192 ratio 2    T=256 H=64 ok   finite 1 max_abs 5.49e-05 rel 1.48e-05 worst/rms 5.32e-03
+  WMMA worst index 2024528 token 61 head 50 dim 80 query_mag 1000 ref 0.424153119 got 0.424208045
+kv pack: WMMA position 8192 ratio 4    T=256 H=64 ok   finite 1 max_abs 6.83e-05 rel 1.68e-05 worst/rms 6.56e-03
+  WMMA worst index 7955504 token 242 head 50 dim 48 query_mag 1000 ref 0.503533065 got 0.503601372
+kv pack: WMMA position 8192 ratio 128  T=256 H=64 ok   finite 1 max_abs 6.91e-05 rel 1.13e-05 worst/rms 6.68e-03
+  WMMA worst index 7767536 token 237 head 2 dim 496 query_mag 1000 ref 0.324387938 got 0.324318886
+kv pack: WMMA position 32768 ratio 0   T=256 H=64 ok   finite 1 max_abs 6.09e-05 rel 1.06e-05 worst/rms 5.94e-03
+  WMMA worst index 5751824 token 175 head 34 dim 16 query_mag 1000 ref 0.433550477 got 0.433489561
+kv pack: WMMA position 32768 ratio 1   T=256 H=64 ok   finite 1 max_abs 5.22e-05 rel 1.50e-05 worst/rms 4.99e-03
+  WMMA worst index 7308512 token 223 head 2 dim 224 query_mag 1000 ref 0.465404272 got 0.465352029
+kv pack: WMMA position 32768 ratio 2   T=256 H=64 ok   finite 1 max_abs 5.48e-05 rel 1.57e-05 worst/rms 5.26e-03
+  WMMA worst index 6153568 token 187 head 50 dim 352 query_mag 1000 ref 0.419880688 got 0.419935524
+kv pack: WMMA position 32768 ratio 4   T=256 H=64 ok   finite 1 max_abs 6.29e-05 rel 1.56e-05 worst/rms 6.06e-03
+  WMMA worst index 2131040 token 65 head 2 dim 96 query_mag 1000 ref 0.551125824 got 0.551188767
+kv pack: WMMA position 32768 ratio 128 T=256 H=64 ok   finite 1 max_abs 5.24e-05 rel 1.53e-05 worst/rms 5.04e-03
+  WMMA worst index 3081344 token 94 head 2 dim 128 query_mag 1000 ref 0.357161194 got 0.357213587
+kv pack: WMMA position 65536 ratio 0   T=256 H=64 ok   finite 1 max_abs 7.34e-05 rel 9.29e-06 worst/rms 7.09e-03
+  WMMA worst index 6407440 token 195 head 34 dim 272 query_mag 1000 ref 0.589719534 got 0.589792907
+kv pack: WMMA position 65536 ratio 1   T=256 H=64 ok   finite 1 max_abs 6.16e-05 rel 1.54e-05 worst/rms 5.89e-03
+  WMMA worst index 5940496 token 181 head 18 dim 272 query_mag 1000 ref 0.706042588 got 0.706104219
+kv pack: WMMA position 65536 ratio 2   T=256 H=64 ok   finite 1 max_abs 5.14e-05 rel 1.59e-05 worst/rms 4.92e-03
+  WMMA worst index 5301376 token 161 head 50 dim 128 query_mag 1000 ref 0.65375495 got 0.65370357
+kv pack: WMMA position 65536 ratio 4   T=256 H=64 ok   finite 1 max_abs 8.08e-05 rel 1.70e-05 worst/rms 7.83e-03
+  WMMA worst index 222256 token 6 head 50 dim 48 query_mag 1000 ref 0.511941612 got 0.511860788
+kv pack: WMMA position 65536 ratio 128 T=256 H=64 ok   finite 1 max_abs 6.14e-05 rel 1.66e-05 worst/rms 5.85e-03
+  WMMA worst index 4039728 token 123 head 18 dim 48 query_mag 1000 ref 0.457529008 got 0.457590431
+kv pack: WMMA position 122880 ratio 0  T=256 H=64 ok   finite 1 max_abs 8.20e-05 rel 1.10e-05 worst/rms 8.01e-03
+  WMMA worst index 4588816 token 140 head 2 dim 272 query_mag 1000 ref 0.540871799 got 0.540953815
+kv pack: WMMA position 122880 ratio 1  T=256 H=64 ok   finite 1 max_abs 7.49e-05 rel 1.53e-05 worst/rms 7.12e-03
+  WMMA worst index 7439456 token 227 head 2 dim 96 query_mag 1000 ref 0.584101796 got 0.58417666
+kv pack: WMMA position 122880 ratio 2  T=256 H=64 ok   finite 1 max_abs 7.21e-05 rel 1.65e-05 worst/rms 6.89e-03
+  WMMA worst index 812080 token 24 head 50 dim 48 query_mag 1000 ref 0.604969621 got 0.605041683
+kv pack: WMMA position 122880 ratio 4  T=256 H=64 ok   finite 1 max_abs 6.46e-05 rel 1.69e-05 worst/rms 6.21e-03
+  WMMA worst index 730448 token 22 head 18 dim 336 query_mag 1000 ref 0.5309515 got 0.530886948
+kv pack: WMMA position 122880 ratio 128 T=256 H=64 ok   finite 1 max_abs 6.51e-05 rel 1.61e-05 worst/rms 6.17e-03
+  WMMA worst index 2114656 token 64 head 34 dim 96 query_mag 1000 ref 0.495904893 got 0.495969981
+kv pack: WMMA offset slab / partial rows T=17 H=64 ok   finite 1 max_abs 6.01e-06 rel 1.51e-06 worst/rms 7.21e-04
+  WMMA worst index 410848 token 12 head 34 dim 224 query_mag 1000 ref 0.185831517 got 0.185837522
+kv pack: index scores                        ok    263184 bytes identical
+kv pack: index score time                          BF16 keys 156.5 us a call, packed 167.2 us
+FAILED (1 failed)
