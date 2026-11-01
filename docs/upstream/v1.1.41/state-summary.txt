@@ -1,0 +1,13 @@
+READY mtp {"status": "ok", "max_context": 32768, "model": "glm-5.3-flash", "max_text_file": 524288, "model_label": "GLM-5.3 \u00b7 Maya-S", "images": false, "api_key": false, "defaults": {"temperature": 1.0, "top_p": 0.95, "reasoning_effort": "max"}, "version": "1.1.42", "mcp_tools": false, "unloaded": false, "tp": {"world_size": 2, "rank": 0, "peer": "up"}}
+PASS mtp acceptance
+PASS mtp matrix
+PASS live lifecycle rejection, unchanged PIDs, subsequent MTP
+PASS: partial-prefill disconnect, fresh paired retry, follow-up and peer up
+PASS mtp partial-prefill cancellation regression
+READY simple {"status": "ok", "max_context": 32768, "model": "glm-5.3-flash", "max_text_file": 524288, "model_label": "GLM-5.3 \u00b7 Maya-S", "images": false, "api_key": false, "defaults": {"temperature": 1.0, "top_p": 0.95, "reasoning_effort": "max"}, "version": "1.1.42", "mcp_tools": false, "unloaded": false, "tp": {"world_size": 2, "rank": 0, "peer": "up"}}
+PASS simple matrix
+PASS: partial-prefill disconnect, fresh paired retry, follow-up and peer up
+PASS simple partial-prefill cancellation regression
+READY mtp {"status": "ok", "max_context": 32768, "model": "glm-5.3-flash", "max_text_file": 524288, "model_label": "GLM-5.3 \u00b7 Maya-S", "images": false, "api_key": false, "defaults": {"temperature": 1.0, "top_p": 0.95, "reasoning_effort": "max"}, "version": "1.1.42", "mcp_tools": false, "unloaded": false, "tp": {"world_size": 2, "rank": 0, "peer": "up"}}
+PASS mtp acceptance
+PASS mtp matrix

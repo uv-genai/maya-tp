@@ -1,0 +1,25 @@
+{
+  "rank0_rounds": 103,
+  "rank1_rounds": 103,
+  "all_round_tuples_match": true,
+  "forced_asymmetric_retries": 8,
+  "additional_both_rank_clashes": [
+    [
+      [
+        "14572",
+        "8",
+        "0",
+        "1",
+        "1"
+      ],
+      [
+        "14572",
+        "8",
+        "0",
+        "1",
+        "1"
+      ]
+    ]
+  ],
+  "all_retry_shapes_match": true
+}
