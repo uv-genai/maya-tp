@@ -2656,11 +2656,15 @@ class StatsAfterConsumerStops(unittest.TestCase):
         import tempfile
         script = r'''import sys
 print("READY 4096 stop", flush=True)
+first = True
 for line in sys.stdin:
     if not line.startswith("GEN"):
         continue
     print("STAT tok_s=10 cpu_read_proxy=4 rng_begin=0 rng_end=1", flush=True)
     print("T 66", flush=True)
+    if first:
+        assert sys.stdin.readline().strip() == "STOP"
+        first = False
     print("STAT tok_s=30 cpu_read_proxy=99 rng_begin=0 rng_end=9", flush=True)
     print("DONE 1 3 1.0 1.0 stop 0 0 0 0 0", flush=True)
 '''
