@@ -1,6 +1,16 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and latest §29.19, then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and latest §29.21, then `AGENTS.md`.
+
+## Active43 update
+
+42 remains accepted. **43 is now in progress: #65/#66/#67/#69, branch merge/upstream-v1.1.43.** Engine source6a2fbe1, MD5b398d4a0711430edd6a28b95264c7293, all5paths matched. Remote review6a2fbe1. CPU602serve11skip/676tools33skip/HIPmap/Node,3HIP/17host/affectedEngram0fail pass. Small-context normal/forced probes46313 exited0. #66 context-note bounds, #67 collapse config aliases and #69 unsupported MTP-bias rejection are fixed but open until acceptance.
+
+**ACTIVE GPU batch8965** `/tmp/maya-upstream-v43-batch.sh`, outputs `/tmp/maya-upstream-v43/`: S state/cancel, long-loop prefix/cache A/B, CLI/recovery,16strictframed Sraw records and prefillAB vs saved42. No concurrentGPU/build/deploy. Inspect outputs before resuming; do not rerun completed gates. All43 final evidence/headCI/PR/mainCI still pending; no44.
+
+**#68 remains OPEN:** full DS4 GPU suite fails packed-KV WMMA stress. Independentlybuilt accepted42 control reproduces both failures:3alternating KVruns/arm counts[1,2,1] vs[1,1,2]. WMMAfunction source unchanged. Engram-only decoder checks pass; full suite is not passing. Never relax/omit the recorded exception. Control source/build `/home/ugo/software/project-maya-v42-ds4-control`; raw /tmp/maya-upstream-v43/wmma-ab. GLM's GPUimage is identical42, so42M/L/math evidence is reusable only where execution is unchanged; server paths need liveS/CPU coverage.
+
+Initial live bias fixture failed to force EOS because pre-existing TP MTP ignored bias; raw failure kept. New guard rejects before state changes; spec1 ordinary bias still works. Forced-follow variant tests EOS branches separately and must not count as raw-pick fidelity. See docs/upstream/v1.1.43.md. Supersede the next43/not-started wording below with this active update.
 
 ## Objective and checkpoint
 

@@ -1,0 +1,10 @@
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] the engine reported an error: the prompt (2612 tokens) and max_new 1 are more than the context 1815
+[maya] done: 133 tokens in 0 s (81562.8 tok/s) (error, cancel=False)
+CONTEXT FAILURE the prompt (2612 tokens) and max_new 1 are more than the context 1815
+CONFIG {"server_value": null, "collapses": false}
+SHELL {"collapses": true}

@@ -1,0 +1,13 @@
+test_server_note_that_exhausts_context_stops_before_another_engine_call (serve.test_loop_guard.ToolBlock.test_server_note_that_exhausts_context_stops_before_another_engine_call) ... [maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 133 tokens in 0 s (91907.1 tok/s) (length, cancel=False)
+ok
+test_config_collapse_limit_reaches_server_behavior_under_both_names (serve.test_loop_guard.Collapse.test_config_collapse_limit_reaches_server_behavior_under_both_names) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.044s
+
+OK

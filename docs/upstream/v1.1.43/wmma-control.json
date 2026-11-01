@@ -1,0 +1,18 @@
+{
+  "control_source": "b1867c8bfa0e7576754208abb9f2ff66303af1b3",
+  "candidate_engine_source": "6a2fbe1",
+  "control_failure_counts": [
+    1,
+    2,
+    1
+  ],
+  "candidate_failure_counts": [
+    1,
+    1,
+    2
+  ],
+  "wmma_function_source_unchanged": true,
+  "engram_focused": "pass;0failed",
+  "issue": 68,
+  "resolved": false
+}

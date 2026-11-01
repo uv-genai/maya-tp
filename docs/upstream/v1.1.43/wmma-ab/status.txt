@@ -1,0 +1,6 @@
+control trial0 exit1
+candidate trial0 exit1
+control trial1 exit1
+candidate trial1 exit1
+control trial2 exit1
+candidate trial2 exit1

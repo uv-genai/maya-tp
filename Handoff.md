@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · **Sequential upstream integration (§29.19)**: v1.1.37–42 accepted; v1.1.43 next.
-> No active GPU/server/test batches. Accepted42 bc4/source837 all5paths matched; baseline saved on BOTH hosts. Main41334938602 PASS; #61/#62/#64 closed.
+> Last updated:2026-11-02 · Sequential integration (§29.21):37–42 accepted;43candidate #65 live validation active.
+> Active batch8965; engine6a2fbe1/b398 all5paths matched. CPU/build/affectedEngram gates pass; known pre-existing DS4 WMMA failure68 remains open.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -1023,3 +1023,11 @@ Review branch merge/upstream-v1.1.43 from39486fe; upstreamacdab34 merge in progr
 237 initial focused tests passed. Deterministic boundary probes then found #66: server note can exhaust context yet max(1,room) sends oversized GEN (prompt2612/context1815). Guard no-room as length before next GEN, retain57 total-budget while guard. #67: collapse-limit JSON setting ignored by server; add whitelist/both-alias support and legacy-shell fallback. Added real tests: pre-fix2failures+1error; corrected2tests pass, same standalone reproducer now length/no second engine call and JSON=shell behavior. Full updated focused run239+ tests running (90457); no GPU/build/batch active.
 
 Need complete semantic review, ordered CPU gates,3HIP builds including ds4_gguf_test syntheticQ5_K and FileExpertSource host checks; live S MTP7/simple/cancel/reuse/large/retry/fidelity plus new continuation/context and long-loop prefix reuse probes. Prove unchanged GLM GPU image to reuse42 M/L/kernel evidence only where executed paths are unchanged. FinalCI/PR/main required before44. #65/66/67 open, no43 acceptance yet.42acceptedbc4 baseline saved bothhosts.
+
+### 29.21 Active43 live gates (#65/#66/#67/#68/#69)
+
+Candidate engine6a2fbe1 **b398d4a0711430edd6a28b95264c7293** deployed/matched5paths; remote review6a2fbe1. GLM GPUimage95… identical42;3HIPengines/17host/602serve11skip/676tools33skip/HIPmap/Node pass. Initialruntime4ec487 superseded by explicit MTPbias guard69; no sampling change. Small-context normal/forced probes46313 exited0, PIDs/peer preserved, context guard+MTP follow-ups pass. Forced EOS is branch coverage, not raw fidelity. Failed initial bias fixture retained.
+
+Broader DS4GPU failed2WMMA checks; independentlybuilt42control b186 also fails.3alternatingKVruns each: control[1,2,1], candidate[1,1,2]; both failures pre-existing, WMMAfunction source unchanged. **68OPEN**, do not claim full DS4 suite passed or relax thresholds. New/old Engram-only suite0fail. Control worktree /home/ugo/software/project-maya-v42-ds4-control; no production source changed.
+
+**ACTIVE batch8965**, /tmp/maya-upstream-v43-batch.sh, output /tmp/maya-upstream-v43/. Runs S normal MTP7/simple state/cancel, long-loop collapse0/default32000 cache A/B, CLI/recovery, strict Stechnical/code256 and3cycle prefillAB vs42. No concurrentGPU/build/deploy. M/L/kernel42evidence reused only for identical executed math; serverchanges covered CPU/newliveS paths. Afterbatch success auditrounds/limits/cache/fidelity/perf, final evidence/headCI/PR/mainCI before44. Close65/66/67/69 onlyaftermainPASS; keep68/33/42/46/52/54/60/11/16 open.43notaccepted.
