@@ -704,3 +704,13 @@ Do not start v1.1.38 until v1.1.37 passes the full checkpoint. No fork release a
 Current user pair is **Maya-L**, context **524288**, rank0 API **:5812** (dynamic), rank1 local.
 It remains running while reviewing/CPU checking; async host-availability clarification is pending
 before GPU validation. Rank0 dirty user checkout remains protected; daemon/YAML untouched.
+
+### 29.1 First tag candidate (#37)
+
+Isolated worktree `/home/ugo/software/project-maya-upstream-review`, branch `merge/upstream-v1.1.37`.
+Upstream v1.1.37 merged there only; VERSION/changelog remain fork-owned. README/AGENTS, GLM control
+flow, TP2/RDMA code, launchers and #33 calibration byte-identical at this first checkpoint.
+Deliberately preserve our all-output-limit thinking answer reserve (reject upstream's tiny-limit-only
+policy); focused HTTP adapter tests 6 PASS, HIP map PASS. Full CPU suites/configured gfx1151 HIP
+candidate build in progress; evidence `/tmp/maya-upstream-v37/`, review `docs/upstream/v1.1.37.md`.
+User Maya-L pair remains active; no candidate deployed. GPU validation window still pending.

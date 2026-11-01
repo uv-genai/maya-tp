@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from serve import loop_guard as LG  # noqa: E402
 from serve.frontend import ChatTemplate  # noqa: E402
-from serve.server import (IM_END, ByteTokenizer, Service, check_request_sampling, loop_guard_setting,  # noqa: E402
+from serve.server import (IM_END, LOOP_STOP_NOTE, ByteTokenizer, Service, check_request_sampling, loop_guard_setting,  # noqa: E402
                           serve)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -142,6 +142,11 @@ class Detection(unittest.TestCase):
         det.reset(kept)
         self.assertEqual(det.hold, 0)
         self.assertTrue(any(det.push(t) for t in block * 9))       # the same loop again is seen again
+        # what is kept may end in copies that were already sent: a new loop still needs copies of its own
+        det.reset(ids[:-1])
+        firsts = [i for i, t in enumerate(block * 9) if det.push(t)]
+        self.assertTrue(firsts)
+        self.assertGreaterEqual(firsts[0] + 1, 3 * len(block))
 
 
 class Policy(unittest.TestCase):
@@ -163,17 +168,44 @@ class Policy(unittest.TestCase):
         a2 = self.fire(g, self.loop_ids())
         self.assertEqual(a2.kind, LG.STOP)
 
-    def test_thinking_penalty_close_then_stop(self):
+    def test_thinking_penalties_then_close_then_stop(self):
         g = LG.LoopGuard(think_end=7, in_think=True)
-        a1 = self.fire(g, self.loop_ids())
-        self.assertEqual((a1.kind, a1.where), (LG.PENALTY, "thinking"))
-        g.resume([], a1)
+        for _ in range(LG.THINK_PENALTIES):                         # the penalty first, twice
+            a = self.fire(g, self.loop_ids())
+            self.assertEqual((a.kind, a.where), (LG.PENALTY, "thinking"))
+            g.resume([], a)
         a2 = self.fire(g, self.loop_ids())
         self.assertEqual((a2.kind, a2.where), (LG.CLOSE_THINKING, "thinking"))
         g.resume([7], a2)
         self.assertFalse(g.in_think)
         a3 = self.fire(g, self.loop_ids())
-        self.assertEqual((a3.kind, a3.where), (LG.STOP, "answer"))
+        self.assertEqual((a3.kind, a3.where), (LG.STOP, "answer"))  # the fourth in all
+
+    def test_never_a_stop_while_thinking(self):
+        g = LG.LoopGuard(think_end=7, in_think=True)
+        kinds = []
+        for _ in range(6):
+            a = self.fire(g, self.loop_ids(20))
+            kinds.append(a.kind)
+            if a.kind == LG.CLOSE_THINKING:
+                break
+            g.resume([], a)
+        self.assertEqual(kinds, [LG.PENALTY] * LG.THINK_PENALTIES + [LG.CLOSE_THINKING])
+
+    def test_thinking_needs_more_copies(self):
+        ids = list(range(100, 140)) * 3 + [5] * 50                  # a 40-token block 3 times: a loop in the answer
+        self.assertIsNotNone(self.fire(LG.LoopGuard(), ids))
+        self.assertIsNone(self.fire(LG.LoopGuard(think_end=7, in_think=True), ids))   # not yet in the thinking
+        self.assertIsNotNone(self.fire(LG.LoopGuard(think_end=7, in_think=True), list(range(100, 140)) * 6))
+
+    def test_the_hold_is_bounded(self):
+        g = LG.LoopGuard()
+        block = list(range(200, 200 + 500))                         # a 500-token block written again
+        for t in block + block[:400]:
+            self.assertIsNone(g.push(t))
+            self.assertLessEqual(g.hold, LG.HOLD_MAX)
+        self.assertEqual(g.hold, LG.HOLD_MAX)                       # (the detector's own run: 400)
+        self.assertEqual(g.det.hold, 400)
 
     def test_a_loop_in_the_answer_after_one_in_the_thinking(self):
         g = LG.LoopGuard(think_end=7, in_think=True)
@@ -182,7 +214,7 @@ class Policy(unittest.TestCase):
         a2 = self.fire(g, self.loop_ids())
         self.assertEqual((a2.kind, a2.where), (LG.PENALTY, "answer"))   # the answer's first: a penalty
         g.resume([], a2)
-        self.assertEqual(self.fire(g, self.loop_ids()).kind, LG.STOP)   # the third in all
+        self.assertEqual(self.fire(g, self.loop_ids()).kind, LG.STOP)   # the answer's second
 
     def test_no_thinking_token_no_thinking_close(self):
         g = LG.LoopGuard(think_end=None, in_think=True)            # (a model without one: the answer's rules)
@@ -210,6 +242,123 @@ class Policy(unittest.TestCase):
         smp, _ = g.sampling({"penalty_last_n": 0}, len(kept), 5000)   # "no penalties": the guard's own window
         self.assertEqual(smp["penalty_last_n"], LG.PENALTY_MIN_N)
         self.assertEqual(LG.penalty_window(300), 600)
+
+
+def chars(text):
+    """A text as ids (its code points); the guard's `piece` is chr."""
+    return [ord(c) for c in text]
+
+
+class ToolCalls(unittest.TestCase):
+    """The guard never cuts inside a tool call: calls written alike, three in a row, stay whole."""
+    CALL = "<tool_call>read_file<arg_key>path</arg_key><arg_value>/src/main.py</arg_value></tool_call>"
+    PROSE = "xyz" + "1017, 245, 26, 100, 47, 187, " * 12
+    SHORT = "xyz" + "1017, 245, 26, 100, 47, 187, " * 4     # (one loop, no more)
+
+    def guard(self, **kw):
+        return LG.ToolSafeGuard(piece=chr, **kw)
+
+    def feed(self, g, text):
+        """Every action the guard returns for `text`, and what a server keeps (the ids minus what an action drops)."""
+        acts, kept = [], []
+        for t in chars(text):
+            kept.append(t)
+            act = g.push(t, len(kept))
+            if act is not None:
+                acts.append(act)
+                del kept[len(kept) - act.drop:]
+                g.resume(kept, act)
+                if act.kind == LG.STOP:
+                    break
+        return acts, "".join(map(chr, kept))
+
+    def test_three_identical_calls_stay_whole(self):
+        text = "Reading the files.\n" + (self.CALL + "\n") * 3 + "Done."
+        self.assertIsNotNone(first_loop(chars(text)))       # (the plain detector does see it as a loop)
+        plain, _ = self.feed(LG.LoopGuard(), text)
+        self.assertTrue(plain and plain[0].drop > 0)
+        g = self.guard()
+        acts, kept = self.feed(g, text)
+        self.assertEqual((acts, kept), ([], text))
+        self.assertEqual(kept.count(self.CALL), 3)
+        self.assertEqual((g.events, g.hits), ([], {"thinking": 0, "answer": 0}))
+
+    def test_three_identical_calls_with_json_arguments_stay_valid_json(self):
+        args = json.dumps({"path": "/src/main.py", "lines": [1, 2, 3]})
+        call = "<tool_call>read_file<arg_key>args</arg_key><arg_value>" + args + "</arg_value></tool_call>"
+        acts, kept = self.feed(self.guard(), "\n".join(["ok"] + [call] * 4))
+        self.assertEqual(acts, [])
+        bodies = re.findall(r"<arg_value>(.*?)</arg_value>", kept)
+        self.assertEqual([json.loads(b) for b in bodies], [json.loads(args)] * 4)
+
+    def test_calls_of_the_other_families(self):
+        ns = "]<]minimax[>["
+        mm = (f'{ns}<tool_call>{ns}<invoke name="read_file">{ns}<path>/src/main.py{ns}</path>{ns}</invoke>'
+              f"{ns}</tool_call>")
+        one = ('<｜DSML｜ invoke name="read_file"><｜DSML｜ parameter name="path" string="true">/src/main.py'
+               "</｜DSML｜ parameter></｜DSML｜ invoke>")
+        dsml = "<｜DSML｜ calls>" + one * 3 + "</｜DSML｜ calls>"
+        for text in ("Reading.\n" + (mm + "\n") * 3 + "Done.", "Reading.\n" + dsml + "\nDone.",
+                     "Reading.\n" + (dsml + "\n") * 3 + "Done."):
+            g = self.guard()
+            acts, kept = self.feed(g, text)
+            self.assertEqual(kept, text)
+            self.assertTrue(all(a.kind == LG.PENALTY and a.drop == 0 for a in acts), acts)
+            self.assertEqual(g.hits, {"thinking": 0, "answer": 0})
+
+    def test_a_loop_in_prose_is_still_cut(self):
+        text = "Reading the files.\n" + self.PROSE
+        acts, kept = self.feed(self.guard(), text)
+        plain, plain_kept = self.feed(LG.LoopGuard(), text)
+        self.assertEqual([(a.kind, a.drop) for a in acts], [(a.kind, a.drop) for a in plain])
+        self.assertEqual(kept, plain_kept)
+        self.assertEqual(acts[0].kind, LG.PENALTY)
+        self.assertGreater(acts[0].drop, 0)
+        self.assertLess(len(kept), len(text))
+
+    def test_a_loop_in_prose_after_a_call_is_cut_and_the_call_stays(self):
+        text = "Reading.\n" + self.CALL + "\nThe numbers:\n" + self.PROSE
+        acts, kept = self.feed(self.guard(), text)
+        self.assertEqual(acts[0].kind, LG.PENALTY)
+        self.assertGreater(acts[0].drop, 0)
+        self.assertIn(self.CALL, kept)
+        self.assertLess(len(kept), len(text))
+
+    def test_a_cut_in_prose_then_three_calls(self):
+        g = self.guard()
+        acts, kept = self.feed(g, self.SHORT)
+        self.assertEqual([a.kind for a in acts], [LG.PENALTY])
+        acts, kept2 = self.feed(g, "\n" + self.CALL * 3)
+        self.assertEqual(kept2.count(self.CALL), 3)
+        self.assertTrue(all(a.drop == 0 for a in acts))
+
+    def test_a_loop_inside_one_call_only_gets_the_penalty_and_keeps_every_token(self):
+        body = "".join(f"line {i % 3}: alpha beta gamma delta\n" for i in range(40))
+        text = "<tool_call>write_file<arg_key>content</arg_key><arg_value>" + body + "</arg_value></tool_call>"
+        g = self.guard(think_end=1, in_think=True)
+        acts, kept = self.feed(g, text)
+        self.assertEqual(kept, text)
+        self.assertEqual([(a.kind, a.drop, a.where) for a in acts], [(LG.PENALTY, 0, "tool call")])
+        self.assertEqual(g.hits, {"thinking": 0, "answer": 0})
+        self.assertTrue(g.in_think)                         # (the thinking is not closed)
+        smp, _ = g.sampling({"temperature": 0}, acts[0].at, 100)
+        self.assertEqual(smp["repetition_penalty"], LG.LOOP_PENALTY)
+
+    def test_without_a_piece_it_is_the_plain_guard(self):
+        acts, _ = self.feed(LG.ToolSafeGuard(), "x" + self.CALL * 3)
+        self.assertTrue(acts and acts[0].drop > 0)
+
+    def test_a_marker_split_across_tokens(self):
+        g = self.guard()
+        for t in chars("<tool_"):
+            g.push(t)
+        self.assertFalse(g.in_tool)
+        for t in chars("call>abc"):
+            g.push(t)
+        self.assertTrue(g.in_tool)
+        for t in chars("</tool_call>"):
+            g.push(t)
+        self.assertFalse(g.in_tool)
 
 
 class Settings(unittest.TestCase):
@@ -283,6 +432,16 @@ BLOCK = "1017, 245, 26, 100, 47, 187, "
 ESCAPE = "and so on.\n\nIn short, the sequence repeats with period six."
 
 
+def kept_block(test, content, head=HEAD, after=""):
+    """The block text that stays between `head` and `after`: the first copy, and what streamed before the loop was
+    clear (the stream holds back at most HOLD_MAX tokens; the tests' tokens are bytes).  Returns it."""
+    test.assertTrue(content.startswith(head) and content.endswith(after), content)
+    body = content[len(head):len(content) - len(after)]
+    test.assertTrue((BLOCK * 100).startswith(body), body)
+    test.assertGreaterEqual(len(body), len(BLOCK))                  # the first copy stays
+    return body
+
+
 def run(svc, max_new=3000, sampling=None, thinking=False, prompt="go"):
     """svc.run's stream: (reasoning text, content text, done, [(content chars so far, engine tokens then)])."""
     ids = svc.tok.encode(prompt)
@@ -308,13 +467,15 @@ class Server(unittest.TestCase):
         eng = LoopingEngine(Tok(), HEAD, BLOCK, escape=ESCAPE)
         svc = self.service(eng)
         _, content, done, _ = run(svc, sampling={"temperature": 0})
-        self.assertEqual(content, HEAD + BLOCK + ESCAPE)
+        body = kept_block(self, content, after=ESCAPE)
+        # the copies it needs are 4 x 30 tokens: all but the last HOLD_MAX of them went out as they came
+        self.assertLessEqual(len(body), 4 * len(BLOCK) - LG.HOLD_MAX)
         self.assertEqual(done["finish"], "stop")
         self.assertEqual(len(eng.calls), 2)
         (p1, n1, s1), (p2, n2, s2) = eng.calls
         self.assertEqual((n1, s1), (3000, {"temperature": 0}))     # the request's own until the loop
         period = len(BLOCK)
-        self.assertEqual(p2, p1 + svc.tok.encode(HEAD + BLOCK))    # on from the first copy
+        self.assertEqual(p2, p1 + svc.tok.encode(HEAD + body))     # on from what was sent
         self.assertEqual(s2, {"temperature": 0, "repetition_penalty": LG.LOOP_PENALTY,
                               "penalty_last_n": max(LG.PENALTY_MIN_N, 2 * period)})
         self.assertEqual(n2, 2 * period + LG.PENALTY_EXTRA)
@@ -326,31 +487,50 @@ class Server(unittest.TestCase):
         self.assertIn(f"a {period}-token block", m["requests"][0]["loop_guard"][0])
         self.assertIn("maya:loop_guard_detected_total 1", svc.prometheus())
 
+    def test_three_identical_tool_calls_in_one_reply_are_not_cut(self):
+        call = "<tool_call>read_file<arg_key>path</arg_key><arg_value>/src/main.py</arg_value></tool_call>"
+        script = "Reading the file three times.\n" + (call + "\n") * 3
+        eng = LoopingEngine(Tok(), None, None, script=script)
+        svc = self.service(eng)
+        calls, text = [], ""
+        for kind, val in svc.run(svc.tok.encode("go"), False, [{"name": "read_file", "parameters": {
+                "type": "object", "properties": {"path": {"type": "string"}}}}], 3000, {}, threading.Event()):
+            if kind == "event" and val.kind == "tool_call" and val.complete:
+                calls.append(json.dumps(val.call.arguments))
+            elif kind == "event" and val.kind == "content":
+                text += val.text
+        self.assertEqual(calls, [json.dumps({"path": "/src/main.py"})] * 3)
+        self.assertEqual(len(eng.calls), 1)                 # (no restart: the guard did nothing)
+        m = svc.metrics()
+        self.assertEqual({k: m["loop_guard"][k] for k in ("detected", "penalised", "thinking_closed", "stopped")},
+                         dict.fromkeys(("detected", "penalised", "thinking_closed", "stopped"), 0))
+
     def test_the_request_sampling_comes_back_after_the_window(self):
         long_escape = " ".join(f"Step {i}: the term at {i} is {i * i % 97}." for i in range(30))
         eng = LoopingEngine(Tok(), HEAD, BLOCK, escape=long_escape)
         svc = self.service(eng)
         _, content, done, _ = run(svc, sampling={"temperature": 0.7, "seed": 5})
-        self.assertEqual(content, HEAD + BLOCK + long_escape)
+        body = kept_block(self, content, after=long_escape)
         self.assertEqual(done["finish"], "stop")
         self.assertEqual(len(eng.calls), 3)
         window = 2 * len(BLOCK) + LG.PENALTY_EXTRA
         self.assertEqual(eng.calls[1][1], window)
         self.assertEqual(eng.calls[2][2], {"temperature": 0.7, "seed": 5})   # the request's own again
-        written = len(svc.tok.encode(HEAD + BLOCK)) + window
+        written = len(svc.tok.encode(HEAD + body)) + window
         self.assertEqual(eng.calls[2][1], 3000 - written)
 
     def test_a_loop_that_persists_in_the_answer_ends_it(self):
         eng = LoopingEngine(Tok(), HEAD, BLOCK)                     # loops whatever the penalty
         svc = self.service(eng)
         _, content, done, _ = run(svc)
-        self.assertEqual(content, HEAD + BLOCK)
+        body = kept_block(self, content)
+        self.assertLessEqual(len(body), 2 * 4 * len(BLOCK))         # two loops' copies at most, then the end
         self.assertEqual(done["finish"], "stop")
-        self.assertLess(done["completion_tokens"], 200)
+        self.assertLess(done["completion_tokens"], 300)
         self.assertEqual(len(eng.calls), 2)
         self.assertEqual(svc.loop_guard_counts, {"detected": 2, "penalised": 1, "thinking_closed": 0, "stopped": 1})
 
-    def test_a_second_loop_in_the_thinking_closes_it(self):
+    def test_a_third_loop_in_the_thinking_closes_it(self):
         tok = Tok()
         think_end = tok.encode("</think>", parse_special=True)[0]
         eng = LoopingEngine(tok, "I need to list them:\n", BLOCK, answer="\n\nThe numbers: 1017, 245, 26.",
@@ -358,13 +538,36 @@ class Server(unittest.TestCase):
         svc = self.service(eng)
         self.assertEqual(svc.think_end_id, think_end)
         reasoning, content, done, _ = run(svc, thinking=True)
-        self.assertEqual(reasoning, "I need to list them:\n" + BLOCK)
+        kept_block(self, reasoning, head="I need to list them:\n")
         self.assertEqual(content.strip(), "The numbers: 1017, 245, 26.")
         self.assertEqual(done["finish"], "stop")
-        self.assertEqual(len(eng.calls), 3)
-        self.assertEqual(eng.calls[2][0][-1], think_end)           # the thinking closed by its own token
-        self.assertEqual(eng.calls[2][0].count(think_end), 1)
-        self.assertEqual(svc.loop_guard_counts["thinking_closed"], 1)
+        self.assertEqual(len(eng.calls), 4)                         # two penalties first, then the close
+        self.assertEqual(eng.calls[3][0][-1], think_end)           # the thinking closed by its own token
+        self.assertEqual(eng.calls[3][0].count(think_end), 1)
+        self.assertEqual(svc.loop_guard_counts, {"detected": 3, "penalised": 2, "thinking_closed": 1, "stopped": 0})
+
+    def test_a_stop_before_any_answer_text_says_so(self):
+        # a model with no end-of-thinking token that loops in its reasoning: the guard can only end it - never with
+        # finish "stop" and no answer at all (a chat client shows the thinking and nothing else)
+        eng = LoopingEngine(Tok(), "I need to list them:\n", BLOCK)
+        svc = self.service(eng)
+        svc.think_end_id = None
+        reasoning, content, done, _ = run(svc, thinking=True)
+        self.assertTrue(reasoning.startswith("I need to list them:\n" + BLOCK))
+        self.assertEqual(content, LOOP_STOP_NOTE)
+        self.assertEqual(done["finish"], "stop")
+
+    def test_a_copied_block_streams_on(self):
+        # a long block the model writes again (a draft in the thinking, then the answer): not a loop, and never held
+        # back whole - the stream is at most HOLD_MAX tokens behind the engine
+        draft = "".join(f"step {i}: check item {i * 7 % 23} and log it\n" for i in range(12))
+        eng = LoopingEngine(Tok(), "", "", script="Draft:\n" + draft + "Final:\n" + draft + "Done.")
+        svc = self.service(eng)
+        _, content, done, seen = run(svc)
+        self.assertEqual(content, "Draft:\n" + draft + "Final:\n" + draft + "Done.")
+        self.assertGreater(len(draft), 4 * LG.HOLD_MAX)
+        self.assertLessEqual(max(made - chars for chars, made in seen), LG.HOLD_MAX + 8)
+        self.assertEqual(svc.loop_guard_counts["detected"], 0)
 
     def test_streaming_holds_back_only_the_repeats(self):
         eng = LoopingEngine(Tok(), HEAD, BLOCK, escape=ESCAPE)
@@ -437,14 +640,14 @@ class Http(unittest.TestCase):
         msg = {"messages": [{"role": "user", "content": "numbers"}], "max_tokens": 2000,
                "chat_template_kwargs": {"enable_thinking": False}}
         whole = json.loads(self.post(msg))
-        self.assertEqual(whole["choices"][0]["message"]["content"], HEAD + BLOCK + ESCAPE)
+        body = kept_block(self, whole["choices"][0]["message"]["content"], after=ESCAPE)
         self.assertEqual(whole["choices"][0]["finish_reason"], "stop")
         text = ""
         for line in self.post(dict(msg, stream=True)).splitlines():
             if line.startswith("data: ") and line != "data: [DONE]":
                 for ch in json.loads(line[6:]).get("choices") or []:
                     text += (ch.get("delta") or {}).get("content") or ""
-        self.assertEqual(text, HEAD + BLOCK + ESCAPE)
+        self.assertEqual(text, HEAD + body + ESCAPE)                # streamed and whole alike
         off = json.loads(self.post(dict(msg, loop_guard=False, max_tokens=400)))
         self.assertEqual(off["choices"][0]["finish_reason"], "length")
         self.assertGreater(off["choices"][0]["message"]["content"].count(BLOCK), 8)
