@@ -1,0 +1,56 @@
+{
+  "accepted": false,
+  "upstream": "6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc",
+  "source_merge": "6862700",
+  "upstream_functional_change_applied": false,
+  "deferred_change": {
+    "commit": "c968b94",
+    "issue": 75,
+    "reason": "Automatic NVIDIA scenario disabled on HIP; required complete flush/lending APIs were intentionally deferred. No partial port or new DS4 stability claim."
+  },
+  "runtime_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
+  "binary_md5": "b398d4a0711430edd6a28b95264c7293",
+  "unchanged_runtime_files": 620,
+  "cpu": {
+    "hip_mapping": "pass",
+    "serve": {
+      "tests": 602,
+      "skips": 11
+    },
+    "tools": {
+      "tests": 679,
+      "skips": 33
+    }
+  },
+  "live": {
+    "fresh_mtp": true,
+    "reuse": true,
+    "ordinary_spec1": true,
+    "drafts": [
+      56,
+      47,
+      0
+    ],
+    "output_budget": 64,
+    "pids_unchanged": true,
+    "peer_up": true
+  },
+  "reused_evidence": "Accepted44/43 builds, kernel and strict S/M-L/state/performance paths are exact unchanged; no fresh DS4 long-prompt validation",
+  "open_issues": [
+    75,
+    68,
+    33,
+    42,
+    46,
+    52,
+    54,
+    60,
+    11,
+    16
+  ],
+  "pending": [
+    "final head CI",
+    "merge",
+    "post-main CI"
+  ]
+}
