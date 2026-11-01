@@ -29,10 +29,7 @@
     41305518760,
     41305514302
   ],
-  "pending": [
-    "final_evidence_ci",
-    "merge_and_main_ci"
-  ],
+  "pending": [],
   "peer_kill_recovery": "PASS8/8",
   "framed_raw_picks": {
     "technical": {
@@ -100,5 +97,16 @@
   "combined_ci": [
     41308044569,
     41308039304
-  ]
+  ],
+  "final_head": "b6483f2bf26e935b60688d71030c4690890e9211",
+  "final_ci": [
+    41310209384,
+    41310204043
+  ],
+  "evidence_ci": [
+    41309834801,
+    41309830439
+  ],
+  "accepted_merge": "d2708b2a6094fda976f1c4b4122d63f16184f3d2",
+  "main_ci": 41311902227
 }

@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37/38 accepted; restart fix #47 main CI green; v1.1.39 review #45 active.
-> User authorized stopping the pair for validation. Candidate binaries deployed; live TP2/MTP checks in progress.
+> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37–39 accepted; v1.1.40 review #50 next.
+> User authorized stopping the pair for validation. Accepted v1.1.39 binaries deployed; test engines stopped; next checkpoint #50.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -869,3 +869,28 @@ Evidencecheckpoint in docs/upstream/v1.1.39/. No nexttag until all gates and mai
 #45 M/L milestone: Maya-M APIacceptance+fresh1K/4K/8K+8raw-pick requests0differences PASS (warmup32s vs375s retained as cold-I/O outlier). Maya-L APIacceptance+fresh1K/4K/8K PASS; last framed raw-pick gate running. Both use measured primary100401 table; final evidence/mainCI pending. Candidate includesmainhandoff e9663f8 via4971b37; latter CI41308044569/41308039304 PASS.
 
 #45 GPU checkpoint complete: S/M/L API/prefill/raw-pick gates PASS; S16+M8+L8 framed requests all raw-pick0. L warmups806s then49s on the same candidate, no timeout/retry/override (temporary long-start wrapper prepared but never used). All5binary hashes remainc3132ee4; both engines/server stopped, daemon/YAML untouched. Final evidence CI, PR#49 merge and mainCI pending; no nexttag before those pass. #33/#42/#11/#16/#46 remainopen.
+
+### 29.9 v1.1.39 accepted; v1.1.40 review next (#50)
+
+PR #49 merged as **d2708b2a6094fda976f1c4b4122d63f16184f3d2** after finalb6483f2
+CI **41310209384 /41310204043 PASS** (evidencef3d8f40 CI41309834801/41309830439 also PASS).
+Post-merge **main41311902227 PASS**; #45 closed. All §29.8 CPU/build/parity/S/M/L/API/prefill/
+fidelity gates passed. S16+M8+L8 framed requests raw-pick0; S CLI32/32 both modes matchesv38.
+Warm S prefill A/B vs38: −0.01/+0.18/−1.21%, all9messages/usage equal; no material regression/new
+speed claim. Same candidate warmups M32/375s, L806/49s retained; #33/#42 remain open.
+
+Runtime27fefcc, binary **c3132ee406429195545f145e04e7aadd** matched on all5canonical/review paths,
+saved on BOTH hosts at `/tmp/maya-upstream-v39-baseline/maya`. Original release5a52 backup and
+accepted38cff backup remain. Engines/server stopped; llama-swap daemon175392/YAML untouched.
+Remote canonical source still777cc92 with user edits/backups and #33 deployments; no pull/reset/rebuild.
+
+Next **#50 / upstream v1.1.40 cbaaec5** (16commits/55files), not merged yet. Review worktree will
+branch `merge/upstream-v1.1.40` from updated origin/main. Exclude new Metal backend/macOS workflow;
+keep HIP/gfx1151-only scope, owned docs, #46 complete stream deferral, existing defaults and all
+TP2/MTP invariants/calibration. No v1.1.41 work until40 passes its full checkpoint/main CI.
+
+Durable M/L64-token reference IDs now accompany docs/upstream/v1.1.39/{Maya-M,Maya-L}/reference.txt.
+Future same-pack/same-prompt benches may use `--reference` with strict ordinary AND MTP raw-pick0
+checks, avoiding a second cold startup while proving agreement with accepted outputs. S256-token
+references remain in docs/benchmarks/tp2-mtp-review-2026-10-30/. Investigate any difference; never
+weaken the fidelity gate to hide it. No release/tag created; future fork tags tp-v.
