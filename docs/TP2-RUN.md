@@ -407,3 +407,5 @@ Model load/unload, idle unload and automatic dead-engine restart are guarded und
 ## Unsupported local-only operations
 
 TP2 refuses images/videos before encoding or lending the expert cache. Direct `GENI`, `VLEND`, `VRECLAIM` and `LOGP` commands are rejected before state changes because no paired operation exists. A vision config is ignored for a TP2 launch, keeping text inference available without starting an encoder. RDMA embedding synchronization remains deferred in #16.
+
+To stress idle wake-up (#64), configure BOTH ranks with `MAYA_GLM_SERVICE_IDLE_MS=10`, `MAYA_GLM_SERVICE_DEEP_S=1`, `MAYA_GLM_SERVICE_DEEP_MS=3000`, then run `tools/tp2/regression_collectives.py --mode mtp --idle-seconds 3 --max-long-decode-ratio 4 --output /tmp/idle-wake.json`. The optional bound rejects repeated deep-sleep delays in decode after the long prefill; prefill time is excluded. Restore normal settings afterward. The regression keeps the ordinary correctness/reuse/stream/peer checks.
