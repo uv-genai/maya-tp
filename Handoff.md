@@ -777,3 +777,31 @@ Next checkpoint **#43**: upstream v1.1.38 `cf6472c` (four commits / 13 files), b
 v1.1.37 acceptance. Review Linux GGUF expert direct I/O and headroom, setup context advice, UI model
 card/answer information and home-screen redirects. Keep VERSION 1.1.42, fork docs and all TP2/MTP
 paths/tuning. New tag is not merged yet. Review worktree will use branch `merge/upstream-v1.1.38`.
+
+### 29.4 v1.1.38 candidate (#43)
+
+Review worktree branch `merge/upstream-v1.1.38`; upstream tag merged there only. Keep raw-GGUF
+direct I/O **opt-in** pending gfx1151 measurements; default buffered behavior preserved. This source
+is separate from GLM packed TP2. New direct/headroom knobs documented in SETTINGS. VERSION remains
+1.1.42; README/AGENTS, GLM control/core, RDMA, launchers and calibration unchanged.
+
+HIP map, **531 serve / 11 skips**, **637 tools / 31 skips** PASS. All three HIP engines build. Extended
+file-source host parity: eight configurations PASS with real O_DIRECT, unaligned offsets, variable
+formats/shards, ring eviction, queued close and MAYA/STRATA precedence. Changed JS syntax and real HTTP redirect test PASS.
+Live TP2/MTP gates and CI remain pending; do not start v1.1.39. Candidate report docs/upstream/v1.1.38.md.
+
+### 29.5 v1.1.38 validation complete — final evidence/CI pending (#43 / PR #44)
+
+Merge9636b1d + alias follow-upfbb5897; direct I/O stays opt-in, both new knobs honor MAYA-over-STRATA.
+Host staging **8 configs PASS** with actual O_DIRECT; HIP map,531 serve/11 skips,637 tools/31 skips,
+all three HIP builds, JS syntax/real HTTP redirects PASS. Code CI41300406757/41300412067 PASS.
+
+Final engine **cff75b48a0f1e0b2d2355c73ce302d94** deployed and hash-matched on all canonical/review
+paths. S MTP7 acceptance, MTP/simple990/7290/14550+reuse/stream matrices, **110** matched wire rounds
+and8 asymmetric retries PASS. CLI simple/MTP7 **32/32 each**, both identical to v1.1.37; all eight
+resident benchmark requests have zero raw-pick differences. Executed GLM/GPU/TP2 source and defaults
+remain byte-identical to the full S/M/L v1.1.37 checkpoint; raw-GGUF changes tested separately on host.
+
+Evidence docs/upstream/v1.1.38.md and directory. Both engines/server stopped; daemon/YAML and remote
+canonical user source preserved. Final evidence CI then PR #44 merge required; do not start39 yet.
+#33/#42/#11/#16 remain open. No release/tag publication; future fork tags use tp-v.

@@ -1,0 +1,10 @@
+{
+  "simple": {
+    "tokens": 32,
+    "identical_to_accepted_v37": true
+  },
+  "mtp": {
+    "tokens": 32,
+    "identical_to_accepted_v37": true
+  }
+}

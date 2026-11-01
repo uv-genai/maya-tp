@@ -6,6 +6,10 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.38 integration** (#43): web model card/answer information and home-screen redirects;
+  raw GGUF expert direct I/O remains opt-in pending gfx1151 measurements. GLM TP2 packed experts,
+  MTP control flow, launchers and measured tuning are preserved. Fork VERSION remains 1.1.42.
+
 - **Upstream v1.1.37 integration** (#37): shared gfx1151 fused-expert and draft-policy updates,
   server streaming/tool-safe loop guard and DeepSeek API/UI improvements. Preserve our TP2/MTP
   protocol, HIP/RDMA installer flags, model-selectable launchers and measured prefill calibration.

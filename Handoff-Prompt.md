@@ -34,10 +34,15 @@ IDs match 32/32 in both modes. Reversed warm prefill deltas **+0.66/−1.77/−0
 all 9 paired messages match. Initial cold outliers preserved; #33 remains open. Evidence:
 `docs/upstream/v1.1.37.md` and its adjacent directory. Do not repeat completed checks without reason.
 
-**Next: #43 / upstream v1.1.38 `cf6472c`**, four commits / 13 files; not merged yet. Review worktree
-`/home/ugo/software/project-maya-upstream-review` on both hosts will use `merge/upstream-v1.1.38`.
+**Next: #43 / upstream v1.1.38 `cf6472c`**, four commits / 13 files; candidate merge only. Review worktree
+`/home/ugo/software/project-maya-upstream-review` uses `merge/upstream-v1.1.38` locally (remote source will be advanced for validation).
 Review raw-GGUF expert direct I/O (separate from GLM's packed TP2 path), setup context and UI fixes.
-See Handoff §29.3. Do not start v1.1.39 until v1.1.38 passes its checkpoint.
+CPU 531/637 gates, all HIP engines, eight real direct/mapped host staging/alias cases and JS syntax PASS.
+Direct I/O stays opt-in pending gfx1151 measurements; GLM packed source/control are unchanged.
+Final source `fbb5897`, engine **cff75b48a0f1e0b2d2355c73ce302d94** deployed/matched. S MTP/simple
+matrices, acceptance/reuse/cancel/limits,110 wire rounds/eight retries, CLI32/32 both modes and
+zero-raw-pick benchmark PASS. Code CI41300406757/41300412067 PASS. Final evidence CI and PR #44
+merge remain pending. See Handoff §29.5; do not start v1.1.39 yet.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.

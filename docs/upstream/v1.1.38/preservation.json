@@ -1,0 +1,28 @@
+{
+  "base": "c2c5610",
+  "candidate": "fbb5897",
+  "identical_blobs": {
+    "README.md": "7ba343524bb18980d2fca52d1b9395b7d9ce45c8",
+    "AGENTS.md": "0fd81b1ad40b728e2afe1ad76bfc37bdf2ccc181",
+    "VERSION": "1171c84e3e5c2c046b8de9064700e6ed83d151c1",
+    "src/program/generate.cpp": "5f1895c5e6b8d1ef27bd07a3829a95a2380ef96b",
+    "src/core/glm_prefill.cu": "926c5cf1d78ff0b5df33f1fd4be0e9bd78fd19d2",
+    "src/core/glm_fast_path.cu": "e5330675d88700f8699c66652f37f913fc51c9ab",
+    "src/core/glm_window.cu": "2b3efcd4a66b828389195eea3032cba195e197e7",
+    "src/core/glm_mtp.cu": "da1a6796e18128f4d61e5cf48ecca6b957a6b3c1",
+    "src/core/glm_rows.cu": "7562cba949df409e558bd1efa5838d4a14522951",
+    "src/core/tp_context.cu": "9faf7e3cc4a3149118caa9def679717785100f18",
+    "src/net/verbs.cpp": "2878ee13b2d482d6022af3a219c983abc75cf315",
+    "tools/tp2/rank0.sh": "7ca543b09524ae118bbbb98e7650f6e0f3d086d2",
+    "tools/tp2/rank1.sh": "d53637bcb0e53de733215bed062e693dd380ab1d",
+    "tools/tp2/model_env.sh": "8cf8bb701ab35fe5837049f04d52d17d622ef05d",
+    "tools/hip/gfx1151-glm-hipblaslt-100401.txt": "523c608746b11b28230e09d827f32b2c7b35abbd"
+  },
+  "gpu_source_groups_unchanged": [
+    "src/prefill",
+    "src/kernels",
+    "include/strata/prefill",
+    "include/strata/kernels"
+  ],
+  "note": "Raw-GGUF expert_source implementation is intentionally changed; GLM returns via glm_pack_generate before reaching that source."
+}
