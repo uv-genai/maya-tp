@@ -76,13 +76,38 @@
     16
   ],
   "pending": [
-    "long-loop cache A/B",
-    "CLI",
     "recovery",
     "strict S raw fidelity",
     "prefill A/B",
     "final head CI",
     "merge",
     "post-main CI"
-  ]
+  ],
+  "long_loop_A_B": {
+    "first_semantic_message_usage_equal": true,
+    "normalization": "Only server-allocated random tool-call IDs; raw original messages retained",
+    "policies": [
+      {
+        "policy": "collapse",
+        "initial_tokens": 20021,
+        "follow_cached": 0,
+        "collapsed": 1,
+        "follow_prompt_tokens": 20042,
+        "prompt_ms": 61761.3,
+        "completion_tokens": 8
+      },
+      {
+        "policy": "keep",
+        "initial_tokens": 20021,
+        "follow_cached": 20020,
+        "collapsed": 0,
+        "follow_prompt_tokens": 20128,
+        "prompt_ms": 1141.8,
+        "completion_tokens": 8
+      }
+    ],
+    "speed_ratio": 54.091171833946404,
+    "scope": "Synthetic long repeating tool history only, not general prefill throughput"
+  },
+  "cli_tokens_each_rank_each_mode": 32
 }

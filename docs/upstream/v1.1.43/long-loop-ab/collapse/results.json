@@ -1,0 +1,116 @@
+{
+  "policy": "collapse",
+  "initial_tokens": 20021,
+  "follow_cached": 0,
+  "collapsed": 1,
+  "responses": [
+    {
+      "id": "chatcmpl-7494642b5ce44e1c9835c24e",
+      "object": "chat.completion",
+      "created": 1793560785,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": null,
+            "reasoning_content": "I need to",
+            "tool_calls": [
+              {
+                "id": "call_5c60e7f767f34439a93641aa",
+                "type": "function",
+                "function": {
+                  "name": "inspect_frame",
+                  "arguments": "{}"
+                }
+              }
+            ]
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20021,
+        "completion_tokens": 8,
+        "total_tokens": 20029,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 20021,
+        "prompt_ms": 63674.6,
+        "prompt_per_token_ms": 3.18,
+        "prompt_per_second": 314.4,
+        "predicted_n": 8,
+        "predicted_ms": 318.1,
+        "predicted_per_token_ms": 39.763,
+        "predicted_per_second": 25.1,
+        "draft_n": 4,
+        "draft_n_accepted": 4
+      }
+    },
+    {
+      "id": "chatcmpl-9d06c22e5ff7409e8c41fe73",
+      "object": "chat.completion",
+      "created": 1793560849,
+      "model": "glm-5.3-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "The `inspect_frame",
+            "reasoning_content": "The tool has"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 20042,
+        "completion_tokens": 8,
+        "total_tokens": 20050,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 20042,
+        "prompt_ms": 61761.3,
+        "prompt_per_token_ms": 3.082,
+        "prompt_per_second": 324.5,
+        "predicted_n": 8,
+        "predicted_ms": 605.0,
+        "predicted_per_token_ms": 75.625,
+        "predicted_per_second": 13.2,
+        "draft_n": 11,
+        "draft_n_accepted": 1
+      }
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  }
+}
