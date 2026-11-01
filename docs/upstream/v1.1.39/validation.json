@@ -30,12 +30,33 @@
     41305514302
   ],
   "pending": [
-    "peer_kill_recovery",
-    "framed_raw_pick_fidelity",
-    "controlled_prefill_ab",
     "Maya-M",
     "Maya-L",
     "final_evidence_ci",
     "merge_and_main_ci"
-  ]
+  ],
+  "peer_kill_recovery": "PASS8/8",
+  "framed_raw_picks": {
+    "technical": {
+      "tokens": 256,
+      "requests": 8,
+      "differences": 0
+    },
+    "code": {
+      "tokens": 256,
+      "requests": 8,
+      "differences": 0
+    },
+    "historical_ordinary_references_identical": true
+  },
+  "prefill_ab": {
+    "paired_messages_and_usage_equal": 9,
+    "throughput_delta_percent": [
+      -0.008297,
+      0.175089,
+      -1.207761
+    ],
+    "warm_samples_per_length_per_arm": 2,
+    "warmup_cycles_excluded": 1
+  }
 }

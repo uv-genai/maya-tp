@@ -29,5 +29,15 @@
       "has_reasoning": false
     }
   ],
-  "follow_up_ok": true
+  "follow_up_ok": true,
+  "initial_math_probe": {
+    "result": "coverage miss; requests and follow-up succeeded",
+    "reason": "Numeric periods were not sentence boundaries; reasoning ended naturally before a soft close",
+    "response_completion_tokens": [
+      241,
+      174,
+      2
+    ],
+    "source_log": "/tmp/maya-upstream-v39/soft-thinking-natural-summary.txt"
+  }
 }

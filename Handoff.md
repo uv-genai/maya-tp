@@ -861,3 +861,7 @@ Real prose soft-close probes now PASS (16+2/16+24 tokens, answers840/1412 tokens
 Remaining batch `/tmp/maya-upstream-v39-remaining.sh` runs kill/recovery,framed raw-pick benches,
 reversed3-cycle prefill A/B vs savedv38 (firstcyclewarmup),M/LAPI/prefill smoke andrawpicks.
 Evidencecheckpoint in docs/upstream/v1.1.39/. No nexttag until all gates and mainCI pass.
+
+#45 milestone: peer kill/recover8/8 PASS. Framed S technical/code256-token benches16/16 raw-pick0; both ordinary references match historical corrected references256/256. ccab795 CI41306661283/41306656736 PASS. Prefill A/B vs acceptedv38 running; M/L gates and final evidence/main CI pending. Current script /tmp/maya-upstream-v39-remaining.sh, outputs /tmp/maya-upstream-v39. No v40 yet.
+
+#45 prefill A/B vs acceptedv38 complete: all9messages/usage match; warm1K/4K/8K throughput -0.01/+0.18/-1.21% (two measuredcycles afteronewarmup, bothrawarmsretained). No material warm regression/new speedclaim; #33 remainsopen. M/L checks now running; no nexttag before39acceptance/mainCI.
