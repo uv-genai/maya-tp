@@ -1,0 +1,82 @@
+{
+  "accepted": false,
+  "upstream": "3589d6f12a3f77e813b184b51a586f8fc3de2185",
+  "code_source": "5b13c83",
+  "glm_runtime_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
+  "glm_binary_md5": "b398d4a0711430edd6a28b95264c7293",
+  "ds4_binary_md5": "51749e860763aea34847b183de95a933",
+  "cpu": {
+    "hip_mapping": "pass",
+    "serve": {
+      "tests": 605,
+      "skips": 11
+    },
+    "tools": {
+      "tests": 679,
+      "skips": 33
+    },
+    "focused": 99,
+    "host_tests": 18,
+    "chunk_policy_properties": 270848
+  },
+  "hip_ds4_build": "pass,gfx1151",
+  "gpu_images_identical_baselines": true,
+  "state": {
+    "matched_rounds": 132,
+    "matched_window_attempts": 8,
+    "asymmetric_retries": 8,
+    "rank0_segment_start_line": 10,
+    "segmentation": "rank0 log appends across engine restarts; keep full raw log and audit from last startup header",
+    "long_decode": {
+      "mtp": {
+        "short_ms_per_token": 88.9203125,
+        "long_ms_per_token": 67.990625,
+        "ratio": 0.7646242246393364,
+        "maximum_ratio": 4
+      },
+      "simple": {
+        "short_ms_per_token": 42.8671875,
+        "long_ms_per_token": 41.1375,
+        "ratio": 0.9596500820120285,
+        "maximum_ratio": 4
+      }
+    },
+    "prefill_cancel_modes": [
+      "mtp",
+      "simple"
+    ],
+    "both_peer_up": true
+  },
+  "parts_live": {
+    "initial_tokens": 20021,
+    "follow_cached": 20020,
+    "collapsed": 0,
+    "normal_and_mtp_followups": "pass",
+    "interpretation": "OpenAI text-only parts flatten to strings; direct CPU regression isolates80, liveprobe validates format/prefix policy endtoend, not independent80A/B"
+  },
+  "reused_evidence": "UnchangedGLM math/transport/tuning andDS4GPUimage: prior kernel/strict S/M-L evidence; new server paths coveredCPU605/liveS. No new strict-reference/performance/DS4fullmodel claim.",
+  "ds4_cap": {
+    "default": 0,
+    "mode": "opt-in,automaticGGUFborrowedplan,gfx1151only",
+    "bounds_issue": 78,
+    "measurement_issue_open": 79
+  },
+  "open_issues": [
+    79,
+    75,
+    68,
+    33,
+    42,
+    46,
+    52,
+    54,
+    60,
+    11,
+    16
+  ],
+  "pending": [
+    "final head CI",
+    "merge",
+    "post-main CI"
+  ]
+}

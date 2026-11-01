@@ -1,0 +1,85 @@
+{
+  "rejected": [
+    {
+      "path": "/models/unload",
+      "status": 400,
+      "message": "TP2 changes require restarting both ranks together. Use the pair launcher's matching --context or --model options."
+    },
+    {
+      "path": "/models/load",
+      "status": 400,
+      "message": "TP2 changes require restarting both ranks together. Use the pair launcher's matching --context or --model options."
+    },
+    {
+      "path": "/api/context",
+      "status": 400,
+      "message": "TP2 changes require restarting both ranks together. Use the pair launcher's matching --context or --model options."
+    },
+    {
+      "path": "/v1/chat/completions",
+      "status": 400,
+      "message": "TP2 images and videos are unavailable until RDMA embedding synchronization is implemented"
+    }
+  ],
+  "pids_unchanged": true,
+  "followup_after_idle": {
+    "id": "chatcmpl-f172da6adeb947cd81c73bcf",
+    "object": "chat.completion",
+    "created": 1793566916,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "RDMA (Remote Direct Memory Access) is a networking technology that allows one computer",
+          "reasoning_content": "The user wants one sentence about RDMA (Remote Direct Memory Access). This"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 19,
+      "completion_tokens": 32,
+      "total_tokens": 51,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 19,
+      "prompt_ms": 441.8,
+      "prompt_per_token_ms": 23.253,
+      "prompt_per_second": 43.0,
+      "predicted_n": 32,
+      "predicted_ms": 1209.3,
+      "predicted_per_token_ms": 37.791,
+      "predicted_per_second": 26.5,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  }
+}

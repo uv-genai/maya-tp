@@ -1,18 +1,20 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read Handoff.md (especially §§18,21,23,27–29 and latest §29.28), then AGENTS.md.
+Read Handoff.md (especially §§18,21,23,27–29 and latest §29.29), then AGENTS.md.
 
 ## Objective and current checkpoint
 
 Integrate upstream v1.1.37–v1.1.46 ONE TAG AT A TIME. Semantic review and relevant validation, exact-final-head CI and post-merge main CI must pass before starting the next tag. Continue through46. Preserve TP2/MTP and fork-owned README/AGENTS/docs; push only origin uv-genai/maya-tp. No release is authorized by integration. Future fork release tags are tp-vMAJOR.MINOR.PATCH; VERSION stays numeric and published legacy tags immutable. Upstream tags are upstream/v*.
 
-**37–45 semantic checkpoints accepted.** Latest45 PR76/2df9e26be0783f7a84ae6c4e8dbc6e8d6d5fe933, final6f1e78c CI41346480733/41346487052 andpost-main41346856373 PASS. #74closed forscopedreview/ancestry. **FunctionalDS4tailfix explicitly DEFERRED#75OPEN**: upstreamautomaticNVIDIApathdisabledHIP anddepends ondeferredcopyflush/strictdrain/lentguard. No partialport orDS4longpromptstabilityclaim. All620runtimefiles exact44; report docs/upstream/v1.1.45.md/validation.json accepted with functional_change_applied=false. WMMA68 remains separatelyOPEN/failing.
+**37–45 semantic checkpoints accepted.** Latest45 PR76/2df9e26, final6f1e78c CI41346480733/41346487052,post-main41346856373PASS.74closed; functionalDS4tailfixDEFERRED75OPEN.44/43acceptedreports/handoffsretainfullprovenance.
 
-**Active46 (#77, merge/upstream-v1.1.46)**3589d6f12a3f77e813b184b51a586f8fc3de2185 (5commits/8files): createownissue/branchfromupdatedmain, semanticreview/affectedgates/finalheadCI/postmainCI. 46source5b13c83: parser/contentparts fixes,78safe opt-in gfx1151chunk(default0),80textparts32Kcapcount.79localDS4measurement OPEN(no5%claim);75tail/68WMMAremainOPEN. CPU605/679/HIPmap,99focused,18host,HIPDS4build PASS; bothGLM/DS4GPUimagesunchanged. **ACTIVE22871** /tmp/maya-upstream-v46-live.sh state/cancel/guards then20KtextpartsAPIprefix+followups; no concurrentGPU/build/deploy. FinalheadCI/PR/mainCI stillpending. Thenfinishwholeobjective: restorecoherentproductionruntimewithoutoverwritingprotectedsource/YAML, retainvalidatedreviewbuilds, finalhandoff. Noactivebatches;45batch2813EXIT0 (HIPmap/602serve11skip/679tools33skip+freshMTP/reuse/spec1drafts56/47/0,64budget,PIDs/peerPASS),44batch64704EXIT0,43batch13476EXIT0.
+**46 runtime COMPLETE (#77/#78/#80, draftPR81, merge/upstream-v1.1.46).** Upstream3589d6f,code5b13c83.605serve11skip/679tools33skip/HIPmap,99focused,18host,HIPDS4buildPASS. Newcapdefault0(gfx1151only,bounds/aliases78);79measurementOPEN,no5%claim. Contentparts/malformedparameterfixes+80capcount. Windows-onlytrimexcluded. BothGPUimagesunchanged;GLMb398,DS4host51749e86.
 
-Engine6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316,MD5b398d4a0711430edd6a28b95264c7293,all5paths matched andsavedBOTHhosts /tmp/maya-upstream-v45-baseline/maya (same43/44, backupsretained). Remotereview6f1e78c; protectedcanonical777cc92 unchanged. Engines/serverstopped;daemon175392/YAMLpreserved. Original5a52baselineverifiedbothhostsforfulltaskrestoration.
+**No active batches/builds.22871EXIT0:** MTP7+ordinarylarge/reuse/stream/guards/idle,real18Kprefillcancel/cache0retry/followup/peerPASS;132rounds/8asymretriesmatch. FreshtextpartsAPI20021initial/cache0→20020cached/collapsed0,ordinary/MTP64followupsPASS. Directunitisolates80;OpenAItextonlypartsflattenstr,soAPIprobeisformat/prefixendtoend,notindependent80A/B. Initialbadparserfixtureexpectationandallbeforefailuresretained. Donotreruncompletedgateswithoutnewreason.
 
-44PR73/842d6e6 final5e920c4 CI41344769559/41344774298,post-main41345166897PASS;72closed.615runtimefiles exact43,installer/catalogonly,73focusedtests andHF18files×2revisionsmetadataexact.43PR70/c2ff719 finalf862e3b CI41343230502/41343235345,post-main41343606174PASS;65/66/67/69/71closed. Its fullTP2/math evidence is reusedonlyforprovenunchanged44/45paths.
+**Remaining:** finalexactheadCI,PR81merge,post-mainCI. Thenmark46accepted/saveGLMb398+DS45174baselinesBOTHhosts,close78/80; finish77wholeobjective: restoreoriginal5a52toONLYlocalcanonicalbuild-hip/maya,remotecanonicalbuild-hip/maya,andremote/tmp/maya-tp2. Keep BOTHreviewGLMb398/DS45174 andsource. ReviewS/M/Lconfigsnow.exe review/build-hip/maya(verifiedlive), so restoration keepsstackscoherent. Protectedremote777userwork/backups/daemon175392/YAMLmustremainunchanged. Thenfinalhandoffs/index/ancestry/hash/CIchecks,close77andindex36,andfinalansweronlywhencomplete. No newrelease;futuretagstp-v*.
+
+GLMsource6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316 MD5b398d4a0711430edd6a28b95264c7293,DS4hostcode5b13c83 MD551749e860763aea34847b183de95a933. Remote review5b13c83;canonical777unchanged;engine/serverstopped. Original5a52cd27167523b6ea4b0f0bde93f503 in/tmp/maya-upstream-baseline-2026-11-01/maya BOTHhosts;remote also maya-build/maya-tmp same5a52. YAML SHA256c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20. Baselines38–45retained;45b398same43/44.79/75/68and33/42/46/52/54/60/11/16remainOPEN.
 
 ## What43 verified
 
@@ -34,7 +36,7 @@ Long-loop policy A/B JSON0vs32000 preserves20020cached instead of0; follow-up pr
 - Preserve canonical MTP input/accept/continuation/abort, global retry/chunk agreement, replicatedNextN/fullsharedwidths/trunkARs, primary100401 tuning/config inheritance. Route rank/fast/SNAP_GEN opt-in/off; snapshot mirror precedes localSave.
 - #46 streamed fetch deferred ENTIRELY: reader/header/kernels unchanged, even MAYA_GLM_STREAM_FETCH=1 does nothing. #11 multi and #16 HIP/RDMA vision remain deferred. Exclude unsupported platforms/same-host multi-GPU additions. Raw-GGUF O_DIRECT and new drive probe stay opt-in/off on HIP pending measurement; packed TP source unchanged.
 
-Keep33/42/46/52/54/60/11/16/68/75 open unless a later change actually resolves them. #42 L CLI uses WARM=0; no ready handshake. #54 transient rank0 config hides Models catalog. #52 archive metadata may inherit parentgitHEAD and cause harmless host relinks; pin unchanged. Never objcopy in place: inspect ELF read-only with readelf offsets and Path.read_bytes.
+Keep33/42/46/52/54/60/11/16/68/75/79 open unless a later change actually resolves them. #42 L CLI uses WARM=0; no ready handshake. #54 transient rank0 config hides Models catalog. #52 archive metadata may inherit parentgitHEAD and cause harmless host relinks; pin unchanged. Never objcopy in place: inspect ELF read-only with readelf offsets and Path.read_bytes.
 
 ## Hosts and tools
 
