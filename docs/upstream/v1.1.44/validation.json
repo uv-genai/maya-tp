@@ -1,0 +1,46 @@
+{
+  "accepted": false,
+  "upstream": "5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b",
+  "source_merge": "adc54a8",
+  "runtime_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
+  "binary_md5": "b398d4a0711430edd6a28b95264c7293",
+  "unchanged_runtime_files": 615,
+  "cpu": {
+    "hip_mapping": "pass",
+    "serve": {
+      "tests": 602,
+      "skips": 11
+    },
+    "tools": {
+      "tests": 679,
+      "skips": 33
+    },
+    "focused_installer": 73
+  },
+  "download_metadata": {
+    "files_per_revision": 18,
+    "revisions_checked": 2,
+    "names_sizes_sha256_match": true
+  },
+  "live": {
+    "fresh_mtp": true,
+    "reuse": true,
+    "ordinary_spec1": true,
+    "output_budget": 64,
+    "pids_unchanged": true,
+    "peer_up": true
+  },
+  "reused_evidence": {
+    "from_checkpoint": "accepted43",
+    "scope": "Exact615runtime files and unchanged binary: HIP builds/kernel parity/strict S and M-L math/state/performance paths; no new44 performance or quant quality claim"
+  },
+  "known_exception": {
+    "issue": 68,
+    "status": "OPEN; full DS4 GPU suite fails on unchanged pre-existing control"
+  },
+  "pending": [
+    "final head CI",
+    "merge",
+    "post-main CI"
+  ]
+}

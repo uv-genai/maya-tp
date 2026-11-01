@@ -1,0 +1,716 @@
+../home/ugo/software/project-maya-upstream-review/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] reloading the model with a 16384-token context (was 32768) ...
+[maya] the model runs with a 16384-token context now
+[maya] done: 16 tokens in 0 s (63485.9 tok/s) (stop, cancel=False)
+..[maya] reloading the model with a 1048576-token context (was 32768) ...
+[maya] the model runs with a 1048576-token context now
+......[maya] done: 74 tokens in 0 s (3056.0 tok/s) (stop, cancel=False)
+[maya] done: 74 tokens in 0 s (3158.1 tok/s) (stop, cancel=False)
+[maya] done: 74 tokens in 0 s (3175.7 tok/s) (stop, cancel=False)
+[maya] done: 5 tokens in 0 s (15960.1 tok/s) (length, cancel=False)
+.[maya] reloading the model with a 65536-token context (was 32768) ...
+[maya] the model runs with a 65536-token context now
+[maya] reloading the model with a 16384-token context (was 65536) ...
+[maya] the model runs with a 16384-token context now
+../home/ugo/software/project-maya-upstream-review/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] done: 16 tokens in 0 s (59465.6 tok/s) (stop, cancel=False)
+.[maya] done: 16 tokens in 0 s (95906.3 tok/s) (stop, cancel=False)
+................................./home/ugo/software/project-maya-upstream-review/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.[maya] the port 54039 is saved - it applies from the next start
+.sss.............................[maya] done: 190 tokens in 0 s (74905.4 tok/s) (stop, cancel=False)
+.[maya] done: 190 tokens in 0 s (79919.7 tok/s) (stop, cancel=False)
+.[maya] done: 104 tokens in 0 s (79516.5 tok/s) (stop, cancel=False)
+[maya] done: 79 tokens in 0 s (82552.5 tok/s) (stop, cancel=False)
+[maya] done: 104 tokens in 0 s (82351.0 tok/s) (stop, cancel=False)
+[maya] done: 79 tokens in 0 s (86503.4 tok/s) (stop, cancel=False)
+......[maya] done: 6 tokens in 0 s (62789.0 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (70138.9 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (68985.3 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (72067.1 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (62601.6 tok/s) (stop, cancel=False)
+....[maya] done: 6 tokens in 0 s (66156.2 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (70611.2 tok/s) (stop, cancel=False)
+......ss...[maya] fair slice: 10 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 9 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 19 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 18 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 28 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 27 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 37 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 36 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 47 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] fair slice: 45 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] done: 50 tokens in 0 s (201.2 tok/s) (disconnect, cancel=False)
+[maya] answering: 352 of max 4096 tokens, 352.5 tok/s, 1 s
+[maya] done: 401 tokens in 1 s (356.4 tok/s) (stop, cancel=False)
+.[maya] answering: 399 of max 4096 tokens, 399.8 tok/s, 1 s
+[maya] done: 601 tokens in 2 s (398.5 tok/s) (stop, cancel=False)
+.[maya] answering: 405 of max 4096 tokens, 405.6 tok/s, 1 s
+[maya] done: 601 tokens in 2 s (399.0 tok/s) (stop, cancel=False)
+[maya] done: 21 tokens in 0 s (425.4 tok/s) (stop, cancel=False)
+.[maya] fair slice: 23 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] done: 21 tokens in 0 s (393.7 tok/s) (stop, cancel=False)
+[maya] reading the prompt: 46 tokens, 1 s so far
+[maya] done: 601 tokens in 2 s (382.0 tok/s) (stop, cancel=False)
+.[maya] fair slice: 21 tokens written, the engine goes to the next request (1 waiting); this one continues after it
+[maya] done: 21 tokens in 0 s (393.3 tok/s) (stop, cancel=False)
+[maya] reading the prompt: 46 tokens, 1 s so far
+[maya] done: 601 tokens in 2 s (378.0 tok/s) (stop, cancel=False)
+./home/ugo/software/project-maya-upstream-review/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] done: 17 tokens in 0 s (58919.1 tok/s) (stop, cancel=False)
+.[maya] done: 11 tokens in 0 s (62137.8 tok/s) (stop, cancel=False)
+.[maya] done: 17 tokens in 0 s (102770.1 tok/s) (stop, cancel=False)
+[maya] done: 17 tokens in 0 s (57952.4 tok/s) (stop, cancel=False)
+.[maya] done: 17 tokens in 0 s (98400.1 tok/s) (stop, cancel=False)
+.[maya] done: 17 tokens in 0 s (27413.8 tok/s) (stop, cancel=False)
+[maya] done: 17 tokens in 0 s (66974.9 tok/s) (stop, cancel=False)
+.[maya] done: 90 tokens in 0 s (78143.8 tok/s) (stop, cancel=False)
+.[maya] done: 17 tokens in 0 s (60567.6 tok/s) (stop, cancel=False)
+.........[maya] done: 17 tokens in 0 s (66444.4 tok/s) (stop, cancel=False)
+.[maya] done: 17 tokens in 0 s (15399.0 tok/s) (stop, cancel=False)
+.[maya] done: 17 tokens in 0 s (45870.7 tok/s) (stop, cancel=False)
+../usr/lib/python3.14/unittest/suite.py:84: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  return self.run(*args, **kwds)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/suite.py:84: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  return self.run(*args, **kwds)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.............[maya] loop guard: a 29-token block 4 times in the answer at token 152: repeats dropped, a short repetition penalty (now 87 tokens)
+[maya] done: 147 tokens in 0 s (66569.0 tok/s) (stop, cancel=False)
+[maya] loop guard: a 29-token block 4 times in the answer at token 152: repeats dropped, a short repetition penalty (now 87 tokens)
+[maya] done: 147 tokens in 0 s (41654.9 tok/s) (stop, cancel=False)
+[maya] done: 400 tokens in 0 s (57448.3 tok/s) (length, cancel=False)
+.........[maya] done: 804 tokens in 0 s (33078.6 tok/s) (stop, cancel=False)
+.[maya] loop guard: a 29-token block 4 times in the answer at token 152: repeats dropped, a short repetition penalty (now 87 tokens)
+[maya] done: 147 tokens in 0 s (85958.5 tok/s) (stop, cancel=False)
+.[maya] loop guard: a 29-token block 4 times in the answer at token 152: repeats dropped, a short repetition penalty (now 87 tokens)
+[maya] loop guard: a 29-token block 4 times in the answer at token 174: answer ended
+[maya] done: 109 tokens in 0 s (74762.3 tok/s) (stop, cancel=False)
+.[maya] loop guard: a 29-token block 4 times in the answer at token 137: repeats dropped, a short repetition penalty (now 72 tokens)
+[maya] loop guard: a 29-token block 4 times in the answer at token 159: answer ended
+[maya] done: 94 tokens in 0 s (86720.8 tok/s) (stop, cancel=False)
+.[maya] loop guard: a 29-token block 7 times in the thinking at token 213: repeats dropped, a short repetition penalty (now 148 tokens)
+[maya] loop guard: a 29-token block 7 times in the thinking at token 311: repeats dropped, a short repetition penalty (now 246 tokens)
+[maya] loop guard: a 29-token block 7 times in the thinking at token 409: thinking closed (now 345 tokens)
+[maya] done: 375 tokens in 0 s (47373.2 tok/s) (stop, cancel=False)
+.[maya] done: 1728 tokens in 0 s (17280.5 tok/s) (stop, cancel=False)
+[maya] done: 1728 tokens in 0 s (19173.0 tok/s) (stop, cancel=False)
+[maya] done: 1728 tokens in 0 s (18712.4 tok/s) (stop, cancel=False)
+[maya] done: 1728 tokens in 0 s (16431.2 tok/s) (stop, cancel=False)
+.[maya] done: 600 tokens in 0 s (47303.6 tok/s) (length, cancel=False)
+.[maya] loop guard: a 29-token block 4 times in the answer at token 152: repeats dropped, a short repetition penalty (now 87 tokens)
+[maya] done: 147 tokens in 0 s (84850.8 tok/s) (stop, cancel=False)
+.[maya] loop guard: a 29-token block 4 times in the answer at token 152: repeats dropped, a short repetition penalty (now 87 tokens)
+[maya] done: 990 tokens in 0 s (25368.3 tok/s) (stop, cancel=False)
+.[maya] done: 304 tokens in 0 s (66817.8 tok/s) (stop, cancel=False)
+...[maya] done: 16 tokens in 0 s (88862.4 tok/s) (stop, cancel=False)
+.[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (1. of 2)
+[maya] done: 29 tokens in 0 s (59735.8 tok/s) (stop, cancel=False)
+.[maya] done: 45 tokens in 0 s (91815.6 tok/s) (stop, cancel=False)
+[maya] done: 24 tokens in 0 s (94116.1 tok/s) (stop, cancel=False)
+[maya] done: 108 tokens in 0 s (89364.9 tok/s) (stop, cancel=False)
+.[maya] done: 12 tokens in 0 s (70871.5 tok/s) (stop, cancel=False)
+[maya] done: 38 tokens in 0 s (97297.3 tok/s) (stop, cancel=False)
+[maya] done: 44 tokens in 0 s (92537.2 tok/s) (stop, cancel=False)
+.[maya] done: 42 tokens in 0 s (132587.9 tok/s) (stop, cancel=False)
+.[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (1. of 2)
+[maya] done: 30 tokens in 0 s (52361.1 tok/s) (stop, cancel=False)
+.[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (1. of 2)
+[maya] thinking: an end-of-turn marker inside it is a quote - going on with the thinking (2. of 2)
+[maya] done: 32 tokens in 0 s (24127.6 tok/s) (stop, cancel=False)
+.[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+.[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (2. time in this answer), not run - a note, the thinking steered away and on
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (3. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 516 tokens in 0 s (93574.2 tok/s) (stop, cancel=False)
+.[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('OK — the loop guard is right. Stop repeating identical greps. Break out: use wha'): kept going (1. time in this answer)
+[maya] done: 224 tokens in 0 s (98663.5 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 250 tokens in 0 s (97806.9 tok/s) (stop, cancel=False)
+.[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 318 tokens in 0 s (91620.3 tok/s) (stop, cancel=False)
+.[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('OK — the loop guard is right. Stop repeating identical greps. Break out: use wha'): kept going (1. time in this answer)
+[maya] done: 224 tokens in 0 s (96915.3 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 14 tokens in 0 s (55356.3 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 488 tokens in 0 s (49251.9 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('What I found: - Finding 0: the operator claim at step 0 is read-only, so the byt'): kept going (1. time in this answer)
+[maya] done: 617 tokens in 0 s (54785.7 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('OK — the loop guard is right. Stop repeating identical greps. Break out: use wha'): kept going (1. time in this answer)
+[maya] loop guard: the model would end its turn with nothing ('OK — the loop guard is right. Stop repeating identical greps. Break out: use wha'): kept going (2. time in this answer)
+[maya] loop guard: the model would end its turn with nothing ('OK — the loop guard is right. Stop repeating identical greps. Break out: use wha'): kept going (3. time in this answer)
+[maya] done: 377 tokens in 0 s (96097.6 tok/s) (stop, cancel=False)
+[maya] done: 9 tokens in 0 s (85163.5 tok/s) (stop, cancel=False)
+..[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 133 tokens in 0 s (100754.9 tok/s) (length, cancel=False)
+.[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 8 tokens in 0 s (82472.3 tok/s) (length, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 9 tokens in 0 s (79891.5 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 9 tokens in 0 s (82443.3 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] done: 132 tokens in 0 s (110443.0 tok/s) (length, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 133 tokens in 0 s (103234.8 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 134 tokens in 0 s (87326.6 tok/s) (stop, cancel=False)
+.[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 133 tokens in 0 s (110047.3 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] done: 104 tokens in 0 s (113389.3 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] done: 222 tokens in 0 s (85827.9 tok/s) (stop, cancel=False)
+..........[maya] loop guard: `bash` 3 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+..[maya] MCP server 'missing' did not start: could not start 'strata-no-such-program': [Errno 2] No such file or directory: 'strata-no-such-program'. Its tools are left out; the chat works without them.
+[maya] MCP server 'paged': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+...[maya] MCP server 'solo': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'solo' had stopped; starting it again
+[maya] MCP server 'solo': 6 tools (echo, fail, sleep, big, die, add)
+........[maya] MCP server 'down' did not start: could not reach http://127.0.0.1:9/mcp: <urlopen error [Errno 111] Connection refused>. Its tools are left out; the chat works without them.
+[maya] MCP server 'web': 6 tools (echo, fail, sleep, big, die, add)
+../home/ugo/software/project-maya-upstream-review/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] done: 13 tokens in 0 s (95144.9 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+/usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 401: 'Unauthorized'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 120 tokens in 0 s (81863.6 tok/s) (stop, cancel=False)
+[maya] tool fake__echo: ok, 5 characters in 0.0 s
+[maya] done: 120 tokens in 0 s (96729.1 tok/s) (stop, cancel=False)
+[maya] tool fake__echo: ok, 5 characters in 0.0 s
+[maya] done: 120 tokens in 0 s (94602.4 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 141 tokens in 0 s (87264.5 tok/s) (stop, cancel=False)
+[maya] tool fake__add: ok, 1 characters in 0.0 s
+[maya] done: 13 tokens in 0 s (54236.7 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 13 tokens in 0 s (71902.4 tok/s) (stop, cancel=False)
+/usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 415: 'Unsupported Media Type'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 109 tokens in 0 s (66148.5 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 116 tokens in 0 s (60657.1 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (40124.1 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (60904.7 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 120 tokens in 0 s (58956.1 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 134 tokens in 0 s (58211.7 tok/s) (stop, cancel=False)
+[maya] tool fake__echo: ok, 19 characters in 0.0 s
+[maya] done: 31 tokens in 0 s (46397.2 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 84 tokens in 0 s (55960.0 tok/s) (stop, cancel=False)
+[maya] tool fake__fail: error, 27 characters in 0.0 s
+[maya] done: 21 tokens in 0 s (68759.1 tok/s) (stop, cancel=False)
+.[maya] MCP server 'fake': 6 tools (echo, fail, sleep, big, die, add)
+[maya] MCP server 'broken' did not start: the server stopped (exit code 2): cannot start: missing configuration. Its tools are left out; the chat works without them.
+[maya] done: 115 tokens in 0 s (90851.4 tok/s) (stop, cancel=False)
+[maya] tool fake__big: ok, 3,000 characters in 0.0 s (truncated for the model)
+[maya] done: 16 tokens in 0 s (69672.8 tok/s) (stop, cancel=False)
+.........s.................[maya] maya-maya-m.json not deleted: it is the model running now
+.[maya] maya-maya-l.json deleted, and its files (0.0 GB)
+.[maya] /tmp/tmp3frq11jm/models/GLM-5.3-Flash/Maya-L deleted (0.0 GB): no model here used it
+..[maya] maya-gguf-q8.json: its model's own sampling and thinking level written into it
+[maya] maya-gguf-q8.json is the model to start: Maya starts again with it
+[maya] maya-maya-m.json is deleted once maya-gguf-q8.json runs
+[maya] maya-maya-m.json deleted (its files stay)
+....[maya] maya-gguf-q8.json: engine settings saved - they apply from its next start
+.....[maya] maya-maya-m.json: engine settings saved: Maya starts again with them
+[maya] starting again with maya-maya-m.json's new engine settings ...
+.[maya] maya-maya-m.json: engine settings saved - they apply from its next start
+.[maya] maya-maya-m.json: engine settings saved - they apply from its next start
+[maya] maya-maya-m.json: engine settings saved - they apply from its next start
+.[maya] maya-gguf-q8.json: its model's own sampling and thinking level written into it
+[maya] maya-gguf-q8.json is the model to start next (a start without --config picks it)
+[maya] maya-gguf-q8.json is the model to start: Maya starts again with it
+[maya] starting again with maya-gguf-q8.json ...
+.[maya] maya-gguf-q8.json: its model's own sampling and thinking level written into it
+[maya] maya-gguf-q8.json is the model to start next (a start without --config picks it)
+................../home/ugo/software/project-maya-upstream-review/serve/test_multi.py:371: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  self.engine = StrataEngine(str(self.path), [])
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/test_multi.py:371: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  self.engine = StrataEngine(str(self.path), [])
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./usr/lib/python3.14/unittest/suite.py:107: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='utf-8'>
+  for index, test in enumerate(self):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/suite.py:107: ResourceWarning: unclosed file <_io.TextIOWrapper name=7 encoding='utf-8'>
+  for index, test in enumerate(self):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] stopped, and the engine has not said the request ended after 0 s (STRATA_DRAIN_S) - it is still working on it (a long prompt is stopped between its chunks); waiting for it
+[maya] the stopped request ended after 2 s
+./usr/lib/python3.14/unittest/suite.py:84: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  return self.run(*args, **kwds)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/suite.py:84: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  return self.run(*args, **kwds)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] request 1: stopped, and the engine did not say it had ended within 0 s (STRATA_DRAIN_S) - going on; the engine may still be writing it
+./usr/lib/python3.14/unittest/suite.py:107: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  for index, test in enumerate(self):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/suite.py:107: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  for index, test in enumerate(self):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] request 1: the engine has said nothing of it for 0 s - stopping it and giving its place in the queue back (STRATA_REQUEST_QUIET_S=0)
+../home/ugo/software/project-maya-upstream-review/serve/server.py:789: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  self.proc = subprocess.Popen([exe, "--serve", *args], cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/serve/server.py:789: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  self.proc = subprocess.Popen([exe, "--serve", *args], cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..........[maya] done: 2 tokens in 0 s (438.1 tok/s) (cancel, cancel=True)
+.[maya] done: 6 tokens in 0 s (462.2 tok/s) (stop, cancel=False)
+[maya] done: 5 tokens in 0 s (37532.9 tok/s) (stop, cancel=False)
+.[maya] done: 15 tokens in 0 s (41294.1 tok/s) (stop, cancel=False)
+.[maya] done: 12 tokens in 0 s (50313.4 tok/s) (stop, cancel=False)
+[maya] done: 8 tokens in 0 s (83886.1 tok/s) (stop, cancel=False)
+.[maya] loop guard: a 8-token block 12 times in the answer at token 96: repeats dropped, a short repetition penalty (now 31 tokens)
+[maya] loop guard: a 32-token block 3 times in the answer at token 96: answer ended
+[maya] done: 32 tokens in 0 s (92.2 tok/s) (stop, cancel=False)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+..[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+.[maya] loop guard: a 8-token block 12 times in the answer at token 96: repeats dropped, a short repetition penalty (now 31 tokens)
+[maya] loop guard: a 32-token block 3 times in the answer at token 96: answer ended
+[maya] done: 32 tokens in 0 s (14893.9 tok/s) (stop, cancel=False)
+[maya] answering: 5296 of max 8144 tokens, 5294.5 tok/s, 1 s
+[maya] done: 6290 tokens in 1 s (4563.6 tok/s) (stop, cancel=False)
+.[maya] done: 8 tokens in 0 s (146.6 tok/s) (cancel, cancel=True)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+..[maya] done: 15 tokens in 0 s (39972.9 tok/s) (stop, cancel=False)
+[maya] done: 15 tokens in 0 s (25288.7 tok/s) (stop, cancel=False)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+.[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+[maya] done: 8 tokens in 0 s (39462.5 tok/s) (stop, cancel=False)
+[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+[maya] done: 8 tokens in 0 s (40552.7 tok/s) (stop, cancel=False)
+[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+[maya] done: 8 tokens in 0 s (37689.5 tok/s) (stop, cancel=False)
+[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+[maya] done: 8 tokens in 0 s (37401.4 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (40563.9 tok/s) (stop, cancel=False)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+.[maya] done: 3 tokens in 0 s (446.6 tok/s) (cancel, cancel=True)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (cancel, cancel=True)
+[maya] done: 6 tokens in 0 s (45100.0 tok/s) (stop, cancel=False)
+.s[maya] done: 6 tokens in 0 s (26214.4 tok/s) (stop, cancel=False)
+...........[maya] done: 6 tokens in 0 s (36220.2 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (441.7 tok/s) (disconnect, cancel=True)
+[maya] done: 6 tokens in 0 s (28263.5 tok/s) (stop, cancel=False)
+.[maya] the engine reported an error: test engine failure
+[maya] done: 7 tokens in 0 s (22940.6 tok/s) (error, cancel=False)
+[maya] the engine reported an error: test engine failure
+[maya] done: 7 tokens in 0 s (38479.9 tok/s) (error, cancel=False)
+.[maya] done: 80 tokens in 0 s (86424.1 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (64002.6 tok/s) (stop, cancel=False)
+[maya] done: 80 tokens in 0 s (74260.4 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (70849.7 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (32017.6 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (35424.9 tok/s) (stop, cancel=False)
+..[maya] done: 158 tokens in 0 s (69083.7 tok/s) (stop, cancel=False)
+[maya] done: 5 tokens in 0 s (45343.8 tok/s) (stop, cancel=False)
+.[maya] done: 58 tokens in 0 s (104628.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (20661.6 tok/s) (length, cancel=False)
+.ss[maya] done: 5 tokens in 0 s (32640.5 tok/s) (length, cancel=False)
+[maya] done: 5 tokens in 0 s (11389.8 tok/s) (length, cancel=False)
+.[maya] done: 13 tokens in 0 s (53601.3 tok/s) (stop, cancel=False)
+[maya] done: 14 tokens in 0 s (63773.0 tok/s) (stop, cancel=False)
+[maya] done: 13 tokens in 0 s (61680.9 tok/s) (stop, cancel=False)
+.[maya] done: 26 tokens in 0 s (38311.1 tok/s) (stop, cancel=False)
+[maya] done: 8 tokens in 0 s (51873.0 tok/s) (stop, cancel=False)
+..[maya] done: 6 tokens in 0 s (15569.1 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (45990.2 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (22028.9 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (48771.0 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (34894.4 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (35246.3 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (24300.7 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (42538.6 tok/s) (stop, cancel=False)
+.[maya] done: 80 tokens in 0 s (103611.6 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (38362.5 tok/s) (stop, cancel=False)
+[maya] done: 80 tokens in 0 s (66085.0 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (63614.3 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (5764.6 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (33989.5 tok/s) (stop, cancel=False)
+...[maya] done: 15 tokens in 0 s (72049.4 tok/s) (stop, cancel=False)
+[maya] done: 18 tokens in 0 s (60070.1 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (38479.9 tok/s) (stop, cancel=False)
+[maya] done: 22 tokens in 0 s (66225.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (38130.0 tok/s) (stop, cancel=False)
+[maya] done: 9 tokens in 0 s (78951.6 tok/s) (stop, cancel=False)
+[maya] done: 24 tokens in 0 s (101333.0 tok/s) (stop, cancel=False)
+[maya] done: 14 tokens in 0 s (90125.5 tok/s) (stop, cancel=False)
+.[maya] done: 18 tokens in 0 s (84482.4 tok/s) (stop, cancel=False)
+[maya] done: 4 tokens in 0 s (41803.7 tok/s) (length, cancel=False)
+.[maya] done: 22 tokens in 0 s (106249.0 tok/s) (stop, cancel=False)
+[maya] done: 13 tokens in 0 s (81049.4 tok/s) (stop, cancel=False)
+[maya] done: 17 tokens in 0 s (61965.7 tok/s) (stop, cancel=False)
+[maya] done: 15 tokens in 0 s (99525.9 tok/s) (stop, cancel=False)
+.s[maya] done: 6 tokens in 0 s (38980.5 tok/s) (stop, cancel=False)
+..[maya] done: 12 tokens in 0 s (74056.7 tok/s) (stop, cancel=False)
+[maya] done: 12 tokens in 0 s (89936.3 tok/s) (stop, cancel=False)
+.[maya] done: 80 tokens in 0 s (105023.8 tok/s) (stop, cancel=False)
+[maya] done: 79 tokens in 0 s (110042.3 tok/s) (stop, cancel=False)
+.[maya] done: 2 tokens in 0 s (12483.0 tok/s) (disconnect, cancel=False)
+[maya] done: 12 tokens in 0 s (56333.8 tok/s) (stop, cancel=False)
+[maya] done: 6 tokens in 0 s (46397.2 tok/s) (stop, cancel=False)
+.[maya] done: 170 tokens in 0 s (69555.2 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (67577.4 tok/s) (stop, cancel=False)
+[maya] done: 170 tokens in 0 s (58668.9 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (67073.1 tok/s) (stop, cancel=False)
+.[maya] done: 151 tokens in 0 s (83441.1 tok/s) (stop, cancel=False)
+[maya] done: 117 tokens in 0 s (91231.8 tok/s) (stop, cancel=False)
+.[maya] done: 149 tokens in 0 s (54861.4 tok/s) (stop, cancel=False)
+.[maya] done: 102 tokens in 0 s (63293.7 tok/s) (length, cancel=False)
+[maya] done: 110 tokens in 0 s (66286.7 tok/s) (length, cancel=False)
+[maya] done: 134 tokens in 0 s (82521.1 tok/s) (length, cancel=False)
+[maya] done: 103 tokens in 0 s (92103.1 tok/s) (stop, cancel=False)
+.[maya] done: 6 tokens in 0 s (32463.7 tok/s) (stop, cancel=False)
+.[maya] done: 53 tokens in 0 s (71556.4 tok/s) (stop, cancel=False)
+[maya] done: 46 tokens in 0 s (92748.7 tok/s) (stop, cancel=False)
+.[maya] done: 68 tokens in 0 s (56990.1 tok/s) (stop, cancel=False)
+[maya] done: 72 tokens in 0 s (35784.1 tok/s) (stop, cancel=False)
+.[maya] done: 147 tokens in 0 s (51663.6 tok/s) (stop, cancel=False)
+.[maya] done: 77 tokens in 0 s (88497.3 tok/s) (disconnect, cancel=False)
+.[maya] done: 26 tokens in 0 s (105809.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (25420.0 tok/s) (length, cancel=False)
+..[maya] done: 79 tokens in 0 s (58661.6 tok/s) (stop, cancel=False)
+[maya] done: 19 tokens in 0 s (43842.9 tok/s) (stop, cancel=False)
+[maya] done: 83 tokens in 0 s (58922.9 tok/s) (stop, cancel=False)
+[maya] done: 19 tokens in 0 s (48057.0 tok/s) (stop, cancel=False)
+.[maya] done: 19 tokens in 0 s (61032.7 tok/s) (disconnect, cancel=False)
+[maya] done: 23 tokens in 0 s (84500.6 tok/s) (disconnect, cancel=False)
+.[maya] done: 90 tokens in 0 s (56422.8 tok/s) (stop, cancel=False)
+[maya] done: 94 tokens in 0 s (64431.8 tok/s) (stop, cancel=False)
+.[maya] done: 52 tokens in 0 s (86393.2 tok/s) (length, cancel=False)
+[maya] done: 55 tokens in 0 s (69668.5 tok/s) (length, cancel=False)
+[maya] done: 77 tokens in 0 s (75951.2 tok/s) (length, cancel=False)
+[maya] done: 13 tokens in 0 s (61082.1 tok/s) (length, cancel=False)
+[maya] done: 45 tokens in 0 s (99380.4 tok/s) (length, cancel=False)
+[maya] done: 48 tokens in 0 s (93694.1 tok/s) (length, cancel=False)
+[maya] done: 81 tokens in 0 s (88651.1 tok/s) (length, cancel=False)
+[maya] done: 13 tokens in 0 s (39977.5 tok/s) (length, cancel=False)
+.....[maya] done: 16 tokens in 0 s (95469.7 tok/s) (stop, cancel=False)
+......[maya] done: 12 tokens in 0 s (86561.6 tok/s) (stop, cancel=False)
+..[maya] done: 12 tokens in 0 s (90643.1 tok/s) (stop, cancel=False)
+.[maya] done: 12 tokens in 0 s (68656.8 tok/s) (stop, cancel=False)
+[maya] done: 12 tokens in 0 s (109330.2 tok/s) (stop, cancel=False)
+[maya] done: 12 tokens in 0 s (112530.1 tok/s) (stop, cancel=False)
+.[maya] done: 16 tokens in 0 s (95614.8 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (41282.5 tok/s) (stop, cancel=False)
+..[maya] done: 16 tokens in 0 s (72986.7 tok/s) (stop, cancel=False)
+......[maya] the engine reported an error: verify: layer 31 never rang (an illegal memory access was encountered)
+[maya] done: 0 tokens in 0 s (0.0 tok/s) (error, cancel=False)
+[maya] the engine reported an error: verify: layer 31 never rang (an illegal memory access was encountered)
+[maya] done: 0 tokens in 0 s (0.0 tok/s) (error, cancel=False)
+.[maya] the engine stopped unexpectedly (exit code -9).  The next request starts the engine again.
+[maya] done: 5 tokens in 0 s (36711.6 tok/s) (error, cancel=False)
+[maya] the engine had stopped (exit code None); starting it again (a minute or two) ...
+[maya] the engine is running again
+[maya] done: 50 tokens in 0 s (112429.4 tok/s) (length, cancel=False)
+./usr/lib/python3.14/unittest/case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='utf-8'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=7 encoding='utf-8'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..[maya] done: 50 tokens in 0 s (98523.9 tok/s) (length, cancel=False)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+.[maya] done: 2011 tokens in 0 s (15026.8 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (13959.8 tok/s) (stop, cancel=False)
+....[maya] reading the prompt: 246 tokens, 1 s so far
+[maya] done: 8 tokens in 1 s (18966.5 tok/s) (length, cancel=False)
+....[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+.[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+[maya] done: 13 tokens in 0 s (74126.1 tok/s) (stop, cancel=False)
+........[maya] the engine stopped unexpectedly (exit code -9).  The next request starts the engine again.
+[maya] done: 3 tokens in 0 s (4122.2 tok/s) (error, cancel=False)
+..[maya] done: 30 tokens in 1 s (49.6 tok/s) (length, cancel=False)
+.......[maya] a malformed tool call, sent on as written instead of failing the answer (62 characters): 'write<arg_key>path</arg_key>oops<arg_value>PLAN.md</arg_value>'
+[maya] done: 110 tokens in 0 s (101257.8 tok/s) (stop, cancel=False)
+..[maya] done: 50 tokens in 0 s (97311.0 tok/s) (length, cancel=False)
+[maya] done: 50 tokens in 0 s (105938.6 tok/s) (length, cancel=False)
+[maya] done: 50 tokens in 0 s (107433.8 tok/s) (length, cancel=False)
+[maya] done: 50 tokens in 0 s (105018.3 tok/s) (length, cancel=False)
+[maya] done: 1500 tokens in 0 s (18391.9 tok/s) (length, cancel=False)
+[maya] done: 1500 tokens in 0 s (18401.3 tok/s) (length, cancel=False)
+..[maya] done: 2011 tokens in 0 s (14778.6 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (13838.8 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (13826.3 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (14232.5 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (14687.9 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (13521.3 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (14464.5 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (13681.5 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (13429.1 tok/s) (stop, cancel=False)
+[maya] done: 2011 tokens in 0 s (13571.2 tok/s) (stop, cancel=False)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 5 tokens in 0 s (68200.1 tok/s) (length, cancel=False)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 5 tokens in 0 s (79891.5 tok/s) (length, cancel=False)
+./usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 503: 'Service Unavailable'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+[maya] done: 8 tokens in 0 s (57568.9 tok/s) (length, cancel=False)
+./usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+..[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+./usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 409: 'Conflict'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+..[maya] the engine's numbers went non-finite after 8 tokens (glm router: layer 7 decode invalid expert ID or non-finite score): the answer ends there
+[maya] done: 8 tokens in 0 s (52522.6 tok/s) (length, cancel=False)
+.[maya] the engine reported an error: verify: layer 31 never rang
+[maya] done: 0 tokens in 0 s (0.0 tok/s) (error, cancel=False)
+.[maya] the engine's numbers went non-finite before the answer started (glm router: layer 7 decode invalid expert ID or non-finite score): running the request again from token 0
+[maya] done: 24 tokens in 0 s (113359.6 tok/s) (stop, cancel=False)
+.[maya] the engine's numbers went non-finite before the answer started (glm router: layer 7 decode invalid expert ID or non-finite score): running the request again from token 0
+[maya] the engine reported an error: glm router: layer 7 decode invalid expert ID or non-finite score
+[maya] done: 0 tokens in 0 s (0.0 tok/s) (error, cancel=False)
+.[maya] done: 8 tokens in 0 s (85349.2 tok/s) (length, cancel=False)
+.[maya] done: 20 tokens in 0 s (27584.6 tok/s) (length, cancel=False)
+[maya] done: 20 tokens in 0 s (58169.2 tok/s) (length, cancel=False)
+.[maya] done: 20 tokens in 0 s (107691.6 tok/s) (length, cancel=False)
+.[maya] done: 20 tokens in 0 s (15477.1 tok/s) (length, cancel=False)
+.[maya] done: 8 tokens in 1 s (22259.4 tok/s) (length, cancel=False)
+.[maya] reading the prompt: 246 tokens, 1 s so far
+[maya] reading the prompt: 246 tokens, 2 s so far
+[maya] reading the prompt: 246 tokens, 3 s so far
+[maya] done: 8 tokens in 3 s (31706.4 tok/s) (length, cancel=False)
+[maya] done: 16 tokens in 0 s (23241.4 tok/s) (stop, cancel=False)
+...[maya] done: 16 tokens in 0 s (59019.3 tok/s) (stop, cancel=False)
+.Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/serve/server.py", line 5164, in do_POST
+    self._openai(req)
+    ~~~~~~~~~~~~^^^^^
+  File "/home/ugo/software/project-maya-upstream-review/serve/server.py", line 5410, in _openai
+    messages, tools, kw = openai_to_messages(req, deepseek=getattr(svc.template, "deepseek", False))
+                          ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ugo/software/project-maya-upstream-review/serve/frontend.py", line 519, in openai_to_messages
+    role = m.get("role")
+           ^^^^^
+AttributeError: 'int' object has no attribute 'get'
+.[maya] done: 16 tokens in 0 s (121456.7 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (116293.1 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (117817.5 tok/s) (stop, cancel=False)
+.........[maya] done: 6 tokens in 0 s (18724.6 tok/s) (stop, cancel=False)
+..........[maya] other apps now use the Chat settings: temperature=0.3
+[maya] other apps use their own settings again
+[maya] done: 16 tokens in 0 s (96940.8 tok/s) (stop, cancel=False)
+.[maya] other apps now use the Chat settings: temperature=1.0
+.[maya] other apps now use the Chat settings: temperature=0.3, top_p=0.9, top_k=10, min_p=0.05, seed=7, max_tokens=77, reasoning_effort=low, experimental_speed_projection=False
+[maya] done: 16 tokens in 0 s (114390.1 tok/s) (stop, cancel=False)
+[maya] done: 5 tokens in 0 s (86928.6 tok/s) (length, cancel=False)
+.[maya] done: 16 tokens in 0 s (108286.7 tok/s) (stop, cancel=False)
+[maya] done: 16 tokens in 0 s (116941.6 tok/s) (stop, cancel=False)
+[maya] other apps now use the Chat settings: temperature=1.0, repetition_penalty=1.1, presence_penalty=0.5
+[maya] done: 16 tokens in 0 s (79538.0 tok/s) (stop, cancel=False)
+.[maya] other apps now use the Chat settings: temperature=1.0
+.[maya] done: 16 tokens in 0 s (110960.4 tok/s) (stop, cancel=False)
+[maya] other apps now use the Chat settings: temperature=1.0, top_p=0.9, top_k=0, min_p=0.0
+.[maya] done: 18 tokens in 0 s (84083.9 tok/s) (length, cancel=False)
+.[maya] done: 26 tokens in 0 s (108660.7 tok/s) (stop, cancel=False)
+....../usr/lib/python3.14/unittest/suite.py:107: ResourceWarning: unclosed file <_io.TextIOWrapper name=8 encoding='utf-8'>
+  for index, test in enumerate(self):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+...../usr/lib/python3.14/unittest/case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..[maya] done: 3 tokens in 0 s (31184.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (28149.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (19328.6 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (36472.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (35544.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (38304.1 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (28149.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (27685.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (29852.7 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (37957.5 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (38836.1 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (5870.3 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (41323.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (42366.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (31300.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (30615.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (37957.5 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (29959.3 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (30615.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (31300.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (33288.1 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (43018.5 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (47127.0 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (43919.4 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (40329.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (44384.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (39199.1 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (40524.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (39945.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (43919.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (43464.3 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (42581.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (18078.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (38479.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (28055.5 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (30840.5 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (30615.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (20867.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (30283.8 tok/s) (stop, cancel=False)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 2 tokens in 0 s (22919.7 tok/s) (length, cancel=False)
+[maya] done: 3 tokens in 0 s (38657.2 tok/s) (stop, cancel=False)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 2 tokens in 0 s (24385.5 tok/s) (length, cancel=False)
+[maya] done: 3 tokens in 0 s (42366.7 tok/s) (stop, cancel=False)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 2 tokens in 0 s (17260.5 tok/s) (length, cancel=False)
+[maya] done: 3 tokens in 0 s (31655.1 tok/s) (stop, cancel=False)
+..[maya] thinking reached its budget (100 tokens): closed at the end of a sentence or line, 45 tokens later; answering
+[maya] done: 152 tokens in 0 s (91114.9 tok/s) (stop, cancel=False)
+.[maya] thinking reached its budget (100 tokens): closed at the end of a sentence or line, 45 tokens later; answering
+[maya] done: 152 tokens in 0 s (92987.8 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (512 tokens): closed, answering
+[maya] done: 519 tokens in 0 s (48536.7 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (650 tokens): closed, answering
+[maya] done: 657 tokens in 0 s (38539.7 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (750 tokens): closed, answering
+[maya] done: 757 tokens in 0 s (34246.6 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (3071 tokens): closed, answering
+[maya] done: 3078 tokens in 0 s (9585.6 tok/s) (stop, cancel=False)
+.[maya] thinking reached its budget (375 tokens, 100 + 275 without a sentence end): closed, answering
+[maya] done: 382 tokens in 0 s (60092.1 tok/s) (stop, cancel=False)
+.[maya] thinking reached its budget (612 tokens, 100 + 512 without a sentence end): closed, answering
+[maya] done: 619 tokens in 0 s (39650.0 tok/s) (stop, cancel=False)
+..[maya] done: 13 tokens in 0 s (50.0 tok/s) (stop, cancel=False), expert cache 90.0% hit
+.[maya] done: 5 tokens in 0 s (47934.9 tok/s) (length, cancel=False)
+.[maya] done: 13 tokens in 0 s (50.0 tok/s) (stop, cancel=False), expert cache 90.0% hit
+.[maya] done: 13 tokens in 0 s (50.0 tok/s) (stop, cancel=False), expert cache 90.0% hit
+.[maya] done: 13 tokens in 0 s (50.0 tok/s) (stop, cancel=False), expert cache 90.0% hit
+.[maya] images: measuring the vision encoder on this GPU (1024 image tokens) ...
+[maya] images: measuring the vision encoder on this GPU (1024 image tokens) ...
+.[maya] images: measuring the vision encoder on this GPU (1024 image tokens) ...
+.[maya] images: measuring the vision encoder on this GPU (1024 image tokens) ...
+[maya] images: measuring the vision encoder on this GPU (1024 image tokens) ...
+.....[maya] done: 5 tokens in 0 s (61680.9 tok/s) (length, cancel=False)
+.................[maya] stopping (a): the engine ends
+.s................................[maya] done: 49 tokens in 0 s (107892.1 tok/s) (stop, cancel=False)
+[maya] done: 59 tokens in 0 s (74852.2 tok/s) (stop, cancel=False)
+..[maya] done: 49 tokens in 0 s (73881.3 tok/s) (stop, cancel=False)
+[maya] done: 49 tokens in 0 s (88612.1 tok/s) (stop, cancel=False)
+.[maya] done: 49 tokens in 0 s (41717.1 tok/s) (stop, cancel=False)
+.[maya] done: 59 tokens in 0 s (111336.2 tok/s) (stop, cancel=False)
+[maya] done: 59 tokens in 0 s (75176.0 tok/s) (stop, cancel=False)
+.[maya] done: 163 tokens in 0 s (70860.1 tok/s) (stop, cancel=False)
+.[maya] done: 116 tokens in 0 s (99967.9 tok/s) (stop, cancel=False)
+.[maya] done: 16 tokens in 0 s (87139.3 tok/s) (stop, cancel=False)
+.[maya] done: 61 tokens in 0 s (107316.9 tok/s) (stop, cancel=False)
+.[maya] done: 84 tokens in 0 s (103763.7 tok/s) (stop, cancel=False)
+[maya] done: 84 tokens in 0 s (98396.6 tok/s) (stop, cancel=False)
+.........[maya] done: 340 tokens in 0 s (56510.8 tok/s) (stop, cancel=False)
+.[maya] done: 340 tokens in 0 s (60154.4 tok/s) (stop, cancel=False)
+..[maya] done: 46 tokens in 0 s (106514.5 tok/s) (stop, cancel=False)
+....[maya] TP2 images: OFF until RDMA embedding synchronization is implemented
+[maya] TP2 images: OFF until RDMA embedding synchronization is implemented
+..........[maya] updating Project Maya to v1.0.1 ...
+[maya] the update did not happen: this folder can't move straight to v1.0.1 (fatal: Not possible to fast-forward, aborting.); update it by hand: git pull
+....[maya] updating Project Maya to tp-v1.0.1 ...
+[maya] updated the files 8372d98d7 -> tp-v1.0.1; Maya starts again (maya.py compiles what changed in the engine, then loads the model) ...
+.[maya] updating Project Maya to v1.0.1 ...
+[maya] updated the files 8372d98d7 -> v1.0.1; Maya starts again (maya.py compiles what changed in the engine, then loads the model) ...
+.
+----------------------------------------------------------------------
+Ran 602 tests in 160.824s
+
+OK (skipped=11)
