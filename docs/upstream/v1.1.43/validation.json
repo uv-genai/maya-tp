@@ -1,5 +1,5 @@
 {
-  "accepted": false,
+  "accepted": true,
   "upstream": "acdab34bd58eec957715392a1d822777c3c579c3",
   "runtime_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
   "binary_md5": "b398d4a0711430edd6a28b95264c7293",
@@ -75,11 +75,7 @@
     11,
     16
   ],
-  "pending": [
-    "final head CI",
-    "merge",
-    "post-main CI"
-  ],
+  "pending": [],
   "long_loop_A_B": {
     "first_semantic_message_usage_equal": true,
     "normalization": "Only server-allocated random tool-call IDs; raw original messages retained",
@@ -232,5 +228,12 @@
   "live_executable_proof": [
     "prefill-ab/process-candidate.json",
     "prefill-ab/process-baseline.json"
-  ]
+  ],
+  "final_head": "f862e3b26bab95f2898beab52c1df5b275d7fea0",
+  "final_ci": [
+    41343230502,
+    41343235345
+  ],
+  "merge_commit": "c2ff7198e8587d9e027bb4f4454e27b1ae784325",
+  "main_ci": 41343606174
 }
