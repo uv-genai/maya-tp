@@ -30,8 +30,6 @@
     41305514302
   ],
   "pending": [
-    "Maya-M",
-    "Maya-L",
     "final_evidence_ci",
     "merge_and_main_ci"
   ],
@@ -58,5 +56,49 @@
     ],
     "warm_samples_per_length_per_arm": 2,
     "warmup_cycles_excluded": 1
-  }
+  },
+  "models": {
+    "Maya-M": {
+      "model": "Maya-M",
+      "api_mtp_acceptance": "PASS",
+      "fresh_prefill_prompt_tokens": [
+        990,
+        4062,
+        8158
+      ],
+      "raw_pick_records": 8,
+      "raw_pick_differences": 0,
+      "rank0_warmup_lines": {
+        "reference": [
+          "tiers warm: 12384 experts (55.8 GB) in 32 s (1.72 GB/s)"
+        ],
+        "benchmark": [
+          "tiers warm: 12384 experts (55.8 GB) in 375 s (0.15 GB/s)"
+        ]
+      }
+    },
+    "Maya-L": {
+      "model": "Maya-L",
+      "api_mtp_acceptance": "PASS",
+      "fresh_prefill_prompt_tokens": [
+        990,
+        4062,
+        8158
+      ],
+      "raw_pick_records": 8,
+      "raw_pick_differences": 0,
+      "rank0_warmup_lines": {
+        "reference": [
+          "tiers warm: 12384 experts (76.4 GB) in 806 s (0.09 GB/s)"
+        ],
+        "benchmark": [
+          "tiers warm: 12384 experts (76.4 GB) in 49 s (1.55 GB/s)"
+        ]
+      }
+    }
+  },
+  "combined_ci": [
+    41308044569,
+    41308039304
+  ]
 }

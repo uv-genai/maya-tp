@@ -857,7 +857,7 @@ S MTP7 acceptance, MTP/simplelarge matrices,105matchedrounds/8asymmetricretries,
 CLI continuations matchv38. First math soft-close probes ended naturally, missing coverage; prose
 probes running. Kill/recover,rawpicks,prefillA/B,M/L gates pending. No nexttag yet.
 
-Real prose soft-close probes now PASS (16+2/16+24 tokens, answers840/1412 tokens plus follow-up).
+Real prose soft-close probes now PASS (16+2/16+24 tokens, total outputs840/1412 tokens plus follow-up).
 Remaining batch `/tmp/maya-upstream-v39-remaining.sh` runs kill/recovery,framed raw-pick benches,
 reversed3-cycle prefill A/B vs savedv38 (firstcyclewarmup),M/LAPI/prefill smoke andrawpicks.
 Evidencecheckpoint in docs/upstream/v1.1.39/. No nexttag until all gates and mainCI pass.
@@ -865,3 +865,7 @@ Evidencecheckpoint in docs/upstream/v1.1.39/. No nexttag until all gates and mai
 #45 milestone: peer kill/recover8/8 PASS. Framed S technical/code256-token benches16/16 raw-pick0; both ordinary references match historical corrected references256/256. ccab795 CI41306661283/41306656736 PASS. Prefill A/B vs acceptedv38 running; M/L gates and final evidence/main CI pending. Current script /tmp/maya-upstream-v39-remaining.sh, outputs /tmp/maya-upstream-v39. No v40 yet.
 
 #45 prefill A/B vs acceptedv38 complete: all9messages/usage match; warm1K/4K/8K throughput -0.01/+0.18/-1.21% (two measuredcycles afteronewarmup, bothrawarmsretained). No material warm regression/new speedclaim; #33 remainsopen. M/L checks now running; no nexttag before39acceptance/mainCI.
+
+#45 M/L milestone: Maya-M APIacceptance+fresh1K/4K/8K+8raw-pick requests0differences PASS (warmup32s vs375s retained as cold-I/O outlier). Maya-L APIacceptance+fresh1K/4K/8K PASS; last framed raw-pick gate running. Both use measured primary100401 table; final evidence/mainCI pending. Candidate includesmainhandoff e9663f8 via4971b37; latter CI41308044569/41308039304 PASS.
+
+#45 GPU checkpoint complete: S/M/L API/prefill/raw-pick gates PASS; S16+M8+L8 framed requests all raw-pick0. L warmups806s then49s on the same candidate, no timeout/retry/override (temporary long-start wrapper prepared but never used). All5binary hashes remainc3132ee4; both engines/server stopped, daemon/YAML untouched. Final evidence CI, PR#49 merge and mainCI pending; no nexttag before those pass. #33/#42/#11/#16/#46 remainopen.
