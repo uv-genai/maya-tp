@@ -2208,6 +2208,17 @@ class Service:
         with self.status_lock:
             return bool(self.reload) and self.reload.get("state") in ("waiting", "running")
 
+    def paired_restart_reason(self) -> str | None:
+        if int((getattr(self.engine, "info", {}) or {}).get("tp_world", 1) or 1) > 1:
+            return ("TP2 changes require restarting both ranks together. "
+                    "Use the pair launcher's matching --context or --model options.")
+        return None
+
+    def _require_single_rank_restart(self):
+        reason = self.paired_restart_reason()
+        if reason:
+            raise ValueError(reason)
+
     def context_limits(self) -> dict:
         """The dashboard's Context size: the range it offers and the engine's measured cost of the current one."""
         info = dict(getattr(self.engine, "info", {}) or {})
@@ -2225,7 +2236,9 @@ class Service:
                 ram = {"ram_gb": round(vm.total / 2**30, 1), "ram_free_gb": round(vm.available / 2**30, 1)}
             except Exception:  # noqa: BLE001 - psutil is optional: no RAM figures, no RAM warning
                 pass
+        reason = self.paired_restart_reason()
         return {"context": self.engine.max_context, **rng,
+                "reload_supported": reason is None, "reload_reason": reason,
                 "kv_gb": info.get("kv_gb"), "kv_ctx": info.get("kv_ctx"),
                 "kv_resident": info.get("kv_resident") or 0,
                 "kv_ram_gb": round(kv_ram / 2**30, 3) if kv_ram else None, **ram,
@@ -2236,6 +2249,7 @@ class Service:
         """Reload the engine with an n-token context (the dashboard's Context size), on a thread: after the request in
         flight; new requests get a 503 meanwhile.  A start that fails (the context does not fit) puts the old one back;
         a good one is saved into the run config, so the next start keeps it."""
+        self._require_single_rank_restart()
         lim = self.context_limits()
         if not lim["min"] <= n <= lim["max"]:
             raise ValueError(f"the context must be between {lim['min']} and {lim['max']} tokens")
@@ -2396,6 +2410,7 @@ class Service:
         return bool(self.config_path) and p.resolve() == Path(self.config_path).resolve()
 
     def _restart_busy(self):
+        self._require_single_rank_restart()
         if getattr(self, "model_restart", None) or getattr(self, "port_restart", None):
             raise ValueError("Maya is already starting again")
         if self.reloading() or self.updater.busy():
@@ -2465,6 +2480,7 @@ class Service:
         return out
 
     def _delete_running(self, p: Path, files: bool, then) -> dict:
+        self._require_single_rank_restart()
         if not then:
             raise ValueError(f"{p.name} is the model running now: pick the model Maya switches to first")
         if not os.environ.get("MAYA_RESTART_ON_UPDATE"):

@@ -94,6 +94,10 @@ export async function loadCtxInfo() {
 }
 // the Context size slider's stops (Settings > Model and the Models page's Engine settings): CTX_STOPS within a model's
 // range ({min, max}: GET /api/context, or /api/models' context_range), and the sizes given (the one now, a draft's)
+// The server may require a paired restart instead of a local engine reload.
+export function contextReloadReason(info = S.ctxInfo) {
+  return info && info.reload_supported === false ? info.reload_reason || "Restart both ranks together to change the context." : null;
+}
 export function ctxStopsIn(r, ...sizes) {
   if (!r) return [];
   const own = sizes.map(Number).filter((n) => n > 0);

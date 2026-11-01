@@ -8,7 +8,7 @@ import {api, ctxfmt, esc, fmt, isPhone, modelName, relTime} from "./lib.js";
 import {S, confirmDialog, copyText, emit, toast} from "./state.js";
 import {newChat} from "./chats.js";
 import {setSide, showView} from "./sidebar.js";
-import {GLM_KV_BYTES, ctxHint, ctxStopsIn, loadCtxInfo} from "./server.js";
+import {GLM_KV_BYTES, contextReloadReason, ctxHint, ctxStopsIn, loadCtxInfo} from "./server.js";
 import {CtxSlider, Icon, ModelLogo, Seg, Switch, trapTab} from "./ui.js";
 
 // the page's own state (beside S: nothing else reads it but the model menu's count)
@@ -237,12 +237,13 @@ function AutoOr({label, k, d, dflt, unit, subLabel}) {
 // bytes per token as the draft sets it (ctxHint's win / whole / ram / vram); `keys`: the settings that change it - while
 // none does, the running model's line is the engine's own measurement, as in Settings
 function contextRow(m, d, ch, cost, keys = [], extra = null) {
+  const reason = m.running ? contextReloadReason() : null;
   const s = m.settings, r = m.context_range || {min: 4096, max: 262144, tested: 262144};
   const n = Number(d.context), now = Number(s.context), stops = ctxStopsIn(r, now, n);
   const warn = [n !== now && n > r.tested ? `Beyond ${ctxfmt(r.tested)} is untested on this engine.` : null, extra].filter(Boolean).join(" ");
   return html`<${Row} label="Context size" flag="--max-context" changed=${ch("context")} warn=${warn || null}
     below=${html`<${CtxSlider} id=${`mdl-ctx-${m.file}`} label="" value=${n} now=${now} stops=${stops}
-      hint=${ctxHint(n, {live: m.running && !ch(...keys), now, ...cost})} onChange=${(v) => setDraft({context: v})}/>`}/>`;
+      disabled=${!!reason} hint=${reason || ctxHint(n, {live: m.running && !ch(...keys), now, ...cost})} onChange=${(v) => setDraft({context: v})}/>`}/>`;
 }
 
 function fieldsOf(m, d) {

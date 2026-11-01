@@ -6,7 +6,7 @@ import {MOD, api, ctxfmt, fmt, gb, isPhone, modelName, store} from "./lib.js";
 import {DEFAULTS, LEVELS, P, PENALTIES, PRESETS, S, confirmDialog, copyText, emit, presetOf, resetPrefs, savePrefs, schemeChoice, setScheme, setTheme,
         themeChoice, thinkTitles, toast} from "./state.js";
 import {usd} from "./sidebar.js";
-import {GLM_KV_BYTES, confirmContext, confirmPort, ctxEstimate, ctxHint, ctxStops, fetchReport, loadCtxInfo, loadMcp, loadPortInfo, loadShared,
+import {GLM_KV_BYTES, confirmContext, confirmPort, contextReloadReason, ctxEstimate, ctxHint, ctxStops, fetchReport, loadCtxInfo, loadMcp, loadPortInfo, loadShared,
         loadTime, loadUpdate, saveShared, startUpdate, syncShared} from "./server.js";
 import {chatInstructions, clearBrowser, estimateTokens, updateCtxMeter} from "./chats.js";
 import {codeBlock, onCodeClick} from "./md.js";
@@ -55,13 +55,14 @@ function Model() {
   const c = S.ctxInfo, stops = ctxStops(), h = S.health, eng = (S.metrics && S.metrics.engine) || {};
   const [ctx, setCtx] = useState(null), [port, setPort] = useState("");
   useEffect(() => { if (S.portInfo) setPort(String(S.portInfo.port)); }, [S.portInfo && S.portInfo.port]);
-  const v = ctx != null && stops[ctx] ? stops[ctx] : c && c.context;
-  const changed = c && v !== c.context && !S.reload;
+  const reloadReason = contextReloadReason(c);
+  const v = reloadReason ? c.context : ctx != null && stops[ctx] ? stops[ctx] : c && c.context;
+  const changed = c && v !== c.context && !S.reload && !reloadReason;
   const e = c ? ctxEstimate(v) : null;
   // (the same line as the Models page's slider: the engine's measurement; GLM's streamed cache: 12 KB a token in RAM)
   const glmWin = eng.engine_kind === "glm-fast" && c && +c.kv_resident > 0 ? +c.kv_resident : 0;
-  const est = S.reload ? `Reloading with a ${ctxfmt(S.reload.to)} context…`
-    : ctxHint(v, {live: true, now: c && c.context, win: glmWin, whole: true, ram: glmWin ? GLM_KV_BYTES : 0});
+  const est = reloadReason || (S.reload ? `Reloading with a ${ctxfmt(S.reload.to)} context…`
+    : ctxHint(v, {live: true, now: c && c.context, win: glmWin, whole: true, ram: glmWin ? GLM_KV_BYTES : 0}));
   const warns = [];
   if (c && changed) {
     const tested = c.tested || 262144;   // (the largest context run end to end on this engine)
@@ -82,7 +83,7 @@ function Model() {
     <div class="model-card"><${ModelLogo} model=${h.model} size=${36}/>
       <span><b>${modelName(h.model)}</b><span>${[h.model, engine, h.version ? `Project Maya v${h.version}` : ""].filter(Boolean).join(" · ")}</span></span></div>
     ${c ? html`<div class="set-block">
-      <${CtxSlider} id="set-ctx" value=${v} now=${c.context} stops=${stops} disabled=${!!S.reload} hint=${est}
+      <${CtxSlider} id="set-ctx" value=${v} now=${c.context} stops=${stops} disabled=${!!S.reload || !!reloadReason} hint=${est}
         onChange=${(n) => setCtx(stops.indexOf(n))}/>
       ${changed ? html`<div class="callout callout--warn"><span>${warns.join(" ")}</span>
         <button type="button" class="btn btn--primary btn--sm" onClick=${reload}>Reload with ${ctxfmt(v)}</button></div>` : null}

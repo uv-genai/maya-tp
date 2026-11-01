@@ -69,6 +69,40 @@ class Dashboard(unittest.TestCase):
         s, _, b = self.req("GET", "/health")
         self.assertEqual(json.loads(b)["version"], MAYA_VERSION)
 
+    def test_tp2_context_reload_is_rejected_before_mutation(self):
+        from unittest import mock
+        self.engine.info = {"tp_world": 2, "tp_rank": 0}
+        before = self.cfg.read_bytes()
+        _, _, raw = self.req("GET", "/api/context")
+        info = json.loads(raw)
+        self.assertFalse(info["reload_supported"])
+        self.assertIn("both ranks", info["reload_reason"])
+        with mock.patch.object(self.svc, "_reload") as reload:
+            code, _, raw = self.req("POST", "/api/context", {"max_context": 65536}, {"Origin": self.base})
+        self.assertEqual(code, 400, raw)
+        self.assertIn("both ranks", json.loads(raw)["error"]["message"])
+        reload.assert_not_called()
+        self.assertIsNone(self.svc.reload)
+        self.assertEqual(self.engine.max_context, 32768)
+        self.assertEqual(self.cfg.read_bytes(), before)
+
+    def test_tp2_running_model_settings_are_not_saved(self):
+        from unittest import mock
+        self.engine.info = {"tp_world": 2, "tp_rank": 0}
+        cfg = json.loads(self.cfg.read_text())
+        cfg["gpu"] = [0]
+        self.cfg.write_text(json.dumps(cfg))
+        before = self.cfg.read_bytes()
+        with mock.patch("serve.server.models.save") as save:
+            with self.assertRaisesRegex(ValueError, "both ranks"):
+                self.svc.model_settings(self.cfg.name, {"context": 65536})
+        save.assert_not_called()
+        self.assertEqual(self.cfg.read_bytes(), before)
+        with self.assertRaisesRegex(ValueError, "both ranks"):
+            self.svc._restart_busy()
+        with self.assertRaisesRegex(ValueError, "both ranks"):
+            self.svc._delete_running(self.cfg, False, "another.json")
+
     def test_context_range(self):
         s, _, b = self.req("GET", "/api/context")
         j = json.loads(b)
@@ -593,6 +627,13 @@ console.log(JSON.stringify(out));""")
                     self.assertAlmostEqual(pill["at"], 100 * i / n)
                     self.assertAlmostEqual(pill["width"], 100 / n)      # (one segment wide: not from 0 up to it)
         self.assertEqual(got["glm-5.3-flash"][1][1]["at"], 25)            # Low: the second quarter only
+
+    def test_context_reload_capability(self):
+        got = self.node("""
+console.log(JSON.stringify([sv.contextReloadReason(null), sv.contextReloadReason({}),
+  sv.contextReloadReason({reload_supported: true}),
+  sv.contextReloadReason({reload_supported: false, reload_reason: "Restart both ranks."})]));""")
+        self.assertEqual(got, [None, None, None, "Restart both ranks."])
 
     def test_context_slider_reaches_each_models_own_top(self):
         # the Models page's Context size: Settings > Model's stops over each model's range (its trained context, up to

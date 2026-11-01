@@ -73,3 +73,5 @@ Future fork release tags are **`tp-vMAJOR.MINOR.PATCH`** (#40); keep VERSION num
 Published v1.1.42 is **64719953312df98c9fdf53a10198c106cb195345**, CI41203815519, public/latest source release with0 assets; #35 /Handoff §28. Do not republish/move. Earlier v1.1.41=a6d15a7, v1.1.40=d9248e8, v1.1.39=20ff03a, v1.1.38=c322b3e remain unchanged.
 
 #50 semantic candidate excludes all Metal/macOS; GLM/TP/RDMA/MTP and c3132ee4 binary unchanged. Retained Python/UI/installer and opt-in DS4 tail-cost fixes;13 focused tests PASS. OrderedCPU/build/host/Node/liveS gates pending. See Handoff §29.10 and docs/upstream/v1.1.40.md.
+
+Current#50 candidate engine is8facc62c09b1138b6787beda7d2f371d on all5paths (GLM/GPUsource unchanged; archive GGML parent metadata relink tracked#52). Accepted39c313backup restored/preserved bothhosts. MTP7 acceptance+matrix passed; empty transient Models catalog tracked#54. Necessary guard#53 now rejects uncoordinated TP2 context/current-model lifecycle changes; slider read-only;5focusedtests pass. Full updatedCPU/liveBoundary/simple/rawpicks pending. No41 yet.

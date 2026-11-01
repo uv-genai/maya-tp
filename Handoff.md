@@ -905,3 +905,6 @@ and installer download recovery retained. DS4 tail heuristic remains opt-in off,
 time per token.13 focused socket/config/long-answer/Origin/concurrent-update/prefixed-tag tests PASS.
 OrderedCPU/build/host/Node/liveS API gates pending; no v41 before40acceptance/mainCI. Reuse39S/M/L
 kernel/CLI/fidelity/performance evidence where source/binary/defaults are unchanged.
+
+#50 update: first builds relinked GLM via archive parent-GGML metadata (#52); fresh binary8facc62c09b1138b6787beda7d2f371d deployed on all5paths, GPUfatbin identical to39. ELF inspection rewrote inspected copies; local39backup restored from untouchedpeer and candidate relinked before GPUtests. Original c31339baseline preserved bothhosts.
+Initial551serve/11skips+653tools/31,all3HIPbuilds/DS4host/JS PASS, de0795f CI41313615184/41313611278 PASS. LiveMTP7 acceptance+large matrix PASS. Probe then found pre-existing empty Models catalog (#54), not inference failure. More critical #53 guards uncoordinated context/model restart underTP2;5focusedtests PASS, oldsetter202 failure reproduced. Updated fullCPU/liveS rejection+simple/fidelity gates pending; no41 yet.
