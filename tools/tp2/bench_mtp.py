@@ -60,8 +60,10 @@ class Pair:
         self.output = output
         self.label = label
         self.lines = queue.Queue()
+        self.diagnostics = queue.Queue()
         self.r0 = self.r1 = None
         self.log0 = (output / f"{label}-rank0.log").open("w")
+        self.log0err = (output / f"{label}-rank0-stderr.log").open("w")
         self.log1 = (output / f"{label}-rank1.log").open("w")
         args = ["--glm-pack", PACK, "--max-context", str(context), "--greedy", "--parallel", "1"]
         tp_args = ["--tp-world-size", "2", "--tp-bootstrap-port", "18515", "--tp-rdma-device", "usb4_rdma5"]
@@ -85,28 +87,33 @@ class Pair:
                 cmd += ["--spec-follow", follow]
             command = cmd if single_host else ["ssh", "-o", "BatchMode=yes", HOST, "exec " + shlex.join(cmd)]
             self.r0 = subprocess.Popen(command,
-                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                        text=True, bufsize=1, env=env if single_host else None)
-            self.pump = threading.Thread(target=self._read, daemon=True)
+            self.pump = threading.Thread(target=self._read, args=(self.r0.stdout, self.log0, self.lines), daemon=True)
+            self.error_pump = threading.Thread(target=self._read,
+                                               args=(self.r0.stderr, self.log0err, self.diagnostics), daemon=True)
             self.pump.start()
+            self.error_pump.start()
             # Maya-L rank0 expert warm can exceed 8 minutes on a cold page cache.
             self.until(lambda line: line.startswith("READY "), 900)
         except BaseException:
             self.close()
             raise
 
-    def _read(self):
-        for line in self.r0.stdout:
-            self.log0.write(line)
-            self.log0.flush()
-            self.lines.put(line.rstrip())
-        self.lines.put(None)
+    def _read(self, stream, log, lines):
+        # A stderr fragment must never splice into a stdout protocol record (#71).
+        for line in stream:
+            log.write(line)
+            log.flush()
+            lines.put(line.rstrip())
+        lines.put(None)
 
-    def until(self, predicate, timeout):
+    def until(self, predicate, timeout, diagnostics=False):
         deadline = time.monotonic() + timeout
         collected = []
         while True:
-            line = self.lines.get(timeout=max(0.001, deadline - time.monotonic()))
+            source = self.diagnostics if diagnostics else self.lines
+            line = source.get(timeout=max(0.001, deadline - time.monotonic()))
             if line is None:
                 raise RuntimeError(f"rank 0 ended; see {self.label}-rank0.log")
             if line.startswith(("ERR ", "TP2_DOWN")):
@@ -127,8 +134,10 @@ class Pair:
         ids = [int(line.split()[1]) for line in lines if line.startswith("T ")]
         if len(ids) != tokens or int(done[1]) != tokens:
             raise RuntimeError(f"expected {tokens} output tokens, got {done}")
+        # The stderr reader can receive the footer before the stdout reader sees DONE.
+        # Its own queue retains that footer for this request, regardless of reader scheduling.
         lines += self.until(lambda line: line.startswith("glm follow:") and "of the continuation decoded" in line
-                            if follow else line.startswith("glm stat: decode"), 30)
+                            if follow else line.startswith("glm stat: decode"), 30, diagnostics=True)
         result = dict(mode=mode, tokens=len(ids), prompt_ms=float(done[3]), decode_ms=float(done[4]),
                       ms_per_token=float(done[4]) / tokens, tokens_per_second=1000 * tokens / float(done[4]),
                       wall_ms=wall_ms, accepted_drafts=int(done[6]), drafts=int(done[7]), cached_tokens=int(done[8]),
@@ -160,7 +169,13 @@ class Pair:
                 self.r1.wait()
         if hasattr(self, "pump"):
             self.pump.join(timeout=5)
+        if hasattr(self, "error_pump"):
+            self.error_pump.join(timeout=5)
+        if self.r0 is not None:
+            self.r0.stdout.close()
+            self.r0.stderr.close()
         self.log0.close()
+        self.log0err.close()
         self.log1.close()
         cleanup()
 

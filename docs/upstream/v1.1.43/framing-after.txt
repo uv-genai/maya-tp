@@ -1,0 +1,11 @@
+test_matching_raw_picks (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_matching_raw_picks) ... ok
+test_missing_or_ambiguous_diagnostic_is_rejected (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_missing_or_ambiguous_diagnostic_is_rejected) ... ok
+test_numeric_tolerance_must_be_explicit (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_numeric_tolerance_must_be_explicit) ... ok
+test_old_verifier_disagreement_is_rejected (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_old_verifier_disagreement_is_rejected) ... ok
+test_separate_streams_preserve_done_and_early_diagnostics (tools.test_tp2_bench.Tp2BenchmarkFramingTests.test_separate_streams_preserve_done_and_early_diagnostics)
+Actual pipes reproduce stderr fragments and either reader scheduling order. ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.030s
+
+OK

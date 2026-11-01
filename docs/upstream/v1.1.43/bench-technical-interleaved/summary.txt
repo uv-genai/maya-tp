@@ -1,0 +1,23 @@
+Starting resident pair with fixed reference; warmups first...
+warmup simple: 39.986 ms/tok, 25.01 tok/s, drafts=0/0
+warmup mtp   : 39.380 ms/tok, 25.39 tok/s, drafts=133/241
+warmup mtp   : 35.228 ms/tok, 28.39 tok/s, drafts=133/241
+warmup simple: 38.921 ms/tok, 25.69 tok/s, drafts=0/0
+measure simple: 39.694 ms/tok, 25.19 tok/s, drafts=0/0
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 282, in <module>
+    main()
+    ~~~~^^
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 251, in main
+    result, ids = pair.request(mode, args.tokens, follow=True)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 124, in request
+    lines = self.until(lambda line: line.startswith("DONE "), 600)
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 109, in until
+    line = self.lines.get(timeout=max(0.001, deadline - time.monotonic()))
+  File "/usr/lib/python3.14/queue.py", line 210, in get
+    self.not_empty.wait(remaining)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.14/threading.py", line 373, in wait
+    gotit = waiter.acquire(True, timeout)
+KeyboardInterrupt

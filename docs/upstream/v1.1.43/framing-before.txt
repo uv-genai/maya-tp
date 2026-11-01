@@ -1,0 +1,60 @@
+test_matching_raw_picks (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_matching_raw_picks) ... ok
+test_missing_or_ambiguous_diagnostic_is_rejected (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_missing_or_ambiguous_diagnostic_is_rejected) ... ok
+test_numeric_tolerance_must_be_explicit (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_numeric_tolerance_must_be_explicit) ... ok
+test_old_verifier_disagreement_is_rejected (tools.test_tp2_bench.Tp2BenchmarkFidelityTests.test_old_verifier_disagreement_is_rejected) ... ok
+test_separate_streams_preserve_done_and_early_diagnostics (tools.test_tp2_bench.Tp2BenchmarkFramingTests.test_separate_streams_preserve_done_and_early_diagnostics)
+Actual pipes reproduce stderr fragments and either reader scheduling order. ... 
+  test_separate_streams_preserve_done_and_early_diagnostics (tools.test_tp2_bench.Tp2BenchmarkFramingTests.test_separate_streams_preserve_done_and_early_diagnostics) (footer='after')
+Actual pipes reproduce stderr fragments and either reader scheduling order. ... ERROR
+/home/ugo/software/project-maya-upstream-review/tools/test_tp2_bench.py:73: ResourceWarning: unclosed file <_io.TextIOWrapper name=7 encoding='UTF-8'>
+  pair = bench.Pair(Path(tmp), "fixture", 4096, follow="fixture", single_host=True)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+  test_separate_streams_preserve_done_and_early_diagnostics (tools.test_tp2_bench.Tp2BenchmarkFramingTests.test_separate_streams_preserve_done_and_early_diagnostics) (footer='before')
+Actual pipes reproduce stderr fragments and either reader scheduling order. ... ERROR
+/usr/lib/python3.14/unittest/case.py:615: ResourceWarning: unclosed file <_io.TextIOWrapper name=8 encoding='UTF-8'>
+  result = method()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+
+======================================================================
+ERROR: test_separate_streams_preserve_done_and_early_diagnostics (tools.test_tp2_bench.Tp2BenchmarkFramingTests.test_separate_streams_preserve_done_and_early_diagnostics) (footer='after')
+Actual pipes reproduce stderr fragments and either reader scheduling order.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/tools/test_tp2_bench.py", line 76, in test_separate_streams_preserve_done_and_early_diagnostics
+    result, ids = pair.request("simple", 1, follow=True)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 124, in request
+    lines = self.until(lambda line: line.startswith("DONE "), 600)
+  File "/home/ugo/software/project-maya-upstream-review/tools/test_tp2_bench.py", line 65, in bounded_until
+    return real_until(pair, predicate, min(timeout, 2), *args, **kwargs)
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 109, in until
+    line = self.lines.get(timeout=max(0.001, deadline - time.monotonic()))
+  File "/usr/lib/python3.14/queue.py", line 209, in get
+    raise Empty
+_queue.Empty
+
+======================================================================
+ERROR: test_separate_streams_preserve_done_and_early_diagnostics (tools.test_tp2_bench.Tp2BenchmarkFramingTests.test_separate_streams_preserve_done_and_early_diagnostics) (footer='before')
+Actual pipes reproduce stderr fragments and either reader scheduling order.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/tools/test_tp2_bench.py", line 76, in test_separate_streams_preserve_done_and_early_diagnostics
+    result, ids = pair.request("simple", 1, follow=True)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 130, in request
+    lines += self.until(lambda line: line.startswith("glm follow:") and "of the continuation decoded" in line
+             ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        if follow else line.startswith("glm stat: decode"), 30)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ugo/software/project-maya-upstream-review/tools/test_tp2_bench.py", line 65, in bounded_until
+    return real_until(pair, predicate, min(timeout, 2), *args, **kwargs)
+  File "/home/ugo/software/project-maya-upstream-review/tools/tp2/bench_mtp.py", line 109, in until
+    line = self.lines.get(timeout=max(0.001, deadline - time.monotonic()))
+  File "/usr/lib/python3.14/queue.py", line 209, in get
+    raise Empty
+_queue.Empty
+
+----------------------------------------------------------------------
+Ran 5 tests in 4.249s
+
+FAILED (errors=2)
