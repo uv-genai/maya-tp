@@ -10,7 +10,7 @@
       "skips": 11
     },
     "tools": {
-      "tests": 676,
+      "tests": 677,
       "skips": 33
     },
     "host_checks": 17,
@@ -76,7 +76,6 @@
     16
   ],
   "pending": [
-    "recovery",
     "strict S raw fidelity",
     "prefill A/B",
     "final head CI",
@@ -109,5 +108,13 @@
     "speed_ratio": 54.091171833946404,
     "scope": "Synthetic long repeating tool history only, not general prefill throughput"
   },
-  "cli_tokens_each_rank_each_mode": 32
+  "cli_tokens_each_rank_each_mode": 32,
+  "benchmark_framing": {
+    "issue": 71,
+    "regression": "real OS pipes with fragmented diagnostics, early/late footer and two sequential requests",
+    "before": "2 errors",
+    "after": "pass",
+    "engine_changed": false
+  },
+  "peer_recovery_passes": 8
 }

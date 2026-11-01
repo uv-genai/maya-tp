@@ -1,0 +1,755 @@
+ss......................
+  Tuning Maya for this PC: the output speed is measured with a few engine settings (the PCIe share, the
+  draft depth, the CPU threads). It takes about 5-10 minutes; the PC is busy meanwhile.
+  [ok] tuned for this PC: --pcie-frac 0.20 (61.2 tok/s)
+.
+  Tuning Maya for this PC: the output speed is measured with a few engine settings (the PCIe share, the
+  draft depth, the CPU threads). It takes about 5-10 minutes; the PC is busy meanwhile.
+  [!]  the tuning did not finish (the engine exited before it was ready): the default settings stay
+...................................................................................................PASS: bytes, two halves, range bounds, fallback, direct=tested; cached interior 4094 -> 4094 (advisory)
+.........ds4: Engram RAM file 0 locked 0.00 / 0.00 GB
+ds4: Engram RAM file 0 locked 0.00 / 0.00 GB
+locked RAM, default reads, FP8/MXFP8, bounds, and failure checks passed
+..................vision: the marker rows: the server answered status 200 (no Content-Range) to a request for bytes 0-7, not just those bytes; trying once more ...
+.vision: the marker rows: image_start: the sha256 does not match the manifest's; trying once more ...
+..vision: the marker rows: image_end is not where the manifest says ({'dtype': 'BF16', 'shape': [64], 'data_offsets': [12800, 12928]}); trying once more ...
+.....................................................................dspark.bin: 11 tensors, 0.00 GB (no config.json beside the shards: pack_gguf.py takes DeepSeek-V4.1-Flash's own DSpark geometry when the GGUF has none)
+dspark.bin: 1 tensors, 0.00 GB (no config.json beside the shards: pack_gguf.py takes DeepSeek-V4.1-Flash's own DSpark geometry when the GGUF has none)
+dspark.bin: 1 tensors, 0.00 GB, its geometry from config.json
+/tmp/tmpiyqj5v5v/Engram: not whole (/tmp/tmpiyqj5v5v/Engram/t.gguf: not a GGUF file) - not used
+/tmp/tmpfj1spu1l/Engram: not whole (t.gguf: 588 of 688 bytes) - not used
+selftest ok: 184 tensors, 11.75 MB
+wrote /tmp/tmp4nq_3av1/glm.bin: 13248 ranked pairs (0 from the base, 3 from the traces, 13245 filled in)
+wrote /tmp/tmp4nq_3av1/glm.bin: 13248 ranked pairs (0 from the base, 3 from the traces, 13245 filled in)
+wrote /tmp/tmpp1bed_3u/out.bin: 192 ranked pairs (190 from the base, 2 from the traces, 0 filled in)
+wrote /tmp/tmpp1bed_3u/out.bin: 192 ranked pairs (192 from the base, 0 from the traces, 0 filled in)
+
+=== Step 1: benchmark: maya-test-cuda.json (loading the model first - a minute or a few) ===
+  [ok] loaded in 0 s
+  decode   128.0 tokens/s   Write a Python function that parses a CSV file into a list o (256 tokens)
+  decode   128.0 tokens/s   Explain how photosynthesis works, step by step, for a high-s (256 tokens)
+  decode   128.0 tokens/s   Write a complete HTML page with a canvas that draws a bounci (256 tokens)
+  prefill   2048 tokens/s   a 2048-token prompt
+  prefill   8192 tokens/s   a 8192-token prompt
+
+  Project Maya vtest benchmark, 2026-11-02 03:34
+  GPUs: V100 16 GB; RAM 192 GB; CPU test CPU
+  setup: maya-test-cuda.json, context 16384, GPUs [1, 0]
+  decode (writing the answer): mean 128.0 tokens/s over 3 answers of up to 256 tokens (greedy, thinking off)
+     128.0 tokens/s  Write a Python function that parses a CSV file into a list of dictionaries, with type hints and a docstring.
+     128.0 tokens/s  Explain how photosynthesis works, step by step, for a high-school student.
+     128.0 tokens/s  Write a complete HTML page with a canvas that draws a bouncing ball animation in JavaScript.
+  prefill (reading the prompt): 2048 tokens/s, 2048 tokens
+  prefill (reading the prompt): 8192 tokens/s, 8192 tokens
+  [ok] written: /tmp/tmpt71h1lqe/maya-bench.txt - attach it (with ./maya.sh --report) to a speed report
+.
+=== Step 1: benchmark: maya-test-hip.json (loading the model first - a minute or a few) ===
+  [ok] loaded in 0 s
+  decode   128.0 tokens/s   Write a Python function that parses a CSV file into a list o (256 tokens)
+  decode   128.0 tokens/s   Explain how photosynthesis works, step by step, for a high-s (256 tokens)
+  decode   128.0 tokens/s   Write a complete HTML page with a canvas that draws a bounci (256 tokens)
+  prefill   2048 tokens/s   a 2048-token prompt
+  prefill   8192 tokens/s   a 8192-token prompt
+
+  Project Maya vtest benchmark, 2026-11-02 03:34
+  GPUs: RX 7900 XT 20 GB; RAM 192 GB; CPU test CPU
+  setup: maya-test-hip.json, context 16384, GPUs 0
+  decode (writing the answer): mean 128.0 tokens/s over 3 answers of up to 256 tokens (greedy, thinking off)
+     128.0 tokens/s  Write a Python function that parses a CSV file into a list of dictionaries, with type hints and a docstring.
+     128.0 tokens/s  Explain how photosynthesis works, step by step, for a high-school student.
+     128.0 tokens/s  Write a complete HTML page with a canvas that draws a bouncing ball animation in JavaScript.
+  prefill (reading the prompt): 2048 tokens/s, 2048 tokens
+  prefill (reading the prompt): 8192 tokens/s, 8192 tokens
+  [ok] written: /tmp/tmpa6x6h2lh/maya-bench.txt - attach it (with ./maya.sh --report) to a speed report
+.
+=== Step 1: benchmark: maya-test-hip.json (loading the model first - a minute or a few) ===
+  [ok] loaded in 0 s
+  decode   128.0 tokens/s   Write a Python function that parses a CSV file into a list o (256 tokens)
+  decode   128.0 tokens/s   Explain how photosynthesis works, step by step, for a high-s (256 tokens)
+  decode   128.0 tokens/s   Write a complete HTML page with a canvas that draws a bounci (256 tokens)
+  prefill   2048 tokens/s   a 2048-token prompt
+  prefill   8192 tokens/s   a 8192-token prompt
+
+  Project Maya vtest benchmark, 2026-11-02 03:34
+  GPUs: R9700 32 GB, RX 7900 XT 20 GB; RAM 192 GB; CPU test CPU
+  setup: maya-test-hip.json, context 16384, GPUs [1, 0]
+  decode (writing the answer): mean 128.0 tokens/s over 3 answers of up to 256 tokens (greedy, thinking off)
+     128.0 tokens/s  Write a Python function that parses a CSV file into a list of dictionaries, with type hints and a docstring.
+     128.0 tokens/s  Explain how photosynthesis works, step by step, for a high-school student.
+     128.0 tokens/s  Write a complete HTML page with a canvas that draws a bouncing ball animation in JavaScript.
+  prefill (reading the prompt): 2048 tokens/s, 2048 tokens
+  prefill (reading the prompt): 8192 tokens/s, 8192 tokens
+  [ok] written: /tmp/tmpnw7tepqy/maya-bench.txt - attach it (with ./maya.sh --report) to a speed report
+.
+=== Step 1: benchmark: maya-test-hip.json (loading the model first - a minute or a few) ===
+  [ok] loaded in 0 s
+  decode   128.0 tokens/s   Write a Python function that parses a CSV file into a list o (256 tokens)
+  decode   128.0 tokens/s   Explain how photosynthesis works, step by step, for a high-s (256 tokens)
+  decode   128.0 tokens/s   Write a complete HTML page with a canvas that draws a bounci (256 tokens)
+  prefill   2048 tokens/s   a 2048-token prompt
+  prefill   8192 tokens/s   a 8192-token prompt
+
+  Project Maya vtest benchmark, 2026-11-02 03:34
+  GPUs: R9700 32 GB, RX 7900 XT 20 GB; RAM 192 GB; CPU test CPU
+  setup: maya-test-hip.json, context 16384, GPUs [1, 0]
+  decode (writing the answer): mean 128.0 tokens/s over 3 answers of up to 256 tokens (greedy, thinking off)
+     128.0 tokens/s  Write a Python function that parses a CSV file into a list of dictionaries, with type hints and a docstring.
+     128.0 tokens/s  Explain how photosynthesis works, step by step, for a high-school student.
+     128.0 tokens/s  Write a complete HTML page with a canvas that draws a bouncing ball animation in JavaScript.
+  prefill (reading the prompt): 2048 tokens/s, 2048 tokens
+  prefill (reading the prompt): 8192 tokens/s, 8192 tokens
+  [ok] written: /tmp/tmphf5g7uh6/maya-bench.txt - attach it (with ./maya.sh --report) to a speed report
+.Project Maya v1.1.42 - GLM-5.3-Flash, DeepSeek-V4.1-Flash-1017 or MiniMax-M3.1-Flash on your own GPU(s).
+
+  [X]  Maya is not set up here yet
+       run ./maya.sh first
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+.Project Maya v1.1.42 - GLM-5.3-Flash, DeepSeek-V4.1-Flash-1017 or MiniMax-M3.1-Flash on your own GPU(s).
+.Project Maya v1.1.42 - GLM-5.3-Flash, DeepSeek-V4.1-Flash-1017 or MiniMax-M3.1-Flash on your own GPU(s).
+Project Maya v1.1.42 - GLM-5.3-Flash, DeepSeek-V4.1-Flash-1017 or MiniMax-M3.1-Flash on your own GPU(s).
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 0 (RX 7900 XT, 20 GB, gfx1100); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpbpmr7xf1/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmpbpmr7xf1/maya-test-hip.json
+  [ok] start script: /tmp/tmpbpmr7xf1/run-maya-test-hip.sh
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmpbpmr7xf1/maya-test-hip.json
+  [ok] start script: /tmp/tmpbpmr7xf1/run-maya-test-hip.sh
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 0 (RX 7900 XT, 20 GB, gfx1100); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpfz9rw50z/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmpfz9rw50z/maya-test-hip.json
+  [ok] start script: /tmp/tmpfz9rw50z/run-maya-test-hip.sh
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 1 (R9700, 32 GB, gfx1201); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmprrhy7rqa/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmprrhy7rqa/maya-test-hip.json
+  [ok] start script: /tmp/tmprrhy7rqa/run-maya-test-hip.sh
+.Project Maya v1.1.42 - GLM-5.3-Flash, DeepSeek-V4.1-Flash-1017 or MiniMax-M3.1-Flash on your own GPU(s).
+
+HIP prerequisites found. Run ./maya.sh --backend hip --gpu 0 to try the experimental port.
+Project Maya v1.1.42 - GLM-5.3-Flash, DeepSeek-V4.1-Flash-1017 or MiniMax-M3.1-Flash on your own GPU(s).
+
+This PC can run Maya. Run ./maya.sh without --check to set it up.
+Project Maya v1.1.42 - GLM-5.3-Flash, DeepSeek-V4.1-Flash-1017 or MiniMax-M3.1-Flash on your own GPU(s).
+
+This PC can run Maya. Run ./maya.sh without --check to set it up.
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+    GPU 3 (Radeon 8060S, 112 GB, gfx1151) - can be used
+  [ok] using GPU 1 (R9700, 32 GB, gfx1201) + GPU 3 (Radeon 8060S, 112 GB, gfx1151); experimental HIP, 2 GPUs (layer split), text only
+  [ok] ROCm: /tmp/tmpohvmvftk/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+  [ok] APU / unified memory: the engine sizes the GPU expert pool from available system RAM
+
+=== Step 8: the configuration and the start script ===
+  [ok] tip: with 192 GB of RAM, --prefill 32768 in the config's args read prompts 21-35% faster in community benchmarks; not set, nothing changes
+  [ok] config: /tmp/tmpohvmvftk/maya-test-hip.json
+  [ok] start script: /tmp/tmpohvmvftk/run-maya-test-hip.sh
+
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+    GPU 3 (Radeon 8060S, 112 GB, gfx1151) - can be used
+  [ok] using GPU 1 (R9700, 32 GB, gfx1201) + GPU 3 (Radeon 8060S, 112 GB, gfx1151); experimental HIP, 2 GPUs (layer split), text only
+  [ok] ROCm: /tmp/tmpohvmvftk/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+  [ok] APU / unified memory: the engine sizes the GPU expert pool from available system RAM
+
+=== Step 8: the configuration and the start script ===
+  [ok] tip: with 192 GB of RAM, --prefill 32768 in the config's args read prompts 21-35% faster in community benchmarks; not set, nothing changes
+  [ok] config: /tmp/tmpohvmvftk/maya-test-hip.json
+  [ok] start script: /tmp/tmpohvmvftk/run-maya-test-hip.sh
+
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+    GPU 3 (Radeon 8060S, 112 GB, gfx1151) - can be used
+  [ok] using GPU 3 (Radeon 8060S, 112 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpohvmvftk/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+  [ok] APU / unified memory: the engine sizes the GPU expert pool from available system RAM
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 0 (RX 7900 XT, 20 GB, gfx1100); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpwmf653lx/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+  Compiling Maya for AMD gfx1100 ...
+  [ok] engine compiled: /tmp/tmpwmf653lx/build-hip/maya
+.
+=== Step 7: images (the vision encoder) ===
+  [ok] HIP port: text only; vision is not enabled
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 0 (RX 7900 XT, 20 GB, gfx1100); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpc5dwpgl6/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+    GPU 3 (Radeon PRO V620, 32 GB, gfx1030) - can be used
+  [ok] using GPU 3 (Radeon PRO V620, 32 GB, gfx1030); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpc5dwpgl6/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+  [!]  gfx1030 (RDNA 2) is experimental: it builds and has the portable kernels, but Maya has not been validated on such a card yet - please report how it goes in an issue (https://github.com/mw00/project-maya/issues)
+..
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+
+  [X]  GPU 2 is not a supported AMD card
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+
+  [X]  GPU 2 is not a supported AMD card
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+
+  [X]  GPU 2 is not a supported AMD card
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+
+  [X]  Maya's HIP port runs on one GPU or splits the model across two or more: --gpu 0, or --gpus 0,1,2,3
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+
+  [X]  --gpus takes GPU numbers as --check shows them, e.g. --gpus 0,1, not 'x'
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+.
+  [ok] written: /tmp/tmpcoal_akd/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmp_oskd3zk/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmppxeihz45/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmp1hve8x7g/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmpf68w6ky8/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmpf1xsp280/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+
+  [ok] written: /tmp/tmpf1xsp280/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+
+  [ok] written: /tmp/tmpf1xsp280/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+
+  [ok] written: /tmp/tmpf1xsp280/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+
+  [ok] written: /tmp/tmpf1xsp280/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+
+  [ok] written: /tmp/tmpf1xsp280/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmpwqq34p1a/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmpj8589948/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+
+  [ok] written: /tmp/tmpj8589948/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+  [ok] written: /tmp/tmpgo7u7903/maya-report.txt
+  Attach this file to your report (GitHub issue, X, or wherever you are asking). It has this PC's hardware,
+  your Maya setup and the engine's speed lines - no API key, and your home folder is shown as ~.
+  Best: run it right after a slow answer, so the log has that answer's numbers.
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 1 (R9700, 32 GB, gfx1201); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpdlz1eu1z/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+    GPU 3 (AMD Radeon (gfx1151), 0 GB, gfx1151) - can be used
+  [ok] using GPU 3 (AMD Radeon (gfx1151), 0 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmppf824nvj/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+  [ok] APU / unified memory: the engine sizes the GPU expert pool from available system RAM
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmppf824nvj/maya-test-hip.json
+  [ok] start script: /tmp/tmppf824nvj/run-maya-test-hip.sh
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmppf824nvj/maya-test-hip.json
+  [ok] start script: /tmp/tmppf824nvj/run-maya-test-hip.sh
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmppf824nvj/maya-test-hip.json
+  [ok] start script: /tmp/tmppf824nvj/run-maya-test-hip.sh
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+    GPU 3 (Radeon 8060S, 112 GB, gfx1151) - can be used
+  [ok] using GPU 3 (Radeon 8060S, 112 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpa4h192gk/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+  [ok] APU / unified memory: the engine sizes the GPU expert pool from available system RAM
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmpa4h192gk/maya-test-hip.json
+  [ok] start script: /tmp/tmpa4h192gk/run-maya-test-hip.sh
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 0 (RX 7900 XT, 20 GB, gfx1100); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpa6_frnmh/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmpa6_frnmh/maya-test-hip.json
+  [ok] start script: /tmp/tmpa6_frnmh/run-maya-test-hip.sh
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmpa6_frnmh/maya-test-hip.json
+  [ok] start script: /tmp/tmpa6_frnmh/run-maya-test-hip.sh
+.
+=== Step 1: checking this PC ===
+    GPU 0 (RX 7900 XT, 20 GB, gfx1100) - can be used
+    GPU 1 (R9700, 32 GB, gfx1201) - can be used
+    GPU 2 (iGPU, 1 GB, gfx1036) - not supported by Maya's HIP build
+  [ok] using GPU 1 (R9700, 32 GB, gfx1201) + GPU 0 (RX 7900 XT, 20 GB, gfx1100); experimental HIP, 2 GPUs (layer split), text only
+  [ok] ROCm: /tmp/tmpc6qc8sdt/rocm; CPU: test CPU (AVX-512)
+  [ok] RAM: 192 GB, 128 GB available now
+
+=== Step 8: the configuration and the start script ===
+  [ok] tip: with 192 GB of RAM, --prefill 32768 in the config's args read prompts 21-35% faster in community benchmarks; not set, nothing changes
+  [ok] config: /tmp/tmpc6qc8sdt/maya-test-hip.json
+  [ok] start script: /tmp/tmpc6qc8sdt/run-maya-test-hip.sh
+.....
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmprfub4i46/_rocm_sdk_devel; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+.
+=== Step 1: checking this PC ===
+
+  [X]  Visual Studio Build Tools (2022 or 2026) are needed: ROCm's compiler uses their headers and libraries
+       winget install -e --id Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" - or https://visualstudio.microsoft.com/visual-cpp-build-tools/ with 'Desktop development with C++'
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+.
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+..
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmp0b2499l7/Program Files/AMD/ROCm/7.2; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+  Compiling Maya for AMD gfx1151 ...
+  [ok] engine compiled: /tmp/tmp0b2499l7/build-hip/maya.exe
+..
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpvkg7ek3j/_rocm_sdk_devel; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+.
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmp48yaumbo/_rocm_sdk_devel; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmp48yaumbo/_rocm_sdk_devel; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+.  AMD's ROCm SDK: rocm-sdk init (the first time it unpacks about 3 GB) ...
+.
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmprr728kz6/_rocm_sdk_devel; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+..
+=== Step 1: checking this PC ===
+
+  [X]  Visual Studio Build Tools (2022 or 2026) are needed: ROCm's compiler uses their headers and libraries
+       winget install -e --id Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended" - or https://visualstudio.microsoft.com/visual-cpp-build-tools/ with 'Desktop development with C++'
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+.
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpr_diwxiy/_rocm_sdk_devel; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+
+=== Step 8: the configuration and the start script ===
+  [ok] config: /tmp/tmpr_diwxiy/maya-maya-l-hip.json
+  [ok] start script: /tmp/tmpr_diwxiy/run-maya-maya-l-hip.bat
+.
+=== Step 1: checking this PC ===
+    GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151) - can be used
+  [ok] using GPU 0 (AMD Radeon(TM) 8065S Graphics, 96 GB, gfx1151); experimental HIP, one GPU, text only
+  [ok] ROCm: /tmp/tmpeprxs7xu/_rocm_sdk_devel; CPU: AMD RYZEN AI MAX+ PRO 495 (AVX-512)
+  [ok] RAM: 32 GB, 24 GB available now
+  [ok] APU: 96 GB of the memory is the GPU's (Windows' share for it): the engine fills it with experts and keeps the next ones in RAM
+  Compiling Maya for AMD gfx1151 ...
+  [ok] engine compiled: /tmp/tmpeprxs7xu/build-hip/maya.exe
+.............................................................................................................  checking GLM-5.3-Flash-test-00001-of-00002.gguf's sha256 ...
+  checking GLM-5.3-Flash-test-00001-of-00002.gguf's sha256 ...
+........
+  [X]  --parallel is supported by GLM-5.3-Flash, DeepSeek-V4.1-Flash and MiniMax-M3.1-Flash; MiniMax-M3.1-Flash serves one request at a time
+       remove --parallel; saved conversations do not enable simultaneous decoding
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+...
+  [X]  --parallel is supported by GLM-5.3-Flash, DeepSeek-V4.1-Flash and MiniMax-M3.1-Flash; MiniMax-M3.1-Flash serves one request at a time
+       remove --parallel; saved conversations do not enable simultaneous decoding
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+  [X]  --parallel is supported by GLM-5.3-Flash, DeepSeek-V4.1-Flash and MiniMax-M3.1-Flash; MiniMax-M3.1-Flash serves one request at a time
+       remove --parallel; saved conversations do not enable simultaneous decoding
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+..
+  [X]  none of the GPUs can run this model
+       it needs an NVIDIA GPU of compute capability 6.0 or newer (V100 and newer; Pascal - Tesla P40 / P100, GTX 10 - is experimental)
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+  [X]  GPU 0 cannot be used
+       use one of: 
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+...  [ok] tip: with 177 GB of RAM, --prefill 32768 in the config's args read prompts 21-35% faster in community benchmarks; not set, nothing changes
+  [ok] config: /tmp/tmpacgebycu/maya-test.json
+  [ok] start script: /tmp/tmpacgebycu/run-maya-test.sh
+  [ok] tip: with 177 GB of RAM, --prefill 32768 in the config's args read prompts 21-35% faster in community benchmarks; not set, nothing changes
+  [ok] config: /tmp/tmpacgebycu/maya-test.json
+  [ok] start script: /tmp/tmpacgebycu/run-maya-test.sh
+.  [ok] config: /tmp/tmpc3i4oukf/maya-test.json
+  [ok] start script: /tmp/tmpc3i4oukf/run-maya-test.sh
+  [ok] tip: with 177 GB of RAM, --prefill 32768 in the config's args read prompts 21-35% faster in community benchmarks; not set, nothing changes
+  [ok] config: /tmp/tmpc3i4oukf/maya-test.json
+  [ok] start script: /tmp/tmpc3i4oukf/run-maya-test.sh
+  [ok] config: /tmp/tmpc3i4oukf/maya-test.json
+  [ok] start script: /tmp/tmpc3i4oukf/run-maya-test.sh
+  [ok] kept from the config before: --expert-cache 1200, --vram-reserve-later-mib 300
+  [ok] config: /tmp/tmpc3i4oukf/maya-test.json
+  [ok] start script: /tmp/tmpc3i4oukf/run-maya-test.sh
+  [ok] kept from the config before: --expert-cache 1200, --vram-reserve-later-mib 300
+  [ok] VRAM kept free beside the expert pool: 1500 MiB (--vram-reserve-mib)
+  [ok] config: /tmp/tmpc3i4oukf/maya-test.json
+  [ok] start script: /tmp/tmpc3i4oukf/run-maya-test.sh
+  [ok] kept from the config before: --expert-cache 1200, --vram-reserve-mib 1500, --vram-reserve-later-mib 300
+  [ok] config: /tmp/tmpc3i4oukf/maya-test.json
+  [ok] start script: /tmp/tmpc3i4oukf/run-maya-test.sh
+  [ok] kept from the config before: --expert-cache 1200, --vram-reserve-mib 1500, --vram-reserve-later-mib 300
+  [ok] VRAM kept free beside the expert pool: 0 MiB (--vram-reserve-mib)
+  [ok] config: /tmp/tmpc3i4oukf/maya-test.json
+  [ok] start script: /tmp/tmpc3i4oukf/run-maya-test.sh
+.  [ok] config: /tmp/tmpd6s3_hk9/maya-test.json
+  [ok] start script: /tmp/tmpd6s3_hk9/run-maya-test.sh
+  [ok] config: /tmp/tmpd6s3_hk9/maya-test.json
+  [ok] start script: /tmp/tmpd6s3_hk9/run-maya-test.sh
+  [ok] config: /tmp/tmpd6s3_hk9/maya-test.json
+  [ok] start script: /tmp/tmpd6s3_hk9/run-maya-test.sh
+  [ok] kept from the config before: --kv-streaming off, --kv-resident 65536
+  [ok] config: /tmp/tmpd6s3_hk9/maya-test.json
+  [ok] start script: /tmp/tmpd6s3_hk9/run-maya-test.sh
+.  [ok] config: /tmp/tmpojtfss0f/maya-test.json
+  [ok] start script: /tmp/tmpojtfss0f/run-maya-test.sh
+  [ok] config: /tmp/tmpojtfss0f/maya-test.json
+  [ok] start script: /tmp/tmpojtfss0f/run-maya-test.sh
+  [ok] kept from the config before: --parallel 4
+  [ok] config: /tmp/tmpojtfss0f/maya-test.json
+  [ok] start script: /tmp/tmpojtfss0f/run-maya-test.sh
+  [ok] kept from the config before: --parallel 4
+  [ok] config: /tmp/tmpojtfss0f/maya-test.json
+  [ok] start script: /tmp/tmpojtfss0f/run-maya-test.sh
+.  [ok] config: /tmp/tmpu09trx4s/maya-test.json
+  [ok] start script: /tmp/tmpu09trx4s/run-maya-test.sh
+  [ok] tip: with 177 GB of RAM, --prefill 32768 in the config's args read prompts 21-35% faster in community benchmarks; not set, nothing changes
+  [ok] config: /tmp/tmpu09trx4s/maya-test.json
+  [ok] start script: /tmp/tmpu09trx4s/run-maya-test.sh
+  [ok] config: /tmp/tmpu09trx4s/maya-test.json
+  [ok] start script: /tmp/tmpu09trx4s/run-maya-test.sh
+  [ok] kept from the config before: --prefill 32768
+  [ok] config: /tmp/tmpu09trx4s/maya-test.json
+  [ok] start script: /tmp/tmpu09trx4s/run-maya-test.sh
+..  [ok] config: /tmp/tmp55w6cjve/maya-test.json
+  [ok] start script: /tmp/tmp55w6cjve/run-maya-test.sh
+  [ok] the settings tuned for this PC earlier are used (2026-10-09): STRATA_GLM_PCIE_SHARE=0.25
+  [ok] (tuned at context 32768: ./maya.sh --calibrate tunes this context too)
+  [ok] config: /tmp/tmp55w6cjve/maya-test.json
+  [ok] start script: /tmp/tmp55w6cjve/run-maya-test.sh
+..  [ok] config: /tmp/tmpmv_j88c7/maya-test.json
+  [ok] start script: /tmp/tmpmv_j88c7/run-maya-test.sh
+  [ok] kept from the config before: --expert-profile-save /tmp/tmpmv_j88c7/learned.bin, --expert-profile-save-every 5, --expert-profile /tmp/tmpmv_j88c7/learned.bin
+  [ok] config: /tmp/tmpmv_j88c7/maya-test.json
+  [ok] start script: /tmp/tmpmv_j88c7/run-maya-test.sh
+...  [ok] config: /tmp/tmp5cv1j1qc/maya-test.json
+  [ok] start script: /tmp/tmp5cv1j1qc/run-maya-test.sh
+.  [ok] config: /tmp/tmpxrad5oxf/maya-test.json
+  [ok] start script: /tmp/tmpxrad5oxf/run-maya-test.sh
+....................s......s...........sssssssssssssssssss../home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.  0.0 / 0.0 GB (100%) · 0 MB/s · 0 files at once   
+..
+  [X]  not enough free space in /tmp/tmpvqj1s8rz/Mix-128G: about 278 GB are needed (the model, the tables + its pack)
+       free some space, or put the model on another drive: ./maya.sh --setup --models-dir /path/on/nvme
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+..
+  [X]  orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF is gated and no Hugging Face token was found
+       accept its terms at https://huggingface.co/orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF, then set HF_TOKEN (a read token from https://huggingface.co/settings/tokens) or run `hf auth login`, and run ./maya.sh again
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+...............
+
+  [X]  the download of m-00000.gguf keeps stopping without progress (curl: (37) Could not open file /tmp/tmpdrn8q_ti/nothing-here.gguf)
+       check the connection, then run ./maya.sh --download-model again: it continues where it stopped
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+.  0.0 / 0.0 GB (100%) · 1 MB/s · 0 files at once   
+.....
+  Which model to set up:
+  1) GLM-5.3-Flash
+  2) DeepSeek-V4.1-Flash-1017   (experimental)
+  3) MiniMax-M3.1-Flash   (new)
+  4) Qwen-3.8-Flash-Next (CYBER-FROST) · Q5_K_M (113 GB)   (new)
+....
+  [X]  not enough free space in /tmp/tmpfbe08j5l/other: about 23 GB of the model are linked into it from /tmp/tmpfbe08j5l/m
+       free some space there, or link the files to another drive
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+  [X]  not enough free space in /tmp/tmpfbe08j5l/m: about 13 GB are needed (the model + its pack)
+       free some space, or put the model on another drive: ./maya.sh --setup --models-dir /path/on/nvme
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+./home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+............
+  [X]  DeepSeek-V4.1-Flash-1017 Maya-S is not published yet
+       set up unsloth's GGUF meanwhile: ./maya.sh --setup --model DeepSeek-V4.1-Flash-1017 --ds4-quant gguf-q8
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+.........../home/ugo/software/project-maya-upstream-review/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-review/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.........................................
+  Maya's GGUF quants run on NVIDIA from V100 on and on AMD; the EXL3 quant on NVIDIA (on AMD: experimental):
+  1) MiniMax M3.1 · EXL3 3.5 bpw (194 GB)   (recommended)
+  2) MiniMax M3.1 · Maya-XS (93 GB)
+  3) MiniMax M3.1 · Maya-S (122 GB)
+
+  Maya's GGUF quants run on NVIDIA from V100 on and on AMD; the EXL3 quant on NVIDIA (on AMD: experimental):
+  1) MiniMax M3.1 · Maya-S (122 GB)   (recommended)
+  2) MiniMax M3.1 · EXL3 3.5 bpw (194 GB)
+  3) MiniMax M3.1 · Maya-XS (93 GB)
+
+  Maya's GGUF quants run on NVIDIA from V100 on and on AMD; the EXL3 quant on NVIDIA (on AMD: experimental):
+  1) MiniMax M3.1 · Maya-XS (93 GB)   (recommended)
+  2) MiniMax M3.1 · EXL3 3.5 bpw (194 GB)
+  3) MiniMax M3.1 · Maya-S (122 GB)
+
+  Maya's GGUF quants run on NVIDIA from V100 on and on AMD; the EXL3 quant on NVIDIA (on AMD: experimental):
+  1) MiniMax M3.1 · Maya-XS (93 GB)   (recommended)
+  2) MiniMax M3.1 · EXL3 3.5 bpw (194 GB)
+  3) MiniMax M3.1 · Maya-S (122 GB)
+
+  Maya's GGUF quants run on NVIDIA from V100 on and on AMD; the EXL3 quant on NVIDIA (on AMD: experimental):
+  1) MiniMax M3.1 · Maya-XS (93 GB)   (recommended)
+  2) MiniMax M3.1 · EXL3 3.5 bpw (194 GB)
+  3) MiniMax M3.1 · Maya-S (122 GB)
+.........................ssssssssss.../home/ugo/software/project-maya-upstream-review/tools/strata_pack.py:351: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmpcw5oohc1/m-00001-of-00002.gguf'>
+  head, flen = open_shard(gguf)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/ugo/software/project-maya-upstream-review/tools/strata_pack.py:351: ResourceWarning: unclosed file <_io.BufferedReader name='/tmp/tmp5baqwdvp/m-00001-of-00002.gguf'>
+  head, flen = open_shard(gguf)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+...........................................................................
+----------------------------------------------------------------------
+Ran 677 tests in 18.998s
+
+OK (skipped=33)
+FAIL: empty dump
+tokens: a=3 b=3 compared=3 agree=3 (1.0000)
+OK: agreement 1.0000 >= 1.0
+tokens: a=100 b=100 compared=100 agree=99 (0.9900)
+  flip at 50: a[48:53]=[48, 49, 50, 51, 52]  b[48:53]=[48, 49, 999, 51, 52]
+OK: agreement 0.9900 >= 0.95
+tokens: a=10 b=10 compared=10 agree=0 (0.0000)
+  flip at 0: a[0:3]=[0, 1, 2]  b[0:3]=[10, 11, 12]
+  flip at 1: a[0:4]=[0, 1, 2, 3]  b[0:4]=[10, 11, 12, 13]
+  flip at 2: a[0:5]=[0, 1, 2, 3, 4]  b[0:5]=[10, 11, 12, 13, 14]
+  flip at 3: a[1:6]=[1, 2, 3, 4, 5]  b[1:6]=[11, 12, 13, 14, 15]
+  flip at 4: a[2:7]=[2, 3, 4, 5, 6]  b[2:7]=[12, 13, 14, 15, 16]
+  ... 5 more flips
+FAIL: agreement 0.0000 < 0.95
+pack /tmp/tmp51dp5n_3  world=2  embd=4096 n_ff=2047 n_ff_dense=12288
+  dense  blk.3.ffn_down.weight  IQ3_XXS  in  2048->1024
+
+PROBLEMS:
+  layer 3: blob_bytes 7536640 != computed 7133120 (gu_row 1056 d_row 686)
+  layer 3 expert n_ff gate/up rows: n_ff gate/up rows 2047 does not split into 2
+  layer 3 expert n_ff down cols: n_ff down cols 2047 does not split into 2
+pack /tmp/tmp1izifb5b  world=2  embd=4096 n_ff=2048 n_ff_dense=12288
+  expert L 3  IQ2_XXS /IQ3_XXS   ff 2048->1024  gate/up rows [0,1024)  down cols [0,1024)  blob 123
+
+PROBLEMS:
+  layer 3: blob_bytes 123 != computed 7536640 (gu_row 1056 d_row 784)
+pack /tmp/tmprlwg7y4e  world=2  embd=4096 n_ff=2048 n_ff_dense=12288
+  expert L 3  IQ2_XXS /IQ3_XXS   ff 2048->1024  gate/up rows [0,1024)  down cols [0,1024)  blob 7536640
+  dense  blk.0.ffn_gate.weight  Q6_K  out 12288->6144
+  dense  blk.0.ffn_down.weight  Q6_K  in  12288->6144
+  dense  blk.3.ffn_gate.weight  IQ2_XXS  out 2048->1024
+  dense  blk.3.ffn_down.weight  IQ3_XXS  in  2048->1024
+
+all splits block-safe
+pack /tmp/tmpn9jqa69u  world=2  embd=4096 n_ff=2048 n_ff_dense=12288
+
+PROBLEMS:
+  missing /tmp/tmpn9jqa69u/native_experts.txt
