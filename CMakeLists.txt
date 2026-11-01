@@ -207,10 +207,13 @@ if(STRATA_BUILD_TESTS)
   add_executable(tp_collective_test tests/tp_collective_test.cpp)
   target_include_directories(tp_collective_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
   add_test(NAME tp_collective_test COMMAND tp_collective_test)
-  # TpContext partitions (host only; all_reduce lives in the HIP TU and is not linked here)
-  add_executable(tp_context_test tests/tp_context_test.cpp)
-  target_link_libraries(tp_context_test PRIVATE strata_artifact)
-  add_test(NAME tp_context_test COMMAND tp_context_test)
+  # Host-only execution, but TpContext's stream types require the HIP SDK.
+  # hip::host supplies headers/platform definitions without compiling a GPU TU.
+  if(STRATA_ENABLE_HIP)
+    add_executable(tp_context_test tests/tp_context_test.cpp)
+    target_link_libraries(tp_context_test PRIVATE strata_artifact hip::host)
+    add_test(NAME tp_context_test COMMAND tp_context_test)
+  endif()
   # tp_slice_expert: a rank's compact expert blob == its column band of the full blob
   add_executable(tp_slice_test tests/tp_slice_test.cpp)
   target_link_libraries(tp_slice_test PRIVATE strata_artifact)
