@@ -1,0 +1,114 @@
+rank1: pack=/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack rdma=usb4_rdma5 bootstrap=192.168.1.22 seqs=1 context=4096
+glm settings from the environment: MAYA_GLM_MTP_DRAFT=2, MAYA_GLM_MTP_FIXED=2, MAYA_GLM_PREFILL_MB=6144, MAYA_GLM_PREFILL_SUB=1024, MAYA_GLM_RAM_HEADROOM_GB=16, MAYA_GLM_RESERVE_MB=1024, MAYA_GLM_SPEC_FOLLOW=/tmp/maya-upstream-v43/small-forced/eos-ids.txt, MAYA_GLM_SPLIT=0
+INFO tp_world=2 tp_rank=1 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[1024,2048)
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 25088 tokens (--prefill auto, up to 32768; mixer sub-batches of 1024), borrowing 6103 MB of the expert pool while a prompt runs (activations 5371, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.42 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.17, activations 0.07, other (context, MTP, scratch, prompt path) 10.33
+glm fast: CUDA0 unified memory: MemAvailable 110.38 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 1 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 2 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 3 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 3 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 5 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 6 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 12 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 13 s)
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 14 s)
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 17 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 17 s (2.76 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+INFO context=4096 kv=fp16 kv_resident=0 expert_slots=12384 expert_cache_mib=43551 engine_kind=glm-fast experts=12096 vram_slots=12384 vram_gb=42.5 ram_slots=48 ram_gb=0.2 mtp=1 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+VRAM dev=0 pci=0000:c5:00.0 total=129922760704 free=65225818112 weights=7362064384 kv=183402496 kv_ram=0 act=75340376 drafter=181694720 window=1230979072 pool=45667100160 tail=6501219120 borrow=6398996992 vision=0 slots=12384 ctx=4096 layers=0-45
+glm follow: every request decodes the 1 tokens of /tmp/maya-upstream-v43/small-forced/eos-ids.txt (MAYA_GLM_SPEC_FOLLOW)
+maya generate: TP2 rank 1 worker — mirroring rank 0's model calls
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 573 experts more lent for it)
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=1024 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 1024,8192,1536)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=960 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 960,8192,1536)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8825 ms | the copy lane 8068 ms: copies 726 (0.9 GB/s), ring wait 1455, gaps 2, mixer windows 5884 | lead 661, tail 96 | pcie 0.68 GB (ram 0.00, disk 0.68) + 2.85 GB vram | experts: staged 1069, resident 10374 (871541 rows), prestaged 32, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 93.5/0.5 ms max/min
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=1011 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 1011,8192,1536)
+glm prefill: CUDA0 chunk 2/2, 1011 tokens, wall 3057 ms | the copy lane 2807 ms: copies 38 (5.1 GB/s), ring wait 93, gaps 0, mixer windows 2676 | lead 205, tail 45 | pcie 0.19 GB (ram 0.01, disk 0.19) + 0.95 GB vram | experts: staged 345, resident 10374 (292418 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 19.0/0.2 ms max/min
+glm prefill: 4019 tokens in 11914.6 ms (2.96 ms/token, 337 tok/s), 2 chunks of 3008 tokens | CUDA0 11882 ms
+TP2 worker: prefill 4019 next=154841
+TP2 worker: snapshot
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm dsa scores: CUDA0 on the original kernels
+glm mla split attention: CUDA0 on the original kernels
+TP2 worker: forward 1
+TP2 worker: mtp decode 1 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=22 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 22,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 22 tokens, wall 534 ms | the copy lane 473 ms: copies 70 (9.9 GB/s), ring wait 36, gaps 1, mixer windows 366 | lead 58, tail 4 | pcie 0.69 GB (ram 0.01, disk 0.68) + 1.16 GB vram | experts: staged 557, resident 10374 (6279 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 6.3/0.4 ms max/min
+glm prefill: 22 tokens in 534.3 ms (24.29 ms/token, 41 tok/s), 1 chunk of 64 tokens | CUDA0 534 ms
+TP2 worker: prefill 22 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: mtp decode 1 tokens
+TP2 worker: force -1
+TP2 worker: restore
+glm prefill TP: rank=1 chunk=128 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=76 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 76,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 76 tokens, wall 817 ms | the copy lane 765 ms: copies 108 (10.0 GB/s), ring wait 263, gaps 1, mixer windows 392 | lead 47, tail 5 | pcie 1.08 GB (ram 0.02, disk 1.06) + 1.97 GB vram | experts: staged 921, resident 10374 (21772 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 16.0/0.6 ms max/min
+glm prefill: 76 tokens in 818.4 ms (10.77 ms/token, 93 tok/s), 1 chunk of 128 tokens | CUDA0 817 ms
+TP2 worker: prefill 76 next=220
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: mtp decode 1 tokens
+TP2 worker: force -1
+TP2 worker: restore
+glm prefill TP: rank=1 chunk=128 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=72 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 72,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 72 tokens, wall 759 ms | the copy lane 711 ms: copies 94 (11.1 GB/s), ring wait 250, gaps 1, mixer windows 365 | lead 43, tail 5 | pcie 1.04 GB (ram 0.02, disk 1.02) + 2.06 GB vram | experts: staged 934, resident 10374 (20608 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 10.5/4.6 ms max/min
+glm prefill: 72 tokens in 760.4 ms (10.56 ms/token, 95 tok/s), 1 chunk of 128 tokens | CUDA0 759 ms
+TP2 worker: prefill 72 next=220
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: mtp decode 1 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8458 ms | the copy lane 7803 ms: copies 190 (3.5 GB/s), ring wait 1685, gaps 2, mixer windows 5926 | lead 558, tail 96 | pcie 0.66 GB (ram 0.02, disk 0.64) + 2.84 GB vram | experts: staged 1059, resident 10374 (876257 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 58.8/4.2 ms max/min
+glm prefill: CUDA0 chunk 2/2, 1011 tokens, wall 2951 ms | the copy lane 2653 ms: copies 35 (4.4 GB/s), ring wait 110, gaps 0, mixer windows 2508 | lead 254, tail 44 | pcie 0.15 GB (ram 0.00, disk 0.15) + 0.94 GB vram | experts: staged 332, resident 10374 (293020 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 18.4/0.2 ms max/min
+glm prefill: 4019 tokens in 11431.0 ms (2.84 ms/token, 352 tok/s), 2 chunks of 3008 tokens | CUDA0 11408 ms
+TP2 worker: prefill 4019 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 22 tokens, wall 442 ms | the copy lane 407 ms: copies 84 (7.8 GB/s), ring wait 31, gaps 1, mixer windows 291 | lead 32, tail 3 | pcie 0.66 GB (ram 0.02, disk 0.63) + 1.13 GB vram | experts: staged 537, resident 10374 (6326 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 12.4/0.4 ms max/min
+glm prefill: 22 tokens in 443.0 ms (20.14 ms/token, 50 tok/s), 1 chunk of 64 tokens | CUDA0 442 ms
+TP2 worker: prefill 22 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: mtp decode 1 tokens
+TP2 worker: force -1
+TP2 worker: restore
+glm prefill TP: rank=1 chunk=128 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 76 tokens, wall 785 ms | the copy lane 734 ms: copies 107 (9.6 GB/s), ring wait 275, gaps 1, mixer windows 350 | lead 46, tail 5 | pcie 1.03 GB (ram 0.02, disk 1.01) + 1.92 GB vram | experts: staged 890, resident 10374 (21968 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 17.8/4.7 ms max/min
+glm prefill: 76 tokens in 786.4 ms (10.35 ms/token, 97 tok/s), 1 chunk of 128 tokens | CUDA0 785 ms
+TP2 worker: prefill 76 next=220
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: mtp decode 1 tokens
+TP2 worker: force -1
+TP2 worker: restore
+glm prefill TP: rank=1 chunk=128 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 72 tokens, wall 734 ms | the copy lane 684 ms: copies 96 (10.5 GB/s), ring wait 244, gaps 1, mixer windows 344 | lead 44, tail 5 | pcie 1.01 GB (ram 0.02, disk 0.99) + 1.96 GB vram | experts: staged 894, resident 10374 (20803 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 10.4/4.8 ms max/min
+glm prefill: 72 tokens in 735.4 ms (10.21 ms/token, 98 tok/s), 1 chunk of 128 tokens | CUDA0 734 ms
+TP2 worker: prefill 72 next=220
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: mtp decode 1 tokens
