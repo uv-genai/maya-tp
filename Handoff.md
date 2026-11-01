@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.15)**, v1.1.37–41 accepted; v1.1.42 review #61 next (§29.16).
-> User authorized stopping the pair for validation. Fixed candidate41 a617 deployed/hash-matched all5paths; test engines/server stopped. Accepted41 main41327238265 PASS; no42 candidate yet.
+> Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.17)**, v1.1.37–41 accepted; v1.1.42 candidate #61/#62 under validation.
+> User authorized stopping the pair for validation. Candidate42 d8b4252a deployed/hash-matched all5paths, runtime d59ea06; HIP/host gates pass, CPU/GPU/live gates pending. Accepted41 main41327238265 PASS.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).

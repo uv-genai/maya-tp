@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and **latest §29.16**, then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and **latest §29.17**, then `AGENTS.md`.
 
 ## Task and current checkpoint
 
@@ -15,9 +15,13 @@ Accepted37–41:
 
 - v1.1.41: #55 /PR58 /0fea27a, final39523ae CI41326842619/41326839560 and **main41327238265 PASS**. #55/#56/#57/#59 closed. Full report docs/upstream/v1.1.41.md and validation.json.
 
-**Active42: #61, upstream cd48762b6d4888205c130238dbc0c7f7904993cf (22commits/49files).** No candidate yet. Review worktree should branch `merge/upstream-v1.1.42` from updated origin/main. Audit HIP vision/APU/idle/env aliases/chunk/pin changes against all preserved TP2/MTP invariants and guards below. Keep TP2 vision gated (#16 requires RDMA embeddings), unsupported platforms excluded and defaults conservative. No43 work before42 acceptance and main CI.
+**Active42 #61 /#62**: review branch merge/upstream-v1.1.42, runtime d59ea06, upstream cd48762 ancestor. All3 HIP builds/16 host gates pass; full ordered CPU/shared GPU/live/perf/fidelity gates pending. Candidate MD5 **d8b4252a17fc09623ef0677051ee1a47** matches all5paths; remote review d59ea06, protected canonical777cc92 unchanged. No42 acceptance/no43 yet. Report docs/upstream/v1.1.42.md.
 
-No active GPU/test batches. Accepted41 runtime32650e8, engine **a6170c07503e139d73789184d9a93971**, all five copies matched; both engines/server stopped. Accepted41 baseline saved on BOTH hosts at `/tmp/maya-upstream-v41-baseline/maya`. Completed batches15734/61183/96027 need no rerun without a reason. Continue through46, not partial completion.
+Retain idle gates with TP worker/nested-MTP wake-up, both-name alias parity across ranks, monotonic GLM auto-chunk search and applicable DS4/MM3 guards. Defer new vision/vendor/setup and same-host DS4 multi-GPU changes. #62 rejects local-only GENI/VLEND/VRECLAIM/LOGP/media before state changes and skips encoder startup for TP config; #16 remains deferred. All41 safeguards below preserved. RuntimeCI41329879097 pending.
+
+Live batch prepared **/tmp/maya-upstream-v42-batch.sh**, outputs **/tmp/maya-upstream-v42/**. Before launching verify no active GPU/parity batch. Runs force-deep-idle S simple/MTP7 matrices, real lifecycle/media rejection with bogus encoder config proving no startup, true prefill cancel both modes, SCLI32/32, kill/recover8/8, direct command refusal followed by technical/code256 strict raw fidelity, candidate-first3-cycle prefill A/B versus saved41, M/L API/prefill/raw64. Keep raw failures/outliers and unchanged900s startup. Final/PR/mainCI before43; continue through46.
+
+Completed41 batches15734/61183/96027 need no rerun without reason. Accepted41 baseline a617 remains BOTHhosts at /tmp/maya-upstream-v41-baseline/maya. No release/tag is authorized by integration.
 
 ## Validated41 behavior
 
@@ -43,7 +47,7 @@ Prefill vs40: all9messages/usage equal; warm throughput+0.57/−0.97/−1.84% at
 
 User authorization persists: **“Hosts are free; you may stop the pair for validation.”** Do not ask again. This machine is **strix-halo-2 rank1**; SSH only to **strix-halo-1.local rank0**. Never nested SSH or invoke the llama-swap wrapper over SSH.
 
-Remote canonical `/home/ugo/software/project-maya` stays777cc92 with user `maya.py` edits, two L-config backups and #33 launcher/tuning deployments. **No pull/reset/rebuild there.** Preserve daemon175392 and its six-entry YAML. Use the isolated `/home/ugo/software/project-maya-upstream-review` worktrees on both hosts; remote review runtime source is32650e8.
+Remote canonical `/home/ugo/software/project-maya` stays777cc92 with user `maya.py` edits, two L-config backups and #33 launcher/tuning deployments. **No pull/reset/rebuild there.** Preserve daemon175392 and its six-entry YAML. Use the isolated `/home/ugo/software/project-maya-upstream-review` worktrees on both hosts; remote review runtime source isd59ea06.
 
 Stop rank0 server BEFORE its engine:
 
