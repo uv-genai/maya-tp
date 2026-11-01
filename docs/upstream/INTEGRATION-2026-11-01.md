@@ -16,7 +16,7 @@ The updater accepts both fork-prefixed and legacy tags; merging an upstream tag 
 | Upstream tag | Exact commit | Commits/files since preceding tag | Status |
 |---|---|---|---|
 | v1.1.37 | `7ee8f2777c754229605a8c19ca985cbb68540419` | 18 / 86 | #37 accepted; PR #38 / `7ea9d71`, final CI PASS |
-| v1.1.38 | `cf6472cc84489765791ad97bb55b395e8f442088` | 4 / 13 | #43 candidate: CPU/build/host PASS; live/CI pending |
+| v1.1.38 | `cf6472cc84489765791ad97bb55b395e8f442088` | 4 / 13 | #43 validated; PR #44 final evidence CI/merge pending |
 | v1.1.39 | `376b4b87402bc992af7b4a8dec089ef7cba7801c` | 33 / 48 | queued |
 | v1.1.40 | `cbaaec5d70fde2730e251dec6b418e4b454c01bd` | 16 / 55 | queued |
 | v1.1.41 | `171077787036ccc2784250ca644760f654e8d4a3` | 50 / 82 | queued |

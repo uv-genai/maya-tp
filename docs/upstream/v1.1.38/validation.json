@@ -1,0 +1,45 @@
+{
+  "source": "fbb5897a6232471bb62d9790d72eb373823fcfbc",
+  "engine_md5": "cff75b48a0f1e0b2d2355c73ce302d94",
+  "cpu": {
+    "hip_map": "PASS",
+    "serve": {
+      "tests": 531,
+      "skips": 11,
+      "result": "PASS"
+    },
+    "tools": {
+      "tests": 637,
+      "skips": 31,
+      "result": "PASS"
+    },
+    "host_staging_configurations": 8,
+    "actual_direct_io_exercised": true,
+    "all_three_hip_engines": "PASS",
+    "js_syntax_and_http_redirects": "PASS"
+  },
+  "gpu": {
+    "mtp7_acceptance": "PASS",
+    "mtp7_and_simple_large_prompt_matrices": "PASS",
+    "paired_cli_simple": "32/32",
+    "paired_cli_mtp7": "32/32",
+    "cli_identical_to_v37": "both32/32",
+    "raw_pick_differences": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "matching_wire_rounds": 110,
+    "asymmetric_retries": 8
+  },
+  "scope": "S live checks; executed GLM/TP2/GPU sources and defaults unchanged, prior M/L full checkpoint retained without repeating cold unaffected paths. Raw-GGUF opt-in IO validated with host bytes; no Qwen gfx1151 performance claim.",
+  "code_ci": [
+    "41300406757",
+    "41300412067"
+  ]
+}

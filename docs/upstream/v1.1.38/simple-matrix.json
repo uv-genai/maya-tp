@@ -1,0 +1,132 @@
+[
+  {
+    "case": "seven-draft-window",
+    "mode": "simple",
+    "wall_s": 6.241,
+    "usage": {
+      "prompt_tokens": 990,
+      "completion_tokens": 64,
+      "total_tokens": 1054,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 990,
+      "prompt_ms": 3682.1,
+      "prompt_per_token_ms": 3.719,
+      "prompt_per_second": 268.9,
+      "predicted_n": 64,
+      "predicted_ms": 2546.4,
+      "predicted_per_token_ms": 39.788,
+      "predicted_per_second": 25.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Summary\n\nThe document contains no substantive content. It consists solely of the word \"alpha\" repeated hundreds of times, with no sentences, arguments, data,",
+      "reasoning_content": "The user has sent a document that is just a bunch of repeated \"alpha\" words \u2014 clearly a stress-test or filler document with no actual content. They"
+    }
+  },
+  {
+    "case": "over-48MiB",
+    "mode": "simple",
+    "wall_s": 21.9,
+    "usage": {
+      "prompt_tokens": 7290,
+      "completion_tokens": 32,
+      "total_tokens": 7322,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 7290,
+      "prompt_ms": 20588.2,
+      "prompt_per_token_ms": 2.824,
+      "prompt_per_second": 354.1,
+      "predicted_n": 32,
+      "predicted_ms": 1302.5,
+      "predicted_per_token_ms": 40.703,
+      "predicted_per_second": 24.6,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "# Document Summary\n\nThe document you provided does not contain substantive content to summarize.",
+      "reasoning_content": "The user has sent a document that is just the word \"alpha\" repeated"
+    }
+  },
+  {
+    "case": "reuse-after-large-prompt",
+    "mode": "simple",
+    "wall_s": 1.627,
+    "usage": {
+      "prompt_tokens": 7333,
+      "completion_tokens": 24,
+      "total_tokens": 7357,
+      "prompt_tokens_details": {
+        "cached_tokens": 7289
+      }
+    },
+    "timings": {
+      "cache_n": 7289,
+      "prompt_n": 44,
+      "prompt_ms": 638.3,
+      "prompt_per_token_ms": 14.507,
+      "prompt_per_second": 68.9,
+      "predicted_n": 24,
+      "predicted_ms": 966.8,
+      "predicted_per_token_ms": 40.283,
+      "predicted_per_second": 24.8,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "# Simpler Explanation\n\nThe document is just the word \"",
+      "reasoning_content": "The user asked me to explain \"the same idea more"
+    }
+  },
+  {
+    "case": "multiple-prefill-chunks",
+    "mode": "simple",
+    "wall_s": 41.079,
+    "usage": {
+      "prompt_tokens": 14550,
+      "completion_tokens": 32,
+      "total_tokens": 14582,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 14550,
+      "prompt_ms": 39751.0,
+      "prompt_per_token_ms": 2.732,
+      "prompt_per_second": 366.0,
+      "predicted_n": 32,
+      "predicted_ms": 1316.0,
+      "predicted_per_token_ms": 41.125,
+      "predicted_per_second": 24.3,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "**Summary of the document**\n\nThe document is a transport stress-test artifact consisting of",
+      "reasoning_content": "The user has sent a document that is essentially a stress-test: thousands of"
+    }
+  },
+  {
+    "case": "stream-after-large-prompt",
+    "mode": "simple",
+    "chunks": 25,
+    "wall_s": 1.613
+  }
+]
