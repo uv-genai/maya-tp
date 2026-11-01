@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37 accepted/merged; v1.1.38 review #43 next.
+> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37/38 accepted; restart fix #47 main CI green; v1.1.39 review #45 active.
 > User authorized stopping the pair for validation. Candidate binaries deployed; live TP2/MTP checks in progress.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
@@ -822,3 +822,16 @@ engine build/deploy; all canonical engine hashes remain **cff75b48a0f1e0b2d2355c
 TP compact reads only write on role0/chunk0, but upstream would mark every no-op job's chunk
 ready. Gate TP streaming before any candidate deployment; preserve existing compact reader.
 New streaming defaults must stay off until gfx1151 validation. #33/#42/#11/#16 remain open.
+
+### 29.7 Fixed main green; v1.1.39 review resumes (#45)
+
+#47 fixed in PR #48 / **f479b91940c938b6fe9edee3b3d9e6c2402c6737**. Both head a6f1ab5 CI
+**41303387525 / 41303664047** and fixed **main41303961934 PASS**. Local ordered532 serve/11 skips,
+637 tools/31 skips, HIP map and6 focused restart/watchdog tests PASS. #47 closed; #43's hold is
+cleared/closed. Do not retry away historical main failure41301502943. No C++ or binary changes.
+
+Next #45: upstream v1.1.39 `376b4b8` (33 commits/48 files). Still review only, no candidate merge yet.
+#46 records confirmed premature readiness with TP compact reads: only role0/chunk0 fills the blob,
+but upstream streams every job's bit before that full gather finishes. Keep TP streaming gated off
+and preserve buffered defaults pending gfx1151 validation. Preserve answer reserve, chunk/retry
+agreement, NextN widths and #33 primary calibration priority. No v1.1.40 work yet.

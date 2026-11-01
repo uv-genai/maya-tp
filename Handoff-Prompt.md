@@ -34,18 +34,22 @@ IDs match 32/32 in both modes. Reversed warm prefill deltas **+0.66/−1.77/−0
 all 9 paired messages match. Initial cold outliers preserved; #33 remains open. Evidence:
 `docs/upstream/v1.1.37.md` and its adjacent directory. Do not repeat completed checks without reason.
 
-**Current hold:** upstream v1.1.38 merged as **ad96053 / PR #44** after final1f51079 CI
-41301067233/41301072413 passed. All CPU/host/HIP/live checks passed, engine
-**cff75b48a0f1e0b2d2355c73ce302d94** is deployed/matched, engines/server stopped. But post-merge
-main CI **41301502943 failed** at FailedRestartKeepsContext. #43 is reopened/held for bug **#47**.
-Review worktree now uses **`fix/failed-engine-restart`**: mark EOF-before-READY ended, reap failed
-child, preserve context/routes. Deterministic repro confirms the old bug; focused6 tests pass, full
-CPU gates/CI pending. No engine rebuild needed. See Handoff §29.6.
+**Accepted upstream tags:** v1.1.37 (PR #38 /7ea9d71) and v1.1.38 (PR #44 /ad96053).
+The v1.1.38 post-merge CI failure was a real pre-existing failed-start liveness race, fixed separately
+in **#47 / PR #48 /f479b91**. Fixed **main CI41303961934 PASS**, plus both a6f1ab5 feature CI runs
+41303387525/41303664047. #43/#47 closed; do not skip this historical failure or repeat the fix.
+Local current CPU gates **532 serve/11 skips**, **637 tools/31 skips**, HIP map PASS.
 
-**Next tag #45 / v1.1.39 remains unmerged.** Resume only after fixed main CI is green. Review found
-stream-fetch ready-bit mismatch with compact TP blobs; future port **#46**. Keep stream fetch
-gated off under TP2 and default off pending gfx1151 validation. Preserve answer reserve and measured
-TP calibration/table priority. No v1.1.40 work until the v1.1.39 checkpoint passes.
+**Active: #45 / upstream v1.1.39 `376b4b8`**,33 commits/48 files; no candidate merge yet. The review
+worktree is currently on `fix/failed-engine-restart` and should branch from updated origin/main for
+`merge/upstream-v1.1.39`. Preserve server fix #47 and all TP2/MTP invariants. #46 tracks the newly
+identified stream-ready contract mismatch with compact TP blobs: gate streamed fetch off under TP2
+and preserve buffered defaults until validated on gfx1151. Preserve all-output-limit answer reserves,
+TP chunk/retry agreement, replicated NextN and measured100401 calibration priority. See Handoff
+§29.7. No v1.1.40 work until v1.1.39 checkpoint passes.
+
+Current engine **cff75b48a0f1e0b2d2355c73ce302d94** from accepted v1.1.38 is deployed/matched;
+engines/server stopped. Remote canonical user source/daemon/YAML preserved. Future fork tags use tp-v.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.
