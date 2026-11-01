@@ -1,0 +1,96 @@
+{
+  "accepted": false,
+  "upstream": "cd48762b6d4888205c130238dbc0c7f7904993cf",
+  "runtime_source": "837a679cad6b15a97e56ae279e78a85e017db10e",
+  "python_policy_source": "456b4a567dca119b605779c6706059754cf4800e",
+  "binary_md5": "bc4e90a607b87fe609398fbdba0fb98c",
+  "cpu": {
+    "hip_mapping": "pass",
+    "serve": {
+      "tests": 584,
+      "skips": 11
+    },
+    "tools": {
+      "tests": 662,
+      "skips": 33
+    },
+    "host_checks": 16,
+    "node": "pass"
+  },
+  "gpu": {
+    "targets": [
+      "maya",
+      "maya-ds4",
+      "maya-mm3"
+    ],
+    "arch": "gfx1151",
+    "fused_cases": 196,
+    "iq_strict_cases": 396,
+    "mmq_attention": "pass",
+    "gpu_image_sha256": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+  },
+  "live": {
+    "matched_rounds": 132,
+    "matched_window_attempts": 8,
+    "asymmetric_retries": 8,
+    "rank0_segment_start_line": 784,
+    "segmentation": "rank0 log appends across engine restarts; keep full raw log and audit from last startup header",
+    "long_decode": {
+      "mtp": {
+        "short_ms_per_token": 61.45625,
+        "long_ms_per_token": 70.046875,
+        "ratio": 1.1397843994711685,
+        "maximum_ratio": 4
+      },
+      "simple": {
+        "short_ms_per_token": 43.6703125,
+        "long_ms_per_token": 42.428125,
+        "ratio": 0.9715553329278328,
+        "maximum_ratio": 4
+      }
+    },
+    "prefill_cancel_modes": [
+      "mtp",
+      "simple"
+    ],
+    "both_peer_up": true
+  },
+  "candidate_framed_records": 32,
+  "candidate_raw_pick_differences": 0,
+  "cli_tokens_each_rank_each_mode": 32,
+  "cli_matches_accepted41": true,
+  "peer_recovery_passes": 8,
+  "prefill_A_B": {
+    "paired_messages_usage_equal": 9,
+    "warm_throughput_delta_percent": [
+      -0.178412132,
+      0.3044499397,
+      1.5736403851
+    ]
+  },
+  "normal_idle_A_B": "pass;65s quiet then10s CPU/switch sample, both ranks, followed by MTP/peer checks",
+  "L_benchmark_warm_seconds": {
+    "rank0": 731,
+    "rank1": 219
+  },
+  "L_startup_limit_seconds": 900,
+  "L_ms_per_token": {
+    "simple": 42.815625,
+    "mtp": 35.16015625
+  },
+  "open_issues": [
+    33,
+    42,
+    46,
+    52,
+    54,
+    60,
+    11,
+    16
+  ],
+  "pending": [
+    "final_head_ci",
+    "merge",
+    "post_merge_main_ci"
+  ]
+}
