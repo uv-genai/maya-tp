@@ -30,6 +30,11 @@ Use `gh` against `uv-genai/maya-tp` (this repo's `origin`). Do not track work on
 
 Push only to `origin` (`uv-genai`). Never push to `upstream`.
 
+**Release tags:** new Maya-TP releases use **`tp-vMAJOR.MINOR.PATCH`** (for example `tp-v1.1.43`),
+so they cannot be confused with upstream Maya's `v*` tags. Fetch upstream tags as `upstream/v*`.
+Keep `VERSION` numeric. Existing published legacy `v*` tags are immutable; do not rename/delete them
+or create a release merely because an upstream tag was merged.
+
 ## Layout
 
 | Path | Role |

@@ -9,6 +9,10 @@ and upstream tags overlap in name but differ in content: upstream tags are fetch
 `refs/tags/upstream/v…`; never overwrite/push fork release tags. Raw commit/file inventory:
 [tag-audit-2026-11-01.json](tag-audit-2026-11-01.json).
 
+User naming requirement (#40): all future fork release tags use **`tp-vMAJOR.MINOR.PATCH`**.
+Keep `VERSION` numeric, published legacy `v*` tags immutable and fetched upstream tags namespaced.
+The updater accepts both fork-prefixed and legacy tags; merging an upstream tag does not publish a release.
+
 | Upstream tag | Exact commit | Commits/files since preceding tag | Status |
 |---|---|---|---|
 | v1.1.37 | `7ee8f2777c754229605a8c19ca985cbb68540419` | 18 / 86 | #37: first checkpoint, not validated |
