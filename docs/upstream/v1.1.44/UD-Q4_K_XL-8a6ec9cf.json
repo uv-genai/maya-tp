@@ -1,0 +1,110 @@
+[
+  {
+    "type": "file",
+    "oid": "a3c7245497e84a76d3612cefff8f2dedf00a984d",
+    "size": 5780589,
+    "lfs": {
+      "oid": "cc15d470afcb030558bbc4d8e2ccd840182e2e95de1a95198138efe63a5fd99f",
+      "size": 5780589,
+      "pointerSize": 132
+    },
+    "xetHash": "cd858dc6ef22e585faa2c89c62fab563cfcc1045b53bb7e1e3ebd944ca46baa6",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00001-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "7e711406c9c04b20d23451c774f767bb43f2c504",
+    "size": 48129640000,
+    "lfs": {
+      "oid": "17df217d8fc26a39f21ea40805dc6ab788c7ce8623a59a95c431051df7eafc94",
+      "size": 48129640000,
+      "pointerSize": 136
+    },
+    "xetHash": "bf230ce8e38b4bf75fad4a1770789160b0e462fa4c32c6f4d150e5567fd6a017",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00002-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "978975072faa50b996b7f3a3498dbe793fdaf917",
+    "size": 48129640000,
+    "lfs": {
+      "oid": "0c8065f620a049cb437024c54ff12c314c94603a1cc683f5191be4689d6d6d3b",
+      "size": 48129640000,
+      "pointerSize": 136
+    },
+    "xetHash": "51577f3aa2abff1c9f413b1ccfaa71320b4a72961586a06aafc076bdeed51542",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00003-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "4aa9b16c18972b6865687f65c3bee1bec21d40e7",
+    "size": 48129640000,
+    "lfs": {
+      "oid": "3bd8b2ebf8f51d8708a73ae0895f8d4acc7e4c983ba4e89d038492b203cc89ac",
+      "size": 48129640000,
+      "pointerSize": 136
+    },
+    "xetHash": "5e34a594d94c64933c8192289ad36add7e4780f6b66988f6ca8e360dbad09f7a",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00004-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "a36942340bae63bc90e6a872b6f991d26fb76353",
+    "size": 48129640000,
+    "lfs": {
+      "oid": "929054a6bbf3701765779b58c37988b6c6284a3b8413901858b59c0e95f37cc3",
+      "size": 48129640000,
+      "pointerSize": 136
+    },
+    "xetHash": "89f4a98629f2b6b78408760dd719b7f01052ad4ff2e0f15cc58f4d47b0b8f17c",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00005-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "754d3d8e14074e2f392e6a738684168eb86e1583",
+    "size": 48129640000,
+    "lfs": {
+      "oid": "49d3de04bd6a09de786c9ef7db900eae02ee9fd391573f91a923013d7d5b24d3",
+      "size": 48129640000,
+      "pointerSize": 136
+    },
+    "xetHash": "2a5bd3d15c491c1683c40e27bfa07cb775517a864b9bdfa5d0430b53aa72f045",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00006-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "2f7799c018f28ad619b0bbdff794b102f94bc3cf",
+    "size": 48129640000,
+    "lfs": {
+      "oid": "f18feae5878dd680f1ea87ecd1d84f4fb098480298b25a3162dcbdab8dc2ca5b",
+      "size": 48129640000,
+      "pointerSize": 136
+    },
+    "xetHash": "d2cdcf2191f5a1ff0a53b4fd78267ce33af4d62e5fbcc9796993f567fb6ee6fa",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00007-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "fabb91aabe61c0a6dbc64226452c0d6fa04d2744",
+    "size": 202758032592,
+    "lfs": {
+      "oid": "12df293355efbd104b088a77e13ee22410fb1ec3f7ab3863947f09896e64bec7",
+      "size": 202758032592,
+      "pointerSize": 137
+    },
+    "xetHash": "1f0f6d47749111e9f596684c83ba014ccacc792b40320e720dcce9cd685eae5e",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00008-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "9a0517f61a4560e76795ade2e3e64911f8434b9d",
+    "size": 9165923392,
+    "lfs": {
+      "oid": "c21ad6105a780bc2f44eb7dd41f9b1a1efb4e8ec87618f60b733bc2652bd2ffe",
+      "size": 9165923392,
+      "pointerSize": 135
+    },
+    "xetHash": "d6112107518a7875195b24e7d846cc3b5353a4330d49df6caac4c23fb3108e39",
+    "path": "UD-Q4_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q4_K_XL-00009-of-00009.gguf"
+  }
+]

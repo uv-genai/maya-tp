@@ -1,0 +1,110 @@
+[
+  {
+    "type": "file",
+    "oid": "a3c7245497e84a76d3612cefff8f2dedf00a984d",
+    "size": 5780589,
+    "lfs": {
+      "oid": "cc15d470afcb030558bbc4d8e2ccd840182e2e95de1a95198138efe63a5fd99f",
+      "size": 5780589,
+      "pointerSize": 132
+    },
+    "xetHash": "cd858dc6ef22e585faa2c89c62fab563cfcc1045b53bb7e1e3ebd944ca46baa6",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00001-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "1ec4126875310ad430fa75fe087c396981984940",
+    "size": 50536121984,
+    "lfs": {
+      "oid": "9cb2047676bd20e448be2377b480080c97fb38fae117f4846e07de2c65bb8522",
+      "size": 50536121984,
+      "pointerSize": 136
+    },
+    "xetHash": "c29de966142252ba9a7066786e3c109c28b1e3ef0cc62d5efe04ab3c8d7a2ae7",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00002-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "5208398b19428529b95ac2125683d19e0c55b2c0",
+    "size": 50536121984,
+    "lfs": {
+      "oid": "17d398dd327e7ff1991b382677814db75d970b074661757564b6f2ac3d0c8d95",
+      "size": 50536121984,
+      "pointerSize": 136
+    },
+    "xetHash": "b8db68733f962d141e070004dd88fbe2b1fb681512dec790a2d5a6aac0ffcb78",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00003-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "19d81e1566b89b63f81c4d1909be4df179842099",
+    "size": 50536122016,
+    "lfs": {
+      "oid": "7ea8da1143b9a6bf1424a361eb1b0d6f66c7ce79eac9711162f212cc4f39c319",
+      "size": 50536122016,
+      "pointerSize": 136
+    },
+    "xetHash": "16630553d40bf0f1edf509409aaf881e188a900a3158e339e4e259a3fa619680",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00004-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "26c77b8d1e1aa0423325ef9c6cb0ad7b1edceaaa",
+    "size": 50536122016,
+    "lfs": {
+      "oid": "1952da19a841176b46f9681c99ea57c674f8a8861e16d76fb35cec4befe039b2",
+      "size": 50536122016,
+      "pointerSize": 136
+    },
+    "xetHash": "b23c2360e4cd024b97546bfcf388aa014a6f236a35cc211f6ba1bf40d8dc90e1",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00005-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "f5f6a2417c3524a02d77d9b35f979ac21d7f9cc4",
+    "size": 50536122016,
+    "lfs": {
+      "oid": "d6711781d8effab79b410af9c40920bffcc0c28976e509bc1227ff0c6669c33a",
+      "size": 50536122016,
+      "pointerSize": 136
+    },
+    "xetHash": "8f95a301ebc2ba5c8bc696526de318df29845710432b019d1888bf3fc439fdfa",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00006-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "278891c34a1e333219f118d4babdff3b22bc9d23",
+    "size": 36097230048,
+    "lfs": {
+      "oid": "2ebc8d198d03a14865e8a85df637285ceb5dd79b1ffc78424bd3c3e06df57823",
+      "size": 36097230048,
+      "pointerSize": 136
+    },
+    "xetHash": "e5e5d83029a8e8e8b52872bac591a23d8bb478ce2a562d3f29cd39ed530e854c",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00007-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "fabb91aabe61c0a6dbc64226452c0d6fa04d2744",
+    "size": 202758032592,
+    "lfs": {
+      "oid": "12df293355efbd104b088a77e13ee22410fb1ec3f7ab3863947f09896e64bec7",
+      "size": 202758032592,
+      "pointerSize": 137
+    },
+    "xetHash": "1f0f6d47749111e9f596684c83ba014ccacc792b40320e720dcce9cd685eae5e",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00008-of-00009.gguf"
+  },
+  {
+    "type": "file",
+    "oid": "adcba9433a0f397445cd5ec424c542d0a919ce47",
+    "size": 16835109952,
+    "lfs": {
+      "oid": "df33722d1dcf5ffe0347ed8406f7acb3b18061f4ded2c13c2b0a184b8d41c9ea",
+      "size": 16835109952,
+      "pointerSize": 136
+    },
+    "xetHash": "096e9e096524d3184b592439b1713dc8bfef9ed5a292e0c9d7f2670d1bcd3852",
+    "path": "UD-Q8_K_XL/DeepSeek-V4.1-Flash-1017-UD-Q8_K_XL-00009-of-00009.gguf"
+  }
+]
