@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · **Sequential integration (§29.18)**:37–41 accepted;42allruntimePASS, finalCI/PR63/mainpending; no43 yet.
-> No active GPU/server/test batches. Fixed42bc4/source837 all5paths matched; defaultidleA/B passed; protectedproductionuserwork/YAMLunchanged.
+> Last updated: 2026-11-02 · **Sequential upstream integration (§29.19)**: v1.1.37–42 accepted; v1.1.43 next.
+> No active GPU/server/test batches. Accepted42 bc4/source837 all5paths matched; baseline saved on BOTH hosts. Main41334938602 PASS; #61/#62/#64 closed.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -1007,3 +1007,11 @@ Review branch merge/upstream-v1.1.42 has an in-progress merge from cd48762. Reta
 All planned42gates PASS; no active GPU/server/test batch. Engine837a679/bc4e90a607b87fe609398fbdba0fb98c all5paths matched; Python456b4a5. Fullbatch19655/idleAB26121 exited0; do not rerun. Report docs/upstream/v1.1.42.md andvalidation.json finalpendingonlyCI/merge/main. PR63/#61/#62/#64 openuntilmainPASS. NormalidleCPU/switchbenefitmeasuredonbothgfx1151ranks; 32strictS/M/Lrecordsraw0, allcancel/reuse/limit/recovery/mirror/perfgatespassed. L731/219s startupwithin900,35.16MTPms;60variabilityremainsopen. Allfailedfixture/prefix-log-audit/pre-fixidledataretained.
 
 Next: finalheadCI, readyPR63, ancestry-preservingmerge, post-mainCI, explicitclose61/62/64, acceptedreport/handoffs/index andsavebc4v42baselineBOTHhosts. Onlythen43issue/branch; continuethrough46. NumericVERSION1.1.42/legacyreleasesunchanged; futuretp-v tags; noreleaseauthorized. Protectedcanonical777cc92useredits/backups/daemon175392/YAMLunchanged.
+
+### 29.19 v1.1.42 accepted; v1.1.43 next
+
+PR63 merged as **b1867c8bfa0e7576754208abb9f2ff66303af1b3** after final aad4e03 CI **41334558152/41334563528 PASS**. Post-merge **main41334938602 PASS**; #61/#62/#64 closed with evidence comments. All §29.18 runtime gates pass. Report docs/upstream/v1.1.42.md /validation.json is accepted. Engine source837a679, binary **bc4e90a607b87fe609398fbdba0fb98c**, all5paths matched and saved on BOTH hosts at **/tmp/maya-upstream-v42-baseline/maya**. No active batches;19655/26121 completed.
+
+Preserve42's paired idle wake-up at mirrored calls/nested MTP, alias parity and explicit unmirrored GENI/VLEND/VRECLAIM/LOGP/media/startup guards alongside41's cancellation/lifecycle/total-budget safeguards. Vision16/multi11/stream46 remain deferred. All32S/M/L framed records raw-pick0;132rounds/8asymmetric retries match; CLI/recovery/state checks pass. Warm prefill vs41−0.18/+0.30/+1.57%, all9responses/usage equal. Normal idle engine switches422/428→11/10 per second with lower sampled CPU and successful MTP follow-up. L731/219s startup within900, MTP35.16ms;60 variability remains open.
+
+Next upstream43 **acdab34bd58eec957715392a1d822777c3c579c3** (18commits/41files): create its own issue/branch from updatedmain, semantic review and affected-path validation, final/mainCI before44. Continue44/45/46 in order. README/AGENTS/VERSION/pin/tuning remain ours; no release. Remote canonical777cc92 user edits/backups/daemon175392/YAML preserved. At fulltask end restore coherent production pair as documented; keep validated review builds.

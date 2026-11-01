@@ -1,5 +1,5 @@
 {
-  "accepted": false,
+  "accepted": true,
   "upstream": "cd48762b6d4888205c130238dbc0c7f7904993cf",
   "runtime_source": "837a679cad6b15a97e56ae279e78a85e017db10e",
   "python_policy_source": "456b4a567dca119b605779c6706059754cf4800e",
@@ -88,9 +88,12 @@
     11,
     16
   ],
-  "pending": [
-    "final_head_ci",
-    "merge",
-    "post_merge_main_ci"
-  ]
+  "pending": [],
+  "final_head": "aad4e031b174fb931e081c2ef15d4986359a725b",
+  "final_ci": [
+    41334558152,
+    41334563528
+  ],
+  "merge_commit": "b1867c8bfa0e7576754208abb9f2ff66303af1b3",
+  "main_ci": 41334938602
 }
