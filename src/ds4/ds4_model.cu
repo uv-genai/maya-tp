@@ -12,6 +12,7 @@
 // and after the last layer logits = head(rmsnorm(sum_s pre[s] h[s])).
 #include "ds4_model.hpp"
 #include "ds4_borrow.hpp"
+#include "ds4_chunk_policy.hpp"
 #include "ds4_cpu_exl3.hpp"
 #include "ds4_ablate.hpp"
 #include "ds4_engram_io.hpp"
@@ -4646,9 +4647,30 @@ struct Model::Impl {
                 ok = ok && rows <= room / 2.0;
             }
             if (groups.size() > 1 && ram != ~uint64_t{0}) ok = ok && 2.0 * C * hand_row * (double) devs.size() <= (double) ram / 8.0;
-            if (ok) return C;
+            if (ok) return gfx11_chunk_cap(C);
         }
         return c0;
+    }
+    // Optional gfx1151 cap; preserve the existing fork default until DS4 validation (#79).
+    int gfx11_chunk_cap(int C) const {
+#if defined(STRATA_USE_HIP)
+        const int cap = chunk_policy::configured_cap(std::getenv("MAYA_DS4_CHUNK_GFX11"),
+                                                    std::getenv("STRATA_DS4_CHUNK_GFX11"),
+                                                    std::getenv("DS4_CHUNK_GFX11"));
+        const int reduced = chunk_policy::capped_rows(C, cap);
+        if (reduced == C || devs.empty()) return C;
+        for (const Dev& d : devs) {
+            cudaDeviceProp prop{};
+            if (cudaGetDeviceProperties(&prop, d.id) != cudaSuccess) {
+                (void) cudaGetLastError();
+                return C;
+            }
+            if (!chunk_policy::gfx1151_arch(prop.gcnArchName)) return C;
+        }
+        return reduced;
+#else
+        return C;
+#endif
     }
     // a device's chunk dimensions in a group of nm members: its heads' width, wo_a groups and FFN share (the widest
     // member's: member 0 takes split128's odd blocks), the attention's and the indexer's slabs (the indexer's scores

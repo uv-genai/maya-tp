@@ -11,7 +11,7 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from serve.frontend import ChatTemplate, OutputParser, parse_tool_call  # noqa: E402
+from serve.frontend import ChatTemplate, OutputParser, MalformedToolCall, parse_tool_call  # noqa: E402
 from serve.server import ByteTokenizer, MockEngine, Service, serve  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,9 +61,29 @@ class GlmCalls(unittest.TestCase):
 
     def test_malformed(self):
         for body in ("<arg_key>a</arg_key><arg_value>1</arg_value>", "f<arg_key>a<arg_value>1</arg_value>",
-                     "f junk <b>"):
+                     "f junk <b>", "<function=f><parameter=a>1</parameter><parameter=b",
+                     "<function=f><parameter=a"):   # (#706: an unclosed <parameter= tag is malformed, not a crash)
             with self.assertRaises(ValueError, msg=body):
                 parse_tool_call(body)
+
+    def test_unclosed_parameter_keeps_the_malformed_stream_contract(self):
+        for body in ("<function=f><parameter=a", "<function=f><parameter=a>1</parameter><parameter=b",
+                     "<function=f><parameter=a</function>"):
+            with self.subTest(body=body):
+                with self.assertRaises(MalformedToolCall):
+                    parse_tool_call(body)
+                for streaming in (False, True):
+                    for width in (1, 3, 7, 4096):
+                        parser = OutputParser(thinking=False, tools=TOOLS, stream_tools=streaming)
+                        text = "<tool_call>" + body + "</tool_call>"
+                        events = []
+                        for at in range(0, len(text), width):
+                            events += parser.feed(text[at:at + width])
+                        events += parser.finish()
+                        self.assertEqual(parser.malformed, [body])
+                        self.assertFalse(any(e.kind == "tool_call" and e.complete for e in events))
+                        if not streaming:
+                            self.assertIn(body, content(events))
 
     def test_malformed_carries_the_whole_body(self):   # (#613: the log shows all of it, the message 80 characters)
         body = "f<arg_key>a<arg_value>" + "x" * 300

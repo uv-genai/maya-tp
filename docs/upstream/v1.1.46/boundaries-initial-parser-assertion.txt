@@ -1,0 +1,37 @@
+test_long_text_parts_keep_the_cached_prefix (serve.test_loop_guard.Collapse.test_long_text_parts_keep_the_cached_prefix) ... ok
+test_unclosed_parameter_is_malformed_and_streams_as_text (serve.test_tools.GlmCalls.test_unclosed_parameter_is_malformed_and_streams_as_text) ... 
+  test_unclosed_parameter_is_malformed_and_streams_as_text (serve.test_tools.GlmCalls.test_unclosed_parameter_is_malformed_and_streams_as_text) (body='<function=f><parameter=a') ... FAIL
+  test_unclosed_parameter_is_malformed_and_streams_as_text (serve.test_tools.GlmCalls.test_unclosed_parameter_is_malformed_and_streams_as_text) (body='<function=f><parameter=a>1</parameter><parameter=b') ... FAIL
+  test_unclosed_parameter_is_malformed_and_streams_as_text (serve.test_tools.GlmCalls.test_unclosed_parameter_is_malformed_and_streams_as_text) (body='<function=f><parameter=a</function>') ... FAIL
+
+======================================================================
+FAIL: test_unclosed_parameter_is_malformed_and_streams_as_text (serve.test_tools.GlmCalls.test_unclosed_parameter_is_malformed_and_streams_as_text) (body='<function=f><parameter=a')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/serve/test_tools.py", line 77, in test_unclosed_parameter_is_malformed_and_streams_as_text
+    self.assertFalse(calls(events))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: [ToolCall(name='f', arguments={}, id='call_d47f2fccde0c4311931dbcf4', namespace=None)] is not false
+
+======================================================================
+FAIL: test_unclosed_parameter_is_malformed_and_streams_as_text (serve.test_tools.GlmCalls.test_unclosed_parameter_is_malformed_and_streams_as_text) (body='<function=f><parameter=a>1</parameter><parameter=b')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/serve/test_tools.py", line 77, in test_unclosed_parameter_is_malformed_and_streams_as_text
+    self.assertFalse(calls(events))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: [ToolCall(name='f', arguments={}, id='call_78cb1274bf9e466e8a6782a6', namespace=None)] is not false
+
+======================================================================
+FAIL: test_unclosed_parameter_is_malformed_and_streams_as_text (serve.test_tools.GlmCalls.test_unclosed_parameter_is_malformed_and_streams_as_text) (body='<function=f><parameter=a</function>')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/serve/test_tools.py", line 77, in test_unclosed_parameter_is_malformed_and_streams_as_text
+    self.assertFalse(calls(events))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: [ToolCall(name='f', arguments={}, id='call_3a454078fdbe43bd969b5f40', namespace=None)] is not false
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.009s
+
+FAILED (failures=3)

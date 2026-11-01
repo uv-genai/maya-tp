@@ -1,0 +1,10 @@
+{
+  "baseline": "cb2b41c",
+  "unchanged_glm_transport_tuning_owned_files": 204,
+  "canonical_git_trees_equal": true,
+  "working_diff_empty": true,
+  "glm_binary_md5": "b398d4a0711430edd6a28b95264c7293",
+  "ds4_changes": "HIP-only opt-in automatic chunk policy; default0, valid aligned reduction only; no kernel or lending changes",
+  "windows_trim_change": "excluded by platform scope",
+  "tail75_reintroduced": false
+}

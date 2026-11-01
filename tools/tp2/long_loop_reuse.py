@@ -11,15 +11,16 @@ import random
 import urllib.request
 
 
-def fixture(turns):
+def fixture(turns, content_parts=False):
     rng = random.Random(904)
     data = ' '.join(''.join(rng.choices('abcdefghijkmnpqrstuvwxyz', k=24)) for _ in range(1500))
     messages = [dict(role='user', content='Inspect the supplied synthetic transport frame and explain it.')]
     for i in range(turns):
         reasoning = 'I need to inspect the same transport frame.\n\nI am stuck repeating the same thing.'
-        if i == 0:
+        if i == 0 and not content_parts:
             reasoning += '\n\n' + data
-        messages += [dict(role='assistant', content='', reasoning_content=reasoning, tool_calls=[
+        content = [dict(type='text', text=data if i == 0 else '')] if content_parts else ''
+        messages += [dict(role='assistant', content=content, reasoning_content=reasoning, tool_calls=[
             dict(id=f'fixture_{i}', type='function', function=dict(name='inspect_frame', arguments='{"case":"same"}'))]),
             dict(role='tool', tool_call_id=f'fixture_{i}', content='{"frame":"unchanged"}')]
     return messages
@@ -33,6 +34,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--url', default='http://192.168.1.22:18080')
     ap.add_argument('--model', default='maya')
+    ap.add_argument('--content-parts', action='store_true', help='Exercise OpenAI text parts in assistant history')
     ap.add_argument('--output', type=Path, required=True)
     choice = ap.add_mutually_exclusive_group(required=True)
     choice.add_argument('--expect-preserved', action='store_true')
@@ -51,7 +53,7 @@ def main():
     assert before['max_context'] >= 32768, before
     rows = []
     for turns in (2, 3):
-        out = request('/v1/chat/completions', dict(model=args.model, messages=fixture(turns), tools=TOOLS,
+        out = request('/v1/chat/completions', dict(model=args.model, messages=fixture(turns, args.content_parts), tools=TOOLS,
                                                  max_tokens=8, temperature=0, reasoning_effort='max'))
         assert 0 < out['usage']['completion_tokens'] <= 8, out
         rows.append(out)
@@ -70,7 +72,7 @@ def main():
         assert cached < 512 and collapsed > 0, (cached, initial, collapsed)
     after = request('/health')
     assert after['tp']['peer'] == 'up', after
-    result = dict(policy='keep' if args.expect_preserved else 'collapse', initial_tokens=initial,
+    result = dict(policy='keep' if args.expect_preserved else 'collapse', content_parts=args.content_parts, initial_tokens=initial,
                   follow_cached=cached, collapsed=collapsed, responses=rows, health=after)
     args.output.write_text(json.dumps(result, indent=2)+'\n')
     print('PASS '+result['policy']+': initial='+str(initial)+' follow_cached='+str(cached), flush=True)

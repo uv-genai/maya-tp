@@ -1,0 +1,20 @@
+[
+  {
+    "limit": 0,
+    "initial_tokens": 20021,
+    "follow_tokens": 19974,
+    "common_prefix": 172,
+    "chars": 38077,
+    "collapsed": true,
+    "internal_content_type": "str"
+  },
+  {
+    "limit": 32000,
+    "initial_tokens": 20021,
+    "follow_tokens": 20060,
+    "common_prefix": 20021,
+    "chars": 38077,
+    "collapsed": false,
+    "internal_content_type": "str"
+  }
+]

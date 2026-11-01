@@ -1,0 +1,7 @@
+[
+  {
+    "config": "maya-maya-s-v2-iq2_xxs-hip.json",
+    "previous_exe": "/home/ugo/software/project-maya/build-hip/maya",
+    "review_exe": "/home/ugo/software/project-maya-upstream-review/build-hip/maya"
+  }
+]

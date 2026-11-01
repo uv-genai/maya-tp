@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.28):37–45 handled;46active #77.
-> CPU/HIP/18host pass; live22871 active. Boundaries78/80 fixed;79capmeasurements/75tail/68WMMA open.
+> Last updated:2026-11-02 · Sequential integration (§29.29):37–45 handled;46 runtime COMPLETE.
+> No active batches. Final exact-head/PR81/mainCI pending, then production restore and final handoff.
 
 ## 1. What we are building
 
@@ -1081,3 +1081,9 @@ Source5b13c83 merges3589d6f: malformedparameter/contentpartsfixes;78safechunkbou
 **ACTIVE22871** /tmp/maya-upstream-v46-live.sh output/tmp/maya-upstream-v46/: MTP7+simple state/large/reuse/stream/guards/real18Kcancel, thenfreshD2textparts20Kprefix+ordinary/MTPfollowups. No concurrentGPU/build/deploy. CPUpreflightOpenAItextpartsflattenstr, so directunitisolates80/liveAPIprovesformatcompatibility+policy, notindependent80A/B. Afterlivesuccess auditrounds/limits/cache,finalevidence/headCI/PR/mainCI,close77/78/80onlyaftermainPASS.79/75/68and33/42/46/52/54/60/11/16stayopen.
 
 Remote review5b13c83; protectedcanonical777userwork/daemon/YAMLuntouched. OwnreviewS/M/Lconfigsnow.exe review/build-hip/maya onBOTHhosts; enablesproductionoriginal5a52restoreafterwhole46taskwithoutmixingreviewserverwitholdcanonicalengine. BothreviewDS4binaries51749; GLM5paths b398 matchedbeforelive. Finalproductionrestore/handoffs/index stillpending.
+
+### 29.29 v1.1.46 runtime complete; final CI/merge/main pending
+
+22871EXIT0.605serve11skip/679tools33skip/HIPmap,99focused,18host,HIPDS4buildPASS;DS4GPUimage92096…unchanged,newhostbinary51749e86; GLMb398/GPU958…exactprior. MTP7+ordinarylarge/reuse/stream/guards/idle andtrue18Kprefillcancel/cache0retry/followup/peerPASS;132rounds/8asymretriesmatch. ForcedidleMTP88.92/67.99ms,ordinary42.87/41.14retained60open,nospeedclaim. FreshtextpartsAPI20021initial/cache0→20020cached/collapsed0,ordinary/MTP64followupPASS. Directunitisolates80;APIflattensalltextpartsstr,notindependent80A/B.
+
+Alltargetedruntimecomplete, bothengines/serverstopped, noactivebatches/builds. FinalexactheadCI/PR81merge/postmainCI pending. Close78/80aftermainPASS;77coversfinalproductionrestore/handoffs/indextoo,closeonlywholeobjectivecomplete.79capmeasurement(default0)/75tail/68WMMAremainOPENwith33/42/46/52/54/60/11/16. Protectedcanonical777userwork/daemon/YAMLpreserved. Reviewconfigsown.exepathsvalidated; after46accepted saveb398+5174baselinesBOTHhosts, restoreoriginal5a52ONLYcanonicalGLMpaths+remote/tmpmaya-tp2whilekeepingreviewGLMb398/DS45174. Neveroverwriteprotectedremote source/YAML. Finalrestoration/hash/source/GHancestry/CI/handoffchecksstillneeded.
