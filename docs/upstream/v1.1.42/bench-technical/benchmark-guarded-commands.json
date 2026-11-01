@@ -1,0 +1,18 @@
+[
+  {
+    "command": "GENI 8 /missing 1,2,3",
+    "reply": "ERR GENI is unavailable under TP2; both ranks require a mirrored operation"
+  },
+  {
+    "command": "VLEND",
+    "reply": "ERR VLEND is unavailable under TP2; both ranks require a mirrored operation"
+  },
+  {
+    "command": "VRECLAIM",
+    "reply": "ERR VRECLAIM is unavailable under TP2; both ranks require a mirrored operation"
+  },
+  {
+    "command": "LOGP 1 1,2,3",
+    "reply": "ERR LOGP is unavailable under TP2; both ranks require a mirrored operation"
+  }
+]
