@@ -2,7 +2,7 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.17)**, v1.1.37–41 accepted; v1.1.42 candidate #61/#62 under validation.
-> User authorized stopping the pair for validation. Fixed42 bc4e90a6/runtime837a679 all5paths matched; CPU/HIP/host/kernel gates pass. HOLD64 latency, fixed live batch19655 active (§29.17); no43. Accepted41 main41327238265 PASS.
+> User authorized stopping the pair for validation. Fixed42 bc4e90a6/runtime837a679 all5paths matched; CPU/HIP/host/kernel gates pass. Fixed64 stress gate passes; live batch19655 finalLbenchmark active, normal-idleAB still required (§29.17); no43. Accepted41 main41327238265 PASS.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -995,3 +995,5 @@ Review branch merge/upstream-v1.1.42 has an in-progress merge from cd48762. Reta
 42 prefillABcomplete: all9messages/usageequal/cache0; warm1K/4K/8Kthroughput−0.18/+0.30/+1.57% vs41, no materialregression/newgainclaim; #33openforcold9.6case/~3008rowcap. Active19655Maya-MAPI/prefill/fidelity, thenL. **After19655 completes successfully**, run /tmp/maya-upstream-v42-idle-ab.py > /tmp/maya-upstream-v42/idle-ab.txt (normaldefault65squiet+10sCPU/wake sample eacharm, thenMTPfollowup). NeverconcurrentGPU. Finalevidence/CI/mainbefore43.
 
 42Maya-M complete: API/reuse/cancel/limits/fresh1K/4K/8K pass;8framedraw-pick0, ordinary40.62/MTP31.90ms/token. Coldsmokeprefill11.32/39.66/24.97s retainedwithoutperfclaim. Lrank1warm73s/ready, rank0progress90% at156s (900boundunchanged), active19655. Afterbatch0 runnormalidleABscriptasabove. FinalCI/mainrequired; no43.
+
+42LAPI milestone: startupR0186/R173s, API/reuse/cancel/limits/fresh1K/4K/8K pass; raw64benchmarkwarmingnow (coldloadnewpair), active19655. Requiredafterbatch0: normal-idleAB /tmp/maya-upstream-v42-idle-ab.py -> /tmp/maya-upstream-v42/idle-ab.txt. Notrunyet. Updatedrestartpromptcontainsallpendinggates. No43untilfinal42evidence/headCI/merge/mainPASS.
