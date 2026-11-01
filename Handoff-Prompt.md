@@ -1,18 +1,18 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read Handoff.md (especially §§18,21,23,27–29 and latest §29.26), then AGENTS.md.
+Read Handoff.md (especially §§18,21,23,27–29 and latest §29.27), then AGENTS.md.
 
 ## Objective and current checkpoint
 
 Integrate upstream v1.1.37–v1.1.46 ONE TAG AT A TIME. Semantic review and relevant validation, exact-final-head CI and post-merge main CI must pass before starting the next tag. Continue through46. Preserve TP2/MTP and fork-owned README/AGENTS/docs; push only origin uv-genai/maya-tp. No release is authorized by integration. Future fork release tags are tp-vMAJOR.MINOR.PATCH; VERSION stays numeric and published legacy tags immutable. Upstream tags are upstream/v*.
 
-**37–44 ACCEPTED.** Latest44 PR73/842d6e67c11ed702d1c7f54d61b8eb69e5212ed6, final5e920c4 CI41344769559/41344774298 PASS, post-main41345166897 PASS; #72closed. Report docs/upstream/v1.1.44.md/validation.json. Installer/catalog/docs/tests only;615runtimefiles/README/AGENTS/VERSION/pin/tuning identical43.73focusedtests,HF18files×2revisions metadataexact,orderedHIPmap/602serve11skip/679tools33skip andfreshS MTP/reuse/spec1ordinary64budget/PIDs/peer PASS. No new quality/performance claim. #68 remainsOPEN: full DS4 GPU suite is failing on pre-existing control.
+**37–45 semantic checkpoints accepted.** Latest45 PR76/2df9e26be0783f7a84ae6c4e8dbc6e8d6d5fe933, final6f1e78c CI41346480733/41346487052 andpost-main41346856373 PASS. #74closed forscopedreview/ancestry. **FunctionalDS4tailfix explicitly DEFERRED#75OPEN**: upstreamautomaticNVIDIApathdisabledHIP anddepends ondeferredcopyflush/strictdrain/lentguard. No partialport orDS4longpromptstabilityclaim. All620runtimefiles exact44; report docs/upstream/v1.1.45.md/validation.json accepted with functional_change_applied=false. WMMA68 remains separatelyOPEN/failing.
 
-**Active45 (#74, merge/upstream-v1.1.45)**6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc (2commits/3files): create ownissue/branch fromupdatedorigin/main, semanticreview/affectedgates/finalheadCI/postmainCI before46. Then46=3589d6f12a3f77e813b184b51a586f8fc3de2185. 45ancestrymerge6862700preservesALLruntimeexact44; its automaticNVIDIAtailfixdepends ondeferredflush/lending APIs. FunctionalHIPbackportdeferred#75OPEN; do not claim45crashfixactive. Dependencyproof/reportin docs/upstream/v1.1.45/. 45gates2813EXIT0:HIPmap/602serve11skip/679tools33skip+freshMTP/reuse/spec1API64budget/PIDs/peerPASS. Noactivebatches;bothengines/serverstopped. FinalheadCI/PR/mainCI requiredbefore46.44batch64704EXIT0,43batch13476EXIT0, earlier8965interrupted130 duefixedharness71. Do not rerun completed gates without a new reason.
+**Next46**3589d6f12a3f77e813b184b51a586f8fc3de2185 (5commits/8files): createownissue/branchfromupdatedmain, semanticreview/affectedgates/finalheadCI/postmainCI. No46sourcepreparedyet. Thenfinishwholeobjective: restorecoherentproductionruntimewithoutoverwritingprotectedsource/YAML, retainvalidatedreviewbuilds, finalhandoff. Noactivebatches;45batch2813EXIT0 (HIPmap/602serve11skip/679tools33skip+freshMTP/reuse/spec1drafts56/47/0,64budget,PIDs/peerPASS),44batch64704EXIT0,43batch13476EXIT0.
 
-Engine6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316, MD5b398d4a0711430edd6a28b95264c7293, all5paths matched and savedBOTHhosts /tmp/maya-upstream-v44-baseline/maya (same43;43backup retained). Remote review5e920c4; protectedcanonical777cc92 unchanged. Both test engines/serverstopped;daemon175392/YAML preserved.
+Engine6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316,MD5b398d4a0711430edd6a28b95264c7293,all5paths matched andsavedBOTHhosts /tmp/maya-upstream-v45-baseline/maya (same43/44, backupsretained). Remotereview6f1e78c; protectedcanonical777cc92 unchanged. Engines/serverstopped;daemon175392/YAMLpreserved. Original5a52baselineverifiedbothhostsforfulltaskrestoration.
 
-43 PR70/c2ff719, finalf862e3b CI41343230502/41343235345 andpost-main41343606174 PASS;65/66/67/69/71closed. Its full TP2/MTP/kernel evidence is reused only for the proven unchanged44paths.
+44PR73/842d6e6 final5e920c4 CI41344769559/41344774298,post-main41345166897PASS;72closed.615runtimefiles exact43,installer/catalogonly,73focusedtests andHF18files×2revisionsmetadataexact.43PR70/c2ff719 finalf862e3b CI41343230502/41343235345,post-main41343606174PASS;65/66/67/69/71closed. Its fullTP2/math evidence is reusedonlyforprovenunchanged44/45paths.
 
 ## What43 verified
 
@@ -34,7 +34,7 @@ Long-loop policy A/B JSON0vs32000 preserves20020cached instead of0; follow-up pr
 - Preserve canonical MTP input/accept/continuation/abort, global retry/chunk agreement, replicatedNextN/fullsharedwidths/trunkARs, primary100401 tuning/config inheritance. Route rank/fast/SNAP_GEN opt-in/off; snapshot mirror precedes localSave.
 - #46 streamed fetch deferred ENTIRELY: reader/header/kernels unchanged, even MAYA_GLM_STREAM_FETCH=1 does nothing. #11 multi and #16 HIP/RDMA vision remain deferred. Exclude unsupported platforms/same-host multi-GPU additions. Raw-GGUF O_DIRECT and new drive probe stay opt-in/off on HIP pending measurement; packed TP source unchanged.
 
-Keep33/42/46/52/54/60/11/16/68 open unless a later change actually resolves them. #42 L CLI uses WARM=0; no ready handshake. #54 transient rank0 config hides Models catalog. #52 archive metadata may inherit parentgitHEAD and cause harmless host relinks; pin unchanged. Never objcopy in place: inspect ELF read-only with readelf offsets and Path.read_bytes.
+Keep33/42/46/52/54/60/11/16/68/75 open unless a later change actually resolves them. #42 L CLI uses WARM=0; no ready handshake. #54 transient rank0 config hides Models catalog. #52 archive metadata may inherit parentgitHEAD and cause harmless host relinks; pin unchanged. Never objcopy in place: inspect ELF read-only with readelf offsets and Path.read_bytes.
 
 ## Hosts and tools
 

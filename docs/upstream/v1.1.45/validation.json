@@ -1,5 +1,5 @@
 {
-  "accepted": false,
+  "accepted": true,
   "upstream": "6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc",
   "source_merge": "6862700",
   "upstream_functional_change_applied": false,
@@ -48,9 +48,12 @@
     11,
     16
   ],
-  "pending": [
-    "final head CI",
-    "merge",
-    "post-main CI"
-  ]
+  "pending": [],
+  "final_head": "6f1e78c17a1095402c929598bf6879d691823dcf",
+  "final_ci": [
+    41346480733,
+    41346487052
+  ],
+  "merge_commit": "2df9e26be0783f7a84ae6c4e8dbc6e8d6d5fe933",
+  "main_ci": 41346856373
 }

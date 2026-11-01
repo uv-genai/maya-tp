@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.26):37–44 accepted;45active #74.
-> Runtime remains exact44; functional DS4 tail backport deferred75. Batch2813 active; WMMA68 open.
+> Last updated:2026-11-02 · Sequential integration (§29.27):37–45 semantic checkpoints accepted; next46.
+>45 functional DS4 tail fix deferred75; runtimeb398 unchanged, no active batches. WMMA68 open.
 
 ## 1. What we are building
 
@@ -1063,3 +1063,13 @@ Upstream6ecbd3c merged6862700withALLruntimeexact44; onlyCHANGELOGfunctionaldecis
 ACTIVE2813 /tmp/maya-upstream-v45-gates.sh orderedHIPmap/serve/tools thenfreshpairedS MTP/reuse/spec1API. Engine6a2f/b398unchanged; remote review6862700. PreserveallTP2/MTP/NextN/RDMA/cancel/lifecycle/wake/media/budget/tuningandownedREADME/AGENTS/VERSION/pin. Finalreport/headCI/PR/mainCI requiredbefore46. Protectedcanonical777userwork/daemon/YAMLunchanged. No44batchactive.
 
 45ALLTARGETEDPASS2813EXIT0:HIPmap/602serve11skip/679tools33skip,freshpairedMTP/reuse/spec1ordinary64budget/PIDs/peerPASS. All5binarypathsb398;620runtimefilesexact44. Noenginebuild/math/wirechange. FunctionalDS4tailfixexplicitlyDEFERRED75OPEN, WMMA68OPEN; do notclaim45crashfixactive. Report/validationJSONpendingonlyexactheadCI/PR76merge/postmainCI before46. Bothengines/serverstopped; protectedcanonical777userwork/daemon/YAMLpreserved.
+
+45PR76merged2df9e26be0783f7a84ae6c4e8dbc6e8d6d5fe933 afterfinal6f1e78c CI41346480733/41346487052PASS. Post-mainCI41346856373pending; #74open andno46yet. Runtime620files/b398exact44; functional75OPEN/WMMA68OPEN. Bothengines/serverstopped, remoterereview6f1e78c, protectedcanonical777userwork/daemon/YAMLpreserved. Original5a52backupverifiedbothhosts (remote maya/maya-build/maya-tmp allsame); YAML SHA256c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20.
+
+### 29.27 v1.1.45 semantic checkpoint ACCEPTED; v1.1.46 next
+
+PR76 **2df9e26be0783f7a84ae6c4e8dbc6e8d6d5fe933**, final6f1e78c CI **41346480733/41346487052 PASS**, post-main **41346856373 PASS**. #74closed as completedscopedreview/ancestryintegration. **FunctionalDS4tailfixDEFERRED#75OPEN**, notclaimedactive. AutomaticNVIDIApathdisabledHIP; strictdrain/copyflush/lentguarddependenciesexcludedearlier, no partialport. DistinctWMMA68OPEN/failing. Report docs/upstream/v1.1.45.md/validation.json acceptedwithupstream_functional_change_applied=false.
+
+620runtimefilesexact44, engine6a2f/b398all5paths, savedBOTHhosts /tmp/maya-upstream-v45-baseline/maya (same43/44). HIPmap/602serve11skip/679tools33skip+freshS MTP/reuse/spec1ordinarydraft56/47/0,64budget,PIDs/peerPASS;2813EXIT0. Noactivebatches; engines/serverstopped. ReusepriorGPU/strict/M-L/state/perfonlyforidenticalpaths. Remotereview6f1e78c;protectedcanonical777userwork/backups/daemon175392/YAMLpreserved. Original5a52baselineverifiedbothhostsforfulltaskrestoration.
+
+Next46 **3589d6f12a3f77e813b184b51a586f8fc3de2185** (5commits/8files), ownissue/branchfromupdatedmain. Semanticreview/affectedgates/finalheadCI/postmainCI. Continue through46, thenrestorecoherentproductionruntimewithoutoverwritingprotectedsource/YAML, retainvalidatedreviewbuilds andfinalhandoff. NumericVERSION1.1.42, futuretp-vtags,no release. Keep33/42/46/52/54/60/11/16/68/75openunlessactuallyresolved.
