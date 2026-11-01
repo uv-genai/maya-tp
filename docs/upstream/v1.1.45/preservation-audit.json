@@ -1,0 +1,10 @@
+{
+  "baseline": "0af397a",
+  "unchanged_runtime_files": 620,
+  "changed_files": [
+    "CHANGELOG.md"
+  ],
+  "all_canonical_runtime_trees_equal": true,
+  "working_runtime_diff_empty": true,
+  "glm_binary_md5": "b398d4a0711430edd6a28b95264c7293"
+}
