@@ -18,8 +18,13 @@ base is v1.1.36 `f031a23`; use namespaced `upstream/v1.1.N` tags (fork tag names
 semantic review, all TP2/MTP invariants and #33 tuning. No new fork release requested.
 
 Current user pair is **Maya-L at context 524288**, rank0 API :5812 (dynamic), rank1 local. It has
-not been stopped. Host availability for GPU validation was asked asynchronously; keep independent
-review/CPU work moving, but do not stop the user pair without resolving that constraint.
+now been stopped **with explicit user authorization**: "Hosts are free; you may stop the pair for
+validation". This authorization persists for the per-tag tests; do not ask again. Baseline binaries
+saved on both hosts in `/tmp/maya-upstream-baseline-2026-11-01/`. Candidate v1.1.37 engine MD5
+**6e59558bdd421fa521040263978b2bd6** is deployed/hash-verified at all three canonical paths.
+Isolated worktree `/home/ugo/software/project-maya-upstream-review` on both hosts; candidate commits
+**884a257 + 0892d77**, draft **PR #38**, host-test wiring fix **#39**. CPU gates and HIP builds pass;
+GPU validation is starting. Do not start the next tag until #37 passes.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.

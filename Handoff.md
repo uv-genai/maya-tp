@@ -702,5 +702,15 @@ Inventory/guard decisions: `docs/upstream/INTEGRATION-2026-11-01.md` and its JSO
 Do not start v1.1.38 until v1.1.37 passes the full checkpoint. No fork release authorized in this task.
 
 Current user pair is **Maya-L**, context **524288**, rank0 API **:5812** (dynamic), rank1 local.
-It remains running while reviewing/CPU checking; async host-availability clarification is pending
-before GPU validation. Rank0 dirty user checkout remains protected; daemon/YAML untouched.
+User explicitly answered **"Hosts are free; you may stop the pair for validation"**. This authorizes
+stopping the pair for per-tag validation throughout this task; do not ask again. Pair stopped safely
+(server before engine), baseline binaries preserved under `/tmp/maya-upstream-baseline-2026-11-01/`
+on both hosts. Candidate `maya` MD5 **6e59558bdd421fa521040263978b2bd6** deployed to all three
+canonical paths and hash-verified for v1.1.37 tests. Daemon/YAML untouched; rank0 dirty user checkout
+still protected (no pull/reset/rebuild).
+
+First-tag worktree `/home/ugo/software/project-maya-upstream-review` exists on both hosts; branch
+`merge/upstream-v1.1.37` locally, detached candidate on rank0. Merge commit **884a257**, draft PR **#38**;
+HIP host-test dependency fix **0892d77** under **#39**. HIP map, **527 serve / 11 skips**, **637 tools /
+31 skips**, six budget tests and 11 CMake host checks PASS; maya/maya-ds4 and HIP parity binaries
+built for gfx1151. GPU validation is starting. Later tags are unmerged; do not proceed until #37 passes.
