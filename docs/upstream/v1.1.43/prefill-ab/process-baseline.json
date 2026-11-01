@@ -1,0 +1,16 @@
+{
+  "rank1": [
+    {
+      "pid": 2928555,
+      "exe": "/tmp/maya-upstream-v42-baseline/maya",
+      "md5": "bc4e90a607b87fe609398fbdba0fb98c"
+    }
+  ],
+  "rank0": [
+    {
+      "pid": 287195,
+      "exe": "/tmp/maya-upstream-v42-baseline/maya",
+      "md5": "bc4e90a607b87fe609398fbdba0fb98c"
+    }
+  ]
+}
