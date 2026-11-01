@@ -6,6 +6,8 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.46 integration** (#77): robust content-parts/unfinished-parameter parsing; count text parts in the history-collapse cap to preserve cached prefixes (#80). Add an opt-in gfx1151 DeepSeek automatic chunk cap with safe bounds/aliases (#78); keep its default off pending local measurements (#79). Windows-only trim changes remain outside scope. GLM TP2/MTP code and tuning stay preserved.
+
 - **Upstream v1.1.45 review** (#74): preserve the HIP runtime. Its automatic NVIDIA single-GPU tail-drain fix depends on previously deferred lending/flush machinery; a complete HIP backport is tracked separately in #75. No DeepSeek long-prompt crash fix or new stability claim is made for this fork.
 
 - **Upstream v1.1.44 integration** (#72): list the existing DeepSeek UD-IQ1_M option, attribute upstream quality/capacity estimates, and update the Q8/Q4 download revision without changing pinned file sizes/hashes. Engine/server/TP2/MTP paths are unchanged.
