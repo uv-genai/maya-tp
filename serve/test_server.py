@@ -2231,6 +2231,47 @@ class FailedRestartKeepsContext(unittest.TestCase):
             self.assertEqual(eng.max_context, 4096)
             self.assertFalse(eng.alive())               # (so the next request's ensure_engine tries again)
 
+    def test_failed_restart_with_open_process_is_ended(self):
+        """EOF before READY is already a failed start, even if the process has not exited yet."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            gone = Path(d) / "gone"
+            exe = Path(d) / "engine"
+            exe.write_text(f"#!{sys.executable}\n"
+                           "import os, sys, time\n"
+                           "from pathlib import Path\n"
+                           f"if Path({str(gone)!r}).exists():\n"
+                           "    os.close(1)\n"
+                           "    time.sleep(60)\n"
+                           "    sys.exit(1)\n"
+                           "print('READY 4096 stop', flush=True)\n"
+                           "for line in sys.stdin:\n"
+                           "    if line.strip() == 'QUIT': break\n")
+            exe.chmod(0o755)
+            eng = StrataEngine(str(exe), [])
+            previous = eng.proc
+            try:
+                previous.kill()
+                previous.wait()
+                # Finish the previous generation's EOF handling before starting the failing one.
+                end = time.monotonic() + 5
+                while not getattr(eng, "ended", False) and time.monotonic() < end:
+                    time.sleep(0.001)
+                self.assertTrue(getattr(eng, "ended", False))
+                gone.touch()
+                with self.assertRaises(RuntimeError):
+                    eng.restart()
+                self.assertEqual(eng.max_context, 4096)
+                self.assertFalse(eng.alive())
+                self.assertIsNotNone(eng.proc.poll(), "failed replacement process was left running")
+            finally:
+                if eng.proc.poll() is None:
+                    eng.proc.kill()
+                eng.proc.wait(timeout=5)
+                for process in (previous, eng.proc):
+                    process.stdin.close()
+                    process.stdout.close()
+
 
 @unittest.skipUnless(os.name == "posix", "the fake engine is a script with a #! line")
 class StaleDoneAfterErr(unittest.TestCase):
