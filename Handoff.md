@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, first tag #37 / draft PR #38.
+> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37 accepted/merged; v1.1.38 review #43 next.
 > User authorized stopping the pair for validation. Candidate binaries deployed; live TP2/MTP checks in progress.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
@@ -765,3 +765,15 @@ Remote canonical source remains777cc92/user edits; new server tested in isolated
 end preserve a coherent deployed pair/source state; do not leave an unvalidated old-server/new-engine
 combination after later tags. No pull/reset/rebuild of the remote user checkout; baseline binaries
 remain available for restoration while validated new builds stay in the review worktrees.
+
+### 29.3 v1.1.37 accepted; v1.1.38 review next (#43)
+
+**PR #38 merged as `7ea9d713ed7765136c081e871eee6648fcf04554`**, retaining upstream v1.1.37
+ancestry. Final evidence head `bedc611` passed CI **41298854143 / 41298857613** before merge.
+All validation in §29.2 passed; #37 and #39 are closed. #33/#42/#11/#16 remain open. No fork
+release/tag created. Local main includes the merge; both review worktrees retain the accepted candidate.
+
+Next checkpoint **#43**: upstream v1.1.38 `cf6472c` (four commits / 13 files), beginning only after
+v1.1.37 acceptance. Review Linux GGUF expert direct I/O and headroom, setup context advice, UI model
+card/answer information and home-screen redirects. Keep VERSION 1.1.42, fork docs and all TP2/MTP
+paths/tuning. New tag is not merged yet. Review worktree will use branch `merge/upstream-v1.1.38`.

@@ -11,7 +11,7 @@ No subagents unless explicitly authorized.
 
 ## Current state
 
-**Active task: sequential upstream integration** (#36 audit; #37 first tag). User requests upstream
+**Active task: sequential upstream integration** (#36 audit complete; #37 accepted; #43 next tag). User requests upstream
 v1.1.37 through v1.1.46 merged one at a time, each fully validated before the next. Common upstream
 base is v1.1.36 `f031a23`; use namespaced `upstream/v1.1.N` tags (fork tag names collide). See Handoff
 §29 and `docs/upstream/INTEGRATION-2026-11-01.md`. Preserve fork-owned README.md/AGENTS.md through
@@ -21,19 +21,23 @@ semantic review, all TP2/MTP invariants and #33 tuning. No new fork release requ
 numeric. Existing published `v*` tags stay immutable. Upstream tags stay under `upstream/v*` locally.
 The updater accepts both the new prefix and legacy tags. Do not publish a release just for a merge.
 
-Current user pair is **Maya-L at context 524288**, rank0 API :5812 (dynamic), rank1 local. It has
-now been stopped **with explicit user authorization**: "Hosts are free; you may stop the pair for
-validation". This authorization persists for the per-tag tests; do not ask again. Baseline binaries
-saved on both hosts in `/tmp/maya-upstream-baseline-2026-11-01/`. Candidate v1.1.37 engine MD5
-**6e59558bdd421fa521040263978b2bd6** is deployed/hash-verified at all three canonical paths.
-Isolated worktree `/home/ugo/software/project-maya-upstream-review` on both hosts; candidate commits
-**884a257 + 0892d77**, draft **PR #38**, host-test wiring fix **#39**. CPU gates and HIP builds pass;
-Shared HIP parity, S MTP/simple matrices, reuse/cancel/limits, CLI 32/32 in both modes,
-zero-raw-pick benchmark and kill/recover 8/8 PASS. M/L API acceptance and1K/4K/8K smoke,
-plus CLI simple/MTP7 **32/32 each** on both M and L PASS. Saved-release CLI matches32/32 in both modes. Reversed warm prefill deltas **+0.66/−1.77/−0.73%**
-at1K/4K/8K; all9 paired messages identical. Initial cold outliers preserved; #33 remains open.
-Final evidence/CI remain before #37 acceptance. See Handoff §29.2; do not start the next tag yet. Candidate now includes `tp-v` policy
-via main merge `efa221a`; all three HIP engines build.
+The previous user **Maya-L context 524288** pair was stopped with explicit authorization:
+"Hosts are free; you may stop the pair for validation". This persists for all per-tag tests; do not ask
+again. Baseline binaries are saved on both hosts in `/tmp/maya-upstream-baseline-2026-11-01/`.
+Accepted v1.1.37 engine MD5 **6e59558bdd421fa521040263978b2bd6** remains deployed/hash-verified on
+all three canonical paths; engines/server stopped, daemon/YAML untouched. Remote user source preserved.
+
+**Upstream v1.1.37 accepted:** PR #38 merged as **`7ea9d71`** after final `bedc611` CI
+**41298854143 / 41298857613 PASS**. #37/#39 closed. All three HIP engines, CPU 530/637 suites,
+shared parity, S/M/L API/CLI tests, asymmetric retries and kill/recover pass. Release-vs-candidate CLI
+IDs match 32/32 in both modes. Reversed warm prefill deltas **+0.66/−1.77/−0.73%** at 1K/4K/8K;
+all 9 paired messages match. Initial cold outliers preserved; #33 remains open. Evidence:
+`docs/upstream/v1.1.37.md` and its adjacent directory. Do not repeat completed checks without reason.
+
+**Next: #43 / upstream v1.1.38 `cf6472c`**, four commits / 13 files; not merged yet. Review worktree
+`/home/ugo/software/project-maya-upstream-review` on both hosts will use `merge/upstream-v1.1.38`.
+Review raw-GGUF expert direct I/O (separate from GLM's packed TP2 path), setup context and UI fixes.
+See Handoff §29.3. Do not start v1.1.39 until v1.1.38 passes its checkpoint.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.
