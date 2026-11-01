@@ -691,3 +691,16 @@ llama-swap during release preparation. Read-only check: rank0 API **:5814** (dyn
 `status=ok`, `tp.world_size=2`, `peer=up`; rank1 worker running locally. **Do not stop/restart this user
 pair.** Daemon pid 736 and YAML unchanged. Rank0 remains at `777cc92` with user `maya.py` edit,
 two config backups, and the deliberately deployed #33 launcher/tuning file; no pull/reset/rebuild there.
+
+## 29. Sequential upstream integration — started (2026-11-01)
+
+User requested new upstream tags merged **one by one**, each verified and validated before the next,
+with extreme care for TP2/MTP. Fork-owned README.md/AGENTS.md and other docs are semantic merges only.
+Audit **#36**; first tag **#37**, upstream v1.1.37 `7ee8f27`. Common upstream base v1.1.36 `f031a23`;
+ten tags through v1.1.46, fetched as **upstream/v1.1.N** to preserve our colliding release tags.
+Inventory/guard decisions: `docs/upstream/INTEGRATION-2026-11-01.md` and its JSON commit/file audit.
+Do not start v1.1.38 until v1.1.37 passes the full checkpoint. No fork release authorized in this task.
+
+Current user pair is **Maya-L**, context **524288**, rank0 API **:5812** (dynamic), rank1 local.
+It remains running while reviewing/CPU checking; async host-availability clarification is pending
+before GPU validation. Rank0 dirty user checkout remains protected; daemon/YAML untouched.

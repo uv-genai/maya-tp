@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya TP2 restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §18, §21, §23, §24, **§27–§28**), then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full (especially §18, §21, §23, §24, **§27–§29**), then `AGENTS.md`.
 
 Project: **Maya-TP**, GLM-5.3-Flash TP2 across twin Strix Halo hosts. HIP/ROCm **gfx1151 Linux only**;
 GPU inference, RDMA tensor path only. Bootstrap/control/token metadata may use TCP.
@@ -10,6 +10,16 @@ Rank0 is at `777cc92` with user-modified `maya.py` and two untracked Maya-L conf
 No subagents unless explicitly authorized.
 
 ## Current state
+
+**Active task: sequential upstream integration** (#36 audit; #37 first tag). User requests upstream
+v1.1.37 through v1.1.46 merged one at a time, each fully validated before the next. Common upstream
+base is v1.1.36 `f031a23`; use namespaced `upstream/v1.1.N` tags (fork tag names collide). See Handoff
+§29 and `docs/upstream/INTEGRATION-2026-11-01.md`. Preserve fork-owned README.md/AGENTS.md through
+semantic review, all TP2/MTP invariants and #33 tuning. No new fork release requested.
+
+Current user pair is **Maya-L at context 524288**, rank0 API :5812 (dynamic), rank1 local. It has
+not been stopped. Host availability for GPU validation was asked asynchronously; keep independent
+review/CPU work moving, but do not stop the user pair without resolving that constraint.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.
