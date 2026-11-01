@@ -80,8 +80,8 @@ int main() {
             cudaMemset(dy_bat, 0, (size_t) max_cols * (size_t) n_out * sizeof(float) + 64);
             strata::kernels::iq_mmvq(t, dw, dx, dy_bat, n_in, n_out, ncols, nullptr);
             if (cudaDeviceSynchronize() != cudaSuccess || cudaGetLastError() != cudaSuccess) return 2;
-            unsigned char guard[64];
-            cudaMemcpy(guard, (unsigned char*)dy_bat + (size_t)max_cols * n_out * sizeof(float), 64, cudaMemcpyDeviceToHost);
+            std::vector<unsigned char> guard((size_t)(max_cols - ncols) * n_out * sizeof(float) + 64);
+            cudaMemcpy(guard.data(), (unsigned char*)dy_bat + (size_t)ncols * n_out * sizeof(float), guard.size(), cudaMemcpyDeviceToHost);
             for (auto v : guard) if (v != 0) ++fails;
 
             std::vector<float> a((size_t) ncols * (size_t) n_out), b((size_t) ncols * (size_t) n_out);
