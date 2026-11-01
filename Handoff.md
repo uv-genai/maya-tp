@@ -1,18 +1,9 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.21):37–42 accepted;43candidate #65 live validation active.
-> Active batch8965; engine6a2fbe1/b398 all5paths matched. CPU/build/affectedEngram gates pass; known pre-existing DS4 WMMA failure68 remains open.
-> Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
-> **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
-> Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
-> **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
-> Open perf: **#33** TP2 prefill — sliced GEMM calibration + rank1 config inheritance improve Maya-S
-> median prompt throughput **32–37%** at 1K/4K/8K (§27). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
-> retained as the pre-integration baseline (§29). Prefill commit `9bc0ec9`, PR #34 merged as `b63f8af`; local **main**
-> tracks origin/main. Rank0 has user work (see §27); preserve it.
-> Historical release-check runtime below is superseded by §29's authorized test window.
-> Llama-swap daemon + 6 maya YAML entries preserved (Maya-L `--context 524288`).
+> Last updated:2026-11-02 · Sequential integration (§29.23):37–43 ACCEPTED; next44 #72.
+>43 PR70/c2ff719, final/head+mainCI PASS. Engine6a2fbe1/b398 backed up BOTH hosts; no active batches.
+>Known pre-existing DS4 WMMA issue68 remains OPEN; full DS4 suite is not passing.
 
 ## 1. What we are building
 
