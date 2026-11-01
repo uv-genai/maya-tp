@@ -30,8 +30,9 @@ int main() {
     int fails = 0, checks = 0, strict_diff = 0;
     for (int t : kTypes) {
         const int qk = block_elems(t);
-        const int n_in = qk * 4;            // 4 blocks per row keeps every format's block loop exercised
-        const int n_out = 8;
+        for (int n_in : {qk * 4, 2048, 4096, 5120}) {
+        //            // 4 blocks per row keeps every format's block loop exercised
+        const int n_out = 9; // partial final output block
         const size_t rb = strata::kernels::iq_row_bytes(t, n_in);
         if (rb == 0) { std::printf("  type %d: no row size, skipped\n", t); ++fails; continue; }
         const size_t w_bytes = rb * (size_t) n_out;
@@ -44,7 +45,7 @@ int main() {
         // quantised values) stay random.
         for (size_t i = 0; i + 1 < hw.size(); i += 2) {
             uint16_t w = (uint16_t) (hw[i] | (hw[i + 1] << 8));
-            if ((w & 0x7C00u) == 0x7C00u) { w &= (uint16_t) ~0x7C00u; w |= 0x7BFFu & 0x7C00u; }
+            w = (uint16_t) ((w & 0x83ffu) | 0x3800u); // finite, bounded scales with random mantissa/sign
             hw[i] = (uint8_t) (w & 0xFF);
             hw[i + 1] = (uint8_t) (w >> 8);
         }
@@ -53,6 +54,10 @@ int main() {
         const size_t xb = (size_t) (n_in / 32) * 36;   // q8_1 bytes per column
         std::vector<uint8_t> hx(xb * (size_t) max_cols);
         for (auto& b : hx) b = (uint8_t) (std::rand() & 0xFF);
+        for (size_t i = 0; i < hx.size(); i += 36) {
+            hx[i] = 0; hx[i + 1] = 0x3c; // d = 1
+            hx[i + 2] = 0; hx[i + 3] = 0x3c; // s = 1
+        }
 
         uint8_t* dw = nullptr;
         uint8_t* dx = nullptr;
@@ -60,21 +65,24 @@ int main() {
         float* dy_bat = nullptr;
         cudaMalloc(&dw, w_bytes);
         cudaMalloc(&dx, xb * (size_t) max_cols);
-        cudaMalloc(&dy_ref, (size_t) max_cols * (size_t) n_out * sizeof(float));
-        cudaMalloc(&dy_bat, (size_t) max_cols * (size_t) n_out * sizeof(float));
+        cudaMalloc(&dy_ref, (size_t) max_cols * (size_t) n_out * sizeof(float) + 64);
+        cudaMalloc(&dy_bat, (size_t) max_cols * (size_t) n_out * sizeof(float) + 64);
         cudaMemcpy(dw, hw.data(), w_bytes, cudaMemcpyHostToDevice);
         cudaMemcpy(dx, hx.data(), xb * (size_t) max_cols, cudaMemcpyHostToDevice);
 
         for (int ncols : kCols) {
             // reference: the scalar entry point, one column at a time
-            cudaMemset(dy_ref, 0, (size_t) max_cols * (size_t) n_out * sizeof(float));
+            cudaMemset(dy_ref, 0, (size_t) max_cols * (size_t) n_out * sizeof(float) + 64);
             for (int c = 0; c < ncols; ++c)
                 strata::kernels::iq_mmvq(t, dw, dx + (size_t) c * xb, dy_ref + (size_t) c * n_out,
                                          n_in, n_out, 1, nullptr);
             // batched
-            cudaMemset(dy_bat, 0, (size_t) max_cols * (size_t) n_out * sizeof(float));
+            cudaMemset(dy_bat, 0, (size_t) max_cols * (size_t) n_out * sizeof(float) + 64);
             strata::kernels::iq_mmvq(t, dw, dx, dy_bat, n_in, n_out, ncols, nullptr);
-            cudaDeviceSynchronize();
+            if (cudaDeviceSynchronize() != cudaSuccess || cudaGetLastError() != cudaSuccess) return 2;
+            unsigned char guard[64];
+            cudaMemcpy(guard, (unsigned char*)dy_bat + (size_t)max_cols * n_out * sizeof(float), 64, cudaMemcpyDeviceToHost);
+            for (auto v : guard) if (v != 0) ++fails;
 
             std::vector<float> a((size_t) ncols * (size_t) n_out), b((size_t) ncols * (size_t) n_out);
             cudaMemcpy(a.data(), dy_ref, a.size() * sizeof(float), cudaMemcpyDeviceToHost);
@@ -89,7 +97,7 @@ int main() {
                 const bool bits_equal = std::memcmp(&a[i], &b[i], sizeof(float)) == 0;
                 if (!bits_equal) ++strict;
                 const bool both_nan = (a[i] != a[i]) && (b[i] != b[i]);
-                if (!bits_equal && !both_nan && value_bad < 0) value_bad = (int) i;
+                if ((!bits_equal || both_nan) && value_bad < 0) value_bad = (int) i;
             }
             if (strict) ++strict_diff;
             if (value_bad >= 0) {
@@ -99,6 +107,7 @@ int main() {
             }
         }
         cudaFree(dw); cudaFree(dx); cudaFree(dy_ref); cudaFree(dy_bat);
+        }
     }
     std::printf("  iq_mmvq parity: %d format/width combinations, %d numerically different, "
                 "%d differing only in a NaN sign bit\n", checks, fails, strict_diff);
