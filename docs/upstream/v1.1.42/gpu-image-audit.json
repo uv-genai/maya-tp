@@ -1,0 +1,20 @@
+[
+  {
+    "path": "/tmp/maya-upstream-v41-baseline/maya",
+    "sections": {
+      ".hip_fatbin": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+    }
+  },
+  {
+    "path": "/tmp/maya-upstream-v42-before-idle-fix/maya",
+    "sections": {
+      ".hip_fatbin": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+    }
+  },
+  {
+    "path": "build-hip/maya",
+    "sections": {
+      ".hip_fatbin": "95821268ebefbc7d7f8d48b4e055e324741b174eb3870a61ee2dff68252e98bd"
+    }
+  }
+]
