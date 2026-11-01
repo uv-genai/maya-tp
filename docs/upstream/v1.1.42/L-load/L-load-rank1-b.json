@@ -1,0 +1,23 @@
+{
+  "time": 1793555429.4105804,
+  "host": "strix-halo-2",
+  "processes": [
+    {
+      "pid": 2884744,
+      "state": "S",
+      "elapsed_s": 451.5200000000186,
+      "cpu_s": 147.98,
+      "minor_faults": 2712100,
+      "major_faults": 21832821,
+      "io": "rchar: 5335325060\nwchar: 331193\nsyscr: 2808\nsyscw: 77\nread_bytes: 110376611840\nwrite_bytes: 0\ncancelled_write_bytes: 0\n",
+      "wchan": "wait_woken"
+    }
+  ],
+  "pressure": {
+    "memory": "some avg10=10.46 avg60=3.43 avg300=3.84 total=968152772\nfull avg10=10.00 avg60=3.30 avg300=3.70 total=936538197\n",
+    "io": "some avg10=6.44 avg60=2.88 avg300=13.47 total=4229282023\nfull avg10=5.81 avg60=2.57 avg300=12.02 total=3765118447\n",
+    "cpu": "some avg10=0.67 avg60=0.21 avg300=0.72 total=2130270799\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n"
+  },
+  "memory": "MemTotal:       129525664 kB\nMemFree:        15573800 kB\nMemAvailable:   39975752 kB\nCached:         26626908 kB\nUnevictable:      101380 kB\nMlocked:               0 kB\nSwapTotal:      129524732 kB\nSwapFree:       127930840 kB\nDirty:              1248 kB\nWriteback:             0 kB",
+  "cpu.stat": "usage_usec 340572762937\nuser_usec 271715844977\nsystem_usec 68856917960\nnice_usec 76424854141\ncore_sched.force_idle_usec 0\nnr_periods 0\nnr_throttled 0\nthrottled_usec 0\nnr_bursts 0\nburst_usec 0\n"
+}

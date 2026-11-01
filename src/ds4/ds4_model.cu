@@ -44,6 +44,7 @@
 #include "strata/kernels/glm_fast.hpp"
 #include "strata/kernels/sampler.hpp"
 #include "strata/platform/dedicated.hpp"
+#include "strata/platform/idle_gate.hpp"
 
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
@@ -3665,6 +3666,46 @@ struct Model::Impl {
             head_dev = L[(size_t) g.nl - 1].dev;
             d_dev = g.n_mtp > 0 ? L[(size_t) g.nl].dev : 0;
         }
+        // the dense weights (attention, the shared experts, the head) always live in VRAM - only the routed experts
+        // can go to RAM, the CPU lane or the disk - so a GPU whose free memory cannot hold its layers' dense weights
+        // cannot run them: said here, before anything loads, instead of a cudaMalloc failure part way in (Maya-XS on
+        // an 8 GB card: 8.46 GB of dense weights).  A device with layers of a tensor parallel group holds a part of
+        // them, so only the devices whose layers are whole are checked.
+        for (size_t di = 0; di < devs.size(); ++di) {
+            double need = di == (size_t) head_dev ? (double) head_b : 0.0;
+            int first = -1, last = -1;
+            bool whole = true;
+            for (const Layer& l : L) {
+                if (l.dev != (int) di) continue;
+                whole = whole && groups[(size_t) l.grp].mem.size() == 1;
+                need += (double) l.dense_bytes;
+                if (!l.mtp) {
+                    if (first < 0) first = l.il;
+                    last = l.il;
+                }
+            }
+            const Dev& d = devs[di];
+            const double room = (double) d.free0 - (double) ((size_t) o.reserve_mib << 20);
+            if (!whole || need <= 0 || need <= room) continue;
+            char msg[1024];
+            std::snprintf(msg, sizeof msg,
+                          "CUDA%d has %.2f GB free of %.2f GB, but the dense weights of %s%s need %.2f GB on it "
+                          "(attention, shared experts%s): they always stay in VRAM - the CPU lane and --vram-experts "
+                          "move only the routed experts. To run it: %s, or more GPUs (the layers are split across "
+                          "them), or close other programs using this GPU",
+                          d.id, (double) d.free0 / 1e9, (double) d.total / 1e9,
+                          first < 0 ? "the drafter"
+                                    : ("layers " + std::to_string(first) + "-" + std::to_string(last)).c_str(),
+                          di == (size_t) head_dev ? " and the head" : "", need / 1e9,
+                          di == (size_t) head_dev ? ", the output head" : "",
+                          (devs.size() == 1 ? "a GPU with about " +
+                                                  std::to_string((int) std::ceil((need + 2.5e9) / 1e9)) +
+                                                  " GB of VRAM or more"
+                                            : std::string("GPUs with more free VRAM"))
+                              .c_str());
+            err = msg;
+            return false;
+        }
         // the groups' members: copies of each layer's device state, a member's part of an expert
         for (Layer& l : L) {
             l.ff0 = 0;
@@ -4712,19 +4753,20 @@ struct Model::Impl {
     }
 
     // this device's host-to-device link (bytes a second): 32 MB from pinned memory, the best of three (~10 ms on
-    // PCIe 3 x16), once a device; 0: not measured
+    // PCIe 3 x16), once a device; 0: not measured.  The copies and their events on the legacy stream, as the
+    // ordinary load copies: timed on a stream of their own (made for it, destroyed after) they left decode ~20%
+    // slower for the whole run on 2x CMP 170HX (PCIe Gen2), though nothing used that stream again (#609)
     std::map<int, double> link_bw;
     double link_h2d(Dev& d) {
         if (auto it = link_bw.find(d.id); it != link_bw.end()) return it->second;
         const size_t nb = (size_t) 32 << 20;
         void* h = nullptr;
         void* v = nullptr;
-        cudaStream_t s = nullptr;
+        const cudaStream_t s = 0;   // (the legacy stream)
         cudaEvent_t e0 = nullptr, e1 = nullptr;
         double best = 0;
         cudaSetDevice(d.id);
         if (cudaHostAlloc(&h, nb, cudaHostAllocPortable) == cudaSuccess && cudaMalloc(&v, nb) == cudaSuccess &&
-            cudaStreamCreateWithFlags(&s, cudaStreamNonBlocking) == cudaSuccess &&
             cudaEventCreate(&e0) == cudaSuccess && cudaEventCreate(&e1) == cudaSuccess) {
             std::memset(h, 0, nb);
             for (int rep = 0; rep < 4; ++rep) {
@@ -4738,7 +4780,6 @@ struct Model::Impl {
         }
         if (e0) cudaEventDestroy(e0);
         if (e1) cudaEventDestroy(e1);
-        if (s) cudaStreamDestroy(s);
         if (v) cudaFree(v);
         if (h) cudaFreeHost(h);
         cudaGetLastError();
@@ -13509,16 +13550,55 @@ struct Model::Impl {
         unsigned next = 1;
         rtrace_open();
         auto last = std::chrono::steady_clock::now();
+        // Idle (through a prompt, between requests) the thread backs off in stages instead of waking every 20 us for
+        // good - a core of a server busy enough to show in `top` while nothing ran (issue #685).  A decode's routes
+        // come ~1 ms apart, so it spins all through one.  After STRATA_DS4_SERVICE_IDLE_MS (200; 0 = the old
+        // 2 ms spin and 20 us sleeps always) without a route it polls every 0.1 ms, after 10x that every 2 ms, and
+        // after STRATA_DS4_SERVICE_DEEP_S (60; 0 = never) of quiet it sleeps on the idle gate, STRATA_DS4_SERVICE_DEEP_MS
+        // (100) at a time: the thread that reads the engine's input pokes the gate at each line, so the next request
+        // finds it awake (strata/platform/idle_gate.hpp).  The first route after a quiet spell is answered up to one
+        // sleep later, as the GLM path's service thread (src/core/glm_fast_path.cu) already does.
+        static const int kIdleMs = [] {
+            const char* v = ds4_env("DS4_SERVICE_IDLE_MS");
+            return v ? std::max(0, std::atoi(v)) : 200;
+        }();
+        static const int kDeepS = [] {
+            const char* v = ds4_env("DS4_SERVICE_DEEP_S");
+            return v ? std::max(0, std::atoi(v)) : 60;
+        }();
+        static const int kDeepMs = [] {
+            const char* v = ds4_env("DS4_SERVICE_DEEP_MS");
+            return v ? std::max(1, std::atoi(v)) : 100;
+        }();
+        strata::platform::IdleGate& gate = strata::platform::idle_gate();
+        uint64_t gate_seen = 0;
+        bool deep = false;
         std::vector<Ent> ents, hents;
         std::vector<std::pair<int, int>> hpicks;   // (expert, t * kPicks + i), the helper's
         while (!quit.load(std::memory_order_relaxed)) {
+            if (deep) gate_seen = gate.epoch();   // (before the look at the ring: a poke after it ends the sleep at once)
             Req& r = reqs[next % kRing];
             if (*(volatile unsigned*) &r.seq != next) {
+                const auto quiet = std::chrono::steady_clock::now() - last;
+                if (kIdleMs > 0 && quiet > std::chrono::milliseconds(kIdleMs)) {
+                    if (kDeepS > 0 && quiet > std::chrono::seconds(kDeepS)) {
+                        deep = true;
+                        if (gate.sleep(kDeepMs, gate_seen)) {   // the engine was written to: awake, as after a route
+                            deep = false;
+                            last = std::chrono::steady_clock::now();
+                        }
+                    } else if (quiet > std::chrono::milliseconds(10 * (int64_t) kIdleMs)) {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+                    } else {
+                        std::this_thread::sleep_for(std::chrono::microseconds(100));
+                    }
+                    continue;
+                }
                 cpu_relax();
-                if (std::chrono::steady_clock::now() - last > std::chrono::milliseconds(2))
-                    std::this_thread::sleep_for(std::chrono::microseconds(20));
+                if (quiet > std::chrono::milliseconds(2)) std::this_thread::sleep_for(std::chrono::microseconds(20));
                 continue;
             }
+            deep = false;
             std::atomic_thread_fence(std::memory_order_acquire);
             const int li = layer_of[next % kRing].load(std::memory_order_acquire);
             Resp& rp = resps[next % kRing];

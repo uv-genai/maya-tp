@@ -1,0 +1,14 @@
+[
+  {
+    "prompt": "technical",
+    "records": 8,
+    "model_pick_differences": 0,
+    "binary_md5": "bc4e90a607b87fe609398fbdba0fb98c"
+  },
+  {
+    "prompt": "code",
+    "records": 8,
+    "model_pick_differences": 0,
+    "binary_md5": "bc4e90a607b87fe609398fbdba0fb98c"
+  }
+]

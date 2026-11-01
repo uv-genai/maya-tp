@@ -1,0 +1,37 @@
+Test project /home/ugo/software/project-maya-upstream-review/build-hip
+      Start   1: ds4_path_policy_test
+ 1/16 Test   #1: ds4_path_policy_test .............   Passed    0.00 sec
+      Start   2: ds4_prefill_stats_test
+ 2/16 Test   #2: ds4_prefill_stats_test ...........   Passed    0.00 sec
+      Start   7: ds4_logprobs_test
+ 3/16 Test   #7: ds4_logprobs_test ................   Passed    0.00 sec
+      Start   9: tp_partition_test
+ 4/16 Test   #9: tp_partition_test ................   Passed    0.00 sec
+      Start  10: tp_collective_test
+ 5/16 Test  #10: tp_collective_test ...............   Passed    0.00 sec
+      Start  11: tp_context_test
+ 6/16 Test  #11: tp_context_test ..................   Passed    0.03 sec
+      Start  12: tp_slice_test
+ 7/16 Test  #12: tp_slice_test ....................   Passed    0.00 sec
+      Start  15: ds4_multi_attn_plan_test
+ 8/16 Test  #15: ds4_multi_attn_plan_test .........   Passed    0.07 sec
+      Start  16: ds4_prompt_mem_test
+ 9/16 Test  #16: ds4_prompt_mem_test ..............   Passed    0.00 sec
+      Start  17: hipblaslt_table_list_test
+10/16 Test  #17: hipblaslt_table_list_test ........   Passed    0.00 sec
+      Start  18: env_report_test
+11/16 Test  #18: env_report_test ..................   Passed    0.00 sec
+      Start  19: idle_gate_test
+12/16 Test  #19: idle_gate_test ...................   Passed    0.32 sec
+      Start  70: glm_memory_test
+13/16 Test  #70: glm_memory_test ..................   Passed    0.01 sec
+      Start  96: draft_policy_test
+14/16 Test  #96: draft_policy_test ................   Passed    0.00 sec
+      Start  97: draft_cost_test
+15/16 Test  #97: draft_cost_test ..................   Passed    0.02 sec
+      Start 115: ds4_store_test
+16/16 Test #115: ds4_store_test ...................   Passed    0.02 sec
+
+100% tests passed out of 16
+
+Total Test time (real) =   0.50 sec

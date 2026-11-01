@@ -1,0 +1,112 @@
+{
+  "baseline_md5": "a6170c07503e139d73789184d9a93971",
+  "candidate_md5": "d8b4252a17fc09623ef0677051ee1a47",
+  "order": [
+    "candidate",
+    "baseline"
+  ],
+  "warmup": "first full1K/4K/8K cycle retained in raw data and excluded from medians",
+  "pairs": [
+    {
+      "trial": 0,
+      "prompt_tokens": 990,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 1,
+      "prompt_tokens": 4062,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 2,
+      "prompt_tokens": 8158,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 3,
+      "prompt_tokens": 990,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 4,
+      "prompt_tokens": 4062,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 5,
+      "prompt_tokens": 8158,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 6,
+      "prompt_tokens": 990,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 7,
+      "prompt_tokens": 4062,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 8,
+      "prompt_tokens": 8158,
+      "messages_equal": true,
+      "usage_equal": true
+    }
+  ],
+  "summary": [
+    {
+      "repeats": 960,
+      "warm_samples_per_arm": 2,
+      "baseline_prompt_ms": 3580.8,
+      "candidate_prompt_ms": 3587.2,
+      "throughput_delta_percent": -0.1784121320249632,
+      "baseline_samples_ms": [
+        3602.3,
+        3559.3
+      ],
+      "candidate_samples_ms": [
+        3592.8,
+        3581.6
+      ]
+    },
+    {
+      "repeats": 4032,
+      "warm_samples_per_arm": 2,
+      "baseline_prompt_ms": 12107.7,
+      "candidate_prompt_ms": 12070.95,
+      "throughput_delta_percent": 0.3044499397313327,
+      "baseline_samples_ms": [
+        12140.0,
+        12075.4
+      ],
+      "candidate_samples_ms": [
+        12013.4,
+        12128.5
+      ]
+    },
+    {
+      "repeats": 8128,
+      "warm_samples_per_arm": 2,
+      "baseline_prompt_ms": 23420.85,
+      "candidate_prompt_ms": 23058.0,
+      "throughput_delta_percent": 1.573640385115782,
+      "baseline_samples_ms": [
+        23431.8,
+        23409.9
+      ],
+      "candidate_samples_ms": [
+        22902.7,
+        23213.3
+      ]
+    }
+  ]
+}

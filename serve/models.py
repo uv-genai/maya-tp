@@ -25,6 +25,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+import maya_names  # noqa: E402
 import maya_quants  # noqa: E402  (tools/) the quants' names users see, and each config's family
 
 SWITCH_FILE = ".maya-switch.json"           # the server's note to maya.py: start this config next (a switch)
@@ -276,7 +277,7 @@ def settings_of(cfg: dict) -> dict:
         return out
     if family(cfg) == "qwen":
         ec, pf = flag(args, "--expert-cache", "auto"), flag(args, "--prefill", "auto")
-        ram = env.get("MAYA_EXPERT_RAM_GB")
+        ram = maya_names.lookup(env, "MAYA_EXPERT_RAM_GB")
         out.update(images=False, reserve_mib=_int(flag(args, "--vram-reserve-mib")),
                    draft="mtp" if flag(args, "--mtp") and flag(args, "--mtp-max-t") != "1" else "none",
                    expert_cache=None if ec == "auto" else _int(ec), prefill=None if pf == "auto" else _int(pf),
@@ -311,7 +312,7 @@ def glm_streams(cfg: dict) -> bool:
     if kvs is not None:
         return kvs != "off"
     return (_int(flag(args, "--kv-resident"), 0) or 0) > 0 or \
-        (_int(env.get("MAYA_GLM_KV_RESIDENT") or env.get("STRATA_GLM_KV_RESIDENT"), 0) or 0) > 0
+        (_int(maya_names.lookup(env, "MAYA_GLM_KV_RESIDENT"), 0) or 0) > 0
 
 
 def _num(s: dict, key: str, lo: int, hi: int, what: str, none_ok: bool = True):
@@ -408,9 +409,9 @@ def apply(cfg: dict, settings: dict) -> dict:
         args = set_flag(args, "--kv", kv) if kv != "fp16" or "--kv" in args else args
         ram = _num(s, "ram_gb", 0, 4096, "Experts in RAM (GB)")
         env2 = dict(out.get("env") or {})
-        if ram is None:
-            env2.pop("MAYA_EXPERT_RAM_GB", None)
-        else:
+        for name in maya_names.both_names("MAYA_EXPERT_RAM_GB"):
+            env2.pop(name, None)
+        if ram is not None:
             env2["MAYA_EXPERT_RAM_GB"] = str(ram)
         if env2:
             out["env"] = env2

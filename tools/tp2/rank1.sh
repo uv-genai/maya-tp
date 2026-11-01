@@ -36,7 +36,13 @@ while IFS= read -r -d '' setting; do
   key="${setting%%=*}"
   [[ "$key" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] || { echo "invalid config env key: $key" >&2; exit 1; }
   export "$setting"
-done < <(jq -j '(.env // {}) | to_entries[] | .key, "=", (.value | tostring), "\u0000"' "$MAYA_CONFIG")
+done < <(jq -j '(.env // {}) | to_entries | sort_by(.key | startswith("MAYA_")) |
+  reduce .[] as $e ({};
+    ($e.key | if startswith("MAYA_") then ltrimstr("MAYA_")
+      elif startswith("STRATA_") then ltrimstr("STRATA_") else null end) as $suffix |
+    if $suffix == null then .[$e.key] = ($e.value | tostring)
+    else .["MAYA_" + $suffix] = ($e.value | tostring) | .["STRATA_" + $suffix] = ($e.value | tostring) end) |
+  to_entries[] | .key, "=", .value, "\u0000"' "$MAYA_CONFIG")
 
 ENGINE="${ENGINE:-$ROOT/build-hip/maya}"
 BOOTSTRAP_HOST="${BOOTSTRAP_HOST:-192.168.1.22}"

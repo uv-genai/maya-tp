@@ -6,6 +6,8 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.42 integration** (#61): idle request gates with TP2 worker wake-up, consistent environment aliases on both ranks, GLM automatic chunk search correction and applicable DeepSeek/MiniMax guards. Reject unmirrored TP2 vision/lending/scoring before state changes (#62). Vision enablement and same-host multi-GPU additions remain deferred. Paired state/fidelity/performance gates pass; reduced default idle polling is measured on gfx1151.
+
 - **Upstream v1.1.41 integration** (#55): retain applicable gfx1151 kernels/CPU rows, parser/loop, model-context and timing fixes with conservative TP2 defaults. Finish each mirrored prefill call before cancellation/reset (#59), reject unpaired load/unload/automatic restarts (#56), and bound loop-guard continuations by the client output limit (#57). Preserve NextN/MTP/RDMA/tuning and owned docs; unsupported platforms/local multi-GPU additions are excluded. S/M/L fidelity and state gates pass; no new performance claim, transient Maya-L timing remains tracked in #60.
 
 - **Upstream v1.1.40 integration** (#50): context/dashboard controls, HTTP request handling and update serialization, download recovery, and the opt-in DeepSeek tail-cost estimate. Exclude the Metal backend; preserve GLM TP2/MTP engine, tuning and owned docs.

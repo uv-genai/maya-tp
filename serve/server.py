@@ -1885,6 +1885,17 @@ def engine_args(cfg: dict) -> list[str]:
     return args
 
 
+def vision_config(cfg: dict):
+    """Choose the encoder before measurement/start; the engine takes the last repeated CLI option."""
+    vcfg = cfg.get("vision") or None
+    args = engine_args(cfg)
+    world = next((args[i + 1] for i in range(len(args) - 2, -1, -1) if args[i] == "--tp-world-size"), "1")
+    if vcfg and int(world) > 1:
+        print("[maya] TP2 images: OFF until RDMA embedding synchronization is implemented", flush=True)
+        return None
+    return vcfg
+
+
 def child_env(cfg: dict) -> dict:
     """The engine's environment: the CUDA libraries setup installed (pip's nvidia packages, or the toolkit that
     compiled it) first on the library search path."""
@@ -1894,8 +1905,8 @@ def child_env(cfg: dict) -> dict:
     elif gpu_list(cfg):   # issue #51: the GPU(s) to run on, numbered as nvidia-smi does; CUDA's
         env["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"      # own default order (fastest first) can number the cards otherwise
         env["CUDA_VISIBLE_DEVICES"] = ",".join(str(i) for i in gpu_list(cfg))
-    for k, v in (cfg.get("env") or {}).items():      # engine settings the config carries (AMD: the GEMM tuning table)
-        env[str(k)] = str(v)
+    # Config settings reach engines under both names; MAYA wins within the config.
+    maya_names.export_env(env, cfg.get("env"))
     dirs = [d for d in cfg.get("lib_dirs") or [] if Path(d).is_dir()]
     if dirs:
         var = "PATH" if os.name == "nt" else "LD_LIBRARY_PATH"
@@ -2629,10 +2640,17 @@ class Service:
                                                     "prefill_tok_s_mean": self._prefill_tok_s_mean()},
                                        gpu_index=int(getattr(self, "gpu_index", 0) or 0),
                                        gpu_indices=getattr(self, "gpu_indices", None),
-                                       amd=getattr(self, "backend", None) == "hip")
+                                       amd=getattr(self, "backend", None) == "hip",
+                                       busy=lambda: bool(self.active or self.status.get("busy") or self.status.get("queued")))
             if isinstance(self.engine, StrataEngine):
                 self.engine.gpu_busy = self._gpu_busy     # the stall watchdog's third sign of work
         self.start_queue_watch()
+
+    def touch_telemetry(self) -> None:
+        """A request starts: the hardware sampler returns to its once-a-second pace now (an idle server samples slower)."""
+        tel = getattr(self, "telemetry", None)
+        if tel is not None:
+            tel.touch()
 
     def start_queue_watch(self):
         """A queue that has stopped moving says so, every QUEUE_WARN_S, with what holds the engine and what is waiting:
@@ -2926,6 +2944,8 @@ class Service:
         a note after that result (_tool_repeat); one it made again after TOOL_NUDGES such notes is blocked in this
         answer (kwargs["_blocked"] for run(), _block_suffixes); and in a conversation that repeats itself an answer
         may not end the turn short (kwargs["_blocked"]["_keep"], _keep_suffix)."""
+        if self.paired_restart_reason() and media_of(messages):
+            raise ValueError("TP2 images and videos are unavailable until RDMA embedding synchronization is implemented")
         on = self.loop_guard if guard is None else guard
         blocked = loop_guard.tool_blocked(messages) if on else {}
         looping = bool(blocked) or bool(on and loop_guard.echoes(messages))
@@ -3457,6 +3477,7 @@ class Service:
                     self.status["queued"] -= 1
             with self.status_lock:
                 self.active += 1
+                self.touch_telemetry()
                 hold[1] = True
                 self.status.update({k: mine[k] for k in ("busy", "phase", "prompt_tokens", "started", "tool", "tail",
                                                          "max_tokens") if k in mine},
@@ -3578,6 +3599,7 @@ class Service:
                                        started=time.time(), tool=None, tail="", max_tokens=max_new)
                     self.latest_request = stat
                     self.active += 1
+                    self.touch_telemetry()
                     counted = hold[1] = True
                     my_started = self.status["started"]
                     self.last_request_at = time.time()
@@ -5419,7 +5441,8 @@ class Server(ThreadingHTTPServer):
 
 SERVER_ENV = ("STRATA_ENGINE_STALL_S", "STRATA_REQUEST_QUIET_S", "STRATA_DRAIN_S", "STRATA_HTTP_BACKLOG",
               "STRATA_MAX_BODY_MIB", "STRATA_REQUEST_TIMEOUT_S", "STRATA_FAIR_SLICE_S", "STRATA_DS4_KEEP_THINKING",
-              "STRATA_SERVER_LOG", "STRATA_GLM_THINK_RESERVE", "STRATA_LOOP_GUARD") + RESPONSE_ENV_KEYS + \
+              "STRATA_SERVER_LOG", "STRATA_GLM_THINK_RESERVE", "STRATA_LOOP_GUARD", "STRATA_QUEUE_PING_S",
+              "STRATA_UPDATE_CHECK", "STRATA_PACK_TEMPLATE") + RESPONSE_ENV_KEYS + \
     tuple(maya_names.read_as(k) for k in ("MAYA_DS4_RESTORE_POINTS", "MAYA_DS4_RESTORE_TAIL"))
 
 
@@ -5430,7 +5453,7 @@ def apply_server_env(cfg: dict) -> None:
     for k in SERVER_ENV:
         v = (cfg.get("env") or {}).get(k)
         if v is not None:
-            os.environ[k] = str(v)
+            maya_names.export_env(os.environ, {k: v})      # (under both names: the server reads some by MAYA_ alone)
     ENGINE_STALL_S = _stall_seconds()
     REQUEST_QUIET_S = _quiet_seconds()
     DRAIN_S = _drain_seconds()
@@ -5805,7 +5828,7 @@ def main() -> int:
             pretty = ", ".join(f"{k}={v}" for k, v in sampling_defaults.items())
             print(f"[maya] sampling defaults from the {'config' if 'sampling' in cfg else 'model'}: {pretty}",
                   flush=True)
-        vcfg = cfg.get("vision") or None
+        vcfg = vision_config(cfg)  # No one-rank encoder measurement/start or expert-cache lending.
         vlog = (open(cfg["log"], "a", encoding="utf-8") if cfg.get("log") else None) if vcfg else None
         venv = dict(env)
         if vcfg and vcfg.get("gpu") and gpu_list(cfg) and cfg.get("backend") != "hip":

@@ -1,0 +1,30 @@
+[
+  {
+    "model": "Maya-M",
+    "rank": 0,
+    "warm": [
+      "tiers warm: 12384 experts (55.8 GB) in 29 s (1.90 GB/s)"
+    ]
+  },
+  {
+    "model": "Maya-M",
+    "rank": 1,
+    "warm": [
+      "tiers warm: 12384 experts (55.8 GB) in 39 s (1.42 GB/s)"
+    ]
+  },
+  {
+    "model": "Maya-L",
+    "rank": 0,
+    "warm": [
+      "tiers warm: 12384 experts (76.4 GB) in 731 s (0.10 GB/s)"
+    ]
+  },
+  {
+    "model": "Maya-L",
+    "rank": 1,
+    "warm": [
+      "tiers warm: 12384 experts (76.4 GB) in 219 s (0.35 GB/s)"
+    ]
+  }
+]

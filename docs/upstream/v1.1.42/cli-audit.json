@@ -1,0 +1,26 @@
+[
+  {
+    "mode": "simple",
+    "rank": 0,
+    "tokens": 32,
+    "matches_accepted41": true
+  },
+  {
+    "mode": "simple",
+    "rank": 1,
+    "tokens": 32,
+    "matches_accepted41": true
+  },
+  {
+    "mode": "mtp",
+    "rank": 0,
+    "tokens": 32,
+    "matches_accepted41": true
+  },
+  {
+    "mode": "mtp",
+    "rank": 1,
+    "tokens": 32,
+    "matches_accepted41": true
+  }
+]

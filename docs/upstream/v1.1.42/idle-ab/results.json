@@ -1,0 +1,272 @@
+[
+  {
+    "arm": "candidate",
+    "engine": "/home/ugo/software/project-maya-upstream-review/build-hip/maya",
+    "hashes": {
+      "rank0": "bc4e90a607b87fe609398fbdba0fb98c  /home/ugo/software/project-maya-upstream-review/build-hip/maya",
+      "rank1": "bc4e90a607b87fe609398fbdba0fb98c  /home/ugo/software/project-maya-upstream-review/build-hip/maya"
+    },
+    "settings": "normal defaults;65s quiet then10s sample",
+    "samples": [
+      {
+        "rank0": {
+          "pid": 273921,
+          "starttime": 13783624,
+          "cpu_ticks": 4856,
+          "clock_ticks": 100,
+          "clock": 137939.349925175,
+          "switches": {
+            "voluntary_ctxt_switches": 107953,
+            "nonvoluntary_ctxt_switches": 13152
+          }
+        },
+        "rank1": {
+          "pid": 2888458,
+          "starttime": 65261210,
+          "cpu_ticks": 4088,
+          "clock_ticks": 100,
+          "clock": 652715.586726053,
+          "switches": {
+            "voluntary_ctxt_switches": 105168,
+            "nonvoluntary_ctxt_switches": 20002
+          }
+        }
+      },
+      {
+        "rank0": {
+          "pid": 273921,
+          "starttime": 13783624,
+          "cpu_ticks": 4858,
+          "clock_ticks": 100,
+          "clock": 137949.58773227,
+          "switches": {
+            "voluntary_ctxt_switches": 108065,
+            "nonvoluntary_ctxt_switches": 13152
+          }
+        },
+        "rank1": {
+          "pid": 2888458,
+          "starttime": 65261210,
+          "cpu_ticks": 4088,
+          "clock_ticks": 100,
+          "clock": 652725.783457175,
+          "switches": {
+            "voluntary_ctxt_switches": 105270,
+            "nonvoluntary_ctxt_switches": 20003
+          }
+        }
+      }
+    ],
+    "metrics": {
+      "rank0": {
+        "elapsed_s": 10.237807095021708,
+        "cpu_percent_of_one_core": 0.195354335302189,
+        "voluntary_switches_per_second": 10.939842776922582,
+        "nonvoluntary_switches_per_second": 0.0
+      },
+      "rank1": {
+        "elapsed_s": 10.196731121977791,
+        "cpu_percent_of_one_core": 0.0,
+        "voluntary_switches_per_second": 10.003205809766978,
+        "nonvoluntary_switches_per_second": 0.09807064519379391
+      }
+    },
+    "followup": {
+      "response": {
+        "id": "chatcmpl-346c0cda246142f0b67adcb5",
+        "object": "chat.completion",
+        "created": 1793555887,
+        "model": "glm-5.3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "RDMA has low latency because it enables direct memory-to-memory data transfer between machines",
+              "reasoning_content": "The question asks me to explain in one sentence why RDMA (Remote Direct"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 24,
+          "completion_tokens": 32,
+          "total_tokens": 56,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 24,
+          "prompt_ms": 889.8,
+          "prompt_per_token_ms": 37.075,
+          "prompt_per_second": 27.0,
+          "predicted_n": 32,
+          "predicted_ms": 1235.0,
+          "predicted_per_token_ms": 38.594,
+          "predicted_per_second": 25.9,
+          "draft_n": 26,
+          "draft_n_accepted": 17
+        }
+      },
+      "health": {
+        "status": "ok",
+        "max_context": 32768,
+        "model": "glm-5.3-flash",
+        "max_text_file": 524288,
+        "model_label": "GLM-5.3 \u00b7 Maya-S",
+        "images": false,
+        "api_key": false,
+        "defaults": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "reasoning_effort": "max"
+        },
+        "version": "1.1.42",
+        "mcp_tools": false,
+        "unloaded": false,
+        "tp": {
+          "world_size": 2,
+          "rank": 0,
+          "peer": "up"
+        }
+      }
+    }
+  },
+  {
+    "arm": "baseline",
+    "engine": "/tmp/maya-upstream-v41-baseline/maya",
+    "hashes": {
+      "rank0": "a6170c07503e139d73789184d9a93971  /tmp/maya-upstream-v41-baseline/maya",
+      "rank1": "a6170c07503e139d73789184d9a93971  /tmp/maya-upstream-v41-baseline/maya"
+    },
+    "settings": "normal defaults;65s quiet then10s sample",
+    "samples": [
+      {
+        "rank0": {
+          "pid": 274254,
+          "starttime": 13795299,
+          "cpu_ticks": 3402,
+          "clock_ticks": 100,
+          "clock": 138042.379667,
+          "switches": {
+            "voluntary_ctxt_switches": 123785,
+            "nonvoluntary_ctxt_switches": 12306
+          }
+        },
+        "rank1": {
+          "pid": 2889066,
+          "starttime": 65272887,
+          "cpu_ticks": 4227,
+          "clock_ticks": 100,
+          "clock": 652818.590671807,
+          "switches": {
+            "voluntary_ctxt_switches": 124864,
+            "nonvoluntary_ctxt_switches": 23783
+          }
+        }
+      },
+      {
+        "rank0": {
+          "pid": 274254,
+          "starttime": 13795299,
+          "cpu_ticks": 3411,
+          "clock_ticks": 100,
+          "clock": 138052.624278894,
+          "switches": {
+            "voluntary_ctxt_switches": 128111,
+            "nonvoluntary_ctxt_switches": 12312
+          }
+        },
+        "rank1": {
+          "pid": 2889066,
+          "starttime": 65272887,
+          "cpu_ticks": 4235,
+          "clock_ticks": 100,
+          "clock": 652828.822763254,
+          "switches": {
+            "voluntary_ctxt_switches": 129243,
+            "nonvoluntary_ctxt_switches": 23793
+          }
+        }
+      }
+    ],
+    "metrics": {
+      "rank0": {
+        "elapsed_s": 10.24461189401336,
+        "cpu_percent_of_one_core": 0.878510586160841,
+        "voluntary_switches_per_second": 422.2707550813109,
+        "nonvoluntary_switches_per_second": 0.5856737241072273
+      },
+      "rank1": {
+        "elapsed_s": 10.232091447105631,
+        "cpu_percent_of_one_core": 0.7818538410603214,
+        "voluntary_switches_per_second": 427.96724625039343,
+        "nonvoluntary_switches_per_second": 0.9773173013254017
+      }
+    },
+    "followup": {
+      "response": {
+        "id": "chatcmpl-fbf9da9f67ed43359a121c53",
+        "object": "chat.completion",
+        "created": 1793555990,
+        "model": "glm-5.3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "RDMA has low latency because it enables direct memory-to-memory data transfer between machines",
+              "reasoning_content": "The question asks me to explain in one sentence why RDMA (Remote Direct"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 24,
+          "completion_tokens": 32,
+          "total_tokens": 56,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 24,
+          "prompt_ms": 758.2,
+          "prompt_per_token_ms": 31.592,
+          "prompt_per_second": 31.7,
+          "predicted_n": 32,
+          "predicted_ms": 1146.0,
+          "predicted_per_token_ms": 35.812,
+          "predicted_per_second": 27.9,
+          "draft_n": 26,
+          "draft_n_accepted": 17
+        }
+      },
+      "health": {
+        "status": "ok",
+        "max_context": 32768,
+        "model": "glm-5.3-flash",
+        "max_text_file": 524288,
+        "model_label": "GLM-5.3 \u00b7 Maya-S",
+        "images": false,
+        "api_key": false,
+        "defaults": {
+          "temperature": 1.0,
+          "top_p": 0.95,
+          "reasoning_effort": "max"
+        },
+        "version": "1.1.42",
+        "mcp_tools": false,
+        "unloaded": false,
+        "tp": {
+          "world_size": 2,
+          "rank": 0,
+          "peer": "up"
+        }
+      }
+    }
+  }
+]

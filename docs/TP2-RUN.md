@@ -41,7 +41,7 @@ rewrite `--glm-pack` (and `tokenizer` when set) to the selected pack. **Both hos
 tree** (index, dense weights, tokenizer, and the GGUF shards beside `pack/`).
 
 Both serve rank scripts apply the base config's `env` to their engines, including prefill
-sub-batches and hipBLASLt tuning. Config entries override inherited values, as on the server.
+sub-batches and hipBLASLt tuning. Config entries override inherited values, as on the server. Both aliases are exported; `MAYA_X` wins over `STRATA_X` when both are in the config.
 Keep those entries consistent on both hosts so a slower worker does not hold up every collective.
 The gfx1151 hipBLASLt 100401 table includes measured TP2 projection shapes. A controlled Maya-S
 comparison improved 1K/4K/8K prompt throughput by 32–37%; see the
@@ -403,3 +403,9 @@ ssh strix-halo-1.local '/tmp/tp_comm_rdma_test --rank 0 --bootstrap-port 18515 \
 A TP2 prompt cancellation completes the current mirrored prefill call on both ranks before resetting them. The client can disconnect immediately; the server drains that call before admitting another request. This can take as long as the current call, and avoids leaving one rank inside abandoned collectives. Cancelled-checkpoint restoration remains single-host-only, even with `MAYA_GLM_KEEP_CANCELLED=1`. Live regression: `tools/tp2/prefill_cancel.py` (both simple and MTP).
 
 Model load/unload, idle unload and automatic dead-engine restart are guarded under TP2, like context/current-model changes. Stop and relaunch both ranks with matching model/context options through the pair launcher. The single-host lifecycle APIs retain their normal behavior.
+
+## Unsupported local-only operations
+
+TP2 refuses images/videos before encoding or lending the expert cache. Direct `GENI`, `VLEND`, `VRECLAIM` and `LOGP` commands are rejected before state changes because no paired operation exists. A vision config is ignored for a TP2 launch, keeping text inference available without starting an encoder. RDMA embedding synchronization remains deferred in #16.
+
+To stress idle wake-up (#64), configure BOTH ranks with `MAYA_GLM_SERVICE_IDLE_MS=10`, `MAYA_GLM_SERVICE_DEEP_S=1`, `MAYA_GLM_SERVICE_DEEP_MS=3000`, then run `tools/tp2/regression_collectives.py --mode mtp --idle-seconds 3 --max-long-decode-ratio 4 --output /tmp/idle-wake.json`. The optional bound rejects repeated deep-sleep delays in decode after the long prefill; prefill time is excluded. Restore normal settings afterward. The regression keeps the ordinary correctness/reuse/stream/peer checks.

@@ -22,15 +22,39 @@ def request(base, body):
         raise RuntimeError(f'HTTP {error.code}: {error.read().decode()}') from error
 
 
+def validate_long_decode_latency(rows, maximum_ratio):
+    """Under exaggerated deep idle, a long prefill must not leave a service lane sleeping (#64).
+
+    Compare decode per output token, excluding the deliberately longer prefill. This is a gross
+    stall check; use the controlled benchmark for performance claims.
+    """
+    picked = {r['case']: r for r in rows}
+    def per_token(case):
+        t = picked[case]['timings']
+        assert t['predicted_n'] > 0 and t['predicted_ms'] > 0, t
+        return t['predicted_ms'] / t['predicted_n']
+    short = per_token('seven-draft-window')
+    long = per_token('multiple-prefill-chunks')
+    ratio = long / short
+    assert ratio <= maximum_ratio, f'long-prefill decode stalled: {long:.3f} vs {short:.3f} ms/token ({ratio:.2f}x)'
+    return {'short_ms_per_token': short, 'long_ms_per_token': long, 'ratio': ratio, 'maximum_ratio': maximum_ratio}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--url', default='http://192.168.1.22:18080')
     parser.add_argument('--mode', choices=('simple', 'mtp'), required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--idle-seconds', type=float, default=0,
+                        help='wait between requests to exercise deep-idle wake-up on both ranks')
+    parser.add_argument('--max-long-decode-ratio', type=float, default=0,
+                        help='optional long/short decode-ms-per-token bound (4 for the forced-idle regression)')
     args = parser.parse_args()
     results = []
 
     def chat(label, messages, limit, minimum_prompt=0, minimum_cache=0):
+        if args.idle_seconds > 0:
+            time.sleep(args.idle_seconds)
         started = time.monotonic()
         with request(args.url, dict(model='maya', messages=messages, max_tokens=limit, temperature=0)) as r:
             out = json.load(r)
@@ -90,6 +114,9 @@ def main():
     with urllib.request.urlopen(args.url + '/health', timeout=5) as r:
         health = json.load(r)
     assert health['tp']['world_size'] == 2 and health['tp']['peer'] == 'up', health
+    if args.max_long_decode_ratio > 0:
+        print('PASS idle latency: ' + json.dumps(validate_long_decode_latency(results, args.max_long_decode_ratio)),
+              flush=True)
     print('PASS: large prompts, reuse, stream, peer up ('+args.mode+')', flush=True)
 
 

@@ -16,6 +16,7 @@
 
 #include "strata/core/expert_cache.hpp"
 #include "strata/platform/env_alias.hpp"
+#include "strata/platform/idle_gate.hpp"
 #include "strata/platform/env_report.hpp"
 #include "strata/kernels/glm_fast.hpp"
 #include "strata/core/expert_source.hpp"
@@ -1310,6 +1311,7 @@ static int glm_pack_generate(const Options& o) {
                 }
             };
             while (getline_fd(l)) {
+                strata::platform::idle_poke();   // (the service threads asleep after a long quiet wake for this line)
                 if (!l.empty() && l.back() == '\r') l.pop_back();
                 if (l == "STOP") { stop_req.store(true); continue; }
                 if (l.rfind("STOP ", 0) == 0 || (l.rfind("PAUSE ", 0) == 0 && l != "PAUSE keep")) {
@@ -1924,6 +1926,8 @@ static int glm_pack_generate(const Options& o) {
                 ok = tp_comm->RecvControl(toks, (size_t) n * sizeof(int32_t), &e);
             }
         }
+        // Both service lanes can have gone idle during prefill or between MTP rounds (#64).
+        if (ok) strata::platform::idle_poke();
         if (!ok) {
             std::fprintf(stderr, "TP2 MTP wire: %s\n", e.c_str());
             tp_down(e.empty() ? "MTP wire failed" : e);
@@ -1956,6 +1960,7 @@ static int glm_pack_generate(const Options& o) {
         return sp;
     };
     const auto tp_send = [&](int32_t op, const int32_t* toks, int32_t n, int32_t next_token = -1) -> bool {
+        if (tp2) strata::platform::idle_poke();  // Wake rank0 before its matching model call too.
         if (!tp_mirror) return true;
         if (tp_pair_down) return false;
         const TpMirrorHdr h{op, n, next_token};
@@ -1985,6 +1990,7 @@ static int glm_pack_generate(const Options& o) {
     const auto tp_send_mtp = [&](int64_t max_new, const strata::kernels::SamplerParams& sq,
                                  int think_budget, int think_end, const std::vector<int64_t>& eos_ids,
                                  bool stop_eos) -> bool {
+        if (tp2) strata::platform::idle_poke();
         if (!tp_mirror) return true;
         TpMirrorHdr h{kTpMirrorMtp, (int32_t) max_new, 0};
         TpMtpSp s{};
@@ -4249,6 +4255,8 @@ static int glm_pack_generate(const Options& o) {
                 std::fprintf(stderr, "TP2 worker: bad instruction n=%d op=%d\n", h.n, h.op);
                 return 1;
             }
+            // Rank 1 has no stdin reader: mirrored requests must wake its CPU service too.
+            strata::platform::idle_poke();
             // MTP carries a POD sampler + optional history before any token vector.
             if (h.op == kTpMirrorMtp) {
                 TpMtpSp s{};
@@ -4650,6 +4658,13 @@ static int glm_pack_generate(const Options& o) {
         std::string cmd;
         ss >> cmd;
         if (cmd == "QUIT") break;
+        // These local-only commands have no peer operation or RDMA embedding path (#62).
+        // Refuse before file reads, cache lending, reset or any collective model call.
+        if (tp2 && (cmd == "GENI" || cmd == "VLEND" || cmd == "VRECLAIM" || cmd == "LOGP")) {
+            std::printf("ERR %s is unavailable under TP2; both ranks require a mirrored operation\n", cmd.c_str());
+            std::fflush(stdout);
+            continue;
+        }
         if (multi && !gens.empty() && (cmd == "VLEND" || cmd == "VRECLAIM" || cmd == "LOGP")) {
             std::printf("ERR %s needs the engine idle (%zu requests running)\n", cmd.c_str(), gens.size());
             continue;
@@ -7725,6 +7740,7 @@ int main(int argc, char** argv) {
                 }
             };
             while (getline_fd(l)) {
+                strata::platform::idle_poke();   // (the service threads asleep after a long quiet wake for this line)
                 if (!l.empty() && l.back() == '\r') l.pop_back();
                 if (l == "STOP") { stop_req.store(true); continue; }
                 std::lock_guard<std::mutex> lk(in_mu);

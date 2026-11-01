@@ -1,0 +1,20 @@
+{
+  "before_runtime": "d59ea06",
+  "fixed_runtime": "837a679",
+  "forced_settings": {
+    "idle_ms": 10,
+    "deep_s": 1,
+    "deep_ms": 3000
+  },
+  "prefill_tokens": 14550,
+  "before": {
+    "rejected": true,
+    "reason": "long-prefill decode stalled: 740.097 vs 60.391 ms/token (12.26x)"
+  },
+  "after": {
+    "short_ms_per_token": 61.45625,
+    "long_ms_per_token": 70.046875,
+    "ratio": 1.1397843994711685,
+    "maximum_ratio": 4
+  }
+}
