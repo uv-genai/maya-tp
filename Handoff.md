@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.29):37–45 handled;46 runtime COMPLETE.
-> No active batches. Final exact-head/PR81/mainCI pending, then production restore and final handoff.
+> Last updated:2026-11-02 · Sequential integration (§29.30):37–46 handled; runtime restored.
+> Source validation PASS. Review builds retained; production5a52 restored; final closeout status in77/36.
 
 ## 1. What we are building
 
@@ -1080,10 +1080,22 @@ Source5b13c83 merges3589d6f: malformedparameter/contentpartsfixes;78safechunkbou
 
 **ACTIVE22871** /tmp/maya-upstream-v46-live.sh output/tmp/maya-upstream-v46/: MTP7+simple state/large/reuse/stream/guards/real18Kcancel, thenfreshD2textparts20Kprefix+ordinary/MTPfollowups. No concurrentGPU/build/deploy. CPUpreflightOpenAItextpartsflattenstr, so directunitisolates80/liveAPIprovesformatcompatibility+policy, notindependent80A/B. Afterlivesuccess auditrounds/limits/cache,finalevidence/headCI/PR/mainCI,close77/78/80onlyaftermainPASS.79/75/68and33/42/46/52/54/60/11/16stayopen.
 
-Remote review5b13c83; protectedcanonical777userwork/daemon/YAMLuntouched. OwnreviewS/M/Lconfigsnow.exe review/build-hip/maya onBOTHhosts; enablesproductionoriginal5a52restoreafterwhole46taskwithoutmixingreviewserverwitholdcanonicalengine. BothreviewDS4binaries51749; GLM5paths b398 matchedbeforelive. Finalproductionrestore/handoffs/index stillpending.
+Remote review5b13c83; protectedcanonical777userwork/daemon/YAMLuntouched. OwnreviewSconfigsnow.exe review/build-hip/maya onBOTHhosts (M/Lvalidationusedexplicittransientconfigs); enablesproductionoriginal5a52restoreafterwhole46taskwithoutmixingreviewserverwitholdcanonicalengine. BothreviewDS4binaries51749; GLM5paths b398 matchedbeforelive. Finalproductionrestore/handoffs/index stillpending.
 
 ### 29.29 v1.1.46 runtime complete; final CI/merge/main pending
 
 22871EXIT0.605serve11skip/679tools33skip/HIPmap,99focused,18host,HIPDS4buildPASS;DS4GPUimage92096…unchanged,newhostbinary51749e86; GLMb398/GPU958…exactprior. MTP7+ordinarylarge/reuse/stream/guards/idle andtrue18Kprefillcancel/cache0retry/followup/peerPASS;132rounds/8asymretriesmatch. ForcedidleMTP88.92/67.99ms,ordinary42.87/41.14retained60open,nospeedclaim. FreshtextpartsAPI20021initial/cache0→20020cached/collapsed0,ordinary/MTP64followupPASS. Directunitisolates80;APIflattensalltextpartsstr,notindependent80A/B.
 
 Alltargetedruntimecomplete, bothengines/serverstopped, noactivebatches/builds. FinalexactheadCI/PR81merge/postmainCI pending. Close78/80aftermainPASS;77coversfinalproductionrestore/handoffs/indextoo,closeonlywholeobjectivecomplete.79capmeasurement(default0)/75tail/68WMMAremainOPENwith33/42/46/52/54/60/11/16. Protectedcanonical777userwork/daemon/YAMLpreserved. Reviewconfigsown.exepathsvalidated; after46accepted saveb398+5174baselinesBOTHhosts, restoreoriginal5a52ONLYcanonicalGLMpaths+remote/tmpmaya-tp2whilekeepingreviewGLMb398/DS45174. Neveroverwriteprotectedremote source/YAML. Finalrestoration/hash/source/GHancestry/CI/handoffchecksstillneeded.
+
+46PR81merged1139fa27d7731941b187de57093c3abe424a5e1f afterfinalb5e46b2 CI41350489382/41350494526PASS. Post-mainCI41351082604pending. All10requestedupstream37–46ancestorsofmain; legacyforktagv1.1.42=64719953312df98c9fdf53a10198c106cb195345 unchanged,VERSION1.1.42,norelease/tagcreated. AftermainPASSmark46accepted/close78/80;77stillcoversrestore/finalhandoff/index. Protectedpre-restoresnapshot /tmp/maya-upstream-v46/protected-before-restore.json records777HEAD/userdiffsha/config/backups/YAML/daemon; compareexactafterrestoringonlycanonicalGLMpathsfrom5a52original. Reviewb398/DS45174kept,ownreviewconfigs.exe pathsalreadyvalidated. NoactiveGPU/tests.
+
+### 29.30 Full requested integration and production restoration complete
+
+Allrequestedupstream37–46areancestorsofmain. Final46PR81 **1139fa27d7731941b187de57093c3abe424a5e1f**, finalb5e46b2 CI **41350489382/41350494526 PASS**, post-main **41351082604 PASS**.46accepted;78/80closed. Detailedcompletion **docs/upstream/COMPLETION-2026-11-02.md** andcompletion-2026-11-02/completion.json. All §29.29gatespass; noactiveintegrationGPU/build/testbatches.79capmeasurements(default0),75functional45tailport,68fullDS4WMMAfailure stayOPEN alongwith33/42/46/52/54/60/11/16. No newrelease/tag; VERSION1.1.42,legacyv42tag6471995unchanged,futuretp-v*.
+
+**ProductionGLM original5a52cd27167523b6ea4b0f0bde93f503RESTORED** at localcanonicalbuild-hip/maya,remotecanonicalbuild-hip/maya,andremote/tmp/maya-tp2 usinghashguards+atomicreplacement. BOTHreviewGLMb398d4a0711430edd6a28b95264c7293 andDS451749e860763aea34847b183de95a933 retained. Accepted46backupsBOTHhosts /tmp/maya-upstream-v46-baseline/maya andmaya-ds4-accepted. Localmaya-ds4inthatbaselinefolderisolderpre46controlcd177,NOTaccepted46hostbuild. Bothreviewsourceworktreescanfollowfinalmain docswithoutrebuildingunchangedCXXcode(GLM6a2f,DS4host5b13).
+
+Protectedremote777cc92HEAD/userdiffs/stageddiffs/modelconfigs/backups/YAML/daemon175392exactlymatchbefore/afterrestoration; rawsundercompletion-2026-11-02/. YAMLsha c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20,6entries/Lcontext524288unchanged. No canonicalremote sourcepull/reset/rebuild. Engines/testserverstopped,llama-swapreadytoloadproductiononrequest. **PermanentreadyreviewconfigisSonly**, .exe ownreviewbinaryonbothhosts; M/Lpastvalidationusedexplicittransientconfigs. FutureM/Lreviewlaunchmustselectsameexplicitmodel/pack/configonbothrankswith.exe review/build-hip/maya,notrestoredcanonicalexe. EarlierS/M/Lconfigurationwordingcorrected; metadataalwaysshowedSonly.
+
+Finalcloseoutcheck: verifyCIonfinaldocumentationcheckpointandconfirm77/36closed; latestSHA/run/outcomepostedthere. IfalreadyclosedandCIpassed,nothingremainsfromthisintegrationtask. No furtherGPUtests/tagmergesrequiredwithoutnewrequest. Finalsource/operationsworkiscomplete; this checkpointprocedureisstableaftercloseout. Preserveallreview/control/failedrawartifactsandoriginalbackups.

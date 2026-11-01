@@ -1,0 +1,8 @@
+{
+  "equal": true,
+  "head": "777cc92eeab582688c54ae78fcd214427453ccc4",
+  "yaml_sha256": "c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20",
+  "daemon_pid": 175392,
+  "source_user_diffs_configs_backups": "exactlyequal before/afterproductionrestore",
+  "snapshot_timing": "snapshots bracket final production restoration, after integration runtime validation"
+}

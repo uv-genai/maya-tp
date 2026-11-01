@@ -1,0 +1,161 @@
+{
+  "work": "Requested sequential upstream37\u201346integration and production-runtime restoration",
+  "integration_merge": "1139fa27d7731941b187de57093c3abe424a5e1f",
+  "final_validation_head": "b5e46b21e8dd855563dae54d3ddd9897bc9b723a",
+  "final_validation_ci": [
+    41350489382,
+    41350494526
+  ],
+  "post_merge_main_ci": 41351082604,
+  "tags": [
+    {
+      "tag": "v1.1.37",
+      "upstream": "7ee8f2777c754229605a8c19ca985cbb68540419",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.37.md"
+    },
+    {
+      "tag": "v1.1.38",
+      "upstream": "cf6472cc84489765791ad97bb55b395e8f442088",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.38.md"
+    },
+    {
+      "tag": "v1.1.39",
+      "upstream": "376b4b87402bc992af7b4a8dec089ef7cba7801c",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.39.md"
+    },
+    {
+      "tag": "v1.1.40",
+      "upstream": "cbaaec5d70fde2730e251dec6b418e4b454c01bd",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.40.md"
+    },
+    {
+      "tag": "v1.1.41",
+      "upstream": "171077787036ccc2784250ca644760f654e8d4a3",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.41.md"
+    },
+    {
+      "tag": "v1.1.42",
+      "upstream": "cd48762b6d4888205c130238dbc0c7f7904993cf",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.42.md"
+    },
+    {
+      "tag": "v1.1.43",
+      "upstream": "acdab34bd58eec957715392a1d822777c3c579c3",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.43.md"
+    },
+    {
+      "tag": "v1.1.44",
+      "upstream": "5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.44.md"
+    },
+    {
+      "tag": "v1.1.45",
+      "upstream": "6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.45.md"
+    },
+    {
+      "tag": "v1.1.46",
+      "upstream": "3589d6f12a3f77e813b184b51a586f8fc3de2185",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.46.md"
+    }
+  ],
+  "fork_version": "1.1.42",
+  "legacy_fork_tag_commit": "64719953312df98c9fdf53a10198c106cb195345",
+  "new_release_or_tag_published": false,
+  "future_fork_tag_prefix": "tp-v",
+  "runtime": {
+    "remote": {
+      "role": "remote",
+      "mode": "restore",
+      "production_targets": [
+        {
+          "source": "/tmp/maya-upstream-baseline-2026-11-01/maya-build",
+          "target": "/home/ugo/software/project-maya/build-hip/maya",
+          "before": "b398d4a0711430edd6a28b95264c7293",
+          "after": "5a52cd27167523b6ea4b0f0bde93f503"
+        },
+        {
+          "source": "/tmp/maya-upstream-baseline-2026-11-01/maya-tmp",
+          "target": "/tmp/maya-tp2",
+          "before": "b398d4a0711430edd6a28b95264c7293",
+          "after": "5a52cd27167523b6ea4b0f0bde93f503"
+        }
+      ],
+      "review_glm": "b398d4a0711430edd6a28b95264c7293",
+      "review_ds4": "51749e860763aea34847b183de95a933",
+      "review_configs_using_own_binary": [
+        "maya-maya-s-v2-iq2_xxs-hip.json"
+      ]
+    },
+    "local": {
+      "role": "local",
+      "mode": "restore",
+      "production_targets": [
+        {
+          "source": "/tmp/maya-upstream-baseline-2026-11-01/maya",
+          "target": "/home/ugo/software/project-maya/build-hip/maya",
+          "before": "b398d4a0711430edd6a28b95264c7293",
+          "after": "5a52cd27167523b6ea4b0f0bde93f503"
+        }
+      ],
+      "review_glm": "b398d4a0711430edd6a28b95264c7293",
+      "review_ds4": "51749e860763aea34847b183de95a933",
+      "review_configs_using_own_binary": [
+        "maya-maya-s-v2-iq2_xxs-hip.json"
+      ]
+    }
+  },
+  "protected_remote": {
+    "head": "777cc92eeab582688c54ae78fcd214427453ccc4",
+    "status": " M maya.py\n M tools/hip/gfx1151-glm-hipblaslt-100401.txt\n M tools/tp2/rank1.sh\n?? maya-maya-l-hip.json.bak-20261031-191927\n?? maya-maya-l-hip.json.bak-20261031-192046\n",
+    "working_diff_sha256": "2ace4f2cf5a732f575fd53246c3912ab359551c5683a72cdf9daf66b0b5198fd",
+    "staged_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "files": {
+      "maya.py": "bc213a158f2e8565cd9989f55bfd5967a55ceb6105f58214cb40114012a6e0ae",
+      "tools/hip/gfx1151-glm-hipblaslt-100401.txt": "fb0f97b615ccc728d51027f168e3787672057bb3fc674f5c460da68627ba5887",
+      "tools/tp2/rank1.sh": "bb16ef480ded479f12e4ddeb7966cf7c6656fba1c8f7180b09b8411801ada452",
+      "maya-maya-s-v2-iq2_xxs-hip.json": "329964acf86d4bbb9e8ab88f3206c4a074e84d0bf9af80f569f8dceff2856745",
+      "maya-maya-l-hip.json": "b7e74656fd3539928afd7ca9adb7addcca5b56f85a18450b4d4d0a0218a01ac6",
+      "maya-maya-l-hip.json.bak-20261031-191927": "d8dfc7ae0af775bf2c2f38b9d25a5c258fc779b2427fc4c0dec65aab9ed25894",
+      "maya-maya-l-hip.json.bak-20261031-192046": "48ba3f2213ca4adb950bac8c32d53f58a66d76eae275bcf06abbe636dbaa9ebc"
+    },
+    "yaml_sha256": "c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20",
+    "daemon_pid": 175392,
+    "daemon_name": "llama-swap"
+  },
+  "protected_snapshot_comparison": "exact before/after production restoration; snapshots taken after runtime integration validation",
+  "glm_code_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
+  "ds4_host_code_source": "5b13c83",
+  "open_issues": [
+    79,
+    75,
+    68,
+    33,
+    42,
+    46,
+    52,
+    54,
+    60,
+    11,
+    16
+  ],
+  "scope_notes": [
+    "v45functional DS4tail fix explicitly deferred75; ancestry/review accepted, no partialport",
+    "DS4full WMMA GPU suite still fails under68; unchanged control/kernel image",
+    "DS4gfx1151cap default0 pending79; no fork5%speedup claim",
+    "Streamedfetch46,vision16,multiseq11 remain deferred/gated",
+    "DirectCPUregression isolates textpartscounter80; OpenAItext-onlyparts flatten, liveprobe verifies format/prefixendtoend",
+    "Permanent self-contained Sreviewconfig exists on both hosts; M/L tests used explicit transient configs"
+  ],
+  "closeout": "Final documentation-checkpoint CI and77/36closure recorded in GitHub issue77"
+}

@@ -1,0 +1,18 @@
+{
+  "head": "777cc92eeab582688c54ae78fcd214427453ccc4",
+  "status": " M maya.py\n M tools/hip/gfx1151-glm-hipblaslt-100401.txt\n M tools/tp2/rank1.sh\n?? maya-maya-l-hip.json.bak-20261031-191927\n?? maya-maya-l-hip.json.bak-20261031-192046\n",
+  "working_diff_sha256": "2ace4f2cf5a732f575fd53246c3912ab359551c5683a72cdf9daf66b0b5198fd",
+  "staged_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "files": {
+    "maya.py": "bc213a158f2e8565cd9989f55bfd5967a55ceb6105f58214cb40114012a6e0ae",
+    "tools/hip/gfx1151-glm-hipblaslt-100401.txt": "fb0f97b615ccc728d51027f168e3787672057bb3fc674f5c460da68627ba5887",
+    "tools/tp2/rank1.sh": "bb16ef480ded479f12e4ddeb7966cf7c6656fba1c8f7180b09b8411801ada452",
+    "maya-maya-s-v2-iq2_xxs-hip.json": "329964acf86d4bbb9e8ab88f3206c4a074e84d0bf9af80f569f8dceff2856745",
+    "maya-maya-l-hip.json": "b7e74656fd3539928afd7ca9adb7addcca5b56f85a18450b4d4d0a0218a01ac6",
+    "maya-maya-l-hip.json.bak-20261031-191927": "d8dfc7ae0af775bf2c2f38b9d25a5c258fc779b2427fc4c0dec65aab9ed25894",
+    "maya-maya-l-hip.json.bak-20261031-192046": "48ba3f2213ca4adb950bac8c32d53f58a66d76eae275bcf06abbe636dbaa9ebc"
+  },
+  "yaml_sha256": "c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20",
+  "daemon_pid": 175392,
+  "daemon_name": "llama-swap"
+}

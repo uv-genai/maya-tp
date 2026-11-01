@@ -1,0 +1,65 @@
+{
+  "head": "1139fa27d7731941b187de57093c3abe424a5e1f",
+  "tags": [
+    {
+      "tag": "v1.1.37",
+      "upstream": "7ee8f2777c754229605a8c19ca985cbb68540419",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.37.md"
+    },
+    {
+      "tag": "v1.1.38",
+      "upstream": "cf6472cc84489765791ad97bb55b395e8f442088",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.38.md"
+    },
+    {
+      "tag": "v1.1.39",
+      "upstream": "376b4b87402bc992af7b4a8dec089ef7cba7801c",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.39.md"
+    },
+    {
+      "tag": "v1.1.40",
+      "upstream": "cbaaec5d70fde2730e251dec6b418e4b454c01bd",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.40.md"
+    },
+    {
+      "tag": "v1.1.41",
+      "upstream": "171077787036ccc2784250ca644760f654e8d4a3",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.41.md"
+    },
+    {
+      "tag": "v1.1.42",
+      "upstream": "cd48762b6d4888205c130238dbc0c7f7904993cf",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.42.md"
+    },
+    {
+      "tag": "v1.1.43",
+      "upstream": "acdab34bd58eec957715392a1d822777c3c579c3",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.43.md"
+    },
+    {
+      "tag": "v1.1.44",
+      "upstream": "5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.44.md"
+    },
+    {
+      "tag": "v1.1.45",
+      "upstream": "6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.45.md"
+    },
+    {
+      "tag": "v1.1.46",
+      "upstream": "3589d6f12a3f77e813b184b51a586f8fc3de2185",
+      "ancestor": true,
+      "report": "docs/upstream/v1.1.46.md"
+    }
+  ]
+}

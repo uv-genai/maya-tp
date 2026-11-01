@@ -24,7 +24,7 @@ The updater accepts both fork-prefixed and legacy tags; merging an upstream tag 
 | v1.1.43 | `acdab34bd58eec957715392a1d822777c3c579c3` | 18 / 41 | #65 accepted; PR70 /c2ff719, final/main CI PASS; #66/#67/#69/#71 fixed, pre-existing DS4 #68 open |
 | v1.1.44 | `5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b` | 4 / 6 | #72 accepted; PR73 /842d6e6, final/main CI PASS; runtime exact43, metadata verified |
 | v1.1.45 | `6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc` | 2 / 3 | #74 scoped review accepted; PR76 /2df9e26, final/main CI PASS; functional DS4 fix deferred #75 |
-| v1.1.46 | `3589d6f12a3f77e813b184b51a586f8fc3de2185` | 5 / 8 | #77 active; CPU/HIP/host pass, live22871; boundaries #78/#80 fixed, cap-default measurement #79 deferred |
+| v1.1.46 | `3589d6f12a3f77e813b184b51a586f8fc3de2185` | 5 / 8 | #77 accepted; PR81 /1139fa2, final/main CI PASS; #78/#80 fixed, cap-default #79 deferred |
 
 ## Preservation and validation decisions
 
@@ -58,3 +58,9 @@ Rank0 checkout `777cc92` has user `maya.py` changes/backups and deployed #33 fil
 no pull/reset/rebuild there. Daemon/YAML unchanged. Use an isolated integration worktree and retain
 baseline binaries/reference data before candidate deployment. Three baseline engine MD5s:
 `5a52cd27167523b6ea4b0f0bde93f503`.
+
+## Completion, 2026-11-02
+
+All ten requested upstream tags v1.1.37–v1.1.46 are ancestors of main, integrated one checkpoint at a time with validation before proceeding. Final46 exact-head CI41350489382/41350494526 and post-merge mainCI41351082604 pass. v1.1.45's functional DeepSeek tail fix remains explicitly deferred under #75; the table records semantic integration rather than claiming every upstream feature is active. DS4 WMMA #68 and cap measurement #79 remain open.
+
+Original production GLM binaries5a52 are restored, validated review GLMb398/DS45174 builds retained, and protected remote source/config/userwork/YAML/daemon preserved. Legacy fork v1.1.42 remains6471995, VERSION stays numeric1.1.42, future tags use tp-v*, and no release/tag was created. [Completion report](COMPLETION-2026-11-02.md) and its JSON/raw snapshots record the final state. Final documentation CI and issue closure are recorded in #77/#36.

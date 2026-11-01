@@ -1,5 +1,5 @@
 {
-  "accepted": false,
+  "accepted": true,
   "upstream": "3589d6f12a3f77e813b184b51a586f8fc3de2185",
   "code_source": "5b13c83",
   "glm_runtime_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
@@ -74,9 +74,13 @@
     11,
     16
   ],
-  "pending": [
-    "final head CI",
-    "merge",
-    "post-main CI"
-  ]
+  "pending": [],
+  "final_head": "b5e46b21e8dd855563dae54d3ddd9897bc9b723a",
+  "final_ci": [
+    41350489382,
+    41350494526
+  ],
+  "merge_commit": "1139fa27d7731941b187de57093c3abe424a5e1f",
+  "main_ci": 41351082604,
+  "final_runtime_state": "Original production GLM5a52 restored; reviewGLMb398/DS45174 retained. See completion-2026-11-02/completion.json."
 }

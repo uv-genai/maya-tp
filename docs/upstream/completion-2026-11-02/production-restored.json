@@ -1,0 +1,42 @@
+{
+  "remote": {
+    "role": "remote",
+    "mode": "restore",
+    "production_targets": [
+      {
+        "source": "/tmp/maya-upstream-baseline-2026-11-01/maya-build",
+        "target": "/home/ugo/software/project-maya/build-hip/maya",
+        "before": "b398d4a0711430edd6a28b95264c7293",
+        "after": "5a52cd27167523b6ea4b0f0bde93f503"
+      },
+      {
+        "source": "/tmp/maya-upstream-baseline-2026-11-01/maya-tmp",
+        "target": "/tmp/maya-tp2",
+        "before": "b398d4a0711430edd6a28b95264c7293",
+        "after": "5a52cd27167523b6ea4b0f0bde93f503"
+      }
+    ],
+    "review_glm": "b398d4a0711430edd6a28b95264c7293",
+    "review_ds4": "51749e860763aea34847b183de95a933",
+    "review_configs_using_own_binary": [
+      "maya-maya-s-v2-iq2_xxs-hip.json"
+    ]
+  },
+  "local": {
+    "role": "local",
+    "mode": "restore",
+    "production_targets": [
+      {
+        "source": "/tmp/maya-upstream-baseline-2026-11-01/maya",
+        "target": "/home/ugo/software/project-maya/build-hip/maya",
+        "before": "b398d4a0711430edd6a28b95264c7293",
+        "after": "5a52cd27167523b6ea4b0f0bde93f503"
+      }
+    ],
+    "review_glm": "b398d4a0711430edd6a28b95264c7293",
+    "review_ds4": "51749e860763aea34847b183de95a933",
+    "review_configs_using_own_binary": [
+      "maya-maya-s-v2-iq2_xxs-hip.json"
+    ]
+  }
+}
