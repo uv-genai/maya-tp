@@ -1,0 +1,12 @@
+{
+  "simple": {
+    "baseline_v38_tokens": 32,
+    "candidate_tokens": 32,
+    "all_equal": true
+  },
+  "mtp": {
+    "baseline_v38_tokens": 32,
+    "candidate_tokens": 32,
+    "all_equal": true
+  }
+}

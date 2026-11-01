@@ -1,0 +1,65 @@
+GPU 0: AMD Radeon 8060S Graphics (gfx1151), 20 CUs
+lanes: dpp
+parity reduce warps=4096 outputs=131072 sum_differ=0 max_differ=0 nonfinite=0 PASS
+glm dsa scores: CUDA0 on the original kernels
+parity dsa_score ctx=28517 n_vis=7129 seed=1 rl2b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=28517 n_vis=7129 seed=1 rl1b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=28517 n_vis=7129 seed=1 sl2b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=28517 n_vis=7129 seed=1 sx2b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=28517 n_vis=7129 seed=2 rl2b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=28517 n_vis=7129 seed=2 rl1b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=28517 n_vis=7129 seed=2 sl2b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=28517 n_vis=7129 seed=2 sx2b4   outputs=7129 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=1 rl2b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=1 rl1b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=1 sl2b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=1 sx2b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=2 rl2b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=2 rl1b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=2 sl2b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=114093 n_vis=28523 seed=2 sx2b4   outputs=28523 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=1 rl2b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=1 rl1b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=1 sl2b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=1 sx2b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=2 rl2b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=2 rl1b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=2 sl2b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=130397 n_vis=32599 seed=2 sx2b4   outputs=32599 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=4 n_vis=1 seed=31 rl2b4   outputs=1 differ=0 nonfinite=0 cells=7 cells_differ=0 PASS
+parity dsa_score ctx=4 n_vis=1 seed=31 rl1b4   outputs=1 differ=0 nonfinite=0 cells=7 cells_differ=0 PASS
+parity dsa_score ctx=4 n_vis=1 seed=31 sl2b4   outputs=1 differ=0 nonfinite=0 cells=7 cells_differ=0 PASS
+parity dsa_score ctx=4 n_vis=1 seed=31 sx2b4   outputs=1 differ=0 nonfinite=0 cells=7 cells_differ=0 PASS
+parity dsa_score ctx=28 n_vis=7 seed=31 rl2b4   outputs=7 differ=0 nonfinite=0 cells=31 cells_differ=0 PASS
+parity dsa_score ctx=28 n_vis=7 seed=31 rl1b4   outputs=7 differ=0 nonfinite=0 cells=31 cells_differ=0 PASS
+parity dsa_score ctx=28 n_vis=7 seed=31 sl2b4   outputs=7 differ=0 nonfinite=0 cells=31 cells_differ=0 PASS
+parity dsa_score ctx=28 n_vis=7 seed=31 sx2b4   outputs=7 differ=0 nonfinite=0 cells=31 cells_differ=0 PASS
+parity dsa_score ctx=36 n_vis=9 seed=31 rl2b4   outputs=9 differ=0 nonfinite=0 cells=39 cells_differ=0 PASS
+parity dsa_score ctx=36 n_vis=9 seed=31 rl1b4   outputs=9 differ=0 nonfinite=0 cells=39 cells_differ=0 PASS
+parity dsa_score ctx=36 n_vis=9 seed=31 sl2b4   outputs=9 differ=0 nonfinite=0 cells=39 cells_differ=0 PASS
+parity dsa_score ctx=36 n_vis=9 seed=31 sx2b4   outputs=9 differ=0 nonfinite=0 cells=39 cells_differ=0 PASS
+parity dsa_score ctx=2052 n_vis=513 seed=31 rl2b4   outputs=513 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=2052 n_vis=513 seed=31 rl1b4   outputs=513 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=2052 n_vis=513 seed=31 sl2b4   outputs=513 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=2052 n_vis=513 seed=31 sx2b4   outputs=513 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=4004 n_vis=1001 seed=31 rl2b4   outputs=1001 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=4004 n_vis=1001 seed=31 rl1b4   outputs=1001 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=4004 n_vis=1001 seed=31 sl2b4   outputs=1001 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+parity dsa_score ctx=4004 n_vis=1001 seed=31 sx2b4   outputs=1001 differ=0 nonfinite=0 cells=2051 cells_differ=0 PASS
+glm mla split attention: CUDA0 on the original kernels
+parity mla scratch heads=32->64 n_sel=2051 cells=all differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=all   h64lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=all   h32lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=all   h16lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=all   h16xeo  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla scratch heads=32->64 n_sel=2051 cells=tail differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=tail  h64lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=tail  h32lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=tail  h16lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=tail  h16xeo  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla scratch heads=32->64 n_sel=2051 cells=chunk differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=chunk h64lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=chunk h32lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=chunk h16lvc  outputs=32768 differ=0 nonfinite=0 PASS
+parity mla_attend n_sel=2051 cells=chunk h16xeo  outputs=32768 differ=0 nonfinite=0 PASS
+glm_attn_bench: PASS

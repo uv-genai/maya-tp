@@ -1,0 +1,16 @@
+{
+  "technical": {
+    "records": 8,
+    "raw_pick_differences": 0,
+    "old_corrected_reference_tokens": 256,
+    "ordinary_reference_identical": true,
+    "output_sha256": "f2e31f28c3ae95b1252d8876551e2031c9578ff2185ed6376e55228f19d68691"
+  },
+  "code": {
+    "records": 8,
+    "raw_pick_differences": 0,
+    "old_corrected_reference_tokens": 256,
+    "ordinary_reference_identical": true,
+    "output_sha256": "cf9f34f003770c0b159481eafbfa3169d73f1074989243a634a363bd24a0951b"
+  }
+}

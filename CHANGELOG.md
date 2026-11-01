@@ -6,6 +6,8 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- Integrate upstream v1.1.39 with TP2/MTP preservation (refs #45): MMQ row-ID padding, ordered hipBLASLt table fallback, bounded sentence-end thinking closure and cancel draining. Keep measured tuning first, answer reserves for every output limit and existing defaults. Streamed expert fetch is deferred pending a compact TP2 reader port (#46).
+
 - **Upstream v1.1.38 integration** (#43): web model card/answer information and home-screen redirects;
   raw GGUF expert direct I/O remains opt-in pending gfx1151 measurements. GLM TP2 packed experts,
   MTP control flow, launchers and measured tuning are preserved. Fork VERSION remains 1.1.42.

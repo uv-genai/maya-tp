@@ -1,0 +1,19 @@
+{
+  "model": "Maya-M",
+  "api_mtp_acceptance": "PASS",
+  "fresh_prefill_prompt_tokens": [
+    990,
+    4062,
+    8158
+  ],
+  "raw_pick_records": 8,
+  "raw_pick_differences": 0,
+  "rank0_warmup_lines": {
+    "reference": [
+      "tiers warm: 12384 experts (55.8 GB) in 32 s (1.72 GB/s)"
+    ],
+    "benchmark": [
+      "tiers warm: 12384 experts (55.8 GB) in 375 s (0.15 GB/s)"
+    ]
+  }
+}

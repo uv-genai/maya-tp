@@ -1,0 +1,57 @@
+{
+  "base": "b30514b",
+  "head": "4971b37a03105566bfdb99c95079f8d5de3fda60",
+  "paths": {
+    "README.md": {
+      "unchanged": true
+    },
+    "AGENTS.md": {
+      "unchanged": true
+    },
+    "src/core/glm_mtp.cu": {
+      "unchanged": true
+    },
+    "src/core/glm_window.cu": {
+      "unchanged": true
+    },
+    "src/core/glm_rows.cu": {
+      "unchanged": true
+    },
+    "src/core/glm_model.cu": {
+      "unchanged": true
+    },
+    "include/strata/core/tp_context.hpp": {
+      "unchanged": true
+    },
+    "include/strata/core/tp_partition.hpp": {
+      "unchanged": true
+    },
+    "src/core/tp_context.cu": {
+      "unchanged": true
+    },
+    "src/net": {
+      "unchanged": true
+    },
+    "include/strata/net": {
+      "unchanged": true
+    },
+    "tools/tp2": {
+      "unchanged": true
+    },
+    "tools/llama-swap/tp2.sh": {
+      "unchanged": true
+    },
+    "tools/hip/gfx1151-glm-hipblaslt-100401.txt": {
+      "unchanged": true
+    },
+    "src/core/glm_fast_path.cu": {
+      "unchanged": true
+    },
+    "include/strata/kernels/glm_fast.hpp": {
+      "unchanged": true
+    },
+    "src/kernels/cuda/glm_fast.cu": {
+      "unchanged": true
+    }
+  }
+}

@@ -121,12 +121,20 @@ CONTEXT_FALLBACK_MAX = 262144   # ... and the largest when the model file does n
 CONTEXT_TESTED = {"ds4": 1048576, "mm3": 262144}
 CONTEXT_TESTED_DEFAULT = 262144
 # the engine log's lines a report carries (maya.py's --report reads the same ones)
-REPORT_LINES = re.compile(r"glm fast:|glm prefill: (?:CUDA|HIP)|glm split|glm stat|glm slots|glm prefill: \d|ERR|error|"
+REPORT_LINES = re.compile(r"glm fast:|glm prefill: (?:CUDA|HIP)|glm split|glm stat|glm slots|glm vram|ds4 serve: prompt read|glm prefill: \d|ERR|error|"
                           r"failed|out of memory|WARNING", re.I)
 IM_END = "<|im_end|>"
 IMAGE_PAD = "<|image_pad|>"
 VISION_START = "<|vision_start|>"
 CTX_SLACK = 8               # `strata --serve` rejects prompt + max_new + 8 > context: keep the same margin here
+TEXT_FILE_MIN, TEXT_FILE_MAX = 512 * 1024, 16 * 1024 * 1024
+
+
+def text_file_limit(context: int) -> int:
+    """The largest text file the chat page attaches (#635): the context holds at most this many bytes of text (about 4
+    bytes a token), at least the 512 KB the page always took and at most 16 MB.  The page sends the file as text, so
+    the real limit is the model's context; the page says so when a file is over it."""
+    return max(TEXT_FILE_MIN, min(TEXT_FILE_MAX, int(context or 0) * 4))
 # The live tok/s is a rate over a window, not a mean since the first token: a mean reads ~1/elapsed at the first
 # token (the Monitor showed five-digit numbers) and then undershoots for the first second of every answer.  5 s: drafted
 # tokens come in bursts of 1-4 a step, and over 2 s the rate swung +-25% around the engine's steady one
@@ -359,6 +367,21 @@ NONFINITE = "non-finite"
 LOOP_STOP = object()
 # ... and the answer it gets when that happens before any answer text (never a silent end after the thinking)
 LOOP_STOP_NOTE = "(The answer was stopped: the model kept repeating itself.)"
+# Output limits at or below this use a strict thinking budget; larger limits may allow bounded sentence grace.
+THINK_TINY_LIMIT = 1024
+# A reasoning block that reaches the thinking budget is closed at the end of its sentence or line, not mid-sentence
+# (#613: an agent's turn closed in the middle of a formula, and the answer after it was garbled): Service._sliced
+# closes it at the first boundary past the budget, and the engine's own close (its think_budget) only comes this many
+# tokens later, for reasoning with no boundary at all. Grace stays inside the answer reserve for every output limit.
+THINK_GRACE = 512
+_THINK_BOUNDARY = re.compile(r"(?:\n|(?<![\d.])[.!?][\"')\]]*|[。！？])[ \t]*$")
+
+
+def think_boundary(text: str) -> bool:
+    """The reasoning so far (its last characters will do) ends a line or a sentence: a newline, or . ! ? after
+    something other than a digit or another dot (not "3." of "3.0", not "..."), closing quotes or brackets allowed
+    after it."""
+    return bool(_THINK_BOUNDARY.search(text))
 
 # ---- log-probabilities (OpenAI's `logprobs` / `top_logprobs`; the DeepSeek engine's GEN logprobs=<n> and LP lines).
 # The engine reports, for each token it writes, the token's logprob and its row's n most likely, from the model's
@@ -589,8 +612,10 @@ def _quiet_seconds() -> float:
 REQUEST_QUIET_S = _quiet_seconds()
 
 
-# The longest a stopped request's own lines (T / PP / DONE) are waited for when it is drained after a cancel: a STOP
-# an engine does not honour (or a rid it has already let go) would otherwise hold the FIFO place for ever.
+# The longest a stopped request's own lines (T / PP / DONE) are waited for when it is drained after a cancel with
+# --parallel: a STOP an engine does not honour (or a rid it has already let go) would otherwise hold the FIFO place for
+# ever.  With one conversation the drain waits for the DONE (its lines share one queue with the next request's) and
+# this is only when it says it is still waiting; a stuck engine there is ended by the stall watchdog (ENGINE_STALL_S).
 def _drain_seconds() -> float:
     try:
         return max(1.0, float(os.environ.get("STRATA_DRAIN_S", "60")))
@@ -611,10 +636,11 @@ def engine_frozen(base: tuple[float, int], now: tuple[float, int], window_s: flo
 
 
 # MAYA_DS4_RESTORE_POINTS (4): the DeepSeek engine keeps restore points where a later prompt is likely to leave this
-# one - its GEN line carries marks=<pos>,... and shared=<pos> - besides the end of the last prompt, the position before
-# it and the anchor it keeps anyway.  N (1-16) turns them on, and is also the engine's cap a conversation (it reads the
-# same setting); 0: no keys, every GEN line as before.  MAYA_DS4_RESTORE_TAIL (512): how far before the
-# prompt's end the tail point sits (0: none).
+# one - its GEN line carries marks=<pos>,..., tail=<pos> and shared=<pos> - besides the end of the last prompt, the
+# position before it and the anchor it keeps anyway.  N (1-16) turns them on, and is also the engine's cap a
+# conversation (it reads the same setting); 0: no keys, every GEN line as before.  MAYA_DS4_RESTORE_TAIL (512): how far
+# before the prompt's end the tail point sits (0: none); it goes as tail=, not in marks=, because the engine leaves it
+# out where its read stop costs more than reading those tokens again (most experts outside VRAM, #668).
 RESTORE_LEAST = 1024        # no point before this many tokens: such a start is read again in about the time a point costs
 
 
@@ -631,14 +657,14 @@ def restore_point_settings(env=None) -> tuple[bool, int]:
 
 
 def deepseek_restore_points(ids, user_id, system_id=None, tail=512, least=RESTORE_LEAST) -> dict:
-    """Where the DeepSeek engine keeps restore points for this prompt -> {"marks": [pos, ...], "shared": pos} (either
-    may be missing; {}: none).  From the prompt's ids as the template wrote them: a turn opens with its role's special
+    """Where the DeepSeek engine keeps restore points for this prompt -> {"marks": [pos, ...], "tail": pos, "shared":
+    pos} (any may be missing; {}: none).  From the prompt's ids as the template wrote them: a turn opens with its role's special
     token (<｜User｜>, a tool result's turn too; <｜System｜> for a system message after the first user turn), and text
     inside a message never encodes to one (render_ids), so the positions are the template's own.
 
     - the start of the last user turn: its last message edited, or sent again after another answer, goes back there;
-    - `tail` tokens before the end, when the last turn is longer than that: a new question after the same long document
-      in the same message;
+    - "tail": `tail` tokens before the end, when the last turn is longer than that: a new question after the same long
+      document in the same message (the engine keeps it where its read stop costs less than reading those tokens);
     - "shared": the end of the system prompt and its tools (the first user turn): another conversation behind the same
       start goes back there, and the engine gives that point up last.
     Positions under `least` are left out: a start that short is read again in about the time a point costs."""
@@ -658,7 +684,7 @@ def deepseek_restore_points(ids, user_id, system_id=None, tail=512, least=RESTOR
         marks.append(last)
     t = len(ids) - tail
     if tail > 0 and t >= least and (last is None or t > last):
-        marks.append(t)
+        out["tail"] = t
     if marks:
         out["marks"] = sorted(marks)
     return out
@@ -1152,16 +1178,19 @@ class StrataEngine:
 
     @staticmethod
     def restore_keys(sampling: dict) -> str:
-        """`marks=<pos>,...` and `shared=<pos>`: the DeepSeek engine's restore points for this prompt (Service.run puts
-        them in `_restore` with MAYA_DS4_RESTORE_POINTS; no other engine gets them).  "" without: the line as before."""
+        """`marks=<pos>,...`, `tail=<pos>` and `shared=<pos>`: the DeepSeek engine's restore points for this prompt
+        (Service.run puts them in `_restore` with MAYA_DS4_RESTORE_POINTS; no other engine gets them).  "" without: the
+        line as before."""
         pts = sampling.get("_restore")
         if not isinstance(pts, dict):
             return ""
-        marks = [p for p in pts.get("marks") or () if isinstance(p, int) and not isinstance(p, bool) and p > 0]
-        shared = pts.get("shared")
+
+        def pos(v):
+            return isinstance(v, int) and not isinstance(v, bool) and v > 0
+        marks = [p for p in pts.get("marks") or () if pos(p)]
+        tail, shared = pts.get("tail"), pts.get("shared")
         return ((" marks=" + ",".join(str(p) for p in marks) if marks else "") +
-                (f" shared={shared}" if isinstance(shared, int) and not isinstance(shared, bool) and shared > 0
-                 else ""))
+                (f" tail={tail}" if pos(tail) else "") + (f" shared={shared}" if pos(shared) else ""))
 
     @staticmethod
     def logprob_key(sampling: dict) -> str:
@@ -1270,16 +1299,33 @@ class StrataEngine:
                         self.proc.stdin.flush()
                     except OSError:
                         pass
-                # Bounded like the multi one (see DRAIN_S): a STOP the engine does not honour must not hold the
-                # request's place in the FIFO for ever.
-                end = time.monotonic() + DRAIN_S
+                # Not bounded like the multi one: one conversation shares one line queue, so going on before this
+                # request's DONE handed its lines (T ... DONE) to the next request, and every request after it read
+                # the one before's answer (a request cancelled 70 s into a long prompt: the engine looks
+                # at STOP between the prompt's chunks, and a 32K chunk deep in a long context takes over a minute).
+                # The engine is busy with it either way, so the drain waits; only a stuck engine (the stall watchdog,
+                # STRATA_ENGINE_STALL_S) ends it.  DRAIN_S is when it says so.
+                t0 = heard = time.monotonic()
+                said, stall = False, {}
                 while True:
                     try:
-                        line = self.lines.get(timeout=max(0.05, end - time.monotonic()))
+                        line, quiet = self.lines.get(timeout=5), False
                     except queue.Empty:
-                        print(f"[maya] stopped, and the engine did not say the request had ended within {DRAIN_S:.0f} s "
-                              "(STRATA_DRAIN_S) - going on; the engine may still be writing it", flush=True)
-                        break
+                        line, quiet = None, True
+                    # (looked at on every line too: a prompt's progress lines go on while its chunk is read)
+                    if not said and time.monotonic() - t0 >= DRAIN_S:
+                        said = True
+                        print(f"[maya] stopped, and the engine has not said the request ended after {DRAIN_S:.0f} s "
+                              "(STRATA_DRAIN_S) - it is still working on it (a long prompt is stopped between its "
+                              "chunks); waiting for it", flush=True)
+                    if quiet:
+                        why = self._stall_check(heard, stall) if ENGINE_STALL_S > 0 else None
+                        if why:
+                            self._end(why)
+                            break
+                        continue
+                    heard = time.monotonic()
+                    stall.clear()
                     if line is None:
                         self.lines.put(None)                # (the engine is gone: the next reader hears it too)
                         break
@@ -1288,6 +1334,8 @@ class StrataEngine:
                         break
                     if line.startswith("DONE"):
                         self._parse_done(line)
+                        if said:
+                            print(f"[maya] the stopped request ended after {heard - t0:.0f} s", flush=True)
                         break
 
     # How long, after an ERR, the reader waits for the DONE that may follow it: maya-ds4 and maya-mm3 print one right
@@ -3000,6 +3048,15 @@ class Service:
         return {"tokens": len(self.render_ids(messages, tools, kw)), "images": len(media),
                 "approximate": bool(media), "max_context": self.engine.max_context}
 
+    @staticmethod
+    def _say_malformed(parser):
+        """A tool call the parser could not read (it went out as text, or as an incomplete call: OutputParser): the
+        whole body in the server window (#613)."""
+        while parser.malformed:
+            body = parser.malformed.pop(0)
+            print(f"[maya] a malformed tool call, sent on as written instead of failing the answer "
+                  f"({len(body)} characters): {body!r}", flush=True)
+
     def _note(self, n, evs, stat):
         with self.status_lock:
             s = self.status
@@ -3099,6 +3156,7 @@ class Service:
         if (sampling or {}).get("_think_end") in produced:
             smp.pop("_think_budget", None)
             smp.pop("_think_end", None)
+            smp.pop("_think_soft", None)
         else:
             smp["_think_budget"] = max(1, tb - len(produced))
         return smp
@@ -3143,13 +3201,19 @@ class Service:
         produced, cur, left, smp = [], list(ids), max_new, sampling
         segments = []                                   # each slice's DONE (engine.last), summed at the end
         sent = 0                                        # produced[:sent] went to the caller (the guard holds the rest)
+        # the thinking budget closed at a sentence's or line's end (THINK_GRACE, #613): past `soft` tokens of
+        # reasoning, the first token that ends one is followed by the end of the thinking - this call stops there and
+        # the next goes on with it (the engine's own close, its think_budget, comes later, for reasoning with none)
+        soft, think_end = (sampling or {}).get("_think_soft"), (sampling or {}).get("_think_end")
+        soft_text = self._guard_piece() if isinstance(soft, int) and isinstance(think_end, int) else None
+        tail_text = ""
         while True:
             last0 = getattr(self.engine, "last", None)
             smp_call, n_call = guard.sampling(smp, len(produced), left) if guard is not None else (smp, left)
             gen = self.engine.generate(cur, n_call, smp_call, cancel, embeddings=emb) if emb else \
                 self.engine.generate(cur, n_call, smp_call, cancel)
             slice_s, t0, cut, pausing = fair_slice_seconds(), None, False, False
-            act, got = None, 0                          # the loop guard's action; this call's tokens
+            act, got, closed = None, 0, False           # the loop guard's action; this call's tokens; a soft close
             try:
                 for t in gen:
                     if guard is None:
@@ -3159,14 +3223,23 @@ class Service:
                     if t is None:
                         continue
                     produced.append(t)
+                    if soft_text is not None:
+                        if t == think_end:
+                            soft_text = None            # (closed: by the model, or the engine's budget)
+                        else:
+                            tail_text = (tail_text + (soft_text(t) or ""))[-16:]
+                            if len(produced) >= soft and think_boundary(tail_text) and len(produced) < max_new - 1:
+                                closed = True
                     if guard is not None:
                         got += 1
-                        act = guard.push(t, len(produced))
+                        act = guard.push(t, len(produced)) if not closed else None
                         if act is not None:
                             break                       # (gen.close(): STOP + drain, still holding the FIFO)
-                        while sent < len(produced) - guard.hold:
+                        while sent < len(produced) - (guard.hold if not closed else 0):
                             sent += 1
                             yield produced[sent - 1]
+                    if closed:
+                        break                           # (gen.close(): STOP + drain, still holding the FIFO)
                     if t0 is None:
                         t0 = time.monotonic()
                     if slice_s > 0 and not pausing and not emb and not self.stopping and len(produced) < max_new \
@@ -3187,6 +3260,20 @@ class Service:
                 fresh = getattr(self.engine, "last", None)
                 if fresh is not None and fresh is not last0:
                     segments.append(fresh)
+            if closed:                                  # the budget, at a sentence's or line's end: the thinking ends
+                produced.append(think_end)
+                sent = len(produced)
+                soft_text = None
+                yield think_end
+                if guard is not None:
+                    guard.thinking_closed(produced)
+                print(f"[maya] thinking reached its budget ({soft} tokens): closed at the end of a sentence or line, "
+                      f"{len(produced) - 1 - soft} tokens later; answering", flush=True)
+                if cancel.is_set() or self.stopping:
+                    break
+                cur, left = list(ids) + produced, max_new - len(produced)
+                smp = self._resumed_sampling(sampling, produced)
+                continue
             if act is not None:                         # a loop: what is kept, then on from there - or the end
                 del produced[max(sent, len(produced) - act.drop):]   # (what was sent stays sent: only the held tail goes)
                 if act.kind == loop_guard.CLOSE_THINKING:
@@ -3354,12 +3441,24 @@ class Service:
                 # the old unconditional floor reduced every limit <=1024 to ONE reasoning token. The forced
                 # </think> also consumes one token of max_new, so account for it before assigning the budget.
                 think_budget = self.think_budget
+                soft = None
+                hard_limit = None
                 if in_think and max_new:
                     reserve_floor = max(0, int(os.environ.get("STRATA_GLM_THINK_RESERVE", "1024") or 1024))
                     reserve = max(int(max_new) // 4, min(reserve_floor, max(1, int(max_new) // 2)))
-                    think_budget = max(1, min(think_budget, int(max_new) - reserve - 1))
+                    hard_limit = max(1, int(max_new) - reserve - 1)
+                    think_budget = min(think_budget, hard_limit)
+                if in_think and (not max_new or int(max_new) > THINK_TINY_LIMIT):
+                    # the engine's own close THINK_GRACE tokens later (at most half the room max_tokens leaves after
+                    # the budget); the reasoning ends at its first sentence or line end past the budget (#613)
+                    room = (hard_limit - think_budget) // 2 if hard_limit is not None else THINK_GRACE
+                    grace = max(0, min(THINK_GRACE, room))
+                    if grace > 0:
+                        soft, think_budget = think_budget, think_budget + grace
                 if in_think:
                     sampling = {**(sampling or {}), "_think_budget": think_budget, "_think_end": self.think_end_id}
+                    if soft is not None:
+                        sampling["_think_soft"] = soft
                 # MAYA_DS4_RESTORE_POINTS: where the DeepSeek engine keeps restore points for this prompt (never a
                 # client's own `_restore`; not with pictures, whose spans the engine reads whole)
                 if sampling and "_restore" in sampling:
@@ -3421,8 +3520,9 @@ class Service:
                         if in_think and t == self.think_end_id:
                             in_think = False
                             if n == think_budget + 1:
-                                print(f"[maya] thinking reached its budget ({think_budget} tokens): closed, "
-                                      "answering", flush=True)
+                                print(f"[maya] thinking reached its budget ({think_budget} tokens"
+                                      f"{f', {soft} + {think_budget - soft} without a sentence end' if soft else ''})"
+                                      ": closed, answering", flush=True)
                         if t in self.stop_ids:
                             finish = "stop"
                             raw_ids.append(t)
@@ -3451,6 +3551,7 @@ class Service:
                                 text, held = held[:len(held) - k], held[len(held) - k:]
                         was = parser.state
                         evs = with_lp(parser.feed(text), was)
+                        self._say_malformed(parser)
                         self._note(n, evs, stat)
                         last_print = self._progress(last_print)
                         for ev in evs:
@@ -3569,6 +3670,7 @@ class Service:
         was = parser.state
         for ev in with_lp(parser.finish(), was):
             yield "event", ev
+        self._say_malformed(parser)
         yield "done", {"finish": finish, "completion_tokens": n, "reasoning_tokens": reasoning_tokens,
                        "reused": (timings or {}).get("cache_n", 0),
                        "timings": timings, "stop_sequence": matched if finish == "stop" else None}
@@ -4430,6 +4532,7 @@ def make_handler(svc: Service):
                     status = "ok"
                 self._json(200, {"status": status,
                                  "max_context": svc.engine.max_context, "model": svc.model,
+                                 "max_text_file": text_file_limit(svc.engine.max_context),
                                  "model_label": svc.model_label,   # (the model first: "GLM-5.3 · Maya-S24")
                                  "images": svc.vision is not None, "api_key": bool(svc.api_key), "defaults": rec,
                                  "version": MAYA_VERSION, "mcp_tools": bool(svc.mcp), "unloaded": svc.unloaded,

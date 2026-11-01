@@ -20,6 +20,7 @@
 
 namespace {
 using strata::prefill::mmq::Context;
+using strata::prefill::mmq::IDS_PAD;
 using strata::prefill::mmq::Product;
 using strata::prefill::mmq::matrix_bytes;
 using strata::prefill::mmq::q8_bytes;
@@ -127,13 +128,14 @@ Metrics run_product(Context & ctx, hipStream_t stream, const std::string & name,
 
     DeviceBuffer dx(x.size() * sizeof(float));
     DeviceBuffer dsrc(src_ids.size() * sizeof(int32_t));
-    DeviceBuffer ddst(dst_ids.size() * sizeof(int32_t));
+    DeviceBuffer ddst((dst_ids.size() + IDS_PAD) * sizeof(int32_t));
     DeviceBuffer dbounds(bounds.size() * sizeof(int32_t));
     DeviceBuffer dw(w.size());
     DeviceBuffer dxq(q8_bytes(rows, cols));
     DeviceBuffer dy((size_t) rows * (size_t) out_rows * sizeof(float));
     hip_check(hipMemcpy(dx.p, x.data(), x.size() * sizeof(float), hipMemcpyHostToDevice), "copy x");
     hip_check(hipMemcpy(dsrc.p, src_ids.data(), src_ids.size() * sizeof(int32_t), hipMemcpyHostToDevice), "copy src ids");
+    hip_check(hipMemset(ddst.p, 0, (dst_ids.size() + IDS_PAD) * sizeof(int32_t)), "pad dst ids");
     hip_check(hipMemcpy(ddst.p, dst_ids.data(), dst_ids.size() * sizeof(int32_t), hipMemcpyHostToDevice), "copy dst ids");
     hip_check(hipMemcpy(dbounds.p, bounds.data(), bounds.size() * sizeof(int32_t), hipMemcpyHostToDevice), "copy bounds");
     hip_check(hipMemcpy(dw.p, w.data(), w.size(), hipMemcpyHostToDevice), "copy weights and zero tail");

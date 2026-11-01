@@ -150,13 +150,18 @@ int main() {
 
     strata::prefill::hipblaslt::TuningTable table;
     std::string error;
-    if (!table.load(tuning_path, arch, version, error)) {
+    const auto paths = strata::prefill::hipblaslt::split_table_list(tuning_path);
+    if (paths.empty() || !table.load(paths.front(), arch, version, error)) {
         std::fprintf(stderr, "tuning table rejected: %s\n", error.c_str());
         return 1;
     }
-    if (!table.closest(strata::prefill::hipblaslt::InputType::bf16, 48, 2560, 96, 4096) ||
-        !table.closest(strata::prefill::hipblaslt::InputType::f16, 512, 2560, 512, 4096)) {
-        std::fprintf(stderr, "tuning table lacks the focused BF16/F16 test rows\n");
+    const bool tp_shapes = arch == "gfx1151";
+    if (tp_shapes ?
+            (!table.closest(strata::prefill::hipblaslt::InputType::f16, 1024, 4096, 1024, 64) ||
+             !table.closest(strata::prefill::hipblaslt::InputType::f16, 4096, 1024, 4096, 64)) :
+            (!table.closest(strata::prefill::hipblaslt::InputType::bf16, 48, 2560, 96, 4096) ||
+             !table.closest(strata::prefill::hipblaslt::InputType::f16, 512, 2560, 512, 4096))) {
+        std::fprintf(stderr, "tuning table lacks the focused test rows\n");
         return 1;
     }
 
@@ -177,10 +182,17 @@ int main() {
 
         // Exact calibrated chunks exercise the selected solution; T=37 reuses the closest bucket,
         // validates the actual shape before launch, and tests a non-tile-multiple tail.
+        if (tp_shapes) {
+            ok &= run_case(gemm, blas, stream, false, 64, 1024, 4096, 1024, 0, 0.0f, 201);
+            ok &= run_case(gemm, blas, stream, false, 64, 1024, 4096, 1024, 0, 0.0f, 201); // cached dispatch
+            ok &= run_case(gemm, blas, stream, false, 37, 1024, 4096, 1024, 7, 1.0f, 202);
+            ok &= run_case(gemm, blas, stream, false, 64, 4096, 1024, 4096, 0, 0.0f, 203);
+        } else {
         ok &= run_case(gemm, blas, stream, true, 4096, 48, 2560, 96, 0, 0.0f, 101);
         ok &= run_case(gemm, blas, stream, true, 37, 48, 2560, 96, 48, 1.0f, 102);
         ok &= run_case(gemm, blas, stream, false, 4096, 512, 2560, 512, 0, 0.0f, 103);
         ok &= run_case(gemm, blas, stream, false, 37, 512, 2560, 512, 7, 1.0f, 104);
+        }
         HIPBLAS_CHECK(hipblasDestroy(blas));
     }
     HIP_CHECK(hipStreamDestroy(stream));

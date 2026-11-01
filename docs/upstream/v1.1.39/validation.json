@@ -1,0 +1,104 @@
+{
+  "upstream_tag": "v1.1.39",
+  "upstream_commit": "376b4b87402bc992af7b4a8dec089ef7cba7801c",
+  "engine_source": "27fefccdb186e0355e592edce52da19654d797c9",
+  "hip_test_head": "f475729d86e6b1729cab1ac175cf9914b17e9471",
+  "engine_md5": "c3132ee406429195545f145e04e7aadd",
+  "local_cpu": {
+    "hip_map": "PASS",
+    "serve": {
+      "tests": 542,
+      "skips": 11,
+      "result": "PASS"
+    },
+    "tools": {
+      "tests": 651,
+      "skips": 31,
+      "result": "PASS"
+    },
+    "focused_thinking": 11,
+    "host_ctest": 13,
+    "engine_builds": [
+      "maya",
+      "maya-ds4",
+      "maya-mm3"
+    ],
+    "js_syntax": "PASS"
+  },
+  "code_ci": [
+    41305518760,
+    41305514302
+  ],
+  "pending": [
+    "final_evidence_ci",
+    "merge_and_main_ci"
+  ],
+  "peer_kill_recovery": "PASS8/8",
+  "framed_raw_picks": {
+    "technical": {
+      "tokens": 256,
+      "requests": 8,
+      "differences": 0
+    },
+    "code": {
+      "tokens": 256,
+      "requests": 8,
+      "differences": 0
+    },
+    "historical_ordinary_references_identical": true
+  },
+  "prefill_ab": {
+    "paired_messages_and_usage_equal": 9,
+    "throughput_delta_percent": [
+      -0.008297,
+      0.175089,
+      -1.207761
+    ],
+    "warm_samples_per_length_per_arm": 2,
+    "warmup_cycles_excluded": 1
+  },
+  "models": {
+    "Maya-M": {
+      "model": "Maya-M",
+      "api_mtp_acceptance": "PASS",
+      "fresh_prefill_prompt_tokens": [
+        990,
+        4062,
+        8158
+      ],
+      "raw_pick_records": 8,
+      "raw_pick_differences": 0,
+      "rank0_warmup_lines": {
+        "reference": [
+          "tiers warm: 12384 experts (55.8 GB) in 32 s (1.72 GB/s)"
+        ],
+        "benchmark": [
+          "tiers warm: 12384 experts (55.8 GB) in 375 s (0.15 GB/s)"
+        ]
+      }
+    },
+    "Maya-L": {
+      "model": "Maya-L",
+      "api_mtp_acceptance": "PASS",
+      "fresh_prefill_prompt_tokens": [
+        990,
+        4062,
+        8158
+      ],
+      "raw_pick_records": 8,
+      "raw_pick_differences": 0,
+      "rank0_warmup_lines": {
+        "reference": [
+          "tiers warm: 12384 experts (76.4 GB) in 806 s (0.09 GB/s)"
+        ],
+        "benchmark": [
+          "tiers warm: 12384 experts (76.4 GB) in 49 s (1.55 GB/s)"
+        ]
+      }
+    }
+  },
+  "combined_ci": [
+    41308044569,
+    41308039304
+  ]
+}
