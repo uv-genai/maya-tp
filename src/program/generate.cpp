@@ -4866,6 +4866,11 @@ static int glm_pack_generate(const Options& o) {
                 std::fflush(stdout);
                 continue;
             }
+            if (!req_bias.empty() && tp2 && tp_mtp_enabled && model.mtp_ready() && req_spec != 1) {
+                std::printf("ERR TP2 MTP does not support logit_bias; use spec=1 for ordinary decoding\n");
+                std::fflush(stdout);
+                continue;  // Reject before any table upload, model-state change or mirrored operation (#69).
+            }
             if (!req_bias.empty() && (rq.greedy || rq.temperature <= 0.0f)) {
                 // greedy with a bias: the sampled path's top_k = 1 is the same argmax (ties to the lower id) over the
                 // biased logits - the greedy shortcuts (the argmax at the end of a forward, the windows' argmax) read
