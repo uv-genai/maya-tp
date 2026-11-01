@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37–39 accepted; v1.1.40 review #50 next.
-> User authorized stopping the pair for validation. Accepted v1.1.39 binaries deployed; test engines stopped; next checkpoint #50.
+> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, v1.1.37–40 accepted; v1.1.41 review #55 next.
+> User authorized stopping the pair for validation. Accepted v1.1.40 binaries deployed; test engines stopped; next checkpoint #55.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -910,3 +910,28 @@ kernel/CLI/fidelity/performance evidence where source/binary/defaults are unchan
 Initial551serve/11skips+653tools/31,all3HIPbuilds/DS4host/JS PASS, de0795f CI41313615184/41313611278 PASS. LiveMTP7 acceptance+large matrix PASS. Probe then found pre-existing empty Models catalog (#54), not inference failure. More critical #53 guards uncoordinated context/model restart underTP2;5focusedtests PASS, oldsetter202 failure reproduced. Updated fullCPU/liveS rejection+simple/fidelity gates pending; no41 yet.
 
 #50 runtime gates complete:554serve/11skips+653tools/31/HIPmap/3HIPtargets/DS4host/Node/JS PASS. InitialMTP7 acceptance+large matrix and guardedSource simple matrix PASS;109/37matchedrounds,8asymmetricretries each. Real#53 rejection400 preserves bothPIDs/context32768/peer, then MTPstream97chunks;77metrics samples69generating andOrigin403/actualcontext1M PASS. Models fixture used only in runtime/tmp and removed; default emptycatalog#54 remains. Technical/code256 ordinary/MTP16/16 raw-pick0. Fresh8facc62c binary all5paths verified;39c313backupbothhosts verified after inspection recovery. Engines/server stopped. Final evidence/mainCI pending; no41 yet.
+
+### 29.11 v1.1.40 accepted; v1.1.41 review next (#55)
+
+PR #51 merged as **0a10f5c042df06bd4aede22ea5e62deda14ef2d8** after finalf1799ad
+CI **41316570180 /41316566065 PASS**. Post-merge **main41316911427 PASS**; #50/#53 closed.
+554serve/11skips,653tools/31,HIPmap,3HIPtargets/DS4marks/Node/JS PASS. S MTP7/simple matrices,
+109/37matchingrounds and8asymmetricretries perphase, real#53 rejection with unchanged PIDs/context/
+peer and subsequent inference,16framed256-token ordinary/MTP requests raw-pick0 PASS.
+
+Keep #53 safeguards in later merges: Service.paired_restart_reason/_require_single_rank_restart,
+context reload_supported/reload_reason and read-only context UI; no rank0-only context/current-model
+restart before paired orchestration exists. docs/TP2-RUN.md explains relaunching both ranks.
+
+Fresh executable **8facc62c09b1138b6787beda7d2f371d** matched all5canonical/reviewpaths, saved
+on BOTH hosts at `/tmp/maya-upstream-v40-baseline/maya`;39c313 baseline restored/preserved both.
+#52 remains open: archive GGML header inherits parentgit metadata (b305→cb86), relinking otherwise
+unchanged GLM; GPU image identical. ELF-inspection rewriting was corrected before GPUtests; no
+rewritten artifact used. #54 remains open: TP transient config hides catalog. #33/#42/#11/#16/#46 open.
+Remotecanonical777cc92/userwork and daemon175392/YAML preserved; test engines/server stopped.
+
+Next **#55 /upstream v1.1.41 1710777** (50commits/82files), no candidate yet. Isolated branch
+merge/upstream-v1.1.41 from updatedmain. Audit every new GLM state/snapshot/cancel/routing operation
+for mirror order, pool size-class bytes against compact TP blobs, replicated NextN/full widths/ARs,
+MTP wire/global retry/chunks, measured tuning/defaults and owned docs. Keep unsupported backends
+excluded, #46 stream deferral and #53 reload guard. No42 work before41acceptance/mainCI.

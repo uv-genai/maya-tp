@@ -30,8 +30,12 @@
     52,
     54
   ],
-  "pending": [
-    "final_evidence_ci",
-    "merge_and_main_ci"
-  ]
+  "pending": [],
+  "final_head": "f1799ad8e55eb90a7f06cf866c5ce01d6ff90faf",
+  "final_ci": [
+    41316570180,
+    41316566065
+  ],
+  "accepted_merge": "0a10f5c042df06bd4aede22ea5e62deda14ef2d8",
+  "main_ci": 41316911427
 }
