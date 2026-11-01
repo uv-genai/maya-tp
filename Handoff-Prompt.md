@@ -1,21 +1,23 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and **latest §29.15**, then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and **latest §29.16**, then `AGENTS.md`.
 
 ## Task and current checkpoint
 
 Integrate upstream **v1.1.37–v1.1.46 one at a time**. Validate each checkpoint and its post-merge main CI before starting the next. Preserve TP2/MTP; merge owned README/AGENTS/docs semantically. The audit is #36 /`docs/upstream/INTEGRATION-2026-11-01.md`; official tags are `upstream/v*`.
 
-Accepted37–40:
+Accepted37–41:
 
--37: #37 /PR38 /7ea9d71, full S/M/L gates; report `docs/upstream/v1.1.37.md`.
--38: #43 /PR44 /ad96053. Its post-main failure was fixed separately by #47 /PR48 /f479b91; fixed main41303961934 passed. Preserve failed-start liveness; do not retry away that historical failure.
--39: #45 /PR49 /d2708b2; main41311902227 passed; report `docs/upstream/v1.1.39.md`.
--40: #50 /PR51 /0a10f5c; main41316911427 passed. Preserve #53's paired context/current-model lifecycle guard.
+- v1.1.37: #37 /PR38 /7ea9d71, full S/M/L gates; report `docs/upstream/v1.1.37.md`.
+- v1.1.38: #43 /PR44 /ad96053. Its post-main failure was fixed separately by #47 /PR48 /f479b91; fixed main41303961934 passed. Preserve failed-start liveness; do not retry away that historical failure.
+- v1.1.39: #45 /PR49 /d2708b2; main41311902227 passed; report `docs/upstream/v1.1.39.md`.
+- v1.1.40: #50 /PR51 /0a10f5c; main41316911427 passed. Preserve #53's paired context/current-model lifecycle guard.
 
-**Active41: #55 /PR58, upstream171077787036ccc2784250ca644760f654e8d4a3. Runtime validation is complete; final CI/merge/main CI remain.** Review branch `merge/upstream-v1.1.41`, evidence head7ab98c8, runtime32650e8, engine **a6170c07503e139d73789184d9a93971**. Report and results: `docs/upstream/v1.1.41.md` and adjacent `validation.json`. Reconcile the latest main handoff into the review branch, require CI on its final head, merge with ancestry preserved, then require main CI before42. The earlier7ab98c8 runs were41326427259/41326422499; inspect actual status.
+- v1.1.41: #55 /PR58 /0fea27a, final39523ae CI41326842619/41326839560 and **main41327238265 PASS**. #55/#56/#57/#59 closed. Full report docs/upstream/v1.1.41.md and validation.json.
 
-There are **no active GPU/test batches**. Sessions15734,61183,96027 completed. All five engine copies match a617; engines/server are stopped. Do not rerun completed gates without a reason. No42 source work has begun. Continue through46, not partial completion.
+**Active42: #61, upstream cd48762b6d4888205c130238dbc0c7f7904993cf (22commits/49files).** No candidate yet. Review worktree should branch `merge/upstream-v1.1.42` from updated origin/main. Audit HIP vision/APU/idle/env aliases/chunk/pin changes against all preserved TP2/MTP invariants and guards below. Keep TP2 vision gated (#16 requires RDMA embeddings), unsupported platforms excluded and defaults conservative. No43 work before42 acceptance and main CI.
+
+No active GPU/test batches. Accepted41 runtime32650e8, engine **a6170c07503e139d73789184d9a93971**, all five copies matched; both engines/server stopped. Accepted41 baseline saved on BOTH hosts at `/tmp/maya-upstream-v41-baseline/maya`. Completed batches15734/61183/96027 need no rerun without a reason. Continue through46, not partial completion.
 
 ## Validated41 behavior
 
@@ -33,7 +35,7 @@ Keep these safeguards in later merges:
 
 Prefill vs40: all9messages/usage equal; warm throughput+0.57/−0.97/−1.84% at1K/4K/8K. No material regression or new gain claim. **#33 stays open** for cold/long-context/request11 at9.6tok/s and the~3008-row cap/unimplemented `MAYA_TP_PREFILL_ROWS`. Preserve #34's worker config inheritance and18calibration rows, which improve S32–37%.
 
-**#60 stays OPEN:** initial L64 MTP76.23/77.20ms/token; controlled accepted40 gave71.02then35.34; repeated candidate gave37.06/37.65, within historical34.82–37.65. Acceptance36/52 and raw picks agree. No persistent candidate regression reproduced; no aggregate speedup claim. Startup rank0/rank1 seconds: initial649/249,40=414/33,repeated617/159, within the unchanged900s bound. The integration hold is cleared subject to final CI, but transient drafting/host-wait variability is not fixed. Raw arms and phase times are committed.
+**#60 stays OPEN:** initial L64 MTP76.23/77.20ms/token; controlled accepted40 gave71.02then35.34; repeated candidate gave37.06/37.65, within historical34.82–37.65. Acceptance36/52 and raw picks agree. No persistent candidate regression reproduced; no aggregate speedup claim. Startup rank0/rank1 seconds: initial649/249,40=414/33,repeated617/159, within the unchanged900s bound. The integration was accepted after final/main CI; transient drafting/host-wait variability remains unresolved. Raw arms and phase times are committed.
 
 ## Hosts and operations
 
@@ -58,9 +60,9 @@ Backups on BOTH hosts:
 - Accepted38cff75b48: `/tmp/maya-upstream-v38-baseline/maya`.
 - Accepted39c3132ee4: `/tmp/maya-upstream-v39-baseline/maya`.
 - Accepted40=8facc62c: `/tmp/maya-upstream-v40-baseline/maya`.
-- Candidate41a617: `/tmp/maya-upstream-v41-candidate/maya`.
+- Accepted41a617: `/tmp/maya-upstream-v41-baseline/maya`; extra candidate backup `/tmp/maya-upstream-v41-candidate/maya`.
 
-Save an accepted41 baseline before42 builds. At the end of the FULL task leave a coherent production source/binary pair; restoring original canonical binaries is available while final validated builds remain in the review worktrees. Never overwrite remote user source/YAML to deploy.
+The accepted41 baseline has been saved before42 builds. At the end of the FULL task leave a coherent production source/binary pair; restoring original canonical binaries is available while final validated builds remain in the review worktrees. Never overwrite remote user source/YAML to deploy.
 
 ## Tools and remaining work
 
@@ -72,6 +74,6 @@ Common references are reusable only with identical pack/prompt/token count and z
 
 #52: archive GGML metadata inherits parent git ID and can cause harmless host relinks. Inspect GPU sections READ-ONLY via readelf offsets and Path.read_bytes; NEVER objcopy in place. #54: transient rank0 config still hides the Models catalog. #11multi/#16vision stay gated; upstream HIP vision does not implement TP2 RDMA embedding synchronization.
 
-After41 final/main CI: close55/56/57/59 with final comments; keep33/42/46/52/54/60/11/16 open; update accepted-state handoff/report and save both41 baselines. Then open the42 issue and begin its semantic review. Continue sequentially through46.
+41 is accepted and55/56/57/59 are closed; keep33/42/46/52/54/60/11/16 open. Active42 issue61 is open; begin its semantic review only from the accepted main. Require42 final/main CI before43 and continue sequentially through46.
 
 Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`**, with numeric VERSION. Legacy published `v*` tags are immutable; upstream tags stay `upstream/v*`. Publishedv1.1.42=64719953312df98c9fdf53a10198c106cb195345(public/latest,0assets). Integration alone does not authorize a release. Legacy updaters throughv42 need one manual clean-main pull for prefix support; mention it in the next release notes.

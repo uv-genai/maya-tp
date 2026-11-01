@@ -1,5 +1,5 @@
 {
-  "accepted": false,
+  "accepted": true,
   "upstream": "171077787036ccc2784250ca644760f654e8d4a3",
   "runtime_source": "32650e88e98041d06fef2309d60a58e60d9e5397",
   "binary_md5": "a6170c07503e139d73789184d9a93971",
@@ -65,9 +65,12 @@
     11,
     16
   ],
-  "pending": [
-    "final evidence CI",
-    "PR58 merge",
-    "post-merge main CI"
-  ]
+  "pending": [],
+  "final_head": "39523ae77005deb314e428f0cdbfffad91919cb2",
+  "final_ci": [
+    41326842619,
+    41326839560
+  ],
+  "merge_commit": "0fea27a0243b360fa700139d48a81529664ec42b",
+  "main_ci": 41327238265
 }

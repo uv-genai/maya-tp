@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.15)**, v1.1.37–40 accepted; v1.1.41 #55 runtime complete, final CI/merge/main CI pending.
-> User authorized stopping the pair for validation. Fixed candidate41 a617 deployed/hash-matched all5paths; test engines/server stopped. No42 before41 acceptance/main CI.
+> Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.15)**, v1.1.37–41 accepted; v1.1.42 review #61 next (§29.16).
+> User authorized stopping the pair for validation. Fixed candidate41 a617 deployed/hash-matched all5paths; test engines/server stopped. Accepted41 main41327238265 PASS; no42 candidate yet.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -971,3 +971,11 @@ All live runs finished; **no active GPU/test batch**. Candidate **a6170c07503e13
 Prefill vs40all9messages/usageequal; warmthroughput+0.57/-0.97/-1.84% at990/4062/8158, no newgainclaim. #33 staysopen. #60controlledLtimingholdcleared forintegration: initial41MTP76.23/77.20, saved40**71.02/35.34**, repeated41**37.06/37.65**ms/token, allrawpicks/acceptanceidentical. Candidate returnedtohistorical34.82–37.65range; accepted40also hastransient. **Keep60open** forvariability/rootcause; do not claimfixedornewMTPgain. StartupR0/R1initial649/249,old40=414/33,repeated41=617/159seconds, allwithinunchanged900s. Rawarmsandphasebreakdownscommitted. A/Bsession61183andSNAP96027 completed; candidate restored allpaths, noactiveruns.
 
 Next: reconcile this final livehandoff into review (docs only), update PR58 finalvalidationbody, finalCI, ancestry-preservingmerge, mainCI. Then close55/56/57/59withfinalcomments, updateaccepted41handoff/report andsavea617baselineBOTHhosts beforeopening42issue. Open33/42/46/52/54/60/11/16remain. Originalbaseline5a52,38cff,39c313,40=8facc andunacceptedcandidatebackup /tmp/maya-upstream-v41-candidate/maya(a617) preservedbothhosts. Remotecanonical777cc92/userwork/daemon175392/YAMLuntouched. No release/tag publication.
+
+### 29.16 v1.1.41 accepted; v1.1.42 review next (#61)
+
+PR58 merged as **0fea27a0243b360fa700139d48a81529664ec42b** after final39523ae CI **41326842619/41326839560 PASS**; post-merge **main41327238265 PASS**. #55/#56/#57/#59 closed with final evidence comments. All §29.15 gates pass. #60 remains OPEN for variability also reproduced on accepted40; no persistent41regression/newgainclaim. #33/#42/#46/#52/#54/#11/#16 remain open.
+
+Runtime32650e8, engine **a6170c07503e139d73789184d9a93971** all5paths matched; accepted41 backup saved on BOTHhosts at **/tmp/maya-upstream-v41-baseline/maya**. Candidatebackup a617 also retained. Rejected13a/pre-fix failure retained separately. Engines/server stopped; no active batches. Daemon175392/YAML and remote canonical777cc92 user work preserved. Report docs/upstream/v1.1.41.md /validation.json markedaccepted; upstream ancestry preserved. No release/tag publication.
+
+Next **#61 /upstream v1.1.42 cd48762b6d4888205c130238dbc0c7f7904993cf**,22commits/49files; no source candidate yet. Branch merge/upstream-v1.1.42 from updated origin/main. Audit HIPvision/APU/idle/env/chunk/pin changes semantically. Keep TP2vision gated (#16 requires RDMA embeddings), #59 completed-call cancellation, #56/#53 lifecycle guards, #57 totalbudget, #47 liveness/all-limit reserves, #46 streamdeferral/#11multi, NextN/fullwidth/AR/MTPwire/globalchunks/retries/primary100401 tuning. Preserve fork docs/defaults; exclude unsupported backend/platform/localmultiGPU work. No43 before42 full acceptance/postmainCI.

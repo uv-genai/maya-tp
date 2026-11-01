@@ -19,8 +19,8 @@ The updater accepts both fork-prefixed and legacy tags; merging an upstream tag 
 | v1.1.38 | `cf6472cc84489765791ad97bb55b395e8f442088` | 4 / 13 | #43 accepted ad96053; #47 fixed f479b91, main CI PASS |
 | v1.1.39 | `376b4b87402bc992af7b4a8dec089ef7cba7801c` | 33 / 48 | #45 accepted; PR #49 /d2708b2, final/main CI PASS; #46 deferred |
 | v1.1.40 | `cbaaec5d70fde2730e251dec6b418e4b454c01bd` | 16 / 55 | #50 accepted; PR #51 /0a10f5c, final/main CI PASS; #53 guarded |
-| v1.1.41 | `171077787036ccc2784250ca644760f654e8d4a3` | 50 / 82 | #55 active review; no candidate yet |
-| v1.1.42 | `cd48762b6d4888205c130238dbc0c7f7904993cf` | 22 / 49 | queued |
+| v1.1.41 | `171077787036ccc2784250ca644760f654e8d4a3` | 50 / 82 | #55 accepted; PR58 /0fea27a, final/main CI PASS; #56/#57/#59 fixed, #60 open |
+| v1.1.42 | `cd48762b6d4888205c130238dbc0c7f7904993cf` | 22 / 49 | #61 active review; no candidate yet |
 | v1.1.43 | `acdab34bd58eec957715392a1d822777c3c579c3` | 18 / 41 | queued |
 | v1.1.44 | `5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b` | 4 / 6 | queued |
 | v1.1.45 | `6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc` | 2 / 3 | queued |
