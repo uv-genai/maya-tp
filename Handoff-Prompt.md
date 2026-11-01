@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and **latest §29.16**, then `AGENTS.md`.
+Read `/home/ugo/software/project-maya/Handoff.md` in full, especially §§18,21,23,27–29 and **latest §29.17**, then `AGENTS.md`.
 
 ## Task and current checkpoint
 
@@ -15,9 +15,17 @@ Accepted37–41:
 
 - v1.1.41: #55 /PR58 /0fea27a, final39523ae CI41326842619/41326839560 and **main41327238265 PASS**. #55/#56/#57/#59 closed. Full report docs/upstream/v1.1.41.md and validation.json.
 
-**Active42: #61, upstream cd48762b6d4888205c130238dbc0c7f7904993cf (22commits/49files).** No candidate yet. Review worktree should branch `merge/upstream-v1.1.42` from updated origin/main. Audit HIP vision/APU/idle/env aliases/chunk/pin changes against all preserved TP2/MTP invariants and guards below. Keep TP2 vision gated (#16 requires RDMA embeddings), unsupported platforms excluded and defaults conservative. No43 work before42 acceptance and main CI.
+**Active42 HOLD #61 /PR63 /#62 /#64**. Review branch merge/upstream-v1.1.42, fixed runtime **837a679**, engine **bc4e90a607b87fe609398fbdba0fb98c** hash-matched all5paths; remote review837a679. Protected remote canonical777cc92 unchanged. Upstream cd48762 is an ancestor. No42 acceptance/no43; continue through46 after per-tag gates/mainCI.
 
-No active GPU/test batches. Accepted41 runtime32650e8, engine **a6170c07503e139d73789184d9a93971**, all five copies matched; both engines/server stopped. Accepted41 baseline saved on BOTH hosts at `/tmp/maya-upstream-v41-baseline/maya`. Completed batches15734/61183/96027 need no rerun without a reason. Continue through46, not partial completion.
+Initiald59/d8 candidate's exaggerated idle1s/3000ms test exposed23.683s MTP32 decode after14.55K prefill, versus60–66ms/token short prompts. **#64** fix wakes BOTH service lanes at mirrored model calls/nested-MTP frames; no wire change. Pre-fix logs /tmp/maya-upstream-v42/idle-before-fix, binary /tmp/maya-upstream-v42-before-idle-fix/maya BOTHhosts. Do not claim the default impact from exaggerated settings. Fixed837a679 GPU image identical to accepted41/d8, so completed kernel gates remain valid.
+
+**ACTIVE fixed live batch19655**: /tmp/maya-upstream-v42-batch.sh, output /tmp/maya-upstream-v42/. No concurrentGPU/build/deploy. Exact forced-idle S simple/MTP7 large/reuse/stream matrices, real startup/media/lifecycle guards, true prefillcancel both modes; CLI/recovery/strictS technical+code256 fidelity; candidate-first3-cycle prefill A/B vs saved41; M/LAPI/prefill/raw64. Keep failed/outlier data and900s startup bound. Check current outputs before resuming; batch86028 was terminated for64, do not rerun initial script blindly. No nexttag until all gates, finalCI/PR/mainCI.
+
+Ordered CPU583serve11skip/662tools33skip/HIPmap/actualNode PASS afterba4c34e adapted2upstream Windows mocks excluded from Linuxfork. Focused21 pass,3HIPengines/16host/196fused/MMQ/attention/396strictIQ pass. FailedinitialCPU fixture log retained. Final headCI still required.
+
+Retain idle/alias parity/monotonicGLMchunk/applicableDS4/MM3 guards. Defer newvision/vendor/setup and same-hostDS4 multi-GPU. #62 rejects GENI/VLEND/VRECLAIM/LOGP/media beforestate/encoding and skipsencoderstartup forTP config; initialliveguard withbogusencoder passed PIDs/peerunchanged andtextfollowup. #16 staysdeferred. All41cancel/lifecycle/totalbudget/tuning invariantsbelowpreserved.
+
+Accepted41 baselinea617 remains BOTHhosts at /tmp/maya-upstream-v41-baseline/maya. Completed41batches15734/61183/96027 need no rerun. No release/tag authorized by integration.
 
 ## Validated41 behavior
 
@@ -43,7 +51,7 @@ Prefill vs40: all9messages/usage equal; warm throughput+0.57/−0.97/−1.84% at
 
 User authorization persists: **“Hosts are free; you may stop the pair for validation.”** Do not ask again. This machine is **strix-halo-2 rank1**; SSH only to **strix-halo-1.local rank0**. Never nested SSH or invoke the llama-swap wrapper over SSH.
 
-Remote canonical `/home/ugo/software/project-maya` stays777cc92 with user `maya.py` edits, two L-config backups and #33 launcher/tuning deployments. **No pull/reset/rebuild there.** Preserve daemon175392 and its six-entry YAML. Use the isolated `/home/ugo/software/project-maya-upstream-review` worktrees on both hosts; remote review runtime source is32650e8.
+Remote canonical `/home/ugo/software/project-maya` stays777cc92 with user `maya.py` edits, two L-config backups and #33 launcher/tuning deployments. **No pull/reset/rebuild there.** Preserve daemon175392 and its six-entry YAML. Use the isolated `/home/ugo/software/project-maya-upstream-review` worktrees on both hosts; remote review runtime source isd59ea06.
 
 Stop rank0 server BEFORE its engine:
 
