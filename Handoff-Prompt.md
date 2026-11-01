@@ -37,7 +37,7 @@ all 9 paired messages match. Initial cold outliers preserved; #33 remains open. 
 **Next: #43 / upstream v1.1.38 `cf6472c`**, four commits / 13 files; candidate merge only. Review worktree
 `/home/ugo/software/project-maya-upstream-review` uses `merge/upstream-v1.1.38` locally (remote source will be advanced for validation).
 Review raw-GGUF expert direct I/O (separate from GLM's packed TP2 path), setup context and UI fixes.
-CPU 531/637 gates, all HIP engines, six real direct/mapped host staging cases and JS syntax PASS.
+CPU 531/637 gates, all HIP engines, eight real direct/mapped host staging/alias cases and JS syntax PASS.
 Direct I/O stays opt-in pending gfx1151 measurements; GLM packed source/control are unchanged.
 Live TP2/MTP and CI remain pending. See Handoff §29.4; do not start v1.1.39 yet.
 

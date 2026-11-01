@@ -203,7 +203,17 @@ void test_gguf_slice_staging() {
             if (present) value = std::getenv(k);
         }
         ~Env() { if (present) setenv(key.c_str(), value.c_str(), 1); else unsetenv(key.c_str()); }
-    } direct_env("MAYA_EXPERT_DIRECT"), stagers_env("MAYA_EXPERT_STAGERS");
+    } direct_env("MAYA_EXPERT_DIRECT"), legacy_direct_env("STRATA_EXPERT_DIRECT"),
+      stagers_env("MAYA_EXPERT_STAGERS"), headroom_env("MAYA_EXPERT_HEADROOM_GB"),
+      legacy_headroom_env("STRATA_EXPERT_HEADROOM_GB");
+    unsetenv("MAYA_EXPERT_HEADROOM_GB");
+    setenv("STRATA_EXPERT_HEADROOM_GB", "2", 1);
+    uint64_t headroom = 0;
+    expert_ram_room(nullptr, &headroom);
+    require(headroom == (2ull << 30), "legacy headroom override was ignored");
+    setenv("MAYA_EXPERT_HEADROOM_GB", "3", 1);
+    expert_ram_room(nullptr, &headroom);
+    require(headroom == (3ull << 30), "MAYA headroom did not override STRATA");
     TempDirectory dir;
     constexpr int layers = 2, experts = 12;
     NativeFmt fmt[layers];
@@ -253,14 +263,18 @@ void test_gguf_slice_staging() {
     if (probe_fd >= 0) ::close(probe_fd);
 #endif
     int configurations = 0;
-    for (int stagers : {0, 4}) for (int direct : {-1, 0, 1}) {
+    for (int stagers : {0, 4}) for (int direct : {-2, -1, 0, 1}) {
         setenv("MAYA_EXPERT_STAGERS", std::to_string(stagers).c_str(), 1);
+        unsetenv("STRATA_EXPERT_DIRECT");
         if (direct < 0) unsetenv("MAYA_EXPERT_DIRECT");
         else setenv("MAYA_EXPERT_DIRECT", std::to_string(direct).c_str(), 1);
+        if (direct == -2 || direct == 0) setenv("STRATA_EXPERT_DIRECT", "1", 1);
+        else if (direct == 1) setenv("STRATA_EXPERT_DIRECT", "0", 1);
         GgufExpertSource source;
         require(source.open(shard.string(), layers, experts, 3, err), err);
         const bool active = source.note().find("unbuffered slice reads") != std::string::npos;
-        require(active == (supports_direct && stagers > 0 && direct == 1), "direct I/O gate/fallback is wrong");
+        require(active == (supports_direct && stagers > 0 && (direct == 1 || direct == -2)),
+                "direct I/O gate/alias/fallback is wrong");
         for (int cycle = 0; cycle < 2; ++cycle) for (int l = 0; l < layers; ++l) {
             const auto& f = fmt[l];
             const size_t sizes[3] = {(size_t) f.up_off, (size_t) f.up_off, (size_t) (f.bytes - f.down_off)};

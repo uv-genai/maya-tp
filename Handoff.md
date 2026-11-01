@@ -786,6 +786,6 @@ is separate from GLM packed TP2. New direct/headroom knobs documented in SETTING
 1.1.42; README/AGENTS, GLM control/core, RDMA, launchers and calibration unchanged.
 
 HIP map, **531 serve / 11 skips**, **637 tools / 31 skips** PASS. All three HIP engines build. Extended
-file-source host parity: six configurations PASS with real O_DIRECT, unaligned offsets, variable
-formats/shards, ring eviction and queued close. Changed JS syntax and real HTTP redirect test PASS.
+file-source host parity: eight configurations PASS with real O_DIRECT, unaligned offsets, variable
+formats/shards, ring eviction, queued close and MAYA/STRATA precedence. Changed JS syntax and real HTTP redirect test PASS.
 Live TP2/MTP gates and CI remain pending; do not start v1.1.39. Candidate report docs/upstream/v1.1.38.md.

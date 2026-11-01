@@ -1394,7 +1394,9 @@ uint64_t expert_ram_room(uint64_t* avail_out, uint64_t* headroom_out, bool unbuf
     // the OS, the server and the engine's own buffers are what stays free
     uint64_t headroom = unbuffered ? std::max<uint64_t>(4ull << 30, total / 100 * 8)
                                    : std::max<uint64_t>(6ull << 30, total / 100 * 12);
-    if (const char* v = std::getenv("MAYA_EXPERT_HEADROOM_GB")) {   // (a measurement knob)
+    const char* headroom_override = std::getenv("MAYA_EXPERT_HEADROOM_GB");
+    if (headroom_override == nullptr) headroom_override = std::getenv("STRATA_EXPERT_HEADROOM_GB");
+    if (const char* v = headroom_override) {   // (a measurement knob; MAYA wins over its legacy alias)
         const double gb = std::atof(v);
         if (gb >= 0.0) headroom = (uint64_t) (gb * 1073741824.0);
     }
@@ -1552,6 +1554,7 @@ bool GgufExpertSource::open(const std::string& shard1, int64_t n_layers, int64_t
             // 4 KB page faults and the file cache (small beside a model this size) churns the RAM the experts need.
             // Opt in with MAYA_EXPERT_DIRECT=1 until measured on gfx1151; unsupported file systems keep the mapping.
             const char* dv = std::getenv("MAYA_EXPERT_DIRECT");
+            if (dv == nullptr) dv = std::getenv("STRATA_EXPERT_DIRECT");
             if (dv != nullptr && std::atoi(dv) != 0) {
                 const int dfd = ::open(path.c_str(), O_RDONLY | O_DIRECT);
                 void* probe = nullptr;
