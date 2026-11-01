@@ -56,7 +56,7 @@ sys.path.insert(0, str(ROOT))   # run as a script (run-<model>.bat) as well as a
 from serve import ds4_vision, gpu_map, loop_guard, mm3_vision, models, savings  # noqa: E402
 
 ENGINE_VISION = (ds4_vision.Vision, mm3_vision.Vision)   # the engines that run their vision tower themselves
-from serve.frontend import (CALL_START, MINIMAX_NS, ChatTemplate, Event, OutputParser,  # noqa: E402
+from serve.frontend import (CALL_END, CALL_START, MINIMAX_NS, ChatTemplate, Event, OutputParser,  # noqa: E402
                             EFFORT_WORDS, QWEN_EFFORT, anthropic_to_messages, deepseek_effort_kwargs, deepseek_images,
                             effort_kwargs,
                             effort_level, effort_name, literal_tags, mark_literals, media_of, openai_to_messages,
@@ -469,6 +469,19 @@ def logprob_entry(tok, t, n_top: int) -> dict | None:
     e = piece(int(t), lp[0])
     e["top_logprobs"] = [piece(i, v) for i, v in lp[1][:n_top]]
     return e
+
+
+def model_management_setting(cfg: dict | None, env=None) -> bool:
+    """llama.cpp's model management (/models/load, /models/unload, /models/sse, for Open WebUI's Models page): off
+    unless the run config has "model_management": true or MAYA_MODEL_MANAGEMENT says 1 / on / true / yes;
+    the environment, when set, wins over the config."""
+    on = ("1", "on", "true", "yes")
+    env = os.environ if env is None else env
+    v = env.get("STRATA_MODEL_MANAGEMENT", env.get("MAYA_MODEL_MANAGEMENT"))
+    if v is not None and str(v).strip():
+        return str(v).strip().lower() in on
+    v = (cfg or {}).get("model_management")
+    return bool(v) if v is not None else False
 
 
 def loop_guard_setting(cfg: dict | None, env=None) -> bool:
@@ -1326,6 +1339,9 @@ class StrataEngine:
                     if line is None:
                         self.lines.put(None)                # (the engine is gone: the next reader hears it too)
                         break
+                    if line.startswith("STAT "):
+                        self._parse_stat(line)   # the final snapshot can follow EOS or the consumer's last token
+                        continue
                     if line.startswith("ERR"):
                         self._done_after_err()
                         break
@@ -2003,7 +2019,8 @@ class Service:
         # the loop guard (serve/loop_guard.py; MAYA_LOOP_GUARD=0 / "loop_guard": false: off) and what it did since
         # the server started: loops seen, and how each was broken (the Monitor's totals, /metrics, Prometheus)
         self.loop_guard = True
-        self.loop_guard_counts = {"detected": 0, "penalised": 0, "thinking_closed": 0, "stopped": 0}
+        self.loop_guard_counts = {"detected": 0, "penalised": 0, "thinking_closed": 0, "stopped": 0, "tool_repeats": 0,
+                                  "tool_blocked": 0, "collapsed": 0, "kept_going": 0}
         self.last_timings = None                         # the last finished request's, llama.cpp's names (/v1/status)
         self.last_request_at = None                      # when a request last started or finished
         self.started_at = time.time()
@@ -2141,6 +2158,7 @@ class Service:
         each: the first one starts it, the others wait for that start."""
         if not hasattr(self.engine, "alive") or self.engine.alive():
             return
+        self._require_single_rank_restart()
         with self._engine_start:
             if self.engine.alive():                      # (another request started it meanwhile)
                 return
@@ -2162,6 +2180,7 @@ class Service:
     def unload(self, idle_for: float | None = None) -> str:
         """End the engine between requests: "unloaded", "not loaded", "busy" (a request is running or waiting, a context
         reload is on, or - with idle_for - one ran more recently than that) or "unsupported"."""
+        self._require_single_rank_restart()
         if not (hasattr(self.engine, "close") and hasattr(self.engine, "restart") and hasattr(self.engine, "alive")):
             return "unsupported"
         if not self.fifo.acquire(blocking=False):        # every place: nothing runs or waits for the engine
@@ -2192,6 +2211,9 @@ class Service:
 
     def start_idle_unload(self):
         if not self.idle_unload_s or not hasattr(self.engine, "close"):
+            return
+        if self.paired_restart_reason():
+            print("[maya] idle unload disabled: " + self.paired_restart_reason(), flush=True)
             return
         print(f"[maya] the model unloads after {self.idle_unload_s:g} s without requests", flush=True)
 
@@ -2762,6 +2784,9 @@ class Service:
 
     # the GLM engine's live STAT values (StrataEngine._parse_stat) exported as gauges: key -> help
     PROM_STAT = {"tok_s": "Decode rate over the running request, tokens/s",
+                 "draft_rounds": "DSpark draft calls in the current decode interval (all requests with parallel serving)",
+                 "draft_ms": "DSpark drafter measured host time in the current decode interval, ms",
+                 "verify_ms": "DSpark verification forward measured host time in the current decode interval, ms",
                  "vram_hit": "Share of the routed experts found in VRAM (0..1)",
                  "ram_fetch": "Experts a token read from the RAM tier",
                  "disk": "Experts a token read from the SSD",
@@ -2819,6 +2844,16 @@ class Service:
              guard["thinking_closed"]),
             ("maya:loop_guard_stopped_total", "counter", "Answers the loop guard ended (a loop that came back)",
              guard["stopped"]),
+            ("maya:loop_guard_tool_repeats_total", "counter",
+             "Tool calls made again and again with the same result that got a note after them", guard["tool_repeats"]),
+            ("maya:loop_guard_tool_blocked_total", "counter",
+             "Tool calls the loop guard did not let out (made again after its notes)", guard["tool_blocked"]),
+            ("maya:loop_guard_kept_going_total", "counter",
+             "Answers that would have ended the turn with nothing in a conversation that repeats itself, kept going",
+             guard["kept_going"]),
+            ("maya:loop_guard_collapsed_total", "counter",
+             "Prompts the loop guard left the model's repeats out of (a conversation that repeats itself)",
+             guard["collapsed"]),
         ]
         rows += [(f"maya:engine_{k}", "counter" if k in self.PROM_STAT_COUNTERS else "gauge", h, stat[k])
                  for k, h in self.PROM_STAT.items()
@@ -2883,10 +2918,24 @@ class Service:
                 "ram": {"used_gib": scaled(hw.get("ram_used"), 2 ** 30, 1),
                         "total_gib": scaled(hw.get("ram_total"), 2 ** 30, 1)} if hw.get("ram_total") else None}}
 
-    def prepare(self, messages, tools, kwargs, max_new=None, cancel=None):
+    def prepare(self, messages, tools, kwargs, max_new=None, cancel=None, guard=None):
         """-> (ids, thinking, max_new). An unset or non-positive max_new (some clients send -1) means "unlimited":
         the rest of the context.  A tool_choice that requires a call ("_force_tool": "" any, else the tool's name)
-        starts the answer with the call's opening, thinking off; that text goes back in kwargs["_prefill"] for run()."""
+        starts the answer with the call's opening, thinking off; that text goes back in kwargs["_prefill"] for run().
+        With the loop guard (`guard`, else the server's) a tool call the model keeps making with the same result gets
+        a note after that result (_tool_repeat); one it made again after TOOL_NUDGES such notes is blocked in this
+        answer (kwargs["_blocked"] for run(), _block_suffixes); and in a conversation that repeats itself an answer
+        may not end the turn short (kwargs["_blocked"]["_keep"], _keep_suffix)."""
+        on = self.loop_guard if guard is None else guard
+        blocked = loop_guard.tool_blocked(messages) if on else {}
+        looping = bool(blocked) or bool(on and loop_guard.echoes(messages))
+        asked = messages                            # (the request's own, before the prompt leaves anything out)
+        if on:
+            noted = self._tool_repeat(messages)
+            if blocked and len(noted) == len(messages) and messages and messages[-1].get("role") == "user" \
+                    and loop_guard.go_on(messages[-1]):     # "continue": which calls stay blocked, said at once
+                noted = messages + [{"role": "user", "content": loop_guard.blocked_note(blocked)}]
+            messages = self._collapse(messages) + noted[len(messages):]
         given, force = kwargs, kwargs.get("_force_tool")
         kwargs = {k: v for k, v in kwargs.items() if k != "_force_tool"}
         if force is not None and tools:
@@ -2905,6 +2954,11 @@ class Service:
             else:
                 prefill = CALL_START + (force if glm_calls else "\n" + (f"<function={force}>\n" if force else ""))
         given["_prefill"] = prefill
+        given["_blocked"] = self._block_suffixes(blocked, tools, kwargs) if blocked and force is None else None
+        if looping and tools and force is None:
+            keep = self._keep_suffix(tools, kwargs)
+            if keep is not None:                     # (+ what the model said before: stops_short's `seen`)
+                given["_blocked"] = {**(given["_blocked"] or {}), "_keep": keep + (loop_guard.said_before(asked),)}
         ids = self.render_ids(messages, tools, kwargs, prefill)
         self.embeddings.path = None
         media = media_of(messages)
@@ -2999,6 +3053,8 @@ class Service:
                 for _, (path, _) in enc:
                     f.write(path.read_bytes())
             self.embeddings.path = combined
+        if self.engine.max_context <= 0:   # (a reload / /models/load: the start has not reported its context yet)
+            raise BadBody(503, "the model is starting; try again in a moment")
         room = self.engine.max_context - CTX_SLACK - len(ids)
         if max_new is None or max_new <= 0 or (self.fit_max_tokens and room < 1):
             if room < 1:
@@ -3166,6 +3222,93 @@ class Service:
         whole), and a tokenizer without bytes decodes the token alone (no decode of the whole answer a token)."""
         d = Detokenizer(self.tok)
         return d.push if d.inc is not None else (lambda t: self.tok.decode([t]))
+
+    def _block_suffixes(self, blocked, tools, kwargs):
+        """{(name, args): (ToolRepeat, ids, thinks)}: for each blocked call (loop_guard.tool_blocked) the prompt that
+        follows the model's own `</tool_call>` when the server answers it itself - the template's call close, the tool
+        result loop_guard.block_result, a user message loop_guard.block_note and the next assistant turn's opening
+        (`thinks`: that opening is an open thinking block, which run() starts with loop_guard.block_steer).  None for
+        a template that does not end a call with </tool_call> or does not render a turn as a prefix of the next."""
+        out = {}
+        for key, rep in blocked.items():
+            call = {"id": "call_loop_guard", "type": "function",
+                    "function": {"name": key[0], "arguments": json.loads(key[1])}}
+            head = [{"role": "user", "content": "."}, {"role": "assistant", "content": "", "tool_calls": [call]}]
+            tail = [{"role": "tool", "tool_call_id": "call_loop_guard", "content": loop_guard.block_result(rep)},
+                    {"role": "user", "content": loop_guard.block_note(rep)}]
+            try:
+                p = self.template.render(head, tools=tools, **{**kwargs, "add_generation_prompt": False})
+                f = self.template.render(head + tail, tools=tools, **kwargs)
+            except Exception as e:                  # (a template that wants more than this: notes only)
+                print(f"[maya] loop guard: cannot block `{rep.name}` with this template ({e})", flush=True)
+                return None
+            if kwargs.get("enable_thinking") is False and f.endswith("<think>"):
+                f += "</think>"                     # (as render_ids)
+            if not f.startswith(p) or CALL_END not in p:
+                return None
+            out[key] = (rep, self.tok.encode(p[p.rindex(CALL_END) + len(CALL_END):] + f[len(p):], parse_special=True),
+                        f.rstrip().endswith("<think>"))
+        return out
+
+    def _keep_suffix(self, tools, kwargs):
+        """(ids, thinks): the prompt that follows the model's own last words when it would end its turn short in a
+        conversation that repeats itself (loop_guard.stops_short) - the template's turn end, a user message
+        loop_guard.KEEP_NOTE and the next assistant turn's opening (`thinks`: an open thinking block).  None for a
+        template that does not render a turn as a prefix of the next."""
+        mark = "\u2063keep\u2063"                  # (the model's words, wherever the template puts them)
+        head = [{"role": "user", "content": "."}, {"role": "assistant", "content": mark}]
+        try:
+            p = self.template.render(head, tools=tools, **{**kwargs, "add_generation_prompt": False})
+            f = self.template.render(head + [{"role": "user", "content": loop_guard.KEEP_NOTE}], tools=tools, **kwargs)
+        except Exception:
+            return None
+        if kwargs.get("enable_thinking") is False and f.endswith("<think>"):
+            f += "</think>"
+        if not f.startswith(p) or mark not in p:
+            return None
+        return (self.tok.encode(p[p.rindex(mark) + len(mark):] + f[len(p):], parse_special=True),
+                f.rstrip().endswith("<think>"))
+
+    def _collapse(self, messages):
+        """A conversation that carries a loop across turns (loop_guard.collapse): its prompt without what the model
+        already wrote - only that prompt changes."""
+        c = loop_guard.collapse(messages)
+        if c is None:
+            return messages
+        print(f"[maya] loop guard: the conversation repeats itself - left out of the prompt: {c.paragraphs} pieces "
+              f"of the model's own text it had written before, {c.rounds} tool rounds that repeat earlier ones",
+              flush=True)
+        with self.status_lock:
+            self.loop_guard_counts["collapsed"] += 1
+        return c.messages
+
+    def _kept_going(self, kept, text):
+        print(f"[maya] loop guard: the model would end its turn with nothing ({' '.join(text.split())[:80]!r}): "
+              f"kept going ({kept}. time in this answer)", flush=True)
+        with self.status_lock:
+            self.loop_guard_counts["kept_going"] += 1
+
+    def _tool_blocked(self, rep, tries):
+        print(f"[maya] loop guard: `{rep.name}` again after {loop_guard.TOOL_NUDGES} notes ({rep.times} runs, the same "
+              f"result): blocked ({tries}. time in this answer), not run - a note, the thinking steered away and on",
+              flush=True)
+        with self.status_lock:
+            self.loop_guard_counts["tool_blocked"] += 1
+
+    def _tool_repeat(self, messages):
+        """The loop guard across turns (loop_guard.tool_repeat): the request's last tool call, made again and again
+        with the same arguments and the same result - a user message with loop_guard.tool_note() follows its result
+        (inside the result GLM-5.3 ran the call again; as a message of its own it moved on).  Only this prompt changes:
+        the client's conversation stays as it sent it (its next request matches the kept one up to that result, so
+        only the tail is read again)."""
+        rep = loop_guard.tool_repeat(messages)
+        if rep is None:
+            return messages
+        print(f"[maya] loop guard: `{rep.name}` {rep.times} times with the same arguments and result: a note after it",
+              flush=True)
+        with self.status_lock:
+            self.loop_guard_counts["tool_repeats"] += 1
+        return messages + [{"role": "user", "content": loop_guard.tool_note(rep)}]
 
     def _loop_noted(self, act, written: int):
         """A loop the guard broke: a line in the server window, and the Monitor's count."""
@@ -3350,10 +3493,23 @@ class Service:
             sampling = {**defaults, **req_values}
         responses = (sampling or {}).get("_responses") is True
         single_tool = responses and (sampling or {}).get("parallel_tool_calls") is False
-        parser = OutputParser(thinking=thinking, tools=tools, stream_tools=True,
-                              dsml=getattr(self.template, "deepseek", False),
-                              minimax=getattr(self.template, "minimax", False),
-                              strict_tools=responses, single_tool=single_tool)
+        def new_parser():
+            return OutputParser(thinking=thinking, tools=tools, stream_tools=True,
+                                dsml=getattr(self.template, "deepseek", False),
+                                minimax=getattr(self.template, "minimax", False),
+                                strict_tools=responses, single_tool=single_tool)
+        parser = new_parser()
+        # calls the loop guard blocks in this answer (prepare, _block_suffixes): {(name, args): (ToolRepeat, ids)}.
+        # While there are any, the answer's calls are held back (`pending`) until it ends; one that ends it alone
+        # with a blocked call never goes out - the server answers it in the prompt and the model goes on, as often as
+        # it takes (only max_tokens ends it, as any answer)
+        blocked = dict((sampling or {}).get("_blocked") or {})
+        keep = blocked.pop("_keep", None)           # (ids, thinks, seen): the answer may not end the turn short
+        said = []                                   # this engine call's text for the user (stops_short)
+        kept = 0                                    # times it was kept going in this answer
+        called = False                              # it wrote a tool call (then its turn does not end here)
+        pending, tries, sent_call = [], {}, False
+        seg = {"prompt": ids, "ids": [], "next": None}   # this engine call's prompt and tokens; the next one's
         prefill = (sampling or {}).get("_prefill") or ""   # the call's opening, already in the prompt (prepare)
         pre_events = parser.feed(prefill) if prefill else []
         detok, n, finish = Detokenizer(self.tok), 0, "length"
@@ -3464,7 +3620,7 @@ class Service:
                     if pts:
                         sampling = {**(sampling or {}), "_restore": pts}
 
-                def attempts():
+                def attempts(prompt, left):
                     """The engine's tokens.  When its numbers went non-finite (a NaN or an infinity in a route: the
                     engine's ERR says "non-finite") before the first token, the engine has dropped that conversation's
                     state and the request runs once more, its prompt read from token 0."""
@@ -3473,7 +3629,7 @@ class Service:
                                                          piece=self._guard_piece()) \
                             if guard_on else None       # (serve/loop_guard.py; a fresh one for a run again; leaves tool calls alone)
                         guards[:] = [guard] if guard is not None else []
-                        sliced, got = self._sliced(ids, max_new, sampling, cancel, emb, hold, stat, guard), 0
+                        sliced, got = self._sliced(prompt, left, sampling, cancel, emb, hold, stat, guard), 0
                         try:
                             for t in sliced:
                                 got += t is not None
@@ -3486,9 +3642,34 @@ class Service:
                                   "running the request again from token 0", flush=True)
                         finally:
                             sliced.close()
+                def segments():
+                    """attempts(), and after a blocked call (seg["next"]) the engine again on that prompt."""
+                    while True:
+                        yield from attempts(seg["prompt"], max(1, max_new - n))
+                        if seg["next"] is None or cancel.is_set() or self.stopping:
+                            return
+                        seg["prompt"], seg["next"], seg["ids"] = seg["next"], None, []
+
+                def flush():
+                    nonlocal sent_call, answered
+                    for ev in pending:
+                        sent_call = sent_call or ev.kind == "tool_call"
+                        answered = answered or ev.kind != "reasoning"
+                        yield "event", ev
+                    pending.clear()
+
+                def blocked_call():
+                    """The key of the blocked call that alone ends what this engine call wrote, else None."""
+                    calls = [ev for ev in pending if ev.kind == "tool_call"]
+                    if sent_call or len(calls) != 1 or not calls[0].complete or \
+                            any(ev.kind == "content" and ev.text.strip() for ev in pending):
+                        return None
+                    key = (calls[0].call.name, loop_guard.args_key(calls[0].call.arguments))
+                    return key if key in blocked else None
+
                 guard_on = self._loop_guard_on(sampling)
-                gen = attempts()
-                said = bool(pre_events)                 # any answer (text or a call) went out yet
+                gen = segments()
+                answered = bool(pre_events)             # any answer (text or a call) went out yet
                 for ev in pre_events:                   # a required call's opening (prepare put it in the prompt)
                     yield "event", ev
                 try:
@@ -3503,10 +3684,10 @@ class Service:
                             finish = "stop"
                             if held:
                                 for ev in parser.feed(held):
-                                    said = said or ev.kind != "reasoning"
+                                    answered = answered or ev.kind != "reasoning"
                                     yield "event", ev
                                 held = ""
-                            if not said:                # (a model with no end-of-thinking token, still thinking)
+                            if not answered:             # (a model with no end-of-thinking token, still thinking)
                                 yield "event", Event("content", LOOP_STOP_NOTE)
                             break
                         n += 1
@@ -3521,7 +3702,38 @@ class Service:
                         if t in self.stop_ids:
                             finish = "stop"
                             raw_ids.append(t)
-                            break
+                            key = blocked_call() if blocked else None
+                            if key is None and keep is not None and not called and \
+                                    (kept < loop_guard.KEEP_MIN or loop_guard.stops_short("".join(said), keep[2])):
+                                # it would end the turn in a conversation that repeats itself: the first KEEP_MIN
+                                # times, and whenever with nothing new (talk about its loop, a line, what it said
+                                # before), it goes on
+                                kept += 1
+                                self._kept_going(kept, "".join(said))
+                                ids_k, thinks, _ = keep
+                                steer = self.tok.encode(loop_guard.keep_steer(kept)) if thinks else []
+                                seg["next"] = list(seg["prompt"]) + seg["ids"] + ids_k + steer
+                                sampling = loop_guard.block_sampling(sampling, kept)
+                                parser, detok, held, said[:] = new_parser(), Detokenizer(self.tok), "", []
+                                in_think = bool(thinking) and self.think_end_id is not None and self.think_budget > 0
+                                continue
+                            if key is None:
+                                break
+                            rep, suffix, thinks = blocked[key]
+                            pending.clear()             # the call never goes out
+                            called = False
+                            tries[key] = tries.get(key, 0) + 1
+                            self._tool_blocked(rep, tries[key])
+                            # the server answers it: the call's result and a note in the prompt, and the model's next
+                            # thinking starts a step away from it (never the end: it goes on until it does something
+                            # else; from the 2nd time a little hotter)
+                            steer = self.tok.encode(loop_guard.block_steer(rep, key[1], tries[key])) if thinks else []
+                            seg["next"] = list(seg["prompt"]) + seg["ids"] + suffix + steer
+                            sampling = loop_guard.block_sampling(sampling, tries[key])
+                            parser, detok, held, said[:] = new_parser(), Detokenizer(self.tok), "", []
+                            in_think = bool(thinking) and self.think_end_id is not None and self.think_budget > 0
+                            continue
+                        seg["ids"].append(t)
                         if parser.state == "reasoning":
                             reasoning_tokens += 1
                         raw_ids.append(t)
@@ -3550,14 +3762,22 @@ class Service:
                         self._note(n, evs, stat)
                         last_print = self._progress(last_print)
                         for ev in evs:
-                            said = said or ev.kind != "reasoning"
-                            yield "event", ev
+                            if ev.kind == "content":
+                                said.append(ev.text)
+                            elif ev.kind == "tool_call":
+                                called = True
+                            if blocked and (pending or ev.kind.startswith("tool")):
+                                pending.append(ev)      # (a call: held back until the answer ends)
+                            else:
+                                answered = answered or ev.kind != "reasoning"
+                                yield "event", ev
                             if single_tool and ev.kind == "tool_call" and ev.complete:
                                 stopped = True
                                 break
                         if stopped:
                             finish = "stop"
                             break
+                    yield from flush()
                     if held:                    # the run ended on what only looked like a marker's start
                         was = parser.state
                         for ev in with_lp(parser.feed(held), was):
@@ -3579,6 +3799,7 @@ class Service:
                         finish = "length"
                         print(f"[maya] the engine's numbers went non-finite after {n} tokens ({e}): the answer ends "
                               "there", flush=True)
+                        yield from flush()
                         if held:
                             was = parser.state
                             for ev in with_lp(parser.feed(held), was):
@@ -3801,9 +4022,10 @@ def run_with_mcp(svc: Service, hub, messages, tools, kw, ids, thinking, max_new,
                                         for c in calls]})
         messages += [{"role": "tool", "tool_call_id": c.id, "content": r} for c, r in zip(calls, results)]
         # a required tool call applies to the first answer only: after the tools ran, the model answers freely
-        kw = {k: v for k, v in kw.items() if k not in ("_force_tool", "_prefill")}
+        kw = {k: v for k, v in kw.items() if k not in ("_force_tool", "_prefill", "_blocked")}
         sampling = {k: v for k, v in (sampling or {}).items() if k != "_prefill"}
-        ids, thinking, max_new = svc.prepare(messages, tools, kw, max_req)
+        ids, thinking, max_new = svc.prepare(messages, tools, kw, max_req, guard=svc._loop_guard_on(sampling))
+        sampling["_blocked"] = kw.get("_blocked")
     yield "done", {**done, "completion_tokens": total, "prompt_tokens": len(ids)}
 
 
@@ -4286,6 +4508,69 @@ def make_handler(svc: Service):
             self.end_headers()
             self.wfile.write(body)
 
+        def _llamacpp_model(self, op: str):
+            """llama.cpp's /models/load and /models/unload: Open WebUI's Models page (load / switch)."""
+            if not getattr(svc, "model_management", False):
+                self._json(404, {"error": {"message": "model management is off (\"model_management\": true, or "
+                                                      "MAYA_MODEL_MANAGEMENT=1, turns it on)"}})
+                return
+            try:
+                body = json.loads(self._body().decode() or "{}")
+            except Exception:  # noqa: BLE001 - no body: the running model
+                body = {}
+            name = (body or {}).get("model") or svc.model
+            if name != svc.model:
+                self._json(404, {"error": {"message": "model not found"}})
+                return
+            svc._require_single_rank_restart()
+            if op == "unload":
+                state = svc.unload()
+                if state == "busy":
+                    self._json(409, {"error": {"message": "a request is running or waiting; unload when idle"}})
+                elif state == "unsupported":
+                    self._json(400, {"error": {"message": "this engine cannot unload"}})
+                else:
+                    self._json(200, {"model": name, "status": {"value": "unloaded"}})
+                return
+            if hasattr(svc.engine, "alive") and svc.engine.alive():
+                self._json(200, {"model": name, "status": {"value": "loaded"}})
+                return
+            if not svc.fifo.acquire(blocking=True):
+                self._json(503, {"error": {"message": "the engine has no free place to start"}})
+                return
+            try:
+                svc.ensure_engine()
+            except Exception as e:  # noqa: BLE001 - the reason goes back to the caller
+                self._json(503, {"error": {"message": f"the engine did not start: {e}"}})
+                return
+            finally:
+                svc.fifo.release()
+            self._json(200, {"model": name, "status": {"value": "loaded"}})
+
+        def _models_sse(self):
+            """llama.cpp's /models/sse: the Models page's live state, a snapshot every few seconds."""
+            if not getattr(svc, "model_management", False):
+                self._json(404, {"error": {"message": "model management is off (\"model_management\": true, or "
+                                                      "MAYA_MODEL_MANAGEMENT=1, turns it on)"}})
+                return
+            if not self._authorized():
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            try:
+                while True:
+                    alive = not hasattr(svc.engine, "alive") or svc.engine.alive()
+                    value = "loaded" if alive else ("unloaded" if svc.unloaded else "loading")
+                    payload = {"object": "list", "data": [{"id": svc.model, "status": {"value": value}}]}
+                    self.wfile.write(("data: " + json.dumps(payload) + "\n\n").encode())
+                    self.wfile.flush()
+                    time.sleep(5)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
         def _cors_allow(self):
             """The Access-Control-Allow-Origin value for this request, or None: only /v1/* paths and only an origin the
             config's cors_origins lists (or "*")."""
@@ -4439,6 +4724,9 @@ def make_handler(svc: Service):
 
         def do_GET(self):
             path = self.path.split("?")[0].rstrip("/")
+            if path == "/models/sse":
+                self._models_sse()
+                return
             if path.startswith("/v1/responses/"):
                 self._response_resource()
                 return
@@ -4575,6 +4863,8 @@ def make_handler(svc: Service):
                     self.end_headers()
                     self.wfile.write(body)
             elif path == "/status":
+                if not self._authorized():   # (it carries `tail`: the last 600 characters written)
+                    return
                 with svc.status_lock:
                     s = dict(svc.status)
                     answering = svc.latest_request in svc.current_requests
@@ -4592,6 +4882,11 @@ def make_handler(svc: Service):
                     model = {"id": svc.model, "object": "model",
                              "status": {"value": "loaded" if loaded else "unloaded"},
                              "meta": {"n_ctx": svc.engine.max_context},
+                             # (the same capacity under the name generic OpenAI-compatible
+                             # clients read on a model listing: DeepSeek Harness's pi-ai discovery,
+                             # open-webui, llama.cpp's server clients, ... - n_ctx stays above;
+                             # no max_output_tokens: a client asking for the whole context as output gets a 400)
+                             "context_length": svc.engine.max_context,
                              # (videos: the llama.cpp encoder's - GLM's; DeepSeek's encoder reads pictures only)
                              "architecture": {"input_modalities": ["text"] if svc.vision is None else
                                               ["text", "image", "video"] if isinstance(svc.vision, Vision) else
@@ -4645,6 +4940,9 @@ def make_handler(svc: Service):
                 return
             path = self.path.split("?")[0].rstrip("/")   # issue #55: Claude Code posts /v1/messages?beta=true
             try:
+                if path in ("/models/load", "/models/unload"):
+                    self._llamacpp_model(path.rsplit("/", 1)[1])
+                    return
                 if path.startswith("/v1/responses/") and path.endswith("/cancel"):
                     self._response_cancel(path)
                     return
@@ -4855,6 +5153,13 @@ def make_handler(svc: Service):
             self._json(200, {"shared": bool(shared), "defaults": shared})
 
         def _sse(self):
+            # token frames are small and flushed as they come; Nagle would otherwise hold one
+            # for the peer's delayed ACK (~40 ms) on its way to the client.
+            try:
+                import socket
+                self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            except OSError:
+                pass
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-cache")
@@ -4928,9 +5233,11 @@ def make_handler(svc: Service):
             try:
                 if cancel.is_set():
                     raise ValueError("generation was cancelled before preparation")
-                ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new, cancel=cancel)
+                ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new, cancel=cancel,
+                                                     guard=svc._loop_guard_on(sampling))
                 if kw.get("_prefill"):
                     sampling["_prefill"] = kw["_prefill"]
+                sampling["_blocked"] = kw.get("_blocked")
                 effective = {**svc.sampling_defaults, **svc.shared, **sampling}
                 config = {**req, **{k: effective[k] for k in ("temperature", "top_p") if k in effective}}
                 run = svc.run(ids, thinking, tools, max_new, sampling, cancel)
@@ -4961,9 +5268,10 @@ def make_handler(svc: Service):
                 extra = svc.mcp.template_tools(exclude=own)       # the request's own tools win a name clash
                 use_mcp = bool(extra)
                 tools = (tools or []) + extra or None
-            ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new)
+            ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new, guard=svc._loop_guard_on(req))
             if kw.get("_prefill"):                             # a required tool call starts the answer
                 req = {**req, "_prefill": kw["_prefill"]}
+            req = {**req, "_blocked": kw.get("_blocked")}      # calls the loop guard blocks (Service.prepare)
             _debug_req("openai", req, messages, tools, max_new, thinking, len(ids))
             cancel = threading.Event()
             if not (req.get("stream") and req.get("strata_resume") is True):   # (the web app's runs on, by design)
@@ -5054,9 +5362,10 @@ def make_handler(svc: Service):
             svc.check_request(req)                             # a bad sampling field: a 400, now
             messages, tools, kw = anthropic_to_messages(req, deepseek=getattr(svc.template, "deepseek", False))
             max_new = int(req.get("max_tokens") or 0)                  # 0/-1: the rest of the context
-            ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new)
+            ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new, guard=svc._loop_guard_on(req))
             if kw.get("_prefill"):                             # a required tool call starts the answer
                 req = {**req, "_prefill": kw["_prefill"]}
+            req = {**req, "_blocked": kw.get("_blocked")}      # calls the loop guard blocks (Service.prepare)
             _debug_req("anthropic", req, messages, tools, max_new, thinking, len(ids))
             cancel = threading.Event()
             watch_client(self, cancel)
@@ -5597,6 +5906,9 @@ def main() -> int:
     svc.idle_unload_s = max(0.0, a.idle_unload if a.idle_unload is not None else float(cfg.get("idle_unload_s") or 0))
     if svc.think_budget:
         print(f"[maya] thinking budget: {svc.think_budget} tokens (then the answer)", flush=True)
+    svc.model_management = model_management_setting(cfg)   # ("model_management": true: llama.cpp's load/unload/sse)
+    if svc.model_management:
+        print("[maya] model management: on (/models/load, /models/unload, /models/sse)", flush=True)
     svc.loop_guard = loop_guard_setting(cfg)            # (MAYA_LOOP_GUARD=0 or "loop_guard": false: off)
     if not svc.loop_guard:
         print("[maya] loop guard: off (a request's \"loop_guard\": true turns it on for that request)", flush=True)

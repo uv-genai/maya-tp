@@ -935,3 +935,7 @@ merge/upstream-v1.1.41 from updatedmain. Audit every new GLM state/snapshot/canc
 for mirror order, pool size-class bytes against compact TP blobs, replicated NextN/full widths/ARs,
 MTP wire/global retry/chunks, measured tuning/defaults and owned docs. Keep unsupported backends
 excluded, #46 stream deferral and #53 reload guard. No42 work before41acceptance/mainCI.
+
+### 29.12 v1.1.41 semantic candidate (#55 / #56)
+
+Review worktree merge/upstream-v1.1.41 from daa8f29; source conflicts resolved semantically. Keep TP2 cancellation paired reset (never rank0 checkpoint restore), mirrored snapshot with optional SNAP_GEN; route optimizations opt-in/default off. Exclude unsupported backend/platform and DS4 same-host multi-GPU features. Retain applicable GLM/CPU/MMQ/server fixes; #56 extends lifecycle safeguard to new load/unload endpoints, idle unload and automatic dead-rank restart. CPU/build/live/fidelity/performance/CI gates pending; no42 yet.

@@ -169,6 +169,11 @@ These settings change what the engine chooses (put them in the config with `--en
 | `MAYA_GLM_DFLASH_TL` | off | DFlash2's pipelined window: a line a round to that file - ms from the round's first token's start: the drafts ready and pushed, the host's begin steps, each pick as it comes out of the last GPU, then a `c` line with the commit done |
 | `MAYA_GLM_DFLASH_PRIO` | on | the drafter's stream at the device's highest priority, so a draft is not held behind the last GPU's queued work (9 GPUs, EXL3-4.05bpw: a draft 6.4 -> 5.7 ms); `0` = the default priority |
 | `MAYA_GLM_TIMING`, `MAYA_GLM_POOL_STATS` | off | `1` = timing and cache statistics in the engine log |
+| `MAYA_GLM_SNAP_GEN` | off | Opt in to saving the reusable snapshot before the generation suffix. The last 2–4 prompt tokens then use the token path and greedy answers can differ. TP2 mirrors snapshot/forward operations at the same position on both ranks. |
+| `MAYA_GLM_KEEP_CANCELLED` | off | Single-host only: preserve the longest completed checkpoint after prompt cancellation. TP2 always resets both ranks after a cancelled prompt until checkpoint restore has a paired protocol. |
+| `MAYA_GLM_ROUTE_RANK` | off | Opt in to ranking experts in parallel instead of serial top-k selection. Retains score/id tie order; gfx1151 TP2 default remains the accepted route. |
+| `MAYA_GLM_ROUTE_FAST` | off | Opt in to reordered routing plan reads/writes and the device error flag. Preserve the accepted route until measured on gfx1151. |
+| `MAYA_GLM_ROUTE_PROF` | off | Routing phase cycle counters, printed at exit. Profiling is excluded from performance claims. |
 | `MAYA_GLM_ROUTE_LOG` | off | `<prefix>`: every decode route as a line in `<prefix>.<GPU>` - the layer, its experts, which were fetched, missed or computed on the CPU, then after a `\|` the 16 near misses (the next ranks by the same score) - for cache studies: `tools/glm_tier_replay.py` replays a log through a model of the VRAM tier's rules and alternatives |
 | `MAYA_GLM_SCORE_PREFILL` | off | with `MAYA_GLM_SCORE=<c>` (score `--tokens` after the first c): `1` reads those c tokens through the prompt path instead of one by one, so a long context is scored in minutes (debug: comparing KV-cache formats at long context) |
 | `MAYA_GLM_MULTI_BENCH` | off | `<n>,<prompt>,<tokens>` (with `MAYA_GLM_SEQS` >= n, `--glm-pack`, no `--serve`): n prompts, then that many greedy tokens each - sequence 0 alone through the token path, then all n through the pipelined decode; positive `MAYA_GLM_SPLIT_ROWS` groups up to k sequences per part and reports `split-rows`; prints both rates and how many of sequence 0's tokens agree (all of them with `MAYA_GLM_CPU_LANE=0`). `MAYA_GLM_MULTI_DUMP=<file>` also writes every sequence's tokens there, a line each (then the lone run's), to compare two builds or settings token for token |
@@ -1706,3 +1711,9 @@ See [TP2-RUN.md](TP2-RUN.md) for bring-up.
 ### Upstream streamed expert fetch
 
 Streamed expert fetch from upstream v1.1.39 is deferred in Maya-TP (#46). The existing compact TP2 reader publishes a full blob only after all reads finish; upstream chunk-ready flags do not describe that layout. `MAYA_GLM_STREAM_FETCH` has no effect in this fork.
+
+### Model lifecycle and timing (upstream v1.1.41 integration)
+
+`MAYA_MODEL_MANAGEMENT=1` (or config `model_management: true`) enables llama.cpp-compatible `/models/load`, `/models/unload`, `/models/sse`. It defaults off. Under TP2, load/unload, idle unload and dead-engine automatic restart are rejected before a single rank changes; relaunch both ranks using the paired launcher. The existing context/current-model guard also applies.
+
+`MAYA_DS4_IQ1S_ROWS=0/1` overrides selection of IQ1_S CPU rows; unset preserves the previous one-GPU policy. DS4 prompt-path calibration now learns each prompt-size class independently, and draft/verify timing is exported without changing drafting policy. New local multi-GPU helper/peer transport and lazy-drafter features are excluded from this fork checkpoint.
