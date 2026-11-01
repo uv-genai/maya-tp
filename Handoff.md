@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.17)**, v1.1.37–41 accepted; v1.1.42 candidate #61/#62 under validation.
-> User authorized stopping the pair for validation. Fixed42 bc4e90a6/runtime837a679 all5paths matched; CPU/HIP/host/kernel gates pass. Fixed64 stress gate passes; live batch19655 finalLbenchmark active, normal-idleAB still required (§29.17); no43. Accepted41 main41327238265 PASS.
+> Last updated:2026-11-02 · **Sequential integration (§29.18)**:37–41 accepted;42allruntimePASS, finalCI/PR63/mainpending; no43 yet.
+> No active GPU/server/test batches. Fixed42bc4/source837 all5paths matched; defaultidleA/B passed; protectedproductionuserwork/YAMLunchanged.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -1001,3 +1001,9 @@ Review branch merge/upstream-v1.1.42 has an in-progress merge from cd48762. Reta
 42 fullbatch19655 EXIT0: LAPI/prefill+8framedrawpick0 PASS; LfinalwarmR0731/R1219s within900 unchanged; ordinary42.82/MTP35.16ms/token (historicalrange), no persistentMTPregression. TotalS16+M8+L8=32strictframedrecordsraw0. IOsnapshotsretained(#60), startupvariabilityunresolved. **ACTIVE normal-idleAB session26121**, /tmp/maya-upstream-v42-idle-ab.py, output /tmp/maya-upstream-v42/idle-ab.txt andidle-ab/results.json. Do notstartconcurrentGPU. Thisislastplannedruntimegate; aftersuccess finalreview/evidence/headCI/PR63/mainCIbefore43.
 
 42 ALLRUNTIMEPASS: idleAB26121 EXIT0, default65squiet+10ssamplesCPU baselineR0/R1 .88/.78%→candidate .20/.00%; voluntaryswitches422/428→10.94/10.00persec; botharmsMTPfollowup/peerpass. All32strictS/M/Lraw0, L731/219warm/35.16MTPwithinrange. Finalbc4all5hashesmatch; bothengines/serverstopped, remotecanonical777userdirtyfiles/backups/daemon/YAMLprotected. Reportrewritten/validation.jsonpendingonlyfinalCI/merge/main. No43beforethose.
+
+### 29.18 v1.1.42 runtime complete — final CI/merge/main pending
+
+All planned42gates PASS; no active GPU/server/test batch. Engine837a679/bc4e90a607b87fe609398fbdba0fb98c all5paths matched; Python456b4a5. Fullbatch19655/idleAB26121 exited0; do not rerun. Report docs/upstream/v1.1.42.md andvalidation.json finalpendingonlyCI/merge/main. PR63/#61/#62/#64 openuntilmainPASS. NormalidleCPU/switchbenefitmeasuredonbothgfx1151ranks; 32strictS/M/Lrecordsraw0, allcancel/reuse/limit/recovery/mirror/perfgatespassed. L731/219s startupwithin900,35.16MTPms;60variabilityremainsopen. Allfailedfixture/prefix-log-audit/pre-fixidledataretained.
+
+Next: finalheadCI, readyPR63, ancestry-preservingmerge, post-mainCI, explicitclose61/62/64, acceptedreport/handoffs/index andsavebc4v42baselineBOTHhosts. Onlythen43issue/branch; continuethrough46. NumericVERSION1.1.42/legacyreleasesunchanged; futuretp-v tags; noreleaseauthorized. Protectedcanonical777cc92useredits/backups/daemon175392/YAMLunchanged.
