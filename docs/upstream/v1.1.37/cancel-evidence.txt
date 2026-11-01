@@ -1,0 +1,2 @@
+Maya-M: [maya] done: 11 tokens in 1 s (33.8 tok/s) (disconnect, cancel=True), expert cache 99.8% hit
+Maya-L: [maya] done: 11 tokens in 1 s (26.6 tok/s) (disconnect, cancel=True), expert cache 99.9% hit

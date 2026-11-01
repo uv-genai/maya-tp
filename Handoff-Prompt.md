@@ -28,7 +28,12 @@ saved on both hosts in `/tmp/maya-upstream-baseline-2026-11-01/`. Candidate v1.1
 **6e59558bdd421fa521040263978b2bd6** is deployed/hash-verified at all three canonical paths.
 Isolated worktree `/home/ugo/software/project-maya-upstream-review` on both hosts; candidate commits
 **884a257 + 0892d77**, draft **PR #38**, host-test wiring fix **#39**. CPU gates and HIP builds pass;
-GPU validation is starting. Do not start the next tag until #37 passes.
+Shared HIP parity, S MTP/simple matrices, reuse/cancel/limits, CLI 32/32 in both modes,
+zero-raw-pick benchmark and kill/recover 8/8 PASS. M/L API acceptance and1K/4K/8K smoke,
+plus CLI simple/MTP7 **32/32 each** on both M and L PASS. Saved-release CLI matches32/32 in both modes. Reversed warm prefill deltas **+0.66/−1.77/−0.73%**
+at1K/4K/8K; all9 paired messages identical. Initial cold outliers preserved; #33 remains open.
+Final evidence/CI remain before #37 acceptance. See Handoff §29.2; do not start the next tag yet. Candidate now includes `tp-v` policy
+via main merge `efa221a`; all three HIP engines build.
 
 **v1.1.42 published** from **`64719953312df98c9fdf53a10198c106cb195345`**, release CI **41203815519 PASS**.
 Annotated tag verified locally/remotely; public/latest/non-prerelease GitHub source release, 0 assets.
@@ -53,7 +58,9 @@ kill/recover, `bench_mtp`). Reports:
   The “copy lane” includes idle mixer windows: initial staging diagnosis was incomplete.
   Cold L startup/lending remains slow; user **9.6 tok/s** request 11 not reproduced (test turn 11: 58).
   ~3008-row RDMA cap and unimplemented `MAYA_TP_PREFILL_ROWS` remain. Decode/MTP generation is fine.
-- **#29** — launchers + Maya-M; work done, issue still open (close when user agrees).
+- **#29** — closed; launchers + Maya-M full suite completed (§21).
+- **#42** — existing CLI readiness/warmup skew; tracking only. Cold L WARM=0 MTP7 passed32/32
+  but needs126s prompt +432s decode; no runtime fix in this merge.
 - **#1** umbrella, **#10** optional, **#11** multi gated, **#16** vision deferred.
 
 **Launchers:** `--model NAME` / `--pack PATH` / `--config PATH` or `MAYA_MODEL` / `MAYA_PACK` /

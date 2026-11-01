@@ -15,7 +15,7 @@ The updater accepts both fork-prefixed and legacy tags; merging an upstream tag 
 
 | Upstream tag | Exact commit | Commits/files since preceding tag | Status |
 |---|---|---|---|
-| v1.1.37 | `7ee8f2777c754229605a8c19ca985cbb68540419` | 18 / 86 | #37: first checkpoint, not validated |
+| v1.1.37 | `7ee8f2777c754229605a8c19ca985cbb68540419` | 18 / 86 | #37: validation passed; PR #38 final CI/merge pending |
 | v1.1.38 | `cf6472cc84489765791ad97bb55b395e8f442088` | 4 / 13 | queued |
 | v1.1.39 | `376b4b87402bc992af7b4a8dec089ef7cba7801c` | 33 / 48 | queued |
 | v1.1.40 | `cbaaec5d70fde2730e251dec6b418e4b454c01bd` | 16 / 55 | queued |
@@ -51,8 +51,9 @@ The updater accepts both fork-prefixed and legacy tags; merging an upstream tag 
 
 ## Host state at audit
 
-User Maya-L pair is running at context 524288 (rank0 API :5812, rank1 local). Do not interrupt it
-while reviewing/CPU checking; host availability for GPU validation was asked asynchronously.
+The audit started with user Maya-L context524288 (rank0 API :5812, rank1 local). User then explicitly
+authorized stopping the pair for per-tag validation. First-tag tests are complete; both engines/server
+are stopped, daemon/YAML untouched. See Handoff §29 and the per-tag checkpoint for current state.
 Rank0 checkout `777cc92` has user `maya.py` changes/backups and deployed #33 files: preserve them;
 no pull/reset/rebuild there. Daemon/YAML unchanged. Use an isolated integration worktree and retain
 baseline binaries/reference data before candidate deployment. Three baseline engine MD5s:

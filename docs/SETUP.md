@@ -121,6 +121,11 @@ downloads the new code (git), compiles only the engine files that changed and lo
 is not downloaded again, and your settings stay. By hand: `git pull`, then `./setup.sh`.
 (The check asks GitHub for the latest release, at most every six hours; `MAYA_UPDATE_CHECK=0` turns it off.)
 
+**Maya-TP release names:** future fork releases use `tp-vMAJOR.MINOR.PATCH`; existing published
+`v*` tags stay unchanged. Installs at v1.1.42 or earlier need a one-time `git pull --ff-only`
+before the dashboard can recognize the new prefix. Use a clean checkout on `main`; preserve any
+local edits first. The updated dashboard accepts both prefixed and legacy release tags.
+
 ## Options
 
 | Option | |

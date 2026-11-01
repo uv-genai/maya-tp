@@ -1,0 +1,50 @@
+{
+  "order": "candidate then baseline, reversed from initial A/B",
+  "method": "Each engine runs three fresh 1K/4K/8K cycles; first cycle is warm-up, final two cycles measured. Same candidate server/config/tuning on both arms. All 9 paired messages and usage match.",
+  "rows": [
+    {
+      "repeats": 960,
+      "baseline_ms": [
+        3599.8,
+        3614.7
+      ],
+      "candidate_ms": [
+        3608.2,
+        3558.9
+      ],
+      "baseline_median_ms": 3607.25,
+      "candidate_median_ms": 3583.55,
+      "throughput_change_percent": 0.6613553599084554
+    },
+    {
+      "repeats": 4032,
+      "baseline_ms": [
+        12236.3,
+        12091.4
+      ],
+      "candidate_ms": [
+        12760.9,
+        12004.6
+      ],
+      "baseline_median_ms": 12163.849999999999,
+      "candidate_median_ms": 12382.75,
+      "throughput_change_percent": -1.7677817932204243
+    },
+    {
+      "repeats": 8128,
+      "baseline_ms": [
+        22889.6,
+        23103.5
+      ],
+      "candidate_ms": [
+        23243.4,
+        23086.7
+      ],
+      "baseline_median_ms": 22996.55,
+      "candidate_median_ms": 23165.050000000003,
+      "throughput_change_percent": -0.7273888897282865
+    }
+  ],
+  "initial_cold_probe": "prefill-comparison.json (contains startup/copy outliers on both binaries; do not treat it as a steady performance estimate)",
+  "general_speedup_claim": false
+}

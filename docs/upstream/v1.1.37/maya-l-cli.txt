@@ -1,0 +1,2 @@
+PASS Maya-L-simple CLI 32/32
+PASS Maya-L-mtp CLI 32/32
