@@ -150,7 +150,8 @@ int main() {
 
     strata::prefill::hipblaslt::TuningTable table;
     std::string error;
-    if (!table.load(tuning_path, arch, version, error)) {
+    const auto paths = strata::prefill::hipblaslt::split_table_list(tuning_path);
+    if (paths.empty() || !table.load(paths.front(), arch, version, error)) {
         std::fprintf(stderr, "tuning table rejected: %s\n", error.c_str());
         return 1;
     }
