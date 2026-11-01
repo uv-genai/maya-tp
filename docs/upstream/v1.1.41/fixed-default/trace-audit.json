@@ -1,0 +1,7 @@
+{
+  "rank0_rounds": 135,
+  "rank1_rounds": 135,
+  "all_round_tuples_match": true,
+  "asymmetric_retries": 8,
+  "retry_tuples_match": true
+}
