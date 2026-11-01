@@ -6,6 +6,8 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.40 integration** (#50): context/dashboard controls, HTTP request handling and update serialization, download recovery, and the opt-in DeepSeek tail-cost estimate. Exclude the Metal backend; preserve GLM TP2/MTP engine, tuning and owned docs.
+
 - Integrate upstream v1.1.39 with TP2/MTP preservation (refs #45): MMQ row-ID padding, ordered hipBLASLt table fallback, bounded sentence-end thinking closure and cancel draining. Keep measured tuning first, answer reserves for every output limit and existing defaults. Streamed expert fetch is deferred pending a compact TP2 reader port (#46).
 
 - **Upstream v1.1.38 integration** (#43): web model card/answer information and home-screen redirects;

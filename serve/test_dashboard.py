@@ -193,6 +193,34 @@ class Dashboard(unittest.TestCase):
                                                   "messages": [{"role": "user", "content": "hi"}]})
         self.assertEqual(json.loads(self.req("GET", "/metrics")[2])["totals"]["peak_decode"], peak)
 
+    def test_peak_decode_follows_the_live_figure(self):
+        # a live Decode reading above the peak is the peak in the same /metrics answer (the owner's screenshot: 30.0
+        # live, peak 27.8), rounded as shown; a reading before PEAK_MIN_TOKENS tokens is not
+        from serve.server import PEAK_MIN_TOKENS, RequestStat
+        svc, now = self.svc, time.time()
+        svc.totals["peak_decode"] = {"tok_s": 27.8, "tokens": 400, "time": now - 60}
+        r = RequestStat()
+        r.first_token = now - 10
+        with svc.status_lock:
+            svc.status.update(busy=True, generated=PEAK_MIN_TOKENS - 1)
+            svc.current_requests.add(r)
+            svc.latest_request = r
+        try:
+            r.base = (now - 1, 0); r.samples.append((now, PEAK_MIN_TOKENS - 1))   # 31 tok/s, but only 31 tokens
+            m = json.loads(self.req("GET", "/metrics")[2])
+            self.assertEqual(m["totals"]["peak_decode"]["tok_s"], 27.8)
+            for k, n in enumerate((300, 330, 310)):                   # 300, 330, 310 tok/s live, one a reading
+                r.samples.clear(); r.base = (time.time() - 1, 1000 * k); r.samples.append((time.time(), 1000 * k + n))
+                m = json.loads(self.req("GET", "/metrics")[2])
+                self.assertGreaterEqual(m["totals"]["peak_decode"]["tok_s"], m["live"]["tok_s"])
+            self.assertAlmostEqual(m["totals"]["peak_decode"]["tok_s"], 330, delta=2)
+            self.assertEqual(m["totals"]["peak_decode"]["tokens"], 1330)
+            self.assertEqual(round(m["totals"]["peak_decode"]["tok_s"], 1), m["totals"]["peak_decode"]["tok_s"])
+        finally:
+            with svc.status_lock:
+                svc.status.update(busy=False)
+                svc.current_requests.discard(r)
+
     def test_requests_record_their_api(self):
         self.req("POST", "/v1/chat/completions", {"model": "m", "messages": [{"role": "user", "content": "hi"}]})
         s, _, b = self.req("GET", "/metrics")
@@ -437,7 +465,8 @@ class GpuRelease(unittest.TestCase):
         from serve import server as SV, telemetry as T
         seen = [{4242, 7}, {4242, 7}, {7}]
         with mock.patch.object(T, "gpu_pids", side_effect=lambda: seen.pop(0) if len(seen) > 1 else seen[0]), \
-                mock.patch.object(SV.time, "sleep") as sleep:
+                mock.patch.object(SV.time, "sleep") as sleep, \
+                mock.patch.object(SV.sys, "platform", "linux"):
             SV.wait_gpu_release(4242, timeout=30)
         self.assertEqual(seen, [{7}])
         self.assertEqual(sleep.call_count, 2)
@@ -445,9 +474,11 @@ class GpuRelease(unittest.TestCase):
     def test_without_nvml_a_short_wait(self):
         from unittest import mock
         from serve import server as SV, telemetry as T
-        with mock.patch.object(T, "gpu_pids", return_value=None), mock.patch.object(SV.time, "sleep") as sleep:
+        with mock.patch.object(T, "gpu_pids", return_value=None), mock.patch.object(SV.time, "sleep") as sleep, \
+             mock.patch.object(SV.sys, "platform", "linux"):
             SV.wait_gpu_release(4242)
         sleep.assert_called_once()
+
 
 
 class NvmlPids(unittest.TestCase):
@@ -512,6 +543,74 @@ class Offline(unittest.TestCase):
         self.assertTrue((self.WEB / "fonts" / "OFL.txt").is_file())
         index = (self.WEB.parent / "web" / "index.html").read_text(encoding="utf-8")
         self.assertNotIn("fonts.googleapis", index)
+
+
+# the page's own modules in Node (skipped without it), the browser's few globals they touch at load stubbed out
+PAGE_STUBS = """
+const noop = () => {};
+const el = new Proxy({}, {get: (t, k) => (k in t ? t[k] : k === "dataset" || k === "style" ? (t[k] = {})
+  : k === "classList" ? (t[k] = {add: noop, remove: noop, toggle: noop}) : noop)});
+globalThis.matchMedia = () => ({matches: false, addEventListener: noop, addListener: noop});
+globalThis.localStorage = {getItem: () => null, setItem: noop, removeItem: noop};
+globalThis.document = {documentElement: el, body: el, head: el, addEventListener: noop, querySelector: () => null,
+                       createElement: () => el};
+globalThis.window = globalThis; globalThis.addEventListener = noop;
+globalThis.location = {href: "http://x/", hash: "", search: "", pathname: "/"};
+const web = process.argv[2];
+const st = await import(web + "/state.js"), sv = await import(web + "/server.js");
+"""
+
+
+@unittest.skipUnless(__import__("shutil").which("node"), "Node.js is not installed")
+class PageLogic(unittest.TestCase):
+    def node(self, body):
+        import subprocess
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "t.mjs"
+            p.write_text(PAGE_STUBS + body, encoding="utf-8")
+            r = subprocess.run(["node", str(p), (ROOT / "serve" / "web").resolve().as_uri()], capture_output=True,
+                               encoding="utf-8", timeout=60)
+        self.assertEqual(r.returncode, 0, r.stderr[-2000:])
+        return json.loads(r.stdout.strip().splitlines()[-1])
+
+    def test_thinking_pill_covers_the_chosen_level_only(self):
+        # the owner's phone: Low chosen, the fill spanned Off and Low.  Every model's levels, every level: the pill sits
+        # on that level's segment alone
+        got = self.node("""
+const out = {};
+for (const model of ["glm-5.3-flash", "deepseek-v4.1-flash", "minimax-m3.1-flash", "cyber-frost-3.8-ps"]) {
+  st.setFamily(model);
+  out[model] = st.LEVELS.map((l) => [l.id, st.thinkPill(l.id)]);
+}
+console.log(JSON.stringify(out));""")
+        self.assertEqual([lv for lv, _ in got["glm-5.3-flash"]], ["none", "low", "high", "max"])
+        self.assertEqual(len(got["minimax-m3.1-flash"]), 7)
+        for model, levels in got.items():
+            n = len(levels)
+            for i, (lv, pill) in enumerate(levels):
+                with self.subTest(model=model, level=lv):
+                    self.assertEqual((pill["i"], pill["n"]), (i, n))
+                    self.assertAlmostEqual(pill["at"], 100 * i / n)
+                    self.assertAlmostEqual(pill["width"], 100 / n)      # (one segment wide: not from 0 up to it)
+        self.assertEqual(got["glm-5.3-flash"][1][1]["at"], 25)            # Low: the second quarter only
+
+    def test_context_slider_reaches_each_models_own_top(self):
+        # the Models page's Context size: Settings > Model's stops over each model's range (its trained context, up to
+        # 1M), the size a config has kept as a stop of its own
+        got = self.node("""
+const r1m = {min: 4096, max: 1048576}, r256 = {min: 4096, max: 262144};
+st.S.ctxInfo = {...r1m, context: 131072};
+console.log(JSON.stringify({m1: sv.ctxStopsIn(r1m, 131072), m256: sv.ctxStopsIn(r256, 131072, 100000),
+                            settings: sv.ctxStops(), none: sv.ctxStopsIn(null, 1),
+                            win: sv.ctxHint(16384, {now: 131072, win: 32768, whole: true, ram: sv.GLM_KV_BYTES}),
+                            past: sv.ctxHint(131072, {now: 131072, win: 32768, whole: true, ram: sv.GLM_KV_BYTES})}));""")
+        self.assertEqual((got["m1"][0], got["m1"][-1]), (4096, 1048576))
+        self.assertEqual(got["m1"], got["settings"])                     # (the same stops as Settings > Model's)
+        self.assertEqual(got["m256"][-1], 262144)
+        self.assertIn(100000, got["m256"])
+        self.assertEqual(got["none"], [])
+        self.assertEqual(got["win"], "Up to 32K the whole cache stays in VRAM.")
+        self.assertTrue(got["past"].startswith("≈ 1.5 GB of RAM for the context"), got["past"])
 
 
 if __name__ == "__main__":

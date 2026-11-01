@@ -177,6 +177,7 @@ These settings change what the engine chooses (put them in the config with `--en
 | `MAYA_WATCHDOG_S` | 180 | the engine: a request that finishes no prompt layer and no token for this long has hung, even with a thread spinning (#40). The engine writes where it stopped to its log (on Windows also `maya-stall-<pid>.dmp`, every thread's stack: attach both to an issue) and ends; the request gets an error and the next request starts it again. `0` = off |
 | `MAYA_DS4_WATCHDOG_S` | 600 | DeepSeek's engine (`maya-ds4 --serve`): a request whose prompt, tokens and steps between stop moving for this long has hung (#539, #494: a tensor-parallel group with one GPU spinning and the other idle). The engine writes where the main thread and each GPU's thread of a prompt were (`maya ds4 serve: where it stopped: ...`) and ends; the request gets an error and the next one starts it again. `0` = off |
 | `MAYA_HTTP_BACKLOG`, `MAYA_MAX_BODY_MIB` | 256, 256 | the server: connections that may wait to be accepted, and the largest request body in MiB (a larger one gets a 413 before it is read) |
+| `MAYA_REQUEST_TIMEOUT_S` | 300 | finite positive seconds allowed for each HTTP socket read/write operation; an incomplete request cannot hold a thread forever. This is not a total generation/thinking deadline. `STRATA_REQUEST_TIMEOUT_S` is an alias; MAYA wins. Works in the run config’s `env`. Invalid/nonpositive values use 300. |
 | `MAYA_ENGINE_QUIT_S` | 50 | the server: how long the engine gets to end (and keep its conversation, with `MAYA_GLM_SLOT_KEEP`) after a stop - SIGTERM and SIGHUP are handled like Ctrl+C, a second one is ignored (a second Ctrl+C ends the server at once); a supervisor's own grace (llama-swap's `unloadTimeout`) should exceed it |
 | `MAYA_ENGINE_WRAP_S` | 40 | the server: on a stop, a request in progress is wrapped up instead of dropped - its thinking is closed at once and it answers for up to this long (then it is cut), so the client gets an answer and the turn ends; requests still queued are refused. Keep it plus the engine's end inside the supervisor's grace (llama-swap's `unloadTimeout`); `0` = cut at once |
 | `MAYA_FAIR_SLICE_S` | 0 (off) | the server: an answer that has been decoding this many seconds while another request waits gives the engine to it and continues afterwards, from where it was (the engine keeps its state with what it wrote: one token is read again). Concurrent chats and an agent's side requests no longer wait for a whole answer (4x RTX 4090, a short question during a 3000-token answer: first token after 34 s -> 13-17 s at 15-20). Each switch sets a conversation aside on disk (0.1-1 s up to 100K tokens on a SATA SSD array), so a slow disk wants a longer slice |
@@ -1401,10 +1402,10 @@ keep the state at three more places of each prompt it reads:
 - 512 tokens before the prompt's end, when the last turn is longer than that: a new question after the same document,
   in the same message, reads those 512 tokens and itself. The read stops there, so those tokens are a run of their own;
   where most experts are not in VRAM that short run costs nearly a whole pass over them, on the CPU lane or lent to the
-  GPU's prompt path (#668: a ~20K-token prompt read ~13% slower on one GPU with 91% of the experts on the CPU lane; one
-  V100 with 12% of the experts in VRAM: ~11%). With `MAYA_DS4_RESTORE_TAIL_AUTO=1` (default off pending gfx1151 validation), the engine measures it on the reads that keep
-  the point - the time an expert pick takes in that run against the rest of the read - and leaves the point out while
-  it costs more than reading those tokens again; one read in 32 still keeps it, to measure again;
+  GPU's prompt path. On a layer split whose experts stream, that adds another pass through every GPU.
+  With `MAYA_DS4_RESTORE_TAIL_AUTO=1` (default off pending gfx1151 validation), the engine compares the tail
+  run's wall time per token with the rest of the read. It omits the point while the tail costs over twice
+  that rate; one read in 32 keeps it to measure again. This replaces the earlier per-expert, per-stage estimate;
 - the end of the system prompt and its tools (the first user turn), given up last: another conversation behind the same
   start reads only its own part.
 

@@ -85,6 +85,44 @@ class Pieces(unittest.TestCase):
             net.assert_not_called()
 
 
+
+class ConcurrentStart(unittest.TestCase):
+    def test_two_clicks_start_one_update(self):
+        updater = U.Updater("1.0.0")
+        updater.latest = {"version": "1.0.1", "tag": "tp-v1.0.1"}
+        checked, finish = threading.Event(), threading.Event()
+        snapshots, results, errors = [], [], []
+        original_busy = updater.busy
+        def busy():
+            value = original_busy()
+            snapshots.append(value)
+            if len(snapshots) == 2:
+                checked.set()
+            checked.wait(0.1)  # Without the start lock both callers can snapshot False before either sets state.
+            return value
+        def click():
+            try:
+                results.append(updater.start(object()))
+            except ValueError as error:
+                errors.append(str(error))
+        with mock.patch.object(updater, "blocker", return_value=None), \
+             mock.patch.object(updater, "busy", side_effect=busy), \
+             mock.patch.object(updater, "_update", side_effect=lambda *_: finish.wait(2)) as work:
+            threads = [threading.Thread(target=click) for _ in range(2)]
+            try:
+                for thread in threads:
+                    thread.start()
+                for thread in threads:
+                    thread.join(2)
+                    self.assertFalse(thread.is_alive())
+                self.assertEqual(len(results), 1)
+                self.assertEqual(errors, ["an update is already running"])
+                self.assertEqual(work.call_count, 1)
+            finally:
+                finish.set()
+                if updater.thread:
+                    updater.thread.join(2)
+
 @unittest.skipUnless(HAVE_GIT, "git is not installed")
 class Updating(unittest.TestCase):
     """An origin with v1.0.0 and v1.0.1, a clone at v1.0.0, and the server's side of the update."""

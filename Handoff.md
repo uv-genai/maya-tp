@@ -894,3 +894,14 @@ Future same-pack/same-prompt benches may use `--reference` with strict ordinary 
 checks, avoiding a second cold startup while proving agreement with accepted outputs. S256-token
 references remain in docs/benchmarks/tp2-mtp-review-2026-10-30/. Investigate any difference; never
 weaken the fidelity gate to hide it. No release/tag created; future fork tags tp-v.
+
+### 29.10 v1.1.40 semantic candidate (#50)
+
+Review branch merge/upstream-v1.1.40 fromcb86c4c; merge in progress. Exclude all Metal/macOS
+source/build/workflow/setup/telemetry/fixtures/docs. README/AGENTS/CMake/launchers and GLM/TP/RDMA/MTP/
+primary tuning unchanged; accepted39c3132ee4 engine retained. New server/context/monitor/UI fixes,
+request socket timeout (300s per operation, not thinking deadline), Origin/stream errors/update-lock
+and installer download recovery retained. DS4 tail heuristic remains opt-in off, corrected to wall
+time per token.13 focused socket/config/long-answer/Origin/concurrent-update/prefixed-tag tests PASS.
+OrderedCPU/build/host/Node/liveS API gates pending; no v41 before40acceptance/mainCI. Reuse39S/M/L
+kernel/CLI/fidelity/performance evidence where source/binary/defaults are unchanged.

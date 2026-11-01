@@ -1504,6 +1504,20 @@ class CorsOptIn(unittest.TestCase):
         code, h, _ = self.call("GET", "/", {"Origin": self.PAGE})
         self.assertIsNone(h.get("Access-Control-Allow-Origin"))
 
+    def test_another_page_cannot_post_without_a_preflight(self):
+        # CSRF: fetch(..., {mode: "no-cors", body: "..."}) sends text/plain and no preflight; its Origin gives it away
+        for origin in ("http://evil.example", "null"):
+            r = urllib.request.Request(self.base + "/v1/chat/completions", data=json.dumps(self.CHAT).encode(),
+                                       headers={"Content-Type": "text/plain", "Origin": origin}, method="POST")
+            with self.assertRaises(urllib.error.HTTPError) as cm:
+                urllib.request.urlopen(r, timeout=30)
+            with cm.exception as e:
+                self.assertEqual(e.code, 403, origin)
+        code, _, _ = self.call("POST", "/v1/chat/completions", None, self.CHAT)   # curl, the SDKs: no Origin
+        self.assertEqual(code, 200)
+        code, _, _ = self.call("DELETE", "/v1/responses/resp_x", {"Origin": "http://evil.example"})
+        self.assertEqual(code, 403)
+
     def test_the_config_value(self):
         self.assertEqual(parse_cors_origins(None), [])
         self.assertEqual(parse_cors_origins([]), [])
@@ -1899,7 +1913,7 @@ class RequestBodies(unittest.TestCase):
     def raw(self, headers: str, body: bytes = b"") -> tuple[int, dict]:
         """One POST written by hand (headers urllib would not send) -> (status, JSON answer)."""
         import socket
-        head = ("POST /v1/chat/completions HTTP/1.1\r\nHost: x\r\nContent-Type: application/json\r\n" + headers +
+        head = ("POST /v1/chat/completions HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\n" + headers +
                 "\r\n").encode()
         with socket.create_connection(("127.0.0.1", self.port), timeout=30) as s:
             s.sendall(head + body)
@@ -1948,6 +1962,54 @@ class RequestBodies(unittest.TestCase):
 
     def test_the_listen_backlog(self):
         self.assertGreaterEqual(self.httpd.request_queue_size, 256)
+
+class RequestSocketTimeout(unittest.TestCase):
+    def configured_server(self, delay=0.0):
+        from serve import server as sv
+        class Slow(MockEngine):
+            def generate(self, *args, **kwargs):
+                time.sleep(delay)
+                yield from super().generate(*args, **kwargs)
+        tok = ByteTokenizer()
+        engine = Slow(tok, "hello", max_context=4096)
+        service = Service(engine, tok, ChatTemplate(ROOT / "serve/chat_template.jinja"))
+        # Exercise the same alias/config boundary as main(), including config precedence over inherited MAYA.
+        self.patch = unittest.mock.patch.dict(os.environ, {"MAYA_REQUEST_TIMEOUT_S": "7"})
+        self.patch.start()
+        self.addCleanup(self.patch.stop)
+        sv.maya_names.alias_env(os.environ)
+        cfg = sv.maya_names.env_in({"env": {"STRATA_REQUEST_TIMEOUT_S": "9", "MAYA_REQUEST_TIMEOUT_S": "0.05"}})
+        sv.apply_server_env(cfg)
+        self.assertEqual(sv.request_timeout(), 0.05)
+        httpd = serve(service, port=0)
+        self.addCleanup(httpd.server_close)
+        self.addCleanup(httpd.shutdown)
+        return httpd
+
+    def test_partial_body_releases_the_connection(self):
+        import socket
+        httpd = self.configured_server()
+        with socket.create_connection(httpd.server_address, timeout=2) as client:
+            client.sendall(b"POST /v1/chat/completions HTTP/1.0\r\nHost: 127.0.0.1\r\n"
+                           b"Content-Type: application/json\r\nContent-Length: 20\r\n\r\n{")
+            self.assertEqual(client.recv(1024), b"")
+
+    def test_silent_generation_can_outlast_socket_timeout(self):
+        httpd = self.configured_server(delay=0.2)
+        body = {"model": "m", "messages": [{"role": "user", "content": "hi"}], "max_tokens": 8,
+                "reasoning_effort": "none"}
+        req = urllib.request.Request(f"http://127.0.0.1:{httpd.server_port}/v1/chat/completions",
+                                     data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=3) as response:
+            result = json.load(response)
+        self.assertIn("hello", result["choices"][0]["message"]["content"])
+
+    def test_invalid_timeout_uses_the_default(self):
+        from serve.server import request_timeout
+        for value in ("0", "-1", "bad", "nan", "inf"):
+            with self.subTest(value=value), unittest.mock.patch.dict(os.environ, {"STRATA_REQUEST_TIMEOUT_S": value}):
+                self.assertEqual(request_timeout(), 300)
+
 
 class TestCarryEmbeddings(unittest.TestCase):
     def test_the_job_thread_sees_the_request_threads_image_file(self):
@@ -2128,7 +2190,7 @@ class GoneClients(unittest.TestCase):
         body = json.dumps({"model": "m", "max_tokens": 8, "stream": stream,
                            "messages": [{"role": "user", "content": "hi"}]}).encode()
         s = socket.create_connection(("127.0.0.1", self.port))
-        s.sendall(b"POST /v1/chat/completions HTTP/1.1\r\nHost: x\r\nContent-Type: application/json\r\n"
+        s.sendall(b"POST /v1/chat/completions HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\n"
                   b"Content-Length: " + str(len(body)).encode() + b"\r\n\r\n" + body)
         return s
 
@@ -2175,7 +2237,7 @@ class QueuedKeepAlives(GoneClients):
         import socket
         b = json.dumps(body).encode()
         s = socket.create_connection(("127.0.0.1", self.port))
-        s.sendall(b"POST " + path.encode() + b" HTTP/1.1\r\nHost: x\r\nContent-Type: application/json\r\n"
+        s.sendall(b"POST " + path.encode() + b" HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\n"
                   b"Content-Length: " + str(len(b)).encode() + b"\r\n\r\n" + b)
         return s
 
