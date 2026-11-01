@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.24):37–43 accepted;44active #72.
-> Engine6a2f/b398 unchanged; gatebatch64704 CPU then paired API. Full DS4 WMMA68 remains open.
+> Last updated:2026-11-02 · Sequential integration (§29.25):37–44 ACCEPTED; next45.
+> Engine6a2f/b398 unchanged and backed up BOTH hosts; no active batches. DS4 WMMA68 remains OPEN.
 
 ## 1. What we are building
 
@@ -1047,3 +1047,11 @@ Next44 **5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b** (4commits/6files), ownissue/
 Branchmerge/upstream-v1.1.44 fromdffea08; upstream5d20b0e mergedadc54a8. Installer/catalog/docs/tests only; ALLtrackedengine/server/tests/TP2/tuning/README/AGENTS/VERSION/pinexact43 (canonicalGitblobs, intentionalbatCRLFhandled).73focusedtestsPASS; independentHFmetadata18files×2revisions sizes/SHAexactmanifest. Nohugeweightdownload. ACTIVE64704 /tmp/maya-upstream-v44-gates.sh orderedHIPmap/serve/tools thenfreshS MTP/reuse/spec1API/PID/peer. Engine6a2f/b398unchanged; remotereviewadc54a8. Reuse43GPU/math/strict/M-L onlyforprovenunchangedpaths. FullDS4WMMA68remainsOPEN. Finalreport/headCI/PR/mainCI requiredbefore45. No43batchactive;protectedcanonical777userwork/daemon/YAMLpreserved.
 
 44ALLTARGETEDPASS:64704EXIT0,HIPmap/602serve11skip/679tools33skip,73focusedinstaller,HF18files×2revisionsSHA/sizesexact. FreshS MTP/reuse/spec1ordinary64-budget/PIDs/peerPASS; engines/serverstopped.615runtimefiles+all5binarypaths exact43b398, noenginebuild/mathchange. Reused43GPU/strict/M-Levidenceonlyforunchangedpaths. DS4WMMA68open. Report/validationJSONnowpendingonlyexactheadCI/PR73merge/postmainCI before45.
+
+44PR73 merged842d6e67c11ed702d1c7f54d61b8eb69e5212ed6 after final5e920c4 CI41344769559/41344774298 PASS. Post-mainCI41345166897pending; #72open andno45. Bothengines/serverstopped, remote review5e920c4, engine6a2f/b398 unchangedall5paths. Protectedcanonical777userwork/daemon/YAMLpreserved.
+
+### 29.25 v1.1.44 ACCEPTED; v1.1.45 next
+
+PR73/ **842d6e67c11ed702d1c7f54d61b8eb69e5212ed6** afterfinal5e920c4 CI **41344769559/41344774298 PASS**; post-main **41345166897 PASS**. #72closedwithfinalcomment. Report docs/upstream/v1.1.44.md/validation.json accepted. Installer/catalog/docs/tests only:615runtimefiles/README/AGENTS/VERSION/pin/tuningexact43; engine6a2f/b398sameall5paths, savedBOTHhosts /tmp/maya-upstream-v44-baseline/maya.73focusedtests,HF18files×2revisions names/sizes/SHAexact,HIPmap/602serve11skip/679tools33skip,freshS MTP/reuse/spec1ordinary64budget/PIDs/peerPASS;64704EXIT0. Noactivebatches; bothengines/serverstopped. Reuse43fullGPU/strict/M-L/state/perfevidenceonlyforunchangedpaths. FullDS4WMMA68remainsOPEN/failing, no newquality/perfclaim. Remotereview5e920c4; protectedcanonical777userwork/backups/daemon175392/YAMLunchanged.
+
+Next45 **6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc** (2commits/3files), ownissue/branchfromupdatedmain; then46=3589d6f. Eachsemanticreview+affectedgates+finalheadCI+postmainCI before next. Continue through46. NumericVERSION1.1.42/legacyreleaseunchanged, futuretp-vtags,no release. Keep33/42/46/52/54/60/11/16/68open.

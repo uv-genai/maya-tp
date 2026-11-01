@@ -1,16 +1,18 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read Handoff.md (especially §§18,21,23,27–29 and latest §29.24), then AGENTS.md.
+Read Handoff.md (especially §§18,21,23,27–29 and latest §29.25), then AGENTS.md.
 
 ## Objective and current checkpoint
 
 Integrate upstream v1.1.37–v1.1.46 ONE TAG AT A TIME. Semantic review and relevant validation, exact-final-head CI and post-merge main CI must pass before starting the next tag. Continue through46. Preserve TP2/MTP and fork-owned README/AGENTS/docs; push only origin uv-genai/maya-tp. No release is authorized by integration. Future fork release tags are tp-vMAJOR.MINOR.PATCH; VERSION stays numeric and published legacy tags immutable. Upstream tags are upstream/v*.
 
-**37–43 ACCEPTED.** Latest43 PR70/c2ff7198e8587d9e027bb4f4454e27b1ae784325, final f862e3b26bab95f2898beab52c1df5b275d7fea0 CI41343230502/41343235345 PASS, post-main41343606174 PASS. #65/#66/#67/#69/#71 closed. Report docs/upstream/v1.1.43.md and validation.json. #68 remains OPEN: full DS4 WMMA GPU stress fails on both accepted42 control and43; affected Engram checks pass. Never claim full DS4 suite passes or relax thresholds.
+**37–44 ACCEPTED.** Latest44 PR73/842d6e67c11ed702d1c7f54d61b8eb69e5212ed6, final5e920c4 CI41344769559/41344774298 PASS, post-main41345166897 PASS; #72closed. Report docs/upstream/v1.1.44.md/validation.json. Installer/catalog/docs/tests only;615runtimefiles/README/AGENTS/VERSION/pin/tuning identical43.73focusedtests,HF18files×2revisions metadataexact,orderedHIPmap/602serve11skip/679tools33skip andfreshS MTP/reuse/spec1ordinary64budget/PIDs/peer PASS. No new quality/performance claim. #68 remainsOPEN: full DS4 GPU suite is failing on pre-existing control.
 
-**Active44 (#72, merge/upstream-v1.1.44)** 5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b (4commits/6files): create its own issue/branch from updated origin/main and review semantically. Then45=6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc,46=3589d6f12a3f77e813b184b51a586f8fc3de2185. 44semantic mergeadc54a8 changes installer/catalog/docs/tests only.73focusedtests and HFmetadata18files×2revisions pass; runtime/tuning/ownedfiles exact43. 44gates64704EXIT0:HIPmap/602serve11skip/679tools33skip andfreshS MTP/reuse/spec1ordinary64budget/PID/peerPASS. Noactivebatches; engines/serverstopped. FinalheadCI/PR/mainCI still required before45.43batch13476 exited0;8965interrupted130 duefixed71. Do not rerun completed gates without a new reason.
+**Next45**6ecbd3cbc5330b57f70cd5cf8a5c42eb8ef950cc (2commits/3files): create ownissue/branch fromupdatedorigin/main, semanticreview/affectedgates/finalheadCI/postmainCI before46. Then46=3589d6f12a3f77e813b184b51a586f8fc3de2185. No45sourcepreparedyet. Noactivebatches;44batch64704EXIT0,43batch13476EXIT0, earlier8965interrupted130 duefixedharness71. Do not rerun completed gates without a new reason.
 
-43 engine source6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316, MD5b398d4a0711430edd6a28b95264c7293, matched all5paths and savedBOTHhosts /tmp/maya-upstream-v43-baseline/maya (candidate backup also retained). Remote reviewf862; protected remote canonical777cc92 unchanged. Both test engines/server are stopped, daemon175392/YAML preserved.
+Engine6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316, MD5b398d4a0711430edd6a28b95264c7293, all5paths matched and savedBOTHhosts /tmp/maya-upstream-v44-baseline/maya (same43;43backup retained). Remote review5e920c4; protectedcanonical777cc92 unchanged. Both test engines/serverstopped;daemon175392/YAML preserved.
+
+43 PR70/c2ff719, finalf862e3b CI41343230502/41343235345 andpost-main41343606174 PASS;65/66/67/69/71closed. Its full TP2/MTP/kernel evidence is reused only for the proven unchanged44paths.
 
 ## What43 verified
 

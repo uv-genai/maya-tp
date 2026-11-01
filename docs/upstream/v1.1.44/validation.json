@@ -1,5 +1,5 @@
 {
-  "accepted": false,
+  "accepted": true,
   "upstream": "5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b",
   "source_merge": "adc54a8",
   "runtime_source": "6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316",
@@ -38,9 +38,12 @@
     "issue": 68,
     "status": "OPEN; full DS4 GPU suite fails on unchanged pre-existing control"
   },
-  "pending": [
-    "final head CI",
-    "merge",
-    "post-main CI"
-  ]
+  "pending": [],
+  "final_head": "5e920c4ba9febff82ba02a655f16f308506ac332",
+  "final_ci": [
+    41344769559,
+    41344774298
+  ],
+  "merge_commit": "842d6e67c11ed702d1c7f54d61b8eb69e5212ed6",
+  "main_ci": 41345166897
 }
