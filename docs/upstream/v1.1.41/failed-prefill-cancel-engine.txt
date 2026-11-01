@@ -1,0 +1,61 @@
+[maya] sampling defaults from the config: temperature=1.0, top_p=0.95
+loading the model (the first start takes a minute or two) ...
+[maya] starting the engine: reading the model's weights ...
+glm settings from the environment: STRATA_GLM_CKPTS=16, STRATA_GLM_CKPT_EVERY=4096, STRATA_GLM_KEEP_CANCELLED=1, MAYA_GLM_MTP_DRAFT=7, MAYA_GLM_MTP_FIXED=7, STRATA_GLM_PREFILL_MB=6144, STRATA_GLM_PREFILL_SUB=1024, STRATA_GLM_RAM_HEADROOM_GB=16, STRATA_GLM_RESERVE_MB=1024, STRATA_GLM_SPLIT=0
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 25088 tokens (--prefill auto, up to 32768; mixer sub-batches of 1024), borrowing 6103 MB of the expert pool while a prompt runs (activations 5371, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.83 of 121.00 GB in use - dense weights 6.86, state/KV (32768 ctx) 0.59, activations 0.07, other (context, MTP, scratch, prompt path) 10.32
+glm fast: CUDA0 unified memory: MemAvailable 110.41 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: the expert profile /home/ugo/software/project-maya/data/expert-profile-glm.bin ranks 13248 (layer, expert) pairs
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 1 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 2 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 3 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 5 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 7 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 10 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 13 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 15 s)
+[maya] still starting (20 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 18 s)
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 20 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 20 s (2.28 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+maya serve: CUDA0: 61783 MiB of VRAM free with everything loaded
+maya generate: glm5-next serve (M3.1): GEN <max_new> [keys] <ids>, GENI <max_new> [keys] <embeddings> <ids>; QUIT to end
+[maya] thinking level when a request names none: max
+[maya] thinking budget: 32768 tokens (then the answer)
+[maya] model management: on (/models/load, /models/unload, /models/sse)
+ready: http://127.0.0.1:18080/v1  (OpenAI: /v1/chat/completions, /v1/responses, Anthropic: /v1/messages, context 32768 tokens)
+       open http://127.0.0.1:18080/ in a browser to chat; close this window to stop the model
+       from other devices: http://192.168.1.22:18080/   (API: http://192.168.1.22:18080/v1)
+       WARNING: no API key - anyone on your network can use this model. Add "api_key": "..." to the config (clients send it as their API key; the web page asks for it)
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 573 experts more lent for it)
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /home/ugo/software/project-maya-upstream-review/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=1024 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 1024,8192,1536)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=960 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 960,8192,1536)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8370 ms | the copy lane 7646 ms: copies 961 (0.6 GB/s), ring wait 1306, gaps 2, mixer windows 5377 | lead 644, tail 80 | pcie 0.61 GB (ram 0.00, disk 0.61) + 2.51 GB vram | experts: staged 945, resident 10374 (806606 rows), prestaged 32, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 102.9/5.0 ms max/min
+[maya] reading the prompt: 3,008 of 18,030 tokens, 8 s so far
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=64 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 64,8192,1536)
+glm prefill: CUDA0 chunk 2/2, 1088 tokens, wall 3217 ms | the copy lane 2924 ms: copies 69 (2.3 GB/s), ring wait 243, gaps 1, mixer windows 2612 | lead 250, tail 43 | pcie 0.16 GB (ram 0.00, disk 0.16) + 1.09 GB vram | experts: staged 382, resident 10374 (304740 rows), prestaged 1, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 19.4/0.1 ms max/min
+glm prefill: 4096 tokens in 11603.8 ms (2.83 ms/token, 353 tok/s), 2 chunks of 3008 tokens | CUDA0 11587 ms
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+[maya] reading the prompt: 3,008 of 18,030 tokens, 18 s so far
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8133 ms | the copy lane 7431 ms: copies 174 (1.0 GB/s), ring wait 842, gaps 1, mixer windows 6414 | lead 591, tail 111 | pcie 0.17 GB (ram 0.00, disk 0.17) + 1.43 GB vram | experts: staged 487, resident 10374 (852199 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 84.7/0.1 ms max/min
+[maya] reading the prompt: 7,104 of 18,030 tokens, 20 s so far
+glm prefill: CUDA0 chunk 2/2, 1088 tokens, wall 3180 ms | the copy lane 2887 ms: copies 58 (1.9 GB/s), ring wait 110, gaps 0, mixer windows 2719 | lead 253, tail 41 | pcie 0.11 GB (ram 0.00, disk 0.11) + 0.91 GB vram | experts: staged 311, resident 10374 (313341 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 16.3/0.1 ms max/min
+glm prefill: 4096 tokens in 11328.0 ms (2.77 ms/token, 362 tok/s), 2 chunks of 3008 tokens | CUDA0 11313 ms
+glm prefill TP: rank=0 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 8103 ms | the copy lane 7403 ms: copies 98 (1.5 GB/s), ring wait 644, gaps 1, mixer windows 6660 | lead 589, tail 111 | pcie 0.15 GB (ram 0.00, disk 0.15) + 1.24 GB vram | experts: staged 424, resident 10374 (879395 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 44.8/0.1 ms max/min
+glm vram: prompt 18030 tokens read in 31.1 s; VRAM free CUDA0 60.3 of 121.0 GB before, 60.1 after
+[maya] done: 0 tokens in 31 s (0.0 tok/s) (cancel, cancel=True)
+[maya] this request waited 9 s for the engine (0 request(s) behind it)
+[maya] the engine reported an error: verbs communicator is poisoned: verbs collective identity or size mismatch: outgoing=0/459/8 incoming=0/459/17825792
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)

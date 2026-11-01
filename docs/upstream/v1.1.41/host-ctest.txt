@@ -1,0 +1,70 @@
+Test project /home/ugo/software/project-maya-upstream-review/build-hip
+      Start   1: ds4_path_policy_test
+ 1/15 Test   #1: ds4_path_policy_test .............   Passed    0.00 sec
+      Start   2: ds4_prefill_stats_test
+Could not find executable /home/ugo/software/project-maya-upstream-review/build-hip/ds4_prefill_stats_test
+Looked in the following places:
+/home/ugo/software/project-maya-upstream-review/build-hip/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Release/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Release/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Debug/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Debug/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/MinSizeRel/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/MinSizeRel/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/RelWithDebInfo/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/RelWithDebInfo/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Deployment/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Deployment/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Development/ds4_prefill_stats_test
+/home/ugo/software/project-maya-upstream-review/build-hip/Development/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Release/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Release/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Debug/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Debug/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/MinSizeRel/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/MinSizeRel/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/RelWithDebInfo/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/RelWithDebInfo/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Deployment/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Deployment/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Development/ds4_prefill_stats_test
+home/ugo/software/project-maya-upstream-review/build-hip/Development/ds4_prefill_stats_test
+Unable to find executable: /home/ugo/software/project-maya-upstream-review/build-hip/ds4_prefill_stats_test
+ 2/15 Test   #2: ds4_prefill_stats_test ...........***Not Run   0.00 sec
+      Start   7: ds4_logprobs_test
+ 3/15 Test   #7: ds4_logprobs_test ................   Passed    0.01 sec
+      Start   9: tp_partition_test
+ 4/15 Test   #9: tp_partition_test ................   Passed    0.00 sec
+      Start  10: tp_collective_test
+ 5/15 Test  #10: tp_collective_test ...............   Passed    0.00 sec
+      Start  11: tp_context_test
+ 6/15 Test  #11: tp_context_test ..................   Passed    0.02 sec
+      Start  12: tp_slice_test
+ 7/15 Test  #12: tp_slice_test ....................   Passed    0.00 sec
+      Start  15: ds4_multi_attn_plan_test
+ 8/15 Test  #15: ds4_multi_attn_plan_test .........   Passed    0.06 sec
+      Start  16: ds4_prompt_mem_test
+ 9/15 Test  #16: ds4_prompt_mem_test ..............   Passed    0.01 sec
+      Start  17: hipblaslt_table_list_test
+10/15 Test  #17: hipblaslt_table_list_test ........   Passed    0.01 sec
+      Start  18: env_report_test
+11/15 Test  #18: env_report_test ..................   Passed    0.01 sec
+      Start  69: glm_memory_test
+12/15 Test  #69: glm_memory_test ..................   Passed    0.00 sec
+      Start  95: draft_policy_test
+13/15 Test  #95: draft_policy_test ................   Passed    0.01 sec
+      Start  96: draft_cost_test
+14/15 Test  #96: draft_cost_test ..................   Passed    0.02 sec
+      Start 114: ds4_store_test
+15/15 Test #114: ds4_store_test ...................   Passed    0.05 sec
+
+93% tests passed, 1 tests failed out of 15
+
+Total Test time (real) =   0.20 sec
+
+The following tests FAILED:
+	  2 - ds4_prefill_stats_test (Not Run)
+Errors while running CTest

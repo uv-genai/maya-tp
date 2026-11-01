@@ -1,0 +1,48 @@
+test_steering_respects_total_output_limit (serve.test_loop_guard.ToolBlock.test_steering_respects_total_output_limit) ... [maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] done: 8 tokens in 0 s (50360.4 tok/s) (length, cancel=False)
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('Done.'): kept going (1. time in this answer)
+[maya] done: 10 tokens in 0 s (21497.0 tok/s) (stop, cancel=False)
+
+  test_steering_respects_total_output_limit (serve.test_loop_guard.ToolBlock.test_steering_respects_total_output_limit) (blocked=False, extra=0) ... FAIL
+[maya] loop guard: `bash` 4 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 3 tool rounds that repeat earlier ones
+[maya] loop guard: the model would end its turn with nothing ('Done.'): kept going (1. time in this answer)
+[maya] done: 10 tokens in 0 s (21682.2 tok/s) (stop, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] done: 132 tokens in 0 s (91377.7 tok/s) (length, cancel=False)
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 134 tokens in 0 s (74647.7 tok/s) (stop, cancel=False)
+  test_steering_respects_total_output_limit (serve.test_loop_guard.ToolBlock.test_steering_respects_total_output_limit) (blocked=True, extra=0) ... FAIL
+[maya] loop guard: `bash` 5 times with the same arguments and result: a note after it
+[maya] loop guard: the conversation repeats itself - left out of the prompt: 0 pieces of the model's own text it had written before, 4 tool rounds that repeat earlier ones
+[maya] loop guard: `bash` again after 3 notes (5 runs, the same result): blocked (1. time in this answer), not run - a note, the thinking steered away and on
+[maya] done: 134 tokens in 0 s (74797.9 tok/s) (stop, cancel=False)
+
+======================================================================
+FAIL: test_steering_respects_total_output_limit (serve.test_loop_guard.ToolBlock.test_steering_respects_total_output_limit) (blocked=False, extra=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/serve/test_loop_guard.py", line 896, in test_steering_respects_total_output_limit
+    self.assertLessEqual(eng.made, limit)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: 10 not less than or equal to 9
+
+======================================================================
+FAIL: test_steering_respects_total_output_limit (serve.test_loop_guard.ToolBlock.test_steering_respects_total_output_limit) (blocked=True, extra=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya-upstream-review/serve/test_loop_guard.py", line 896, in test_steering_respects_total_output_limit
+    self.assertLessEqual(eng.made, limit)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: 134 not less than or equal to 133
+
+----------------------------------------------------------------------
+Ran 1 test in 0.120s
+
+FAILED (failures=2)
