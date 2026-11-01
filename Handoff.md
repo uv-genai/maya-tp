@@ -1,9 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.23):37–43 ACCEPTED; next44 #72.
->43 PR70/c2ff719, final/head+mainCI PASS. Engine6a2fbe1/b398 backed up BOTH hosts; no active batches.
->Known pre-existing DS4 WMMA issue68 remains OPEN; full DS4 suite is not passing.
+> Last updated:2026-11-02 · Sequential integration (§29.24):37–43 accepted;44active #72.
+> Engine6a2f/b398 unchanged; gatebatch64704 CPU then paired API. Full DS4 WMMA68 remains open.
 
 ## 1. What we are building
 
@@ -1042,3 +1041,7 @@ PR70 merged **c2ff7198e8587d9e027bb4f4454e27b1ae784325** after final f862e3b CI 
 43preservespairedwake/media/cancel/lifecycle/totalbudget/NextN/fullwidth/MTP/RDMA/tuning. Adds safecontinuationcontextbounds, collapseJSONaliasparity, explicitunsupportedTPMTPbiasrejection(spec1works), and separatebenchmarkstreams. Longloopfixturecache0→20020/prefill61.76→1.14s; notuniversalthroughputgain. FreshprefillABvs42all9response/usageequal/cache0,warm+0.94/−0.36/−0.37%. StrictS16raw0, allCLI32streamsidentical42, recovery8/8,133rounds/8retries. CPU602/677,3HIP/17host/Engrampass; fullDS4suiteFAIL68explicitexception. ShortMTP491msoutlierretained60open. M/L/math42evidencereusedonlyforidenticalGLMGPUimage/executedpaths.
 
 Next44 **5d20b0e8fd7c15fde2a9f2b4eac5e9776883690b** (4commits/6files), ownissue/branchfromupdatedorigin/main. Then45=6ecbd3c,46=3589d6f. Eachsemanticreview+affectedgates+finalheadCI+postmainCI before next. Continue through46. NumericVERSION1.1.42/legacyreleaseunchanged; futuretp-v tags, no releaseauthorized. Keep33/42/46/52/54/60/11/16/68open. Atfulltaskendrestorecoherentproductionruntimewithoutoverwritingprotectedremoteuser source/YAML; retainvalidatedreviewbuilds.
+
+### 29.24 Active v1.1.44 installer-only semantic merge (#72)
+
+Branchmerge/upstream-v1.1.44 fromdffea08; upstream5d20b0e mergedadc54a8. Installer/catalog/docs/tests only; ALLtrackedengine/server/tests/TP2/tuning/README/AGENTS/VERSION/pinexact43 (canonicalGitblobs, intentionalbatCRLFhandled).73focusedtestsPASS; independentHFmetadata18files×2revisions sizes/SHAexactmanifest. Nohugeweightdownload. ACTIVE64704 /tmp/maya-upstream-v44-gates.sh orderedHIPmap/serve/tools thenfreshS MTP/reuse/spec1API/PID/peer. Engine6a2f/b398unchanged; remotereviewadc54a8. Reuse43GPU/math/strict/M-L onlyforprovenunchangedpaths. FullDS4WMMA68remainsOPEN. Finalreport/headCI/PR/mainCI requiredbefore45. No43batchactive;protectedcanonical777userwork/daemon/YAMLpreserved.
