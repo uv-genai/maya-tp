@@ -1926,7 +1926,8 @@ static int glm_pack_generate(const Options& o) {
                 ok = tp_comm->RecvControl(toks, (size_t) n * sizeof(int32_t), &e);
             }
         }
-        if (ok && tp_comm->rank() != 0) strata::platform::idle_poke();
+        // Both service lanes can have gone idle during prefill or between MTP rounds (#64).
+        if (ok) strata::platform::idle_poke();
         if (!ok) {
             std::fprintf(stderr, "TP2 MTP wire: %s\n", e.c_str());
             tp_down(e.empty() ? "MTP wire failed" : e);
@@ -1959,6 +1960,7 @@ static int glm_pack_generate(const Options& o) {
         return sp;
     };
     const auto tp_send = [&](int32_t op, const int32_t* toks, int32_t n, int32_t next_token = -1) -> bool {
+        if (tp2) strata::platform::idle_poke();  // Wake rank0 before its matching model call too.
         if (!tp_mirror) return true;
         if (tp_pair_down) return false;
         const TpMirrorHdr h{op, n, next_token};
@@ -1988,6 +1990,7 @@ static int glm_pack_generate(const Options& o) {
     const auto tp_send_mtp = [&](int64_t max_new, const strata::kernels::SamplerParams& sq,
                                  int think_budget, int think_end, const std::vector<int64_t>& eos_ids,
                                  bool stop_eos) -> bool {
+        if (tp2) strata::platform::idle_poke();
         if (!tp_mirror) return true;
         TpMirrorHdr h{kTpMirrorMtp, (int32_t) max_new, 0};
         TpMtpSp s{};
