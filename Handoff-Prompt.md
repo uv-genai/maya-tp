@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read Handoff.md (especially §§18,21,23,27–29 and latest §29.27), then AGENTS.md.
+Read Handoff.md (especially §§18,21,23,27–29 and latest §29.28), then AGENTS.md.
 
 ## Objective and current checkpoint
 
@@ -8,7 +8,7 @@ Integrate upstream v1.1.37–v1.1.46 ONE TAG AT A TIME. Semantic review and rele
 
 **37–45 semantic checkpoints accepted.** Latest45 PR76/2df9e26be0783f7a84ae6c4e8dbc6e8d6d5fe933, final6f1e78c CI41346480733/41346487052 andpost-main41346856373 PASS. #74closed forscopedreview/ancestry. **FunctionalDS4tailfix explicitly DEFERRED#75OPEN**: upstreamautomaticNVIDIApathdisabledHIP anddepends ondeferredcopyflush/strictdrain/lentguard. No partialport orDS4longpromptstabilityclaim. All620runtimefiles exact44; report docs/upstream/v1.1.45.md/validation.json accepted with functional_change_applied=false. WMMA68 remains separatelyOPEN/failing.
 
-**Next46**3589d6f12a3f77e813b184b51a586f8fc3de2185 (5commits/8files): createownissue/branchfromupdatedmain, semanticreview/affectedgates/finalheadCI/postmainCI. No46sourcepreparedyet. Thenfinishwholeobjective: restorecoherentproductionruntimewithoutoverwritingprotectedsource/YAML, retainvalidatedreviewbuilds, finalhandoff. Noactivebatches;45batch2813EXIT0 (HIPmap/602serve11skip/679tools33skip+freshMTP/reuse/spec1drafts56/47/0,64budget,PIDs/peerPASS),44batch64704EXIT0,43batch13476EXIT0.
+**Active46 (#77, merge/upstream-v1.1.46)**3589d6f12a3f77e813b184b51a586f8fc3de2185 (5commits/8files): createownissue/branchfromupdatedmain, semanticreview/affectedgates/finalheadCI/postmainCI. 46source5b13c83: parser/contentparts fixes,78safe opt-in gfx1151chunk(default0),80textparts32Kcapcount.79localDS4measurement OPEN(no5%claim);75tail/68WMMAremainOPEN. CPU605/679/HIPmap,99focused,18host,HIPDS4build PASS; bothGLM/DS4GPUimagesunchanged. **ACTIVE22871** /tmp/maya-upstream-v46-live.sh state/cancel/guards then20KtextpartsAPIprefix+followups; no concurrentGPU/build/deploy. FinalheadCI/PR/mainCI stillpending. Thenfinishwholeobjective: restorecoherentproductionruntimewithoutoverwritingprotectedsource/YAML, retainvalidatedreviewbuilds, finalhandoff. Noactivebatches;45batch2813EXIT0 (HIPmap/602serve11skip/679tools33skip+freshMTP/reuse/spec1drafts56/47/0,64budget,PIDs/peerPASS),44batch64704EXIT0,43batch13476EXIT0.
 
 Engine6a2fbe11aeae4fbc0242f0fa2d3cf2ba9d510316,MD5b398d4a0711430edd6a28b95264c7293,all5paths matched andsavedBOTHhosts /tmp/maya-upstream-v45-baseline/maya (same43/44, backupsretained). Remotereview6f1e78c; protectedcanonical777cc92 unchanged. Engines/serverstopped;daemon175392/YAMLpreserved. Original5a52baselineverifiedbothhostsforfulltaskrestoration.
 

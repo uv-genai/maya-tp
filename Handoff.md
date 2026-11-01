@@ -1,8 +1,8 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.27):37–45 semantic checkpoints accepted; next46.
->45 functional DS4 tail fix deferred75; runtimeb398 unchanged, no active batches. WMMA68 open.
+> Last updated:2026-11-02 · Sequential integration (§29.28):37–45 handled;46active #77.
+> CPU/HIP/18host pass; live22871 active. Boundaries78/80 fixed;79capmeasurements/75tail/68WMMA open.
 
 ## 1. What we are building
 
@@ -1073,3 +1073,11 @@ PR76 **2df9e26be0783f7a84ae6c4e8dbc6e8d6d5fe933**, final6f1e78c CI **41346480733
 620runtimefilesexact44, engine6a2f/b398all5paths, savedBOTHhosts /tmp/maya-upstream-v45-baseline/maya (same43/44). HIPmap/602serve11skip/679tools33skip+freshS MTP/reuse/spec1ordinarydraft56/47/0,64budget,PIDs/peerPASS;2813EXIT0. Noactivebatches; engines/serverstopped. ReusepriorGPU/strict/M-L/state/perfonlyforidenticalpaths. Remotereview6f1e78c;protectedcanonical777userwork/backups/daemon175392/YAMLpreserved. Original5a52baselineverifiedbothhostsforfulltaskrestoration.
 
 Next46 **3589d6f12a3f77e813b184b51a586f8fc3de2185** (5commits/8files), ownissue/branchfromupdatedmain. Semanticreview/affectedgates/finalheadCI/postmainCI. Continue through46, thenrestorecoherentproductionruntimewithoutoverwritingprotectedsource/YAML, retainvalidatedreviewbuilds andfinalhandoff. NumericVERSION1.1.42, futuretp-vtags,no release. Keep33/42/46/52/54/60/11/16/68/75openunlessactuallyresolved.
+
+### 29.28 Active v1.1.46 final tag (#77/#78/#79/#80)
+
+Source5b13c83 merges3589d6f: malformedparameter/contentpartsfixes;78safechunkbounds/aliases(default0),80textparts count32Kcap. Windows-onlytrimexcluded. 79OPENforDeepSeeklocalcapmeasurements; noDSweightsinconfiguredmodelstore,no5%claim/defaultenable.75tail/68WMMAremainOPEN; no lending/stream/vision/multifragmentsreintroduced. GLM/core/transport/tuning/ownedfilesexact45, binaryb398/GPUimage958…unchanged. HIPDS4hostbinary51749e860763aea34847b183de95a933 built;DS4GPUimage92096f8e…exactbaseline.605serve11skip/679tools33skip/HIPmap,99focused,18hostactualpolicyPASS;270848boundaryproperties. Beforefailures/rawincorrectparserfixtureassumptionretained.
+
+**ACTIVE22871** /tmp/maya-upstream-v46-live.sh output/tmp/maya-upstream-v46/: MTP7+simple state/large/reuse/stream/guards/real18Kcancel, thenfreshD2textparts20Kprefix+ordinary/MTPfollowups. No concurrentGPU/build/deploy. CPUpreflightOpenAItextpartsflattenstr, so directunitisolates80/liveAPIprovesformatcompatibility+policy, notindependent80A/B. Afterlivesuccess auditrounds/limits/cache,finalevidence/headCI/PR/mainCI,close77/78/80onlyaftermainPASS.79/75/68and33/42/46/52/54/60/11/16stayopen.
+
+Remote review5b13c83; protectedcanonical777userwork/daemon/YAMLuntouched. OwnreviewS/M/Lconfigsnow.exe review/build-hip/maya onBOTHhosts; enablesproductionoriginal5a52restoreafterwhole46taskwithoutmixingreviewserverwitholdcanonicalengine. BothreviewDS4binaries51749; GLM5paths b398 matchedbeforelive. Finalproductionrestore/handoffs/index stillpending.
