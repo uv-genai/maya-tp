@@ -777,3 +777,15 @@ Next checkpoint **#43**: upstream v1.1.38 `cf6472c` (four commits / 13 files), b
 v1.1.37 acceptance. Review Linux GGUF expert direct I/O and headroom, setup context advice, UI model
 card/answer information and home-screen redirects. Keep VERSION 1.1.42, fork docs and all TP2/MTP
 paths/tuning. New tag is not merged yet. Review worktree will use branch `merge/upstream-v1.1.38`.
+
+### 29.4 v1.1.38 candidate (#43)
+
+Review worktree branch `merge/upstream-v1.1.38`; upstream tag merged there only. Keep raw-GGUF
+direct I/O **opt-in** pending gfx1151 measurements; default buffered behavior preserved. This source
+is separate from GLM packed TP2. New direct/headroom knobs documented in SETTINGS. VERSION remains
+1.1.42; README/AGENTS, GLM control/core, RDMA, launchers and calibration unchanged.
+
+HIP map, **531 serve / 11 skips**, **637 tools / 31 skips** PASS. All three HIP engines build. Extended
+file-source host parity: six configurations PASS with real O_DIRECT, unaligned offsets, variable
+formats/shards, ring eviction and queued close. Changed JS syntax and real HTTP redirect test PASS.
+Live TP2/MTP gates and CI remain pending; do not start v1.1.39. Candidate report docs/upstream/v1.1.38.md.

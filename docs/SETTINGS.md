@@ -1623,6 +1623,8 @@ Engine options, in the config's `"args"`:
 |---|---|---|
 | `MAYA_EXPERT_RAM_GB` | unset (what the RAM allows) | caps the experts' RAM tier, in GB (the dashboard's Models page: Experts in RAM) |
 | `MAYA_EXPERT_STAGERS` | a quarter of the CPU threads, 2 to 8 | the threads that read a layer's experts from the file while the CPU prepares the layer (their reads overlap); `0`: read one by one when the CPU needs them |
+| `MAYA_EXPERT_DIRECT` | `0` in Maya-TP | opt in with `1` to Linux `O_DIRECT` slice reads for the raw GGUF expert source; requires stagers and a successful file/byte probe, otherwise uses the mapping. No gfx1151 speedup is claimed; GLM's packed TP2 path does not use this source |
+| `MAYA_EXPERT_HEADROOM_GB` | unset | override raw GGUF expert RAM headroom in GiB. Buffered default: max(6 GiB, 12% of RAM); opt-in direct reads: max(4 GiB, 8%). This is separate from GLM's `MAYA_GLM_RAM_HEADROOM_GB` |
 
 ## GLM: two-host tensor parallel (TP2)
 

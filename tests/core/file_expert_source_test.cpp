@@ -10,6 +10,8 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -19,6 +21,11 @@
 #include <system_error>
 #include <utility>
 #include <vector>
+
+#if defined(__linux__)
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 namespace fs = std::filesystem;
 
@@ -182,6 +189,102 @@ void test_native_variable_layout() {
     require(reopened && source.reads() == 1 && reopened[0] == 'c', "reopened native source kept stale state");
     source.close();
 }
+
+#if defined(__linux__)
+// Exercise real asynchronous slice reads against independent patterned bytes, including unaligned GGUF
+// offsets, a short final page, multiple shards/layer formats, ring eviction and queued work at close.
+void test_gguf_slice_staging() {
+    using namespace strata::core;
+    using namespace strata::kernels::cpu;
+    struct Env {
+        std::string key, value;
+        bool present;
+        explicit Env(const char* k) : key(k), present(std::getenv(k) != nullptr) {
+            if (present) value = std::getenv(k);
+        }
+        ~Env() { if (present) setenv(key.c_str(), value.c_str(), 1); else unsetenv(key.c_str()); }
+    } direct_env("MAYA_EXPERT_DIRECT"), stagers_env("MAYA_EXPERT_STAGERS");
+    TempDirectory dir;
+    constexpr int layers = 2, experts = 12;
+    NativeFmt fmt[layers];
+    uint64_t offsets[layers][3]{};
+    std::string err;
+    require(native_fmt(GGML_TYPE_IQ3_XXS, GGML_TYPE_IQ4_NL, 2560, 640, fmt[0], err), err);
+    require(native_fmt(GGML_TYPE_IQ2_XS, GGML_TYPE_IQ4_NL, 2560, 640, fmt[1], err), err);
+    auto byte = [](int l, int e, int part, size_t i) {
+        return (uint8_t) ((l * 61 + e * 17 + part * 113 + i * 29) % 251);
+    };
+    std::ofstream meta(dir.path / "native_experts.txt");
+    uint64_t packed_offset = 0;
+    for (int l = 0; l < layers; ++l) {
+        const auto& f = fmt[l];
+        require(f.down_off == 2 * f.up_off, "fixture has unexpected internal padding");
+        const uint64_t sizes[3] = {f.up_off, f.up_off, f.bytes - f.down_off};
+        uint64_t cursor = 96;
+        for (int part = 0; part < 3; ++part) {
+            offsets[l][part] = cursor;
+            cursor += sizes[part] * experts + 32;
+        }
+        std::vector<uint8_t> data((size_t) cursor - 19, 0xa7); // partial last 4 KiB page
+        for (int part = 0; part < 3; ++part)
+            for (int e = 0; e < experts; ++e)
+                for (size_t i = 0; i < sizes[part]; ++i)
+                    data[(size_t) offsets[l][part] + e * sizes[part] + i] = byte(l, e, part, i);
+        const std::string name = "slice-" + std::to_string(l) + ".gguf";
+        std::ofstream file(dir.path / name, std::ios::binary);
+        file.write((const char*) data.data(), (std::streamsize) data.size());
+        require((bool) file, "cannot write synthetic GGUF slices");
+        meta << l << ' ' << (l == 0 ? GGML_TYPE_IQ3_XXS : GGML_TYPE_IQ2_XS) << ' ' << GGML_TYPE_IQ4_NL
+             << ' ' << packed_offset << ' ' << f.bytes << ' ' << offsets[l][0] << ' ' << offsets[l][1]
+             << ' ' << offsets[l][2] << ' ' << name << '\n';
+        packed_offset += f.bytes * experts;
+    }
+    meta.close();
+    require(expert_layout_load(dir.path.string(), layers, experts, err), err);
+    const auto shard = dir.path / "slice-0.gguf";
+    bool supports_direct = false;
+#if defined(O_DIRECT)
+    const int probe_fd = ::open(shard.c_str(), O_RDONLY | O_DIRECT);
+    void* probe = nullptr;
+    if (probe_fd >= 0 && posix_memalign(&probe, 4096, 4096) == 0) {
+        supports_direct = ::pread(probe_fd, probe, 4096, 0) == 4096;
+        std::free(probe);
+    }
+    if (probe_fd >= 0) ::close(probe_fd);
+#endif
+    int configurations = 0;
+    for (int stagers : {0, 4}) for (int direct : {-1, 0, 1}) {
+        setenv("MAYA_EXPERT_STAGERS", std::to_string(stagers).c_str(), 1);
+        if (direct < 0) unsetenv("MAYA_EXPERT_DIRECT");
+        else setenv("MAYA_EXPERT_DIRECT", std::to_string(direct).c_str(), 1);
+        GgufExpertSource source;
+        require(source.open(shard.string(), layers, experts, 3, err), err);
+        const bool active = source.note().find("unbuffered slice reads") != std::string::npos;
+        require(active == (supports_direct && stagers > 0 && direct == 1), "direct I/O gate/fallback is wrong");
+        for (int cycle = 0; cycle < 2; ++cycle) for (int l = 0; l < layers; ++l) {
+            const auto& f = fmt[l];
+            const size_t sizes[3] = {(size_t) f.up_off, (size_t) f.up_off, (size_t) (f.bytes - f.down_off)};
+            const size_t to[3] = {0, (size_t) f.up_off, (size_t) f.down_off};
+            for (int group = 0; group < experts; group += 3) {
+                int32_t ids[6] = {group, group + 1, group + 2, group, -1, 999};
+                source.begin_layer(l, ids, 6);
+                for (int e = group; e < group + 3; ++e) {
+                    const uint8_t* blob = source.blob(l, e);
+                    require(blob != nullptr, "missing assembled GGUF blob");
+                    for (int part = 0; part < 3; ++part) for (size_t i = 0; i < sizes[part]; ++i)
+                        require(blob[to[part] + i] == byte(l, e, part, i), "GGUF slice byte/offset mismatch");
+                }
+            }
+        }
+        int32_t pending[3] = {0, 1, 2};
+        source.begin_layer(0, pending, 3);
+        source.close(); // join pending slice tasks before unmapping
+        require(!source.mapped(), "closed GGUF source kept mappings");
+        ++configurations;
+    }
+    std::cout << "GGUF slice staging: " << configurations << " configs PASS, O_DIRECT=" << supports_direct << '\n';
+}
+#endif
 #endif
 
 void test_complement_plan() {
@@ -296,6 +399,9 @@ int main() {
         test_begin_layer_prefetch();
 #if defined(STRATA_NATIVE_EXPERTS)
         test_native_variable_layout();
+#if defined(__linux__)
+        test_gguf_slice_staging();
+#endif
 #endif
         std::cout << "file_expert_source_test: PASS\n";
         return 0;
