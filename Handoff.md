@@ -2,7 +2,7 @@
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
 > Last updated: 2026-11-02 · **Active: sequential upstream integration (§29.17)**, v1.1.37–41 accepted; v1.1.42 candidate #61/#62 under validation.
-> User authorized stopping the pair for validation. Fixed42 bc4e90a6/runtime837a679 all5paths matched; CPU/HIP/host/kernel gates pass. HOLD64 latency, fixed live batch19655 active (§29.17); no43. Accepted41 main41327238265 PASS.
+> User authorized stopping the pair for validation. Fixed42 bc4e90a6/runtime837a679 all5paths matched; CPU/HIP/host/kernel gates pass. Fixed64 stress gate passes; live batch19655 finalLbenchmark active, normal-idleAB still required (§29.17); no43. Accepted41 main41327238265 PASS.
 > Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
 > **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
@@ -987,3 +987,13 @@ Review branch merge/upstream-v1.1.42 has an in-progress merge from cd48762. Reta
 42 build milestone: runtime d59ea06 engine **d8b4252a17fc09623ef0677051ee1a47** matched all5paths. All3HIP/16host/196fused/MMQ/attention/396strictIQ pass. First CPU583server had2 fixture errors (excluded WINDOWS symbol); ba4c34e fixes mocks, focusedSampler pass, orderedCPU session85089 rerunning. **Active live session86028**, /tmp/maya-upstream-v42-batch.sh, output /tmp/maya-upstream-v42/. DraftPR63, no42acceptance/no43. Do not start concurrentGPU/build/deployment. Test-only/doc commits afterd59 do not change engine; remote review d59.
 
 42 HOLD #64: force-deep-idle1s/3000ms exposed23.683s MTP32 decode after14.55K prefill (initiald8 candidate), versus~60–66ms/token short probes. Initial port woke rank1 only at mirror/MTP; rank0 needed wake-up again after long prefill. Pre-fix logs/binary preserved, batch86028stopped. **837a679** wakes both lanes at mirrored-call/nested-MTP boundaries without wire changes; newengine **bc4e90a607b87fe609398fbdba0fb98c**. Active fixedbatch19655 same /tmp/maya-upstream-v42-batch.sh. Verify deployedfivehashes/GPUimageaudit completed before live. OrderedCPU583serve11skip/662tools33skip/HIPmap/Node PASS; no Python changes after those. No42acceptance/no43.
+
+42 fixedstate milestone: same14.55K MTP probe decode23.683→2.2415s, prefill41.463→41.399s, long/short12.26x→1.14x; durable4x gate rejectsactualpre-fix/passesfixed. BOTHsimple/MTP7 matrices/lifecycle/media/idlefollowup/trueprefillcancelcache0retry pass,132roundtuples/8asym retries match,CLI32/32both pass. Initialaudit249/132wasappendlogmixing; segmentedlaststartup(line784), rawpreserved. Final584serve11skip/662tools33skip/HIPmap/Node pass; 456Pythonlast-worldflagguardremoteupdatedbeforelaterphases; engine837/bc4unchanged. RuntimeCI41330559259/PythonCI41331029193PASS; finalheadCIstillpending. Activebatch19655 recovery/fidelity/prefillAB/M-L; no43.
+
+42 recovery/fidelity milestone: kill/recover8/8; SCLI32/32bothranks/modesidenticalaccepted41; technical/code256framed16/16ordinaryANDMTPrawpick0 withall4directunsupportedcommandsrejectedbeforedecode. Current779headCI41331428973/41331432952PASS. Candidate-prefill9/9done, accepted41baselinearmloading; M/Lnext in active19655batch. No42acceptance/no43.
+
+42 prefillABcomplete: all9messages/usageequal/cache0; warm1K/4K/8Kthroughput−0.18/+0.30/+1.57% vs41, no materialregression/newgainclaim; #33openforcold9.6case/~3008rowcap. Active19655Maya-MAPI/prefill/fidelity, thenL. **After19655 completes successfully**, run /tmp/maya-upstream-v42-idle-ab.py > /tmp/maya-upstream-v42/idle-ab.txt (normaldefault65squiet+10sCPU/wake sample eacharm, thenMTPfollowup). NeverconcurrentGPU. Finalevidence/CI/mainbefore43.
+
+42Maya-M complete: API/reuse/cancel/limits/fresh1K/4K/8K pass;8framedraw-pick0, ordinary40.62/MTP31.90ms/token. Coldsmokeprefill11.32/39.66/24.97s retainedwithoutperfclaim. Lrank1warm73s/ready, rank0progress90% at156s (900boundunchanged), active19655. Afterbatch0 runnormalidleABscriptasabove. FinalCI/mainrequired; no43.
+
+42LAPI milestone: startupR0186/R173s, API/reuse/cancel/limits/fresh1K/4K/8K pass; raw64benchmarkwarmingnow (coldloadnewpair), active19655. Requiredafterbatch0: normal-idleAB /tmp/maya-upstream-v42-idle-ab.py -> /tmp/maya-upstream-v42/idle-ab.txt. Notrunyet. Updatedrestartpromptcontainsallpendinggates. No43untilfinal42evidence/headCI/merge/mainPASS.
