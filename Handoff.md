@@ -1,14 +1,17 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-10-31 · **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
+> Last updated: 2026-11-01 · **Active: sequential upstream integration (§29)**, first tag #37 / draft PR #38.
+> User authorized stopping the pair for validation. Candidate binaries deployed; live TP2/MTP checks in progress.
+> Future fork release tags: **`tp-vMAJOR.MINOR.PATCH`** (#40); legacy published tags remain immutable.
+> **v1.1.42 published** at `6471995` (CI41203815519 passed); release #35 (§28).
 > Previous: **v1.1.41** at `a6d15a7` (CI41191735148 passed); #32 closed (§24).
 > **v1.1.40** = `d9248e8`, **v1.1.39** = `20ff03a`. **Maya-S + Maya-M + Maya-L TP2/MTP validated** (§21, §23).
 > Open perf: **#33** TP2 prefill — sliced GEMM calibration + rank1 config inheritance improve Maya-S
 > median prompt throughput **32–37%** at 1K/4K/8K (§27). Binary **`5a52cd27167523b6ea4b0f0bde93f503`**
 > unchanged on all three paths. Prefill commit `9bc0ec9`, PR #34 merged as `b63f8af`; local **main**
 > tracks origin/main. Rank0 has user work (see §27); preserve it.
-> **User Maya-M TP2 pair running** at the release check (context 32768, healthy peer); leave it alone.
+> Historical release-check runtime below is superseded by §29's authorized test window.
 > Llama-swap daemon + 6 maya YAML entries preserved (Maya-L `--context 524288`).
 
 ## 1. What we are building
@@ -700,6 +703,12 @@ Audit **#36**; first tag **#37**, upstream v1.1.37 `7ee8f27`. Common upstream ba
 ten tags through v1.1.46, fetched as **upstream/v1.1.N** to preserve our colliding release tags.
 Inventory/guard decisions: `docs/upstream/INTEGRATION-2026-11-01.md` and its JSON commit/file audit.
 Do not start v1.1.38 until v1.1.37 passes the full checkpoint. No fork release authorized in this task.
+
+**User tag naming requirement (#40):** future fork releases use **`tp-vMAJOR.MINOR.PATCH`**
+(e.g. `tp-v1.1.43`), while `VERSION` remains numeric. Keep published legacy `v*` tags immutable;
+fetch upstream tags into `upstream/v*`. The dashboard updater now accepts the fork prefix, preserves
+the exact git tag during update and compares/displays its numeric version. Legacy tags still work.
+Tests cover release discovery, numeric ordering and an actual fast-forward from a temporary origin.
 
 Current user pair is **Maya-L**, context **524288**, rank0 API **:5812** (dynamic), rank1 local.
 User explicitly answered **"Hosts are free; you may stop the pair for validation"**. This authorizes
