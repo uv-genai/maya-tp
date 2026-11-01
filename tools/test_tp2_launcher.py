@@ -203,6 +203,28 @@ os.unlink(p)
         self.assertIn('MAYA_MODEL=Maya-M', tokens)
         self.assertIn(f'MAYA_MODELS_DIR={models}', tokens)
 
+    def test_rank1_aliases_match_server_for_config_and_shell_conflicts(self):
+        from serve.server import child_env
+        cases = ({'STRATA_GLM_PREFILL_SUB': '1024'},
+                 {'MAYA_GLM_PREFILL_SUB': '1024'},
+                 {'MAYA_GLM_PREFILL_SUB': '1024', 'STRATA_GLM_PREFILL_SUB': '256'})
+        engine = self.executable('engine', '''import os,json
+keys=('MAYA_GLM_PREFILL_SUB','STRATA_GLM_PREFILL_SUB')
+with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump({k:os.environ.get(k) for k in keys},f)
+''')
+        for settings in cases:
+            with self.subTest(settings=settings):
+                cfg = json.loads(self.config.read_text())
+                cfg['env'] = settings
+                self.config.write_text(json.dumps(cfg))
+                r = self.run_script('tools/tp2/rank1.sh', ENGINE=str(engine),
+                                    MAYA_GLM_PREFILL_SUB='128', STRATA_GLM_PREFILL_SUB='64')
+                self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+                actual = json.loads((self.root / 'result.json').read_text())
+                expected = child_env(cfg)
+                self.assertEqual(actual, {k: expected[k] for k in actual})
+                self.assertEqual(set(actual.values()), {'1024'})
+
 
 if __name__ == '__main__':
     unittest.main()
