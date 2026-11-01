@@ -215,7 +215,7 @@ class Sampler(unittest.TestCase):
         a read of the numbers (snapshot), a request (touch) or work in hand brings back the second at once."""
         r = reader(absent=True)
         busy = [False]
-        with mock.patch.object(T, "SYSFS", str(ROOT / "no-such-sysfs")), mock.patch.object(T, "WINDOWS", False):
+        with mock.patch.object(T, "SYSFS", str(ROOT / "no-such-sysfs")):
             t = T.Telemetry(gpu_index=0, reader=r, start=False, busy=lambda: busy[0])
         self.assertEqual(t.pause(), 1.0)                       # (just started: watched)
         t.watched_at -= T.WATCH_S + 1
@@ -231,7 +231,7 @@ class Sampler(unittest.TestCase):
         import threading
         import time
         r = reader(absent=True)
-        with mock.patch.object(T, "SYSFS", str(ROOT / "no-such-sysfs")), mock.patch.object(T, "WINDOWS", False), \
+        with mock.patch.object(T, "SYSFS", str(ROOT / "no-such-sysfs")), \
              mock.patch.object(T, "IDLE_S", 3.0), mock.patch.object(T, "WATCH_S", 0.0):
             t = T.Telemetry(gpu_index=0, reader=r, start=False, busy=lambda: False, extra=lambda: {"tok_s": 7.0})
             time.sleep(0.01)
