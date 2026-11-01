@@ -6,7 +6,9 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
-- **Upstream v1.1.43 integration** (#65): bounded loop/thinking continuations and long-conversation prefix preservation, live speculation/tier metrics, unattended calibration handling and DeepSeek GGUF/Engram tooling. Keep total output budgets and paired safeguards; reject a continuation when its server note exhausts context (#66), and apply the collapse limit from config under both aliases (#67). Validation is in progress.
+- **Upstream v1.1.44 integration** (#72): list the existing DeepSeek UD-IQ1_M option, attribute upstream quality/capacity estimates, and update the Q8/Q4 download revision without changing pinned file sizes/hashes. Engine/server/TP2/MTP paths are unchanged.
+
+- **Upstream v1.1.43 integration** (#65): bounded loop/thinking continuations and long-conversation prefix preservation, live speculation/tier metrics, unattended calibration handling and DeepSeek GGUF/Engram tooling. Keep total output budgets and paired safeguards; reject a continuation when its server note exhausts context (#66), and apply the collapse limit from config under both aliases (#67). Targeted TP2 and affected Engram validation pass; broader pre-existing DS4 WMMA failures remain tracked in #68.
 
 - **Upstream v1.1.42 integration** (#61): idle request gates with TP2 worker wake-up, consistent environment aliases on both ranks, GLM automatic chunk search correction and applicable DeepSeek/MiniMax guards. Reject unmirrored TP2 vision/lending/scoring before state changes (#62). Vision enablement and same-host multi-GPU additions remain deferred. Paired state/fidelity/performance gates pass; reduced default idle polling is measured on gfx1151.
 
