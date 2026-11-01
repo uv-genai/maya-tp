@@ -805,3 +805,20 @@ remain byte-identical to the full S/M/L v1.1.37 checkpoint; raw-GGUF changes tes
 Evidence docs/upstream/v1.1.38.md and directory. Both engines/server stopped; daemon/YAML and remote
 canonical user source preserved. Final evidence CI then PR #44 merge required; do not start39 yet.
 #33/#42/#11/#16 remain open. No release/tag publication; future fork tags use tp-v.
+
+### 29.6 Post-merge v1.1.38 CI hold — failed restart #47
+
+PR #44 merged as **ad96053f2aaecb284d1f5fe3c165a1d34a36146f** after final1f51079 CI
+**41301067233 / 41301072413 PASS**. Post-merge main CI **41301502943 failed** at
+FailedRestartKeepsContext: EOF before READY can arrive while the failed process still appears alive.
+This pre-existing server lifecycle bug is separate **#47**. #43 reopened/held; **do not import39 yet**.
+
+Review branch `fix/failed-engine-restart` marks a failed start ended, kills/reaps its child and
+preserves context/metadata/routes. A deterministic stdout-EOF/lingering-process test reproduced
+the old failure; focused restart/watchdog tests6 PASS. Full ordered CPU gates/CI pending. No C++
+engine build/deploy; all canonical engine hashes remain **cff75b48a0f1e0b2d2355c73ce302d94**.
+
+#45 is v1.1.39 review only (no candidate merge). #46 tracks its confirmed stream-fetch mismatch:
+TP compact reads only write on role0/chunk0, but upstream would mark every no-op job's chunk
+ready. Gate TP streaming before any candidate deployment; preserve existing compact reader.
+New streaming defaults must stay off until gfx1151 validation. #33/#42/#11/#16 remain open.
