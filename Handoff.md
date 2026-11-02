@@ -1312,5 +1312,11 @@ was a mean of three greedy 256-token answers (thinking off), 453 prefill at 8192
 Mix-128G on a Windows 192 GB Ryzen AI Max+ PRO 495 / 8065S. This user's 128 GB Max+ 395 / 8060S
 Linux uses Maya-XS. Those figures do not establish a like-for-like comparison or a single cause.
 Issue #100 tracks performance; #101 tracks calibration hangs. User authorizes reading anywhere but
-issues only on uv-genai/maya-tp. Asked asynchronously for permission to send benchmark requests to
-the running server; do not mutate its prompt cache without that response.
+issues only on uv-genai/maya-tp. User explicitly authorized benchmark requests to the running server. API benchmark session6443
+EXIT0: the same greedy/thinking-off Python, prose and HTML questions yielded 39.3/28.5/47.9 tok/s
+(mean 38.6 vs upstream 43.2). Fresh 2052 and 8196-token prompts, both cache0, yielded 203.5 and
+298.1 tok/s (upstream 2048/8192: 278/453). Single samples; API and upstream direct engine differ,
+as do model quant, OS and hardware; no causal attribution. Server was healthy, idle, DSpark enabled
+afterward. Durable report and raw timing data: `docs/benchmarks/deepseek-maya-xs-2026-11-02/`.
+#100 remains open for investigation, #101 for the 600-second calibration hang. Only open issues
+on uv-genai/maya-tp; the user permits read-only access anywhere.

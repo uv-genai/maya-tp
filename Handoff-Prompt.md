@@ -7,8 +7,8 @@ Read [AGENTS.md](AGENTS.md), then [Handoff.md §33](Handoff.md#33-prefill-promot
 Read Handoff.md §35 and issues #100/#101. The user's DeepSeek Maya-XS server on port 8000 is
 user-owned: do not stop/restart it. DSpark is enabled; the 600-second calibration watchdog failure
 is separately tracked. The upstream 43.2/453 figures were for a different quant/hardware and an
-8K prefill with greedy, thinking-off answers. A request for permission to send benchmark requests
-to the live server is pending. Read from any repository, but only open issues on uv-genai/maya-tp.
+8K prefill with greedy, thinking-off answers. The user authorized benchmark requests; session6443 completed successfully. See §35 and
+`docs/benchmarks/deepseek-maya-xs-2026-11-02/`. Read from any repository, but only open issues on uv-genai/maya-tp.
 The HIP setup fix #98 merged in PR #99 and the user successfully started DeepSeek.
 
 ## Current state
