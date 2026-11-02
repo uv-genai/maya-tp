@@ -77,7 +77,7 @@ On the pair, MTP adds **10.8%** for the technical prompt with one draft and **29
 Acceptance depends on the workload: seven drafts slowed the technical case by 38.6%. One or two drafts
 are useful starting points for the measured workloads.
 
-Simple/MTP comparisons use the same continuation and agree on all 256 raw greedy picks, with zero measured
+The 2026-10-30 simple/MTP comparisons used the same continuation and agreed on all 256 raw greedy picks, with zero measured
 disk reads or CPU expert work. Single-host and TP2 controls use their own references because reduction
 order can change greedy text. These are workload measurements, not a universal speedup guarantee.
 The [full review, methodology and raw results](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md)
@@ -94,7 +94,8 @@ The `main` branch includes the sequential semantic integration of upstream **v1.
 the cumulative **v1.1.47–v1.1.49** merge, with TP2/MTP preservation checks and CI. This is unreleased source work: the latest published
 fork release remains **v1.1.42**, and future fork releases use **`tp-vMAJOR.MINOR.PATCH`**.
 Fresh S/M/L ordinary/MTP API, CLI, strict historical-reference and peer-recovery checks passed after
-the cumulative merge; the report also records prefill timing variation and the first-failure health fix.
+the cumulative upstream merge on its then-current binary. The later prefill build was accepted in user
+trials; its stricter fidelity limitations are documented in the [prefill report](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
 The [latest merge report](docs/upstream/v1.1.49.md) and
 [earlier integration report](docs/upstream/COMPLETION-2026-11-02.md) distinguish accepted changes from
 deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya-tp/issues/68),
@@ -203,8 +204,8 @@ Reports should include the model/quant, both hosts' configuration, commit and bi
 draft width, cache/disk counters and reproduction steps. `./maya.sh --report` collects local diagnostics.
 
 GitHub CI runs CPU-only checks: the HIP compatibility-name gate, server tests and installer/tools tests.
-GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery are exercised on the
-Strix Halo pair for **Maya-S, Maya-M and Maya-L** (simple and MTP). Evidence:
+GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery were exercised on the
+Strix Halo pair for **Maya-S, Maya-M and Maya-L** (simple and MTP) on earlier builds. Evidence:
 
 - [Maya-S MTP review](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md)
 - [Maya-M TP2/MTP suite](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md)
@@ -221,8 +222,8 @@ Useful references:
 Some inherited documentation describes upstream Maya's broader platform and model support; the validated
 Maya-TP scope is listed above. Release **v1.1.42** improves controlled Maya-S TP2 prefill throughput by
 32–37% through worker configuration and gfx1151/hipBLASLt 100401 tuning. Cold Maya-L delays and the
-prefill row cap remain open; consult the [changelog](CHANGELOG.md) and
-[prefill report](docs/benchmarks/tp2-prefill-2026-10-31/RESULTS.md) when selecting a revision.
+prefill row cap remain limitations; #33 was closed after user acceptance. Consult the
+[changelog](CHANGELOG.md) and [latest prefill report](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
 
 ## Credits and license
 

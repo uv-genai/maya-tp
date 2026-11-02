@@ -127,7 +127,7 @@ is not downloaded again, and your settings stay. By hand: `git pull`, then `./se
 (The check asks GitHub for the latest release, at most every six hours; `MAYA_UPDATE_CHECK=0` turns it off.)
 
 These update steps apply to a clean installation. On the development pair, the rank0 canonical
-checkout has protected user edits and intentionally restored production binaries. Do not update or
+checkout has protected user edits and uses the user-accepted promoted binary. Do not update or
 rebuild it as part of routine validation; use the isolated review trees described in
 [the runbook](TP2-RUN.md#development-pair-production-and-review-builds).
 

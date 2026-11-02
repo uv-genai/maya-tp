@@ -1,22 +1,20 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§33** (active prefill fixes #90/#91, parent #33).
-> Fresh S/M/L API/CLI/strict/recovery and both-order prefill gates complete; final CI/merge checkpoint on #87/PR89.
-> Integration through upstream v1.1.46 and restoration are complete; final CI41352750402 PASS,
-> #77/#36 closed. Review builds retained; production5a52 restored. The user launches their processes.
-> §§10–31 are dated session history, including superseded active/pending states and deployment paths.
-> Current process-ownership rules in §2 and §32 override historical cleanup commands.
+> Last updated: 2026-11-02 · Current state: **§33**, prefill candidate accepted and promoted.
+> PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
+> §§10–32 are dated history, including superseded status, deployment paths and pending actions.
+> Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
 
 ## 1. What we are building
 
-Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (**Maya-S, Maya-M and Maya-L** all passed the full
-TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
+Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (**Maya-S, Maya-M and Maya-L** passed the full
+TP2+MTP suite on earlier builds and user trials on the promoted build; geometry is pack-derived via #12) across two twin hosts:
 
 | Host | Role | IP |
 | --- | --- | --- |
 | `strix-halo-1.local` | rank 0 (API server) | 192.168.1.22 |
-| `strix-halo-2.local` | rank 1 (worker, **this machine**) | 192.168.1.92 |
+| `strix-halo-2.local` | rank 1 (worker; usual agent workspace) | 192.168.1.92 |
 
 - **Platform (hard rule):** HIP/ROCm **gfx1151 (Strix Halo) Linux only**. No CUDA/NVIDIA work.
 - **Interconnect (hard rule):** **RDMA only** over Thunderbolt `usb4_rdma*` (gufo's path). No TCP data path (bootstrap TCP: QP handshake + serve instruction mirror + MTP accept wire only).
@@ -28,10 +26,10 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 2. **Push only to `origin` (`uv-genai/maya-tp`). Never push to `upstream` (`mw00/project-maya`).**
 3. **GPU is the inference path.** CPU only for unit tests of slice math.
 4. Perf claims need **controlled** measurements. Use `--spec-follow` for near-tie counts.
-5. **NEVER use nested SSH.** You are ON strix-halo-2. SSH only to strix-halo-1.
+5. **NEVER use nested SSH.** The usual workspace is on strix-halo-2; SSH directly to strix-halo-1 from there.
 6. **Python uses `.venv/bin/python`.** Shell uses `jq`.
 7. **Stop only validation processes you started**, using recorded PIDs/process groups. The user launches their own processes. No name-wide `pkill`, port-wide killing, or unrelated service inspection/control; prior validation permission is not standing permission to stop user processes.
-8. **Binaries are per-host.** Select matching review builds on both hosts and verify hashes before testing. Preserve restored canonical production binaries and the protected remote source; do not overwrite them as routine test setup. `run_bench.sh` uses rank0 `/tmp/maya-tp2`, currently restored production, so do not assume it selects a newer review build.
+8. **Binaries are per-host.** Select matching review builds on both hosts and verify hashes before testing. Preserve the promoted canonical production binaries and the protected remote source; do not overwrite them as routine test setup. `run_bench.sh` uses rank0 `/tmp/maya-tp2`; verify its executable rather than assuming it matches production.
 9. **Stop an owned rank0 server before its owned engine** to prevent respawn and release its executable. Track those processes at launch. Do not clear a busy environment by name or port. Older harness cleanup is tracked in #83 and must not run against user processes.
 
 ## 3. Git / GitHub
@@ -69,7 +67,7 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 30 | Maya-L TP2 + MTP validation | **complete** — suite PASS, report `docs/benchmarks/tp2-maya-l-mtp-2026-10-31`; docs updated |
 | 31 | Release v1.1.40 | published from `d9248e8`; tag/CI/publication verified; closed (§22) |
 | 32 | Release v1.1.41 | published from `a6d15a7`; tag/CI/publication verified; closed (§24) |
-| 33 | TP2 prefill throughput | **open** — sliced GEMM tuning + rank1 config inheritance improve S 32–37% (§27); row cap/short-request overhead remain |
+| 33 | TP2 prefill throughput | **closed by user acceptance** — tuning and pool improvements promoted; row cap and cold variability remain (§33) |
 | 35 | Release v1.1.42 | **published** — `6471995`, CI41203815519 PASS, annotated tag/public latest release verified (§28) |
 | 42 | TP2 CLI readiness after expert warmup | **open** — existing Maya-L warmup skew needs a peer-ready handshake; WARM=0 cold CLI is very slow; tracking only during #37 |
 | 18 | MTP rank-local scratch retry diverges collective shapes | fixed and validated (§16) |
@@ -79,7 +77,9 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 36–81 | Sequential upstream v1.1.37–v1.1.46 integration | completed; per-tag evidence in `docs/upstream/`, final #77/#36 closed; deferred #46/#52/#54/#60/#68/#75/#79 remain open |
 | 82 | User/agent documentation audit | documentation refreshed; final checks, commit/CI and outcome recorded on GitHub |
 | 83 | Validation harness cleanup ownership | open; replace name-/port-wide cleanup with owned PIDs/process groups |
-| 85 | Direct cumulative upstream v1.1.49 integration | v47–49 reviewed together; source validation/report and CI/merge provenance on #85 (§31) |
+| 85 | Direct cumulative upstream v1.1.49 integration | closed; v47–49 reviewed together (§31) |
+| 90 / 91 | Prefill pool sizing and DSA tuning | closed after user acceptance; promoted in PR #94 (§33) |
+| 93 | Cold Maya-L baseline output variation | closed as not planned at user request; cause unresolved (§33) |
 
 ## 5. What works (Maya-S pack)
 
@@ -89,12 +89,12 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 - **Serve** (`tools/tp2/rank1.sh` then `rank0.sh`): rank 0 mirrors `TpMirrorHdr` before every collective; rank 1 worker executes them. `curl /v1/chat/completions` works; multi-turn reuse works (simple loop).
 - **Peer health:** `/health` → `tp.peer: up|down`, `status: degraded` after first failed mirror send. Sticky `TP2_DOWN` until both ranks restart.
 - **TP2 + MTP:** opt-in `MAYA_TP_MTP=1` (leave `MAYA_GLM_NO_MTP` unset). Three-turn serve with restore/reuse, thinking-budget force, and cancel/follow-up verified (§11). Rank 0 owns inputs, acceptance and continuation; tensors stay on RDMA.
-- **Acceptance:** `tools/tp2/acceptance.sh`.
+- **Acceptance:** `tools/tp2/acceptance.sh` is a legacy broad-cleanup harness (#83); agents must not run it against user processes.
 - **Decode under TP2:** simple loop is the default; MTP is opt-in and greedy (see #13).
 
 ## 6. Performance (Maya-S IQ2_XXS)
 
-**Current corrected engine**, framed chat, warm resident 256-token common references, all raw picks agree:
+**Historical 2026-10-30 corrected engine**, framed chat, warm resident 256-token common references, all raw picks agreed on that build:
 
 | Workload | Drafts | Simple tok/s | MTP tok/s | Gain |
 | --- | ---: | ---: | ---: | ---: |
@@ -1263,7 +1263,8 @@ Remote canonical Git checkout retains its other user changes; do not reset it. N
 Changes: HIP APU complete pool retains experts if complete layout fits above headroom/reserve and
 respects existing caps; TP2 scratch uses existing 3008-row receive bound; three DSA hipBLASLt entries
 are calibrated for gfx1151/100401. `MAYA_GLM_COMPLETE_POOL=0` remains the capped-pool control.
-Branch `perf/apu-prefill-90`, commits 3da1347 and 8d3ce94; branch CI41396532631 passed.
+PR #94 merged as `6f85d30`; commits 3da1347 and 8d3ce94 contain the engine changes, and both PR
+checks passed. Issues #33/#90/#91 closed as completed; #93 closed as not planned at user request.
 
 **Limits:** strict S technical historical-reference test reported 12/256 raw picks different, and
 L balanced comparison found one differing cold output in the old baseline; full candidate API/CLI

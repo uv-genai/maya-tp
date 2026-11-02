@@ -60,9 +60,9 @@ unless the current task explicitly requests it. Earlier validation permission is
 authorization to stop user processes.
 
 Read the current state in `Handoff.md` before deploying: the remote canonical checkout contains
-protected user edits, and restored production binaries intentionally differ from retained review
-builds. Use isolated review trees and explicit configs for future validation; do not pull/reset,
-rebuild or overwrite the protected production checkout as routine test setup.
+protected user edits, and production and review binaries may differ. Use isolated review trees and
+explicit configs for future validation; do not pull/reset, rebuild or overwrite the protected
+production checkout as routine test setup.
 
 ## Commands (CI / local, no GPU)
 

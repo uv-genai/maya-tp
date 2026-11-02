@@ -24,8 +24,9 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 The user accepted the prefill candidate after Maya-S, Maya-M and Maya-L llama-swap tests. Canonical
 `build-hip/maya` on both hosts is MD5 `cbd9e99a6a49e9107b0db3190a40766a`, with matching calibrated
 tuning. The original llama-swap configuration is restored; restart llama-swap to load it. The
-previous binaries, configs, rank1 launchers, tuning and rank0 server files are backed up on both hosts
-in `/home/ugo/software/project-maya-before-prefill-90-promotion`. The remote canonical checkout
+previous binaries, configs, rank1 launchers and tuning are backed up on both hosts in
+`/home/ugo/software/project-maya-before-prefill-90-promotion`; the rank0 backup also contains its
+previous server files. The rank0 llama-swap backup is `~/.config/llama-swap/config.yaml.before-prefill-90`. The remote canonical checkout
 still contains user edits; do not reset it. See [Handoff §33](../Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33)
 for performance and validation limits.
 
@@ -145,8 +146,9 @@ Before a live pair, confirm identical pack hashes on both hosts and `audit_split
 Controlled `run_bench.sh --model Maya-M` (2026-10-31, binary `5dbc9356…`, simple decode, 32 tokens):
 **pair parity 32/32**, decode **42.57 / 42.83 ms/token** (rank0 / rank1), prefill 11 tokens ≈ 470 ms.
 
-**Maya-S, Maya-M and Maya-L** have passed the suite (S/M: 7-draft API matrices, `mtp_acceptance`, CLI 32/32
-both modes, kill/recover 8/8, `bench_mtp`). Reports:
+**Maya-S, Maya-M and Maya-L** passed these suites on earlier builds (S/M: 7-draft API matrices,
+`mtp_acceptance`, CLI 32/32 both modes, kill/recover 8/8, `bench_mtp`). The promoted prefill build
+was accepted in user llama-swap trials; its complete API/CLI regression was not repeated. Reports:
 [Maya-M](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md),
 [Maya-L](benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md).
 Maya-S raw MTP data remains in [tp2-mtp-review](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md).
