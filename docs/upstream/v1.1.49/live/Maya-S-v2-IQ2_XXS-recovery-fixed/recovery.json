@@ -1,0 +1,181 @@
+{
+  "before": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  },
+  "first_chat": {
+    "id": "chatcmpl-d3a8e9ae52964cfe8a740f2a",
+    "object": "chat.completion",
+    "created": 1793587783,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Tensor parallel RDMA refers to the use of Remote Direct Memory Access (RDMA",
+          "reasoning_content": "The user is asking about tensor parallel RDMA. Let me think about what"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 22,
+      "completion_tokens": 32,
+      "total_tokens": 54,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 22,
+      "prompt_ms": 465.4,
+      "prompt_per_token_ms": 21.155,
+      "prompt_per_second": 47.3,
+      "predicted_n": 32,
+      "predicted_ms": 1145.5,
+      "predicted_per_token_ms": 35.797,
+      "predicted_per_second": 27.9,
+      "draft_n": 49,
+      "draft_n_accepted": 23
+    }
+  },
+  "peer_error": {
+    "type": "invalid_request_error",
+    "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+  },
+  "after": {
+    "status": "degraded",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "down"
+    }
+  },
+  "owned_processes_before": {
+    "rank1": [
+      [
+        3055503,
+        68431273
+      ]
+    ],
+    "rank0": [
+      [
+        334602,
+        16953659
+      ],
+      [
+        334605,
+        16953697
+      ]
+    ]
+  },
+  "owned_processes_after": {
+    "rank1": [],
+    "rank0": [
+      [
+        334602,
+        16953659
+      ],
+      [
+        334605,
+        16953697
+      ]
+    ]
+  },
+  "checks_before_restart": 6,
+  "recovered": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  },
+  "recovered_chat": {
+    "id": "chatcmpl-e9395e4507e3409fa0c0a43b",
+    "object": "chat.completion",
+    "created": 1793587818,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Tensor parallel RDMA refers to the use of Remote Direct Memory Access (RDMA",
+          "reasoning_content": "The user is asking about tensor parallel RDMA. Let me think about what"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 22,
+      "completion_tokens": 32,
+      "total_tokens": 54,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 22,
+      "prompt_ms": 786.7,
+      "prompt_per_token_ms": 35.759,
+      "prompt_per_second": 28.0,
+      "predicted_n": 32,
+      "predicted_ms": 2319.4,
+      "predicted_per_token_ms": 72.481,
+      "predicted_per_second": 13.8,
+      "draft_n": 46,
+      "draft_n_accepted": 23
+    }
+  },
+  "checks_passed": 8
+}

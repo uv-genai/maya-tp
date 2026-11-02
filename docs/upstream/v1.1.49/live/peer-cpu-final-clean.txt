@@ -1,0 +1,16 @@
+test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) ... ok
+test_health_is_degraded_immediately_after_first_http_failure (serve.test_tp2_peer_loss.PeerLoss.test_health_is_degraded_immediately_after_first_http_failure) ... /home/ugo/software/project-maya/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] the engine reported an error: TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)
+ok
+test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior (serve.test_tp2_peer_loss.PeerLoss.test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.769s
+
+OK

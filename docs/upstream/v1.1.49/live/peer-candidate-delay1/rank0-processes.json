@@ -1,0 +1,30 @@
+{
+  "owner": "d721572db24c483aa706c80f52446126",
+  "root": 332082,
+  "processes": [
+    {
+      "pid": 332082,
+      "start": 16829888,
+      "state": "R"
+    },
+    {
+      "pid": 332085,
+      "start": 16829926,
+      "state": "S"
+    }
+  ],
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/source/serve/server.py",
+    "--engine",
+    "strata",
+    "--config",
+    "/tmp/maya-v49-live-87/peer-candidate-delay1/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "alive": [],
+  "stopped": true
+}

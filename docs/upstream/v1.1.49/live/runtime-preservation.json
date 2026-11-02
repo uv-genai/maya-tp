@@ -1,0 +1,13 @@
+{
+  "local_md5": {
+    "/home/ugo/software/project-maya/build-hip/maya": "5a52cd27167523b6ea4b0f0bde93f503",
+    "/home/ugo/software/project-maya-upstream-review/build-hip/maya": "b398d4a0711430edd6a28b95264c7293"
+  },
+  "remote_md5": {
+    "/home/ugo/software/project-maya/build-hip/maya": "5a52cd27167523b6ea4b0f0bde93f503",
+    "/home/ugo/software/project-maya-upstream-review/build-hip/maya": "b398d4a0711430edd6a28b95264c7293",
+    "/tmp/maya-tp2": "5a52cd27167523b6ea4b0f0bde93f503"
+  },
+  "fixed_server_sha256": "c6ce5d425534423988975c6816ea288ef9dd6e6d5b41f8662f12f5f29cb65a4f",
+  "production_binary_unchanged": true
+}

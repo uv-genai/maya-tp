@@ -1,0 +1,13 @@
+{
+  "owner": "selftest-stale-start",
+  "root": 3046694,
+  "processes": [
+    {
+      "pid": 3046694,
+      "start": 68225621,
+      "state": "S"
+    }
+  ],
+  "alive": [],
+  "stopped": true
+}

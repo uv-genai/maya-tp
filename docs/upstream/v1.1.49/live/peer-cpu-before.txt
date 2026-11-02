@@ -1,0 +1,73 @@
+test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) ... 
+  test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) (multi=0) ... FAIL
+  test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) (multi=2) ... FAIL
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=7 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_health_is_degraded_immediately_after_first_http_failure (serve.test_tp2_peer_loss.PeerLoss.test_health_is_degraded_immediately_after_first_http_failure) ... /home/ugo/software/project-maya/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] the engine reported an error: verbs communicator is poisoned: verbs peer closed the bootstrap connection
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)
+FAIL
+/usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 400: 'Bad Request'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior (serve.test_tp2_peer_loss.PeerLoss.test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior) ... /usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=8 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=9 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+======================================================================
+FAIL: test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) (multi=0)
+----------------------------------------------------------------------
+ValueError: verbs communicator is poisoned: verbs peer closed the bootstrap connection
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya/serve/test_tp2_peer_loss.py", line 52, in test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine
+    with self.assertRaisesRegex(ValueError, 'TP2 pair down.*verbs communicator is poisoned'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "TP2 pair down.*verbs communicator is poisoned" does not match "verbs communicator is poisoned: verbs peer closed the bootstrap connection"
+
+======================================================================
+FAIL: test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) (multi=2)
+----------------------------------------------------------------------
+ValueError: verbs communicator is poisoned: verbs peer closed the bootstrap connection
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya/serve/test_tp2_peer_loss.py", line 52, in test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine
+    with self.assertRaisesRegex(ValueError, 'TP2 pair down.*verbs communicator is poisoned'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "TP2 pair down.*verbs communicator is poisoned" does not match "verbs communicator is poisoned: verbs peer closed the bootstrap connection"
+
+======================================================================
+FAIL: test_health_is_degraded_immediately_after_first_http_failure (serve.test_tp2_peer_loss.PeerLoss.test_health_is_degraded_immediately_after_first_http_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ugo/software/project-maya/serve/test_tp2_peer_loss.py", line 81, in test_health_is_degraded_immediately_after_first_http_failure
+    self.assertIn('TP2 pair down', json.load(failed.exception)['error']['message'])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'TP2 pair down' not found in 'verbs communicator is poisoned: verbs peer closed the bootstrap connection'
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.765s
+
+FAILED (failures=3)

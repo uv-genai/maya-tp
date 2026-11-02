@@ -386,6 +386,7 @@ MTP verification currently uses greedy sampling under TP2.
 | `bootstrap connect: Operation now in progress` | Rank 0 not listening yet | Wait; engine retries 120 s (`MAYA_TP_BOOTSTRAP_TIMEOUT`) |
 | `TP2 mirror send: Broken pipe` | Rank 1 died | Restart **both**; `/health` → `status=degraded`, `tp.peer=down` |
 | Request: `TP2 pair down` | Peer already lost | Restart both ranks (engine sticky until restart) |
+| `TP2 pair down: verbs communicator is poisoned…` | A fatal collective failure was detected before a mirror send | Health reports degraded/down on this first failure; preserve its cause and restart both ranks. Never reuse or clear the poisoned communicator (#88). |
 | Request hangs after “reading the prompt” | Rank 1 not in worker mode / AR mismatch | Kill both; rank 1 without `--tokens` must log “mirroring” |
 | `ibv_post_send failed` | RDMA link down | `ip link show`, reload `thunderbolt_ibverbs` |
 | Pair parity < 100% | Slicing bug | `greedy_parity.py`; try `MAYA_TP_NOSLICE=1` |

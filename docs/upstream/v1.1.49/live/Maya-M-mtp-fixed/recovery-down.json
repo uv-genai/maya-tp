@@ -1,0 +1,120 @@
+{
+  "before": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  },
+  "first_chat": {
+    "id": "chatcmpl-eaf98345040145a98ce6ef78",
+    "object": "chat.completion",
+    "created": 1793588296,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Tensor parallel RDMA (Remote Direct Memory Access) is a networking technique used in",
+          "reasoning_content": "The user is asking me to explain tensor parallel RDMA in one paragraph."
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 22,
+      "completion_tokens": 32,
+      "total_tokens": 54,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 22,
+      "prompt_ms": 753.9,
+      "prompt_per_token_ms": 34.268,
+      "prompt_per_second": 29.2,
+      "predicted_n": 32,
+      "predicted_ms": 1194.6,
+      "predicted_per_token_ms": 37.331,
+      "predicted_per_second": 26.8,
+      "draft_n": 43,
+      "draft_n_accepted": 23
+    }
+  },
+  "peer_error": {
+    "type": "invalid_request_error",
+    "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+  },
+  "after": {
+    "status": "degraded",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "down"
+    }
+  },
+  "owned_processes_before": {
+    "rank1": [
+      [
+        3061083,
+        68486047
+      ]
+    ],
+    "rank0": [
+      [
+        336162,
+        17008432
+      ],
+      [
+        336165,
+        17008468
+      ]
+    ]
+  },
+  "owned_processes_after": {
+    "rank1": [],
+    "rank0": [
+      [
+        336162,
+        17008432
+      ],
+      [
+        336165,
+        17008468
+      ]
+    ]
+  },
+  "checks_before_restart": 6
+}

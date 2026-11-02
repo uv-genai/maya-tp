@@ -1,0 +1,19 @@
+{
+  "owner": "f2c9bd1a12d846ad8b475b9df890c8ae",
+  "root": 340546,
+  "processes": [
+    {
+      "pid": 340546,
+      "start": 17207324,
+      "state": "R"
+    }
+  ],
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "-u",
+    "-c",
+    "import sys; print(\"READY 4096\",flush=True); line=sys.stdin.readline(); sys.stderr.write(\"diagnostic fragment\"); sys.stderr.flush(); print(\"DONE 1\",flush=True)"
+  ],
+  "alive": [],
+  "stopped": true
+}

@@ -1,0 +1,49 @@
+{
+  "local": {
+    "Maya-S-v2-IQ2_XXS": {
+      "index.txt": "9fe5a78c3f80d1151c30d8f5d560627ca1b2222cd5ca4ff0bc0d5208de805ec4",
+      "native_experts.txt": "ad42f63bcd2bfc54df603e42710ed42a2b77541afa668a30d4ead70e979d8a20",
+      "tokenizer/vocab.json": "168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2",
+      "tokenizer/merges.txt": "bb93732e5136ac1b2b731f55573988442a91a33c10178ef18e24b4443b593f4a",
+      "dense_bytes": 943911040
+    },
+    "Maya-M": {
+      "index.txt": "73706db6223e225025b034fae6c69dd0f3188c14c0f83bf4dce9d5fa2d2882e1",
+      "native_experts.txt": "a53732d7d32ad3cb8f7b3174dfe01034f81238b3f482a54d34721e483efcd6d1",
+      "tokenizer/vocab.json": "168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2",
+      "tokenizer/merges.txt": "bb93732e5136ac1b2b731f55573988442a91a33c10178ef18e24b4443b593f4a",
+      "dense_bytes": 943911040
+    },
+    "Maya-L": {
+      "index.txt": "5d5690818008a6ed3cb265c94fad5dacacedca785c4a1a1c4a08721e18c160a7",
+      "native_experts.txt": "348a9cec64bf30691d48b6df5a767b4cda174182c166d8d059bd1f1c344d6024",
+      "tokenizer/vocab.json": "168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2",
+      "tokenizer/merges.txt": "bb93732e5136ac1b2b731f55573988442a91a33c10178ef18e24b4443b593f4a",
+      "dense_bytes": 943911040
+    }
+  },
+  "peer": {
+    "Maya-S-v2-IQ2_XXS": {
+      "index.txt": "9fe5a78c3f80d1151c30d8f5d560627ca1b2222cd5ca4ff0bc0d5208de805ec4",
+      "native_experts.txt": "ad42f63bcd2bfc54df603e42710ed42a2b77541afa668a30d4ead70e979d8a20",
+      "tokenizer/vocab.json": "168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2",
+      "tokenizer/merges.txt": "bb93732e5136ac1b2b731f55573988442a91a33c10178ef18e24b4443b593f4a",
+      "dense_bytes": 943911040
+    },
+    "Maya-M": {
+      "index.txt": "73706db6223e225025b034fae6c69dd0f3188c14c0f83bf4dce9d5fa2d2882e1",
+      "native_experts.txt": "a53732d7d32ad3cb8f7b3174dfe01034f81238b3f482a54d34721e483efcd6d1",
+      "tokenizer/vocab.json": "168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2",
+      "tokenizer/merges.txt": "bb93732e5136ac1b2b731f55573988442a91a33c10178ef18e24b4443b593f4a",
+      "dense_bytes": 943911040
+    },
+    "Maya-L": {
+      "index.txt": "5d5690818008a6ed3cb265c94fad5dacacedca785c4a1a1c4a08721e18c160a7",
+      "native_experts.txt": "348a9cec64bf30691d48b6df5a767b4cda174182c166d8d059bd1f1c344d6024",
+      "tokenizer/vocab.json": "168e8586859e110a73372e50e742258eac5314627fddcd85957c1d6781d38ae2",
+      "tokenizer/merges.txt": "bb93732e5136ac1b2b731f55573988442a91a33c10178ef18e24b4443b593f4a",
+      "dense_bytes": 943911040
+    }
+  },
+  "matching": true
+}

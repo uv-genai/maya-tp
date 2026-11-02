@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/maya-v49-live-87/summarize.py", line 41, in <module>
+    assert 'TP2 pair down' in r['peer_error']['message'] and 'verbs communicator is poisoned' in r['peer_error']['message']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

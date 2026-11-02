@@ -6,6 +6,12 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **TP2 first-failure health** (#88): a fatal queued-collective error now marks the pair down before
+  the next mirror send. Preserve the transport cause, report degraded health immediately and refuse
+  subsequent generation commands; recovery still requires restarting both ranks. Fresh S/M/L
+  ordinary/MTP API, CLI and peer recovery pass; all32 historical-reference records have raw-pick
+  differences0. [Live v1.1.49 evidence](docs/upstream/v1.1.49.md) records timing variation and limits (#87).
+
 - **Upstream v1.1.47–v1.1.49 cumulative integration** (#85): merge directly from v1.1.49. Keep both
   `--engine maya` and legacy `--engine strata` working, improve monitor/setup readiness, and add
   DeepSeek Maya-XS v2 upgrade/shared-table fixes and engine-side soft thinking closure. Preserve

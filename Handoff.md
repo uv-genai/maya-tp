@@ -1,11 +1,12 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§31** (direct upstream v1.1.49 merge #85).
+> Last updated: 2026-11-02 · Current state: **§32** (v1.1.49 live validation complete, #87/#88).
+> Fresh S/M/L API/CLI/strict/recovery and both-order prefill gates complete; final CI/merge checkpoint on #87/PR89.
 > Integration through upstream v1.1.46 and restoration are complete; final CI41352750402 PASS,
 > #77/#36 closed. Review builds retained; production5a52 restored. The user launches their processes.
-> §§10–30 are dated session history, including superseded active/pending states and deployment paths.
-> Current process-ownership rules in §2 and §31 override historical cleanup commands.
+> §§10–31 are dated session history, including superseded active/pending states and deployment paths.
+> Current process-ownership rules in §2 and §32 override historical cleanup commands.
 
 ## 1. What we are building
 
@@ -1178,3 +1179,62 @@ record exact PIDs/process groups; no name-/port-wide cleanup. The user launches 
 **Open work:** #33/#42/#46/#52/#54/#60/#68/#75/#79/#83/#11/#16/#10 remain open. The new DeepSeek
 soft-close fix does not resolve GLM prefill, full DS4 WMMA, tail-drain or cap-measurement issues.
 No release or tag was created. This checkpoint's acceptance and final CI outcome live in #85.
+
+## 32. Fresh v1.1.49 live acceptance complete (#87 / #88)
+
+The user required the same live validation used after earlier merges; preliminary §31 CPU/host checks
+alone were insufficient. Fresh GPU gates now pass on both gfx1151/RDMA hosts. Source main997bba7
+contains the cumulative v47–49 merge; server fix **e1682cb** and durable evidence are in **PR89**.
+Exact final-head/merge/main CI and issue closure provenance are recorded on #87/#85/PR89. If #87 is
+still open after an interruption, finish its GitHub closeout; do not rerun completed GPU stages.
+
+**No active validation engines/builds.** API38059, CLI30667, strict89906, prefill32674 and reverse10081
+all EXIT0. Final audit52 local/26 remote saved ownership records stopped/alive=[]. Ordered CPU
+HIPmap/613server11skip/686tools35skip PASS; final focused peer-loss3tests PASS. Detailed report
+[docs/upstream/v1.1.49.md](docs/upstream/v1.1.49.md), [live evidence](docs/upstream/v1.1.49/live/README.md)
+and machine-readable [summary](docs/upstream/v1.1.49/live/summary.json).
+
+- S/M/L ordinary+MTP7 large/reuse/stream/forced-idle, lifecycle/media/context rejection, stable PIDs,
+  true18K partial-prefill disconnect/cache0 retry/follow-up PASS. Long/short decode ratios0.30–1.43,
+  unchanged bound4. MTP matching rounds S146/M127/L148, each8 asymmetric retries.
+- First intentional peer-loss request degrades health/down, no rank0 respawn; restart BOTH ranks
+  restores healthy MTP,8/8 recovery per model. S/M first hit queued poisoned errors; L first hits the
+  existing mirror-send guard. No spontaneous peer-closed error in healthy-path suites.
+- All6 paired CLI modes32/32; S exact acceptedv42 trajectories. L WARM0 workaround remains (#42),
+  within unchanged600s bound. Strict S technical/code256 + M/L64: all32 warm/measured records raw0.
+- Both prefill orders candidate→baseline and baseline→candidate, sameb398/normalized configs/tuning,
+  normalidle/MTP2, fresh1K/4K/8Kx3/arm: all18 response/usage pairs equal/cache0. First full cycle of
+  every arm retained/excluded from medians;4warm samples/length/server. Pooled throughput deltas
+  −3.64/−1.66/−1.95%; no speedup claim. Extra MTPbias rejection/spec1ordinary, Responses/Anthropic
+  output limits and MTP follow-up PASS.
+
+#88 fixes a gap in original #6: a queued-collective drain can fail before mirror-send TP2_DOWN.
+Both merged997bba7 and premerge serverd7626 reproduce the stale-health first poisoned error with
+sameb398. The server now marks explicit fatal TP errors sticky-down immediately, retains cause
+and poison, and refuses later GEN before an engine write. Never reset poison/retry collectives or
+restart one rank. CPU regressions fail before/pass after. Original failed/control logs, runner-only
+TIME_WAIT preflight failure and initial overly narrow artifact-audit expectation are all retained.
+The latter incorrectly required poisoned text for L too; it now recognizes both legitimate fatal
+paths. No live assertion/time bound/raw-pick tolerance was relaxed.
+
+All live files were isolated under `/tmp/maya-v49-live-87` on both hosts; API18087/bootstrap18587,
+usb4_rdma5. Archives997bba7 SHA44bb2781… and e1682cb SHAa91d3652…; both use matching retained GLM
+**b398d4a0711430edd6a28b95264c7293**. GLM/transport/MTP/tuning/launchers remain source-identical to
+premerge; four tuning tables and expert profile match. Pack/tokenizer/native-map proofs retained.
+Owned supervisor checks PID/start ticks/unique owner marker and descendants; foreign/stale identities
+are refused. Only recorded test processes were stopped, owned server before engine. Legacy broad
+cleanup in acceptance.sh/bench_mtp.py remains open #83; temporary owned adaptations do not fix it.
+
+**Production unchanged:** canonical GLM **5a52cd27167523b6ea4b0f0bde93f503** both hosts and rank0
+/tmp/maya-tp2; review GLMb398/DS451749 retained. Protected remote canonical777cc92 user edits/configs
+were not pulled/reset/rebuilt. No unrelated service inspection/control, production deployment, tag
+or release. The user granted full host freedom during this run; no further availability question is
+needed for its closeout. The user launches production processes themselves.
+
+**Limits remain open:** cold/first-request latency, including candidate first4K23.5–27.0s,
+M recovery22token prefill99.7s and L WARM0 CLI MTP32token decode326.6s, is retained under #33/#60.
+No causal regression/speedup claim follows from these small timing samples. No fresh full-model
+DS4 GPU acceptance: #68 WMMA failures, #75 deferred tail-drain and #79 default-off chunk-cap
+measurements remain open. Also retain #42/#46/#52/#54/#83/#11/#16/#10. Future fork tags use tp-v*;
+VERSION remains numeric1.1.42 and legacy v1.1.42 immutable. No more runtime validation is required
+for this v1.1.49 batch; use linked GitHub records for final repository closeout status.

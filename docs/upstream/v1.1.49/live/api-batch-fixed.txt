@@ -1,0 +1,44 @@
+READY Maya-S-v2-IQ2_XXS mtp
+PASS Maya-S-v2-IQ2_XXS mtp mtp_acceptance
+PASS Maya-S-v2-IQ2_XXS mtp regression_collectives
+PASS Maya-S-v2-IQ2_XXS mtp lifecycle/media/idle and owned PIDs stable
+PASS Maya-S-v2-IQ2_XXS mtp prefill_cancel
+PASS Maya-S-v2-IQ2_XXS mtp long_loop_reuse
+PASS Maya-S-v2-IQ2_XXS owned peer kill, clean failure, degraded health, no respawn
+PASS Maya-S-v2-IQ2_XXS round/retry audit {'matched_rounds': 146, 'matched_window_attempts': 8, 'asymmetric_retries': 8}
+READY Maya-S-v2-IQ2_XXS mtp
+PASS Maya-S-v2-IQ2_XXS kill/recover 8/8
+READY Maya-S-v2-IQ2_XXS simple
+PASS Maya-S-v2-IQ2_XXS simple regression_collectives
+PASS Maya-S-v2-IQ2_XXS simple lifecycle/media/idle and owned PIDs stable
+PASS Maya-S-v2-IQ2_XXS simple prefill_cancel
+PASS ALL API Maya-S-v2-IQ2_XXS
+READY Maya-M mtp
+PASS Maya-M mtp mtp_acceptance
+PASS Maya-M mtp regression_collectives
+PASS Maya-M mtp lifecycle/media/idle and owned PIDs stable
+PASS Maya-M mtp prefill_cancel
+PASS Maya-M owned peer kill, clean failure, degraded health, no respawn
+PASS Maya-M round/retry audit {'matched_rounds': 127, 'matched_window_attempts': 8, 'asymmetric_retries': 8}
+READY Maya-M mtp
+PASS Maya-M kill/recover 8/8
+READY Maya-M simple
+PASS Maya-M simple regression_collectives
+PASS Maya-M simple lifecycle/media/idle and owned PIDs stable
+PASS Maya-M simple prefill_cancel
+PASS ALL API Maya-M
+READY Maya-L mtp
+PASS Maya-L mtp mtp_acceptance
+PASS Maya-L mtp regression_collectives
+PASS Maya-L mtp lifecycle/media/idle and owned PIDs stable
+PASS Maya-L mtp prefill_cancel
+PASS Maya-L owned peer kill, clean failure, degraded health, no respawn
+PASS Maya-L round/retry audit {'matched_rounds': 148, 'matched_window_attempts': 8, 'asymmetric_retries': 8}
+READY Maya-L mtp
+PASS Maya-L kill/recover 8/8
+READY Maya-L simple
+PASS Maya-L simple regression_collectives
+PASS Maya-L simple lifecycle/media/idle and owned PIDs stable
+PASS Maya-L simple prefill_cancel
+PASS ALL API Maya-L
+PASS all requested model API/recovery suites

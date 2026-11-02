@@ -1,0 +1,2469 @@
+glm settings from the environment: MAYA_GLM_LOOP_ANSWER=0, MAYA_GLM_LOOP_THINK=0, MAYA_GLM_MTP_DRAFT=1, MAYA_GLM_MTP_FIXED=1
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 32768 tokens (--prefill auto, up to 32768; mixer sub-batches of 256), borrowing 7747 MB of the expert pool while a prompt runs (activations 7015, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.54 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.17, activations 0.07, other (context, MTP, scratch, prompt path) 10.44
+glm fast: CUDA0 unified memory: MemAvailable 110.51 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 3 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 5 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 8 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 12 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 19 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 21 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 24 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 27 s)
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 30 s)
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 32 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 32 s (1.40 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+glm follow: every request decodes the 256 tokens of /tmp/strict-S-technical-reference.txt (MAYA_GLM_SPEC_FOLLOW)
+maya serve: CUDA0: 62089 MiB of VRAM free with everything loaded
+maya generate: glm5-next serve (M3.1): GEN <max_new> [keys] <ids>, GENI <max_new> [keys] <embeddings> <ids>; QUIT to end
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 58 experts more lent for it)
+glm prefill: CUDA0 chunk 1/1, 63 tokens, wall 920 ms | the copy lane 819 ms: copies 116 (1.3 GB/s), ring wait 266, gaps 2, mixer windows 436 | lead 97, tail 5 | pcie 0.15 GB (ram 0.04, disk 0.11) + 3.60 GB vram | experts: staged 1132, resident 9912 (17383 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 57.1/4.3 ms max/min
+glm prefill: 63 tokens in 924.3 ms (14.67 ms/token, 68 tok/s), 1 chunk of 64 tokens | CUDA0 920 ms
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+glm vram: prompt 64 tokens read in 1.0 s; VRAM free CUDA0 60.6 of 121.0 GB before, 60.5 after
+glm stat: decode 39.87 ms/tok (25.08 tok/s) | vram hit 99.95% | ram fetches 0.00/tok | disk 0.17 reads/tok in 0.14 waits/tok, 0.34 ms/tok | promotions 0.17/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 15.8 ms/tok | vram 12383/12384 ram 0/48
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm mtp TP: rank=0 n=1 p0=64 produced=1
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=2
+glm mtp TP: rank=0 round-end p0=64 produced=3 keep=2
+glm mtp TP: rank=0 n=1 p0=66 produced=3
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=66 keep=1
+glm mtp TP: rank=0 round-end p0=66 produced=4 keep=1
+glm mtp TP: rank=0 n=1 p0=67 produced=4
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=2
+glm mtp TP: rank=0 round-end p0=67 produced=6 keep=2
+glm mtp TP: rank=0 n=1 p0=69 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=69 keep=2
+glm mtp TP: rank=0 round-end p0=69 produced=8 keep=2
+glm mtp TP: rank=0 n=1 p0=71 produced=8
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=1 p0=72 produced=9
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=2
+glm mtp TP: rank=0 round-end p0=72 produced=11 keep=2
+glm mtp TP: rank=0 n=1 p0=74 produced=11
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=74 keep=2
+glm mtp TP: rank=0 round-end p0=74 produced=13 keep=2
+glm mtp TP: rank=0 n=1 p0=76 produced=13
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=2
+glm mtp TP: rank=0 round-end p0=76 produced=15 keep=2
+glm mtp TP: rank=0 n=1 p0=78 produced=15
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=78 keep=1
+glm mtp TP: rank=0 round-end p0=78 produced=16 keep=1
+glm mtp TP: rank=0 n=1 p0=79 produced=16
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=1 p0=81 produced=18
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=2
+glm mtp TP: rank=0 round-end p0=81 produced=20 keep=2
+glm mtp TP: rank=0 n=1 p0=83 produced=20
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=83 keep=2
+glm mtp TP: rank=0 round-end p0=83 produced=22 keep=2
+glm mtp TP: rank=0 n=1 p0=85 produced=22
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=2
+glm mtp TP: rank=0 round-end p0=85 produced=24 keep=2
+glm mtp TP: rank=0 n=1 p0=87 produced=24
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=87 keep=2
+glm mtp TP: rank=0 round-end p0=87 produced=26 keep=2
+glm mtp TP: rank=0 n=1 p0=89 produced=26
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=89 keep=2
+glm mtp TP: rank=0 round-end p0=89 produced=28 keep=2
+glm mtp TP: rank=0 n=1 p0=91 produced=28
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=1 p0=93 produced=30
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=1 p0=95 produced=32
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=2
+glm mtp TP: rank=0 round-end p0=95 produced=34 keep=2
+glm mtp TP: rank=0 n=1 p0=97 produced=34
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=97 keep=2
+glm mtp TP: rank=0 round-end p0=97 produced=36 keep=2
+glm mtp TP: rank=0 n=1 p0=99 produced=36
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=1
+glm mtp TP: rank=0 round-end p0=99 produced=37 keep=1
+glm mtp TP: rank=0 n=1 p0=100 produced=37
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=100 keep=2
+glm mtp TP: rank=0 round-end p0=100 produced=39 keep=2
+glm mtp TP: rank=0 n=1 p0=102 produced=39
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=2
+glm mtp TP: rank=0 round-end p0=102 produced=41 keep=2
+glm mtp TP: rank=0 n=1 p0=104 produced=41
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=104 keep=2
+glm mtp TP: rank=0 round-end p0=104 produced=43 keep=2
+glm mtp TP: rank=0 n=1 p0=106 produced=43
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=1
+glm mtp TP: rank=0 round-end p0=106 produced=44 keep=1
+glm mtp TP: rank=0 n=1 p0=107 produced=44
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=107 keep=2
+glm mtp TP: rank=0 round-end p0=107 produced=46 keep=2
+glm mtp TP: rank=0 n=1 p0=109 produced=46
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=2
+glm mtp TP: rank=0 round-end p0=109 produced=48 keep=2
+glm mtp TP: rank=0 n=1 p0=111 produced=48
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=111 keep=2
+glm mtp TP: rank=0 round-end p0=111 produced=50 keep=2
+glm mtp TP: rank=0 n=1 p0=113 produced=50
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=113 keep=2
+glm mtp TP: rank=0 round-end p0=113 produced=52 keep=2
+glm mtp TP: rank=0 n=1 p0=115 produced=52
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=2
+glm mtp TP: rank=0 round-end p0=115 produced=54 keep=2
+glm mtp TP: rank=0 n=1 p0=117 produced=54
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=117 keep=2
+glm mtp TP: rank=0 round-end p0=117 produced=56 keep=2
+glm mtp TP: rank=0 n=1 p0=119 produced=56
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=119 keep=2
+glm mtp TP: rank=0 round-end p0=119 produced=58 keep=2
+glm mtp TP: rank=0 n=1 p0=121 produced=58
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=1
+glm mtp TP: rank=0 round-end p0=121 produced=59 keep=1
+glm mtp TP: rank=0 n=1 p0=122 produced=59
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=122 keep=1
+glm mtp TP: rank=0 round-end p0=122 produced=60 keep=1
+glm mtp TP: rank=0 n=1 p0=123 produced=60
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=2
+glm mtp TP: rank=0 round-end p0=123 produced=62 keep=2
+glm mtp TP: rank=0 n=1 p0=125 produced=62
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=125 keep=2
+glm mtp TP: rank=0 round-end p0=125 produced=64 keep=2
+glm mtp TP: rank=0 n=1 p0=127 produced=64
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=127 keep=1
+glm mtp TP: rank=0 round-end p0=127 produced=65 keep=1
+glm mtp TP: rank=0 n=1 p0=128 produced=65
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=128 keep=2
+glm mtp TP: rank=0 round-end p0=128 produced=67 keep=2
+glm mtp TP: rank=0 n=1 p0=130 produced=67
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=130 keep=1
+glm mtp TP: rank=0 round-end p0=130 produced=68 keep=1
+glm mtp TP: rank=0 n=1 p0=131 produced=68
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=131 keep=2
+glm mtp TP: rank=0 round-end p0=131 produced=70 keep=2
+glm mtp TP: rank=0 n=1 p0=133 produced=70
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=133 keep=2
+glm mtp TP: rank=0 round-end p0=133 produced=72 keep=2
+glm mtp TP: rank=0 n=1 p0=135 produced=72
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=135 keep=2
+glm mtp TP: rank=0 round-end p0=135 produced=74 keep=2
+glm mtp TP: rank=0 n=1 p0=137 produced=74
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=137 keep=2
+glm mtp TP: rank=0 round-end p0=137 produced=76 keep=2
+glm mtp TP: rank=0 n=1 p0=139 produced=76
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=139 keep=2
+glm mtp TP: rank=0 round-end p0=139 produced=78 keep=2
+glm mtp TP: rank=0 n=1 p0=141 produced=78
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=141 keep=2
+glm mtp TP: rank=0 round-end p0=141 produced=80 keep=2
+glm mtp TP: rank=0 n=1 p0=143 produced=80
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=143 keep=2
+glm mtp TP: rank=0 round-end p0=143 produced=82 keep=2
+glm mtp TP: rank=0 n=1 p0=145 produced=82
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=145 keep=2
+glm mtp TP: rank=0 round-end p0=145 produced=84 keep=2
+glm mtp TP: rank=0 n=1 p0=147 produced=84
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=147 keep=2
+glm mtp TP: rank=0 round-end p0=147 produced=86 keep=2
+glm mtp TP: rank=0 n=1 p0=149 produced=86
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=149 keep=1
+glm mtp TP: rank=0 round-end p0=149 produced=87 keep=1
+glm mtp TP: rank=0 n=1 p0=150 produced=87
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=150 keep=2
+glm mtp TP: rank=0 round-end p0=150 produced=89 keep=2
+glm mtp TP: rank=0 n=1 p0=152 produced=89
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=152 keep=2
+glm mtp TP: rank=0 round-end p0=152 produced=91 keep=2
+glm mtp TP: rank=0 n=1 p0=154 produced=91
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=154 keep=2
+glm mtp TP: rank=0 round-end p0=154 produced=93 keep=2
+glm mtp TP: rank=0 n=1 p0=156 produced=93
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=156 keep=2
+glm mtp TP: rank=0 round-end p0=156 produced=95 keep=2
+glm mtp TP: rank=0 n=1 p0=158 produced=95
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=158 keep=2
+glm mtp TP: rank=0 round-end p0=158 produced=97 keep=2
+glm mtp TP: rank=0 n=1 p0=160 produced=97
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=160 keep=1
+glm mtp TP: rank=0 round-end p0=160 produced=98 keep=1
+glm mtp TP: rank=0 n=1 p0=161 produced=98
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=161 keep=1
+glm mtp TP: rank=0 round-end p0=161 produced=99 keep=1
+glm mtp TP: rank=0 n=1 p0=162 produced=99
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=162 keep=1
+glm mtp TP: rank=0 round-end p0=162 produced=100 keep=1
+glm mtp TP: rank=0 n=1 p0=163 produced=100
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=163 keep=1
+glm mtp TP: rank=0 round-end p0=163 produced=101 keep=1
+glm mtp TP: rank=0 n=1 p0=164 produced=101
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=164 keep=2
+glm mtp TP: rank=0 round-end p0=164 produced=103 keep=2
+glm mtp TP: rank=0 n=1 p0=166 produced=103
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=166 keep=2
+glm mtp TP: rank=0 round-end p0=166 produced=105 keep=2
+glm mtp TP: rank=0 n=1 p0=168 produced=105
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=168 keep=2
+glm mtp TP: rank=0 round-end p0=168 produced=107 keep=2
+glm mtp TP: rank=0 n=1 p0=170 produced=107
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=170 keep=2
+glm mtp TP: rank=0 round-end p0=170 produced=109 keep=2
+glm mtp TP: rank=0 n=1 p0=172 produced=109
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=172 keep=2
+glm mtp TP: rank=0 round-end p0=172 produced=111 keep=2
+glm mtp TP: rank=0 n=1 p0=174 produced=111
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=174 keep=2
+glm mtp TP: rank=0 round-end p0=174 produced=113 keep=2
+glm mtp TP: rank=0 n=1 p0=176 produced=113
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=176 keep=2
+glm mtp TP: rank=0 round-end p0=176 produced=115 keep=2
+glm mtp TP: rank=0 n=1 p0=178 produced=115
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=178 keep=2
+glm mtp TP: rank=0 round-end p0=178 produced=117 keep=2
+glm mtp TP: rank=0 n=1 p0=180 produced=117
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=180 keep=2
+glm mtp TP: rank=0 round-end p0=180 produced=119 keep=2
+glm mtp TP: rank=0 n=1 p0=182 produced=119
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=182 keep=1
+glm mtp TP: rank=0 round-end p0=182 produced=120 keep=1
+glm mtp TP: rank=0 n=1 p0=183 produced=120
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=183 keep=2
+glm mtp TP: rank=0 round-end p0=183 produced=122 keep=2
+glm mtp TP: rank=0 n=1 p0=185 produced=122
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=185 keep=2
+glm mtp TP: rank=0 round-end p0=185 produced=124 keep=2
+glm mtp TP: rank=0 n=1 p0=187 produced=124
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=187 keep=1
+glm mtp TP: rank=0 round-end p0=187 produced=125 keep=1
+glm mtp TP: rank=0 n=1 p0=188 produced=125
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=188 keep=2
+glm mtp TP: rank=0 round-end p0=188 produced=127 keep=2
+glm mtp TP: rank=0 n=1 p0=190 produced=127
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=190 keep=2
+glm mtp TP: rank=0 round-end p0=190 produced=129 keep=2
+glm mtp TP: rank=0 n=1 p0=192 produced=129
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=192 keep=2
+glm mtp TP: rank=0 round-end p0=192 produced=131 keep=2
+glm mtp TP: rank=0 n=1 p0=194 produced=131
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=194 keep=2
+glm mtp TP: rank=0 round-end p0=194 produced=133 keep=2
+glm mtp TP: rank=0 n=1 p0=196 produced=133
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=196 keep=2
+glm mtp TP: rank=0 round-end p0=196 produced=135 keep=2
+glm mtp TP: rank=0 n=1 p0=198 produced=135
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=198 keep=2
+glm mtp TP: rank=0 round-end p0=198 produced=137 keep=2
+glm mtp TP: rank=0 n=1 p0=200 produced=137
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=200 keep=1
+glm mtp TP: rank=0 round-end p0=200 produced=138 keep=1
+glm mtp TP: rank=0 n=1 p0=201 produced=138
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=201 keep=1
+glm mtp TP: rank=0 round-end p0=201 produced=139 keep=1
+glm mtp TP: rank=0 n=1 p0=202 produced=139
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=202 keep=2
+glm mtp TP: rank=0 round-end p0=202 produced=141 keep=2
+glm mtp TP: rank=0 n=1 p0=204 produced=141
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=204 keep=1
+glm mtp TP: rank=0 round-end p0=204 produced=142 keep=1
+glm mtp TP: rank=0 n=1 p0=205 produced=142
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=205 keep=1
+glm mtp TP: rank=0 round-end p0=205 produced=143 keep=1
+glm mtp TP: rank=0 n=1 p0=206 produced=143
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=206 keep=1
+glm mtp TP: rank=0 round-end p0=206 produced=144 keep=1
+glm mtp TP: rank=0 n=1 p0=207 produced=144
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=207 keep=1
+glm mtp TP: rank=0 round-end p0=207 produced=145 keep=1
+glm mtp TP: rank=0 n=1 p0=208 produced=145
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=208 keep=1
+glm mtp TP: rank=0 round-end p0=208 produced=146 keep=1
+glm mtp TP: rank=0 n=1 p0=209 produced=146
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=209 keep=2
+glm mtp TP: rank=0 round-end p0=209 produced=148 keep=2
+glm mtp TP: rank=0 n=1 p0=211 produced=148
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=211 keep=2
+glm mtp TP: rank=0 round-end p0=211 produced=150 keep=2
+glm mtp TP: rank=0 n=1 p0=213 produced=150
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=213 keep=2
+glm mtp TP: rank=0 round-end p0=213 produced=152 keep=2
+glm mtp TP: rank=0 n=1 p0=215 produced=152
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=215 keep=2
+glm mtp TP: rank=0 round-end p0=215 produced=154 keep=2
+glm mtp TP: rank=0 n=1 p0=217 produced=154
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=217 keep=2
+glm mtp TP: rank=0 round-end p0=217 produced=156 keep=2
+glm mtp TP: rank=0 n=1 p0=219 produced=156
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=219 keep=2
+glm mtp TP: rank=0 round-end p0=219 produced=158 keep=2
+glm mtp TP: rank=0 n=1 p0=221 produced=158
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=221 keep=1
+glm mtp TP: rank=0 round-end p0=221 produced=159 keep=1
+glm mtp TP: rank=0 n=1 p0=222 produced=159
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=222 keep=1
+glm mtp TP: rank=0 round-end p0=222 produced=160 keep=1
+glm mtp TP: rank=0 n=1 p0=223 produced=160
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=223 keep=2
+glm mtp TP: rank=0 round-end p0=223 produced=162 keep=2
+glm mtp TP: rank=0 n=1 p0=225 produced=162
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=225 keep=2
+glm mtp TP: rank=0 round-end p0=225 produced=164 keep=2
+glm mtp TP: rank=0 n=1 p0=227 produced=164
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=227 keep=2
+glm mtp TP: rank=0 round-end p0=227 produced=166 keep=2
+glm mtp TP: rank=0 n=1 p0=229 produced=166
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=229 keep=2
+glm mtp TP: rank=0 round-end p0=229 produced=168 keep=2
+glm mtp TP: rank=0 n=1 p0=231 produced=168
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=231 keep=1
+glm mtp TP: rank=0 round-end p0=231 produced=169 keep=1
+glm mtp TP: rank=0 n=1 p0=232 produced=169
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=232 keep=1
+glm mtp TP: rank=0 round-end p0=232 produced=170 keep=1
+glm mtp TP: rank=0 n=1 p0=233 produced=170
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=233 keep=1
+glm mtp TP: rank=0 round-end p0=233 produced=171 keep=1
+glm mtp TP: rank=0 n=1 p0=234 produced=171
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=234 keep=2
+glm mtp TP: rank=0 round-end p0=234 produced=173 keep=2
+glm mtp TP: rank=0 n=1 p0=236 produced=173
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=236 keep=1
+glm mtp TP: rank=0 round-end p0=236 produced=174 keep=1
+glm mtp TP: rank=0 n=1 p0=237 produced=174
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=237 keep=2
+glm mtp TP: rank=0 round-end p0=237 produced=176 keep=2
+glm mtp TP: rank=0 n=1 p0=239 produced=176
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=239 keep=2
+glm mtp TP: rank=0 round-end p0=239 produced=178 keep=2
+glm mtp TP: rank=0 n=1 p0=241 produced=178
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=241 keep=2
+glm mtp TP: rank=0 round-end p0=241 produced=180 keep=2
+glm mtp TP: rank=0 n=1 p0=243 produced=180
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=243 keep=2
+glm mtp TP: rank=0 round-end p0=243 produced=182 keep=2
+glm mtp TP: rank=0 n=1 p0=245 produced=182
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=245 keep=2
+glm mtp TP: rank=0 round-end p0=245 produced=184 keep=2
+glm mtp TP: rank=0 n=1 p0=247 produced=184
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=247 keep=2
+glm mtp TP: rank=0 round-end p0=247 produced=186 keep=2
+glm mtp TP: rank=0 n=1 p0=249 produced=186
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=249 keep=1
+glm mtp TP: rank=0 round-end p0=249 produced=187 keep=1
+glm mtp TP: rank=0 n=1 p0=250 produced=187
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=250 keep=1
+glm mtp TP: rank=0 round-end p0=250 produced=188 keep=1
+glm mtp TP: rank=0 n=1 p0=251 produced=188
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=251 keep=2
+glm mtp TP: rank=0 round-end p0=251 produced=190 keep=2
+glm mtp TP: rank=0 n=1 p0=253 produced=190
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=253 keep=2
+glm mtp TP: rank=0 round-end p0=253 produced=192 keep=2
+glm mtp TP: rank=0 n=1 p0=255 produced=192
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=255 keep=2
+glm mtp TP: rank=0 round-end p0=255 produced=194 keep=2
+glm mtp TP: rank=0 n=1 p0=257 produced=194
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=257 keep=2
+glm mtp TP: rank=0 round-end p0=257 produced=196 keep=2
+glm mtp TP: rank=0 n=1 p0=259 produced=196
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=259 keep=1
+glm mtp TP: rank=0 round-end p0=259 produced=197 keep=1
+glm mtp TP: rank=0 n=1 p0=260 produced=197
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=260 keep=2
+glm mtp TP: rank=0 round-end p0=260 produced=199 keep=2
+glm mtp TP: rank=0 n=1 p0=262 produced=199
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=262 keep=2
+glm mtp TP: rank=0 round-end p0=262 produced=201 keep=2
+glm mtp TP: rank=0 n=1 p0=264 produced=201
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=264 keep=2
+glm mtp TP: rank=0 round-end p0=264 produced=203 keep=2
+glm mtp TP: rank=0 n=1 p0=266 produced=203
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=266 keep=2
+glm mtp TP: rank=0 round-end p0=266 produced=205 keep=2
+glm mtp TP: rank=0 n=1 p0=268 produced=205
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=268 keep=2
+glm mtp TP: rank=0 round-end p0=268 produced=207 keep=2
+glm mtp TP: rank=0 n=1 p0=270 produced=207
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=270 keep=2
+glm mtp TP: rank=0 round-end p0=270 produced=209 keep=2
+glm mtp TP: rank=0 n=1 p0=272 produced=209
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=272 keep=2
+glm mtp TP: rank=0 round-end p0=272 produced=211 keep=2
+glm mtp TP: rank=0 n=1 p0=274 produced=211
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=274 keep=1
+glm mtp TP: rank=0 round-end p0=274 produced=212 keep=1
+glm mtp TP: rank=0 n=1 p0=275 produced=212
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=275 keep=1
+glm mtp TP: rank=0 round-end p0=275 produced=213 keep=1
+glm mtp TP: rank=0 n=1 p0=276 produced=213
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=276 keep=1
+glm mtp TP: rank=0 round-end p0=276 produced=214 keep=1
+glm mtp TP: rank=0 n=1 p0=277 produced=214
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=277 keep=2
+glm mtp TP: rank=0 round-end p0=277 produced=216 keep=2
+glm mtp TP: rank=0 n=1 p0=279 produced=216
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=279 keep=2
+glm mtp TP: rank=0 round-end p0=279 produced=218 keep=2
+glm mtp TP: rank=0 n=1 p0=281 produced=218
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=281 keep=2
+glm mtp TP: rank=0 round-end p0=281 produced=220 keep=2
+glm mtp TP: rank=0 n=1 p0=283 produced=220
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=283 keep=2
+glm mtp TP: rank=0 round-end p0=283 produced=222 keep=2
+glm mtp TP: rank=0 n=1 p0=285 produced=222
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=285 keep=2
+glm mtp TP: rank=0 round-end p0=285 produced=224 keep=2
+glm mtp TP: rank=0 n=1 p0=287 produced=224
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=287 keep=1
+glm mtp TP: rank=0 round-end p0=287 produced=225 keep=1
+glm mtp TP: rank=0 n=1 p0=288 produced=225
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=288 keep=1
+glm mtp TP: rank=0 round-end p0=288 produced=226 keep=1
+glm mtp TP: rank=0 n=1 p0=289 produced=226
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=289 keep=1
+glm mtp TP: rank=0 round-end p0=289 produced=227 keep=1
+glm mtp TP: rank=0 n=1 p0=290 produced=227
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=290 keep=2
+glm mtp TP: rank=0 round-end p0=290 produced=229 keep=2
+glm mtp TP: rank=0 n=1 p0=292 produced=229
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=292 keep=2
+glm mtp TP: rank=0 round-end p0=292 produced=231 keep=2
+glm mtp TP: rank=0 n=1 p0=294 produced=231
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=294 keep=2
+glm mtp TP: rank=0 round-end p0=294 produced=233 keep=2
+glm mtp TP: rank=0 n=1 p0=296 produced=233
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=296 keep=1
+glm mtp TP: rank=0 round-end p0=296 produced=234 keep=1
+glm mtp TP: rank=0 n=1 p0=297 produced=234
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=297 keep=2
+glm mtp TP: rank=0 round-end p0=297 produced=236 keep=2
+glm mtp TP: rank=0 n=1 p0=299 produced=236
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=299 keep=2
+glm mtp TP: rank=0 round-end p0=299 produced=238 keep=2
+glm mtp TP: rank=0 n=1 p0=301 produced=238
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=301 keep=1
+glm mtp TP: rank=0 round-end p0=301 produced=239 keep=1
+glm mtp TP: rank=0 n=1 p0=302 produced=239
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=302 keep=2
+glm mtp TP: rank=0 round-end p0=302 produced=241 keep=2
+glm mtp TP: rank=0 n=1 p0=304 produced=241
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=304 keep=1
+glm mtp TP: rank=0 round-end p0=304 produced=242 keep=1
+glm mtp TP: rank=0 n=1 p0=305 produced=242
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=305 keep=1
+glm mtp TP: rank=0 round-end p0=305 produced=243 keep=1
+glm mtp TP: rank=0 n=1 p0=306 produced=243
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=306 keep=2
+glm mtp TP: rank=0 round-end p0=306 produced=245 keep=2
+glm mtp TP: rank=0 n=1 p0=308 produced=245
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=308 keep=2
+glm mtp TP: rank=0 round-end p0=308 produced=247 keep=2
+glm mtp TP: rank=0 n=1 p0=310 produced=247
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=310 keep=2
+glm mtp TP: rank=0 round-end p0=310 produced=249 keep=2
+glm mtp TP: rank=0 n=1 p0=312 produced=249
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=312 keep=2
+glm mtp TP: rank=0 round-end p0=312 produced=251 keep=2
+glm mtp TP: rank=0 n=1 p0=314 produced=251
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=314 keep=1
+glm mtp TP: rank=0 round-end p0=314 produced=252 keep=1
+glm mtp TP: rank=0 n=1 p0=315 produced=252
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=315 keep=2
+glm mtp TP: rank=0 round-end p0=315 produced=254 keep=2
+glm mtp TP: rank=0 n=1 p0=317 produced=254
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=317 keep=1
+glm mtp TP: rank=0 round-end p0=317 produced=255 keep=1
+glm mtp TP: rank=0 n=0 p0=318 produced=255
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=318 produced=256 keep=1
+glm mtp: a drafting round's host time - drafts 4.16 ms, verify 56.72 ms, commit + cache 0.03 ms (149 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 256 emitted tokens outside it, 0 of 149 drafting rounds on the whole head
+glm mtp: 150 rounds, 1.71 tokens a round | rounds by draft length 0:1 1:149
+glm stat: decode 35.61 ms/tok (28.08 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12383/12384 ram 0/48
+glm spec: 105 of 149 drafts accepted (70.5%)
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm mtp TP: rank=0 n=1 p0=64 produced=1
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=2
+glm mtp TP: rank=0 round-end p0=64 produced=3 keep=2
+glm mtp TP: rank=0 n=1 p0=66 produced=3
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=66 keep=1
+glm mtp TP: rank=0 round-end p0=66 produced=4 keep=1
+glm mtp TP: rank=0 n=1 p0=67 produced=4
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=2
+glm mtp TP: rank=0 round-end p0=67 produced=6 keep=2
+glm mtp TP: rank=0 n=1 p0=69 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=69 keep=2
+glm mtp TP: rank=0 round-end p0=69 produced=8 keep=2
+glm mtp TP: rank=0 n=1 p0=71 produced=8
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=1 p0=72 produced=9
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=2
+glm mtp TP: rank=0 round-end p0=72 produced=11 keep=2
+glm mtp TP: rank=0 n=1 p0=74 produced=11
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=74 keep=2
+glm mtp TP: rank=0 round-end p0=74 produced=13 keep=2
+glm mtp TP: rank=0 n=1 p0=76 produced=13
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=2
+glm mtp TP: rank=0 round-end p0=76 produced=15 keep=2
+glm mtp TP: rank=0 n=1 p0=78 produced=15
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=78 keep=1
+glm mtp TP: rank=0 round-end p0=78 produced=16 keep=1
+glm mtp TP: rank=0 n=1 p0=79 produced=16
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=1 p0=81 produced=18
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=2
+glm mtp TP: rank=0 round-end p0=81 produced=20 keep=2
+glm mtp TP: rank=0 n=1 p0=83 produced=20
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=83 keep=2
+glm mtp TP: rank=0 round-end p0=83 produced=22 keep=2
+glm mtp TP: rank=0 n=1 p0=85 produced=22
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=2
+glm mtp TP: rank=0 round-end p0=85 produced=24 keep=2
+glm mtp TP: rank=0 n=1 p0=87 produced=24
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=87 keep=2
+glm mtp TP: rank=0 round-end p0=87 produced=26 keep=2
+glm mtp TP: rank=0 n=1 p0=89 produced=26
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=89 keep=2
+glm mtp TP: rank=0 round-end p0=89 produced=28 keep=2
+glm mtp TP: rank=0 n=1 p0=91 produced=28
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=1 p0=93 produced=30
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=1 p0=95 produced=32
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=2
+glm mtp TP: rank=0 round-end p0=95 produced=34 keep=2
+glm mtp TP: rank=0 n=1 p0=97 produced=34
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=97 keep=2
+glm mtp TP: rank=0 round-end p0=97 produced=36 keep=2
+glm mtp TP: rank=0 n=1 p0=99 produced=36
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=1
+glm mtp TP: rank=0 round-end p0=99 produced=37 keep=1
+glm mtp TP: rank=0 n=1 p0=100 produced=37
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=100 keep=2
+glm mtp TP: rank=0 round-end p0=100 produced=39 keep=2
+glm mtp TP: rank=0 n=1 p0=102 produced=39
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=2
+glm mtp TP: rank=0 round-end p0=102 produced=41 keep=2
+glm mtp TP: rank=0 n=1 p0=104 produced=41
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=104 keep=2
+glm mtp TP: rank=0 round-end p0=104 produced=43 keep=2
+glm mtp TP: rank=0 n=1 p0=106 produced=43
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=1
+glm mtp TP: rank=0 round-end p0=106 produced=44 keep=1
+glm mtp TP: rank=0 n=1 p0=107 produced=44
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=107 keep=2
+glm mtp TP: rank=0 round-end p0=107 produced=46 keep=2
+glm mtp TP: rank=0 n=1 p0=109 produced=46
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=2
+glm mtp TP: rank=0 round-end p0=109 produced=48 keep=2
+glm mtp TP: rank=0 n=1 p0=111 produced=48
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=111 keep=2
+glm mtp TP: rank=0 round-end p0=111 produced=50 keep=2
+glm mtp TP: rank=0 n=1 p0=113 produced=50
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=113 keep=2
+glm mtp TP: rank=0 round-end p0=113 produced=52 keep=2
+glm mtp TP: rank=0 n=1 p0=115 produced=52
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=2
+glm mtp TP: rank=0 round-end p0=115 produced=54 keep=2
+glm mtp TP: rank=0 n=1 p0=117 produced=54
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=117 keep=2
+glm mtp TP: rank=0 round-end p0=117 produced=56 keep=2
+glm mtp TP: rank=0 n=1 p0=119 produced=56
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=119 keep=2
+glm mtp TP: rank=0 round-end p0=119 produced=58 keep=2
+glm mtp TP: rank=0 n=1 p0=121 produced=58
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=1
+glm mtp TP: rank=0 round-end p0=121 produced=59 keep=1
+glm mtp TP: rank=0 n=1 p0=122 produced=59
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=122 keep=1
+glm mtp TP: rank=0 round-end p0=122 produced=60 keep=1
+glm mtp TP: rank=0 n=1 p0=123 produced=60
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=2
+glm mtp TP: rank=0 round-end p0=123 produced=62 keep=2
+glm mtp TP: rank=0 n=1 p0=125 produced=62
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=125 keep=2
+glm mtp TP: rank=0 round-end p0=125 produced=64 keep=2
+glm mtp TP: rank=0 n=1 p0=127 produced=64
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=127 keep=1
+glm mtp TP: rank=0 round-end p0=127 produced=65 keep=1
+glm mtp TP: rank=0 n=1 p0=128 produced=65
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=128 keep=2
+glm mtp TP: rank=0 round-end p0=128 produced=67 keep=2
+glm mtp TP: rank=0 n=1 p0=130 produced=67
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=130 keep=1
+glm mtp TP: rank=0 round-end p0=130 produced=68 keep=1
+glm mtp TP: rank=0 n=1 p0=131 produced=68
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=131 keep=2
+glm mtp TP: rank=0 round-end p0=131 produced=70 keep=2
+glm mtp TP: rank=0 n=1 p0=133 produced=70
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=133 keep=2
+glm mtp TP: rank=0 round-end p0=133 produced=72 keep=2
+glm mtp TP: rank=0 n=1 p0=135 produced=72
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=135 keep=2
+glm mtp TP: rank=0 round-end p0=135 produced=74 keep=2
+glm mtp TP: rank=0 n=1 p0=137 produced=74
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=137 keep=2
+glm mtp TP: rank=0 round-end p0=137 produced=76 keep=2
+glm mtp TP: rank=0 n=1 p0=139 produced=76
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=139 keep=2
+glm mtp TP: rank=0 round-end p0=139 produced=78 keep=2
+glm mtp TP: rank=0 n=1 p0=141 produced=78
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=141 keep=2
+glm mtp TP: rank=0 round-end p0=141 produced=80 keep=2
+glm mtp TP: rank=0 n=1 p0=143 produced=80
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=143 keep=2
+glm mtp TP: rank=0 round-end p0=143 produced=82 keep=2
+glm mtp TP: rank=0 n=1 p0=145 produced=82
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=145 keep=2
+glm mtp TP: rank=0 round-end p0=145 produced=84 keep=2
+glm mtp TP: rank=0 n=1 p0=147 produced=84
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=147 keep=2
+glm mtp TP: rank=0 round-end p0=147 produced=86 keep=2
+glm mtp TP: rank=0 n=1 p0=149 produced=86
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=149 keep=1
+glm mtp TP: rank=0 round-end p0=149 produced=87 keep=1
+glm mtp TP: rank=0 n=1 p0=150 produced=87
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=150 keep=2
+glm mtp TP: rank=0 round-end p0=150 produced=89 keep=2
+glm mtp TP: rank=0 n=1 p0=152 produced=89
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=152 keep=2
+glm mtp TP: rank=0 round-end p0=152 produced=91 keep=2
+glm mtp TP: rank=0 n=1 p0=154 produced=91
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=154 keep=2
+glm mtp TP: rank=0 round-end p0=154 produced=93 keep=2
+glm mtp TP: rank=0 n=1 p0=156 produced=93
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=156 keep=2
+glm mtp TP: rank=0 round-end p0=156 produced=95 keep=2
+glm mtp TP: rank=0 n=1 p0=158 produced=95
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=158 keep=2
+glm mtp TP: rank=0 round-end p0=158 produced=97 keep=2
+glm mtp TP: rank=0 n=1 p0=160 produced=97
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=160 keep=1
+glm mtp TP: rank=0 round-end p0=160 produced=98 keep=1
+glm mtp TP: rank=0 n=1 p0=161 produced=98
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=161 keep=1
+glm mtp TP: rank=0 round-end p0=161 produced=99 keep=1
+glm mtp TP: rank=0 n=1 p0=162 produced=99
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=162 keep=1
+glm mtp TP: rank=0 round-end p0=162 produced=100 keep=1
+glm mtp TP: rank=0 n=1 p0=163 produced=100
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=163 keep=1
+glm mtp TP: rank=0 round-end p0=163 produced=101 keep=1
+glm mtp TP: rank=0 n=1 p0=164 produced=101
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=164 keep=2
+glm mtp TP: rank=0 round-end p0=164 produced=103 keep=2
+glm mtp TP: rank=0 n=1 p0=166 produced=103
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=166 keep=2
+glm mtp TP: rank=0 round-end p0=166 produced=105 keep=2
+glm mtp TP: rank=0 n=1 p0=168 produced=105
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=168 keep=2
+glm mtp TP: rank=0 round-end p0=168 produced=107 keep=2
+glm mtp TP: rank=0 n=1 p0=170 produced=107
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=170 keep=2
+glm mtp TP: rank=0 round-end p0=170 produced=109 keep=2
+glm mtp TP: rank=0 n=1 p0=172 produced=109
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=172 keep=2
+glm mtp TP: rank=0 round-end p0=172 produced=111 keep=2
+glm mtp TP: rank=0 n=1 p0=174 produced=111
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=174 keep=2
+glm mtp TP: rank=0 round-end p0=174 produced=113 keep=2
+glm mtp TP: rank=0 n=1 p0=176 produced=113
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=176 keep=2
+glm mtp TP: rank=0 round-end p0=176 produced=115 keep=2
+glm mtp TP: rank=0 n=1 p0=178 produced=115
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=178 keep=2
+glm mtp TP: rank=0 round-end p0=178 produced=117 keep=2
+glm mtp TP: rank=0 n=1 p0=180 produced=117
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=180 keep=2
+glm mtp TP: rank=0 round-end p0=180 produced=119 keep=2
+glm mtp TP: rank=0 n=1 p0=182 produced=119
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=182 keep=1
+glm mtp TP: rank=0 round-end p0=182 produced=120 keep=1
+glm mtp TP: rank=0 n=1 p0=183 produced=120
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=183 keep=2
+glm mtp TP: rank=0 round-end p0=183 produced=122 keep=2
+glm mtp TP: rank=0 n=1 p0=185 produced=122
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=185 keep=2
+glm mtp TP: rank=0 round-end p0=185 produced=124 keep=2
+glm mtp TP: rank=0 n=1 p0=187 produced=124
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=187 keep=1
+glm mtp TP: rank=0 round-end p0=187 produced=125 keep=1
+glm mtp TP: rank=0 n=1 p0=188 produced=125
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=188 keep=2
+glm mtp TP: rank=0 round-end p0=188 produced=127 keep=2
+glm mtp TP: rank=0 n=1 p0=190 produced=127
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=190 keep=2
+glm mtp TP: rank=0 round-end p0=190 produced=129 keep=2
+glm mtp TP: rank=0 n=1 p0=192 produced=129
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=192 keep=2
+glm mtp TP: rank=0 round-end p0=192 produced=131 keep=2
+glm mtp TP: rank=0 n=1 p0=194 produced=131
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=194 keep=2
+glm mtp TP: rank=0 round-end p0=194 produced=133 keep=2
+glm mtp TP: rank=0 n=1 p0=196 produced=133
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=196 keep=2
+glm mtp TP: rank=0 round-end p0=196 produced=135 keep=2
+glm mtp TP: rank=0 n=1 p0=198 produced=135
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=198 keep=2
+glm mtp TP: rank=0 round-end p0=198 produced=137 keep=2
+glm mtp TP: rank=0 n=1 p0=200 produced=137
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=200 keep=1
+glm mtp TP: rank=0 round-end p0=200 produced=138 keep=1
+glm mtp TP: rank=0 n=1 p0=201 produced=138
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=201 keep=1
+glm mtp TP: rank=0 round-end p0=201 produced=139 keep=1
+glm mtp TP: rank=0 n=1 p0=202 produced=139
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=202 keep=2
+glm mtp TP: rank=0 round-end p0=202 produced=141 keep=2
+glm mtp TP: rank=0 n=1 p0=204 produced=141
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=204 keep=1
+glm mtp TP: rank=0 round-end p0=204 produced=142 keep=1
+glm mtp TP: rank=0 n=1 p0=205 produced=142
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=205 keep=1
+glm mtp TP: rank=0 round-end p0=205 produced=143 keep=1
+glm mtp TP: rank=0 n=1 p0=206 produced=143
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=206 keep=1
+glm mtp TP: rank=0 round-end p0=206 produced=144 keep=1
+glm mtp TP: rank=0 n=1 p0=207 produced=144
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=207 keep=1
+glm mtp TP: rank=0 round-end p0=207 produced=145 keep=1
+glm mtp TP: rank=0 n=1 p0=208 produced=145
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=208 keep=1
+glm mtp TP: rank=0 round-end p0=208 produced=146 keep=1
+glm mtp TP: rank=0 n=1 p0=209 produced=146
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=209 keep=2
+glm mtp TP: rank=0 round-end p0=209 produced=148 keep=2
+glm mtp TP: rank=0 n=1 p0=211 produced=148
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=211 keep=2
+glm mtp TP: rank=0 round-end p0=211 produced=150 keep=2
+glm mtp TP: rank=0 n=1 p0=213 produced=150
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=213 keep=2
+glm mtp TP: rank=0 round-end p0=213 produced=152 keep=2
+glm mtp TP: rank=0 n=1 p0=215 produced=152
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=215 keep=2
+glm mtp TP: rank=0 round-end p0=215 produced=154 keep=2
+glm mtp TP: rank=0 n=1 p0=217 produced=154
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=217 keep=2
+glm mtp TP: rank=0 round-end p0=217 produced=156 keep=2
+glm mtp TP: rank=0 n=1 p0=219 produced=156
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=219 keep=2
+glm mtp TP: rank=0 round-end p0=219 produced=158 keep=2
+glm mtp TP: rank=0 n=1 p0=221 produced=158
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=221 keep=1
+glm mtp TP: rank=0 round-end p0=221 produced=159 keep=1
+glm mtp TP: rank=0 n=1 p0=222 produced=159
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=222 keep=1
+glm mtp TP: rank=0 round-end p0=222 produced=160 keep=1
+glm mtp TP: rank=0 n=1 p0=223 produced=160
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=223 keep=2
+glm mtp TP: rank=0 round-end p0=223 produced=162 keep=2
+glm mtp TP: rank=0 n=1 p0=225 produced=162
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=225 keep=2
+glm mtp TP: rank=0 round-end p0=225 produced=164 keep=2
+glm mtp TP: rank=0 n=1 p0=227 produced=164
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=227 keep=2
+glm mtp TP: rank=0 round-end p0=227 produced=166 keep=2
+glm mtp TP: rank=0 n=1 p0=229 produced=166
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=229 keep=2
+glm mtp TP: rank=0 round-end p0=229 produced=168 keep=2
+glm mtp TP: rank=0 n=1 p0=231 produced=168
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=231 keep=1
+glm mtp TP: rank=0 round-end p0=231 produced=169 keep=1
+glm mtp TP: rank=0 n=1 p0=232 produced=169
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=232 keep=1
+glm mtp TP: rank=0 round-end p0=232 produced=170 keep=1
+glm mtp TP: rank=0 n=1 p0=233 produced=170
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=233 keep=1
+glm mtp TP: rank=0 round-end p0=233 produced=171 keep=1
+glm mtp TP: rank=0 n=1 p0=234 produced=171
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=234 keep=2
+glm mtp TP: rank=0 round-end p0=234 produced=173 keep=2
+glm mtp TP: rank=0 n=1 p0=236 produced=173
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=236 keep=1
+glm mtp TP: rank=0 round-end p0=236 produced=174 keep=1
+glm mtp TP: rank=0 n=1 p0=237 produced=174
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=237 keep=2
+glm mtp TP: rank=0 round-end p0=237 produced=176 keep=2
+glm mtp TP: rank=0 n=1 p0=239 produced=176
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=239 keep=2
+glm mtp TP: rank=0 round-end p0=239 produced=178 keep=2
+glm mtp TP: rank=0 n=1 p0=241 produced=178
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=241 keep=2
+glm mtp TP: rank=0 round-end p0=241 produced=180 keep=2
+glm mtp TP: rank=0 n=1 p0=243 produced=180
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=243 keep=2
+glm mtp TP: rank=0 round-end p0=243 produced=182 keep=2
+glm mtp TP: rank=0 n=1 p0=245 produced=182
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=245 keep=2
+glm mtp TP: rank=0 round-end p0=245 produced=184 keep=2
+glm mtp TP: rank=0 n=1 p0=247 produced=184
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=247 keep=2
+glm mtp TP: rank=0 round-end p0=247 produced=186 keep=2
+glm mtp TP: rank=0 n=1 p0=249 produced=186
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=249 keep=1
+glm mtp TP: rank=0 round-end p0=249 produced=187 keep=1
+glm mtp TP: rank=0 n=1 p0=250 produced=187
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=250 keep=1
+glm mtp TP: rank=0 round-end p0=250 produced=188 keep=1
+glm mtp TP: rank=0 n=1 p0=251 produced=188
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=251 keep=2
+glm mtp TP: rank=0 round-end p0=251 produced=190 keep=2
+glm mtp TP: rank=0 n=1 p0=253 produced=190
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=253 keep=2
+glm mtp TP: rank=0 round-end p0=253 produced=192 keep=2
+glm mtp TP: rank=0 n=1 p0=255 produced=192
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=255 keep=2
+glm mtp TP: rank=0 round-end p0=255 produced=194 keep=2
+glm mtp TP: rank=0 n=1 p0=257 produced=194
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=257 keep=2
+glm mtp TP: rank=0 round-end p0=257 produced=196 keep=2
+glm mtp TP: rank=0 n=1 p0=259 produced=196
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=259 keep=1
+glm mtp TP: rank=0 round-end p0=259 produced=197 keep=1
+glm mtp TP: rank=0 n=1 p0=260 produced=197
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=260 keep=2
+glm mtp TP: rank=0 round-end p0=260 produced=199 keep=2
+glm mtp TP: rank=0 n=1 p0=262 produced=199
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=262 keep=2
+glm mtp TP: rank=0 round-end p0=262 produced=201 keep=2
+glm mtp TP: rank=0 n=1 p0=264 produced=201
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=264 keep=2
+glm mtp TP: rank=0 round-end p0=264 produced=203 keep=2
+glm mtp TP: rank=0 n=1 p0=266 produced=203
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=266 keep=2
+glm mtp TP: rank=0 round-end p0=266 produced=205 keep=2
+glm mtp TP: rank=0 n=1 p0=268 produced=205
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=268 keep=2
+glm mtp TP: rank=0 round-end p0=268 produced=207 keep=2
+glm mtp TP: rank=0 n=1 p0=270 produced=207
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=270 keep=2
+glm mtp TP: rank=0 round-end p0=270 produced=209 keep=2
+glm mtp TP: rank=0 n=1 p0=272 produced=209
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=272 keep=2
+glm mtp TP: rank=0 round-end p0=272 produced=211 keep=2
+glm mtp TP: rank=0 n=1 p0=274 produced=211
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=274 keep=1
+glm mtp TP: rank=0 round-end p0=274 produced=212 keep=1
+glm mtp TP: rank=0 n=1 p0=275 produced=212
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=275 keep=1
+glm mtp TP: rank=0 round-end p0=275 produced=213 keep=1
+glm mtp TP: rank=0 n=1 p0=276 produced=213
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=276 keep=1
+glm mtp TP: rank=0 round-end p0=276 produced=214 keep=1
+glm mtp TP: rank=0 n=1 p0=277 produced=214
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=277 keep=2
+glm mtp TP: rank=0 round-end p0=277 produced=216 keep=2
+glm mtp TP: rank=0 n=1 p0=279 produced=216
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=279 keep=2
+glm mtp TP: rank=0 round-end p0=279 produced=218 keep=2
+glm mtp TP: rank=0 n=1 p0=281 produced=218
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=281 keep=2
+glm mtp TP: rank=0 round-end p0=281 produced=220 keep=2
+glm mtp TP: rank=0 n=1 p0=283 produced=220
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=283 keep=2
+glm mtp TP: rank=0 round-end p0=283 produced=222 keep=2
+glm mtp TP: rank=0 n=1 p0=285 produced=222
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=285 keep=2
+glm mtp TP: rank=0 round-end p0=285 produced=224 keep=2
+glm mtp TP: rank=0 n=1 p0=287 produced=224
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=287 keep=1
+glm mtp TP: rank=0 round-end p0=287 produced=225 keep=1
+glm mtp TP: rank=0 n=1 p0=288 produced=225
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=288 keep=1
+glm mtp TP: rank=0 round-end p0=288 produced=226 keep=1
+glm mtp TP: rank=0 n=1 p0=289 produced=226
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=289 keep=1
+glm mtp TP: rank=0 round-end p0=289 produced=227 keep=1
+glm mtp TP: rank=0 n=1 p0=290 produced=227
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=290 keep=2
+glm mtp TP: rank=0 round-end p0=290 produced=229 keep=2
+glm mtp TP: rank=0 n=1 p0=292 produced=229
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=292 keep=2
+glm mtp TP: rank=0 round-end p0=292 produced=231 keep=2
+glm mtp TP: rank=0 n=1 p0=294 produced=231
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=294 keep=2
+glm mtp TP: rank=0 round-end p0=294 produced=233 keep=2
+glm mtp TP: rank=0 n=1 p0=296 produced=233
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=296 keep=1
+glm mtp TP: rank=0 round-end p0=296 produced=234 keep=1
+glm mtp TP: rank=0 n=1 p0=297 produced=234
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=297 keep=2
+glm mtp TP: rank=0 round-end p0=297 produced=236 keep=2
+glm mtp TP: rank=0 n=1 p0=299 produced=236
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=299 keep=2
+glm mtp TP: rank=0 round-end p0=299 produced=238 keep=2
+glm mtp TP: rank=0 n=1 p0=301 produced=238
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=301 keep=1
+glm mtp TP: rank=0 round-end p0=301 produced=239 keep=1
+glm mtp TP: rank=0 n=1 p0=302 produced=239
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=302 keep=2
+glm mtp TP: rank=0 round-end p0=302 produced=241 keep=2
+glm mtp TP: rank=0 n=1 p0=304 produced=241
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=304 keep=1
+glm mtp TP: rank=0 round-end p0=304 produced=242 keep=1
+glm mtp TP: rank=0 n=1 p0=305 produced=242
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=305 keep=1
+glm mtp TP: rank=0 round-end p0=305 produced=243 keep=1
+glm mtp TP: rank=0 n=1 p0=306 produced=243
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=306 keep=2
+glm mtp TP: rank=0 round-end p0=306 produced=245 keep=2
+glm mtp TP: rank=0 n=1 p0=308 produced=245
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=308 keep=2
+glm mtp TP: rank=0 round-end p0=308 produced=247 keep=2
+glm mtp TP: rank=0 n=1 p0=310 produced=247
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=310 keep=2
+glm mtp TP: rank=0 round-end p0=310 produced=249 keep=2
+glm mtp TP: rank=0 n=1 p0=312 produced=249
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=312 keep=2
+glm mtp TP: rank=0 round-end p0=312 produced=251 keep=2
+glm mtp TP: rank=0 n=1 p0=314 produced=251
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=314 keep=1
+glm mtp TP: rank=0 round-end p0=314 produced=252 keep=1
+glm mtp TP: rank=0 n=1 p0=315 produced=252
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=315 keep=2
+glm mtp TP: rank=0 round-end p0=315 produced=254 keep=2
+glm mtp TP: rank=0 n=1 p0=317 produced=254
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=317 keep=1
+glm mtp TP: rank=0 round-end p0=317 produced=255 keep=1
+glm mtp TP: rank=0 n=0 p0=318 produced=255
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=318 produced=256 keep=1
+glm mtp: a drafting round's host time - drafts 4.10 ms, verify 56.07 ms, commit + cache 0.03 ms (149 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 256 emitted tokens outside it, 0 of 149 drafting rounds on the whole head
+glm mtp: 150 rounds, 1.71 tokens a round | rounds by draft length 0:1 1:149
+glm stat: decode 35.20 ms/tok (28.41 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12383/12384 ram 0/48
+glm spec: 105 of 149 drafts accepted (70.5%)
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm stat: decode 39.68 ms/tok (25.20 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.7 ms/tok | vram 12383/12384 ram 0/48
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm stat: decode 38.98 ms/tok (25.65 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12383/12384 ram 0/48
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm mtp TP: rank=0 n=1 p0=64 produced=1
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=2
+glm mtp TP: rank=0 round-end p0=64 produced=3 keep=2
+glm mtp TP: rank=0 n=1 p0=66 produced=3
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=66 keep=1
+glm mtp TP: rank=0 round-end p0=66 produced=4 keep=1
+glm mtp TP: rank=0 n=1 p0=67 produced=4
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=2
+glm mtp TP: rank=0 round-end p0=67 produced=6 keep=2
+glm mtp TP: rank=0 n=1 p0=69 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=69 keep=2
+glm mtp TP: rank=0 round-end p0=69 produced=8 keep=2
+glm mtp TP: rank=0 n=1 p0=71 produced=8
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=1 p0=72 produced=9
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=2
+glm mtp TP: rank=0 round-end p0=72 produced=11 keep=2
+glm mtp TP: rank=0 n=1 p0=74 produced=11
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=74 keep=2
+glm mtp TP: rank=0 round-end p0=74 produced=13 keep=2
+glm mtp TP: rank=0 n=1 p0=76 produced=13
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=2
+glm mtp TP: rank=0 round-end p0=76 produced=15 keep=2
+glm mtp TP: rank=0 n=1 p0=78 produced=15
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=78 keep=1
+glm mtp TP: rank=0 round-end p0=78 produced=16 keep=1
+glm mtp TP: rank=0 n=1 p0=79 produced=16
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=1 p0=81 produced=18
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=2
+glm mtp TP: rank=0 round-end p0=81 produced=20 keep=2
+glm mtp TP: rank=0 n=1 p0=83 produced=20
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=83 keep=2
+glm mtp TP: rank=0 round-end p0=83 produced=22 keep=2
+glm mtp TP: rank=0 n=1 p0=85 produced=22
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=2
+glm mtp TP: rank=0 round-end p0=85 produced=24 keep=2
+glm mtp TP: rank=0 n=1 p0=87 produced=24
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=87 keep=2
+glm mtp TP: rank=0 round-end p0=87 produced=26 keep=2
+glm mtp TP: rank=0 n=1 p0=89 produced=26
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=89 keep=2
+glm mtp TP: rank=0 round-end p0=89 produced=28 keep=2
+glm mtp TP: rank=0 n=1 p0=91 produced=28
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=1 p0=93 produced=30
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=1 p0=95 produced=32
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=2
+glm mtp TP: rank=0 round-end p0=95 produced=34 keep=2
+glm mtp TP: rank=0 n=1 p0=97 produced=34
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=97 keep=2
+glm mtp TP: rank=0 round-end p0=97 produced=36 keep=2
+glm mtp TP: rank=0 n=1 p0=99 produced=36
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=1
+glm mtp TP: rank=0 round-end p0=99 produced=37 keep=1
+glm mtp TP: rank=0 n=1 p0=100 produced=37
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=100 keep=2
+glm mtp TP: rank=0 round-end p0=100 produced=39 keep=2
+glm mtp TP: rank=0 n=1 p0=102 produced=39
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=2
+glm mtp TP: rank=0 round-end p0=102 produced=41 keep=2
+glm mtp TP: rank=0 n=1 p0=104 produced=41
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=104 keep=2
+glm mtp TP: rank=0 round-end p0=104 produced=43 keep=2
+glm mtp TP: rank=0 n=1 p0=106 produced=43
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=1
+glm mtp TP: rank=0 round-end p0=106 produced=44 keep=1
+glm mtp TP: rank=0 n=1 p0=107 produced=44
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=107 keep=2
+glm mtp TP: rank=0 round-end p0=107 produced=46 keep=2
+glm mtp TP: rank=0 n=1 p0=109 produced=46
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=2
+glm mtp TP: rank=0 round-end p0=109 produced=48 keep=2
+glm mtp TP: rank=0 n=1 p0=111 produced=48
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=111 keep=2
+glm mtp TP: rank=0 round-end p0=111 produced=50 keep=2
+glm mtp TP: rank=0 n=1 p0=113 produced=50
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=113 keep=2
+glm mtp TP: rank=0 round-end p0=113 produced=52 keep=2
+glm mtp TP: rank=0 n=1 p0=115 produced=52
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=2
+glm mtp TP: rank=0 round-end p0=115 produced=54 keep=2
+glm mtp TP: rank=0 n=1 p0=117 produced=54
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=117 keep=2
+glm mtp TP: rank=0 round-end p0=117 produced=56 keep=2
+glm mtp TP: rank=0 n=1 p0=119 produced=56
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=119 keep=2
+glm mtp TP: rank=0 round-end p0=119 produced=58 keep=2
+glm mtp TP: rank=0 n=1 p0=121 produced=58
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=1
+glm mtp TP: rank=0 round-end p0=121 produced=59 keep=1
+glm mtp TP: rank=0 n=1 p0=122 produced=59
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=122 keep=1
+glm mtp TP: rank=0 round-end p0=122 produced=60 keep=1
+glm mtp TP: rank=0 n=1 p0=123 produced=60
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=2
+glm mtp TP: rank=0 round-end p0=123 produced=62 keep=2
+glm mtp TP: rank=0 n=1 p0=125 produced=62
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=125 keep=2
+glm mtp TP: rank=0 round-end p0=125 produced=64 keep=2
+glm mtp TP: rank=0 n=1 p0=127 produced=64
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=127 keep=1
+glm mtp TP: rank=0 round-end p0=127 produced=65 keep=1
+glm mtp TP: rank=0 n=1 p0=128 produced=65
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=128 keep=2
+glm mtp TP: rank=0 round-end p0=128 produced=67 keep=2
+glm mtp TP: rank=0 n=1 p0=130 produced=67
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=130 keep=1
+glm mtp TP: rank=0 round-end p0=130 produced=68 keep=1
+glm mtp TP: rank=0 n=1 p0=131 produced=68
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=131 keep=2
+glm mtp TP: rank=0 round-end p0=131 produced=70 keep=2
+glm mtp TP: rank=0 n=1 p0=133 produced=70
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=133 keep=2
+glm mtp TP: rank=0 round-end p0=133 produced=72 keep=2
+glm mtp TP: rank=0 n=1 p0=135 produced=72
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=135 keep=2
+glm mtp TP: rank=0 round-end p0=135 produced=74 keep=2
+glm mtp TP: rank=0 n=1 p0=137 produced=74
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=137 keep=2
+glm mtp TP: rank=0 round-end p0=137 produced=76 keep=2
+glm mtp TP: rank=0 n=1 p0=139 produced=76
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=139 keep=2
+glm mtp TP: rank=0 round-end p0=139 produced=78 keep=2
+glm mtp TP: rank=0 n=1 p0=141 produced=78
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=141 keep=2
+glm mtp TP: rank=0 round-end p0=141 produced=80 keep=2
+glm mtp TP: rank=0 n=1 p0=143 produced=80
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=143 keep=2
+glm mtp TP: rank=0 round-end p0=143 produced=82 keep=2
+glm mtp TP: rank=0 n=1 p0=145 produced=82
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=145 keep=2
+glm mtp TP: rank=0 round-end p0=145 produced=84 keep=2
+glm mtp TP: rank=0 n=1 p0=147 produced=84
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=147 keep=2
+glm mtp TP: rank=0 round-end p0=147 produced=86 keep=2
+glm mtp TP: rank=0 n=1 p0=149 produced=86
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=149 keep=1
+glm mtp TP: rank=0 round-end p0=149 produced=87 keep=1
+glm mtp TP: rank=0 n=1 p0=150 produced=87
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=150 keep=2
+glm mtp TP: rank=0 round-end p0=150 produced=89 keep=2
+glm mtp TP: rank=0 n=1 p0=152 produced=89
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=152 keep=2
+glm mtp TP: rank=0 round-end p0=152 produced=91 keep=2
+glm mtp TP: rank=0 n=1 p0=154 produced=91
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=154 keep=2
+glm mtp TP: rank=0 round-end p0=154 produced=93 keep=2
+glm mtp TP: rank=0 n=1 p0=156 produced=93
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=156 keep=2
+glm mtp TP: rank=0 round-end p0=156 produced=95 keep=2
+glm mtp TP: rank=0 n=1 p0=158 produced=95
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=158 keep=2
+glm mtp TP: rank=0 round-end p0=158 produced=97 keep=2
+glm mtp TP: rank=0 n=1 p0=160 produced=97
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=160 keep=1
+glm mtp TP: rank=0 round-end p0=160 produced=98 keep=1
+glm mtp TP: rank=0 n=1 p0=161 produced=98
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=161 keep=1
+glm mtp TP: rank=0 round-end p0=161 produced=99 keep=1
+glm mtp TP: rank=0 n=1 p0=162 produced=99
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=162 keep=1
+glm mtp TP: rank=0 round-end p0=162 produced=100 keep=1
+glm mtp TP: rank=0 n=1 p0=163 produced=100
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=163 keep=1
+glm mtp TP: rank=0 round-end p0=163 produced=101 keep=1
+glm mtp TP: rank=0 n=1 p0=164 produced=101
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=164 keep=2
+glm mtp TP: rank=0 round-end p0=164 produced=103 keep=2
+glm mtp TP: rank=0 n=1 p0=166 produced=103
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=166 keep=2
+glm mtp TP: rank=0 round-end p0=166 produced=105 keep=2
+glm mtp TP: rank=0 n=1 p0=168 produced=105
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=168 keep=2
+glm mtp TP: rank=0 round-end p0=168 produced=107 keep=2
+glm mtp TP: rank=0 n=1 p0=170 produced=107
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=170 keep=2
+glm mtp TP: rank=0 round-end p0=170 produced=109 keep=2
+glm mtp TP: rank=0 n=1 p0=172 produced=109
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=172 keep=2
+glm mtp TP: rank=0 round-end p0=172 produced=111 keep=2
+glm mtp TP: rank=0 n=1 p0=174 produced=111
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=174 keep=2
+glm mtp TP: rank=0 round-end p0=174 produced=113 keep=2
+glm mtp TP: rank=0 n=1 p0=176 produced=113
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=176 keep=2
+glm mtp TP: rank=0 round-end p0=176 produced=115 keep=2
+glm mtp TP: rank=0 n=1 p0=178 produced=115
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=178 keep=2
+glm mtp TP: rank=0 round-end p0=178 produced=117 keep=2
+glm mtp TP: rank=0 n=1 p0=180 produced=117
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=180 keep=2
+glm mtp TP: rank=0 round-end p0=180 produced=119 keep=2
+glm mtp TP: rank=0 n=1 p0=182 produced=119
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=182 keep=1
+glm mtp TP: rank=0 round-end p0=182 produced=120 keep=1
+glm mtp TP: rank=0 n=1 p0=183 produced=120
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=183 keep=2
+glm mtp TP: rank=0 round-end p0=183 produced=122 keep=2
+glm mtp TP: rank=0 n=1 p0=185 produced=122
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=185 keep=2
+glm mtp TP: rank=0 round-end p0=185 produced=124 keep=2
+glm mtp TP: rank=0 n=1 p0=187 produced=124
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=187 keep=1
+glm mtp TP: rank=0 round-end p0=187 produced=125 keep=1
+glm mtp TP: rank=0 n=1 p0=188 produced=125
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=188 keep=2
+glm mtp TP: rank=0 round-end p0=188 produced=127 keep=2
+glm mtp TP: rank=0 n=1 p0=190 produced=127
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=190 keep=2
+glm mtp TP: rank=0 round-end p0=190 produced=129 keep=2
+glm mtp TP: rank=0 n=1 p0=192 produced=129
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=192 keep=2
+glm mtp TP: rank=0 round-end p0=192 produced=131 keep=2
+glm mtp TP: rank=0 n=1 p0=194 produced=131
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=194 keep=2
+glm mtp TP: rank=0 round-end p0=194 produced=133 keep=2
+glm mtp TP: rank=0 n=1 p0=196 produced=133
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=196 keep=2
+glm mtp TP: rank=0 round-end p0=196 produced=135 keep=2
+glm mtp TP: rank=0 n=1 p0=198 produced=135
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=198 keep=2
+glm mtp TP: rank=0 round-end p0=198 produced=137 keep=2
+glm mtp TP: rank=0 n=1 p0=200 produced=137
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=200 keep=1
+glm mtp TP: rank=0 round-end p0=200 produced=138 keep=1
+glm mtp TP: rank=0 n=1 p0=201 produced=138
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=201 keep=1
+glm mtp TP: rank=0 round-end p0=201 produced=139 keep=1
+glm mtp TP: rank=0 n=1 p0=202 produced=139
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=202 keep=2
+glm mtp TP: rank=0 round-end p0=202 produced=141 keep=2
+glm mtp TP: rank=0 n=1 p0=204 produced=141
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=204 keep=1
+glm mtp TP: rank=0 round-end p0=204 produced=142 keep=1
+glm mtp TP: rank=0 n=1 p0=205 produced=142
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=205 keep=1
+glm mtp TP: rank=0 round-end p0=205 produced=143 keep=1
+glm mtp TP: rank=0 n=1 p0=206 produced=143
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=206 keep=1
+glm mtp TP: rank=0 round-end p0=206 produced=144 keep=1
+glm mtp TP: rank=0 n=1 p0=207 produced=144
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=207 keep=1
+glm mtp TP: rank=0 round-end p0=207 produced=145 keep=1
+glm mtp TP: rank=0 n=1 p0=208 produced=145
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=208 keep=1
+glm mtp TP: rank=0 round-end p0=208 produced=146 keep=1
+glm mtp TP: rank=0 n=1 p0=209 produced=146
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=209 keep=2
+glm mtp TP: rank=0 round-end p0=209 produced=148 keep=2
+glm mtp TP: rank=0 n=1 p0=211 produced=148
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=211 keep=2
+glm mtp TP: rank=0 round-end p0=211 produced=150 keep=2
+glm mtp TP: rank=0 n=1 p0=213 produced=150
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=213 keep=2
+glm mtp TP: rank=0 round-end p0=213 produced=152 keep=2
+glm mtp TP: rank=0 n=1 p0=215 produced=152
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=215 keep=2
+glm mtp TP: rank=0 round-end p0=215 produced=154 keep=2
+glm mtp TP: rank=0 n=1 p0=217 produced=154
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=217 keep=2
+glm mtp TP: rank=0 round-end p0=217 produced=156 keep=2
+glm mtp TP: rank=0 n=1 p0=219 produced=156
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=219 keep=2
+glm mtp TP: rank=0 round-end p0=219 produced=158 keep=2
+glm mtp TP: rank=0 n=1 p0=221 produced=158
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=221 keep=1
+glm mtp TP: rank=0 round-end p0=221 produced=159 keep=1
+glm mtp TP: rank=0 n=1 p0=222 produced=159
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=222 keep=1
+glm mtp TP: rank=0 round-end p0=222 produced=160 keep=1
+glm mtp TP: rank=0 n=1 p0=223 produced=160
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=223 keep=2
+glm mtp TP: rank=0 round-end p0=223 produced=162 keep=2
+glm mtp TP: rank=0 n=1 p0=225 produced=162
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=225 keep=2
+glm mtp TP: rank=0 round-end p0=225 produced=164 keep=2
+glm mtp TP: rank=0 n=1 p0=227 produced=164
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=227 keep=2
+glm mtp TP: rank=0 round-end p0=227 produced=166 keep=2
+glm mtp TP: rank=0 n=1 p0=229 produced=166
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=229 keep=2
+glm mtp TP: rank=0 round-end p0=229 produced=168 keep=2
+glm mtp TP: rank=0 n=1 p0=231 produced=168
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=231 keep=1
+glm mtp TP: rank=0 round-end p0=231 produced=169 keep=1
+glm mtp TP: rank=0 n=1 p0=232 produced=169
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=232 keep=1
+glm mtp TP: rank=0 round-end p0=232 produced=170 keep=1
+glm mtp TP: rank=0 n=1 p0=233 produced=170
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=233 keep=1
+glm mtp TP: rank=0 round-end p0=233 produced=171 keep=1
+glm mtp TP: rank=0 n=1 p0=234 produced=171
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=234 keep=2
+glm mtp TP: rank=0 round-end p0=234 produced=173 keep=2
+glm mtp TP: rank=0 n=1 p0=236 produced=173
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=236 keep=1
+glm mtp TP: rank=0 round-end p0=236 produced=174 keep=1
+glm mtp TP: rank=0 n=1 p0=237 produced=174
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=237 keep=2
+glm mtp TP: rank=0 round-end p0=237 produced=176 keep=2
+glm mtp TP: rank=0 n=1 p0=239 produced=176
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=239 keep=2
+glm mtp TP: rank=0 round-end p0=239 produced=178 keep=2
+glm mtp TP: rank=0 n=1 p0=241 produced=178
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=241 keep=2
+glm mtp TP: rank=0 round-end p0=241 produced=180 keep=2
+glm mtp TP: rank=0 n=1 p0=243 produced=180
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=243 keep=2
+glm mtp TP: rank=0 round-end p0=243 produced=182 keep=2
+glm mtp TP: rank=0 n=1 p0=245 produced=182
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=245 keep=2
+glm mtp TP: rank=0 round-end p0=245 produced=184 keep=2
+glm mtp TP: rank=0 n=1 p0=247 produced=184
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=247 keep=2
+glm mtp TP: rank=0 round-end p0=247 produced=186 keep=2
+glm mtp TP: rank=0 n=1 p0=249 produced=186
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=249 keep=1
+glm mtp TP: rank=0 round-end p0=249 produced=187 keep=1
+glm mtp TP: rank=0 n=1 p0=250 produced=187
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=250 keep=1
+glm mtp TP: rank=0 round-end p0=250 produced=188 keep=1
+glm mtp TP: rank=0 n=1 p0=251 produced=188
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=251 keep=2
+glm mtp TP: rank=0 round-end p0=251 produced=190 keep=2
+glm mtp TP: rank=0 n=1 p0=253 produced=190
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=253 keep=2
+glm mtp TP: rank=0 round-end p0=253 produced=192 keep=2
+glm mtp TP: rank=0 n=1 p0=255 produced=192
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=255 keep=2
+glm mtp TP: rank=0 round-end p0=255 produced=194 keep=2
+glm mtp TP: rank=0 n=1 p0=257 produced=194
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=257 keep=2
+glm mtp TP: rank=0 round-end p0=257 produced=196 keep=2
+glm mtp TP: rank=0 n=1 p0=259 produced=196
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=259 keep=1
+glm mtp TP: rank=0 round-end p0=259 produced=197 keep=1
+glm mtp TP: rank=0 n=1 p0=260 produced=197
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=260 keep=2
+glm mtp TP: rank=0 round-end p0=260 produced=199 keep=2
+glm mtp TP: rank=0 n=1 p0=262 produced=199
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=262 keep=2
+glm mtp TP: rank=0 round-end p0=262 produced=201 keep=2
+glm mtp TP: rank=0 n=1 p0=264 produced=201
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=264 keep=2
+glm mtp TP: rank=0 round-end p0=264 produced=203 keep=2
+glm mtp TP: rank=0 n=1 p0=266 produced=203
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=266 keep=2
+glm mtp TP: rank=0 round-end p0=266 produced=205 keep=2
+glm mtp TP: rank=0 n=1 p0=268 produced=205
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=268 keep=2
+glm mtp TP: rank=0 round-end p0=268 produced=207 keep=2
+glm mtp TP: rank=0 n=1 p0=270 produced=207
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=270 keep=2
+glm mtp TP: rank=0 round-end p0=270 produced=209 keep=2
+glm mtp TP: rank=0 n=1 p0=272 produced=209
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=272 keep=2
+glm mtp TP: rank=0 round-end p0=272 produced=211 keep=2
+glm mtp TP: rank=0 n=1 p0=274 produced=211
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=274 keep=1
+glm mtp TP: rank=0 round-end p0=274 produced=212 keep=1
+glm mtp TP: rank=0 n=1 p0=275 produced=212
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=275 keep=1
+glm mtp TP: rank=0 round-end p0=275 produced=213 keep=1
+glm mtp TP: rank=0 n=1 p0=276 produced=213
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=276 keep=1
+glm mtp TP: rank=0 round-end p0=276 produced=214 keep=1
+glm mtp TP: rank=0 n=1 p0=277 produced=214
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=277 keep=2
+glm mtp TP: rank=0 round-end p0=277 produced=216 keep=2
+glm mtp TP: rank=0 n=1 p0=279 produced=216
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=279 keep=2
+glm mtp TP: rank=0 round-end p0=279 produced=218 keep=2
+glm mtp TP: rank=0 n=1 p0=281 produced=218
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=281 keep=2
+glm mtp TP: rank=0 round-end p0=281 produced=220 keep=2
+glm mtp TP: rank=0 n=1 p0=283 produced=220
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=283 keep=2
+glm mtp TP: rank=0 round-end p0=283 produced=222 keep=2
+glm mtp TP: rank=0 n=1 p0=285 produced=222
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=285 keep=2
+glm mtp TP: rank=0 round-end p0=285 produced=224 keep=2
+glm mtp TP: rank=0 n=1 p0=287 produced=224
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=287 keep=1
+glm mtp TP: rank=0 round-end p0=287 produced=225 keep=1
+glm mtp TP: rank=0 n=1 p0=288 produced=225
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=288 keep=1
+glm mtp TP: rank=0 round-end p0=288 produced=226 keep=1
+glm mtp TP: rank=0 n=1 p0=289 produced=226
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=289 keep=1
+glm mtp TP: rank=0 round-end p0=289 produced=227 keep=1
+glm mtp TP: rank=0 n=1 p0=290 produced=227
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=290 keep=2
+glm mtp TP: rank=0 round-end p0=290 produced=229 keep=2
+glm mtp TP: rank=0 n=1 p0=292 produced=229
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=292 keep=2
+glm mtp TP: rank=0 round-end p0=292 produced=231 keep=2
+glm mtp TP: rank=0 n=1 p0=294 produced=231
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=294 keep=2
+glm mtp TP: rank=0 round-end p0=294 produced=233 keep=2
+glm mtp TP: rank=0 n=1 p0=296 produced=233
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=296 keep=1
+glm mtp TP: rank=0 round-end p0=296 produced=234 keep=1
+glm mtp TP: rank=0 n=1 p0=297 produced=234
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=297 keep=2
+glm mtp TP: rank=0 round-end p0=297 produced=236 keep=2
+glm mtp TP: rank=0 n=1 p0=299 produced=236
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=299 keep=2
+glm mtp TP: rank=0 round-end p0=299 produced=238 keep=2
+glm mtp TP: rank=0 n=1 p0=301 produced=238
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=301 keep=1
+glm mtp TP: rank=0 round-end p0=301 produced=239 keep=1
+glm mtp TP: rank=0 n=1 p0=302 produced=239
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=302 keep=2
+glm mtp TP: rank=0 round-end p0=302 produced=241 keep=2
+glm mtp TP: rank=0 n=1 p0=304 produced=241
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=304 keep=1
+glm mtp TP: rank=0 round-end p0=304 produced=242 keep=1
+glm mtp TP: rank=0 n=1 p0=305 produced=242
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=305 keep=1
+glm mtp TP: rank=0 round-end p0=305 produced=243 keep=1
+glm mtp TP: rank=0 n=1 p0=306 produced=243
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=306 keep=2
+glm mtp TP: rank=0 round-end p0=306 produced=245 keep=2
+glm mtp TP: rank=0 n=1 p0=308 produced=245
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=308 keep=2
+glm mtp TP: rank=0 round-end p0=308 produced=247 keep=2
+glm mtp TP: rank=0 n=1 p0=310 produced=247
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=310 keep=2
+glm mtp TP: rank=0 round-end p0=310 produced=249 keep=2
+glm mtp TP: rank=0 n=1 p0=312 produced=249
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=312 keep=2
+glm mtp TP: rank=0 round-end p0=312 produced=251 keep=2
+glm mtp TP: rank=0 n=1 p0=314 produced=251
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=314 keep=1
+glm mtp TP: rank=0 round-end p0=314 produced=252 keep=1
+glm mtp TP: rank=0 n=1 p0=315 produced=252
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=315 keep=2
+glm mtp TP: rank=0 round-end p0=315 produced=254 keep=2
+glm mtp TP: rank=0 n=1 p0=317 produced=254
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=317 keep=1
+glm mtp TP: rank=0 round-end p0=317 produced=255 keep=1
+glm mtp TP: rank=0 n=0 p0=318 produced=255
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=318 produced=256 keep=1
+glm mtp: a drafting round's host time - drafts 4.13 ms, verify 58.78 ms, commit + cache 0.04 ms (149 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 256 emitted tokens outside it, 0 of 149 drafting rounds on the whole head
+glm mtp: 150 rounds, 1.71 tokens a round | rounds by draft length 0:1 1:149
+glm stat: decode 36.79 ms/tok (27.18 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12383/12384 ram 0/48
+glm spec: 105 of 149 drafts accepted (70.5%)
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm mtp TP: rank=0 n=1 p0=64 produced=1
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=2
+glm mtp TP: rank=0 round-end p0=64 produced=3 keep=2
+glm mtp TP: rank=0 n=1 p0=66 produced=3
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=66 keep=1
+glm mtp TP: rank=0 round-end p0=66 produced=4 keep=1
+glm mtp TP: rank=0 n=1 p0=67 produced=4
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=2
+glm mtp TP: rank=0 round-end p0=67 produced=6 keep=2
+glm mtp TP: rank=0 n=1 p0=69 produced=6
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=69 keep=2
+glm mtp TP: rank=0 round-end p0=69 produced=8 keep=2
+glm mtp TP: rank=0 n=1 p0=71 produced=8
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=1 p0=72 produced=9
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=2
+glm mtp TP: rank=0 round-end p0=72 produced=11 keep=2
+glm mtp TP: rank=0 n=1 p0=74 produced=11
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=74 keep=2
+glm mtp TP: rank=0 round-end p0=74 produced=13 keep=2
+glm mtp TP: rank=0 n=1 p0=76 produced=13
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=2
+glm mtp TP: rank=0 round-end p0=76 produced=15 keep=2
+glm mtp TP: rank=0 n=1 p0=78 produced=15
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=78 keep=1
+glm mtp TP: rank=0 round-end p0=78 produced=16 keep=1
+glm mtp TP: rank=0 n=1 p0=79 produced=16
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=1 p0=81 produced=18
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=2
+glm mtp TP: rank=0 round-end p0=81 produced=20 keep=2
+glm mtp TP: rank=0 n=1 p0=83 produced=20
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=83 keep=2
+glm mtp TP: rank=0 round-end p0=83 produced=22 keep=2
+glm mtp TP: rank=0 n=1 p0=85 produced=22
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=2
+glm mtp TP: rank=0 round-end p0=85 produced=24 keep=2
+glm mtp TP: rank=0 n=1 p0=87 produced=24
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=87 keep=2
+glm mtp TP: rank=0 round-end p0=87 produced=26 keep=2
+glm mtp TP: rank=0 n=1 p0=89 produced=26
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=89 keep=2
+glm mtp TP: rank=0 round-end p0=89 produced=28 keep=2
+glm mtp TP: rank=0 n=1 p0=91 produced=28
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=1 p0=93 produced=30
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=1 p0=95 produced=32
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=2
+glm mtp TP: rank=0 round-end p0=95 produced=34 keep=2
+glm mtp TP: rank=0 n=1 p0=97 produced=34
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=97 keep=2
+glm mtp TP: rank=0 round-end p0=97 produced=36 keep=2
+glm mtp TP: rank=0 n=1 p0=99 produced=36
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=1
+glm mtp TP: rank=0 round-end p0=99 produced=37 keep=1
+glm mtp TP: rank=0 n=1 p0=100 produced=37
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=100 keep=2
+glm mtp TP: rank=0 round-end p0=100 produced=39 keep=2
+glm mtp TP: rank=0 n=1 p0=102 produced=39
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=2
+glm mtp TP: rank=0 round-end p0=102 produced=41 keep=2
+glm mtp TP: rank=0 n=1 p0=104 produced=41
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=104 keep=2
+glm mtp TP: rank=0 round-end p0=104 produced=43 keep=2
+glm mtp TP: rank=0 n=1 p0=106 produced=43
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=1
+glm mtp TP: rank=0 round-end p0=106 produced=44 keep=1
+glm mtp TP: rank=0 n=1 p0=107 produced=44
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=107 keep=2
+glm mtp TP: rank=0 round-end p0=107 produced=46 keep=2
+glm mtp TP: rank=0 n=1 p0=109 produced=46
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=2
+glm mtp TP: rank=0 round-end p0=109 produced=48 keep=2
+glm mtp TP: rank=0 n=1 p0=111 produced=48
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=111 keep=2
+glm mtp TP: rank=0 round-end p0=111 produced=50 keep=2
+glm mtp TP: rank=0 n=1 p0=113 produced=50
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=113 keep=2
+glm mtp TP: rank=0 round-end p0=113 produced=52 keep=2
+glm mtp TP: rank=0 n=1 p0=115 produced=52
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=2
+glm mtp TP: rank=0 round-end p0=115 produced=54 keep=2
+glm mtp TP: rank=0 n=1 p0=117 produced=54
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=117 keep=2
+glm mtp TP: rank=0 round-end p0=117 produced=56 keep=2
+glm mtp TP: rank=0 n=1 p0=119 produced=56
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=119 keep=2
+glm mtp TP: rank=0 round-end p0=119 produced=58 keep=2
+glm mtp TP: rank=0 n=1 p0=121 produced=58
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=1
+glm mtp TP: rank=0 round-end p0=121 produced=59 keep=1
+glm mtp TP: rank=0 n=1 p0=122 produced=59
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=122 keep=1
+glm mtp TP: rank=0 round-end p0=122 produced=60 keep=1
+glm mtp TP: rank=0 n=1 p0=123 produced=60
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=2
+glm mtp TP: rank=0 round-end p0=123 produced=62 keep=2
+glm mtp TP: rank=0 n=1 p0=125 produced=62
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=125 keep=2
+glm mtp TP: rank=0 round-end p0=125 produced=64 keep=2
+glm mtp TP: rank=0 n=1 p0=127 produced=64
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=127 keep=1
+glm mtp TP: rank=0 round-end p0=127 produced=65 keep=1
+glm mtp TP: rank=0 n=1 p0=128 produced=65
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=128 keep=2
+glm mtp TP: rank=0 round-end p0=128 produced=67 keep=2
+glm mtp TP: rank=0 n=1 p0=130 produced=67
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=130 keep=1
+glm mtp TP: rank=0 round-end p0=130 produced=68 keep=1
+glm mtp TP: rank=0 n=1 p0=131 produced=68
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=131 keep=2
+glm mtp TP: rank=0 round-end p0=131 produced=70 keep=2
+glm mtp TP: rank=0 n=1 p0=133 produced=70
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=133 keep=2
+glm mtp TP: rank=0 round-end p0=133 produced=72 keep=2
+glm mtp TP: rank=0 n=1 p0=135 produced=72
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=135 keep=2
+glm mtp TP: rank=0 round-end p0=135 produced=74 keep=2
+glm mtp TP: rank=0 n=1 p0=137 produced=74
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=137 keep=2
+glm mtp TP: rank=0 round-end p0=137 produced=76 keep=2
+glm mtp TP: rank=0 n=1 p0=139 produced=76
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=139 keep=2
+glm mtp TP: rank=0 round-end p0=139 produced=78 keep=2
+glm mtp TP: rank=0 n=1 p0=141 produced=78
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=141 keep=2
+glm mtp TP: rank=0 round-end p0=141 produced=80 keep=2
+glm mtp TP: rank=0 n=1 p0=143 produced=80
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=143 keep=2
+glm mtp TP: rank=0 round-end p0=143 produced=82 keep=2
+glm mtp TP: rank=0 n=1 p0=145 produced=82
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=145 keep=2
+glm mtp TP: rank=0 round-end p0=145 produced=84 keep=2
+glm mtp TP: rank=0 n=1 p0=147 produced=84
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=147 keep=2
+glm mtp TP: rank=0 round-end p0=147 produced=86 keep=2
+glm mtp TP: rank=0 n=1 p0=149 produced=86
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=149 keep=1
+glm mtp TP: rank=0 round-end p0=149 produced=87 keep=1
+glm mtp TP: rank=0 n=1 p0=150 produced=87
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=150 keep=2
+glm mtp TP: rank=0 round-end p0=150 produced=89 keep=2
+glm mtp TP: rank=0 n=1 p0=152 produced=89
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=152 keep=2
+glm mtp TP: rank=0 round-end p0=152 produced=91 keep=2
+glm mtp TP: rank=0 n=1 p0=154 produced=91
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=154 keep=2
+glm mtp TP: rank=0 round-end p0=154 produced=93 keep=2
+glm mtp TP: rank=0 n=1 p0=156 produced=93
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=156 keep=2
+glm mtp TP: rank=0 round-end p0=156 produced=95 keep=2
+glm mtp TP: rank=0 n=1 p0=158 produced=95
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=158 keep=2
+glm mtp TP: rank=0 round-end p0=158 produced=97 keep=2
+glm mtp TP: rank=0 n=1 p0=160 produced=97
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=160 keep=1
+glm mtp TP: rank=0 round-end p0=160 produced=98 keep=1
+glm mtp TP: rank=0 n=1 p0=161 produced=98
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=161 keep=1
+glm mtp TP: rank=0 round-end p0=161 produced=99 keep=1
+glm mtp TP: rank=0 n=1 p0=162 produced=99
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=162 keep=1
+glm mtp TP: rank=0 round-end p0=162 produced=100 keep=1
+glm mtp TP: rank=0 n=1 p0=163 produced=100
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=163 keep=1
+glm mtp TP: rank=0 round-end p0=163 produced=101 keep=1
+glm mtp TP: rank=0 n=1 p0=164 produced=101
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=164 keep=2
+glm mtp TP: rank=0 round-end p0=164 produced=103 keep=2
+glm mtp TP: rank=0 n=1 p0=166 produced=103
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=166 keep=2
+glm mtp TP: rank=0 round-end p0=166 produced=105 keep=2
+glm mtp TP: rank=0 n=1 p0=168 produced=105
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=168 keep=2
+glm mtp TP: rank=0 round-end p0=168 produced=107 keep=2
+glm mtp TP: rank=0 n=1 p0=170 produced=107
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=170 keep=2
+glm mtp TP: rank=0 round-end p0=170 produced=109 keep=2
+glm mtp TP: rank=0 n=1 p0=172 produced=109
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=172 keep=2
+glm mtp TP: rank=0 round-end p0=172 produced=111 keep=2
+glm mtp TP: rank=0 n=1 p0=174 produced=111
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=174 keep=2
+glm mtp TP: rank=0 round-end p0=174 produced=113 keep=2
+glm mtp TP: rank=0 n=1 p0=176 produced=113
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=176 keep=2
+glm mtp TP: rank=0 round-end p0=176 produced=115 keep=2
+glm mtp TP: rank=0 n=1 p0=178 produced=115
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=178 keep=2
+glm mtp TP: rank=0 round-end p0=178 produced=117 keep=2
+glm mtp TP: rank=0 n=1 p0=180 produced=117
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=180 keep=2
+glm mtp TP: rank=0 round-end p0=180 produced=119 keep=2
+glm mtp TP: rank=0 n=1 p0=182 produced=119
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=182 keep=1
+glm mtp TP: rank=0 round-end p0=182 produced=120 keep=1
+glm mtp TP: rank=0 n=1 p0=183 produced=120
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=183 keep=2
+glm mtp TP: rank=0 round-end p0=183 produced=122 keep=2
+glm mtp TP: rank=0 n=1 p0=185 produced=122
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=185 keep=2
+glm mtp TP: rank=0 round-end p0=185 produced=124 keep=2
+glm mtp TP: rank=0 n=1 p0=187 produced=124
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=187 keep=1
+glm mtp TP: rank=0 round-end p0=187 produced=125 keep=1
+glm mtp TP: rank=0 n=1 p0=188 produced=125
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=188 keep=2
+glm mtp TP: rank=0 round-end p0=188 produced=127 keep=2
+glm mtp TP: rank=0 n=1 p0=190 produced=127
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=190 keep=2
+glm mtp TP: rank=0 round-end p0=190 produced=129 keep=2
+glm mtp TP: rank=0 n=1 p0=192 produced=129
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=192 keep=2
+glm mtp TP: rank=0 round-end p0=192 produced=131 keep=2
+glm mtp TP: rank=0 n=1 p0=194 produced=131
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=194 keep=2
+glm mtp TP: rank=0 round-end p0=194 produced=133 keep=2
+glm mtp TP: rank=0 n=1 p0=196 produced=133
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=196 keep=2
+glm mtp TP: rank=0 round-end p0=196 produced=135 keep=2
+glm mtp TP: rank=0 n=1 p0=198 produced=135
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=198 keep=2
+glm mtp TP: rank=0 round-end p0=198 produced=137 keep=2
+glm mtp TP: rank=0 n=1 p0=200 produced=137
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=200 keep=1
+glm mtp TP: rank=0 round-end p0=200 produced=138 keep=1
+glm mtp TP: rank=0 n=1 p0=201 produced=138
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=201 keep=1
+glm mtp TP: rank=0 round-end p0=201 produced=139 keep=1
+glm mtp TP: rank=0 n=1 p0=202 produced=139
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=202 keep=2
+glm mtp TP: rank=0 round-end p0=202 produced=141 keep=2
+glm mtp TP: rank=0 n=1 p0=204 produced=141
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=204 keep=1
+glm mtp TP: rank=0 round-end p0=204 produced=142 keep=1
+glm mtp TP: rank=0 n=1 p0=205 produced=142
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=205 keep=1
+glm mtp TP: rank=0 round-end p0=205 produced=143 keep=1
+glm mtp TP: rank=0 n=1 p0=206 produced=143
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=206 keep=1
+glm mtp TP: rank=0 round-end p0=206 produced=144 keep=1
+glm mtp TP: rank=0 n=1 p0=207 produced=144
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=207 keep=1
+glm mtp TP: rank=0 round-end p0=207 produced=145 keep=1
+glm mtp TP: rank=0 n=1 p0=208 produced=145
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=208 keep=1
+glm mtp TP: rank=0 round-end p0=208 produced=146 keep=1
+glm mtp TP: rank=0 n=1 p0=209 produced=146
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=209 keep=2
+glm mtp TP: rank=0 round-end p0=209 produced=148 keep=2
+glm mtp TP: rank=0 n=1 p0=211 produced=148
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=211 keep=2
+glm mtp TP: rank=0 round-end p0=211 produced=150 keep=2
+glm mtp TP: rank=0 n=1 p0=213 produced=150
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=213 keep=2
+glm mtp TP: rank=0 round-end p0=213 produced=152 keep=2
+glm mtp TP: rank=0 n=1 p0=215 produced=152
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=215 keep=2
+glm mtp TP: rank=0 round-end p0=215 produced=154 keep=2
+glm mtp TP: rank=0 n=1 p0=217 produced=154
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=217 keep=2
+glm mtp TP: rank=0 round-end p0=217 produced=156 keep=2
+glm mtp TP: rank=0 n=1 p0=219 produced=156
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=219 keep=2
+glm mtp TP: rank=0 round-end p0=219 produced=158 keep=2
+glm mtp TP: rank=0 n=1 p0=221 produced=158
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=221 keep=1
+glm mtp TP: rank=0 round-end p0=221 produced=159 keep=1
+glm mtp TP: rank=0 n=1 p0=222 produced=159
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=222 keep=1
+glm mtp TP: rank=0 round-end p0=222 produced=160 keep=1
+glm mtp TP: rank=0 n=1 p0=223 produced=160
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=223 keep=2
+glm mtp TP: rank=0 round-end p0=223 produced=162 keep=2
+glm mtp TP: rank=0 n=1 p0=225 produced=162
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=225 keep=2
+glm mtp TP: rank=0 round-end p0=225 produced=164 keep=2
+glm mtp TP: rank=0 n=1 p0=227 produced=164
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=227 keep=2
+glm mtp TP: rank=0 round-end p0=227 produced=166 keep=2
+glm mtp TP: rank=0 n=1 p0=229 produced=166
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=229 keep=2
+glm mtp TP: rank=0 round-end p0=229 produced=168 keep=2
+glm mtp TP: rank=0 n=1 p0=231 produced=168
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=231 keep=1
+glm mtp TP: rank=0 round-end p0=231 produced=169 keep=1
+glm mtp TP: rank=0 n=1 p0=232 produced=169
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=232 keep=1
+glm mtp TP: rank=0 round-end p0=232 produced=170 keep=1
+glm mtp TP: rank=0 n=1 p0=233 produced=170
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=233 keep=1
+glm mtp TP: rank=0 round-end p0=233 produced=171 keep=1
+glm mtp TP: rank=0 n=1 p0=234 produced=171
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=234 keep=2
+glm mtp TP: rank=0 round-end p0=234 produced=173 keep=2
+glm mtp TP: rank=0 n=1 p0=236 produced=173
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=236 keep=1
+glm mtp TP: rank=0 round-end p0=236 produced=174 keep=1
+glm mtp TP: rank=0 n=1 p0=237 produced=174
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=237 keep=2
+glm mtp TP: rank=0 round-end p0=237 produced=176 keep=2
+glm mtp TP: rank=0 n=1 p0=239 produced=176
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=239 keep=2
+glm mtp TP: rank=0 round-end p0=239 produced=178 keep=2
+glm mtp TP: rank=0 n=1 p0=241 produced=178
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=241 keep=2
+glm mtp TP: rank=0 round-end p0=241 produced=180 keep=2
+glm mtp TP: rank=0 n=1 p0=243 produced=180
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=243 keep=2
+glm mtp TP: rank=0 round-end p0=243 produced=182 keep=2
+glm mtp TP: rank=0 n=1 p0=245 produced=182
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=245 keep=2
+glm mtp TP: rank=0 round-end p0=245 produced=184 keep=2
+glm mtp TP: rank=0 n=1 p0=247 produced=184
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=247 keep=2
+glm mtp TP: rank=0 round-end p0=247 produced=186 keep=2
+glm mtp TP: rank=0 n=1 p0=249 produced=186
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=249 keep=1
+glm mtp TP: rank=0 round-end p0=249 produced=187 keep=1
+glm mtp TP: rank=0 n=1 p0=250 produced=187
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=250 keep=1
+glm mtp TP: rank=0 round-end p0=250 produced=188 keep=1
+glm mtp TP: rank=0 n=1 p0=251 produced=188
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=251 keep=2
+glm mtp TP: rank=0 round-end p0=251 produced=190 keep=2
+glm mtp TP: rank=0 n=1 p0=253 produced=190
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=253 keep=2
+glm mtp TP: rank=0 round-end p0=253 produced=192 keep=2
+glm mtp TP: rank=0 n=1 p0=255 produced=192
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=255 keep=2
+glm mtp TP: rank=0 round-end p0=255 produced=194 keep=2
+glm mtp TP: rank=0 n=1 p0=257 produced=194
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=257 keep=2
+glm mtp TP: rank=0 round-end p0=257 produced=196 keep=2
+glm mtp TP: rank=0 n=1 p0=259 produced=196
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=259 keep=1
+glm mtp TP: rank=0 round-end p0=259 produced=197 keep=1
+glm mtp TP: rank=0 n=1 p0=260 produced=197
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=260 keep=2
+glm mtp TP: rank=0 round-end p0=260 produced=199 keep=2
+glm mtp TP: rank=0 n=1 p0=262 produced=199
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=262 keep=2
+glm mtp TP: rank=0 round-end p0=262 produced=201 keep=2
+glm mtp TP: rank=0 n=1 p0=264 produced=201
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=264 keep=2
+glm mtp TP: rank=0 round-end p0=264 produced=203 keep=2
+glm mtp TP: rank=0 n=1 p0=266 produced=203
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=266 keep=2
+glm mtp TP: rank=0 round-end p0=266 produced=205 keep=2
+glm mtp TP: rank=0 n=1 p0=268 produced=205
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=268 keep=2
+glm mtp TP: rank=0 round-end p0=268 produced=207 keep=2
+glm mtp TP: rank=0 n=1 p0=270 produced=207
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=270 keep=2
+glm mtp TP: rank=0 round-end p0=270 produced=209 keep=2
+glm mtp TP: rank=0 n=1 p0=272 produced=209
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=272 keep=2
+glm mtp TP: rank=0 round-end p0=272 produced=211 keep=2
+glm mtp TP: rank=0 n=1 p0=274 produced=211
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=274 keep=1
+glm mtp TP: rank=0 round-end p0=274 produced=212 keep=1
+glm mtp TP: rank=0 n=1 p0=275 produced=212
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=275 keep=1
+glm mtp TP: rank=0 round-end p0=275 produced=213 keep=1
+glm mtp TP: rank=0 n=1 p0=276 produced=213
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=276 keep=1
+glm mtp TP: rank=0 round-end p0=276 produced=214 keep=1
+glm mtp TP: rank=0 n=1 p0=277 produced=214
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=277 keep=2
+glm mtp TP: rank=0 round-end p0=277 produced=216 keep=2
+glm mtp TP: rank=0 n=1 p0=279 produced=216
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=279 keep=2
+glm mtp TP: rank=0 round-end p0=279 produced=218 keep=2
+glm mtp TP: rank=0 n=1 p0=281 produced=218
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=281 keep=2
+glm mtp TP: rank=0 round-end p0=281 produced=220 keep=2
+glm mtp TP: rank=0 n=1 p0=283 produced=220
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=283 keep=2
+glm mtp TP: rank=0 round-end p0=283 produced=222 keep=2
+glm mtp TP: rank=0 n=1 p0=285 produced=222
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=285 keep=2
+glm mtp TP: rank=0 round-end p0=285 produced=224 keep=2
+glm mtp TP: rank=0 n=1 p0=287 produced=224
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=287 keep=1
+glm mtp TP: rank=0 round-end p0=287 produced=225 keep=1
+glm mtp TP: rank=0 n=1 p0=288 produced=225
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=288 keep=1
+glm mtp TP: rank=0 round-end p0=288 produced=226 keep=1
+glm mtp TP: rank=0 n=1 p0=289 produced=226
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=289 keep=1
+glm mtp TP: rank=0 round-end p0=289 produced=227 keep=1
+glm mtp TP: rank=0 n=1 p0=290 produced=227
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=290 keep=2
+glm mtp TP: rank=0 round-end p0=290 produced=229 keep=2
+glm mtp TP: rank=0 n=1 p0=292 produced=229
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=292 keep=2
+glm mtp TP: rank=0 round-end p0=292 produced=231 keep=2
+glm mtp TP: rank=0 n=1 p0=294 produced=231
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=294 keep=2
+glm mtp TP: rank=0 round-end p0=294 produced=233 keep=2
+glm mtp TP: rank=0 n=1 p0=296 produced=233
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=296 keep=1
+glm mtp TP: rank=0 round-end p0=296 produced=234 keep=1
+glm mtp TP: rank=0 n=1 p0=297 produced=234
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=297 keep=2
+glm mtp TP: rank=0 round-end p0=297 produced=236 keep=2
+glm mtp TP: rank=0 n=1 p0=299 produced=236
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=299 keep=2
+glm mtp TP: rank=0 round-end p0=299 produced=238 keep=2
+glm mtp TP: rank=0 n=1 p0=301 produced=238
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=301 keep=1
+glm mtp TP: rank=0 round-end p0=301 produced=239 keep=1
+glm mtp TP: rank=0 n=1 p0=302 produced=239
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=302 keep=2
+glm mtp TP: rank=0 round-end p0=302 produced=241 keep=2
+glm mtp TP: rank=0 n=1 p0=304 produced=241
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=304 keep=1
+glm mtp TP: rank=0 round-end p0=304 produced=242 keep=1
+glm mtp TP: rank=0 n=1 p0=305 produced=242
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=305 keep=1
+glm mtp TP: rank=0 round-end p0=305 produced=243 keep=1
+glm mtp TP: rank=0 n=1 p0=306 produced=243
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=306 keep=2
+glm mtp TP: rank=0 round-end p0=306 produced=245 keep=2
+glm mtp TP: rank=0 n=1 p0=308 produced=245
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=308 keep=2
+glm mtp TP: rank=0 round-end p0=308 produced=247 keep=2
+glm mtp TP: rank=0 n=1 p0=310 produced=247
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=310 keep=2
+glm mtp TP: rank=0 round-end p0=310 produced=249 keep=2
+glm mtp TP: rank=0 n=1 p0=312 produced=249
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=312 keep=2
+glm mtp TP: rank=0 round-end p0=312 produced=251 keep=2
+glm mtp TP: rank=0 n=1 p0=314 produced=251
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=314 keep=1
+glm mtp TP: rank=0 round-end p0=314 produced=252 keep=1
+glm mtp TP: rank=0 n=1 p0=315 produced=252
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=315 keep=2
+glm mtp TP: rank=0 round-end p0=315 produced=254 keep=2
+glm mtp TP: rank=0 n=1 p0=317 produced=254
+glm mtp TP: rank=0 nd=1 T=2 ok=1
+glm mtp TP: rank=0 after-commit p0=317 keep=1
+glm mtp TP: rank=0 round-end p0=317 produced=255 keep=1
+glm mtp TP: rank=0 n=0 p0=318 produced=255
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=318 produced=256 keep=1
+glm mtp: a drafting round's host time - drafts 4.37 ms, verify 57.06 ms, commit + cache 0.03 ms (149 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 256 emitted tokens outside it, 0 of 149 drafting rounds on the whole head
+glm mtp: 150 rounds, 1.71 tokens a round | rounds by draft length 0:1 1:149
+glm stat: decode 35.94 ms/tok (27.82 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12383/12384 ram 0/48
+glm spec: 105 of 149 drafts accepted (70.5%)
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 60.5 of 121.0 GB before, 60.5 after
+glm stat: decode 38.70 ms/tok (25.84 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.6 ms/tok | vram 12383/12384 ram 0/48
+glm follow: 256 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm spec: 596 speculative positions, 70.5% accepted

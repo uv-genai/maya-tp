@@ -1,0 +1,112 @@
+glm settings from the environment: MAYA_GLM_LOOP_ANSWER=0, MAYA_GLM_LOOP_THINK=0, MAYA_GLM_MTP_DRAFT=7, MAYA_GLM_MTP_FIXED=7, MAYA_GLM_TIMING=1, STRATA_GLM_WARM=0
+INFO tp_world=2 tp_rank=0 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[0,1024)
+glm pack: CUDA0 dense weights 6.86 GB: | kda q/k/v q14 2677 MB | attn output q14 1470 MB | shared experts q14 826 MB | other q14 496 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 352 MB | mla q/kv q14 288 MB | kda small bf16 221 MB | mla q/kv bf16 132 MB | routers bf16 94 MB | mhc bf16 67 MB | dsa indexer bf16 24 MB | kda small f32 13 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q4_K/q5_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 32768 tokens (--prefill auto, up to 32768; mixer sub-batches of 256), borrowing 8191 MB of the expert pool while a prompt runs (activations 7015, weight scratch 96, expert staging 74, prestage 990: 160 experts); disk landing ring 12 experts (74 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.61 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.17, activations 0.12, other (context, MTP, scratch, prompt path) 10.47
+glm fast: CUDA0 unified memory: MemAvailable 110.19 GB, headroom 16.00 GB + 1024 MB reserve, experts need 71.21 GB, pool budget 71.21 GB
+glm fast: CUDA0 layers [0,45) expert pool 71.21 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 slots per layer 3:288 4:288 5:288 6:288 7:288 8:288 9:288 10:288 11:288 12:288 13:288 14:288 15:288 16:288 17:288 18:288 19:288 20:288 21:288 22:288 23:288 24:288 25:288 26:288 27:288 28:288 29:288 30:288 31:288 32:288 33:288 34:288 35:288 36:288 37:288 38:288 39:288 40:288 41:288 42:288 43:288 44:288 45:288 
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.41 GB pinned, 48 slots
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+INFO context=4096 kv=fp16 kv_resident=0 expert_slots=12384 expert_cache_mib=72916 engine_kind=glm-fast experts=12096 vram_slots=12384 vram_gb=71.2 ram_slots=48 ram_gb=0.4 mtp=1 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+VRAM dev=0 pci=0000:c5:00.0 total=129922760704 free=34007371776 weights=7362064384 kv=183402496 kv_ram=0 act=124099160 drafter=181694720 window=1230979072 pool=76458336768 tail=8760851088 borrow=8589313792 vision=0 slots=12384 ctx=4096 layers=0-45
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 0 experts more lent for it)
+glm prefill: CUDA0 chunk 1/1, 11 tokens, wall 29244 ms | the copy lane 29193 ms: copies 28887 (0.4 GB/s), ring wait 5, gaps 32, mixer windows 269 | lead 40, tail 11 | pcie 11.83 GB (ram 0.00, disk 11.83) + 0.00 GB vram | experts: staged 2123, resident 10710 (0 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 3028.7/288.7 ms max/min
+glm prefill: 11 tokens in 29272.3 ms (2661.11 ms/token, 0 tok/s), 1 chunk of 64 tokens | CUDA0 29244 ms
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+T 12089
+glm vram: prompt 12 tokens read in 33.5 s; VRAM free CUDA0 31.7 of 121.0 GB before, 31.6 after
+glm mtp TP: rank=0 n=7 p0=12 produced=1
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=12 T=8 attempt=0 local-clash=1 retry=1
+glm window: a window's tokens took more scratch slots than a layer has - that window runs again token by token (said once)
+T 13
+T 576
+T 6722
+T 315
+glm mtp TP: rank=0 after-commit p0=12 keep=4
+glm mtp TP: rank=0 round-end p0=12 produced=5 keep=4
+glm mtp TP: rank=0 n=7 p0=16 produced=5
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=16 T=8 attempt=0 local-clash=1 retry=1
+T 9851
+T 374
+T 19808
+glm mtp TP: rank=0 after-commit p0=16 keep=3
+glm mtp TP: rank=0 round-end p0=16 produced=8 keep=3
+glm mtp TP: rank=0 n=7 p0=19 produced=8
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=19 T=8 attempt=0 local-clash=1 retry=1
+T 13
+T 576
+T 6722
+T 315
+T 15332
+glm mtp TP: rank=0 after-commit p0=19 keep=5
+glm mtp TP: rank=0 round-end p0=19 produced=13 keep=5
+glm mtp TP: rank=0 n=7 p0=24 produced=13
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=24 T=8 attempt=0 local-clash=1 retry=1
+T 374
+T 21666
+glm mtp TP: rank=0 after-commit p0=24 keep=2
+glm mtp TP: rank=0 round-end p0=24 produced=15 keep=2
+glm mtp TP: rank=0 n=7 p0=26 produced=15
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=26 T=8 attempt=0 local-clash=1 retry=1
+T 13
+T 576
+T 6722
+T 315
+T 17664
+glm mtp TP: rank=0 after-commit p0=26 keep=5
+glm mtp TP: rank=0 round-end p0=26 produced=20 keep=5
+glm mtp TP: rank=0 n=7 p0=31 produced=20
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=31 T=8 attempt=0 local-clash=1 retry=1
+T 374
+T 24013
+glm mtp TP: rank=0 after-commit p0=31 keep=2
+glm mtp TP: rank=0 round-end p0=31 produced=22 keep=2
+glm mtp TP: rank=0 n=7 p0=33 produced=22
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=33 T=8 attempt=0 local-clash=1 retry=1
+T 13
+T 576
+T 6722
+T 315
+T 33151
+glm mtp TP: rank=0 after-commit p0=33 keep=5
+glm mtp TP: rank=0 round-end p0=33 produced=27 keep=5
+glm mtp TP: rank=0 n=4 p0=38 produced=27
+glm mtp TP: rank=0 nd=4 T=5 ok=1
+glm window TP: rank=0 p0=38 T=5 attempt=0 local-clash=1 retry=1
+T 374
+T 80047
+glm mtp TP: rank=0 after-commit p0=38 keep=2
+glm mtp TP: rank=0 round-end p0=38 produced=29 keep=2
+glm mtp TP: rank=0 n=2 p0=40 produced=29
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm window TP: rank=0 p0=40 T=3 attempt=0 local-clash=1 retry=1
+T 13
+T 576
+T 6722
+glm mtp TP: rank=0 after-commit p0=40 keep=3
+glm mtp TP: rank=0 round-end p0=40 produced=32 keep=3
+glm mtp: a drafting round's host time - drafts 79.97 ms, verify 36209.95 ms, commit + cache 0.33 ms (9 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 32 emitted tokens outside it, 0 of 9 drafting rounds on the whole head
+DONE 32 12 33500.3 326620.8 length 22 55 0 20365 43448
+glm mtp: 9 rounds, 3.56 tokens a round | rounds by draft length 2:1 4:1 7:7
+glm stat: decode 10206.90 ms/tok (0.10 tok/s) | vram hit 46.87% | ram fetches 5.69/tok | disk 711.12 reads/tok in 160.84 waits/tok, 9049.87 ms/tok | promotions 35.88/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 2791.7 ms/tok | vram 1384/12384 ram 9/48
+glm spec: 22 of 55 drafts accepted (40.0%)
+glm follow: 32 decoded ids written to /tmp/maya-v49-live-87/cli-fixed/Maya-L-mtp-rank0-ids.txt (MAYA_GLM_SPEC_FOLLOW_SAVE)
+glm fast timing: 1 tokens, 4215.35 ms/token
+glm fast tiers CUDA0: vram hits 20365, ram fetches 182, disk reads 23092 (46.51% vram hit) | promotions 1274 (scratch 22145) demotions 0 drops 0 prefetches 0 | disk waits 5189, 293358.8 ms
+glm spec: 55 speculative positions, 40.0% accepted

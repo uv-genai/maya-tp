@@ -1,0 +1,501 @@
+glm settings from the environment: MAYA_GLM_LOOP_ANSWER=0, MAYA_GLM_LOOP_THINK=0, MAYA_GLM_MTP_DRAFT=2, MAYA_GLM_MTP_FIXED=2
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q4_K/q5_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 32768 tokens (--prefill auto, up to 32768; mixer sub-batches of 256), borrowing 8191 MB of the expert pool while a prompt runs (activations 7015, weight scratch 96, expert staging 74, prestage 990: 160 experts); disk landing ring 12 experts (74 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.61 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.17, activations 0.12, other (context, MTP, scratch, prompt path) 10.47
+glm fast: CUDA0 unified memory: MemAvailable 110.33 GB, headroom 16.00 GB + 1024 MB reserve, experts need 71.21 GB, pool budget 71.21 GB
+glm fast: CUDA0 layers [0,45) expert pool 71.21 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.41 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (7.7 of 76.4 GB, 5 s)
+glm fast: CUDA0 warming the expert tiers 20% (15.3 of 76.4 GB, 10 s)
+glm fast: CUDA0 warming the expert tiers 30% (23.0 of 76.4 GB, 19 s)
+glm fast: CUDA0 warming the expert tiers 40% (30.6 of 76.4 GB, 23 s)
+glm fast: CUDA0 warming the expert tiers 50% (38.2 of 76.4 GB, 28 s)
+glm fast: CUDA0 warming the expert tiers 60% (45.9 of 76.4 GB, 33 s)
+glm fast: CUDA0 warming the expert tiers 70% (53.5 of 76.4 GB, 37 s)
+glm fast: CUDA0 warming the expert tiers 80% (61.2 of 76.4 GB, 42 s)
+glm fast: CUDA0 warming the expert tiers 90% (68.8 of 76.4 GB, 47 s)
+glm fast: CUDA0 warming the expert tiers 100% (76.4 of 76.4 GB, 50 s)
+glm fast: CUDA0 tiers warm: 12384 experts (76.4 GB) in 50 s (1.53 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+glm follow: every request decodes the 64 tokens of /tmp/strict-L-reference.txt (MAYA_GLM_SPEC_FOLLOW)
+maya serve: CUDA0: 32431 MiB of VRAM free with everything loaded
+maya generate: glm5-next serve (M3.1): GEN <max_new> [keys] <ids>, GENI <max_new> [keys] <embeddings> <ids>; QUIT to end
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 39 experts more lent for it)
+glm prefill: CUDA0 chunk 1/1, 63 tokens, wall 1062 ms | the copy lane 916 ms: copies 104 (1.6 GB/s), ring wait 338, gaps 1, mixer windows 473 | lead 140, tail 6 | pcie 0.16 GB (ram 0.07, disk 0.10) + 3.93 GB vram | experts: staged 735, resident 10710 (18773 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 54.3/0.9 ms max/min
+glm prefill: 63 tokens in 1065.9 ms (16.92 ms/token, 59 tok/s), 1 chunk of 64 tokens | CUDA0 1062 ms
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+glm vram: prompt 64 tokens read in 1.2 s; VRAM free CUDA0 31.7 of 121.0 GB before, 31.6 after
+glm stat: decode 43.90 ms/tok (22.78 tok/s) | vram hit 99.91% | ram fetches 0.00/tok | disk 0.31 reads/tok in 0.31 waits/tok, 0.94 ms/tok | promotions 0.31/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 19.0 ms/tok | vram 12378/12384 ram 0/48
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 31.6 of 121.0 GB before, 31.6 after
+glm mtp TP: rank=0 n=2 p0=64 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=3
+glm mtp TP: rank=0 round-end p0=64 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=67 produced=4
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=3
+glm mtp TP: rank=0 round-end p0=67 produced=7 keep=3
+glm mtp TP: rank=0 n=2 p0=70 produced=7
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=70 keep=1
+glm mtp TP: rank=0 round-end p0=70 produced=8 keep=1
+glm mtp TP: rank=0 n=2 p0=71 produced=8
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=2 p0=72 produced=9
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=1
+glm mtp TP: rank=0 round-end p0=72 produced=10 keep=1
+glm mtp TP: rank=0 n=2 p0=73 produced=10
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=73 keep=3
+glm mtp TP: rank=0 round-end p0=73 produced=13 keep=3
+glm mtp TP: rank=0 n=2 p0=76 produced=13
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=3
+glm mtp TP: rank=0 round-end p0=76 produced=16 keep=3
+glm mtp TP: rank=0 n=2 p0=79 produced=16
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=2 p0=81 produced=18
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=3
+glm mtp TP: rank=0 round-end p0=81 produced=21 keep=3
+glm mtp TP: rank=0 n=2 p0=84 produced=21
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=84 keep=1
+glm mtp TP: rank=0 round-end p0=84 produced=22 keep=1
+glm mtp TP: rank=0 n=2 p0=85 produced=22
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=3
+glm mtp TP: rank=0 round-end p0=85 produced=25 keep=3
+glm mtp TP: rank=0 n=2 p0=88 produced=25
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=88 keep=3
+glm mtp TP: rank=0 round-end p0=88 produced=28 keep=3
+glm mtp TP: rank=0 n=2 p0=91 produced=28
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=2 p0=93 produced=30
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=2 p0=95 produced=32
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=1
+glm mtp TP: rank=0 round-end p0=95 produced=33 keep=1
+glm mtp TP: rank=0 n=2 p0=96 produced=33
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=96 keep=3
+glm mtp TP: rank=0 round-end p0=96 produced=36 keep=3
+glm mtp TP: rank=0 n=2 p0=99 produced=36
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=3
+glm mtp TP: rank=0 round-end p0=99 produced=39 keep=3
+glm mtp TP: rank=0 n=2 p0=102 produced=39
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=1
+glm mtp TP: rank=0 round-end p0=102 produced=40 keep=1
+glm mtp TP: rank=0 n=2 p0=103 produced=40
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=103 keep=3
+glm mtp TP: rank=0 round-end p0=103 produced=43 keep=3
+glm mtp TP: rank=0 n=2 p0=106 produced=43
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=3
+glm mtp TP: rank=0 round-end p0=106 produced=46 keep=3
+glm mtp TP: rank=0 n=2 p0=109 produced=46
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=3
+glm mtp TP: rank=0 round-end p0=109 produced=49 keep=3
+glm mtp TP: rank=0 n=2 p0=112 produced=49
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=112 keep=3
+glm mtp TP: rank=0 round-end p0=112 produced=52 keep=3
+glm mtp TP: rank=0 n=2 p0=115 produced=52
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=3
+glm mtp TP: rank=0 round-end p0=115 produced=55 keep=3
+glm mtp TP: rank=0 n=2 p0=118 produced=55
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=118 keep=3
+glm mtp TP: rank=0 round-end p0=118 produced=58 keep=3
+glm mtp TP: rank=0 n=2 p0=121 produced=58
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=2
+glm mtp TP: rank=0 round-end p0=121 produced=60 keep=2
+glm mtp TP: rank=0 n=2 p0=123 produced=60
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=3
+glm mtp TP: rank=0 round-end p0=123 produced=63 keep=3
+glm mtp TP: rank=0 n=0 p0=126 produced=63
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=126 produced=64 keep=1
+glm mtp: a drafting round's host time - drafts 8.07 ms, verify 80.95 ms, commit + cache 0.05 ms (26 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head
+glm mtp: 27 rounds, 2.37 tokens a round | rounds by draft length 0:1 2:26
+glm stat: decode 36.89 ms/tok (27.11 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.8 ms/tok | vram 12378/12384 ram 0/48
+glm spec: 36 of 52 drafts accepted (69.2%)
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 31.6 of 121.0 GB before, 31.6 after
+glm mtp TP: rank=0 n=2 p0=64 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=3
+glm mtp TP: rank=0 round-end p0=64 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=67 produced=4
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=3
+glm mtp TP: rank=0 round-end p0=67 produced=7 keep=3
+glm mtp TP: rank=0 n=2 p0=70 produced=7
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=70 keep=1
+glm mtp TP: rank=0 round-end p0=70 produced=8 keep=1
+glm mtp TP: rank=0 n=2 p0=71 produced=8
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=2 p0=72 produced=9
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=1
+glm mtp TP: rank=0 round-end p0=72 produced=10 keep=1
+glm mtp TP: rank=0 n=2 p0=73 produced=10
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=73 keep=3
+glm mtp TP: rank=0 round-end p0=73 produced=13 keep=3
+glm mtp TP: rank=0 n=2 p0=76 produced=13
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=3
+glm mtp TP: rank=0 round-end p0=76 produced=16 keep=3
+glm mtp TP: rank=0 n=2 p0=79 produced=16
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=2 p0=81 produced=18
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=3
+glm mtp TP: rank=0 round-end p0=81 produced=21 keep=3
+glm mtp TP: rank=0 n=2 p0=84 produced=21
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=84 keep=1
+glm mtp TP: rank=0 round-end p0=84 produced=22 keep=1
+glm mtp TP: rank=0 n=2 p0=85 produced=22
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=3
+glm mtp TP: rank=0 round-end p0=85 produced=25 keep=3
+glm mtp TP: rank=0 n=2 p0=88 produced=25
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=88 keep=3
+glm mtp TP: rank=0 round-end p0=88 produced=28 keep=3
+glm mtp TP: rank=0 n=2 p0=91 produced=28
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=2 p0=93 produced=30
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=2 p0=95 produced=32
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=1
+glm mtp TP: rank=0 round-end p0=95 produced=33 keep=1
+glm mtp TP: rank=0 n=2 p0=96 produced=33
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=96 keep=3
+glm mtp TP: rank=0 round-end p0=96 produced=36 keep=3
+glm mtp TP: rank=0 n=2 p0=99 produced=36
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=3
+glm mtp TP: rank=0 round-end p0=99 produced=39 keep=3
+glm mtp TP: rank=0 n=2 p0=102 produced=39
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=1
+glm mtp TP: rank=0 round-end p0=102 produced=40 keep=1
+glm mtp TP: rank=0 n=2 p0=103 produced=40
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=103 keep=3
+glm mtp TP: rank=0 round-end p0=103 produced=43 keep=3
+glm mtp TP: rank=0 n=2 p0=106 produced=43
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=3
+glm mtp TP: rank=0 round-end p0=106 produced=46 keep=3
+glm mtp TP: rank=0 n=2 p0=109 produced=46
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=3
+glm mtp TP: rank=0 round-end p0=109 produced=49 keep=3
+glm mtp TP: rank=0 n=2 p0=112 produced=49
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=112 keep=3
+glm mtp TP: rank=0 round-end p0=112 produced=52 keep=3
+glm mtp TP: rank=0 n=2 p0=115 produced=52
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=3
+glm mtp TP: rank=0 round-end p0=115 produced=55 keep=3
+glm mtp TP: rank=0 n=2 p0=118 produced=55
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=118 keep=3
+glm mtp TP: rank=0 round-end p0=118 produced=58 keep=3
+glm mtp TP: rank=0 n=2 p0=121 produced=58
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=2
+glm mtp TP: rank=0 round-end p0=121 produced=60 keep=2
+glm mtp TP: rank=0 n=2 p0=123 produced=60
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=3
+glm mtp TP: rank=0 round-end p0=123 produced=63 keep=3
+glm mtp TP: rank=0 n=0 p0=126 produced=63
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=126 produced=64 keep=1
+glm mtp: a drafting round's host time - drafts 8.06 ms, verify 77.60 ms, commit + cache 0.05 ms (26 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head
+glm mtp: 27 rounds, 2.37 tokens a round | rounds by draft length 0:1 2:26
+glm stat: decode 35.52 ms/tok (28.15 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.7 ms/tok | vram 12378/12384 ram 0/48
+glm spec: 36 of 52 drafts accepted (69.2%)
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 31.6 of 121.0 GB before, 31.6 after
+glm stat: decode 42.20 ms/tok (23.70 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.7 ms/tok | vram 12378/12384 ram 0/48
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 31.6 of 121.0 GB before, 31.6 after
+glm stat: decode 42.07 ms/tok (23.77 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.7 ms/tok | vram 12378/12384 ram 0/48
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 31.6 of 121.0 GB before, 31.6 after
+glm mtp TP: rank=0 n=2 p0=64 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=3
+glm mtp TP: rank=0 round-end p0=64 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=67 produced=4
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=3
+glm mtp TP: rank=0 round-end p0=67 produced=7 keep=3
+glm mtp TP: rank=0 n=2 p0=70 produced=7
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=70 keep=1
+glm mtp TP: rank=0 round-end p0=70 produced=8 keep=1
+glm mtp TP: rank=0 n=2 p0=71 produced=8
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=2 p0=72 produced=9
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=1
+glm mtp TP: rank=0 round-end p0=72 produced=10 keep=1
+glm mtp TP: rank=0 n=2 p0=73 produced=10
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=73 keep=3
+glm mtp TP: rank=0 round-end p0=73 produced=13 keep=3
+glm mtp TP: rank=0 n=2 p0=76 produced=13
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=3
+glm mtp TP: rank=0 round-end p0=76 produced=16 keep=3
+glm mtp TP: rank=0 n=2 p0=79 produced=16
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=2 p0=81 produced=18
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=3
+glm mtp TP: rank=0 round-end p0=81 produced=21 keep=3
+glm mtp TP: rank=0 n=2 p0=84 produced=21
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=84 keep=1
+glm mtp TP: rank=0 round-end p0=84 produced=22 keep=1
+glm mtp TP: rank=0 n=2 p0=85 produced=22
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=3
+glm mtp TP: rank=0 round-end p0=85 produced=25 keep=3
+glm mtp TP: rank=0 n=2 p0=88 produced=25
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=88 keep=3
+glm mtp TP: rank=0 round-end p0=88 produced=28 keep=3
+glm mtp TP: rank=0 n=2 p0=91 produced=28
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=2 p0=93 produced=30
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=2 p0=95 produced=32
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=1
+glm mtp TP: rank=0 round-end p0=95 produced=33 keep=1
+glm mtp TP: rank=0 n=2 p0=96 produced=33
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=96 keep=3
+glm mtp TP: rank=0 round-end p0=96 produced=36 keep=3
+glm mtp TP: rank=0 n=2 p0=99 produced=36
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=3
+glm mtp TP: rank=0 round-end p0=99 produced=39 keep=3
+glm mtp TP: rank=0 n=2 p0=102 produced=39
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=1
+glm mtp TP: rank=0 round-end p0=102 produced=40 keep=1
+glm mtp TP: rank=0 n=2 p0=103 produced=40
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=103 keep=3
+glm mtp TP: rank=0 round-end p0=103 produced=43 keep=3
+glm mtp TP: rank=0 n=2 p0=106 produced=43
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=3
+glm mtp TP: rank=0 round-end p0=106 produced=46 keep=3
+glm mtp TP: rank=0 n=2 p0=109 produced=46
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=3
+glm mtp TP: rank=0 round-end p0=109 produced=49 keep=3
+glm mtp TP: rank=0 n=2 p0=112 produced=49
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=112 keep=3
+glm mtp TP: rank=0 round-end p0=112 produced=52 keep=3
+glm mtp TP: rank=0 n=2 p0=115 produced=52
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=3
+glm mtp TP: rank=0 round-end p0=115 produced=55 keep=3
+glm mtp TP: rank=0 n=2 p0=118 produced=55
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=118 keep=3
+glm mtp TP: rank=0 round-end p0=118 produced=58 keep=3
+glm mtp TP: rank=0 n=2 p0=121 produced=58
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=2
+glm mtp TP: rank=0 round-end p0=121 produced=60 keep=2
+glm mtp TP: rank=0 n=2 p0=123 produced=60
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=3
+glm mtp TP: rank=0 round-end p0=123 produced=63 keep=3
+glm mtp TP: rank=0 n=0 p0=126 produced=63
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=126 produced=64 keep=1
+glm mtp: a drafting round's host time - drafts 12.66 ms, verify 77.57 ms, commit + cache 0.06 ms (26 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head
+glm mtp: 27 rounds, 2.37 tokens a round | rounds by draft length 0:1 2:26
+glm stat: decode 37.32 ms/tok (26.80 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.7 ms/tok | vram 12378/12384 ram 0/48
+glm spec: 36 of 52 drafts accepted (69.2%)
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 31.6 of 121.0 GB before, 31.6 after
+glm mtp TP: rank=0 n=2 p0=64 produced=1
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=64 keep=3
+glm mtp TP: rank=0 round-end p0=64 produced=4 keep=3
+glm mtp TP: rank=0 n=2 p0=67 produced=4
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=67 keep=3
+glm mtp TP: rank=0 round-end p0=67 produced=7 keep=3
+glm mtp TP: rank=0 n=2 p0=70 produced=7
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=70 keep=1
+glm mtp TP: rank=0 round-end p0=70 produced=8 keep=1
+glm mtp TP: rank=0 n=2 p0=71 produced=8
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=71 keep=1
+glm mtp TP: rank=0 round-end p0=71 produced=9 keep=1
+glm mtp TP: rank=0 n=2 p0=72 produced=9
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=72 keep=1
+glm mtp TP: rank=0 round-end p0=72 produced=10 keep=1
+glm mtp TP: rank=0 n=2 p0=73 produced=10
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=73 keep=3
+glm mtp TP: rank=0 round-end p0=73 produced=13 keep=3
+glm mtp TP: rank=0 n=2 p0=76 produced=13
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=76 keep=3
+glm mtp TP: rank=0 round-end p0=76 produced=16 keep=3
+glm mtp TP: rank=0 n=2 p0=79 produced=16
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=79 keep=2
+glm mtp TP: rank=0 round-end p0=79 produced=18 keep=2
+glm mtp TP: rank=0 n=2 p0=81 produced=18
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=81 keep=3
+glm mtp TP: rank=0 round-end p0=81 produced=21 keep=3
+glm mtp TP: rank=0 n=2 p0=84 produced=21
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=84 keep=1
+glm mtp TP: rank=0 round-end p0=84 produced=22 keep=1
+glm mtp TP: rank=0 n=2 p0=85 produced=22
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=85 keep=3
+glm mtp TP: rank=0 round-end p0=85 produced=25 keep=3
+glm mtp TP: rank=0 n=2 p0=88 produced=25
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=88 keep=3
+glm mtp TP: rank=0 round-end p0=88 produced=28 keep=3
+glm mtp TP: rank=0 n=2 p0=91 produced=28
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=91 keep=2
+glm mtp TP: rank=0 round-end p0=91 produced=30 keep=2
+glm mtp TP: rank=0 n=2 p0=93 produced=30
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=93 keep=2
+glm mtp TP: rank=0 round-end p0=93 produced=32 keep=2
+glm mtp TP: rank=0 n=2 p0=95 produced=32
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=95 keep=1
+glm mtp TP: rank=0 round-end p0=95 produced=33 keep=1
+glm mtp TP: rank=0 n=2 p0=96 produced=33
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=96 keep=3
+glm mtp TP: rank=0 round-end p0=96 produced=36 keep=3
+glm mtp TP: rank=0 n=2 p0=99 produced=36
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=99 keep=3
+glm mtp TP: rank=0 round-end p0=99 produced=39 keep=3
+glm mtp TP: rank=0 n=2 p0=102 produced=39
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=102 keep=1
+glm mtp TP: rank=0 round-end p0=102 produced=40 keep=1
+glm mtp TP: rank=0 n=2 p0=103 produced=40
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=103 keep=3
+glm mtp TP: rank=0 round-end p0=103 produced=43 keep=3
+glm mtp TP: rank=0 n=2 p0=106 produced=43
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=106 keep=3
+glm mtp TP: rank=0 round-end p0=106 produced=46 keep=3
+glm mtp TP: rank=0 n=2 p0=109 produced=46
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=109 keep=3
+glm mtp TP: rank=0 round-end p0=109 produced=49 keep=3
+glm mtp TP: rank=0 n=2 p0=112 produced=49
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=112 keep=3
+glm mtp TP: rank=0 round-end p0=112 produced=52 keep=3
+glm mtp TP: rank=0 n=2 p0=115 produced=52
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=115 keep=3
+glm mtp TP: rank=0 round-end p0=115 produced=55 keep=3
+glm mtp TP: rank=0 n=2 p0=118 produced=55
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=118 keep=3
+glm mtp TP: rank=0 round-end p0=118 produced=58 keep=3
+glm mtp TP: rank=0 n=2 p0=121 produced=58
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=121 keep=2
+glm mtp TP: rank=0 round-end p0=121 produced=60 keep=2
+glm mtp TP: rank=0 n=2 p0=123 produced=60
+glm mtp TP: rank=0 nd=2 T=3 ok=1
+glm mtp TP: rank=0 after-commit p0=123 keep=3
+glm mtp TP: rank=0 round-end p0=123 produced=63 keep=3
+glm mtp TP: rank=0 n=0 p0=126 produced=63
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=126 produced=64 keep=1
+glm mtp: a drafting round's host time - drafts 8.01 ms, verify 76.01 ms, commit + cache 0.05 ms (26 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head
+glm mtp: 27 rounds, 2.37 tokens a round | rounds by draft length 0:1 2:26
+glm stat: decode 34.87 ms/tok (28.68 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.7 ms/tok | vram 12378/12384 ram 0/48
+glm spec: 36 of 52 drafts accepted (69.2%)
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm vram: prompt 1 tokens read in 0.0 s; VRAM free CUDA0 31.6 of 121.0 GB before, 31.6 after
+glm stat: decode 43.39 ms/tok (23.05 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.7 ms/tok | vram 12378/12384 ram 0/48
+glm follow: 64 tokens of the continuation decoded, 0 of them differ from the model's own pick
+glm spec: 208 speculative positions, 69.2% accepted

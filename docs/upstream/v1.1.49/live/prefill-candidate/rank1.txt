@@ -1,0 +1,543 @@
+glm settings from the environment: MAYA_GLM_MTP_DRAFT=2, MAYA_GLM_MTP_FIXED=2, MAYA_GLM_PREFILL_MB=6144, MAYA_GLM_PREFILL_SUB=1024, MAYA_GLM_RAM_HEADROOM_GB=16, MAYA_GLM_RESERVE_MB=1024, MAYA_GLM_SPLIT=0
+INFO tp_world=2 tp_rank=1 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[1024,2048)
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 25088 tokens (--prefill auto, up to 32768; mixer sub-batches of 1024), borrowing 6103 MB of the expert pool while a prompt runs (activations 5371, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.84 of 121.00 GB in use - dense weights 6.86, state/KV (32768 ctx) 0.59, activations 0.07, other (context, MTP, scratch, prompt path) 10.33
+glm fast: CUDA0 unified memory: MemAvailable 109.73 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: the expert profile /tmp/maya-v49-live-87/fixed-source/data/expert-profile-glm.bin ranks 13248 (layer, expert) pairs
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 2 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 4 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 6 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 8 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 11 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 13 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 15 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 18 s)
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 19 s)
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 21 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 21 s (2.20 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+INFO context=32768 kv=fp16 kv_resident=0 expert_slots=12384 expert_cache_mib=43551 engine_kind=glm-fast experts=12096 vram_slots=12384 vram_gb=42.5 ram_slots=48 ram_gb=0.2 mtp=1 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+VRAM dev=0 pci=0000:c5:00.0 total=129922760704 free=64779124736 weights=7362064384 kv=630882304 kv_ram=0 act=75397720 drafter=181694720 window=1230979072 pool=45667100160 tail=6501219120 borrow=6398996992 vision=0 slots=12384 ctx=32768 layers=0-45
+maya generate: TP2 rank 1 worker — mirroring rank 0's model calls
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=1024 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 394 experts more lent for it)
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /tmp/maya-v49-live-87/fixed-source/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=977 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 977,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 977 tokens, wall 9830 ms | the copy lane 9493 ms: copies 467 (0.8 GB/s), ring wait 904, gaps 1, mixer windows 8121 | lead 290, tail 46 | pcie 0.37 GB (ram 0.02, disk 0.35) + 2.68 GB vram | experts: staged 923, resident 10374 (258872 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 99.5/4.0 ms max/min
+glm prefill: 977 tokens in 9863.6 ms (10.10 ms/token, 99 tok/s), 1 chunk of 1024 tokens | CUDA0 9830 ms
+TP2 worker: prefill 977 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=12 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 12,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 1313 ms | the copy lane 1279 ms: copies 124 (1.2 GB/s), ring wait 0, gaps 0, mixer windows 1154 | lead 31, tail 4 | pcie 0.14 GB (ram 0.02, disk 0.13) + 0.26 GB vram | experts: staged 120, resident 10374 (3878 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 24.4/0.0 ms max/min
+glm prefill: 12 tokens in 1313.7 ms (109.48 ms/token, 9 tok/s), 1 chunk of 64 tokens | CUDA0 1313 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=990 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=990 keep=3
+glm mtp TP: rank=1 round-end p0=990 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=993 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=993 keep=1
+glm mtp TP: rank=1 round-end p0=993 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=994 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=994 keep=1
+glm mtp TP: rank=1 round-end p0=994 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=995 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=995 keep=2
+glm mtp TP: rank=1 round-end p0=995 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 10.37 ms, verify 301.60 ms, commit + cache 0.49 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=1024 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 1024,8192,1536)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=960 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 960,8192,1536)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 22972 ms | the copy lane 22220 ms: copies 956 (0.6 GB/s), ring wait 1509, gaps 2, mixer windows 19753 | lead 608, tail 145 | pcie 0.61 GB (ram 0.03, disk 0.59) + 2.71 GB vram | experts: staged 1008, resident 10374 (807132 rows), prestaged 7, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 104.7/34.8 ms max/min
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=17 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 17,8192,1536)
+glm prefill: CUDA0 chunk 2/2, 1041 tokens, wall 3478 ms | the copy lane 3162 ms: copies 73 (2.0 GB/s), ring wait 390, gaps 1, mixer windows 2698 | lead 251, tail 65 | pcie 0.14 GB (ram 0.00, disk 0.14) + 1.39 GB vram | experts: staged 467, resident 10374 (287168 rows), prestaged 6, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 25.4/0.1 ms max/min
+glm prefill: 4049 tokens in 26472.0 ms (6.54 ms/token, 153 tok/s), 2 chunks of 3008 tokens | CUDA0 26451 ms
+TP2 worker: prefill 4049 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 356 ms | the copy lane 321 ms: copies 15 (6.0 GB/s), ring wait 0, gaps 0, mixer windows 305 | lead 32, tail 4 | pcie 0.09 GB (ram 0.00, disk 0.09) + 0.25 GB vram | experts: staged 102, resident 10374 (3899 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.4/0.0 ms max/min
+glm prefill: 12 tokens in 356.4 ms (29.70 ms/token, 34 tok/s), 1 chunk of 64 tokens | CUDA0 356 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+glm dsa scores: CUDA0 on the original kernels
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=4062 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4062 keep=3
+glm mtp TP: rank=1 round-end p0=4062 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=4065 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4065 keep=1
+glm mtp TP: rank=1 round-end p0=4065 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=4066 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4066 keep=1
+glm mtp TP: rank=1 round-end p0=4066 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=4067 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=4067 keep=2
+glm mtp TP: rank=1 round-end p0=4067 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 10.46 ms, verify 74.31 ms, commit + cache 0.51 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/3, 3008 tokens, wall 9229 ms | the copy lane 8470 ms: copies 248 (2.6 GB/s), ring wait 1687, gaps 2, mixer windows 6533 | lead 612, tail 147 | pcie 0.64 GB (ram 0.01, disk 0.63) + 2.62 GB vram | experts: staged 991, resident 10374 (828986 rows), prestaged 8, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 59.4/6.5 ms max/min
+glm prefill: CUDA0 chunk 2/3, 3008 tokens, wall 8926 ms | the copy lane 8106 ms: copies 112 (1.5 GB/s), ring wait 1061, gaps 1, mixer windows 6932 | lead 636, tail 184 | pcie 0.17 GB (ram 0.00, disk 0.17) + 1.71 GB vram | experts: staged 571, resident 10374 (854608 rows), prestaged 3, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 52.4/0.1 ms max/min
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=81 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 81,8192,1536)
+glm prefill: CUDA0 chunk 3/3, 2129 tokens, wall 6392 ms | the copy lane 5787 ms: copies 66 (1.8 GB/s), ring wait 243, gaps 0, mixer windows 5478 | lead 475, tail 130 | pcie 0.12 GB (ram 0.00, disk 0.12) + 1.00 GB vram | experts: staged 342, resident 10374 (613705 rows), prestaged 2, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 29.9/0.1 ms max/min
+glm prefill: 8145 tokens in 24592.3 ms (3.02 ms/token, 331 tok/s), 3 chunks of 3008 tokens | CUDA0 24548 ms
+TP2 worker: prefill 8145 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 348 ms | the copy lane 312 ms: copies 15 (7.6 GB/s), ring wait 0, gaps 0, mixer windows 297 | lead 32, tail 3 | pcie 0.11 GB (ram 0.03, disk 0.08) + 0.26 GB vram | experts: staged 111, resident 10374 (3890 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.5/0.0 ms max/min
+glm prefill: 12 tokens in 348.2 ms (29.01 ms/token, 34 tok/s), 1 chunk of 64 tokens | CUDA0 348 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=8158 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8158 keep=3
+glm mtp TP: rank=1 round-end p0=8158 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=8161 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8161 keep=1
+glm mtp TP: rank=1 round-end p0=8161 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=8162 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8162 keep=1
+glm mtp TP: rank=1 round-end p0=8162 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=8163 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=8163 keep=2
+glm mtp TP: rank=1 round-end p0=8163 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 8.11 ms, verify 82.16 ms, commit + cache 0.54 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=1024 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 977 tokens, wall 3475 ms | the copy lane 3214 ms: copies 129 (5.0 GB/s), ring wait 920, gaps 1, mixer windows 2163 | lead 207, tail 55 | pcie 0.64 GB (ram 0.04, disk 0.60) + 2.52 GB vram | experts: staged 957, resident 10374 (269441 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 35.9/2.8 ms max/min
+glm prefill: 977 tokens in 3480.7 ms (3.56 ms/token, 281 tok/s), 1 chunk of 1024 tokens | CUDA0 3475 ms
+TP2 worker: prefill 977 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 346 ms | the copy lane 312 ms: copies 14 (5.8 GB/s), ring wait 0, gaps 0, mixer windows 297 | lead 31, tail 4 | pcie 0.08 GB (ram 0.00, disk 0.08) + 0.24 GB vram | experts: staged 97, resident 10374 (3908 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.7/0.0 ms max/min
+glm prefill: 12 tokens in 346.8 ms (28.90 ms/token, 35 tok/s), 1 chunk of 64 tokens | CUDA0 346 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=990 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=990 keep=3
+glm mtp TP: rank=1 round-end p0=990 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=993 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=993 keep=1
+glm mtp TP: rank=1 round-end p0=993 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=994 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=994 keep=1
+glm mtp TP: rank=1 round-end p0=994 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=995 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=995 keep=2
+glm mtp TP: rank=1 round-end p0=995 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.48 ms, verify 69.24 ms, commit + cache 0.55 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 9287 ms | the copy lane 8536 ms: copies 258 (2.5 GB/s), ring wait 1707, gaps 2, mixer windows 6570 | lead 609, tail 141 | pcie 0.64 GB (ram 0.02, disk 0.62) + 2.71 GB vram | experts: staged 1015, resident 10374 (821537 rows), prestaged 10, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 59.4/6.5 ms max/min
+glm prefill: CUDA0 chunk 2/2, 1041 tokens, wall 3502 ms | the copy lane 3195 ms: copies 70 (2.5 GB/s), ring wait 387, gaps 1, mixer windows 2737 | lead 245, tail 63 | pcie 0.17 GB (ram 0.00, disk 0.17) + 1.42 GB vram | experts: staged 485, resident 10374 (292019 rows), prestaged 3, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 26.6/0.2 ms max/min
+glm prefill: 4049 tokens in 12809.8 ms (3.16 ms/token, 316 tok/s), 2 chunks of 3008 tokens | CUDA0 12789 ms
+TP2 worker: prefill 4049 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 398 ms | the copy lane 363 ms: copies 48 (2.4 GB/s), ring wait 0, gaps 0, mixer windows 316 | lead 31, tail 4 | pcie 0.11 GB (ram 0.03, disk 0.08) + 0.25 GB vram | experts: staged 109, resident 10374 (3891 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 33.6/0.0 ms max/min
+glm prefill: 12 tokens in 398.8 ms (33.23 ms/token, 30 tok/s), 1 chunk of 64 tokens | CUDA0 398 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=4062 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4062 keep=3
+glm mtp TP: rank=1 round-end p0=4062 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=4065 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4065 keep=1
+glm mtp TP: rank=1 round-end p0=4065 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=4066 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4066 keep=1
+glm mtp TP: rank=1 round-end p0=4066 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=4067 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=4067 keep=2
+glm mtp TP: rank=1 round-end p0=4067 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 10.56 ms, verify 149.64 ms, commit + cache 0.62 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/3, 3008 tokens, wall 9022 ms | the copy lane 8274 ms: copies 208 (3.1 GB/s), ring wait 1696, gaps 2, mixer windows 6369 | lead 605, tail 143 | pcie 0.64 GB (ram 0.01, disk 0.63) + 2.66 GB vram | experts: staged 998, resident 10374 (827784 rows), prestaged 4, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 90.5/4.9 ms max/min
+glm prefill: CUDA0 chunk 2/3, 3008 tokens, wall 8952 ms | the copy lane 8141 ms: copies 113 (1.3 GB/s), ring wait 1012, gaps 1, mixer windows 7014 | lead 636, tail 175 | pcie 0.14 GB (ram 0.00, disk 0.14) + 1.69 GB vram | experts: staged 559, resident 10374 (864463 rows), prestaged 5, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 53.6/0.2 ms max/min
+glm prefill: CUDA0 chunk 3/3, 2129 tokens, wall 6380 ms | the copy lane 5779 ms: copies 61 (1.8 GB/s), ring wait 134, gaps 0, mixer windows 5584 | lead 478, tail 123 | pcie 0.11 GB (ram 0.00, disk 0.11) + 0.80 GB vram | experts: staged 277, resident 10374 (618279 rows), prestaged 4, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 26.1/0.1 ms max/min
+glm prefill: 8145 tokens in 24406.9 ms (3.00 ms/token, 334 tok/s), 3 chunks of 3008 tokens | CUDA0 24355 ms
+TP2 worker: prefill 8145 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 352 ms | the copy lane 316 ms: copies 15 (5.9 GB/s), ring wait 0, gaps 0, mixer windows 301 | lead 32, tail 4 | pcie 0.09 GB (ram 0.00, disk 0.09) + 0.26 GB vram | experts: staged 106, resident 10374 (3896 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.7/0.0 ms max/min
+glm prefill: 12 tokens in 352.6 ms (29.38 ms/token, 34 tok/s), 1 chunk of 64 tokens | CUDA0 352 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=8158 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8158 keep=3
+glm mtp TP: rank=1 round-end p0=8158 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=8161 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8161 keep=1
+glm mtp TP: rank=1 round-end p0=8161 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=8162 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8162 keep=1
+glm mtp TP: rank=1 round-end p0=8162 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=8163 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=8163 keep=2
+glm mtp TP: rank=1 round-end p0=8163 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 9.35 ms, verify 95.84 ms, commit + cache 0.64 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=1024 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 977 tokens, wall 3486 ms | the copy lane 3231 ms: copies 132 (4.8 GB/s), ring wait 909, gaps 1, mixer windows 2188 | lead 203, tail 52 | pcie 0.64 GB (ram 0.03, disk 0.61) + 2.53 GB vram | experts: staged 960, resident 10374 (266389 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 37.0/2.5 ms max/min
+glm prefill: 977 tokens in 3490.8 ms (3.57 ms/token, 280 tok/s), 1 chunk of 1024 tokens | CUDA0 3486 ms
+TP2 worker: prefill 977 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 345 ms | the copy lane 311 ms: copies 15 (5.5 GB/s), ring wait 0, gaps 0, mixer windows 296 | lead 31, tail 4 | pcie 0.08 GB (ram 0.00, disk 0.08) + 0.26 GB vram | experts: staged 103, resident 10374 (3902 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.9/0.0 ms max/min
+glm prefill: 12 tokens in 345.9 ms (28.82 ms/token, 35 tok/s), 1 chunk of 64 tokens | CUDA0 345 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=990 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=990 keep=3
+glm mtp TP: rank=1 round-end p0=990 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=993 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=993 keep=1
+glm mtp TP: rank=1 round-end p0=993 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=994 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=994 keep=1
+glm mtp TP: rank=1 round-end p0=994 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=995 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=995 keep=2
+glm mtp TP: rank=1 round-end p0=995 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 7.69 ms, verify 69.21 ms, commit + cache 0.65 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/2, 3008 tokens, wall 9269 ms | the copy lane 8513 ms: copies 250 (2.6 GB/s), ring wait 1757, gaps 2, mixer windows 6505 | lead 612, tail 144 | pcie 0.65 GB (ram 0.02, disk 0.64) + 2.63 GB vram | experts: staged 995, resident 10374 (826718 rows), prestaged 2, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 60.8/5.9 ms max/min
+glm prefill: CUDA0 chunk 2/2, 1041 tokens, wall 3515 ms | the copy lane 3201 ms: copies 79 (1.9 GB/s), ring wait 362, gaps 1, mixer windows 2760 | lead 251, tail 63 | pcie 0.15 GB (ram 0.00, disk 0.15) + 1.39 GB vram | experts: staged 470, resident 10374 (294740 rows), prestaged 2, cpu 0 (0 rows, 0 ms) | plan 4 ms host, disk wait 0 ms, hop in 0 ms | layer lane 25.4/0.2 ms max/min
+glm prefill: 4049 tokens in 12806.0 ms (3.16 ms/token, 316 tok/s), 2 chunks of 3008 tokens | CUDA0 12785 ms
+TP2 worker: prefill 4049 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 348 ms | the copy lane 313 ms: copies 15 (6.2 GB/s), ring wait 0, gaps 0, mixer windows 297 | lead 32, tail 4 | pcie 0.09 GB (ram 0.01, disk 0.09) + 0.25 GB vram | experts: staged 104, resident 10374 (3898 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.4/0.0 ms max/min
+glm prefill: 12 tokens in 348.3 ms (29.02 ms/token, 34 tok/s), 1 chunk of 64 tokens | CUDA0 348 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=4062 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4062 keep=3
+glm mtp TP: rank=1 round-end p0=4062 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=4065 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4065 keep=1
+glm mtp TP: rank=1 round-end p0=4065 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=4066 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=4066 keep=1
+glm mtp TP: rank=1 round-end p0=4066 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=4067 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=4067 keep=2
+glm mtp TP: rank=1 round-end p0=4067 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 8.98 ms, verify 80.47 ms, commit + cache 0.88 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=3008 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/3, 3008 tokens, wall 9166 ms | the copy lane 8409 ms: copies 211 (3.1 GB/s), ring wait 1741, gaps 2, mixer windows 6455 | lead 614, tail 143 | pcie 0.66 GB (ram 0.02, disk 0.64) + 2.72 GB vram | experts: staged 1025, resident 10374 (829508 rows), prestaged 2, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 60.9/6.5 ms max/min
+glm prefill: CUDA0 chunk 2/3, 3008 tokens, wall 9009 ms | the copy lane 8189 ms: copies 104 (1.6 GB/s), ring wait 1072, gaps 1, mixer windows 7012 | lead 641, tail 179 | pcie 0.16 GB (ram 0.00, disk 0.16) + 1.72 GB vram | experts: staged 575, resident 10374 (863386 rows), prestaged 2, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 53.0/0.2 ms max/min
+glm prefill: CUDA0 chunk 3/3, 2129 tokens, wall 6496 ms | the copy lane 5892 ms: copies 80 (1.6 GB/s), ring wait 311, gaps 1, mixer windows 5500 | lead 476, tail 127 | pcie 0.13 GB (ram 0.00, disk 0.12) + 1.11 GB vram | experts: staged 376, resident 10374 (626141 rows), prestaged 2, cpu 0 (0 rows, 0 ms) | plan 5 ms host, disk wait 0 ms, hop in 0 ms | layer lane 32.4/0.1 ms max/min
+glm prefill: 8145 tokens in 24724.0 ms (3.04 ms/token, 329 tok/s), 3 chunks of 3008 tokens | CUDA0 24671 ms
+TP2 worker: prefill 8145 next=154827
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 12 tokens, wall 352 ms | the copy lane 315 ms: copies 15 (6.2 GB/s), ring wait 0, gaps 0, mixer windows 300 | lead 34, tail 4 | pcie 0.09 GB (ram 0.00, disk 0.09) + 0.25 GB vram | experts: staged 102, resident 10374 (3904 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2.5/0.0 ms max/min
+glm prefill: 12 tokens in 352.9 ms (29.41 ms/token, 34 tok/s), 1 chunk of 64 tokens | CUDA0 352 ms
+TP2 worker: prefill 12 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=8158 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8158 keep=3
+glm mtp TP: rank=1 round-end p0=8158 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=8161 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8161 keep=1
+glm mtp TP: rank=1 round-end p0=8161 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=8162 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=8162 keep=1
+glm mtp TP: rank=1 round-end p0=8162 produced=6 keep=1
+glm mtp TP: rank=1 n=1 p0=8163 produced=6
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=8163 keep=2
+glm mtp TP: rank=1 round-end p0=8163 produced=8 keep=2
+glm mtp: a drafting round's host time - drafts 10.31 ms, verify 79.57 ms, commit + cache 0.66 ms (4 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 8 emitted tokens outside it, 0 of 4 drafting rounds on the whole head
+TP2 worker: mtp decode 8 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=19 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 19,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 19 tokens, wall 425 ms | the copy lane 387 ms: copies 47 (7.2 GB/s), ring wait 0, gaps 0, mixer windows 339 | lead 33, tail 5 | pcie 0.34 GB (ram 0.01, disk 0.33) + 0.33 GB vram | experts: staged 200, resident 10374 (6104 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 11.1/0.1 ms max/min
+glm prefill: 19 tokens in 425.0 ms (22.37 ms/token, 45 tok/s), 1 chunk of 64 tokens | CUDA0 425 ms
+TP2 worker: prefill 19 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: force 154842
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: forward 1
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 17 tokens, wall 424 ms | the copy lane 389 ms: copies 50 (3.9 GB/s), ring wait 0, gaps 0, mixer windows 338 | lead 32, tail 4 | pcie 0.20 GB (ram 0.00, disk 0.20) + 0.40 GB vram | experts: staged 180, resident 10374 (5457 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 23.7/0.0 ms max/min
+glm prefill: 17 tokens in 424.7 ms (24.98 ms/token, 40 tok/s), 1 chunk of 64 tokens | CUDA0 424 ms
+TP2 worker: prefill 17 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=18 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=18 keep=2
+glm mtp TP: rank=1 round-end p0=18 produced=3 keep=2
+glm mtp TP: rank=1 n=2 p0=20 produced=3
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=20 keep=3
+glm mtp TP: rank=1 round-end p0=20 produced=6 keep=3
+glm mtp TP: rank=1 n=2 p0=23 produced=6
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=23 keep=3
+glm mtp TP: rank=1 round-end p0=23 produced=9 keep=3
+glm mtp TP: rank=1 n=2 p0=26 produced=9
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=26 keep=3
+glm mtp TP: rank=1 round-end p0=26 produced=12 keep=3
+glm mtp TP: rank=1 n=2 p0=29 produced=12
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=29 keep=3
+glm mtp TP: rank=1 round-end p0=29 produced=15 keep=3
+glm mtp TP: rank=1 n=2 p0=32 produced=15
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=32 keep=1
+glm mtp TP: rank=1 round-end p0=32 produced=16 keep=1
+glm mtp TP: rank=1 n=2 p0=33 produced=16
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=33 keep=3
+glm mtp TP: rank=1 round-end p0=33 produced=19 keep=3
+glm mtp TP: rank=1 n=2 p0=36 produced=19
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=36 keep=3
+glm mtp TP: rank=1 round-end p0=36 produced=22 keep=3
+glm mtp TP: rank=1 n=2 p0=39 produced=22
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=39 keep=3
+glm mtp TP: rank=1 round-end p0=39 produced=25 keep=3
+glm mtp TP: rank=1 n=2 p0=42 produced=25
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=42 keep=3
+glm mtp TP: rank=1 round-end p0=42 produced=28 keep=3
+glm mtp TP: rank=1 n=2 p0=45 produced=28
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=45 keep=3
+glm mtp TP: rank=1 round-end p0=45 produced=31 keep=3
+glm mtp TP: rank=1 n=0 p0=48 produced=31
+glm mtp TP: rank=1 nd=0 T=1 ok=1
+glm mtp TP: rank=1 round-end p0=48 produced=32 keep=1
+glm mtp: a drafting round's host time - drafts 11.42 ms, verify 83.74 ms, commit + cache 0.59 ms (11 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 32 emitted tokens outside it, 0 of 11 drafting rounds on the whole head
+TP2 worker: mtp decode 32 tokens
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 chunk 1/1, 19 tokens, wall 392 ms | the copy lane 355 ms: copies 26 (6.8 GB/s), ring wait 1, gaps 0, mixer windows 328 | lead 33, tail 5 | pcie 0.17 GB (ram 0.01, disk 0.17) + 0.46 GB vram | experts: staged 190, resident 10374 (6115 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 3.5/0.1 ms max/min
+glm prefill: 19 tokens in 392.8 ms (20.67 ms/token, 48 tok/s), 1 chunk of 64 tokens | CUDA0 392 ms
+TP2 worker: prefill 19 next=154841
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=20 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=20 keep=3
+glm mtp TP: rank=1 round-end p0=20 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=23 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=23 keep=1
+glm mtp TP: rank=1 round-end p0=23 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=24 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=24 keep=3
+glm mtp TP: rank=1 round-end p0=24 produced=8 keep=3
+glm mtp TP: rank=1 n=2 p0=27 produced=8
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=27 keep=2
+glm mtp TP: rank=1 round-end p0=27 produced=10 keep=2
+glm mtp TP: rank=1 n=2 p0=29 produced=10
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=29 keep=3
+glm mtp TP: rank=1 round-end p0=29 produced=13 keep=3
+glm mtp TP: rank=1 n=2 p0=32 produced=13
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=32 keep=3
+glm mtp TP: rank=1 round-end p0=32 produced=16 keep=3
+glm mtp TP: rank=1 n=2 p0=35 produced=16
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=35 keep=3
+glm mtp TP: rank=1 round-end p0=35 produced=19 keep=3
+glm mtp TP: rank=1 n=2 p0=38 produced=19
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=38 keep=3
+glm mtp TP: rank=1 round-end p0=38 produced=22 keep=3
+glm mtp TP: rank=1 n=2 p0=41 produced=22
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=41 keep=3
+glm mtp TP: rank=1 round-end p0=41 produced=25 keep=3
+glm mtp TP: rank=1 n=2 p0=44 produced=25
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=44 keep=2
+glm mtp TP: rank=1 round-end p0=44 produced=27 keep=2
+glm mtp TP: rank=1 n=2 p0=46 produced=27
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=46 keep=3
+glm mtp TP: rank=1 round-end p0=46 produced=30 keep=3
+glm mtp TP: rank=1 n=1 p0=49 produced=30
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=49 keep=2
+glm mtp TP: rank=1 round-end p0=49 produced=32 keep=2
+glm mtp: a drafting round's host time - drafts 15.04 ms, verify 71.33 ms, commit + cache 0.62 ms (12 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 32 emitted tokens outside it, 0 of 12 drafting rounds on the whole head
+TP2 worker: mtp decode 32 tokens
+TP2 worker: force -1
+TP2 worker: restore
+TP2 worker: snapshot
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=2 p0=20 produced=1
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=20 keep=3
+glm mtp TP: rank=1 round-end p0=20 produced=4 keep=3
+glm mtp TP: rank=1 n=2 p0=23 produced=4
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=23 keep=1
+glm mtp TP: rank=1 round-end p0=23 produced=5 keep=1
+glm mtp TP: rank=1 n=2 p0=24 produced=5
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=24 keep=3
+glm mtp TP: rank=1 round-end p0=24 produced=8 keep=3
+glm mtp TP: rank=1 n=2 p0=27 produced=8
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=27 keep=2
+glm mtp TP: rank=1 round-end p0=27 produced=10 keep=2
+glm mtp TP: rank=1 n=2 p0=29 produced=10
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=29 keep=3
+glm mtp TP: rank=1 round-end p0=29 produced=13 keep=3
+glm mtp TP: rank=1 n=2 p0=32 produced=13
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=32 keep=3
+glm mtp TP: rank=1 round-end p0=32 produced=16 keep=3
+glm mtp TP: rank=1 n=2 p0=35 produced=16
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=35 keep=3
+glm mtp TP: rank=1 round-end p0=35 produced=19 keep=3
+glm mtp TP: rank=1 n=2 p0=38 produced=19
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=38 keep=3
+glm mtp TP: rank=1 round-end p0=38 produced=22 keep=3
+glm mtp TP: rank=1 n=2 p0=41 produced=22
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=41 keep=3
+glm mtp TP: rank=1 round-end p0=41 produced=25 keep=3
+glm mtp TP: rank=1 n=2 p0=44 produced=25
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=44 keep=2
+glm mtp TP: rank=1 round-end p0=44 produced=27 keep=2
+glm mtp TP: rank=1 n=2 p0=46 produced=27
+glm mtp TP: rank=1 nd=2 T=3 ok=1
+glm mtp TP: rank=1 after-commit p0=46 keep=3
+glm mtp TP: rank=1 round-end p0=46 produced=30 keep=3
+glm mtp TP: rank=1 n=1 p0=49 produced=30
+glm mtp TP: rank=1 nd=1 T=2 ok=1
+glm mtp TP: rank=1 after-commit p0=49 keep=2
+glm mtp TP: rank=1 round-end p0=49 produced=32 keep=2
+glm mtp: a drafting round's host time - drafts 14.71 ms, verify 81.16 ms, commit + cache 0.66 ms (12 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 32 emitted tokens outside it, 0 of 12 drafting rounds on the whole head
+TP2 worker: mtp decode 32 tokens
+TP2 worker recv: control recv: Is a directory
+glm spec: 131 speculative positions, 64.1% accepted

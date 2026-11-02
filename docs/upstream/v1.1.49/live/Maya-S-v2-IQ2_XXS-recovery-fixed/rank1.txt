@@ -1,0 +1,94 @@
+glm settings from the environment: MAYA_GLM_CKPTS=16, MAYA_GLM_CKPT_EVERY=4096, MAYA_GLM_KEEP_CANCELLED=1, MAYA_GLM_MTP_DRAFT=7, MAYA_GLM_MTP_FIXED=7, MAYA_GLM_MTP_TRACE=1, MAYA_GLM_PREFILL_MB=6144, MAYA_GLM_PREFILL_SUB=1024, MAYA_GLM_RAM_HEADROOM_GB=16, MAYA_GLM_RESERVE_MB=1024, MAYA_GLM_SPLIT=0
+INFO tp_world=2 tp_rank=1 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[1024,2048)
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 25088 tokens (--prefill auto, up to 32768; mixer sub-batches of 1024), borrowing 6103 MB of the expert pool while a prompt runs (activations 5371, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.84 of 121.00 GB in use - dense weights 6.86, state/KV (32768 ctx) 0.59, activations 0.07, other (context, MTP, scratch, prompt path) 10.33
+glm fast: CUDA0 unified memory: MemAvailable 109.62 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: the expert profile /tmp/maya-v49-live-87/fixed-source/data/expert-profile-glm.bin ranks 13248 (layer, expert) pairs
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 0 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 1 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 2 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 3 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 4 s)
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 5 s)
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 8 s)
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 10 s)
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 12 s)
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 13 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 13 s (3.43 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+INFO context=32768 kv=fp16 kv_resident=0 expert_slots=12384 expert_cache_mib=43551 engine_kind=glm-fast experts=12096 vram_slots=12384 vram_gb=42.5 ram_slots=48 ram_gb=0.2 mtp=1 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+VRAM dev=0 pci=0000:c5:00.0 total=129922760704 free=64779124736 weights=7362064384 kv=630882304 kv_ram=0 act=75397720 drafter=181694720 window=1230979072 pool=45667100160 tail=6501219120 borrow=6398996992 vision=0 slots=12384 ctx=32768 layers=0-45
+maya generate: TP2 rank 1 worker — mirroring rank 0's model calls
+TP2 worker: force -1
+TP2 worker: reset
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 59 experts more lent for it)
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /tmp/maya-v49-live-87/fixed-source/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=21 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 21,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 21 tokens, wall 696 ms | the copy lane 386 ms: copies 19 (4.3 GB/s), ring wait 2, gaps 18, mixer windows 348 | lead 305, tail 4 | pcie 0.08 GB (ram 0.03, disk 0.05) + 0.63 GB vram | experts: staged 214, resident 10374 (6745 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 19.6/0.0 ms max/min
+glm prefill: 21 tokens in 698.1 ms (33.24 ms/token, 30 tok/s), 1 chunk of 64 tokens | CUDA0 696 ms
+TP2 worker: prefill 21 next=154841
+TP2 worker: snapshot
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+TP2 worker: forward 1
+glm mtp TP: rank=1 n=7 p0=22 produced=1
+glm mtp TP: rank=1 nd=7 T=8 ok=1
+glm window TP: rank=1 p0=22 T=8 attempt=0 local-clash=1 retry=1
+glm window: a window's tokens took more scratch slots than a layer has - that window runs again token by token (said once)
+glm mtp TP: rank=1 after-commit p0=22 keep=2
+glm mtp TP: rank=1 round-end p0=22 produced=3 keep=2
+glm mtp: p0 22 drafts 7 kept 2 accepted 1 (331.5 ms)
+glm mtp TP: rank=1 n=7 p0=24 produced=3
+glm mtp TP: rank=1 nd=7 T=8 ok=1
+glm window TP: rank=1 p0=24 T=8 attempt=0 local-clash=1 retry=1
+glm mtp TP: rank=1 after-commit p0=24 keep=8
+glm mtp TP: rank=1 round-end p0=24 produced=11 keep=8
+glm mtp: p0 24 drafts 7 kept 8 accepted 7 (344.4 ms)
+glm mtp TP: rank=1 n=7 p0=32 produced=11
+glm mtp TP: rank=1 nd=7 T=8 ok=1
+glm window TP: rank=1 p0=32 T=8 attempt=0 local-clash=1 retry=1
+glm mtp TP: rank=1 after-commit p0=32 keep=5
+glm mtp TP: rank=1 round-end p0=32 produced=16 keep=5
+glm mtp: p0 32 drafts 7 kept 5 accepted 4 (444.4 ms)
+glm mtp TP: rank=1 n=7 p0=37 produced=16
+glm mtp TP: rank=1 nd=7 T=8 ok=1
+glm window TP: rank=1 p0=37 T=8 attempt=0 local-clash=1 retry=1
+glm mtp TP: rank=1 after-commit p0=37 keep=5
+glm mtp TP: rank=1 round-end p0=37 produced=21 keep=5
+glm mtp: p0 37 drafts 7 kept 5 accepted 4 (305.2 ms)
+glm mtp TP: rank=1 n=7 p0=42 produced=21
+glm mtp TP: rank=1 nd=7 T=8 ok=1
+glm window TP: rank=1 p0=42 T=8 attempt=0 local-clash=1 retry=1
+glm mtp TP: rank=1 after-commit p0=42 keep=3
+glm mtp TP: rank=1 round-end p0=42 produced=24 keep=3
+glm mtp: p0 42 drafts 7 kept 3 accepted 2 (308.9 ms)
+glm mtp TP: rank=1 n=7 p0=45 produced=24
+glm mtp TP: rank=1 nd=7 T=8 ok=1
+glm window TP: rank=1 p0=45 T=8 attempt=0 local-clash=1 retry=1
+glm mtp TP: rank=1 after-commit p0=45 keep=3
+glm mtp TP: rank=1 round-end p0=45 produced=27 keep=3
+glm mtp: p0 45 drafts 7 kept 3 accepted 2 (312.0 ms)
+glm mtp TP: rank=1 n=4 p0=48 produced=27
+glm mtp TP: rank=1 nd=4 T=5 ok=1
+glm window TP: rank=1 p0=48 T=5 attempt=0 local-clash=1 retry=1
+glm mtp TP: rank=1 after-commit p0=48 keep=4
+glm mtp TP: rank=1 round-end p0=48 produced=31 keep=4
+glm mtp: p0 48 drafts 4 kept 4 accepted 3 (222.9 ms)
+glm mtp TP: rank=1 n=0 p0=52 produced=31
+glm mtp TP: rank=1 nd=0 T=1 ok=1
+glm mtp TP: rank=1 round-end p0=52 produced=32 keep=1
+glm mtp: p0 52 drafts 0 kept 1 accepted 0 (50.2 ms)
+glm mtp: a drafting round's host time - drafts 28.19 ms, verify 295.21 ms, commit + cache 0.77 ms (7 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 32 emitted tokens outside it, 0 of 7 drafting rounds on the whole head
+TP2 worker: mtp decode 32 tokens
+TP2 worker recv: control recv: Is a directory
+glm spec: 46 speculative positions, 50.0% accepted

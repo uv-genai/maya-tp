@@ -1,0 +1,100 @@
+--- tools/tp2/bench_mtp.py
++++ bench_mtp_owned.py
+@@ -2,7 +2,7 @@
+ """Compare MTP and simple TP2 decode on a resident gfx1151 pair over RDMA.
+ 
+ Run on strix-halo-2: .venv/bin/python tools/tp2/bench_mtp.py --output /tmp/mtp-bench
+-Both hosts must have matching binaries. Stops existing Maya engines/remote server.
++Both hosts must have matching binaries. Stops only recorded processes owned by this run.
+ Generates a simple-loop reference, then replays it with --spec-follow. MTP stays
+ loaded in both modes; GEN spec=1/0 selects simple/MTP. Model load and warmups are
+ excluded. EOS stopping is disabled via an unreachable EOS ID for fixed-length runs.
+@@ -19,8 +19,10 @@
+ import subprocess
+ import threading
+ import time
+-
+-ROOT = Path(__file__).resolve().parents[2]
++import uuid
++import owned
++
++ROOT = Path('/tmp/maya-v49-live-87/fixed-source')
+ HOST = "strix-halo-1.local"
+ PROMPT = "154822,25062,287,29905,371,25,7487,785,6722,315,9621,374"
+ DEFAULT_PACK = "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack"
+@@ -49,16 +51,17 @@
+ 
+ 
+ def cleanup():
+-    subprocess.run(["pkill", "-9", "-x", "maya"], check=False, capture_output=True)
+-    subprocess.run(["ssh", "-o", "BatchMode=yes", HOST,
+-                    'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'],
+-                   check=False, capture_output=True)
++    pass  # Exact owned processes are closed below; never clear hosts by name.
+ 
+ 
+ class Pair:
+     def __init__(self, output, label, context, follow=None, single_host=False):
+         self.output = output
++        self.owner = uuid.uuid4().hex
++        self.remote_registry = str(output / (label + "-owned-rank0.json"))
++        self.local_registry = output / (label + "-owned-rank1.json")
+         self.label = label
++        self.single_host = single_host
+         self.lines = queue.Queue()
+         self.diagnostics = queue.Queue()
+         self.r0 = self.r1 = None
+@@ -66,9 +69,10 @@
+         self.log0err = (output / f"{label}-rank0-stderr.log").open("w")
+         self.log1 = (output / f"{label}-rank1.log").open("w")
+         args = ["--glm-pack", PACK, "--max-context", str(context), "--greedy", "--parallel", "1"]
+-        tp_args = ["--tp-world-size", "2", "--tp-bootstrap-port", "18515", "--tp-rdma-device", "usb4_rdma5"]
++        tp_args = ["--tp-world-size", "2", "--tp-bootstrap-port", "18587", "--tp-rdma-device", "usb4_rdma5"]
+         env = {k: v for k, v in os.environ.items() if not k.startswith(("MAYA_", "STRATA_"))}
+         env.update(SETTINGS)
++        env["MAYA_VALIDATION_OWNER"] = self.owner
+         try:
+             if single_host:
+                 cmd = [str(ROOT / "build-hip/maya"), *args, "--serve", "--eos-ids", "2147483647"]
+@@ -76,6 +80,7 @@
+                 self.r1 = subprocess.Popen([str(ROOT / "build-hip/maya"), *args, *tp_args, "--tp-rank", "1",
+                                             "--tp-bootstrap-host", HOST], stdin=subprocess.DEVNULL,
+                                            stdout=self.log1, stderr=subprocess.STDOUT, env=env)
++                owned.save(self.local_registry, {"owner": self.owner, "root": self.r1.pid, "processes": [owned.identity(self.r1.pid)]})
+                 remote_env = ["env"]
+                 for setting in CLEAR:
+                     for prefix in ("MAYA_", "STRATA_"):
+@@ -85,6 +90,8 @@
+                        "--eos-ids", "2147483647"]
+             if follow:
+                 cmd += ["--spec-follow", follow]
++            if not single_host:
++                cmd = ["/home/ugo/software/project-maya/.venv/bin/python", "/tmp/maya-v49-live-87/owned.py", "exec", self.remote_registry, self.owner, *cmd]
+             command = cmd if single_host else ["ssh", "-o", "BatchMode=yes", HOST, "exec " + shlex.join(cmd)]
+             self.r0 = subprocess.Popen(command,
+                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+@@ -174,6 +181,11 @@
+         if self.r0 is not None:
+             self.r0.stdout.close()
+             self.r0.stderr.close()
++        if self.r0 is not None and not getattr(self, "single_host", False):
++            result = remote(["/home/ugo/software/project-maya/.venv/bin/python", "/tmp/maya-v49-live-87/owned.py", "stop", self.remote_registry, self.owner], capture_output=True, text=True)
++            (self.output / (self.label + "-cleanup.json")).write_text(result.stdout)
++        if self.r1 is not None and self.local_registry.exists():
++            subprocess.run(["/home/ugo/software/project-maya/.venv/bin/python", "/tmp/maya-v49-live-87/owned.py", "stop", str(self.local_registry), self.owner], check=True, capture_output=True)
+         self.log0.close()
+         self.log0err.close()
+         self.log1.close()
+@@ -223,10 +235,10 @@
+     binary = ROOT / "build-hip/maya"
+     md5 = hashlib.md5(binary.read_bytes()).hexdigest()
+     if not args.single_host:
+-        peer_md5 = remote(["md5sum", str(binary), "/tmp/maya-tp2"], capture_output=True, text=True).stdout
++        peer_md5 = remote(["md5sum", str(binary)], capture_output=True, text=True).stdout
+         if any(line.split()[0] != md5 for line in peer_md5.splitlines()) or not peer_md5.strip():
+             raise RuntimeError("host binary hashes do not match")
+-    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
++    head = "e1682cb8e0782fb2a1103ba4511734c12cd1a6b3"
+     metadata = dict(binary_md5=md5, source_head=head, host=os.uname().nodename if args.single_host else HOST,
+                     world_size=1 if args.single_host else 2, pack=PACK, prompt=PROMPT,
+                     context=args.context, tokens=args.tokens, runs_per_mode=args.runs,

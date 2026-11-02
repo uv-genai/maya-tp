@@ -1,0 +1,72 @@
+{
+  "exe": "/tmp/maya-v49-live-87/fixed-source/build-hip/maya",
+  "args": [
+    "--glm-pack",
+    "/home/ugo/software/Maya-data/models/Maya-L/pack",
+    "--max-context",
+    "32768",
+    "--expert-cache",
+    "auto",
+    "--prefill",
+    "auto",
+    "--kv-streaming",
+    "on",
+    "--expert-profile",
+    "/tmp/maya-v49-live-87/fixed-source/data/expert-profile-glm.bin",
+    "--tp-world-size",
+    "2",
+    "--tp-bootstrap-port",
+    "18587",
+    "--tp-rdma-device",
+    "usb4_rdma5",
+    "--tp-rank",
+    "0",
+    "--serve"
+  ],
+  "cwd": "/tmp/maya-v49-live-87/fixed-source",
+  "tokenizer": "/home/ugo/software/Maya-data/models/Maya-L/pack/tokenizer",
+  "model_name": "glm-5.3-flash",
+  "gpu": [
+    0
+  ],
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95
+  },
+  "reasoning_effort": "max",
+  "lib_dirs": [
+    "/opt/rocm/lib"
+  ],
+  "port": 8080,
+  "backend": "hip",
+  "env": {
+    "MAYA_GLM_RESERVE_MB": "1024",
+    "MAYA_GLM_RAM_HEADROOM_GB": "16",
+    "MAYA_GLM_SPLIT": "0",
+    "MAYA_GLM_PREFILL_SUB": "1024",
+    "MAYA_GLM_PREFILL_MB": "6144",
+    "MAYA_HIPBLASLT_TUNING": "/tmp/maya-v49-live-87/fixed-source/tools/hip/gfx1151-glm-hipblaslt-100202.txt:/tmp/maya-v49-live-87/fixed-source/tools/hip/gfx1151-glm-hipblaslt-100401.txt:/tmp/maya-v49-live-87/fixed-source/tools/hip/gfx1151-glm-hipblaslt-100401-b.txt:/tmp/maya-v49-live-87/fixed-source/tools/hip/gfx1151-glm-hipblaslt-100500.txt",
+    "MAYA_GLM_KEEP_CANCELLED": "1",
+    "MAYA_GLM_CKPT_EVERY": "4096",
+    "MAYA_GLM_CKPTS": "16",
+    "MAYA_GLM_SERVICE_IDLE_MS": "10",
+    "MAYA_GLM_SERVICE_DEEP_S": "1",
+    "MAYA_GLM_SERVICE_DEEP_MS": "3000",
+    "MAYA_GLM_NO_MTP": "1",
+    "MAYA_TP_MTP": "0"
+  },
+  "log": "/tmp/maya-v49-live-87/Maya-L-simple-fixed/engine-rank0.txt",
+  "installer": {
+    "models_dir": "/home/ugo/software/Maya-data/models",
+    "quant": "Maya-S-v2-IQ2_XXS",
+    "gguf": null,
+    "gguf_dir": null,
+    "draft": "mtp",
+    "written": "2026-10-29 09:58"
+  },
+  "model_management": true,
+  "vision": {
+    "exe": "/missing/encoder-must-not-start",
+    "gpu": true
+  }
+}

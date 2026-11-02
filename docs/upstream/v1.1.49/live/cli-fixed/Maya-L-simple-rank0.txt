@@ -1,0 +1,59 @@
+glm settings from the environment: MAYA_GLM_LOOP_ANSWER=0, MAYA_GLM_LOOP_THINK=0, MAYA_GLM_NO_MTP=1, MAYA_GLM_TIMING=1, STRATA_GLM_WARM=0
+INFO tp_world=2 tp_rank=0 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[0,1024)
+glm pack: CUDA0 dense weights 6.86 GB: | kda q/k/v q14 2677 MB | attn output q14 1470 MB | shared experts q14 826 MB | other q14 496 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 352 MB | mla q/kv q14 288 MB | kda small bf16 221 MB | mla q/kv bf16 132 MB | routers bf16 94 MB | mhc bf16 67 MB | dsa indexer bf16 24 MB | kda small f32 13 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 32768 tokens (--prefill auto, up to 32768; mixer sub-batches of 256), borrowing 6333 MB of the expert pool while a prompt runs (activations 5157, weight scratch 96, expert staging 74, prestage 990: 160 experts); disk landing ring 12 experts (74 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 16.09 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.16, activations 0.05, other (context, MTP, scratch, prompt path) 9.02
+glm fast: CUDA0 unified memory: MemAvailable 111.29 GB, headroom 16.00 GB + 1024 MB reserve, experts need 67.13 GB, pool budget 67.13 GB
+glm fast: CUDA0 layers [0,45) expert pool 67.13 GB, 288-288 slots/layer (12096 total)
+glm fast: CUDA0 slots per layer 3:288 4:288 5:288 6:288 7:288 8:288 9:288 10:288 11:288 12:288 13:288 14:288 15:288 16:288 17:288 18:288 19:288 20:288 21:288 22:288 23:288 24:288 25:288 26:288 27:288 28:288 29:288 30:288 31:288 32:288 33:288 34:288 35:288 36:288 37:288 38:288 39:288 40:288 41:288 42:288 43:288 44:288 
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.18 GB pinned, 32 slots
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+INFO context=4096 kv=fp16 kv_resident=0 expert_slots=12096 expert_cache_mib=68740 engine_kind=glm-fast experts=12096 vram_slots=12096 vram_gb=67.1 ram_slots=32 ram_gb=0.2 mtp=0 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+VRAM dev=0 pci=0000:c5:00.0 total=129922760704 free=40337809408 weights=7362064384 kv=174489600 kv_ram=0 act=54368856 drafter=0 window=0 pool=72079349760 tail=6757439040 borrow=6641099264 vision=0 slots=12096 ctx=4096 layers=0-45
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 0 experts more lent for it)
+glm prefill: CUDA0 chunk 1/1, 11 tokens, wall 35453 ms | the copy lane 35415 ms: copies 35122 (0.3 GB/s), ring wait 5, gaps 24, mixer windows 264 | lead 34, tail 4 | pcie 11.47 GB (ram 0.00, disk 11.47) + 0.00 GB vram | experts: staged 2063, resident 10701 (0 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 2927.1/380.2 ms max/min
+glm prefill: 11 tokens in 35509.4 ms (3228.13 ms/token, 0 tok/s), 1 chunk of 64 tokens | CUDA0 35453 ms
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+glm vram: prompt 12 tokens read in 43.1 s; VRAM free CUDA0 37.6 of 121.0 GB before, 37.5 after
+T 12089
+T 13
+T 576
+T 6722
+T 315
+T 9851
+T 374
+T 19808
+T 13
+T 576
+T 6722
+T 315
+T 15332
+T 374
+T 21666
+T 13
+T 576
+T 6722
+T 315
+T 17664
+T 374
+T 24013
+T 13
+T 576
+T 6722
+T 315
+T 33151
+T 374
+T 80047
+T 13
+T 576
+T 6722
+DONE 32 12 43128.7 37934.8 length 0 0 0 7392 10416
+glm stat: decode 1185.46 ms/tok (0.84 tok/s) | vram hit 70.97% | ram fetches 0.28/tok | disk 94.22 reads/tok in 32.59 waits/tok, 1005.73 ms/tok | promotions 70.38/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3594.1 ms/tok | vram 2500/12096 ram 0/32
+glm follow: 32 decoded ids written to /tmp/maya-v49-live-87/cli-fixed/Maya-L-simple-rank0-ids.txt (MAYA_GLM_SPEC_FOLLOW_SAVE)
+glm fast timing: 32 tokens, 1423.24 ms/token
+glm fast tiers CUDA0: vram hits 7392, ram fetches 9, disk reads 3351 (68.75% vram hit) | promotions 2378 (scratch 982) demotions 0 drops 0 prefetches 0 | disk waits 1085, 39177.5 ms

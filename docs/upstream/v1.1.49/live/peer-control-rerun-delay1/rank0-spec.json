@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/control-source/serve/server.py",
+    "--engine",
+    "strata",
+    "--config",
+    "/tmp/maya-v49-live-87/peer-control-rerun-delay1/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "cwd": "/tmp/maya-v49-live-87/control-source",
+  "env": {},
+  "log": "/tmp/maya-v49-live-87/peer-control-rerun-delay1/rank0.txt"
+}

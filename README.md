@@ -89,6 +89,8 @@ MTP/API suite passing. Report:
 The `main` branch includes the sequential semantic integration of upstream **v1.1.37–v1.1.46** and
 the cumulative **v1.1.47–v1.1.49** merge, with TP2/MTP preservation checks and CI. This is unreleased source work: the latest published
 fork release remains **v1.1.42**, and future fork releases use **`tp-vMAJOR.MINOR.PATCH`**.
+Fresh S/M/L ordinary/MTP API, CLI, strict historical-reference and peer-recovery checks passed after
+the cumulative merge; the report also records prefill timing variation and the first-failure health fix.
 The [latest merge report](docs/upstream/v1.1.49.md) and
 [earlier integration report](docs/upstream/COMPLETION-2026-11-02.md) distinguish accepted changes from
 deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya-tp/issues/68),

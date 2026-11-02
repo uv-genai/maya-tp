@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/source/serve/server.py",
+    "--engine",
+    "maya",
+    "--config",
+    "/tmp/maya-v49-live-87/Maya-S-v2-IQ2_XXS-mtp/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "cwd": "/tmp/maya-v49-live-87/source",
+  "env": {},
+  "log": "/tmp/maya-v49-live-87/Maya-S-v2-IQ2_XXS-mtp/rank0.txt"
+}

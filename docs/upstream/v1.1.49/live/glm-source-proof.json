@@ -1,0 +1,35 @@
+{
+  "base": "d7626ac",
+  "fixed": "e1682cb",
+  "protected_scopes": [
+    "src",
+    "include",
+    "cmake",
+    "CMakeLists.txt",
+    "tools/tp2",
+    "tools/hip",
+    "tools/llama-swap/tp2.sh"
+  ],
+  "changed_paths": [
+    "src/ds4/ds4_main.cpp"
+  ],
+  "glm_transport_kernels_mtp_tuning_launchers_unchanged": true,
+  "tuning_hashes": [
+    {
+      "path": "tools/hip/gfx1151-glm-hipblaslt-100202.txt",
+      "sha256_both": "27551c3b5374af1ca77c34765c5d34abd9dc49c6aedd530c533711389538430d"
+    },
+    {
+      "path": "tools/hip/gfx1151-glm-hipblaslt-100401.txt",
+      "sha256_both": "fb0f97b615ccc728d51027f168e3787672057bb3fc674f5c460da68627ba5887"
+    },
+    {
+      "path": "tools/hip/gfx1151-glm-hipblaslt-100401-b.txt",
+      "sha256_both": "45f40329951e8f1e8c8d852318047bcdfffef9b9f1b3fcc9c1899bc9991a7458"
+    },
+    {
+      "path": "tools/hip/gfx1151-glm-hipblaslt-100500.txt",
+      "sha256_both": "ef73b65e97cb31af13167b506f0b7181f3bf3ef0290d6b28b04de4b6a440847c"
+    }
+  ]
+}

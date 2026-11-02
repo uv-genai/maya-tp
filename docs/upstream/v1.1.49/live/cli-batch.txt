@@ -1,0 +1,7 @@
+PASS Maya-S-v2-IQ2_XXS-simple CLI32/32
+PASS Maya-S-v2-IQ2_XXS-mtp CLI32/32
+PASS Maya-M-simple CLI32/32
+PASS Maya-M-mtp CLI32/32
+PASS Maya-L-simple CLI32/32
+PASS Maya-L-mtp CLI32/32
+PASS all S/M/L paired CLI modes

@@ -1,0 +1,30 @@
+{
+  "owner": "9c8efe8e840944aa81d80ffc8102936c",
+  "root": 334602,
+  "processes": [
+    {
+      "pid": 334602,
+      "start": 16953659,
+      "state": "R"
+    },
+    {
+      "pid": 334605,
+      "start": 16953697,
+      "state": "S"
+    }
+  ],
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/fixed-source/serve/server.py",
+    "--engine",
+    "maya",
+    "--config",
+    "/tmp/maya-v49-live-87/Maya-S-v2-IQ2_XXS-mtp-fixed/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "alive": [],
+  "stopped": true
+}
