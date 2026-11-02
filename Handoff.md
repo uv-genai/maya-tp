@@ -14,7 +14,7 @@ TP2+MTP suite on earlier builds and user trials on the promoted build; geometry 
 | Host | Role | IP |
 | --- | --- | --- |
 | `strix-halo-1.local` | rank 0 (API server) | 192.168.1.22 |
-| `strix-halo-2.local` | rank 1 (worker, **this machine**) | 192.168.1.92 |
+| `strix-halo-2.local` | rank 1 (worker; usual agent workspace) | 192.168.1.92 |
 
 - **Platform (hard rule):** HIP/ROCm **gfx1151 (Strix Halo) Linux only**. No CUDA/NVIDIA work.
 - **Interconnect (hard rule):** **RDMA only** over Thunderbolt `usb4_rdma*` (gufo's path). No TCP data path (bootstrap TCP: QP handshake + serve instruction mirror + MTP accept wire only).
@@ -26,7 +26,7 @@ TP2+MTP suite on earlier builds and user trials on the promoted build; geometry 
 2. **Push only to `origin` (`uv-genai/maya-tp`). Never push to `upstream` (`mw00/project-maya`).**
 3. **GPU is the inference path.** CPU only for unit tests of slice math.
 4. Perf claims need **controlled** measurements. Use `--spec-follow` for near-tie counts.
-5. **NEVER use nested SSH.** You are ON strix-halo-2. SSH only to strix-halo-1.
+5. **NEVER use nested SSH.** The usual workspace is on strix-halo-2; SSH directly to strix-halo-1 from there.
 6. **Python uses `.venv/bin/python`.** Shell uses `jq`.
 7. **Stop only validation processes you started**, using recorded PIDs/process groups. The user launches their own processes. No name-wide `pkill`, port-wide killing, or unrelated service inspection/control; prior validation permission is not standing permission to stop user processes.
 8. **Binaries are per-host.** Select matching review builds on both hosts and verify hashes before testing. Preserve the promoted canonical production binaries and the protected remote source; do not overwrite them as routine test setup. `run_bench.sh` uses rank0 `/tmp/maya-tp2`; verify its executable rather than assuming it matches production.
