@@ -1,5 +1,11 @@
 # TP2 Design — Maya GLM-5.3 Tensor Parallel over Two Strix Halo Hosts
 
+> **Historical original design, not an implementation specification.** The delivered code differs:
+> GLM Maya-S/M/L have opt-in MTP, snapshot reuse and cancellation; control uses the bootstrap socket.
+> Proposed settings/handshakes below must not be assumed implemented. Consult
+> [TP2-RUN.md](TP2-RUN.md), [SETTINGS.md](SETTINGS.md#glm-two-host-tensor-parallel-tp2) and
+> [Handoff §30](../Handoff.md#30-current-restart-state--documentation-audit-2026-11-02-82).
+
 Companion to [TP2-ANALYSIS.md](TP2-ANALYSIS.md). Design only — no code in this document.
 
 **Product shape:** one logical Maya-S model, two ranks on `strix-halo-1` (rank 0) and `strix-halo-2` (rank 1), connected by the existing striped Thunderbolt RDMA (`usb4_rdma*`). Rank 0 exposes the usual OpenAI/Anthropic API via `serve/`; rank 1 is a lockstep worker.

@@ -1,5 +1,9 @@
 # R9700 / RX 9070: experimental Maya HIP
 
+> **Inherited upstream gfx1201 reference.** Maya-TP targets gfx1151 Linux. This page's R9700/RX9070
+> measurements and build examples are historical upstream information; use [TP2-RUN.md](TP2-RUN.md)
+> for the fork's supported two-host RDMA build and validation scope.
+
 The Linux HIP installer accepts RX 7900 XT/XTX (`gfx1100`) and RX 9070 /
 Radeon AI PRO R9700 (`gfx1201`). It uses one GPU, text input, and system ROCm 7.
 The shared backend changes come from Strata

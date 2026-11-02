@@ -1,5 +1,5 @@
 # Every push and pull request: the Python tests (server, installer, tools) and the AMD build's CUDA-name check - no GPU
-# needed. The engine's CUDA build and its GPU tests run on the maintainers' V100s before a merge (CONTRIBUTING.md).
+# needed. Affected engine/GPU checks run on the gfx1151 HIP/RDMA pair before merge (CONTRIBUTING.md).
 name: tests
 
 on:

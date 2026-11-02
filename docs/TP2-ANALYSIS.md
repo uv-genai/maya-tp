@@ -1,5 +1,10 @@
 # TP2 Analysis — Two-Host Tensor Parallelism for Maya GLM-5.3 (Maya-S)
 
+> **Historical initial analysis.** Constraints and implementation gaps below describe the original
+> planning session. TP2 and opt-in MTP now work for GLM Maya-S/M/L. Use [TP2-RUN.md](TP2-RUN.md),
+> [AGENTS.md](../AGENTS.md) and [Handoff §30](../Handoff.md#30-current-restart-state--documentation-audit-2026-11-02-82)
+> for current instructions; historical process restrictions are not a new task.
+
 **Goal:** run GLM-5.3-Flash **Maya-S** as a **2-way tensor-parallel (TP2)** job on two twin systems:
 
 | Host | Role | Platform |

@@ -86,6 +86,14 @@ MTP/API suite passing. Report:
 
 ## Current scope
 
+The `main` branch has completed the sequential semantic integration of upstream **v1.1.37–v1.1.46**,
+with TP2/MTP preservation gates and per-tag CI. This is unreleased source work: the latest published
+fork release remains **v1.1.42**, and future fork releases use **`tp-vMAJOR.MINOR.PATCH`**.
+The [integration report](docs/upstream/COMPLETION-2026-11-02.md) distinguishes accepted changes from
+deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya-tp/issues/68),
+[tail draining](https://github.com/uv-genai/maya-tp/issues/75) and
+[chunk-cap measurement](https://github.com/uv-genai/maya-tp/issues/79).
+
 | Area | Status |
 | --- | --- |
 | Platform | Two Strix Halo gfx1151 systems, Linux, HIP/ROCm, Thunderbolt/USB4 RDMA |
@@ -121,6 +129,7 @@ cmake -S . -B build-hip \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_HIP_ARCHITECTURES=gfx1151 \
   -DSTRATA_ENABLE_HIP=ON \
+  -DSTRATA_ENABLE_CUDA=OFF \
   -DSTRATA_PREFILL_MMQ=ON \
   -DSTRATA_ENABLE_TP2_RDMA=ON \
   -DSTRATA_BUILD_TESTS=OFF
@@ -197,6 +206,7 @@ Strix Halo pair for **Maya-S, Maya-M and Maya-L** (simple and MTP). Evidence:
 
 Useful references:
 
+- [Documentation index and scope](docs/README.md)
 - [TP2 operations](docs/TP2-RUN.md) and [runtime settings](docs/SETTINGS.md)
 - [HIP setup](docs/AMD_MAYA.md), [model files](docs/MODELS.md) and [Responses API](docs/RESPONSES.md)
 - [Contributing](CONTRIBUTING.md), [changelog](CHANGELOG.md) and [releases](https://github.com/uv-genai/maya-tp/releases)

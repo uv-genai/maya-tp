@@ -3,6 +3,11 @@
 Everything on this page is optional: the engine sizes itself for the PC it runs on. Back to the
 [README](../README.md).
 
+**Scope:** this reference includes inherited upstream controls. Maya-TP targets gfx1151 HIP on Linux;
+its [TP2 controls](#glm-two-host-tensor-parallel-tp2) and [runbook](TP2-RUN.md) describe the validated
+two-host RDMA path. NVIDIA, Windows, other-model and same-host multi-GPU examples are not fork
+validation claims. In particular, TP2 uses one active sequence and opt-in greedy MTP.
+
 The settings below are environment variables named `MAYA_*`: set them before a start, or keep them in the config
 with `./maya.sh --setup --env MAYA_NAME=value`. Their earlier `STRATA_*` spellings still work; where both are set, the
 `MAYA_` one counts.
@@ -193,6 +198,21 @@ These settings change what the engine chooses (put them in the config with `--en
 | `MAYA_VIDEO_MAX_FRAMES` | 240 | the server (GLM): the most frames a video may give (read at 4 a second, so 240 = a minute); a longer video is refused before it is decoded, with its length in the message. Every frame takes an image's share of the context. Videos need ffmpeg and ffprobe installed |
 
 When a configured `thinking_budget` is below the output limit’s reserved ceiling and `max_tokens > 1024`, reasoning may finish its sentence or line within up to 512 extra tokens. Grace uses at most half the room below that ceiling; the answer reserve and closing-token allowance still apply to every output limit.
+
+### Limiting GLM thinking for a coding agent
+
+Set a top-level `"thinking_budget": 2048` in the server's base `maya-*.json` and restart the pair
+with that config. The default is 32768 tokens; it is independent of `--max-context`, so a 512K context
+does not select a 512K thinking budget. This is a soft reasoning limit with the bounded grace above;
+`0` disables the configured reasoning cap. Set the client's `max_tokens` (Chat Completions/Messages)
+or `max_output_tokens` (Responses) to bound total generated output, including reasoning, answer and
+internal continuations. For example, a 2048 thinking budget with a 4096 total output limit leaves room
+for an answer; the server may lower the thinking allowance to preserve that room.
+
+`reasoning_effort` selects the model's prompting level. On GLM, Anthropic `thinking.budget_tokens`
+maps to a level (under 2048: Low; under 8192: High; otherwise Max); it does not override the server's
+numeric `thinking_budget`. `MAYA_REQUEST_TIMEOUT_S` controls individual HTTP socket operations,
+not a total thinking deadline. A client or proxy may have its own request timeout.
 
 **The expert profile** (`data/expert-profile-glm.bin`). At start the engine fills VRAM with the experts a profile ranks
 first. That profile ranks every (layer, expert) pair, and its order also decides how many VRAM slots each layer

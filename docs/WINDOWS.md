@@ -1,5 +1,9 @@
 # Maya on Windows
 
+> **Inherited upstream platform reference.** Maya-TP targets HIP/ROCm on gfx1151 Linux only.
+> Windows instructions below are retained as upstream history; [TP2-RUN.md](TP2-RUN.md) describes
+> this fork's build and launch procedure.
+
 Back to the [README](../README.md).
 
 Experimental: the same installer sets Maya up natively on Windows 10/11 (64-bit), and the engine and the image

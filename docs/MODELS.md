@@ -3,6 +3,11 @@
 Maya runs three models, each on an engine built for it. This page has each one's files, what they need and what is
 special about it. Back to the [README](../README.md).
 
+**Maya-TP scope:** HIP/ROCm on gfx1151 Linux; two-host RDMA TP2/MTP is validated for GLM Maya-S,
+Maya-M and Maya-L. Broader NVIDIA, Windows, same-host multi-GPU and other-model descriptions below
+are inherited upstream catalog information, not additional fork validation. DeepSeek's known
+[gfx1151 WMMA failures](https://github.com/uv-genai/maya-tp/issues/68) remain unresolved.
+
 - [How the quants are named](#how-the-quants-are-named)
 - [GLM-5.3-Flash](#glm-53-flash)
 - [DeepSeek-V4.1-Flash-1017](#deepseek-v41-flash-1017)
@@ -40,7 +45,9 @@ Maya-L have each passed the full TP2 + MTP suite** (API matrices, acceptance, CL
 controlled bench): [S](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md),
 [M](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md),
 [L](benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md) (#29, #30).
-Under TP2, MTP/DFlash and multi-conversation are off for now (#11, #13).
+Under TP2, **MTP is supported and opt-in** with `MAYA_TP_MTP=1`; fixed draft widths are 1–8,
+with greedy verification. See [the launch instructions](TP2-RUN.md#opt-in-mtp).
+DFlash and multi-conversation remain gated ([#11](https://github.com/uv-genai/maya-tp/issues/11)).
 
 The setup recommends one for your PC. How they're made and measured: [MAYA-S](../bench/results/MAYA-S.md),
 [MAYA-S24](../bench/results/MAYA-S24.md), [MAYA-M](../bench/results/MAYA-M.md), [MAYA-L](../bench/results/MAYA-L.md). On

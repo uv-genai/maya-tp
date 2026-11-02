@@ -1,8 +1,11 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated:2026-11-02 · Sequential integration (§29.30):37–46 handled; runtime restored.
-> Source validation PASS. Review builds retained; production5a52 restored; final closeout status in77/36.
+> Last updated: 2026-11-02 · Current state: **§30** (documentation audit #82).
+> Integration through upstream v1.1.46 and restoration are complete; final CI41352750402 PASS,
+> #77/#36 closed. Review builds retained; production5a52 restored. The user launches their processes.
+> §§10–29 are dated session history, including superseded active/pending states and deployment paths.
+> Current process-ownership rules in §2 and §30 override historical cleanup commands.
 
 ## 1. What we are building
 
@@ -26,9 +29,9 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 4. Perf claims need **controlled** measurements. Use `--spec-follow` for near-tie counts.
 5. **NEVER use nested SSH.** You are ON strix-halo-2. SSH only to strix-halo-1.
 6. **Python uses `.venv/bin/python`.** Shell uses `jq`.
-7. **Kill old processes before starting new ones.** `pkill -9 -x maya` — **do not** `pkill -f server.py` (matches the ssh shell and kills the session).
-8. **Binaries are per-host.** After every build: `scp build-hip/maya strix-halo-1.local:.../maya` **and** `strix-halo-1.local:/tmp/maya-tp2` (used by `run_bench.sh`). Verify `md5sum` matches both sides before a test.
-9. **Kill rank 0's server.py too before redeploying** — a live server respawns its engine and holds the binary open (`scp` fails "text file busy"); the respawned engine also inherits the OLD environment (no new env vars). Kill the server first to prevent respawn: `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'` (the `[s]` bracket stops the remote shell matching itself).
+7. **Stop only validation processes you started**, using recorded PIDs/process groups. The user launches their own processes. No name-wide `pkill`, port-wide killing, or unrelated service inspection/control; prior validation permission is not standing permission to stop user processes.
+8. **Binaries are per-host.** Select matching review builds on both hosts and verify hashes before testing. Preserve restored canonical production binaries and the protected remote source; do not overwrite them as routine test setup. `run_bench.sh` uses rank0 `/tmp/maya-tp2`, currently restored production, so do not assume it selects a newer review build.
+9. **Stop an owned rank0 server before its owned engine** to prevent respawn and release its executable. Track those processes at launch. Do not clear a busy environment by name or port. Older harness cleanup is tracked in #83 and must not run against user processes.
 
 ## 3. Git / GitHub
 
@@ -72,6 +75,9 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 19 | Large prefill exceeds 48 MiB RDMA window | fixed and validated (§16) |
 | 20 | Large-prompt cache double-slice | fixed and validated (§16) |
 | 21 | MTP window attention head width / HIP scratch capacity | fixed and validated (§16) |
+| 36–81 | Sequential upstream v1.1.37–v1.1.46 integration | completed; per-tag evidence in `docs/upstream/`, final #77/#36 closed; deferred #46/#52/#54/#60/#68/#75/#79 remain open |
+| 82 | User/agent documentation audit | documentation refreshed; final checks, commit/CI and outcome recorded on GitHub |
+| 83 | Validation harness cleanup ownership | open; replace name-/port-wide cleanup with owned PIDs/process groups |
 
 ## 5. What works (Maya-S pack)
 
@@ -137,11 +143,11 @@ docs/TP2-RUN.md                        ops runbook
 7. **GCC 16 + HIP `<format>`:** `-include format` (already in CMake for TP targets).
 8. **`ibv_create_cq_ex` / `IBV_SEND_INLINE` unsupported** on Thunderbolt.
 9. **`RecvControl` must loop on EAGAIN.**
-10. **`pkill -f server.py` over SSH kills the shell** — use `pkill -9 -x maya` for engines and the `[s]erver.py` bracket form for the server (§2.9).
+10. **Name-based cleanup can kill unrelated work.** Use only recorded owned PIDs/process groups (§2.7–9); never copy historical broad cleanup commands into a new run.
 11. **SETTINGS:** only implemented `MAYA_TP_*` knobs are real (see `docs/SETTINGS.md`). `MAYA_TP_OVERLAP` is NOT one.
-12. **Per-host binaries + scripts** — always scp after build (§2.8/2.9).
+12. **Per-host binaries + scripts** — match selected validation paths after a build, preserving production (§2.8/2.9).
 13. **Gufo MTP pattern:** rank 0 plans and wires inputs/decisions; Maya uses fixed draft width (default 2), canonical input tokens (op 13), and accepted tokens/continuation (op 12).
-14. **Idle TP worker holds ~45 GB VRAM with zero kernels** — normal (persistent worker waiting on the mirror socket); `pkill -9 -x maya` frees it.
+14. **Idle TP worker holds ~45 GB VRAM with zero kernels** — normal (persistent worker waiting on the mirror socket). Memory residency alone is not a reason to terminate a user's worker.
 15. **rank 0 logs are split:** engine stderr → repo `maya-maya-s-v2-iq2_xxs-hip.log` (**append mode** — multiple runs; segment by the last `glm prefill: CUDA0 chunks` line); server narration → `/tmp/tp2-r0.log`. rank 1 has everything in `/tmp/tp2-r1.log`.
 16. **Engine restart during a request wipes TP INFO** — `/health` can briefly report `world_size: 1`; wait for `INFO tp_world=2` before judging. **Poisoned verbs communicator is sticky** — restart both ranks after any `size mismatch`/`timed out`.
 
@@ -180,7 +186,8 @@ ssh strix-halo-1.local 'cd /home/ugo/software/project-maya || exit; \
   setsid nohup bash tools/tp2/rank0.sh 18080 --model Maya-M >/tmp/tp2-r0.log 2>&1 </dev/null &'
 curl http://192.168.1.22:18080/health   # expect tp.peer=up
 ```
-Kill: `pkill -9 -x maya` locally; `ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'`.
+For an agent-started validation pair, record exact PIDs at launch and stop only those processes,
+server before engine. User-started processes are outside agent cleanup scope.
 
 Runbook: **`docs/TP2-RUN.md`**. Settings: **`docs/SETTINGS.md`**.
 
@@ -1098,4 +1105,39 @@ Allrequestedupstream37–46areancestorsofmain. Final46PR81 **1139fa27d7731941b18
 
 Protectedremote777cc92HEAD/userdiffs/stageddiffs/modelconfigs/backups/YAML/daemon175392exactlymatchbefore/afterrestoration; rawsundercompletion-2026-11-02/. YAMLsha c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20,6entries/Lcontext524288unchanged. No canonicalremote sourcepull/reset/rebuild. Engines/testserverstopped,llama-swapreadytoloadproductiononrequest. **PermanentreadyreviewconfigisSonly**, .exe ownreviewbinaryonbothhosts; M/Lpastvalidationusedexplicittransientconfigs. FutureM/Lreviewlaunchmustselectsameexplicitmodel/pack/configonbothrankswith.exe review/build-hip/maya,notrestoredcanonicalexe. EarlierS/M/Lconfigurationwordingcorrected; metadataalwaysshowedSonly.
 
-Finalcloseoutcheck: verifyCIonfinaldocumentationcheckpointandconfirm77/36closed; latestSHA/run/outcomepostedthere. IfalreadyclosedandCIpassed,nothingremainsfromthisintegrationtask. No furtherGPUtests/tagmergesrequiredwithoutnewrequest. Finalsource/operationsworkiscomplete; this checkpointprocedureisstableaftercloseout. Preserveallreview/control/failedrawartifactsandoriginalbackups.
+Final closeout completed: documentation checkpoint `dede882111be994b3e913463c8fa6b211f34633d`, main CI41352750402 PASS; #77/#36 closed. No further integration GPU tests/tag merges are required without a new request. Preserve all review/control/failed raw artifacts and original backups. Current operating instructions and the later user clarification are in §30.
+
+## 30. Current restart state — documentation audit (2026-11-02, #82)
+
+The requested v1.1.37–v1.1.46 integration and production restoration are complete. Final source merge
+PR81/1139fa2 and documentation checkpoint dede882 passed CI41351082604 and CI41352750402 respectively.
+#77/#36/#78/#80 are closed. No release/tag was created; numeric VERSION remains1.1.42, legacy release
+v1.1.42 is immutable, and future fork releases use `tp-vMAJOR.MINOR.PATCH`.
+
+**Process ownership:** the user wants to launch processes themselves and explicitly limited cleanup
+to processes the agent started. All agent validation processes ended. Do not infer current user
+process state from historical snapshots or inspect unrelated services. Future validation must track
+its own PIDs/process groups and stop the owned server before its engine. No broad pkill/fuser cleanup.
+Legacy `acceptance.sh`/`bench_mtp.py` cleanup is a separate open follow-up #83; these harnesses must
+not run against user processes. Earlier permission to use the pair does not override this rule.
+
+**Runtime split:** canonical GLM binaries on both hosts and rank0 `/tmp/maya-tp2` were restored to
+production MD5 `5a52cd27167523b6ea4b0f0bde93f503`. Both review trees retain GLM
+`b398d4a0711430edd6a28b95264c7293` and DS4 `51749e860763aea34847b183de95a933`.
+The protected remote canonical checkout was777cc92 with user edits; no pull/reset/rebuild there.
+Only the S review config is permanent. For M/L review launches use explicit temporary configs and
+matching model/pack selection: rank0 config.exe and rank1 ENGINE/checkout path must both select the
+review build. See [the runbook](docs/TP2-RUN.md#development-pair-production-and-review-builds) and
+[completion evidence](docs/upstream/COMPLETION-2026-11-02.md). No runtime deployment occurred in #82.
+
+**Documentation:** README now distinguishes unreleased main from the published release; MODELS
+correctly describes opt-in TP2 MTP; CONTRIBUTING/AGENTS use the fork's HIP scope and issue workflow;
+SETTINGS explains numeric thinking budgets separately from context size; the runbook uses corrected
+MTP measurements. Original design/plan documents and inherited platform references are labeled as
+historical/upstream material. [The documentation index](docs/README.md) identifies current guides.
+
+**Open work:** #33 was found closed despite its keep-open body and later unresolved-work comments;
+reopened during #82. Its cold/long-context 9.6tok/s case and ~3008-row cap remain unresolved; retain
+the measured S32–37% improvement without claiming a general fix. #68 full DS4 WMMA failures, #75
+deferred tail-drain port, #79 default-off chunk-cap measurements, #60 latency variation and
+#42/#46/#52/#54/#11/#16/#10 remain open. No new GPU/performance claim follows from this docs audit.
