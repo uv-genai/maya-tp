@@ -86,10 +86,11 @@ MTP/API suite passing. Report:
 
 ## Current scope
 
-The `main` branch has completed the sequential semantic integration of upstream **v1.1.37–v1.1.46**,
-with TP2/MTP preservation gates and per-tag CI. This is unreleased source work: the latest published
+The `main` branch includes the sequential semantic integration of upstream **v1.1.37–v1.1.46** and
+the cumulative **v1.1.47–v1.1.49** merge, with TP2/MTP preservation checks and CI. This is unreleased source work: the latest published
 fork release remains **v1.1.42**, and future fork releases use **`tp-vMAJOR.MINOR.PATCH`**.
-The [integration report](docs/upstream/COMPLETION-2026-11-02.md) distinguishes accepted changes from
+The [latest merge report](docs/upstream/v1.1.49.md) and
+[earlier integration report](docs/upstream/COMPLETION-2026-11-02.md) distinguish accepted changes from
 deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya-tp/issues/68),
 [tail draining](https://github.com/uv-genai/maya-tp/issues/75) and
 [chunk-cap measurement](https://github.com/uv-genai/maya-tp/issues/79).

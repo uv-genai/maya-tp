@@ -1,11 +1,11 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§30** (documentation audit #82).
+> Last updated: 2026-11-02 · Current state: **§31** (direct upstream v1.1.49 merge #85).
 > Integration through upstream v1.1.46 and restoration are complete; final CI41352750402 PASS,
 > #77/#36 closed. Review builds retained; production5a52 restored. The user launches their processes.
-> §§10–29 are dated session history, including superseded active/pending states and deployment paths.
-> Current process-ownership rules in §2 and §30 override historical cleanup commands.
+> §§10–30 are dated session history, including superseded active/pending states and deployment paths.
+> Current process-ownership rules in §2 and §31 override historical cleanup commands.
 
 ## 1. What we are building
 
@@ -78,6 +78,7 @@ TP2+MTP suite; geometry is pack-derived via #12) across two twin hosts:
 | 36–81 | Sequential upstream v1.1.37–v1.1.46 integration | completed; per-tag evidence in `docs/upstream/`, final #77/#36 closed; deferred #46/#52/#54/#60/#68/#75/#79 remain open |
 | 82 | User/agent documentation audit | documentation refreshed; final checks, commit/CI and outcome recorded on GitHub |
 | 83 | Validation harness cleanup ownership | open; replace name-/port-wide cleanup with owned PIDs/process groups |
+| 85 | Direct cumulative upstream v1.1.49 integration | v47–49 reviewed together; source validation/report and CI/merge provenance on #85 (§31) |
 
 ## 5. What works (Maya-S pack)
 
@@ -1141,3 +1142,39 @@ reopened during #82. Its cold/long-context 9.6tok/s case and ~3008-row cap remai
 the measured S32–37% improvement without claiming a general fix. #68 full DS4 WMMA failures, #75
 deferred tail-drain port, #79 default-off chunk-cap measurements, #60 latency variation and
 #42/#46/#52/#54/#11/#16/#10 remain open. No new GPU/performance claim follows from this docs audit.
+
+## 31. Current restart state — upstream v1.1.49 (#85)
+
+The user explicitly requested **one merge from the latest upstream tag**, rather than repeating the
+previous per-tag sequence. #85 integrates v1.1.47–v1.1.49 directly from
+`26aacb6bcea9333e4f408a68ee60c4c1c316bd68`, fork base d7626ac. The isolated worktree is
+`/home/ugo/software/project-maya-upstream-v49`, branch `merge/upstream-v1.1.49`.
+[Report](docs/upstream/v1.1.49.md) and raw evidence record the cumulative decisions; exact-head,
+merge and main CI provenance is recorded on #85. The earlier v37–46 integration/#77 and docs
+audit/#82 are complete; no old closeout task should be resumed.
+
+Accepted: legacy/new real-engine names, Maya identity, monitor/TUI fixes, DeepSeek XS-v2/shared-table
+installer fixes, soft thinking closure and read-order interleaving. Retain model-management opt-in,
+all TP2 safeguards, numeric VERSION1.1.42, future `tp-v*` release namespace. Exclude unrelated
+NVIDIA/Qwen allocator, local multi-GPU chunk default, Windows helper and conflict-reintroduced
+Metal functions. README/AGENTS and catalog/settings were merged semantically.
+
+**Validation:** ordered HIP-map/610 server (11 skips)/686 tools (35 skips) PASS; 118 focused tests,
+42 bundled-wheel Textual/dashboard tests and 336010 actual DS4 request-policy checks PASS.
+The changed DS4 entry point compiles/links using accepted read-only HIP dependencies into the
+isolated `build-host-v49/maya-ds4`, MD5 `64f5092b583ea33815069fbbf28057ea`.
+GPU image SHA25692096f8e… is identical to accepted DS451749e86. Across444 protected engine/header/
+build/launcher/tuning files only DS4main changes; GLM/TP2/MTP/math/transport/tuning/launchers stay
+exact to accepted main. New tests exercise both CLI names with the TP encoder guard and preserve
+GLM wire keys and budget continuation. The initial focused-command class-name typo is retained
+alongside the corrected passing run. No fresh GPU/S-M-L/performance claim.
+
+**Runtime unchanged:** no production deployment or remote source update. Canonical GLM5a52,
+retained review GLMb398/DS451749, protected remote777cc92 user edits and configurations remain
+as recorded in the prior restoration snapshot. Do not inspect unrelated services or stop user
+processes. Only test-owned fake-engine children were started and cleaned up. For future work,
+record exact PIDs/process groups; no name-/port-wide cleanup. The user launches their processes.
+
+**Open work:** #33/#42/#46/#52/#54/#60/#68/#75/#79/#83/#11/#16/#10 remain open. The new DeepSeek
+soft-close fix does not resolve GLM prefill, full DS4 WMMA, tail-drain or cap-measurement issues.
+No release or tag was created. This checkpoint's acceptance and final CI outcome live in #85.

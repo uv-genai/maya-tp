@@ -1,0 +1,33 @@
+{
+  "baseline": "d7626ac36637388517331c323a40adbf4b315f01",
+  "upstream_tag": "upstream/v1.1.49",
+  "upstream_commit": "26aacb6bcea9333e4f408a68ee60c4c1c316bd68",
+  "intermediate_tags_included": [
+    "v1.1.47",
+    "v1.1.48"
+  ],
+  "batching": "one direct merge, per user instruction",
+  "protected_files_compared": 444,
+  "only_changed_engine_file": [
+    "src/ds4/ds4_main.cpp"
+  ],
+  "focused_tests": 118,
+  "textual_tests": 42,
+  "server_tests": 610,
+  "server_skips": 11,
+  "tools_tests": 686,
+  "tools_skips": 35,
+  "ordered_cpu_gates": "PASS",
+  "gpu_execution": false,
+  "production_deployment": false,
+  "tag_or_release_created": false,
+  "model_management_default": false,
+  "gfx1151_ds4_chunk_cap_default": 0,
+  "excluded_upstream_runtime_files": [
+    "src/program/generate.cpp",
+    "src/ds4/ds4_model.cu",
+    "tools/ds4/slot_keep_test.py"
+  ],
+  "ci_and_merge_provenance": "https://github.com/uv-genai/maya-tp/issues/85",
+  "initial_focused_invocation": "Selected a nonexistent class; corrected invocation and all actual selected tests passed."
+}

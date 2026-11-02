@@ -220,6 +220,13 @@ lines back after it.
 
 ## Unattended starts and calibration
 
+DeepSeek Maya-XS v1 installations are offered v2 during setup. The default and `--yes` keep the
+existing version; choosing v2 downloads its model files, keeps the shared Q6_K tables, and removes
+old model shards only after the new files are complete. Shared tables are reused by hard link where
+possible. An old duplicate in the model folder is relinked only when both copies have verification
+records. These changes do not download or modify models merely by updating this source checkout.
+
+
 A start without a terminal on stdin, under systemd, or with `--yes` skips automatic speed/prefill calibration. Saved calibration remains effective; a missing calibration uses defaults and prints the command to measure later. Interactive starts keep their existing behavior. The skipped start does not write a replacement calibration to the config.
 
 TP2 still requires both ranks to be launched with matching model/pack/config and context through the pair launcher. A standalone service restart cannot coordinate the pair; the existing paired lifecycle guards remain in effect. See [TP2 operations](TP2-RUN.md).

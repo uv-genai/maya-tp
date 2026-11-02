@@ -22,8 +22,9 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 ## Development pair: production and review builds
 
 At the completed 2026-11-02 integration checkpoint, source `main` includes semantic integration
-through upstream v1.1.46; the latest published fork release is still v1.1.42. The development pair
-intentionally has two runtime sets:
+through upstream v1.1.49; the latest published fork release is still v1.1.42. The v1.1.49 merge
+does not deploy binaries or change user processes. The development pair intentionally retains
+the two runtime sets from the earlier integration/restoration:
 
 - Canonical `build-hip/maya` on both hosts and rank0 `/tmp/maya-tp2`: restored production binary,
   MD5 `5a52cd27167523b6ea4b0f0bde93f503`.

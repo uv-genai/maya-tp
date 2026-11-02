@@ -1,0 +1,9 @@
+.................../usr/lib/python3.14/asyncio/events.py:94: ResourceWarning: unclosed <socket.socket fd=6, family=2, type=1, proto=0, laddr=('127.0.0.1', 38725)>
+  self._context.run(self._callback, *self._args)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+Executing <Task finished name='Task-259' coro=<Screen.test_the_screen_is_ready_when_the_server_answers_though_the_ready_line_was_missed() done, defined at /home/ugo/software/project-maya-upstream-v49/tools/test_setup_tui.py:340> result=None created at /usr/lib/python3.14/asyncio/runners.py:110> took 0.405 seconds
+.......................
+----------------------------------------------------------------------
+Ran 42 tests in 19.206s
+
+OK

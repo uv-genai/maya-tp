@@ -57,4 +57,4 @@ restoration and protected-state comparisons. Completed documentation CI and clos
 recorded in [#77](https://github.com/uv-genai/maya-tp/issues/77) and
 [#36](https://github.com/uv-genai/maya-tp/issues/36). The later documentation consistency audit is
 [#82](https://github.com/uv-genai/maya-tp/issues/82); current operations are in
-[Handoff §30](../../Handoff.md#30-current-restart-state--documentation-audit-2026-11-02-82).
+[Handoff](../../Handoff.md).

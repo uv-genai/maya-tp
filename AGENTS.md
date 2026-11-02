@@ -135,10 +135,12 @@ gfx1201 reference, not this fork's target build recipe.
 `Handoff.md` is the **live** restart document (state, issue map, performance, gotchas, how to run). `Handoff-Prompt.md` is the prompt to give a fresh session. **Keep `Handoff.md` current** — update it whenever state changes, and comment on the relevant issue.
 
 `README.md`, this file and the fork's operational docs are fork-owned. Merge applicable upstream
-documentation semantically; do not replace them wholesale. Review upstream tags one at a time and
-finish affected validation plus exact-head and post-merge CI before the next tag. Historical design
+documentation semantically; do not replace them wholesale. Follow the user's requested upstream
+batch size: for sequential work, finish affected validation plus exact-head and post-merge CI before
+the next tag; for a cumulative merge, review the entire delta and validate it as one checkpoint. Historical design
 documents and measurement reports describe their dated checkpoints; [docs/README.md](docs/README.md)
-identifies the current guides. The requested v1.1.37–v1.1.46 integration is complete.
+identifies the current guides. v1.1.37–v1.1.46 was integrated sequentially; #85 integrates v1.1.47–v1.1.49
+directly from the latest tag, as explicitly requested by the user.
 
 ## Key references
 

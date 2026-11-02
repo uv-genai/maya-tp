@@ -195,6 +195,7 @@ These settings change what the engine chooses (put them in the config with `--en
 | `MAYA_FAIR_SLICE_S` | 0 (off) | the server: an answer that has been decoding this many seconds while another request waits gives the engine to it and continues afterwards, from where it was (the engine keeps its state with what it wrote: one token is read again). Concurrent chats and an agent's side requests no longer wait for a whole answer (4x RTX 4090, a short question during a 3000-token answer: first token after 34 s -> 13-17 s at 15-20). Each switch sets a conversation aside on disk (0.1-1 s up to 100K tokens on a SATA SSD array), so a slow disk wants a longer slice |
 | `MAYA_LOOP_GUARD` | on | the server, every model: an answer that falls into a loop (one block of tokens repeated back to back) is caught as it starts and steered out of it - see [The loop guard](#the-loop-guard). `0` = off (as `"loop_guard": false` in the config) |
 | `MAYA_LOOP_GUARD_COLLAPSE_MAX` | 32000 | conversation characters above which history is left whole to preserve cached prefixes; generation-side loop protection stays active. `0` restores unlimited history collapse; nonnumeric values use the default. Works from JSON config or either environment alias |
+| `MAYA_MODEL_MANAGEMENT` | off | opt into `/models/load`, `/models/unload` and `/models/sse` with `1` or config `"model_management": true`. API authentication and TP2 paired-lifecycle guards apply. This fork retains its existing default; upstream v1.1.47 changed its default to on. |
 | `MAYA_VIDEO_MAX_FRAMES` | 240 | the server (GLM): the most frames a video may give (read at 4 a second, so 240 = a minute); a longer video is refused before it is decoded, with its length in the message. Every frame takes an image's share of the context. Videos need ffmpeg and ffprobe installed |
 
 When a configured `thinking_budget` is below the output limit’s reserved ceiling and `max_tokens > 1024`, reasoning may finish its sentence or line within up to 512 extra tokens. Grace uses at most half the room below that ceiling; the answer reserve and closing-token allowance still apply to every output limit.
@@ -459,7 +460,8 @@ context shares the memory beside the model among the N conversations.
   piece's (a prompt that fits in one piece still goes after one token). A share helps a short answer beside a long
   read (on 3 GPUs, 20: a 24-token answer beside a 101K read done in 15-30 s, not 56 s) but delays the next long
   reads, so it is off: in `tools/ds4/agent_bench.py` it made a turn's first token later.
-  `MAYA_DS4_READ_ORDER=arrival` reads each prompt whole as it comes, the others waiting (as v1.1.34 did). On 3 GPUs
+  `MAYA_DS4_READ_ORDER=arrival` reads prompts in arrival order. When an answer is running, the prompt
+  is read in pieces so the answer can write between them; later prompts still wait their turn. On 3 GPUs
   (2x RTX 5090 + RTX 3090, GSQ IQ2_XXS, about half the experts in RAM), `tools/ds4/agent_bench.py` - 4 agents x 8
   turns, 4-12K-token first prompts, tool results of 150-2,000 tokens with one in ten of 5-20K: a turn's first token
   5.23 s on the mean and 13.5 s at p95, against 6.14 and 29.1 s whole; a turn done and the wall the same (20.0 s,
@@ -1748,6 +1750,13 @@ DeepSeek CPU service idle controls: `MAYA_DS4_SERVICE_IDLE_MS=200` starts staged
 Looping answers continue only when they add nothing new, at most three times; useful short answers may end immediately. Reasoning is not reopened after answer text. An engine turn-end token quoted during reasoning may resume reasoning at most twice. All internal segments share the client output limit and fit the remaining context, including server notes; when a note exhausts the context the request ends as `length` before another engine call. A client's own stop string still applies inside answer code.
 
 `MAYA_EXPERT_DRIVE_PROBE` defaults off on HIP until measured on gfx1151; `1` opts into raw-GGUF drive calibration and `0` skips it. It is inactive on the packed TP2 reader and on normal buffered reads. With the existing opt-in `MAYA_EXPERT_DIRECT=1`, an unspecified stager count probes the drive once and caches a count in `~/.config/project-maya/drive-reads.txt` (or XDG_CONFIG_HOME). An explicit `MAYA_EXPERT_STAGERS` overrides it. This does not enable deferred streamed fetch (#46) or change TP2 packed reads.
+
+### DeepSeek soft thinking closure
+
+The v1.1.47–v1.1.49 merge adds engine-side soft thinking closure for DeepSeek so a speculative
+window cannot run past the chosen sentence boundary and invalidate the cached prefix. It leaves
+GLM TP2/MTP wire keys and engine code unchanged. The separate upstream 4096 default for file-backed
+experts on multiple local GPUs is outside this fork's gfx1151 target and was not applied.
 
 ### DeepSeek automatic chunk cap on gfx1151
 

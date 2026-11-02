@@ -28,7 +28,7 @@ try:
 except ImportError:                                     # (the CI's and setup's environments have it)
     psutil = None
 try:
-    import regex  # noqa: F401  (the GLM tokenizer's, which --engine strata loads: else the mock engine, no process)
+    import regex  # noqa: F401  (the GLM tokenizer's, which --engine maya loads: else the mock engine, no process)
     FAKE_ENGINE = True
 except ImportError:
     FAKE_ENGINE = False
@@ -65,7 +65,7 @@ def fake_config(d: Path) -> Path:
 
 
 def server_cmd(cfg: Path, port: int) -> list:
-    engine = ["--engine", "strata", "--config", str(cfg)] if FAKE_ENGINE else ["--engine", "mock"]
+    engine = ["--engine", "maya", "--config", str(cfg)] if FAKE_ENGINE else ["--engine", "mock"]
     return [sys.executable, str(ROOT / "serve" / "server.py"), *engine, "--port", str(port)]
 
 
@@ -198,6 +198,34 @@ class ServerStops(unittest.TestCase):
         out = p.rest()
         self.assertIn(f"[maya] stopping ({why}): the engine ends", out)
         self.assertEqual(gone(self.engine), [], "the engine outlived the server")
+
+    @unittest.skipUnless(FAKE_ENGINE, "the tokenizer's regex module")
+    def test_old_engine_name(self):
+        """--engine strata (the old name, in older run scripts) starts the configured engine, not the mock one."""
+        cmd = server_cmd(self.cfg, free_port())
+        cmd[cmd.index("maya")] = "strata"
+        p = Proc(cmd, stdin=subprocess.DEVNULL)
+        self.addCleanup(p.close)
+        self.assertTrue(p.until("ready:"), "the server did not start:\n" + "\n".join(p.seen))
+        self.assertTrue(descendants(p.p.pid), "no engine process: --engine strata ran the mock engine")
+
+    @unittest.skipUnless(FAKE_ENGINE and not WIN, "POSIX fake-engine startup")
+    def test_both_engine_names_preserve_tp_encoder_startup_guard(self):
+        cfg = json.loads(self.cfg.read_text())
+        cfg["args"] += ["--tp-world-size", "2"]
+        cfg["vision"] = {"exe": "/missing/must-not-start-a-tp-encoder", "gpu": True}
+        self.cfg.write_text(json.dumps(cfg))
+        for name in ("maya", "strata"):
+            with self.subTest(engine=name):
+                cmd = server_cmd(self.cfg, free_port())
+                cmd[cmd.index("--engine") + 1] = name
+                p = Proc(cmd, stdin=subprocess.DEVNULL)
+                self.addCleanup(p.close)
+                self.assertTrue(p.until("ready:"), "\n".join(p.seen))
+                self.engine = descendants(p.p.pid)
+                self.assertTrue(self.engine, "the configured fake engine was not started")
+                p.p.send_signal(signal.SIGTERM)
+                self.ended(p, "SIGTERM")
 
     def test_parent_pipe_closed(self):
         p = self.start(["--parent-pipe"], stdin=subprocess.PIPE)

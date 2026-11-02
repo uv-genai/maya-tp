@@ -1,6 +1,30 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read AGENTS.md, then Handoff.md §30 for current state. §§18,21,23,27–29 retain historical evidence.
+Read AGENTS.md, then Handoff.md §31 for current state. Earlier sections retain historical evidence.
+
+## Latest requested batch: direct v1.1.49 merge (#85)
+
+The user requested one cumulative merge from latest upstream v1.1.49 (26aacb6), including v47/v48.
+Worktree /home/ugo/software/project-maya-upstream-v49, branch merge/upstream-v1.1.49, fork base d7626ac.
+Report docs/upstream/v1.1.49.md and its evidence directory; exact-head/merge/main CI and acceptance
+are recorded in #85. This replaces the per-tag sequence only for this requested batch.
+
+Keep model management opt-in and all TP2/MTP/cancel/budget/media/lifecycle safeguards. Both --engine
+maya and legacy strata work; GLM wire keys remain unchanged. Accept DS4 XS-v2/shared-table/soft-close/
+read-order and monitor/TUI fixes. Exclude NVIDIA/Qwen allocator, local multi-GPU chunk default,
+Windows pipe helper and conflict-reintroduced Metal functions. VERSION1.1.42, future tp-v*, no release/tag.
+
+Fresh gates: HIP-map,610serve/11skip,686tools/35skip,118focused,42Textual/dashboard and336010 actual
+DS4request-policy checks PASS. Changed DS4main compiles/links against read-only accepted HIP deps;
+isolated build-host-v49/maya-ds4 MD5 64f5092b583ea33815069fbbf28057ea, same GPUimage92096f8e… as51749.
+Only DS4main differs among444 protected engine/build/header/launcher/tuning files; no GLM/TP2/MTP
+math/transport/tuning changes. No fresh GPU/performance claims or runtime deployment.
+
+The user launches their processes. Stop only your own recorded validation PIDs/process groups;
+do not inspect/manage unrelated services or run broad-cleanup harnesses against user processes.
+Production/review binary sets and protected remote source below are unchanged. Keep all previously
+open issues, including #83, open unless independently resolved. Prior v37–46/#77 and docs/#82 work
+are complete; do not resume their historical pending steps.
 
 ## Completed integration
 
