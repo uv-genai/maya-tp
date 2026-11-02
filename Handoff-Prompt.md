@@ -2,6 +2,10 @@
 
 Read [AGENTS.md](AGENTS.md), then [Handoff.md §33](Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33). Sections 10–32 of the handoff are dated history and may describe superseded processes, issues, binaries or pending steps.
 
+## Active DeepSeek setup fix
+
+Read Handoff.md §34 and issue #98. The user's setup failed at the HIP build before download. A split ROCm installation needs HIP_PATH to name its versioned compiler core. The installer fix selects the versioned ROCm compiler core; a clean DeepSeek build and ordered CPU checks passed, and its binary is installed locally. Preserve the production GLM binary. The user can rerun setup; no DeepSeek model has been downloaded or run.
+
 ## Current state
 
 - PR [#94](https://github.com/uv-genai/maya-tp/pull/94) merged as `6f85d3036a1010b3a2f1b0cfca2105b3f28fdb94`. It includes HIP APU complete-pool sizing, TP2 startup scratch bounded by the existing receive window, and gfx1151/hipBLASLt 100401 DSA projection tuning. Issues #33, #90, #91 and #93 are closed at the user's request.
