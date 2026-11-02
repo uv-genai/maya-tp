@@ -225,6 +225,36 @@ class HipSetupTests(unittest.TestCase):
         self.assertEqual(env["ROCM_PATH"], str(self.rocm))
         self.assertEqual(meta["backend"], "hip")
 
+    def test_split_rocm_uses_the_compiler_installation_for_hip_path(self):
+        pc = maya.check_pc(self.a)
+        maya.BUILD.mkdir()
+        core = self.rocm / "core"
+        clang = core / "llvm/bin/clang++"
+        clang.parent.mkdir(parents=True)
+        clang.touch()
+        (core / ".info").mkdir()
+        (core / ".info/version").write_text("10.1.0\n")
+        (core / "include/hip").mkdir(parents=True)
+        (core / "include/hip/hip_runtime.h").touch()
+        (self.rocm / "llvm/bin/clang++").unlink()
+        (self.rocm / "llvm/bin/clang++").symlink_to(clang)
+        with patch.object(maya, "pick_cmake", return_value="cmake"), \
+                patch.object(maya, "cmake_steps", return_value=None) as build:
+            maya.compile_engine_hip(pc, self.root / "llama", "source-sha", target="maya-ds4")
+        conf, command, env, _ = build.call_args.args
+        self.assertEqual(env["ROCM_PATH"], str(self.rocm))
+        self.assertEqual(env["HIP_PATH"], str(core))
+        self.assertIn("maya-ds4", command)
+        self.assertIn(f"-DCMAKE_PREFIX_PATH={self.rocm}", conf)
+        # A versioned ROCm root remains authoritative even if clang resolves
+        # through a nested versioned directory.
+        (self.rocm / ".info").mkdir()
+        (self.rocm / ".info/version").write_text("10.1.0\n")
+        with patch.object(maya, "pick_cmake", return_value="cmake"), \
+                patch.object(maya, "cmake_steps", return_value=None) as build:
+            maya.compile_engine_hip(pc, self.root / "llama", "source-sha", target="maya-ds4")
+        self.assertEqual(build.call_args.args[2]["HIP_PATH"], str(self.rocm))
+
     def test_refresh_compiles_a_target_the_new_source_has_not_built(self):
         # #664: after a git pull, starting GLM compiled build-hip/maya and stamped the new source with targets
         # ["maya"]; the DeepSeek setup's next start found that source in the stamp and ran the old maya-ds4.

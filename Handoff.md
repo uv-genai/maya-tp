@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§33**, prefill candidate accepted and promoted.
+> Last updated: 2026-11-02 · Current state: **§34**, DeepSeek HIP setup fix; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -1272,3 +1272,24 @@ regression was not repeated. User accepted their real-workload result; do not cl
 that these observations were fixed. Earlier raw logs are in `/tmp/maya-prefill-90`; #93 documents
 the baseline variation. The 3008-row limit and intermittent cold/startup latency are not eliminated.
 Checkpoint tag `tp-v1.1.43` uses numeric VERSION `1.1.43`; no GitHub release was requested.
+
+## 34. DeepSeek setup HIP failure (#98)
+
+User attempted `./maya.sh --setup --backend hip --gpu 0 --model deepseek-maya-xs ...`; build
+failed before model download/packing. On this split ROCm install `/opt/rocm` lacks `.info/version`
+while the resolved compiler's `/opt/rocm/core` has it. `HIP_PATH=/opt/rocm` made clang omit its HIP
+runtime wrapper, so device math calls failed; `HIP_PATH=/opt/rocm/core` compiled the same source.
+
+Branch `fix/hip-setup-98` fixes installer path selection only for such a versioned compiler subroot;
+focused split/normal tests and HIP mapping pass. Clean installer-driven gfx1151 `maya-ds4` build
+completed in `/tmp/maya-ds4-build-98`, log `/tmp/maya-ds4-build-98.log`. The clean binary MD5
+`0001d60d186d879b971eee254c03671a` is installed at local `build-hip/maya-ds4`; verified its
+shared libraries and the real installer reuse check. `build-hip/MAYA-BUILD.json` records the actual
+engine source fingerprint `957159b3d6717a89` and both build targets; its previous contents are in
+`build-hip/MAYA-BUILD.before-issue-98.json`. Engine sources match the promoted GLM build's source
+and `build-hip/maya` remains `cbd9e99a6a49e9107b0db3190a40766a`. No model was downloaded or started.
+
+Ordered CPU checks passed: HIP mapping, 613 server tests (11 skipped), 687 tools tests (3 skipped);
+logs `/tmp/maya-98-{hip-map,serve,tools}.txt`. The user can rerun setup after the installer fix is
+available; the installed DeepSeek binary passes the real build-reuse check. A successful engine build
+is not full-model DeepSeek validation; #68 remains open.

@@ -1856,8 +1856,18 @@ def compile_engine_hip(pc: dict, llama: Path, src: str, soft=False, target: str 
         fail("CMake 3.24 or newer is needed")
     clang = hip_clang(root) or root / "llvm/bin/clang++"
     bindir = Path(pc.get("rocm_bin") or root / "bin")
+    hip_root = root
+    if not WIN and not (root / ".info/version").is_file():
+        # Split ROCm installs can expose <root>/include and LLVM through links
+        # into <root>/core, while only core identifies its HIP version. Clang
+        # needs that version to inject its device-math runtime wrapper.
+        for parent in clang.resolve().parents:
+            if (parent.is_relative_to(root.resolve()) and (parent / ".info/version").is_file()
+                    and (parent / "include/hip/hip_runtime.h").is_file()):
+                hip_root = parent
+                break
     env = dict(os.environ, HIP_PLATFORM="amd", HIP_COMPILER="clang", HIP_RUNTIME="rocclr",
-               ROCM_PATH=str(root), HIP_PATH=str(root))
+               ROCM_PATH=str(root), HIP_PATH=str(hip_root))
     env["PATH"] = os.pathsep.join([str(bindir), str(clang.parent), env.get("PATH", "")])
     if not WIN:
         libs = [str(root / d) for d in ("lib", "lib64") if (root / d).is_dir() and root != Path("/usr")]

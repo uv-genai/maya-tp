@@ -6,6 +6,10 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **HIP setup:** select the versioned compiler subdirectory for `HIP_PATH` on split ROCm
+  installations, so clang loads its device-math declarations when building DeepSeek and other
+  engines. Existing standard ROCm paths keep their previous selection.
+
 - **GLM TP2 prefill** (#90, #91): retain all experts plus prompt scratch on HIP APUs when memory
   headroom permits, bound startup scratch to the existing receive window, and add measured gfx1151
   DSA projection tuning. The user reported successful Maya-S/M/L llama-swap trials; their prompt
