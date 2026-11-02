@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§32** (v1.1.49 live validation complete, #87/#88).
+> Last updated: 2026-11-02 · Current state: **§33** (active prefill fix #90, parent #33).
 > Fresh S/M/L API/CLI/strict/recovery and both-order prefill gates complete; final CI/merge checkpoint on #87/PR89.
 > Integration through upstream v1.1.46 and restoration are complete; final CI41352750402 PASS,
 > #77/#36 closed. Review builds retained; production5a52 restored. The user launches their processes.
@@ -1238,3 +1238,26 @@ DS4 GPU acceptance: #68 WMMA failures, #75 deferred tail-drain and #79 default-o
 measurements remain open. Also retain #42/#46/#52/#54/#83/#11/#16/#10. Future fork tags use tp-v*;
 VERSION remains numeric1.1.42 and legacy v1.1.42 immutable. No more runtime validation is required
 for this v1.1.49 batch; use linked GitHub records for final repository closeout status.
+
+## 33. Active prefill fix (#90, parent #33)
+
+User now requests fixing prefill across models. Completed #85/#87/#88/PR89 main4d1183e and CI41388274621
+are accepted; this is NEW work, branch `perf/apu-prefill-90`. Full host freedom remains authorized;
+do not ask again. Preserve production5a52, reviewb398 and protected remote source/configs.
+
+Found Linux APU pool sizing caps allocation at expert_bytes and excludes unified memory from the
+existing complete-pool layout. Prefill then evicts hundreds of already-loaded experts to borrow
+scratch even with tens of GiB available. Prototype HIP-only complete-pool budget includes all
+experts+spares+tail ONLY when full bytes fit after OS headroom/reserve; original cap fallback and
+user caps remain. Existing MAYA_GLM_COMPLETE_POOL=0 gives same-binary control. No transport/chunk/
+MTP math/cancel/poison changes. New host boundary tests PASS, isolated HIP configure PASS.
+
+Fresh HIP build and host memory tests PASS; final incremental check build-final.txt PASS.
+Build: `cmake --build /tmp/maya-prefill-90/build-hip --target maya glm_memory_test -j4`;
+log `/tmp/maya-prefill-90/build.txt`. No GPU model launched yet. Build source canonical working
+branch; output entirely isolated. Do not time GPU inference concurrently with compiler/CPU suites.
+After build: matching isolated binaries on both hosts, exact-owned supervisor from v49 evidence,
+new API18090/bootstrap18590, same explicit pack/config on both ranks. Measure old b398 and new
+COMPLETE_POOL=0/1 controls, fresh/warm S/M/L, retain all data and check raw fidelity/MTP/reuse/cancel.
+Implement only measured safe improvement; #33 row cap/original long-context case remains separate.
+Track progress in #90; update docs/handoffs, ordered CPU gates, final CI/PR/main before completion.

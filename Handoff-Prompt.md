@@ -1,6 +1,19 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read AGENTS.md, then Handoff.md §32 for current state. Earlier sections retain historical evidence.
+Read AGENTS.md, then Handoff.md §33 for current state. Earlier sections retain historical evidence.
+
+## Active prefill fix (#90, parent #33)
+
+New user request: fix prefill. Branch perf/apu-prefill-90 from accepted4d1183e. Full host freedom
+already authorized; no availability question. HIP-only prototype lets the Linux APU complete pool
+keep experts+spares+prompt tail when all fit above RAM headroom/reserve, with old capped fallback
+and user caps preserved. Current code excluded APU and needlessly evicted residents for scratch.
+Existing MAYA_GLM_COMPLETE_POOL=0 is same-binary control. Host memory boundary tests PASS.
+Isolated build /tmp/maya-prefill-90/build-hip (maya + glm_memory_test, -j4) PASS, logs build.txt and
+build-final.txt. HIPmap/host memory tests PASS. No GPU model started. Use new API18090/bootstrap18590 and
+exact-owned supervisor, matching binaries/explicit packs both ranks, oldb398 + new0/1 before/after.
+Require measured fresh/warm gains, strict fidelity and MTP/reuse/cancel/peer-health. Preserve all
+production/review/protected source states. Track #90, keep #33 remaining work honest. Details§33.
 
 ## Fresh live validation complete (#87 / #88)
 

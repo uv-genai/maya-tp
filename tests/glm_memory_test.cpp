@@ -29,6 +29,16 @@ int main() {
     assert(expert_pool_budget(true, 112 * G, 70 * G, 2 * G, 8 * G, experts) == 60 * G);
     assert(expert_pool_budget(false, 12 * G, 110 * G, 3 * G, 16 * G, experts) == 9 * G);
     assert(expert_pool_budget(false, G, 110 * G, 3 * G, 16 * G, experts) == 0);
+    // A HIP APU complete layout keeps the prompt tail beside all residents.
+    // The exact boundary includes reserve/headroom; a single byte short falls
+    // back to the original expert cap, rather than consuming the OS margin.
+    const size_t full = experts + 7 * G;
+    assert(expert_pool_budget(true, G, full + 17 * G, G, 16 * G, experts, full) == full);
+    assert(expert_pool_budget(true, G, full + 17 * G - 1, G, 16 * G, experts, full) == experts);
+    assert(expert_pool_budget(true, G, 70 * G, G, 16 * G, experts, full) == 53 * G);
+    assert(expert_pool_budget(true, G, 0, G, 16 * G, experts, full) == 0);
+    assert(expert_pool_budget(true, G, 110 * G, G, 16 * G, experts, experts - 1) == experts);
+    assert(expert_pool_budget(false, 12 * G, 110 * G, 3 * G, 16 * G, experts, full) == 9 * G);
     assert(minimal_ram_tier(true, true, false));
     assert(!minimal_ram_tier(true, true, true));  // STRATA_GLM_RAM_GB / supplied budget wins
     assert(!minimal_ram_tier(true, false, false));
