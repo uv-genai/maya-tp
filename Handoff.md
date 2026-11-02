@@ -1239,54 +1239,35 @@ measurements remain open. Also retain #42/#46/#52/#54/#83/#11/#16/#10. Future fo
 VERSION remains numeric1.1.42 and legacy v1.1.42 immutable. No more runtime validation is required
 for this v1.1.49 batch; use linked GitHub records for final repository closeout status.
 
-## 33. Active prefill fix (#90, parent #33)
+## 33. Prefill promotion and user acceptance (#90 / #91 / #93 / #33)
 
-User now requests fixing prefill across models. Completed #85/#87/#88/PR89 main4d1183e and CI41388274621
-are accepted; this is NEW work, branch `perf/apu-prefill-90`. Full host freedom remains authorized;
-do not ask again. Preserve production5a52, reviewb398 and protected remote source/configs.
+The user tested Maya-S, Maya-M and Maya-L through llama-swap and
+reported prefill and generation working across all models. On the prompt “write an eBPF tutorial
+to explain how to use eBPF”, their observed prefill / generation ranges and average generation were:
 
-Found Linux APU pool sizing caps allocation at expert_bytes and excludes unified memory from the
-existing complete-pool layout. Prefill then evicts hundreds of already-loaded experts to borrow
-scratch even with tens of GiB available. Prototype HIP-only complete-pool budget includes all
-experts+spares+tail ONLY when full bytes fit after OS headroom/reserve; original cap fallback and
-user caps remain. Existing MAYA_GLM_COMPLETE_POOL=0 gives same-binary control. No transport/chunk/
-MTP math/cancel/poison changes. New host boundary tests PASS, isolated HIP configure PASS.
+| Model | Prefill tok/s | Generation tok/s | Prompt average generation tok/s |
+| --- | ---: | ---: | ---: |
+| Maya-S | 131–308 | 29–46 | 30 |
+| Maya-M | 187–299 | 31–45 | 32 |
+| Maya-L | 194–310 | 25–33 | 28 |
 
-Fresh HIP build and host memory tests PASS; final incremental check build-final.txt PASS.
-Build: `cmake --build /tmp/maya-prefill-90/build-hip --target maya glm_memory_test -j4`;
-log `/tmp/maya-prefill-90/build.txt`. Build source canonical working
-branch; output entirely isolated. Do not time GPU inference concurrently with compiler/CPU suites.
-After build: matching isolated binaries on both hosts, exact-owned supervisor from v49 evidence,
-new API18090/bootstrap18590, same explicit pack/config on both ranks. Measure old b398 and new
-COMPLETE_POOL=0/1 controls, fresh/warm S/M/L, retain all data and check raw fidelity/MTP/reuse/cancel.
-Implement only measured safe improvement; #33 row cap/original long-context case remains separate.
-Track progress in #90; update docs/handoffs, ordered CPU gates, final CI/PR/main before completion.
+The user considers Maya-L higher quality with similar prefill and requested promotion and closure.
+Canonical `build-hip/maya` on BOTH hosts is the tested candidate **cbd9e99a6a49e9107b0db3190a40766a**;
+primary hipBLASLt table SHA256 **084286e9620f01443f7d2b66b6312fbdcb64e436b518e170d7aafa73ce742aa5**
+matched on both. Canonical rank0 `serve/`, both rank1 launchers, tuning tables and S/L configs were
+aligned with tested source8d3; original files are backed up on BOTH hosts in
+`/home/ugo/software/project-maya-before-prefill-90-promotion`. Rank0 llama-swap config restored
+byte-for-byte to `~/.config/llama-swap/config.yaml.before-prefill-90`; the user restarts services.
+Remote canonical Git checkout retains its other user changes; do not reset it. No process was stopped.
 
-Prototype3da1347 pushed, CI41392437370 PASS; candidate48d677462ac42c26d985d62772bdbafd and oldb398 match both hosts.
-Pilot35741 EXIT0 `/tmp/maya-prefill-90/pilot.py` writes pilot.txt: S old0/new0/new1,
-six fresh1K/4K/8K requests per arm, MTP2/context32768, normal idle/stage lines. Source archive
-f51fb062… deployed only isolated source/. Build completed before pilot; no concurrent CPU suite.
-Supervision uses owned.py exact PID/start ticks/owner markers. Check exit/cleanup before next GPU stage.
-All6 pilot registries stopped. On stages0 experts/copies, all6 response/usage pairs equal old/off/on.
-Warm throughput essentially unchanged; off first1K26.87s versus on4.53s is a retained cold sample,
-not a statistical gain claim. Need balanced S/M/L and user's large-context fit/fallback checks.
-Independent missing DSA projection f16N8192K1536ldy8192 at everyT found in stage logs; issue #91.
-ACTIVE GPU tuner99452 (stock tune_hipblaslt,64/256/1024,16MiBworkspace, original accuracy gates),
-log dsa-tuner.txt / output dsa-tuning.txt. No models active. Inspect before next GPU stage.
+Changes: HIP APU complete pool retains experts if complete layout fits above headroom/reserve and
+respects existing caps; TP2 scratch uses existing 3008-row receive bound; three DSA hipBLASLt entries
+are calibrated for gfx1151/100401. `MAYA_GLM_COMPLETE_POOL=0` remains the capped-pool control.
+Branch `perf/apu-prefill-90`, commits 3da1347 and 8d3ce94; branch CI41396532631 passed.
 
-Latest: tuner99452 and tuned-pilot79153 EXIT0. Three100401 DSA rows selected;20 GPU parity cases
-on both hosts PASS, actualLt launches10/fallbacks0 each, including960/977tails,beta/guards.
-Warm tuned S pilot still only small variation; all6 messages/usage equal.
-512K L old-control probe38122 FAILED its new cache>0-every-turn assumption at turn4 (143prompt/cache0),
-while generation/peer stay healthy. Both owned roles stopped; failed raw data retained. #92 tracks
-rendering/checkpoint investigation, no causal claim. Do not hide misses in performance reporting;
-the unchanged mtp_acceptance.py remains the separate three-turn reuse gate. Optional async question
-asks the user for the worst workload/timing; keep working while awaiting it.
-
-Workspace planning also ignored the existing TP3008 limit and reserved20–25K layouts (~6GiB).
-HIP startup now caps workspace at the SAME unchanged receive-window limit; use exact3008 if it fits,
-old256-grid fallback otherwise. No protocol/window/cap increase. Fresh build24599 and host memory/
-TP tests/HIPmap PASS. New runtime binary must replace isolated candidate only after all owned jobs
-are stopped, retaining prototype48d and oldb398; new source archive/provenance needed. No GPU active.
-Next: balanced before/after S/M/L (beforeoldb398/oldtable, afternewcandidate/newtable), high-context
-measurement including actual cache misses, explicit cap fallback and full API/CLI/strict fidelity.
+**Limits:** strict S technical historical-reference test reported 12/256 raw picks different, and
+L balanced comparison found one differing cold output in the old baseline; full candidate API/CLI
+regression was not repeated. User accepted their real-workload result; do not claim bit-exactness or
+that these observations were fixed. Earlier raw logs are in `/tmp/maya-prefill-90`; #93 documents
+the baseline variation. The 3008-row limit and intermittent cold/startup latency are not eliminated.
+No release/tag requested. Future fork tags use `tp-v*`.

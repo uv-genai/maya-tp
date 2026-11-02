@@ -1,0 +1,11 @@
+Starting resident pair with fixed reference; warmups first...
+Traceback (most recent call last):
+  File "/tmp/maya-prefill-90/bench_mtp_owned.py", line 309, in <module>
+    main()
+    ~~~~^^
+  File "/tmp/maya-prefill-90/bench_mtp_owned.py", line 281, in main
+    result["model_pick_differences"] = check_fidelity(result["diagnostics"], args.max_pick_differences)
+                                       ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/maya-prefill-90/bench_mtp_owned.py", line 45, in check_fidelity
+    raise RuntimeError(f"{counts[0]} raw model picks differ from reference (maximum {maximum})")
+RuntimeError: 12 raw model picks differ from reference (maximum 0)
