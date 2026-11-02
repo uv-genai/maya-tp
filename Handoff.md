@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§34**, DeepSeek HIP setup fix; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-02 · Current state: **§35**, DeepSeek performance investigation; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -1280,7 +1280,7 @@ failed before model download/packing. On this split ROCm install `/opt/rocm` lac
 while the resolved compiler's `/opt/rocm/core` has it. `HIP_PATH=/opt/rocm` made clang omit its HIP
 runtime wrapper, so device math calls failed; `HIP_PATH=/opt/rocm/core` compiled the same source.
 
-Branch `fix/hip-setup-98` fixes installer path selection only for such a versioned compiler subroot;
+PR #99 merged as `21c9944` and #98 closed after the user successfully started DeepSeek. The installer fix selects the versioned compiler subroot;
 focused split/normal tests and HIP mapping pass. Clean installer-driven gfx1151 `maya-ds4` build
 completed in `/tmp/maya-ds4-build-98`, log `/tmp/maya-ds4-build-98.log`. The clean binary MD5
 `0001d60d186d879b971eee254c03671a` is installed at local `build-hip/maya-ds4`; verified its
@@ -1293,3 +1293,24 @@ Ordered CPU checks passed: HIP mapping, 613 server tests (11 skipped), 687 tools
 logs `/tmp/maya-98-{hip-map,serve,tools}.txt`. The user can rerun setup after the installer fix is
 available; the installed DeepSeek binary passes the real build-reuse check. A successful engine build
 is not full-model DeepSeek validation; #68 remains open.
+
+## 35. DeepSeek performance and calibration (#100 / #101)
+
+User has a running DeepSeek Maya-XS server on local port 8000. Treat it as user-owned; do not stop,
+restart or reconfigure it. Read-only `/health` and `/metrics` show 262144 context, one GPU, DSpark
+and prompt lookup enabled. Last completed request generated 853 tokens at 24.76 tok/s; 399/531
+drafts accepted, only 6/12 from lookup, and reported VRAM hit 100% with CPU expert share 0.0%.
+Startup logged 15730/15744 experts in VRAM, 14 on CPU lane, ~0.5 GiB free before prompt.
+The 35-token prompt's 37.8 tok/s is not comparable to long-prompt prefill.
+
+Setup calibration's no-DSpark arm reported 19.5 tok/s; its DSpark arm failed with a 600-second
+watchdog and did not produce a valid final comparison. Three such earlier watchdog reports were
+observed; #101 tracks them separately. Do not disable/extend watchdog without investigation.
+
+User compared to upstream [#663](https://github.com/mw00/project-maya/issues/663): 43.2 tok/s
+was a mean of three greedy 256-token answers (thinking off), 453 prefill at 8192 tokens; that was
+Mix-128G on a Windows 192 GB Ryzen AI Max+ PRO 495 / 8065S. This user's 128 GB Max+ 395 / 8060S
+Linux uses Maya-XS. Those figures do not establish a like-for-like comparison or a single cause.
+Issue #100 tracks performance; #101 tracks calibration hangs. User authorizes reading anywhere but
+issues only on uv-genai/maya-tp. Asked asynchronously for permission to send benchmark requests to
+the running server; do not mutate its prompt cache without that response.

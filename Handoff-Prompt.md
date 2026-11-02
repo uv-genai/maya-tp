@@ -2,9 +2,14 @@
 
 Read [AGENTS.md](AGENTS.md), then [Handoff.md §33](Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33). Sections 10–32 of the handoff are dated history and may describe superseded processes, issues, binaries or pending steps.
 
-## Active DeepSeek setup fix
+## Active DeepSeek performance investigation
 
-Read Handoff.md §34 and issue #98. The user's setup failed at the HIP build before download. A split ROCm installation needs HIP_PATH to name its versioned compiler core. The installer fix selects the versioned ROCm compiler core; a clean DeepSeek build and ordered CPU checks passed, and its binary is installed locally. Preserve the production GLM binary. The user can rerun setup; no DeepSeek model has been downloaded or run.
+Read Handoff.md §35 and issues #100/#101. The user's DeepSeek Maya-XS server on port 8000 is
+user-owned: do not stop/restart it. DSpark is enabled; the 600-second calibration watchdog failure
+is separately tracked. The upstream 43.2/453 figures were for a different quant/hardware and an
+8K prefill with greedy, thinking-off answers. A request for permission to send benchmark requests
+to the live server is pending. Read from any repository, but only open issues on uv-genai/maya-tp.
+The HIP setup fix #98 merged in PR #99 and the user successfully started DeepSeek.
 
 ## Current state
 
