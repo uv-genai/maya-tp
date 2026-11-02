@@ -8,7 +8,7 @@ Read [AGENTS.md](AGENTS.md), then [Handoff.md §33](Handoff.md#33-prefill-promot
 - The user tested Maya-S, Maya-M and Maya-L through llama-swap and reported working prefill and generation. Their eBPF tutorial prompt averaged 30, 32 and 28 generation tok/s respectively; [report and raw results](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
 - The promoted `build-hip/maya` on both hosts has MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. The original rank0 llama-swap configuration was restored; the user restarts and launches their own services. Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
-- No further prefill investigation, deployment, release or tag is requested. VERSION remains `1.1.42`; future fork tags use `tp-vMAJOR.MINOR.PATCH`. Push only to `origin`.
+- The checkpoint tag is `tp-v1.1.43`, with numeric VERSION `1.1.43`; no GitHub release was requested. No further prefill investigation or deployment is requested. Push only to `origin`.
 
 ## Operating rules
 

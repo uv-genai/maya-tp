@@ -1271,4 +1271,4 @@ L balanced comparison found one differing cold output in the old baseline; full 
 regression was not repeated. User accepted their real-workload result; do not claim bit-exactness or
 that these observations were fixed. Earlier raw logs are in `/tmp/maya-prefill-90`; #93 documents
 the baseline variation. The 3008-row limit and intermittent cold/startup latency are not eliminated.
-No release/tag requested. Future fork tags use `tp-v*`.
+Checkpoint tag `tp-v1.1.43` uses numeric VERSION `1.1.43`; no GitHub release was requested.
