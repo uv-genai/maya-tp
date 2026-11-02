@@ -918,6 +918,10 @@ class StrataEngine:
                 print("[maya] TP2 pair down: " + (line[8:].strip() or "mirror send failed") +
                       " - restart both ranks (rank1.sh then rank0.sh)", flush=True)
                 continue
+            if line.startswith("ERR "):
+                fields = line.split(None, 2)
+                message = fields[2] if self.multi and len(fields) > 2 and fields[1].isdigit() else line[4:].strip()
+                self._request_error(message)             # a failed drain may precede the mirror's TP2_DOWN line
             if line.startswith("STAT "):
                 self._parse_stat(line)
                 continue
@@ -1256,10 +1260,22 @@ class StrataEngine:
         on = sampling.get("experimental_speed_projection")
         return f" cvec={int(on)}" if isinstance(on, bool) else ""
 
+    def _request_error(self, message: str) -> ValueError:
+        # A queued collective can notice peer loss before the next mirror send. Its communicator is
+        # already unusable; make health/restart guards sticky immediately, preserving the cause.
+        if int(self.info.get("tp_world", 1) or 1) > 1 and \
+                message.startswith(("verbs communicator is poisoned", "TP2 pair down")):
+            self.info["tp_pair"] = "down"
+            if not message.startswith("TP2 pair down"):
+                message = "TP2 pair down: " + message + "; restart both ranks"
+        return ValueError(message)
+
     def generate(self, ids, max_new, sampling, cancel, embeddings=None):
         """Yields token ids, and None as a heartbeat every 10 s while the engine is quiet (reading a long prompt):
         the HTTP layer turns it into an SSE comment, which keeps clients' watchdogs calm and notices a client that
         has gone.  A consumer that stops early (or `cancel`) makes the engine STOP, so it does not run to max_new."""
+        if getattr(self, "info", {}).get("tp_pair") == "down":
+            raise ValueError("TP2 pair down: restart both ranks")
         if self.multi:
             yield from self._generate_multi(ids, max_new, sampling, cancel, embeddings)
             return
@@ -1339,8 +1355,9 @@ class StrataEngine:
                     return
                 elif line.startswith("ERR"):
                     done = True
+                    error = self._request_error(line[4:].strip())
                     self._done_after_err()        # (maya-ds4 / maya-mm3 end the request with a DONE after it)
-                    raise ValueError(line[4:].strip())
+                    raise error
         finally:
             if not done:                                  # the consumer stopped early: stop the engine, drain to DONE
                 if self.can_stop:
@@ -1537,7 +1554,7 @@ class StrataEngine:
                     return
                 elif line.startswith("ERR "):
                     done = True
-                    raise ValueError(line.split(None, 2)[2].strip() if len(f) > 2 else "engine error")
+                    raise self._request_error(line.split(None, 2)[2].strip() if len(f) > 2 else "engine error")
         finally:
             if not done:                                  # the consumer stopped early: stop this request, drain it
                 try:
