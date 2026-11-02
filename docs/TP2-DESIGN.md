@@ -4,7 +4,7 @@
 > GLM Maya-S/M/L have opt-in MTP, snapshot reuse and cancellation; control uses the bootstrap socket.
 > Proposed settings/handshakes below must not be assumed implemented. Consult
 > [TP2-RUN.md](TP2-RUN.md), [SETTINGS.md](SETTINGS.md#glm-two-host-tensor-parallel-tp2) and
-> [Handoff §30](../Handoff.md#30-current-restart-state--documentation-audit-2026-11-02-82).
+> [Handoff](../Handoff.md).
 
 Companion to [TP2-ANALYSIS.md](TP2-ANALYSIS.md). Design only — no code in this document.
 

@@ -2,7 +2,7 @@
 
 > **Historical initial plan.** Phases 1–7 and opt-in TP2 MTP are complete. #10/#11 remain open;
 > #12/#13 are complete. Original branch/process constraints below belong to that planning session.
-> Current work and safeguards live in [Handoff §30](../Handoff.md#30-current-restart-state--documentation-audit-2026-11-02-82),
+> Current work and safeguards live in [Handoff](../Handoff.md),
 > [AGENTS.md](../AGENTS.md) and [TP2-RUN.md](TP2-RUN.md).
 
 Implements [TP2-DESIGN.md](TP2-DESIGN.md); background in [TP2-ANALYSIS.md](TP2-ANALYSIS.md).  

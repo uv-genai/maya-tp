@@ -1,0 +1,103 @@
+In file included from /home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:32:
+/home/ugo/software/project-maya-upstream-review/include/strata/core/vram_mark.hpp: In function ‘strata::core::VramMark strata::core::vram_mark(std::vector<int>)’:
+/home/ugo/software/project-maya-upstream-review/include/strata/core/vram_mark.hpp:24:25: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   24 |         cudaGetLastError();
+In file included from /opt/rocm/include/hip/hip_runtime.h:49,
+                 from /home/ugo/software/project-maya-upstream-review/include/strata/hip_compat/cuda_runtime.h:11,
+                 from <command-line>:
+/opt/rocm/include/hip/hip_runtime_api.h:2950:12: note: in call to ‘hipError_t hipGetLastError()’, declared here
+ 2950 | hipError_t hipGetLastError(void);
+      |            ^~~~~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/ugo/software/project-maya-upstream-review/include/strata/core/vram_mark.hpp:29:68: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   29 |         if (cudaGetDeviceCount(&n) != cudaSuccess) cudaGetLastError();
+/opt/rocm/include/hip/hip_runtime_api.h:2950:12: note: in call to ‘hipError_t hipGetLastError()’, declared here
+ 2950 | hipError_t hipGetLastError(void);
+      |            ^~~~~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/ugo/software/project-maya-upstream-review/include/strata/core/vram_mark.hpp:35:29: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   35 |             cudaGetLastError();
+/opt/rocm/include/hip/hip_runtime_api.h:2950:12: note: in call to ‘hipError_t hipGetLastError()’, declared here
+ 2950 | hipError_t hipGetLastError(void);
+      |            ^~~~~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/ugo/software/project-maya-upstream-review/include/strata/core/vram_mark.hpp:42:18: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   42 |     cudaSetDevice(cur);
+/opt/rocm/include/hip/hip_runtime_api.h:2422:12: note: in call to ‘hipError_t hipSetDevice(int)’, declared here
+ 2422 | hipError_t hipSetDevice(int deviceId);
+      |            ^~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp: In function ‘int main(int, char**)’:
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3637:39: warning: ‘hipError_t hipProfilerStart()’ is deprecated: use roctracer/rocTX instead [-Wdeprecated-declarations]
+ 3637 |     if (prof_prompt) cudaProfilerStart();
+/opt/rocm/include/hip/hip_runtime_api.h:7691:12: note: declared here
+ 7691 | hipError_t hipProfilerStart();
+      |            ^~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3637:39: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+ 3637 |     if (prof_prompt) cudaProfilerStart();
+/opt/rocm/include/hip/hip_runtime_api.h:7691:12: note: in call to ‘hipError_t hipProfilerStart()’, declared here
+ 7691 | hipError_t hipProfilerStart();
+      |            ^~~~~~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3651:38: warning: ‘hipError_t hipProfilerStop()’ is deprecated: use roctracer/rocTX instead [-Wdeprecated-declarations]
+ 3651 |     if (prof_prompt) cudaProfilerStop();
+/opt/rocm/include/hip/hip_runtime_api.h:7699:12: note: declared here
+ 7699 | hipError_t hipProfilerStop();
+      |            ^~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3651:38: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+ 3651 |     if (prof_prompt) cudaProfilerStop();
+/opt/rocm/include/hip/hip_runtime_api.h:7699:12: note: in call to ‘hipError_t hipProfilerStop()’, declared here
+ 7699 | hipError_t hipProfilerStop();
+      |            ^~~~~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3671:51: warning: ‘hipError_t hipProfilerStart()’ is deprecated: use roctracer/rocTX instead [-Wdeprecated-declarations]
+ 3671 |     if (prof && rep == reps - 1) cudaProfilerStart();   // (the last pass)
+/opt/rocm/include/hip/hip_runtime_api.h:7691:12: note: declared here
+ 7691 | hipError_t hipProfilerStart();
+      |            ^~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3671:51: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+ 3671 |     if (prof && rep == reps - 1) cudaProfilerStart();   // (the last pass)
+/opt/rocm/include/hip/hip_runtime_api.h:7691:12: note: in call to ‘hipError_t hipProfilerStart()’, declared here
+ 7691 | hipError_t hipProfilerStart();
+      |            ^~~~~~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3716:50: warning: ‘hipError_t hipProfilerStop()’ is deprecated: use roctracer/rocTX instead [-Wdeprecated-declarations]
+ 3716 |     if (prof && rep == reps - 1) cudaProfilerStop();
+/opt/rocm/include/hip/hip_runtime_api.h:7699:12: note: declared here
+ 7699 | hipError_t hipProfilerStop();
+      |            ^~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-v49/src/ds4/ds4_main.cpp:3716:50: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+ 3716 |     if (prof && rep == reps - 1) cudaProfilerStop();
+/opt/rocm/include/hip/hip_runtime_api.h:7699:12: note: in call to ‘hipError_t hipProfilerStop()’, declared here
+ 7699 | hipError_t hipProfilerStop();
+      |            ^~~~~~~~~~~~~~~
+/opt/rocm/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+{
+  "policy_checks": 336010,
+  "reference_head": "dede882111be994b3e913463c8fa6b211f34633d",
+  "changed_engine_files": [
+    "src/ds4/ds4_main.cpp"
+  ],
+  "gpu_sections": {
+    ".hip_fatbin": "92096f8e43afcbe13fbd89b0c3157ea61d20973d02a99e84ef58f84c3f7c3a50"
+  },
+  "reference_md5": "51749e860763aea34847b183de95a933",
+  "candidate_md5": "64f5092b583ea33815069fbbf28057ea",
+  "gpu_execution": false
+}

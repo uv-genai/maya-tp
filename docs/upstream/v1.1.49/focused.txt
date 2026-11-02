@@ -1,0 +1,167 @@
+/home/ugo/software/project-maya-upstream-v49/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] done: 3 tokens in 0 s (20360.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (19878.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (41734.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (34379.5 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (16677.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (44150.6 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (27503.6 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (27776.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (32263.9 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (45590.3 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (41323.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (42581.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (42366.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (41943.0 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (40920.0 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (44858.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (43240.2 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (30393.5 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (31536.1 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (32514.0 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (31895.8 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (43240.2 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (43690.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (43690.7 tok/s) (stop, cancel=False)
+.[maya] done: 3 tokens in 0 s (44150.6 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (41734.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (44858.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (43919.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (45590.3 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (46345.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (48210.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (42366.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (43690.7 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (44858.9 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (33962.0 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (31895.8 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (32140.3 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (31184.4 tok/s) (stop, cancel=False)
+[maya] done: 3 tokens in 0 s (34239.2 tok/s) (stop, cancel=False)
+.[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 2 tokens in 0 s (28149.7 tok/s) (length, cancel=False)
+[maya] done: 3 tokens in 0 s (51463.9 tok/s) (stop, cancel=False)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 2 tokens in 0 s (24528.1 tok/s) (length, cancel=False)
+[maya] done: 3 tokens in 0 s (46603.4 tok/s) (stop, cancel=False)
+[maya] done: 1 tokens in 0 s (0.0 tok/s) (length, cancel=False)
+[maya] done: 2 tokens in 0 s (19972.9 tok/s) (length, cancel=False)
+[maya] done: 3 tokens in 0 s (33689.2 tok/s) (stop, cancel=False)
+..[maya] thinking reached its budget (100 tokens): closed at the end of a sentence or line, 45 tokens later; answering
+[maya] done: 152 tokens in 0 s (83708.7 tok/s) (stop, cancel=False)
+..[maya] thinking reached its budget (100 tokens): closed at the end of a sentence or line, 45 tokens later; answering
+[maya] done: 152 tokens in 0 s (83997.3 tok/s) (stop, cancel=False)
+.[maya] thinking reached its budget (100 tokens): closed at the end of a sentence or line, 45 tokens later; answering
+[maya] done: 152 tokens in 0 s (84220.7 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (512 tokens): closed, answering
+[maya] done: 519 tokens in 0 s (44763.7 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (650 tokens): closed, answering
+[maya] done: 657 tokens in 0 s (37177.4 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (750 tokens): closed, answering
+[maya] done: 757 tokens in 0 s (33107.4 tok/s) (stop, cancel=False)
+[maya] thinking reached its budget (3071 tokens): closed, answering
+[maya] done: 3078 tokens in 0 s (9445.9 tok/s) (stop, cancel=False)
+.[maya] thinking reached its budget (375 tokens, 100 + 275 without a sentence end): closed, answering
+[maya] done: 382 tokens in 0 s (55731.0 tok/s) (stop, cancel=False)
+.[maya] thinking reached its budget (612 tokens, 100 + 512 without a sentence end): closed, answering
+[maya] done: 619 tokens in 0 s (38869.9 tok/s) (stop, cancel=False)
+../usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 503: 'Service Unavailable'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+[maya] done: 8 tokens in 0 s (110376.4 tok/s) (length, cancel=False)
+./usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+./usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 401: 'Unauthorized'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.[maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+./usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 409: 'Conflict'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.[maya] TP2 images: OFF until RDMA embedding synchronization is implemented
+[maya] TP2 images: OFF until RDMA embedding synchronization is implemented
+..../home/ugo/software/project-maya-upstream-v49/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.  0.0 / 0.0 GB (100%) · 0 MB/s · 0 files at once   
+..
+  [X]  not enough free space in /tmp/tmpgbmibyqv/Mix-128G: about 278 GB are needed (the model, the tables + its pack)
+       free some space, or put the model on another drive: ./maya.sh --setup --models-dir /path/on/nvme
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+..
+  [X]  orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF is gated and no Hugging Face token was found
+       accept its terms at https://huggingface.co/orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF, then set HF_TOKEN (a read token from https://huggingface.co/settings/tokens) or run `hf auth login`, and run ./maya.sh again
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+...............
+
+  [X]  the download of m-00000.gguf keeps stopping without progress (curl: (37) Could not open file /tmp/tmpjmu41oxe/nothing-here.gguf)
+       check the connection, then run ./maya.sh --download-model again: it continues where it stopped
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+.  0.0 / 0.0 GB (100%) · 1 MB/s · 0 files at once   
+.....
+  Which model to set up:
+  1) GLM-5.3-Flash
+  2) DeepSeek-V4.1-Flash-1017   (experimental)
+  3) MiniMax-M3.1-Flash   (new)
+  4) Qwen-3.8-Flash-Next (CYBER-FROST) · Q5_K_M (113 GB)   (new)
+.....
+  [X]  not enough free space in /tmp/tmpyertiylq/other: about 23 GB of the model are linked into it from /tmp/tmpyertiylq/m
+       free some space there, or link the files to another drive
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+
+  [X]  not enough free space in /tmp/tmpyertiylq/m: about 13 GB are needed (the model + its pack)
+       free some space, or put the model on another drive: ./maya.sh --setup --models-dir /path/on/nvme
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+./home/ugo/software/project-maya-upstream-v49/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..................
+  [X]  DeepSeek-V4.1-Flash-1017 Maya-S is not published yet
+       set up unsloth's GGUF meanwhile: ./maya.sh --setup --model DeepSeek-V4.1-Flash-1017 --ds4-quant gguf-q8
+
+Setup stopped. Fix the item above and run it again - everything already done is kept and skipped.
+.........../home/ugo/software/project-maya-upstream-v49/setup.py:290: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='UTF-8'>
+  txt = open("/proc/cpuinfo").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-v49/setup.py:203: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/meminfo' mode='r' encoding='UTF-8'>
+  return int(line.split()[1]) * 1024 / 2**30
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..................................
+----------------------------------------------------------------------
+Ran 118 tests in 9.342s
+
+OK

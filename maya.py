@@ -2265,7 +2265,8 @@ def file_url(m: dict, name: str) -> str:
     """A download's file on Hugging Face: from the model's repo, or the one its "sources" names for it (DeepSeek's
     Engram tables: DeepSeek's base repo)."""
     repo, revision = (m.get("sources") or {}).get(name) or (m["repo"], m["revision"])
-    return hf_url(repo, revision, m["folder"], name)
+    folder = (m.get("source_folders") or {}).get(name, m["folder"]) if name in (m.get("sources") or {}) else m["folder"]
+    return hf_url(repo, revision, folder, name)
 
 
 def hf_token() -> str | None:
@@ -2597,6 +2598,24 @@ def stamp_pack(pack: Path, shards: list) -> None:
         (pack / PACK_SOURCES).write_text(json.dumps({"files": files}, indent=1), encoding="utf-8")
     except OSError:
         pass
+
+
+def pack_index_files(pack: Path) -> list | None:
+    """The model files a DS4 pack's tensors.txt reads (its 'file N <path>' lines, relative to the model folder), or
+    None when it names none (an older pack: the caller globs the model folder as before).  A quant that takes its
+    Engram tables (or drafter, vision) from a set beside the model folder names them THERE - the pack is built from
+    those files, and a same-named file an earlier layout left in the model folder is not one of them."""
+    try:
+        lines = (pack / "tensors.txt").read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+    out = []
+    for ln in lines:
+        m = re.match(r"file \d+ (.+)", ln)
+        if m:
+            p = Path(m.group(1).strip())
+            out.append(p if p.is_absolute() else pack.parent / p)
+    return out or None
 
 
 def pack_step(a, d: Path, shards: list, llama: Path, quant: str | None = None) -> Path:
@@ -3829,10 +3848,12 @@ def server_command(cfg_path: Path, a) -> tuple:
         if p is None or not p.exists():
             fail(f"{cfg_path.name}: {what} is missing ({p})", f"run {ME} --setup to repair it")
     # a model file changed after its pack was built (pack_stale, #155): the pack's places in it are wrong
-    if ds4 and (pack / PACK_SOURCES).exists():
+    if ds4 and pack is not None and (pack / PACK_SOURCES).exists():
         rec = {r.get("name") for r in read_json(pack / PACK_SOURCES).get("files") or []}
-        why = pack_stale(pack, [s for s in ds4_shards(pack.parent) if s.name in rec or not rec])   # (its own files:
-        # the folder may also hold an earlier layout's)
+        files = pack_index_files(pack)                     # the files the pack's index itself reads: a shared Engram
+        if files is None:                                  # set (or drafter, vision) lives beside the model folder, so
+            files = ds4_shards(pack.parent)                # match those, not a same-named file an earlier layout
+        why = pack_stale(pack, [s for s in files if s.exists() and (s.name in rec or not rec)])   # left there
         if why is not None:
             fail(f"{cfg_path.name}: {why}, so its index of where the tensors sit is wrong",
                  f"run {ME} --setup --repack to build it again (a minute)")
@@ -3872,7 +3893,7 @@ def server_command(cfg_path: Path, a) -> tuple:
     port = a.port or cfg.get("port") or 8080
     host = a.host or cfg.get("host") or "127.0.0.1"
     key = a.api_key or cfg.get("api_key")
-    cmd = [sys.executable, str(ROOT / "serve" / "server.py"), "--engine", "strata", "--config", str(cfg_path),
+    cmd = [sys.executable, str(ROOT / "serve" / "server.py"), "--engine", "maya", "--config", str(cfg_path),
            "--port", str(port)]
     if a.host:
         cmd += ["--host", a.host]
@@ -4553,8 +4574,10 @@ def ds4_gguf_model(quant: str) -> dict:
     m = form(q["files"], revision)
     if quant in DS4_ABL and q.get("table"):
         m["table"] = Path(q["table"]).name   # (listed in the manifest, never fetched)
-    m["earlier"] = [dict(form(e["files"], e["revision"]), engram=[form(s, e["revision"]) for s in e.get("engram") or []])
+    m["earlier"] = [dict(form(e["files"], e["revision"]), engram=[form(s, e["revision"]) for s in e.get("engram") or []],
+                         upgrade=bool(e.get("upgrade")))
                     for e in q.get("earlier") or []]
+    m["tables"] = [Path(k).name for k in q.get("tables") or {}]   # (shared table shards: kept by an upgrade)
     return m
 
 
@@ -4566,8 +4589,8 @@ def ds4_earlier(m: dict, d: Path) -> dict | None:
     if not any(file_incomplete(m, d / n) for n in m["files"]):
         return None
     for e in m.get("earlier") or []:
-        if any(file_incomplete(e, d / n) for n in e["files"]):
-            continue
+        if e.get("upgrade") or any(file_incomplete(e, d / n) for n in e["files"]):
+            continue                                   # (an "upgrade" layout is replaced: ds4_upgrade_from)
         if not e["engram"]:
             return dict(e, engram=None, layout="earlier")
         eg = d.parent / "Engram"
@@ -4576,12 +4599,103 @@ def ds4_earlier(m: dict, d: Path) -> dict | None:
     return None
 
 
+def ds4_upgrade_from(m: dict, d: Path) -> dict | None:
+    """The earlier layout of m's files that d holds whole and the manifest marks "upgrade": the setup then downloads m's
+    own files instead (keeping the shards both layouts share: m["tables"]) and drops the old ones last
+    (ds4_upgrade_drop).  None: m's own files are whole, or no such layout is there."""
+    if not any(file_incomplete(m, d / n) for n in m["files"]):
+        return None
+    for e in m.get("earlier") or []:
+        if e.get("upgrade") and not any(file_incomplete(e, d / n) for n in e["files"]):
+            return e
+    return None
+
+
+def ds4_upgrade_wanted(a, m: dict, d: Path) -> bool:
+    """Ask before an upgrade's download: the newer version, or the one on disk as it is (--yes keeps it: no large
+    download nobody asked for)."""
+    gb = sum(v for n, v in m["files"].items() if file_incomplete(m, d / n)) / 1e9
+    rows = [(f"Download the newer {m['folder']}", f"{gb:.0f} GB", "Closer to the original model and faster; the n-gram "
+             "table files you have are kept, and the old model files are deleted once the new ones are complete."),
+            (f"Keep my current {m['folder']}", "no download", "Starts with the version already on this PC. Run the "
+             "setup again later to update.")]
+    return choose(f"A newer {m['folder']} is available", [f"A newer version of {m['folder']} is out."], rows,
+                  1, a.yes) == 0
+
+
+def ds4_upgrade_note(m: dict, d: Path) -> None:
+    """The one line that says an upgrade is under way and how much it downloads."""
+    gb = sum(v for n, v in m["files"].items() if file_incomplete(m, d / n)) / 1e9
+    say(f"  Updating {m['folder']} to its newer version: {gb:.0f} GB to download "
+        f"({len(m['files'])} model files; the n-gram table files you have are kept).")
+
+
+def ds4_table_dupes(pack: Path, d: Path) -> list:
+    """A second copy of a file the pack reads from beside the model folder (a shared Engram set: Engram-Q6_K) left in
+    the model folder d under the same name - Maya-XS v1's table shards after the update to v2 (#777): a hard link to
+    the shared copy takes its place, so the disk holds one copy and any path to either name still works.  Only when
+    both were checked against the same published sha256 (VERIFIED, size and time unchanged) - else left as they are.
+    The names relinked."""
+    done = []
+    for f in pack_index_files(pack) or []:
+        if f.parent.resolve() == d.resolve() or not f.is_file():
+            continue
+        old = d / f.name
+        try:
+            if not old.is_file() or os.path.samefile(old, f) or old.stat().st_size != f.stat().st_size:
+                continue
+        except OSError:
+            continue
+
+        def verified(p: Path) -> bool:
+            seen, st = read_json(p.parent / VERIFIED).get(p.name) or {}, p.stat()
+            return seen.get("size") == st.st_size and seen.get("mtime_ns") == st.st_mtime_ns
+
+        if not (verified(old) and verified(f)):
+            continue
+        tmp = old.with_name(old.name + ".link")
+        try:
+            os.link(f, tmp)
+            os.replace(tmp, old)
+            done.append(old.name)
+            book, st = read_json(d / VERIFIED), old.stat()   # (the same checked file now: not read again)
+            book[old.name] = {"size": st.st_size, "mtime_ns": st.st_mtime_ns}
+            (d / VERIFIED).write_text(json.dumps(book, indent=1), encoding="utf-8")
+        except OSError as x:
+            tmp.unlink(missing_ok=True)
+            warn(f"{old}: a second copy of {f} ({x}) - you can delete it")
+    if done:
+        ok(f"{len(done)} second cop{'ies' if len(done) != 1 else 'y'} of the n-gram tables in {d.name} now share "
+           f"{f.parent.name}'s ({sum((d / n).stat().st_size for n in done) / 1e9:.0f} GB back)")
+    return done
+
+
+def ds4_upgrade_drop(old: dict, m: dict, d: Path) -> list:
+    """After the upgrade: delete the old layout's files that m does not use (not m's own, not m["tables"]), but only
+    when every one of m's files is whole - an interrupted download leaves the old model working.  The deleted names."""
+    if any(file_incomplete(m, d / n) for n in m["files"]):
+        return []
+    gone = []
+    for n in old["files"]:
+        if n in m["files"] or n in (m.get("tables") or []):
+            continue
+        try:
+            (d / n).unlink()
+            gone.append(n)
+        except OSError as x:
+            warn(f"{d / n}: could not delete the old file ({x}) - you can delete it")
+    if gone:
+        ok(f"the earlier version's {len(gone)} model file{'s' if len(gone) != 1 else ''} deleted")
+    return gone
+
+
 def ds4_unused(m: dict, d: Path) -> None:
     """A note for the files of an earlier layout in d (and its Engram tables beside it), now that m's own are used: the
     user may delete them."""
     for where, names in ((d, [n for e in m.get("earlier") or [] for n in e["files"]]),
                          (d.parent / "Engram", [n for e in m.get("earlier") or [] for s in e["engram"] for n in s["files"]])):
-        names = [n for n in dict.fromkeys(names) if (where / n).exists() and n not in m["files"]]
+        names = [n for n in dict.fromkeys(names) if (where / n).exists() and n not in m["files"]
+                 and n not in (m.get("tables") or [])]
         if names:
             warn(f"{where}: {len(names)} file{'s' if len(names) != 1 else ''} of an earlier layout of the model, not "
                  f"used - you can delete {'them' if len(names) != 1 else 'it'} ({', '.join(names[:2])}"
@@ -4789,9 +4903,15 @@ def choose_ds4_quant(a, prev: dict) -> str:
     abl = ds4_abl_recommended(hip)
     default = before if before in keys else maya[0] if maya else DS4_DEFAULT_QUANT
     gb = {k: ds4_gguf_model(k)["download_gb"] for k in maya + [k for k in DS4_ABL + DS4_UD if k in keys]}
-    for k in DS4_ABL:   # (as the other entries: the whole download, Maya's n-gram tables with it)
-        gb[k] += ds4_abl_engram_gb()
+    for k in DS4_ABL + ("maya-xs",):   # (as the other entries: the whole download, Maya's n-gram tables with it)
+        if k in gb:
+            gb[k] += ds4_abl_engram_gb()
     gb.update({"gguf-q8": 508, "gguf-q4": 501, "exl3": 414})
+    for k in ("gguf-q8", "gguf-q4") + DS4_UD:   # (unsloth's: its table shard left out, Maya's Q6_K tables instead)
+        t = ds4_own_table(k)
+        if t and k in keys:
+            mk = ds4_gguf_model(k)
+            gb[k] = mk["download_gb"] - mk["files"].get(t, 0) / 1e9 + ds4_abl_engram_gb()
     if "exl3-3.5" in keys:
         gb["exl3-3.5"] = ds4_model("exl3-3.5")["download_gb"]
     about = {"maya-s": "Maya's quant: experts in 2-3 bits, the most of it in memory",
@@ -4859,18 +4979,50 @@ def ds4_abl_recommended(hip: bool = False) -> str:
     return max(fit, key=ds4_memory_gb) if fit else min(DS4_ABL, key=ds4_memory_gb)
 
 
+def ds4_tier_files(my: dict, tier: str) -> dict:
+    """A Maya quant's files in the manifest, with its Q6_K n-gram table shards ("tables": the pair Maya-XS shares with
+    Maya-S, not among its own model files)."""
+    q = (my.get("quants") or {}).get(tier) or {}
+    return {**(q.get("files") or {}), **(q.get("tables") or {})}
+
+
+def ds4_table_homes(models: Path, d: Path | None = None) -> list:
+    """Folders where a whole copy of Maya's Q6_K tables may be on this PC: each Maya quant's own folder (as published),
+    and the Engram-Q6_K folders the setups make (Maya's, orcarouter's, unsloth's)."""
+    man = read_json(DS4_GGUF_MANIFEST)
+    eg = (man.get("abliterated") or {}).get("engram") or {}
+    f = eg.get("folder", "Engram-Q6_K")
+    homes = [models / f"{DS4}-Maya-GGUF" / t for t in (eg.get("from") or {})]
+    homes += [models / g / f for g in (f"{DS4}-Maya-GGUF", f"{DS4}-abliterated-GGUF", f"{DS4}-GGUF")]
+    return homes
+
+
+def ds4_trim_files(m: dict, names: list) -> dict:
+    """m without the files in names (their sizes and sha256 too, the download smaller by them)."""
+    files = {k: v for k, v in m["files"].items() if k not in names}
+    return dict(m, files=files, sha256={k: v for k, v in m["sha256"].items() if k in files},
+                download_gb=sum(files.values()) / 1e9)
+
+
+def ds4_own_table(quant: str) -> str | None:
+    """The shard of a unsloth GGUF that holds only the n-gram tables (download_gguf.json's "table"): left out, Maya's
+    Q6_K tables are read instead (every DeepSeek quant takes them from Maya's repo)."""
+    q = ((read_json(DS4_GGUF_MANIFEST).get("quants") or {}).get(DS4_QUANTS.get(quant, "")) or {})
+    return Path(q["table"]).name if q.get("table") else None
+
+
 def ds4_abl_engram_gb() -> float:
     """GB of Maya's Q6_K n-gram tables an orcarouter version reads (the pair the setup downloads when none is there)."""
     man = read_json(DS4_GGUF_MANIFEST)
     eg = (man.get("abliterated") or {}).get("engram") or {}
     tier = eg.get("download", "Maya-XS")
-    files = ((man.get("maya") or {}).get("quants") or {}).get(tier, {}).get("files") or {}
+    files = ds4_tier_files(man.get("maya") or {}, tier)
     return sum(files[n][0] for n in (eg.get("from") or {}).get(tier, []) if n in files) / 1e9
 
 
 def ds4_abl_engram_there(d: Path, models: Path) -> bool:
-    """Whether a copy of Maya's Q6_K n-gram tables is there for an orcarouter version in d - in its Engram-Q6_K folder,
-    or a Maya quant's pair in <models> on the same drive (linked, not downloaded) - by the files' sizes."""
+    """Whether a copy of Maya's Q6_K n-gram tables is there for a quant in d - in its Engram-Q6_K folder, or anywhere a
+    Maya setup keeps them in <models> on the same drive (linked, not downloaded) - by the files' sizes."""
     man = read_json(DS4_GGUF_MANIFEST)
     eg, my = (man.get("abliterated") or {}).get("engram") or {}, man.get("maya") or {}
     e = d.parent / eg.get("folder", "Engram-Q6_K")
@@ -4879,8 +5031,8 @@ def ds4_abl_engram_there(d: Path, models: Path) -> bool:
     except OSError:
         dev = None
     for tier, names in (eg.get("from") or {}).items():
-        files = {Path(n).name: my["quants"][tier]["files"][n][0] for n in names}
-        for where in (e, models / f"{DS4}-Maya-GGUF" / tier):
+        files = {Path(n).name: ds4_tier_files(my, tier)[n][0] for n in names}
+        for where in [e] + ds4_table_homes(models):
             try:
                 if all((where / f).stat().st_size == n for f, n in files.items()) and \
                         (where == e or os.stat(where).st_dev == dev):
@@ -4891,7 +5043,8 @@ def ds4_abl_engram_there(d: Path, models: Path) -> bool:
 
 
 def ds4_abl_engram_step(a, d: Path, models: Path) -> Path | None:
-    """Maya's Q6_K Engram tables for an orcarouter version (its own shard 2, the table alone, is left out): in
+    """Maya's Q6_K Engram tables for a quant whose own table shard is left out (orcarouter's, unsloth's, Maya-XS's: all
+    take them from Maya's repo): in
     <d's parent>/Engram-Q6_K, shared by both versions - there already (either Maya quant's pair of shards, whole and as
     published), else hard-linked from a Maya quant set up in <models> on the same drive (no second copy), else downloaded
     from Maya's repo (Maya-XS's pair).  The folder, or None when nothing was downloaded."""
@@ -4900,7 +5053,7 @@ def ds4_abl_engram_step(a, d: Path, models: Path) -> Path | None:
     if not eg.get("from"):
         fail(f"{DS4_GGUF_MANIFEST} is missing or damaged", "restore it (git checkout tools/ds4/download_gguf.json)")
     e = d.parent / eg.get("folder", "Engram-Q6_K")
-    pairs = {t: {Path(n).name: my["quants"][t]["files"][n] for n in names} for t, names in eg["from"].items()}
+    pairs = {t: {Path(n).name: ds4_tier_files(my, t)[n] for n in names} for t, names in eg["from"].items()}
 
     def whole(where: Path, files: dict) -> bool:
         return all((where / f).is_file() and (where / f).stat().st_size == v[0] for f, v in files.items())
@@ -4915,8 +5068,8 @@ def ds4_abl_engram_step(a, d: Path, models: Path) -> Path | None:
             ok(f"the n-gram (Engram) tables: Maya's Q6_K, {e} ({sum(v[0] for v in files.values()) / 1e9:.1f} GB)")
             return e
     for tier, files in pairs.items():   # (a Maya quant of DeepSeek beside it: its own pair, linked)
-        src = models / f"{DS4}-Maya-GGUF" / tier
-        if not whole(src, files):
+        src = next((h for h in ds4_table_homes(models) if h != e and whole(h, files)), None)
+        if src is None:
             continue
         try:
             e.mkdir(parents=True, exist_ok=True)
@@ -4988,7 +5141,7 @@ def ds4_shared_tables(quant: str, d: Path, models: Path, m: dict) -> dict | None
         if table not in m["files"] or not pairs:
             return None
         for tier, names in pairs.items():
-            q = ((man.get("maya") or {}).get("quants") or {}).get(tier, {}).get("files") or {}
+            q = ds4_tier_files(man.get("maya") or {}, tier)
             full = {Path(n).name: v for n, v in q.items() if Path(n).name in names}
             for where in (models / f"{DS4}-Maya-GGUF" / tier, d.parent / "Engram-Q6_K"):   # (Maya's folder first: its
                 # files were checked there, a rerun does not read the 161 GB again through the link)
@@ -5084,6 +5237,7 @@ def ds4_model(quant: str = "exl3") -> dict:
             "repo": man["repo"], "revision": man["revision"], "folder": "",
             "files": {k: v[0] for k, v in both.items()}, "sha256": {k: v[1] for k, v in both.items()},
             "sources": {k: (eg["repo"], eg["revision"]) for k in eg["files"]},
+            "source_folders": {k: eg["folder"] for k in eg["files"]} if eg.get("folder") else {},
             "download_gb": sum(v[0] for v in both.values()) / 1e9}
 
 
@@ -5342,28 +5496,42 @@ def set_up_ds4(a, prev: dict) -> Path | None:
     m = ds4_gguf_model(quant) if gguf else ds4_model(quant)
     if not gguf:                                       # (the Engram tables from the other EXL3 quant's folder)
         ds4_link_engram(d, m, models, prev)
-    if quant in DS4_ABL and not ds4_abl_engram_there(d, models):   # (the tables follow: room for them too)
-        m = dict(m, also_gb=ds4_abl_engram_gb(), also_what="Maya's Q6_K n-gram tables, downloaded after it")
     old = ds4_earlier(m, d) if gguf else None          # (an earlier layout of the files, whole: used as it is)
+    upgrade = ds4_upgrade_from(m, d) if gguf else None   # (Maya-XS v1 whole: v2 is downloaded, the old model files go last)
+    if upgrade and not ds4_upgrade_wanted(a, m, d):    # (kept: the earlier layout used as it is, as ds4_earlier's)
+        old, upgrade = dict(upgrade, engram=None, layout="earlier"), None
+    if upgrade:
+        ds4_upgrade_note(m, d)
     shared = None
-    look = gguf and old is None and quant not in DS4_ABL
+    look = gguf and old is None and quant not in DS4_ABL and quant != "maya-xs"
     if look:                                           # (its checks of the other model's tables print under the heading)
         step(5, f"the model ({DS4})")
         shared = ds4_shared_tables(quant, d, models, m)
     if shared:                                         # (the same Q6_K tables are there: unsloth's UD-IQ3_S <-> Maya's)
         ok(f"{shared['what']}: {(m['download_gb'] - shared['model']['download_gb']):.0f} GB less to download")
         m = shared["model"]
+    # every DeepSeek quant takes its n-gram tables from Maya's repo (Q6_K): unsloth's own table shard is left out unless
+    # it is there whole already (nothing is downloaded twice), Maya-XS's tables are not among its model shards
+    own_table = ds4_own_table(quant) if gguf and old is None and not shared and quant not in DS4_ABL + DS4_MAYA else None
+    if own_table and own_table in m["files"] and not (
+            (d / own_table).is_file() and (d / own_table).stat().st_size == m["files"][own_table]):
+        m = ds4_trim_files(m, [own_table])
+    else:
+        own_table = None
+    tabled = gguf and old is None and bool(own_table or quant == "maya-xs" or (quant in DS4_ABL and m.get("table")))
+    if tabled and not ds4_abl_engram_there(d, models):  # (the tables follow: room for them too)
+        m = dict(m, also_gb=ds4_abl_engram_gb(), also_what="Maya's Q6_K n-gram tables, downloaded after it")
     files = ds4_model_step(a, d, old or m, announce=not look)             # 5
     if files is None:
         return None
-    if gguf and old is None:
+    if gguf and old is None and not upgrade:
         ds4_unused(m, d)
     engram = old and old["engram"]                     # (v1.1.16's Maya-S: its Engram tables beside it)
-    without = [m["table"]] if quant in DS4_ABL and m.get("table") else None
-    if without:                                        # (orcarouter's: Maya's Q6_K tables, its own table shard left out)
-        if (d / m["table"]).exists():
-            warn(f"{d / m['table']}: the n-gram table orcarouter ships, not used - Maya's Q6_K tables are read instead; "
-                 f"you can delete it ({(d / m['table']).stat().st_size / 1e9:.1f} GB)")
+    without = [m["table"]] if quant in DS4_ABL and m.get("table") else [own_table] if own_table else None
+    if without or (tabled and quant == "maya-xs"):     # (Maya's Q6_K tables; the quant's own table shard, if any, left out)
+        if without and (d / without[0]).exists():
+            warn(f"{d / without[0]}: the n-gram table the model's publisher ships, not used - Maya's Q6_K tables are "
+                 f"read instead; you can delete it ({(d / without[0]).stat().st_size / 1e9:.1f} GB)")
         engram = ds4_abl_engram_step(a, d, models)
         if engram is None:
             return None
@@ -5386,6 +5554,10 @@ def set_up_ds4(a, prev: dict) -> Path | None:
         else:
             ok("the model's own vision tower runs in the engine: its weights in RAM, no VRAM between pictures (about "
                "320 MB of the first GPU's while one is read); the server resizes the pictures")
+    if upgrade:                                        # (the new files are whole and packed: the old model files go)
+        ds4_upgrade_drop(upgrade, m, d)
+    if gguf:                                           # (an earlier layout's copy of the shared tables: one copy, #777)
+        ds4_table_dupes(pack, d)
     cfg_path = write_config_ds4(a, pc, meta, pack, ctx, models, d, quant, vision)   # 8
     if (drafter or not gguf) and CDS.has_drafter(read_json(cfg_path)):
         how = drafting_choice(a, "The DSpark drafter", "10-30")

@@ -1,0 +1,13 @@
+{
+  "policy_checks": 336010,
+  "reference_head": "dede882111be994b3e913463c8fa6b211f34633d",
+  "changed_engine_files": [
+    "src/ds4/ds4_main.cpp"
+  ],
+  "gpu_sections": {
+    ".hip_fatbin": "92096f8e43afcbe13fbd89b0c3157ea61d20973d02a99e84ef58f84c3f7c3a50"
+  },
+  "reference_md5": "51749e860763aea34847b183de95a933",
+  "candidate_md5": "64f5092b583ea33815069fbbf28057ea",
+  "gpu_execution": false
+}

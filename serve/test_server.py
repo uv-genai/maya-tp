@@ -2198,13 +2198,14 @@ class ModelManagement(unittest.TestCase):
         finally:
             conn.close()
 
-    def test_off_unless_the_config_turns_it_on(self):
+    def test_off_unless_explicitly_enabled(self):
         for method, path in (("POST", "/models/load"), ("POST", "/models/unload"), ("GET", "/models/sse")):
             self.assertEqual(self.call(method, path, {} if method == "POST" else None)[0], 404, path)
         self.assertEqual((self.engine.closes, self.engine.restarts), (0, 0))
         from serve.server import model_management_setting
         self.assertFalse(model_management_setting({}, env={}))
         self.assertTrue(model_management_setting({"model_management": True}, env={}))
+        self.assertFalse(model_management_setting({"model_management": False}, env={}))
         self.assertFalse(model_management_setting({"model_management": True}, env={"MAYA_MODEL_MANAGEMENT": "0"}))
         self.assertTrue(model_management_setting({}, env={"MAYA_MODEL_MANAGEMENT": "on"}))
 
@@ -2599,6 +2600,37 @@ class ThinkingBudgetAtASentenceEnd(unittest.TestCase):
         self.assertEqual(len(msg.get("reasoning_content") or ""), 375)
         self.assertEqual(msg.get("content"), "Done.")
         self.assertLessEqual(375 + 1 + len("Done."), 1301)
+
+    def test_engine_gets_the_soft_close_tables(self):   # (#746)
+        class Tok:
+            tokens = ["a", "end.", ".", "\n", "3.", "x"]
+
+            def decode(self, ids):
+                return self.tokens[ids[0]]
+        from serve import server
+        keys = server.think_stop_tables(Tok())
+        self.assertEqual(keys, " think_stop=1,3 think_weak=2 think_dig=1,2,4")
+        smp = {"_think_budget": 612, "_think_end": 9, "_think_soft": 100, "_think_stops": keys}
+        self.assertIn("think_soft=100 think_stop=1,3", StrataEngine.sampling_keys(smp))
+
+    def test_resuming_reduces_both_budgets_and_clears_tables_after_thinking(self):
+        from serve.server import Service
+        sampling = {"_think_budget": 612, "_think_end": 9, "_think_soft": 100,
+                    "_think_stops": " think_stop=2", "temperature": 0.0}
+        resumed = Service._resumed_sampling(sampling, [1] * 70)
+        self.assertEqual((resumed["_think_budget"], resumed["_think_soft"]), (542, 30))
+        self.assertEqual(resumed["_think_stops"], sampling["_think_stops"])
+        self.assertEqual(Service._resumed_sampling(sampling, [1] * 110)["_think_soft"], 1)
+        self.assertEqual(Service._resumed_sampling(sampling, [1, 9]), {"temperature": 0.0})
+        self.assertEqual((sampling["_think_budget"], sampling["_think_soft"]), (612, 100))
+
+    def test_glm_soft_close_keeps_deepseek_tables_off_the_wire(self):
+        _, calls = self.run_one(self.SENT, 100, 8192)
+        for sampling in calls:
+            self.assertNotIn("_think_stops", sampling)
+            keys = StrataEngine.sampling_keys(sampling)
+            self.assertNotIn("think_stop=", keys)
+            self.assertNotIn("think_soft=", keys)
 
 
 class MalformedToolCallAnswers(unittest.TestCase):

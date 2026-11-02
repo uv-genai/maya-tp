@@ -16,12 +16,12 @@ model descriptions retained from Project Maya are upstream references, not fork 
 | Responses API | [Responses](RESPONSES.md) |
 | Contributor workflow and validation | [Contributing](../CONTRIBUTING.md) |
 | Coding-agent rules | [AGENTS.md](../AGENTS.md) |
-| Coding-agent current state and restart prompt | [Handoff §30](../Handoff.md#30-current-restart-state--documentation-audit-2026-11-02-82), [Handoff-Prompt](../Handoff-Prompt.md) |
+| Coding-agent current state and restart prompt | [Handoff](../Handoff.md), [Handoff-Prompt](../Handoff-Prompt.md) |
 | Published versus unreleased changes | [Changelog](../CHANGELOG.md) |
-| Upstream integration decisions and evidence | [Integration index](upstream/INTEGRATION-2026-11-01.md), [completion report](upstream/COMPLETION-2026-11-02.md) |
+| Upstream integration decisions and evidence | [Latest v1.1.49 merge](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
 
 At the 2026-11-02 checkpoint, `main` includes the completed semantic integration through upstream
-v1.1.46. The latest published fork release remains legacy v1.1.42; future fork tags use
+v1.1.49 (v1.1.47–v1.1.49 in one cumulative merge). The latest published fork release remains legacy v1.1.42; future fork tags use
 `tp-vMAJOR.MINOR.PATCH`. Production binaries were intentionally restored while validated review
 builds were retained. See [executable selection](TP2-RUN.md#development-pair-production-and-review-builds)
 before launching from an existing development checkout.

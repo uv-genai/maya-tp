@@ -6,6 +6,13 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.47–v1.1.49 cumulative integration** (#85): merge directly from v1.1.49. Keep both
+  `--engine maya` and legacy `--engine strata` working, improve monitor/setup readiness, and add
+  DeepSeek Maya-XS v2 upgrade/shared-table fixes and engine-side soft thinking closure. Preserve
+  opt-in model management, all GLM TP2/MTP code/tuning and existing gfx1151 chunk defaults.
+  Unrelated NVIDIA/Qwen, local multi-GPU chunk tuning and Windows-only changes remain outside scope.
+  See [review and validation](docs/upstream/v1.1.49.md); no new GPU performance claim or deployment.
+
 - **Documentation consistency** (#82): refresh user/agent guides for the completed upstream integration,
   opt-in TP2 MTP, corrected benchmarks, numeric thinking budgets and production/review executable
   selection. Clarify process ownership and mark original plans/platform references as historical.
