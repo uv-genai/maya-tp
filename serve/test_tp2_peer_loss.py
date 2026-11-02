@@ -38,7 +38,12 @@ for line in sys.stdin:
 ''')
         script.chmod(0o755)
         engine = StrataEngine(str(script), [])
-        self.addCleanup(engine.close)
+        def close_engine():
+            engine.close()
+            engine.proc.wait(timeout=5)
+            engine.proc.stdin.close()
+            engine.proc.stdout.close()
+        self.addCleanup(close_engine)
         return engine, seen
 
     @staticmethod
@@ -78,7 +83,8 @@ for line in sys.stdin:
         with self.assertRaises(urllib.error.HTTPError) as failed:
             urllib.request.urlopen(req, timeout=10)
         self.assertEqual(failed.exception.code, 400)
-        self.assertIn('TP2 pair down', json.load(failed.exception)['error']['message'])
+        with failed.exception as response:
+            self.assertIn('TP2 pair down', json.load(response)['error']['message'])
         with urllib.request.urlopen(base + '/health', timeout=10) as response:
             health = json.load(response)
         self.assertEqual((health['status'], health['tp']['peer']), ('degraded', 'down'))

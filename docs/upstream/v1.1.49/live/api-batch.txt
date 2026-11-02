@@ -1,0 +1,16 @@
+READY Maya-S-v2-IQ2_XXS mtp
+PASS Maya-S-v2-IQ2_XXS mtp mtp_acceptance
+PASS Maya-S-v2-IQ2_XXS mtp regression_collectives
+PASS Maya-S-v2-IQ2_XXS mtp lifecycle/media/idle and owned PIDs stable
+PASS Maya-S-v2-IQ2_XXS mtp prefill_cancel
+PASS Maya-S-v2-IQ2_XXS mtp long_loop_reuse
+Traceback (most recent call last):
+  File "/tmp/maya-v49-live-87/api_batch.py", line 140, in <module>
+    model(name)
+    ~~~~~^^^^^^
+  File "/tmp/maya-v49-live-87/api_batch.py", line 120, in model
+    down = recovery_fail(p)
+  File "/tmp/maya-v49-live-87/api_batch.py", line 92, in recovery_fail
+    assert error and 'TP2 pair down' in str(error), error
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'type': 'invalid_request_error', 'message': 'verbs communicator is poisoned: verbs peer closed the bootstrap connection'}

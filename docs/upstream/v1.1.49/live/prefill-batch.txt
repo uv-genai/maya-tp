@@ -1,0 +1,116 @@
+READY Maya-S-v2-IQ2_XXS mtp
+PASS MTP bias rejection/spec1, Responses/Anthropic limits and MTP follow-up
+PASS prefill arm candidate
+READY Maya-S-v2-IQ2_XXS mtp
+PASS prefill arm baseline
+{
+  "order": [
+    "candidate",
+    "baseline"
+  ],
+  "engine_md5_both": "b398d4a0711430edd6a28b95264c7293",
+  "baseline_server": "d7626ac",
+  "candidate_server": "e1682cb",
+  "warmup": "first full 1K/4K/8K cycle retained and excluded from medians",
+  "pairs": [
+    {
+      "trial": 0,
+      "prompt_tokens": 990,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 1,
+      "prompt_tokens": 4062,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 2,
+      "prompt_tokens": 8158,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 3,
+      "prompt_tokens": 990,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 4,
+      "prompt_tokens": 4062,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 5,
+      "prompt_tokens": 8158,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 6,
+      "prompt_tokens": 990,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 7,
+      "prompt_tokens": 4062,
+      "messages_equal": true,
+      "usage_equal": true
+    },
+    {
+      "trial": 8,
+      "prompt_tokens": 8158,
+      "messages_equal": true,
+      "usage_equal": true
+    }
+  ],
+  "summary": [
+    {
+      "repeats": 960,
+      "baseline_prompt_ms": 3734.3,
+      "candidate_prompt_ms": 3877.8500000000004,
+      "throughput_delta_percent": -3.7017935196049345,
+      "baseline_samples_ms": [
+        3741.3,
+        3727.3
+      ],
+      "candidate_samples_ms": [
+        3871.9,
+        3883.8
+      ]
+    },
+    {
+      "repeats": 4032,
+      "baseline_prompt_ms": 13380.25,
+      "candidate_prompt_ms": 13382.35,
+      "throughput_delta_percent": -0.01569231114116887,
+      "baseline_samples_ms": [
+        12858.2,
+        13902.3
+      ],
+      "candidate_samples_ms": [
+        13386.2,
+        13378.5
+      ]
+    },
+    {
+      "repeats": 8128,
+      "baseline_prompt_ms": 25456.199999999997,
+      "candidate_prompt_ms": 25135.800000000003,
+      "throughput_delta_percent": 1.2746759601842461,
+      "baseline_samples_ms": [
+        24338.8,
+        26573.6
+      ],
+      "candidate_samples_ms": [
+        24907.7,
+        25363.9
+      ]
+    }
+  ]
+}
+PASS all 9 prefill responses/usage/cache0; warm timing comparison recorded

@@ -1,0 +1,30 @@
+{
+  "owner": "d3842f5d7ace48a88a849d88bc97d63c",
+  "root": 336881,
+  "processes": [
+    {
+      "pid": 336881,
+      "start": 17036649,
+      "state": "R"
+    },
+    {
+      "pid": 336886,
+      "start": 17036687,
+      "state": "S"
+    }
+  ],
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/fixed-source/serve/server.py",
+    "--engine",
+    "maya",
+    "--config",
+    "/tmp/maya-v49-live-87/Maya-M-recovery-fixed/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "alive": [],
+  "stopped": true
+}

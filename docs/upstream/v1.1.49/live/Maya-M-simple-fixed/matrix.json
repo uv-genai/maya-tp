@@ -1,0 +1,132 @@
+[
+  {
+    "case": "seven-draft-window",
+    "mode": "simple",
+    "wall_s": 35.703,
+    "usage": {
+      "prompt_tokens": 990,
+      "completion_tokens": 64,
+      "total_tokens": 1054,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 990,
+      "prompt_ms": 30116.0,
+      "prompt_per_token_ms": 30.42,
+      "prompt_per_second": 32.9,
+      "predicted_n": 64,
+      "predicted_ms": 5562.2,
+      "predicted_per_token_ms": 86.909,
+      "predicted_per_second": 11.5,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Document Summary\n\nThe document contains no substantive content to summarize. It consists entirely of the word \"alpha\" repeated hundreds of times in a uniform sequence, with",
+      "reasoning_content": "The user has sent a document that consists entirely of the word \"alpha\" repeated many times. This appears to be a stress-test document with no actual meaningful"
+    }
+  },
+  {
+    "case": "over-48MiB",
+    "mode": "simple",
+    "wall_s": 46.478,
+    "usage": {
+      "prompt_tokens": 7290,
+      "completion_tokens": 32,
+      "total_tokens": 7322,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 7290,
+      "prompt_ms": 44967.1,
+      "prompt_per_token_ms": 6.168,
+      "prompt_per_second": 162.1,
+      "predicted_n": 32,
+      "predicted_ms": 1495.5,
+      "predicted_per_token_ms": 46.734,
+      "predicted_per_second": 21.4,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Summary\n\nThe document contains no substantive content. It consists entirely of the word",
+      "reasoning_content": "The user has provided a document that consists entirely of the word \"alpha\""
+    }
+  },
+  {
+    "case": "reuse-after-large-prompt",
+    "mode": "simple",
+    "wall_s": 1.903,
+    "usage": {
+      "prompt_tokens": 7333,
+      "completion_tokens": 24,
+      "total_tokens": 7357,
+      "prompt_tokens_details": {
+        "cached_tokens": 7289
+      }
+    },
+    "timings": {
+      "cache_n": 7289,
+      "prompt_n": 44,
+      "prompt_ms": 760.8,
+      "prompt_per_token_ms": 17.291,
+      "prompt_per_second": 57.8,
+      "predicted_n": 24,
+      "predicted_ms": 1113.5,
+      "predicted_per_token_ms": 46.396,
+      "predicted_per_second": 21.6,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## The Simple Version\n\nThe document is just the word \"",
+      "reasoning_content": "The user is asking me to explain \"the same idea"
+    }
+  },
+  {
+    "case": "multiple-prefill-chunks",
+    "mode": "simple",
+    "wall_s": 46.922,
+    "usage": {
+      "prompt_tokens": 14550,
+      "completion_tokens": 32,
+      "total_tokens": 14582,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 14550,
+      "prompt_ms": 45458.7,
+      "prompt_per_token_ms": 3.124,
+      "prompt_per_second": 320.1,
+      "predicted_n": 32,
+      "predicted_ms": 1445.5,
+      "predicted_per_token_ms": 45.172,
+      "predicted_per_second": 22.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    },
+    "message": {
+      "role": "assistant",
+      "content": "## Summary\n\nThe document contains no substantive content to summarize. It consists entirely of",
+      "reasoning_content": "The user has provided a document that consists entirely of the word \"alpha\""
+    }
+  },
+  {
+    "case": "stream-after-large-prompt",
+    "mode": "simple",
+    "chunks": 25,
+    "wall_s": 1.84
+  }
+]

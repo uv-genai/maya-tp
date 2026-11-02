@@ -1,0 +1,18 @@
+{
+  "owner": "selftest-owned-tree",
+  "root": 3046696,
+  "processes": [
+    {
+      "pid": 3046696,
+      "start": 68225645,
+      "state": "S"
+    },
+    {
+      "pid": 3046697,
+      "start": 68225646,
+      "state": "S"
+    }
+  ],
+  "alive": [],
+  "stopped": true
+}

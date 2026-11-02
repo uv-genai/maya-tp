@@ -1,0 +1,38 @@
+{
+  "owner": "9d74ee036aa945f69be21db8cf835719",
+  "root": 3065573,
+  "processes": [
+    {
+      "pid": 3065573,
+      "start": 68589970,
+      "state": "R"
+    }
+  ],
+  "argv": [
+    "/tmp/maya-v49-live-87/fixed-source/build-hip/maya",
+    "--glm-pack",
+    "/home/ugo/software/Maya-data/models/Maya-L/pack",
+    "--max-context",
+    "32768",
+    "--expert-cache",
+    "auto",
+    "--prefill",
+    "auto",
+    "--kv-streaming",
+    "on",
+    "--expert-profile",
+    "/tmp/maya-v49-live-87/fixed-source/data/expert-profile-glm.bin",
+    "--tp-world-size",
+    "2",
+    "--tp-bootstrap-port",
+    "18587",
+    "--tp-rdma-device",
+    "usb4_rdma5",
+    "--tp-rank",
+    "1",
+    "--tp-bootstrap-host",
+    "strix-halo-1.local"
+  ],
+  "alive": [],
+  "stopped": true
+}

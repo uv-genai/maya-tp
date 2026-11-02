@@ -1,0 +1,5 @@
+PASS strict S-technical 8 warm/measured records, raw pick differences0
+PASS strict S-code 8 warm/measured records, raw pick differences0
+PASS strict M 8 warm/measured records, raw pick differences0
+PASS strict L 8 warm/measured records, raw pick differences0
+PASS all S/M/L strict historical references

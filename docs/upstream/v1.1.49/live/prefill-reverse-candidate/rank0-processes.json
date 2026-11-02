@@ -1,0 +1,30 @@
+{
+  "owner": "9ce9e8372ba84de19a563caba4408a9c",
+  "root": 346334,
+  "processes": [
+    {
+      "pid": 346334,
+      "start": 17465618,
+      "state": "R"
+    },
+    {
+      "pid": 346337,
+      "start": 17465654,
+      "state": "S"
+    }
+  ],
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/fixed-source/serve/server.py",
+    "--engine",
+    "strata",
+    "--config",
+    "/tmp/maya-v49-live-87/prefill-reverse-candidate/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "alive": [],
+  "stopped": true
+}

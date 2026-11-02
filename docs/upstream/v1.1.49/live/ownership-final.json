@@ -1,0 +1,553 @@
+{
+  "rank1": [
+    {
+      "path": "Maya-L-mtp-fixed/rank0-processes.json",
+      "root": 337911,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-L-mtp-fixed/rank1-processes.json",
+      "root": 3064209,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-L-recovery-fixed/rank0-processes.json",
+      "root": 338724,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-L-recovery-fixed/rank1-processes.json",
+      "root": 3065573,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-L-simple-fixed/rank0-processes.json",
+      "root": 339917,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-L-simple-fixed/rank1-processes.json",
+      "root": 3068154,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-mtp-fixed/rank0-processes.json",
+      "root": 336162,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-mtp-fixed/rank1-processes.json",
+      "root": 3061083,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-recovery-fixed/rank0-processes.json",
+      "root": 336881,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-recovery-fixed/rank1-processes.json",
+      "root": 3062282,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-simple-fixed/rank0-processes.json",
+      "root": 337238,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-simple-fixed/rank1-processes.json",
+      "root": 3062911,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-mtp/rank0-processes.json",
+      "root": 330663,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-mtp/rank1-processes.json",
+      "root": 3047380,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-mtp-fixed/rank0-processes.json",
+      "root": 334602,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-mtp-fixed/rank1-processes.json",
+      "root": 3055503,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-recovery-fixed/rank0-processes.json",
+      "root": 335422,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-recovery-fixed/rank1-processes.json",
+      "root": 3059918,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-simple-fixed/rank0-processes.json",
+      "root": 335570,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-simple-fixed/rank1-processes.json",
+      "root": 3060144,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-L-mtp-rank0-cleanup.json",
+      "root": 343136,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-L-mtp-rank1-processes.json",
+      "root": 3075397,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-L-simple-rank0-cleanup.json",
+      "root": 342919,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-L-simple-rank1-processes.json",
+      "root": 3074959,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-M-mtp-rank0-cleanup.json",
+      "root": 342738,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-M-mtp-rank1-processes.json",
+      "root": 3074505,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-M-simple-rank0-cleanup.json",
+      "root": 342574,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-M-simple-rank1-processes.json",
+      "root": 3074104,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-S-v2-IQ2_XXS-mtp-rank0-cleanup.json",
+      "root": 342468,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-S-v2-IQ2_XXS-mtp-rank1-processes.json",
+      "root": 3073902,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-S-v2-IQ2_XXS-simple-rank0-cleanup.json",
+      "root": 342313,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-S-v2-IQ2_XXS-simple-rank1-processes.json",
+      "root": 3073385,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "peer-candidate-delay1/rank0-processes.json",
+      "root": 332082,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "peer-candidate-delay1/rank1-processes.json",
+      "root": 3050164,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "peer-control-rerun-delay1/rank0-processes.json",
+      "root": 333191,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "peer-control-rerun-delay1/rank1-processes.json",
+      "root": 3052495,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-baseline/rank0-processes.json",
+      "root": 345430,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-baseline/rank1-processes.json",
+      "root": 3080284,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-candidate/rank0-processes.json",
+      "root": 344895,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-candidate/rank1-processes.json",
+      "root": 3079309,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-reverse-baseline/rank0-processes.json",
+      "root": 345913,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-reverse-baseline/rank1-processes.json",
+      "root": 3081354,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-reverse-candidate/rank0-processes.json",
+      "root": 346334,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-reverse-candidate/rank1-processes.json",
+      "root": 3082187,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-L/benchmark-cleanup.json",
+      "root": 344643,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-L/benchmark-owned-rank1.json",
+      "root": 3078734,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-M/benchmark-cleanup.json",
+      "root": 344491,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-M/benchmark-owned-rank1.json",
+      "root": 3078428,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-S-code/benchmark-cleanup.json",
+      "root": 344221,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-S-code/benchmark-owned-rank1.json",
+      "root": 3077867,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-S-technical/benchmark-cleanup.json",
+      "root": 343961,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-S-technical/benchmark-owned-rank1.json",
+      "root": 3077258,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    }
+  ],
+  "rank0": [
+    {
+      "path": "Maya-L-mtp-fixed/rank0-processes.json",
+      "root": 337911,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-L-recovery-fixed/rank0-processes.json",
+      "root": 338724,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-L-simple-fixed/rank0-processes.json",
+      "root": 339917,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-mtp-fixed/rank0-processes.json",
+      "root": 336162,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-recovery-fixed/rank0-processes.json",
+      "root": 336881,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-M-simple-fixed/rank0-processes.json",
+      "root": 337238,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-mtp/rank0-processes.json",
+      "root": 330663,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-mtp-fixed/rank0-processes.json",
+      "root": 334602,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-recovery-fixed/rank0-processes.json",
+      "root": 335422,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "Maya-S-v2-IQ2_XXS-simple-fixed/rank0-processes.json",
+      "root": 335570,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-L-mtp-rank0-processes.json",
+      "root": 343136,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-L-simple-rank0-processes.json",
+      "root": 342919,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-M-mtp-rank0-processes.json",
+      "root": 342738,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-M-simple-rank0-processes.json",
+      "root": 342574,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-S-v2-IQ2_XXS-mtp-rank0-processes.json",
+      "root": 342468,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "cli-fixed/Maya-S-v2-IQ2_XXS-simple-rank0-processes.json",
+      "root": 342313,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "peer-candidate-delay1/rank0-processes.json",
+      "root": 332082,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "peer-control-rerun-delay1/rank0-processes.json",
+      "root": 333191,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-baseline/rank0-processes.json",
+      "root": 345430,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-candidate/rank0-processes.json",
+      "root": 344895,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-reverse-baseline/rank0-processes.json",
+      "root": 345913,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "prefill-reverse-candidate/rank0-processes.json",
+      "root": 346334,
+      "recorded_identities": 2,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-L/benchmark-owned-rank0.json",
+      "root": 344643,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-M/benchmark-owned-rank0.json",
+      "root": 344491,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-S-code/benchmark-owned-rank0.json",
+      "root": 344221,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    },
+    {
+      "path": "strict-S-technical/benchmark-owned-rank0.json",
+      "root": 343961,
+      "recorded_identities": 1,
+      "alive": [],
+      "stopped": true
+    }
+  ],
+  "all_registered_processes_ended": true
+}

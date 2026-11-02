@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/fixed-source/serve/server.py",
+    "--engine",
+    "strata",
+    "--config",
+    "/tmp/maya-v49-live-87/prefill-reverse-candidate/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "cwd": "/tmp/maya-v49-live-87/fixed-source",
+  "env": {},
+  "log": "/tmp/maya-v49-live-87/prefill-reverse-candidate/rank0.txt"
+}

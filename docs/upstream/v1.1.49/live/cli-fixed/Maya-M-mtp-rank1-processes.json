@@ -1,0 +1,13 @@
+{
+  "owner": "87eb9767a2e9478f8aa7d8c7e5761cbe",
+  "root": 3074505,
+  "processes": [
+    {
+      "pid": 3074505,
+      "start": 68791189,
+      "state": "R"
+    }
+  ],
+  "alive": [],
+  "stopped": true
+}

@@ -122,6 +122,7 @@ gfx1201 reference, not this fork's target build recipe.
 6. **Per-model engines, not one generic backend.** `maya` (GLM: `src/core`, `src/prefill`, …), `maya-ds4` (`src/ds4`), and `maya-mm3` (`src/mm3`) share kernels but not control flow. A change in one engine usually does not apply to the others. Server routing and templates differ per model family (DeepSeek: vendored `serve/ds41_encoding.py` + fixtures; others: Jinja).
 7. **Pack integrity.** The pack index next to model shards is hashed; engine refuses mismatched shards. Use `./maya.sh --repack` after intentional pack changes.
 8. **TP2 launchers take the model as input.** Do not hardcode Maya-S paths in `tools/tp2/*` or `tools/llama-swap/tp2.sh`. Use `tools/tp2/model_env.sh`: `--model NAME`/`MAYA_MODEL`, `--pack PATH`/`MAYA_PACK`, `--config PATH`/`MAYA_CONFIG` (and `MAYA_MODELS_DIR`). Pass the **same** selection to both ranks. Document new flags in `docs/TP2-RUN.md` “Choosing a model”. Example pack root: `/home/ugo/software/Maya-data/models/<Name>/pack`.
+9. **A fatal TP transport error is sticky on its first occurrence.** A queued collective may fail before the mirror-send guard. Preserve `StrataEngine._request_error` and the pre-write `generate` guard: health must report the pair down immediately, with the original cause retained, and later GEN must not reach the engine. Never clear communicator poison or retry/restart one rank. Regression: `python -m unittest serve.test_tp2_peer_loss` (#88).
 
 ## PRs (from CONTRIBUTING.md)
 

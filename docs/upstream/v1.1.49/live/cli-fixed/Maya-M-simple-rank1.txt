@@ -1,0 +1,71 @@
+glm settings from the environment: MAYA_GLM_LOOP_ANSWER=0, MAYA_GLM_LOOP_THINK=0, MAYA_GLM_NO_MTP=1, MAYA_GLM_TIMING=1
+INFO tp_world=2 tp_rank=1 rdma=rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 n_ff=2048 n_ff_dense=12288 ff_band=[1024,2048)
+glm pack: CUDA0 dense weights 6.86 GB: | kda q/k/v q14 2677 MB | attn output q14 1470 MB | shared experts q14 826 MB | other q14 496 MB | dense ffn q14 354 MB | mla k_b/v_b bf16 352 MB | mla q/kv q14 288 MB | kda small bf16 221 MB | mla q/kv bf16 132 MB | routers bf16 94 MB | mhc bf16 67 MB | dsa indexer bf16 24 MB | kda small f32 13 MB | norms f32 0 MB | dense ffn f32 0 MB | mla q/kv f32 0 MB | other f32 0 MB | mhc f32 0 MB | dsa indexer f32 0 MB
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 32768 tokens (--prefill auto, up to 32768; mixer sub-batches of 256), borrowing 6009 MB of the expert pool while a prompt runs (activations 5157, weight scratch 96, expert staging 52, prestage 688: 160 experts); disk landing ring 12 experts (52 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 16.05 of 121.00 GB in use - dense weights 6.86, state/KV (4096 ctx) 0.16, activations 0.04, other (context, MTP, scratch, prompt path) 9.00
+glm fast: CUDA0 unified memory: MemAvailable 110.98 GB, headroom 16.00 GB + 1024 MB reserve, experts need 48.96 GB, pool budget 48.96 GB
+glm fast: CUDA0 layers [0,45) expert pool 48.96 GB, 288-288 slots/layer (12096 total)
+glm fast: CUDA0 slots per layer 3:288 4:288 5:288 6:288 7:288 8:288 9:288 10:288 11:288 12:288 13:288 14:288 15:288 16:288 17:288 18:288 19:288 20:288 21:288 22:288 23:288 24:288 25:288 26:288 27:288 28:288 29:288 30:288 31:288 32:288 33:288 34:288 35:288 36:288 37:288 38:288 39:288 40:288 41:288 42:288 43:288 44:288 
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.13 GB pinned, 32 slots
+glm fast: CUDA0 warming the expert tiers 10% (5.2 of 52.4 GB, 4 s)
+glm fast: CUDA0 warming the expert tiers 20% (10.5 of 52.4 GB, 9 s)
+glm fast: CUDA0 warming the expert tiers 30% (15.7 of 52.4 GB, 12 s)
+glm fast: CUDA0 warming the expert tiers 40% (21.0 of 52.4 GB, 14 s)
+glm fast: CUDA0 warming the expert tiers 50% (26.2 of 52.4 GB, 16 s)
+glm fast: CUDA0 warming the expert tiers 60% (31.4 of 52.4 GB, 18 s)
+glm fast: CUDA0 warming the expert tiers 70% (36.7 of 52.4 GB, 21 s)
+glm fast: CUDA0 warming the expert tiers 80% (41.9 of 52.4 GB, 23 s)
+glm fast: CUDA0 warming the expert tiers 90% (47.2 of 52.4 GB, 25 s)
+glm fast: CUDA0 warming the expert tiers 100% (52.4 of 52.4 GB, 27 s)
+glm fast: CUDA0 tiers warm: 12096 experts (52.4 GB) in 27 s (1.91 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+INFO context=4096 kv=fp16 kv_resident=0 expert_slots=12096 expert_cache_mib=50132 engine_kind=glm-fast experts=12096 vram_slots=12096 vram_gb=49.0 ram_slots=32 ram_gb=0.1 mtp=0 dflash=0 vision_lend=0 cpu_threads=0 cpu_threads_max=0 pcie_share=1.00 logit_bias=1
+VRAM dev=0 pci=0000:c5:00.0 total=129922760704 free=59953098752 weights=7362064384 kv=174489600 kv_ram=0 act=38378072 drafter=0 window=0 pool=52568082432 tail=6388482240 borrow=6300841984 vision=0 slots=12096 ctx=4096 layers=0-45
+glm prefill TP: rank=1 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 51 experts more lent for it)
+glm prefill: CUDA0 chunk 1/1, 11 tokens, wall 623 ms | the copy lane 415 ms: copies 43 (1.0 GB/s), ring wait 0, gaps 0, mixer windows 371 | lead 202, tail 6 | pcie 0.04 GB (ram 0.02, disk 0.03) + 1.02 GB vram | experts: staged 264, resident 10373 (3136 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 20.6/0.1 ms max/min
+glm prefill: 11 tokens in 631.8 ms (57.44 ms/token, 17 tok/s), 1 chunk of 64 tokens | CUDA0 623 ms
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+glm experts: CUDA0 IQ2_S gate/up on the original kernel (token path)
+glm vram: prompt 12 tokens read in 30.2 s; VRAM free CUDA0 55.8 of 121.0 GB before, 55.7 after
+T 12089
+T 13
+T 154842
+T 785
+T 6722
+T 315
+T 9621
+T 374
+T 3070
+T 59190
+T 334
+T 13
+T 154827
+T 785
+T 1196
+T 374
+T 10156
+T 911
+T 279
+T 6722
+T 315
+T 9621
+T 13
+T 1096
+T 374
+T 264
+T 4285
+T 59485
+T 3405
+T 448
+T 264
+T 1632
+DONE 32 12 30192.7 1968.0 length 0 0 0 10398 10416
+glm stat: decode 61.50 ms/tok (16.26 tok/s) | vram hit 99.83% | ram fetches 0.00/tok | disk 0.56 reads/tok in 0.47 waits/tok, 2.57 ms/tok | promotions 0.56/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 2516.1 ms/tok | vram 12075/12096 ram 0/32
+glm follow: 32 decoded ids written to /tmp/maya-v49-live-87/cli-fixed/Maya-M-simple-rank1-ids.txt (MAYA_GLM_SPEC_FOLLOW_SAVE)
+glm fast timing: 32 tokens, 62.71 ms/token
+glm fast tiers CUDA0: vram hits 10734, ram fetches 0, disk reads 18 (99.83% vram hit) | promotions 18 (scratch 0) demotions 0 drops 0 prefetches 0 | disk waits 15, 82.3 ms

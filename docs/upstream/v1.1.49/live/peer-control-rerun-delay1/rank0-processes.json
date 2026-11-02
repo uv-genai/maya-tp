@@ -1,0 +1,30 @@
+{
+  "owner": "5ba73894f5a14199a9fd0294baf5f7e4",
+  "root": 333191,
+  "processes": [
+    {
+      "pid": 333191,
+      "start": 16882723,
+      "state": "R"
+    },
+    {
+      "pid": 333196,
+      "start": 16882763,
+      "state": "S"
+    }
+  ],
+  "argv": [
+    "/home/ugo/software/project-maya/.venv/bin/python",
+    "/tmp/maya-v49-live-87/control-source/serve/server.py",
+    "--engine",
+    "strata",
+    "--config",
+    "/tmp/maya-v49-live-87/peer-control-rerun-delay1/config.json",
+    "--port",
+    "18087",
+    "--host",
+    "0.0.0.0"
+  ],
+  "alive": [],
+  "stopped": true
+}

@@ -1,6 +1,39 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read AGENTS.md, then Handoff.md §31 for current state. Earlier sections retain historical evidence.
+Read AGENTS.md, then Handoff.md §32 for current state. Earlier sections retain historical evidence.
+
+## Fresh live validation complete (#87 / #88)
+
+Read Handoff.md §32 and docs/upstream/v1.1.49.md/live evidence. Main997bba7 integrates upstream
+v1.1.47–49; fix e1682cb/PR89 adds first-fatal-transport sticky-down health and a pre-GEN refusal.
+Exact-final-head/merge/main CI and closure provenance are on #87/#85/PR89. If #87 is still open
+after interruption, finish GitHub closeout only; all runtime gates have completed successfully.
+No new GPU work/tag/release/deployment is required for this batch.
+
+API38059/CLI30667/strict89906/prefill32674/reverse10081 EXIT0. All6 S/M/L ordinary/MTP7 modes pass
+large/reuse/stream/forcedidle/guards/18Kcancel; MTP rounds146/127/148,8 asymmetric retries each.
+Peer loss immediately down/degraded/no respawn and dual-rank recovery8/8 per model. S/M exercise
+queued poison, L existing mirror-send path. Healthy suites have no spontaneous peer-closed error.
+CLI32/32 all6 modes, S exact acceptedv42, L WARM0 retained. Strict S256technical/code+M/L64:
+all32 warm/measured records raw-pickdiff0. Both prefill orders all18 message/usage pairs equal/cache0;
+pooled warm throughput−3.64/−1.66/−1.95% at1K/4K/8K, no speedupclaim. Extra bias/spec1/Responses/
+Anthropic limits/MTP follow-up PASS. CPU HIPmap/613serve11skip/686tools35skip + finalfocused3 PASS.
+Final52 local/26 remote saved ownership records all stopped/alive=[]. Raw failures/outliers retained.
+
+Both premerge d7626ac and merged997bba7 reproduce the first poisoned-error stale-health gap in #6;
+#88 preserves original cause/poison and blocks subsequent GEN. Never clear poison, retry collectives
+or restart one rank. No GLM C++/transport/MTP/tuning/launcher change. Live source archives/configs/logs
+under /tmp/maya-v49-live-87 on both hosts, API18087/bootstrap18587/usb4_rdma5, matchingb398 binaries.
+Durable proofs: docs/upstream/v1.1.49/live/{summary.json,manifest.json,README.md}.
+
+No active engines/builds. Production5a52/reviewb398+DS451749 split and protected remote777cc92 user
+source/configs remain unchanged. User granted full host freedom for this run; no availability question
+is needed for its closeout. Only owned exact PID/starttick/marker cleanup was used, server first.
+Legacy broad harness cleanup #83 remains open. No unrelated service inspection/control.
+
+Cold/first-request outliers remain #33/#60, L WARM0 #42. No full-model DeepSeek GPU acceptance;
+#68/#75/#79 remain open along with all other previously unresolved issues. No tag/release;
+VERSION1.1.42, futuretp-v*.
 
 ## Latest requested batch: direct v1.1.49 merge (#85)
 
@@ -14,11 +47,11 @@ maya and legacy strata work; GLM wire keys remain unchanged. Accept DS4 XS-v2/sh
 read-order and monitor/TUI fixes. Exclude NVIDIA/Qwen allocator, local multi-GPU chunk default,
 Windows pipe helper and conflict-reintroduced Metal functions. VERSION1.1.42, future tp-v*, no release/tag.
 
-Fresh gates: HIP-map,610serve/11skip,686tools/35skip,118focused,42Textual/dashboard and336010 actual
+Preliminary source/host gates before #87: HIP-map,610serve/11skip,686tools/35skip,118focused,42Textual/dashboard and336010 actual
 DS4request-policy checks PASS. Changed DS4main compiles/links against read-only accepted HIP deps;
 isolated build-host-v49/maya-ds4 MD5 64f5092b583ea33815069fbbf28057ea, same GPUimage92096f8e… as51749.
 Only DS4main differs among444 protected engine/build/header/launcher/tuning files; no GLM/TP2/MTP
-math/transport/tuning changes. No fresh GPU/performance claims or runtime deployment.
+math/transport/tuning changes. Fresh GLM GPU results are above; no full DS4 GPU claim or runtime deployment.
 
 The user launches their processes. Stop only your own recorded validation PIDs/process groups;
 do not inspect/manage unrelated services or run broad-cleanup harnesses against user processes.

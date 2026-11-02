@@ -1,0 +1,29 @@
+Starting resident pair with fixed reference; warmups first...
+warmup simple: 44.250 ms/tok, 22.60 tok/s, drafts=0/0
+warmup mtp   : 30.491 ms/tok, 32.80 tok/s, drafts=155/199
+warmup mtp   : 31.004 ms/tok, 32.25 tok/s, drafts=155/199
+warmup simple: 39.325 ms/tok, 25.43 tok/s, drafts=0/0
+measure simple: 39.195 ms/tok, 25.51 tok/s, drafts=0/0
+measure mtp   : 29.996 ms/tok, 33.34 tok/s, drafts=155/199
+measure mtp   : 31.096 ms/tok, 32.16 tok/s, drafts=155/199
+measure simple: 39.263 ms/tok, 25.47 tok/s, drafts=0/0
+{
+  "simple": {
+    "median_ms_per_token": 39.22890625,
+    "median_tokens_per_second": 25.491406607850557,
+    "min_ms_per_token": 39.1953125,
+    "max_ms_per_token": 39.2625,
+    "mean_ms_per_token": 39.22890625,
+    "stdev_ms_per_token": 0.04750873686097317
+  },
+  "mtp": {
+    "median_ms_per_token": 30.5462890625,
+    "median_tokens_per_second": 32.73720084144836,
+    "min_ms_per_token": 29.996484375,
+    "max_ms_per_token": 31.09609375,
+    "mean_ms_per_token": 30.5462890625,
+    "stdev_ms_per_token": 0.7775412457188012
+  },
+  "mtp_latency_change_percent": -22.13321251468743,
+  "mtp_throughput_change_percent": 28.424458269659915
+}

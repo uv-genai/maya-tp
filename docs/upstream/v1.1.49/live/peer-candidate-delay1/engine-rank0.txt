@@ -1,0 +1,123 @@
+[maya] sampling defaults from the config: temperature=1.0, top_p=0.95
+[maya] TP2 images: OFF until RDMA embedding synchronization is implemented
+loading the model (the first start takes a minute or two) ...
+[maya] starting the engine: reading the model's weights ...
+glm settings from the environment: MAYA_GLM_CKPTS=16, MAYA_GLM_CKPT_EVERY=4096, MAYA_GLM_KEEP_CANCELLED=1, MAYA_GLM_MTP_DRAFT=7, MAYA_GLM_MTP_FIXED=7, MAYA_GLM_MTP_TRACE=1, MAYA_GLM_PREFILL_MB=6144, MAYA_GLM_PREFILL_SUB=1024, MAYA_GLM_RAM_HEADROOM_GB=16, MAYA_GLM_RESERVE_MB=1024, MAYA_GLM_SPLIT=0
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 25088 tokens (--prefill auto, up to 32768; mixer sub-batches of 1024), borrowing 6103 MB of the expert pool while a prompt runs (activations 5371, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm fast: CUDA0 VRAM before the expert pool: 17.83 of 121.00 GB in use - dense weights 6.86, state/KV (32768 ctx) 0.59, activations 0.07, other (context, MTP, scratch, prompt path) 10.32
+glm fast: CUDA0 unified memory: MemAvailable 110.01 GB, headroom 16.00 GB + 1024 MB reserve, experts need 42.53 GB, pool budget 42.53 GB
+glm fast: the expert profile /tmp/maya-v49-live-87/source/data/expert-profile-glm.bin ranks 13248 (layer, expert) pairs
+glm fast: CUDA0 layers [0,45) expert pool 42.53 GB, 288-288 slots/layer, the draft layer 288 (12384 total)
+glm fast: CUDA0 all experts fit in the GPU pool; RAM tier is staging only
+glm fast: CUDA0 RAM tier 0.24 GB pinned, 48 slots
+glm fast: CUDA0 warming the expert tiers 10% (4.6 of 45.6 GB, 1 s)
+glm fast: CUDA0 warming the expert tiers 20% (9.1 of 45.6 GB, 5 s)
+glm fast: CUDA0 warming the expert tiers 30% (13.7 of 45.6 GB, 9 s)
+glm fast: CUDA0 warming the expert tiers 40% (18.3 of 45.6 GB, 12 s)
+glm fast: CUDA0 warming the expert tiers 50% (22.8 of 45.6 GB, 16 s)
+[maya] still starting (20 s) - please wait ...
+[maya] still starting (40 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 60% (27.4 of 45.6 GB, 45 s)
+[maya] still starting (60 s) - please wait ...
+[maya] still starting (80 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 70% (32.0 of 45.6 GB, 91 s)
+[maya] still starting (100 s) - please wait ...
+[maya] still starting (120 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 80% (36.5 of 45.6 GB, 131 s)
+[maya] still starting (140 s) - please wait ...
+[maya] still starting (160 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 90% (41.1 of 45.6 GB, 172 s)
+[maya] still starting (180 s) - please wait ...
+glm fast: CUDA0 warming the expert tiers 100% (45.6 of 45.6 GB, 192 s)
+glm fast: CUDA0 tiers warm: 12384 experts (45.6 GB) in 192 s (0.24 GB/s)
+glm fast: CUDA0 CPU lane off: the RAM tier holds no expert
+maya serve: CUDA0: 61783 MiB of VRAM free with everything loaded
+maya generate: glm5-next serve (M3.1): GEN <max_new> [keys] <ids>, GENI <max_new> [keys] <embeddings> <ids>; QUIT to end
+[maya] thinking level when a request names none: max
+[maya] thinking budget: 32768 tokens (then the answer)
+[maya] model management: on (/models/load, /models/unload, /models/sse)
+ready: http://127.0.0.1:18087/v1  (OpenAI: /v1/chat/completions, /v1/responses, Anthropic: /v1/messages, context 32768 tokens)
+       open http://127.0.0.1:18087/ in a browser to chat; close this window to stop the model
+       from other devices: http://192.168.1.22:18087/   (API: http://192.168.1.22:18087/v1)
+       WARNING: no API key - anyone on your network can use this model. Add "api_key": "..." to the config (clients send it as their API key; the web page asks for it)
+glm prefill TP: rank=0 chunk=64 rows (RDMA payload max=50331584 bytes)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 59 experts more lent for it)
+prefill gemm: hipBLASLt tuning enabled (2 tables, 90 rows, gfx1151, version 100401)
+prefill gemm: hipBLASLt table in use: /tmp/maya-v49-live-87/source/tools/hip/gfx1151-glm-hipblaslt-100401.txt
+prefill gemm: Lt fallback; no calibration for dtype=f16 T=21 N=8192 K=1536 ldy=8192 (tune it: tune_hipblaslt --shape 21,8192,1536)
+glm prefill: CUDA0 chunk 1/1, 21 tokens, wall 1189 ms | the copy lane 1069 ms: copies 701 (0.1 GB/s), ring wait 2, gaps 8, mixer windows 358 | lead 115, tail 5 | pcie 0.08 GB (ram 0.03, disk 0.05) + 0.63 GB vram | experts: staged 214, resident 10374 (6745 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 479.6/0.0 ms max/min
+glm prefill: 21 tokens in 1192.8 ms (56.80 ms/token, 18 tok/s), 1 chunk of 64 tokens | CUDA0 1189 ms
+[maya] reading the prompt: 21 of 22 tokens, 1 s so far
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm mla split attention: CUDA0 on the original kernels
+glm vram: prompt 22 tokens read in 1.3 s; VRAM free CUDA0 60.3 of 121.0 GB before, 60.2 after
+glm mtp TP: rank=0 n=7 p0=22 produced=1
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=22 T=8 attempt=0 local-clash=0 retry=1
+glm window: a window's tokens took more scratch slots than a layer has - that window runs again token by token (said once)
+glm mtp TP: rank=0 after-commit p0=22 keep=2
+glm mtp TP: rank=0 round-end p0=22 produced=3 keep=2
+glm mtp: p0 22 drafts 7 kept 2 accepted 1 (947.2 ms)
+glm mtp TP: rank=0 n=7 p0=24 produced=3
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=24 T=8 attempt=0 local-clash=0 retry=1
+glm mtp TP: rank=0 after-commit p0=24 keep=8
+glm mtp TP: rank=0 round-end p0=24 produced=11 keep=8
+glm mtp: p0 24 drafts 7 kept 8 accepted 7 (609.8 ms)
+glm mtp TP: rank=0 n=7 p0=32 produced=11
+[maya] thinking: 4 of max 32 tokens, 2.6 tok/s, 3 s
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=32 T=8 attempt=0 local-clash=0 retry=1
+glm mtp TP: rank=0 after-commit p0=32 keep=5
+glm mtp TP: rank=0 round-end p0=32 produced=16 keep=5
+glm mtp: p0 32 drafts 7 kept 5 accepted 4 (608.3 ms)
+glm mtp TP: rank=0 n=7 p0=37 produced=16
+[maya] thinking reached its budget (15 tokens): closed, answering
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=37 T=8 attempt=0 local-clash=0 retry=1
+glm mtp TP: rank=0 after-commit p0=37 keep=5
+glm mtp TP: rank=0 round-end p0=37 produced=21 keep=5
+glm mtp: p0 37 drafts 7 kept 5 accepted 4 (335.7 ms)
+glm mtp TP: rank=0 n=7 p0=42 produced=21
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=42 T=8 attempt=0 local-clash=0 retry=1
+glm mtp TP: rank=0 after-commit p0=42 keep=3
+glm mtp TP: rank=0 round-end p0=42 produced=24 keep=3
+glm mtp: p0 42 drafts 7 kept 3 accepted 2 (338.6 ms)
+glm mtp TP: rank=0 n=7 p0=45 produced=24
+[maya] answering: 22 of max 32 tokens, 7.7 tok/s, 4 s
+glm mtp TP: rank=0 nd=7 T=8 ok=1
+glm window TP: rank=0 p0=45 T=8 attempt=0 local-clash=0 retry=1
+glm mtp TP: rank=0 after-commit p0=45 keep=3
+glm mtp TP: rank=0 round-end p0=45 produced=27 keep=3
+glm mtp: p0 45 drafts 7 kept 3 accepted 2 (356.6 ms)
+glm mtp TP: rank=0 n=4 p0=48 produced=27
+glm mtp TP: rank=0 nd=4 T=5 ok=1
+glm window TP: rank=0 p0=48 T=5 attempt=0 local-clash=0 retry=1
+glm mtp TP: rank=0 after-commit p0=48 keep=4
+glm mtp TP: rank=0 round-end p0=48 produced=31 keep=4
+glm mtp: p0 48 drafts 4 kept 4 accepted 3 (224.6 ms)
+glm mtp TP: rank=0 n=0 p0=52 produced=31
+glm mtp TP: rank=0 nd=0 T=1 ok=1
+glm mtp TP: rank=0 round-end p0=52 produced=32 keep=1
+glm mtp: p0 52 drafts 0 kept 1 accepted 0 (48.1 ms)
+glm mtp: a drafting round's host time - drafts 151.54 ms, verify 336.97 ms, commit + cache 0.19 ms (7 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 32 emitted tokens outside it, 0 of 7 drafting rounds on the whole head
+glm mtp: 8 rounds, 4.00 tokens a round | rounds by draft length 0:1 4:1 7:6
+glm stat: decode 108.41 ms/tok (9.22 tok/s) | vram hit 99.91% | ram fetches 0.00/tok | disk 0.81 reads/tok in 0.84 waits/tok, 15.66 ms/tok | promotions 0.66/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 57.4 ms/tok | vram 12363/12384 ram 0/48
+glm spec: 23 of 46 drafts accepted (50.0%)
+[maya] done: 32 tokens in 5 s (9.2 tok/s) (length, cancel=False), expert cache 99.9% hit
+[maya] the engine reported an error: verbs communicator is poisoned: verbs peer closed the bootstrap connection
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)
+TP2 mirror send: bootstrap send: Connection reset by peer (pair down)
+[maya] TP2 pair down: bootstrap send: Connection reset by peer - restart both ranks (rank1.sh then rank0.sh)
+[maya] the engine reported an error: TP2 pair down (force reset mirror failed)
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)
+[maya] the engine reported an error: TP2 pair down: restart both ranks
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)
+[maya] stopping (SIGTERM): the engine ends
+glm spec: 46 speculative positions, 50.0% accepted

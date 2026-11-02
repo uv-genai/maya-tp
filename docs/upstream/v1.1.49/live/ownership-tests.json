@@ -1,0 +1,58 @@
+[
+  {
+    "case": "foreign-marker",
+    "pass_": true,
+    "result": {
+      "owner": "selftest-foreign-marker",
+      "root": 3046692,
+      "processes": [
+        {
+          "pid": 3046692,
+          "start": 68225598,
+          "state": "S"
+        }
+      ],
+      "alive": [],
+      "stopped": true
+    }
+  },
+  {
+    "case": "stale-start",
+    "pass_": true,
+    "result": {
+      "owner": "selftest-stale-start",
+      "root": 3046694,
+      "processes": [
+        {
+          "pid": 3046694,
+          "start": 68225621,
+          "state": "S"
+        }
+      ],
+      "alive": [],
+      "stopped": true
+    }
+  },
+  {
+    "case": "owned-tree",
+    "pass_": true,
+    "result": {
+      "owner": "selftest-owned-tree",
+      "root": 3046696,
+      "processes": [
+        {
+          "pid": 3046696,
+          "start": 68225645,
+          "state": "S"
+        },
+        {
+          "pid": 3046697,
+          "start": 68225646,
+          "state": "S"
+        }
+      ],
+      "alive": [],
+      "stopped": true
+    }
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "owner": "selftest-foreign-marker",
+  "root": 3046692,
+  "processes": [
+    {
+      "pid": 3046692,
+      "start": 68225598,
+      "state": "S"
+    }
+  ],
+  "alive": [],
+  "stopped": true
+}

@@ -1,0 +1,203 @@
+{
+  "rejected_mtp_bias": {
+    "error": {
+      "type": "invalid_request_error",
+      "message": "TP2 MTP does not support logit_bias; use spec=1 for ordinary decoding"
+    }
+  },
+  "ordinary_bias_spec1": {
+    "id": "chatcmpl-b07495a091824ddaac46f5e5",
+    "object": "chat.completion",
+    "created": 1793592236,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "RDMA (Remote Direct Memory Access) is a networking technology that allows one computer",
+          "reasoning_content": "The user is asking me to explain RDMA (Remote Direct Memory Access)"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 20,
+      "completion_tokens": 32,
+      "total_tokens": 52,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 20,
+      "prompt_ms": 467.3,
+      "prompt_per_token_ms": 23.365,
+      "prompt_per_second": 42.8,
+      "predicted_n": 32,
+      "predicted_ms": 1256.7,
+      "predicted_per_token_ms": 39.272,
+      "predicted_per_second": 25.5,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "/v1/responses": {
+    "id": "resp_8df78f52254e46e3b9a9689f",
+    "object": "response",
+    "created_at": 1793592238,
+    "status": "incomplete",
+    "error": null,
+    "incomplete_details": {
+      "reason": "max_output_tokens"
+    },
+    "model": "glm-5.3-flash",
+    "output": [
+      {
+        "id": "rs_3733e2bbafe24f74b0035795",
+        "type": "reasoning",
+        "status": "completed",
+        "summary": [],
+        "content": [
+          {
+            "type": "reasoning_text",
+            "text": "The user is asking for a brief explanation of RDMA (Remote Direct Memory"
+          }
+        ]
+      },
+      {
+        "id": "msg_47c2aea35dbb41f8b36fb88e",
+        "type": "message",
+        "role": "assistant",
+        "status": "incomplete",
+        "content": [
+          {
+            "type": "output_text",
+            "text": "**RDMA (Remote Direct Memory Access)** is a networking technology that allows one",
+            "annotations": [],
+            "logprobs": []
+          }
+        ]
+      }
+    ],
+    "instructions": null,
+    "max_output_tokens": 32,
+    "tools": [],
+    "tool_choice": "auto",
+    "parallel_tool_calls": true,
+    "reasoning": {
+      "effort": null,
+      "summary": null
+    },
+    "text": {
+      "format": {
+        "type": "text"
+      }
+    },
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "metadata": {},
+    "store": false,
+    "background": false,
+    "previous_response_id": null,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 18,
+      "output_tokens": 32,
+      "total_tokens": 50,
+      "input_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0
+      },
+      "output_tokens_details": {
+        "reasoning_tokens": 16
+      }
+    },
+    "completed_at": 1793592240
+  },
+  "/v1/messages": {
+    "id": "msg_788fb85a397d41b8a2147b7d",
+    "type": "message",
+    "role": "assistant",
+    "model": "glm-5.3-flash",
+    "content": [
+      {
+        "type": "thinking",
+        "thinking": "The user is asking me to explain RDMA (Remote Direct Memory Access)",
+        "signature": ""
+      },
+      {
+        "type": "text",
+        "text": "RDMA (Remote Direct Memory Access) is a networking technology that allows one computer"
+      }
+    ],
+    "stop_reason": "max_tokens",
+    "stop_sequence": null,
+    "usage": {
+      "input_tokens": 20,
+      "output_tokens": 32,
+      "cache_read_input_tokens": 0
+    }
+  },
+  "mtp_followup": {
+    "id": "chatcmpl-f2489fc4753d420f9384193e",
+    "object": "chat.completion",
+    "created": 1793592241,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "RDMA (Remote Direct Memory Access) is a networking technology that allows one computer",
+          "reasoning_content": "The user is asking me to explain RDMA (Remote Direct Memory Access)"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 20,
+      "completion_tokens": 32,
+      "total_tokens": 52,
+      "prompt_tokens_details": {
+        "cached_tokens": 19
+      }
+    },
+    "timings": {
+      "cache_n": 19,
+      "prompt_n": 1,
+      "prompt_ms": 38.2,
+      "prompt_per_token_ms": 38.2,
+      "prompt_per_second": 26.2,
+      "predicted_n": 32,
+      "predicted_ms": 1158.5,
+      "predicted_per_token_ms": 36.203,
+      "predicted_per_second": 27.6,
+      "draft_n": 23,
+      "draft_n_accepted": 19
+    }
+  },
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": "GLM-5.3 \u00b7 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.42",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  }
+}

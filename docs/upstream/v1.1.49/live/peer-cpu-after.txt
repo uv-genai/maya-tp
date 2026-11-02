@@ -1,0 +1,57 @@
+test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) ... /usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=7 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=4 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=5 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_health_is_degraded_immediately_after_first_http_failure (serve.test_tp2_peer_loss.PeerLoss.test_health_is_degraded_immediately_after_first_http_failure) ... /home/ugo/software/project-maya/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] the engine reported an error: TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)
+/usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 400: 'Bad Request'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior (serve.test_tp2_peer_loss.PeerLoss.test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior) ... /usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=8 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=9 encoding='utf-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_last_world_option_controls_encoder_without_changing_config (serve.test_tp2_boundaries.EncoderStartupBoundary.test_last_world_option_controls_encoder_without_changing_config) ... [maya] TP2 images: OFF until RDMA embedding synchronization is implemented
+[maya] TP2 images: OFF until RDMA embedding synchronization is implemented
+ok
+test_media_rejected_before_render_or_encoding_and_text_still_works (serve.test_tp2_boundaries.MediaBoundary.test_media_rejected_before_render_or_encoding_and_text_still_works) ... ok
+test_a_request_while_the_engine_starts_gets_a_retryable_503 (serve.test_server.ModelManagement.test_a_request_while_the_engine_starts_gets_a_retryable_503) ... /usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 503: 'Service Unavailable'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+[maya] done: 8 tokens in 0 s (45449.1 tok/s) (length, cancel=False)
+ok
+test_off_unless_explicitly_enabled (serve.test_server.ModelManagement.test_off_unless_explicitly_enabled) ... /usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_the_api_key_guards_them_and_status (serve.test_server.ModelManagement.test_the_api_key_guards_them_and_status) ... /usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 401: 'Unauthorized'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+test_unload_load_and_the_state_stream (serve.test_server.ModelManagement.test_unload_load_and_the_state_stream) ... [maya] model unloaded (GPU memory and the RAM tier given back); the next request loads it again
+[maya] loading the model again after an idle unload (a minute or so) ...
+[maya] the engine is running again
+ok
+test_unload_waits_for_a_running_request (serve.test_server.ModelManagement.test_unload_waits_for_a_running_request) ... /usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 409: 'Conflict'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 5.294s
+
+OK
