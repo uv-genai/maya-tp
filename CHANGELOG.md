@@ -6,6 +6,12 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **GLM TP2 prefill** (#90, #91): retain all experts plus prompt scratch on HIP APUs when memory
+  headroom permits, bound startup scratch to the existing receive window, and add measured gfx1151
+  DSA projection tuning. The user reported successful Maya-S/M/L llama-swap trials; their prompt
+  averaged 30/32/28 generation tok/s respectively. Historical greedy picks can differ: one S strict
+  reference had 12/256 differences and one old-baseline L cold prompt differed.
+
 - **TP2 first-failure health** (#88): a fatal queued-collective error now marks the pair down before
   the next mirror send. Preserve the transport cause, report degraded health immediately and refuse
   subsequent generation commands; recovery still requires restarting both ranks. Fresh S/M/L

@@ -21,23 +21,13 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 
 ## Development pair: production and review builds
 
-At the completed 2026-11-02 integration checkpoint, source `main` includes semantic integration
-through upstream v1.1.49; the latest published fork release is still v1.1.42. The v1.1.49 merge
-does not deploy binaries or change user processes. The development pair intentionally retains
-the two runtime sets from the earlier integration/restoration:
-
-- Canonical `build-hip/maya` on both hosts and rank0 `/tmp/maya-tp2`: restored production binary,
-  MD5 `5a52cd27167523b6ea4b0f0bde93f503`.
-- `/home/ugo/software/project-maya-upstream-review/build-hip/maya` on both hosts: validated review
-  binary, MD5 `b398d4a0711430edd6a28b95264c7293`.
-
-The remote canonical source remains `777cc92` with protected user edits. Do not pull/reset or rebuild
-that checkout to validate newer source. For review launches, run both rank scripts from their review
-trees, with the same model/pack selection. Rank0 uses the base config's `exe`; rank1 uses `ENGINE`
-or its checkout's `build-hip/maya`. If selecting paths explicitly, set both accordingly. Only the
-Maya-S review config is permanent; M/L validation used temporary configs. Verify both executable
-hashes before a future test. A newer source checkout does not imply its configured binary was rebuilt.
-The [completion report](upstream/COMPLETION-2026-11-02.md) records the restoration and validation limits.
+The user accepted the prefill candidate after Maya-S, Maya-M and Maya-L llama-swap tests. Canonical
+`build-hip/maya` on both hosts is MD5 `cbd9e99a6a49e9107b0db3190a40766a`, with matching calibrated
+tuning. The original llama-swap configuration is restored; restart llama-swap to load it. The
+previous binaries, configs, rank1 launchers, tuning and rank0 server files are backed up on both hosts
+in `/home/ugo/software/project-maya-before-prefill-90-promotion`. The remote canonical checkout
+still contains user edits; do not reset it. See [Handoff §33](../Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33)
+for performance and validation limits.
 
 ## Process ownership and validation
 

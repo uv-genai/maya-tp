@@ -38,6 +38,10 @@ controlled bench). Reports: [Maya-S](docs/benchmarks/tp2-mtp-review-2026-10-30/R
 [Maya-M](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md),
 [Maya-L](docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md).
 
+The user tested the prefill candidate on Maya-S, Maya-M and Maya-L through llama-swap and reported
+working prefill and generation across all three. Their eBPF tutorial prompt averaged 30, 32 and
+28 generation tokens/s respectively. [Results and validation limits](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
+
 ## What this project adds
 
 - **Two-host GLM tensor parallelism:** attention heads, routed experts, shared experts and dense FFNs are

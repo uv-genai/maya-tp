@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§32** (v1.1.49 live validation complete, #87/#88).
+> Last updated: 2026-11-02 · Current state: **§33** (active prefill fixes #90/#91, parent #33).
 > Fresh S/M/L API/CLI/strict/recovery and both-order prefill gates complete; final CI/merge checkpoint on #87/PR89.
 > Integration through upstream v1.1.46 and restoration are complete; final CI41352750402 PASS,
 > #77/#36 closed. Review builds retained; production5a52 restored. The user launches their processes.
@@ -1238,3 +1238,36 @@ DS4 GPU acceptance: #68 WMMA failures, #75 deferred tail-drain and #79 default-o
 measurements remain open. Also retain #42/#46/#52/#54/#83/#11/#16/#10. Future fork tags use tp-v*;
 VERSION remains numeric1.1.42 and legacy v1.1.42 immutable. No more runtime validation is required
 for this v1.1.49 batch; use linked GitHub records for final repository closeout status.
+
+## 33. Prefill promotion and user acceptance (#90 / #91 / #93 / #33)
+
+The user tested Maya-S, Maya-M and Maya-L through llama-swap and
+reported prefill and generation working across all models. On the prompt “write an eBPF tutorial
+to explain how to use eBPF”, their observed prefill / generation ranges and average generation were:
+
+| Model | Prefill tok/s | Generation tok/s | Prompt average generation tok/s |
+| --- | ---: | ---: | ---: |
+| Maya-S | 131–308 | 29–46 | 30 |
+| Maya-M | 187–299 | 31–45 | 32 |
+| Maya-L | 194–310 | 25–33 | 28 |
+
+The user considers Maya-L higher quality with similar prefill and requested promotion and closure.
+Canonical `build-hip/maya` on BOTH hosts is the tested candidate **cbd9e99a6a49e9107b0db3190a40766a**;
+primary hipBLASLt table SHA256 **084286e9620f01443f7d2b66b6312fbdcb64e436b518e170d7aafa73ce742aa5**
+matched on both. Canonical rank0 `serve/`, both rank1 launchers, tuning tables and S/L configs were
+aligned with tested source8d3; original files are backed up on BOTH hosts in
+`/home/ugo/software/project-maya-before-prefill-90-promotion`. Rank0 llama-swap config restored
+byte-for-byte to `~/.config/llama-swap/config.yaml.before-prefill-90`; the user restarts services.
+Remote canonical Git checkout retains its other user changes; do not reset it. No process was stopped.
+
+Changes: HIP APU complete pool retains experts if complete layout fits above headroom/reserve and
+respects existing caps; TP2 scratch uses existing 3008-row receive bound; three DSA hipBLASLt entries
+are calibrated for gfx1151/100401. `MAYA_GLM_COMPLETE_POOL=0` remains the capped-pool control.
+Branch `perf/apu-prefill-90`, commits 3da1347 and 8d3ce94; branch CI41396532631 passed.
+
+**Limits:** strict S technical historical-reference test reported 12/256 raw picks different, and
+L balanced comparison found one differing cold output in the old baseline; full candidate API/CLI
+regression was not repeated. User accepted their real-workload result; do not claim bit-exactness or
+that these observations were fixed. Earlier raw logs are in `/tmp/maya-prefill-90`; #93 documents
+the baseline variation. The 3008-row limit and intermittent cold/startup latency are not eliminated.
+No release/tag requested. Future fork tags use `tp-v*`.

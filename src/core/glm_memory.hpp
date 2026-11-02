@@ -55,11 +55,18 @@ inline bool skip_empty_on() {
 
 // All inputs are bytes. On an APU the GPU pool and pinned host allocations spend
 // the same physical memory; the runtime's GTT/carve-out size is not free RAM.
+// complete_bytes optionally prices experts + spares + prompt tail as one layout.
 inline size_t expert_pool_budget(bool unified, size_t device_free, size_t ram_available,
-                                size_t reserve, size_t ram_headroom, size_t expert_bytes) {
+                                size_t reserve, size_t ram_headroom, size_t expert_bytes,
+                                size_t complete_bytes = 0) {
     if (!unified) return device_free > reserve ? device_free - reserve : 0;
     const size_t room = ram_available > ram_headroom ? ram_available - ram_headroom : 0;
-    return std::min(expert_bytes, room > reserve ? room - reserve : 0);
+    const size_t budget = room > reserve ? room - reserve : 0;
+    // A full pool needs the experts, spares AND a separate prompt tail. Only
+    // expand when that whole layout fits; otherwise retain the capped policy.
+    if (complete_bytes >= expert_bytes && complete_bytes > 0 && complete_bytes <= budget)
+        return complete_bytes;
+    return std::min(expert_bytes, budget);
 }
 
 // The VRAM kept free beside a discrete card's expert pool: the reserve, except on a small card where the default

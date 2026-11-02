@@ -1120,6 +1120,7 @@ bool Glm5Model::fast_setup(std::string& err) {
                              dev_, (double) sc / 1048576.0);
             }
         }
+        bool allow_complete = !F->unified_memory;
 #if !defined(_WIN32)
         if (F->unified_memory) {
             // Measure after dense/KV/scratch and pinned prompt staging are allocated.  The runtime's free figure counts
@@ -1143,8 +1144,21 @@ bool Glm5Model::fast_setup(std::string& err) {
                 if (Ly.moe) expert_bytes += (size_t) g.n_expert * glmfast::expert_stride(Ly.blob, Ly.gu_type, Ly.d_type);
             }
             if (avail_kb > 0 && expert_bytes > 0) {
+                size_t complete_bytes = 0;
+#if defined(STRATA_USE_HIP)
+                // gfx1151: retain every expert during prefill when RAM can also
+                // hold its scratch tail. Capping at expert_bytes made lending
+                // evict residents even with tens of GiB left above headroom.
+                if (glmfast::complete_pool_on() && stride_sum > 0) {
+                    const size_t tail = (prefill_borrow_bytes() + stride_sum - 1) / stride_sum;
+                    complete_bytes = ((size_t) g.n_expert + gf::kSpares + tail) * stride_sum;
+                }
+#endif
                 avail = glmfast::expert_pool_budget(true, free_b, (size_t) avail_kb * 1024, reserve,
-                                                    (size_t) (head_gb * 1073741824.0), expert_bytes);
+                                                    (size_t) (head_gb * 1073741824.0), expert_bytes, complete_bytes);
+#if defined(STRATA_USE_HIP)
+                allow_complete = complete_bytes > 0 && avail >= complete_bytes;
+#endif
                 std::fprintf(stderr, "glm fast: CUDA%d unified memory: MemAvailable %.2f GB, headroom %.2f GB + "
                                      "%zu MB reserve, experts need %.2f GB, pool budget %.2f GB\n", dev_,
                              (double) avail_kb / 1048576.0, head_gb, reserve >> 20,
@@ -1211,13 +1225,14 @@ bool Glm5Model::fast_setup(std::string& err) {
         // experts out (6 GB) and staged ~1900 from the SSD.  Complete, the warm-up loads all of them, a prompt lends
         // only the tail, the decode never misses, the RAM tier is staging only and the CPU lane has nothing to take.
         // Any device whose budget holds it (a discrete card too: the slots past the experts cost only budget nothing
-        // else used); Linux's unified-memory budget is the experts' bytes exactly, so it keeps its own policy there.
+        // else used). HIP APUs additionally require MemAvailable to cover this full layout above RAM headroom;
+        // otherwise their original expert-only cap remains in force.
         // STRATA_GLM_COMPLETE_POOL=0: the capped pool (A/B); on by default on every GPU (complete_pool_on, #474).
         {
             int k_full = pf_ != nullptr ? tail_slots(prefill_borrow_bytes()) : 0;
             if (const char* v = getenv("STRATA_GLM_VISION_LEND_MB"); v != nullptr && dev_ == 0)
                 k_full = std::max(k_full, tail_slots((size_t) std::max(0LL, std::atoll(v)) << 20));
-            const int full = glmfast::complete_pool_on() && !F->unified_memory
+            const int full = glmfast::complete_pool_on() && allow_complete
                                  ? glmfast::complete_pool_slots(avail, stride_sum, g.n_expert, gf::kSpares, k_full)
                                  : 0;
             if (full > 0) {

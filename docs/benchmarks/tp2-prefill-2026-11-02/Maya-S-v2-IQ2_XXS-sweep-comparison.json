@@ -1,0 +1,184 @@
+{
+  "model": "Maya-S-v2-IQ2_XXS",
+  "order": [
+    "off",
+    "on",
+    "on",
+    "off"
+  ],
+  "off": "accepted b398/capped/old tuning",
+  "on": "complete/new DSA tuning",
+  "warmup": "first full cycle per arm retained/excluded",
+  "pairs": [
+    {
+      "pair": "a",
+      "trial": 0,
+      "repeats": 960,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 1,
+      "repeats": 4032,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 2,
+      "repeats": 8128,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 3,
+      "repeats": 960,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 4,
+      "repeats": 4032,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 5,
+      "repeats": 8128,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 6,
+      "repeats": 960,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 7,
+      "repeats": 4032,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "a",
+      "trial": 8,
+      "repeats": 8128,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 0,
+      "repeats": 960,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 1,
+      "repeats": 4032,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 2,
+      "repeats": 8128,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 3,
+      "repeats": 960,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 4,
+      "repeats": 4032,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 5,
+      "repeats": 8128,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 6,
+      "repeats": 960,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 7,
+      "repeats": 4032,
+      "message_usage_equal": true
+    },
+    {
+      "pair": "b",
+      "trial": 8,
+      "repeats": 8128,
+      "message_usage_equal": true
+    }
+  ],
+  "summary": [
+    {
+      "repeats": 960,
+      "off_ms": 3654.45,
+      "on_ms": 3594.3,
+      "throughput_gain_percent": 1.6734830147733915,
+      "samples_ms": {
+        "off": [
+          3657.5,
+          3913.6,
+          3648.1,
+          3651.4
+        ],
+        "on": [
+          3608.4,
+          3621.3,
+          3580.2,
+          3580.1
+        ]
+      }
+    },
+    {
+      "repeats": 4032,
+      "off_ms": 13040.650000000001,
+      "on_ms": 12542.15,
+      "throughput_gain_percent": 3.974597656701606,
+      "samples_ms": {
+        "off": [
+          13085.7,
+          12774.9,
+          13840.3,
+          12995.6
+        ],
+        "on": [
+          12613.5,
+          12395.0,
+          12470.8,
+          12913.7
+        ]
+      }
+    },
+    {
+      "repeats": 8128,
+      "off_ms": 24839.699999999997,
+      "on_ms": 24169.050000000003,
+      "throughput_gain_percent": 2.7748297926480037,
+      "samples_ms": {
+        "off": [
+          24790.1,
+          24889.3,
+          25350.1,
+          24416.5
+        ],
+        "on": [
+          23910.2,
+          23820.0,
+          24736.9,
+          24427.9
+        ]
+      }
+    }
+  ]
+}

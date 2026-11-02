@@ -1,6 +1,12 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read AGENTS.md, then Handoff.md §32 for current state. Earlier sections retain historical evidence.
+Read AGENTS.md and Handoff.md §33 for the latest production state and user acceptance. The user
+tested all models through llama-swap and explicitly promoted the optimized candidate; canonical
+engine on both hosts is cbd9e99a6a49e9107b0db3190a40766a, and llama-swap configuration was restored.
+Backups on both hosts: /home/ugo/software/project-maya-before-prefill-90-promotion.
+Respect the documented 12/256 historical-pick difference and one cold baseline output variation;
+user accepted their observed performance, not a claim of bit-exactness. Earlier sections below are
+historical and may describe superseded binaries or pending validation. User starts their processes.
 
 ## Fresh live validation complete (#87 / #88)
 
@@ -109,3 +115,24 @@ PreservecanonicalMTPinput/accept/continuation/abort,globalretry/chunkagreement,r
 Use .venv/bin/python; STRATA_GGUF_PY=/home/ugo/software/project-maya/third_party/llama.cpp/gguf-py; pin3cf03257f219afbe7334045ff7c6a06ac68c627d unchanged. OrderedHIPmap→serve(-t .)→tools. IsolatedHIPbuild:gfx1151,HIPON,CUDAOFF,MMQON,TP2_RDMAON,-j4,compiler/opt/rocm/lib/llvm/bin/clang++,GGML_DIR canonicalpinnedcheckout. #52 archiveparentgitHEAD can causeharmlesshostrelinks; NEVERobjcopyinplace. InspectELFread-onlywithreadelfoffsets/Path.read_bytes.
 
 Backups BOTHhosts: original5a52 in/tmp/maya-upstream-baseline-2026-11-01/;accepted38cff,39c313,40=8facc,41a617,42bc4,43–45b398 in/tmp/maya-upstream-vNN-baseline/maya;46acceptedpaths describedabove. Preserveallrawfailures/controlworktree /home/ugo/software/project-maya-v42-ds4-control. Sharedhelpers /tmp/maya-upstream-live.py,/tmp/maya-upstream-cli.py; noactivebatches. Use model_env.sh --model/--pack/--config sameBOTHranks; MTP opt-in withmatchingFIXED/DRAFT,ordinaryNO_MTP=1. StrictS256refs docs/benchmarks/tp2-mtp-review-2026-10-30;M/L64refs docs/upstream/v1.1.39. RequireordinaryANDMTPraw-pick0;preserveoutliers,keep900sstartupbound.
+
+Active continuation: sweep session 68586 is in Maya-L off-b; S/M passed and L off-a/on-a/on-b passed. Watcher session 77787 (`/tmp/maya-prefill-90/after_sweep.py`) waits for the L comparison and all eight L ownership records stopped, then automatically runs `run_remaining.py` sequentially (512K varied, cap fallback, API, CLI, strict), stopping on first failure. Logs: after-sweep.txt, remaining-stages.json and per-stage txt under that directory. Inspect both sessions and the actual results before starting another GPU job. Trial tree remains uncreated.
+
+CURRENT OVERRIDE: sweep session68586 EXIT1, L response assertion failed (b trial2, 8,158 tokens); watcher77787 stopped EXIT143 and no queued stages ran. Baseline off-b first8K response differs from all other 11 8K responses, including its own later two; usage identical, temperature0. See #93 and issue90 comment6571164090; do not claim L parity or relax gate. All L sweep pair ownership records stopped. Strict historical-reference tests are NOW ACTIVE session56767, output /tmp/maya-prefill-90/strict-fixed.txt; inspect result before further work. Need investigate #93, then decide safe candidate and finish remaining 512K/cap/API/CLI/CPU/docs/evidence/trial. Trial tree not created.
+
+## User trial — 2026-11-02 (latest state)
+
+User stopped further testing and requested an optimized build for their own llama-swap trials.
+Strict S technical session56767 EXIT1: **12 of 256 historical raw picks differ**, bound0. L balanced
+gate also failed on one cold accepted-baseline 8K output (#93). No thresholds relaxed; do not claim
+full parity or close #90/#91/#93/#33. Both GPU jobs and watcher stopped, owned strict cleanup passed.
+
+Isolated source8d3 and candidate engine **cbd9e99a6a49e9107b0db3190a40766a** on both hosts at
+`/home/ugo/software/project-maya-prefill-review-90`; matching primary table SHA256 084286e9620f01443f7d2b66b6312fbdcb64e436b518e170d7aafa73ce742aa5.
+User S/L config copied from rank0 canonical into review tree on BOTH hosts; executable/cwd/tuning paths
+point to review, 100401-b inserted, model selection stays dynamic (M falls back to S base). Six Maya
+run/stop pairs in rank0 `~/.config/llama-swap/config.yaml` now use this tree; original backup
+`~/.config/llama-swap/config.yaml.before-prefill-90`. Syntax, matching binary/table hashes and config
+paths checked; **no live test of this exact llama-swap deployment**. User must restart llama-swap
+to load changed config and will launch/test themselves. Original canonical source/binaries untouched.
+Issue comments #90/#91/#93 describe deployment and failure. Await user results before resuming.

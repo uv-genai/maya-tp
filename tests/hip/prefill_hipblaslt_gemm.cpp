@@ -187,6 +187,15 @@ int main() {
             ok &= run_case(gemm, blas, stream, false, 64, 1024, 4096, 1024, 0, 0.0f, 201); // cached dispatch
             ok &= run_case(gemm, blas, stream, false, 37, 1024, 4096, 1024, 7, 1.0f, 202);
             ok &= run_case(gemm, blas, stream, false, 64, 4096, 1024, 4096, 0, 0.0f, 203);
+            if (version == 100401) {
+                // TP2 DSA q_b: actual tails, cached dispatch, beta and guards (#91).
+                ok &= run_case(gemm, blas, stream, false, 64, 8192, 1536, 8192, 0, 0.0f, 204);
+                ok &= run_case(gemm, blas, stream, false, 256, 8192, 1536, 8192, 0, 0.0f, 205);
+                ok &= run_case(gemm, blas, stream, false, 1024, 8192, 1536, 8192, 0, 0.0f, 206);
+                ok &= run_case(gemm, blas, stream, false, 960, 8192, 1536, 8192, 7, 0.0f, 207);
+                ok &= run_case(gemm, blas, stream, false, 977, 8192, 1536, 8192, 7, 1.0f, 208);
+                ok &= run_case(gemm, blas, stream, false, 37, 8192, 1536, 8192, 7, 1.0f, 209);
+            }
         } else {
         ok &= run_case(gemm, blas, stream, true, 4096, 48, 2560, 96, 0, 0.0f, 101);
         ok &= run_case(gemm, blas, stream, true, 37, 48, 2560, 96, 48, 1.0f, 102);
