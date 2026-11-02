@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§33** (active prefill fix #90, parent #33).
+> Last updated: 2026-11-02 · Current state: **§33** (active prefill fixes #90/#91, parent #33).
 > Fresh S/M/L API/CLI/strict/recovery and both-order prefill gates complete; final CI/merge checkpoint on #87/PR89.
 > Integration through upstream v1.1.46 and restoration are complete; final CI41352750402 PASS,
 > #77/#36 closed. Review builds retained; production5a52 restored. The user launches their processes.
@@ -1254,10 +1254,39 @@ MTP math/cancel/poison changes. New host boundary tests PASS, isolated HIP confi
 
 Fresh HIP build and host memory tests PASS; final incremental check build-final.txt PASS.
 Build: `cmake --build /tmp/maya-prefill-90/build-hip --target maya glm_memory_test -j4`;
-log `/tmp/maya-prefill-90/build.txt`. No GPU model launched yet. Build source canonical working
+log `/tmp/maya-prefill-90/build.txt`. Build source canonical working
 branch; output entirely isolated. Do not time GPU inference concurrently with compiler/CPU suites.
 After build: matching isolated binaries on both hosts, exact-owned supervisor from v49 evidence,
 new API18090/bootstrap18590, same explicit pack/config on both ranks. Measure old b398 and new
 COMPLETE_POOL=0/1 controls, fresh/warm S/M/L, retain all data and check raw fidelity/MTP/reuse/cancel.
 Implement only measured safe improvement; #33 row cap/original long-context case remains separate.
 Track progress in #90; update docs/handoffs, ordered CPU gates, final CI/PR/main before completion.
+
+Prototype3da1347 pushed, CI41392437370 PASS; candidate48d677462ac42c26d985d62772bdbafd and oldb398 match both hosts.
+Pilot35741 EXIT0 `/tmp/maya-prefill-90/pilot.py` writes pilot.txt: S old0/new0/new1,
+six fresh1K/4K/8K requests per arm, MTP2/context32768, normal idle/stage lines. Source archive
+f51fb062… deployed only isolated source/. Build completed before pilot; no concurrent CPU suite.
+Supervision uses owned.py exact PID/start ticks/owner markers. Check exit/cleanup before next GPU stage.
+All6 pilot registries stopped. On stages0 experts/copies, all6 response/usage pairs equal old/off/on.
+Warm throughput essentially unchanged; off first1K26.87s versus on4.53s is a retained cold sample,
+not a statistical gain claim. Need balanced S/M/L and user's large-context fit/fallback checks.
+Independent missing DSA projection f16N8192K1536ldy8192 at everyT found in stage logs; issue #91.
+ACTIVE GPU tuner99452 (stock tune_hipblaslt,64/256/1024,16MiBworkspace, original accuracy gates),
+log dsa-tuner.txt / output dsa-tuning.txt. No models active. Inspect before next GPU stage.
+
+Latest: tuner99452 and tuned-pilot79153 EXIT0. Three100401 DSA rows selected;20 GPU parity cases
+on both hosts PASS, actualLt launches10/fallbacks0 each, including960/977tails,beta/guards.
+Warm tuned S pilot still only small variation; all6 messages/usage equal.
+512K L old-control probe38122 FAILED its new cache>0-every-turn assumption at turn4 (143prompt/cache0),
+while generation/peer stay healthy. Both owned roles stopped; failed raw data retained. #92 tracks
+rendering/checkpoint investigation, no causal claim. Do not hide misses in performance reporting;
+the unchanged mtp_acceptance.py remains the separate three-turn reuse gate. Optional async question
+asks the user for the worst workload/timing; keep working while awaiting it.
+
+Workspace planning also ignored the existing TP3008 limit and reserved20–25K layouts (~6GiB).
+HIP startup now caps workspace at the SAME unchanged receive-window limit; use exact3008 if it fits,
+old256-grid fallback otherwise. No protocol/window/cap increase. Fresh build24599 and host memory/
+TP tests/HIPmap PASS. New runtime binary must replace isolated candidate only after all owned jobs
+are stopped, retaining prototype48d and oldb398; new source archive/provenance needed. No GPU active.
+Next: balanced before/after S/M/L (beforeoldb398/oldtable, afternewcandidate/newtable), high-context
+measurement including actual cache misses, explicit cap fallback and full API/CLI/strict fidelity.

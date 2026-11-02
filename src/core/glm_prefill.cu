@@ -1137,8 +1137,23 @@ bool Glm5Model::prefill_setup(std::string& err) {
     // STRATA_GLM_PREFILL_MB=<MB> fixes what may be lent.
     const std::string mode = prefill_mode();
     const bool is_auto = mode == "auto";
-    const int64_t auto_max = n_parts_ == 1 ? 32768 : 8192;
-    const int64_t ceiling = is_auto ? auto_max : (int64_t) std::atoll(mode.c_str());
+    int64_t auto_max = n_parts_ == 1 ? 32768 : 8192;
+    int64_t ceiling = is_auto ? auto_max : (int64_t) std::atoll(mode.c_str());
+    bool tp_window_limited = false;
+#if defined(STRATA_USE_HIP)
+    if (tp_.active()) {
+        const int cap = tp_prefill_limit((int) std::min<int64_t>(ceiling, INT_MAX), g.n_embd,
+                                         tp_.comm->MaxPartialBytes());
+        if (cap > 0) {
+            // Use the same bound as prefill(), before reserving its scratch.
+            // A TP2 call cannot use the old 25K-token layout, yet reserving it
+            // displaced residents and priced several unused GiB into the pool.
+            ceiling = cap;
+            if (is_auto) auto_max = cap;
+            tp_window_limited = true;
+        }
+    }
+#endif
     // the pool to come: `per` slots a layer over the tier layers, as fast_setup sizes it from the same free VRAM
     size_t dev_free = 0, dev_total = 0;
     cudaMemGetInfo(&dev_free, &dev_total);
@@ -1227,6 +1242,11 @@ bool Glm5Model::prefill_setup(std::string& err) {
         // beside a 1024-token chunk got 768-token chunks with no ring at all instead of the largest chunk with a part
         // of it (#673: a 20 GB card, Maya-S24 at 256K: 768 where 10240 fit, half the prompt speed)
         const auto biggest = [&](int64_t floor) -> int64_t {
+            // The receive bound is aligned to64, not256 (3008 on this pair).
+            // Keep that exact runtime shape whenever it fits; retain the old
+            // 256-row search for a smaller memory-constrained layout.
+            if (tp_window_limited && (floor == 0 || ceiling >= kPreMinT) && room(ceiling) >= floor)
+                return ceiling;
             int64_t lo = floor > 0 && gstride > 0 ? kPreMinT / 256 : 1, hi = ceiling / 256, best = 0;
             while (lo <= hi) {
                 const int64_t mid = lo + (hi - lo) / 2;

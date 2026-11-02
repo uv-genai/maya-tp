@@ -14,6 +14,23 @@ build-final.txt. HIPmap/host memory tests PASS. No GPU model started. Use new AP
 exact-owned supervisor, matching binaries/explicit packs both ranks, oldb398 + new0/1 before/after.
 Require measured fresh/warm gains, strict fidelity and MTP/reuse/cancel/peer-health. Preserve all
 production/review/protected source states. Track #90, keep #33 remaining work honest. Details§33.
+Prototype3da1347 pushed/CI41392437370 PASS; matching candidate48d67746 / oldb398 on both hosts. Pilot35741 EXIT0,
+/tmp/maya-prefill-90/pilot.py → pilot.txt, S old0/new0/new1 six fresh1K/4K/8K/arm MTP2/context32768.
+All6 registries stopped; all6 response/usage pairs equal. On stages0 experts/copies; warm throughput
+essentially unchanged. Cold off1K26.87s/on4.53s retained, no statistical gain claim. Need balanced
+M/L+largecontext eligibility and fidelity before accepting. Separate missing DSA GEMM shape
+f16N8192K1536ldy8192 identified; #91 calibration. ACTIVE GPU tuner99452, stock tool64/256/1024,
+16MiBworkspace unchanged accuracy gates; dsa-tuner.txt/dsa-tuning.txt. No models active. Inspect
+tuner completion before any GPU stage. Prepared sweep.py, API/CLI/strict owned helpers under90.
+LATEST: tuner99452/tuned-pilot79153 EXIT0,20 GPU parity cases pass both hosts with actualLt10/fallback0
+each; all6 tuned pilot outputs/usage equal, warm variation small. Old L512K probe38122 failed new
+cache>0-on-everyturn assumption at turn4; generation/peer healthy, both roles stopped, data retained.
+#92 tracks cache/render/checkpoint investigation; record misses, retain unchanged three-turn cache gate.
+User workload/timing async question pending; continue independently. HIP workspace now also sized
+to SAME TP3008 limit (old startup reserved20–25K/6GiB), exact3008 if fit else old256-grid fallback.
+Build24599/host memory+TP tests/HIPmap PASS, no GPU active. Need new candidate deployment/provenance
+(keep48d prototype andb398), then balanced S/M/L beforeold/afternew, highcontext, cap fallback,
+full API/CLI/strict fidelity, final evidence/docs/orderedCPU/headCI/PR/main. #90/#91 open,33/60/92 open.
 
 ## Fresh live validation complete (#87 / #88)
 
