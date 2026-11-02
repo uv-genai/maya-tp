@@ -22,8 +22,8 @@ model descriptions retained from Project Maya are upstream references, not fork 
 
 At the 2026-11-02 checkpoint, `main` includes the completed semantic integration through upstream
 v1.1.49 (v1.1.47–v1.1.49 in one cumulative merge). The latest published fork release remains legacy v1.1.42; future fork tags use
-`tp-vMAJOR.MINOR.PATCH`. Production binaries were intentionally restored while validated review
-builds were retained. See [executable selection](TP2-RUN.md#development-pair-production-and-review-builds)
+`tp-vMAJOR.MINOR.PATCH`. The user-accepted prefill candidate was promoted to the canonical binary
+on both hosts after the v1.1.49 integration; earlier runtime files are backed up. See [executable selection](TP2-RUN.md#development-pair-production-and-review-builds)
 before launching from an existing development checkout.
 
 The user launches their own processes. Agents clean up only their recorded validation processes;

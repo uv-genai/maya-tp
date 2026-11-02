@@ -79,10 +79,12 @@ to 22.90 s**. No engine/kernel, transport or decode-default changes versus v1.1.
   fresh 1K/4K/8K smoke and twelve Maya-L cached turns pass. Required gates pass: HIP mappings,
   464 server tests (11 skips), 630 tools tests (31 skips), including eleven launcher tests.
 
-**Still open in #33:** cold Maya-L startup/lending delays, the original 9.6 tok/s request-11 workload,
+**At this release, #33 remained open for:** cold Maya-L startup/lending delays, the original 9.6 tok/s request-11 workload,
 and the ~3008-row RDMA cap / unimplemented `MAYA_TP_PREFILL_ROWS`. No comparative speedup is claimed
 for Maya-M/L. Source release with no prebuilt binary assets; existing engine binaries remain valid.
-MTP stays opt-in. Llama-swap daemon/YAML and older tags are unchanged.
+MTP stayed opt-in. Llama-swap daemon/YAML and older tags were unchanged at this release. #33 was
+later closed after the user accepted the promoted prefill build; its row cap and cold variability
+remain limitations.
 
 ## v1.1.41 - 2026-10-31
 
