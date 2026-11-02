@@ -14,3 +14,8 @@ With the user's permission, the existing DeepSeek V4.1 Flash Maya-XS server on o
 All three measured answers produced 256 tokens. The API prefill prompts contained 2052 and 8196 tokens respectively, each with zero cached tokens; upstream's direct-engine benchmark used 2048 and 8192 tokens. These are single samples, and this is an API approximation, not an identical benchmark. The [upstream report](https://github.com/mw00/project-maya/issues/663) used orcarouter abliterated Mix-128G, 256K context and DSpark on a 192 GB Ryzen AI Max+ PRO 495 / 8065S under Windows. This host uses Maya-XS v2 on a 128 GB Ryzen AI Max+ 395 / 8060S under Linux. These differences mean the results do not identify a cause for the gap.
 
 The saved `results.json` contains usage and timings, `output.txt` contains progress, and `bench_api.py` contains the synthetic prompts and corpus construction. No user conversation was saved. Earlier setup's DSpark calibration failed with a 600-second watchdog (#101); these requests passed with DSpark enabled but do not resolve that failure. Issue #100 tracks the performance comparison.
+
+The user requested one additional coding prompt: a thread-safe Python LRU cache with tests. With
+the same greedy, thinking-off settings and DSpark enabled, a 38-token uncached prompt took 1.44 s
+and generated 512 tokens in 12.33 s (**41.5 tok/s**). The response reached the 512-token limit
+and its tests were cut off; this is a speed measurement, not a completed-code correctness result.

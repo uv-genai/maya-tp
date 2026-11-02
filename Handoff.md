@@ -1320,3 +1320,8 @@ as do model quant, OS and hardware; no causal attribution. Server was healthy, i
 afterward. Durable report and raw timing data: `docs/benchmarks/deepseek-maya-xs-2026-11-02/`.
 #100 remains open for investigation, #101 for the 600-second calibration hang. Only open issues
 on uv-genai/maya-tp; the user permits read-only access anywhere.
+
+User requested one final coding prompt (thread-safe Python LRU cache and tests). With DSpark on,
+greedy/thinking off, 38 uncached prompt tokens took 1438.8 ms; 512 output tokens took 12333.8 ms
+(41.5 tok/s), 408/436 drafts accepted. The output hit the token limit and was incomplete. The user
+server stayed healthy and idle. Timing data is in `docs/benchmarks/deepseek-maya-xs-2026-11-02/coding-last-summary.json`.

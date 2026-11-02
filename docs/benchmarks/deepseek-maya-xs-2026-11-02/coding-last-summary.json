@@ -1,0 +1,29 @@
+{
+  "prompt": "Write a thread-safe LRU cache in Python with get and put methods, a fixed capacity, type hints, and concise unit tests. Use only the Python standard library.",
+  "thinking": false,
+  "temperature": 0,
+  "dspark": true,
+  "usage": {
+    "prompt_tokens": 38,
+    "completion_tokens": 512,
+    "total_tokens": 550,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "timings": {
+    "cache_n": 0,
+    "prompt_n": 38,
+    "prompt_ms": 1438.8,
+    "prompt_per_token_ms": 37.863,
+    "prompt_per_second": 26.4,
+    "predicted_n": 512,
+    "predicted_ms": 12333.8,
+    "predicted_per_token_ms": 24.089,
+    "predicted_per_second": 41.5,
+    "draft_n": 436,
+    "draft_n_accepted": 408
+  },
+  "finish_reason": "length",
+  "wall_seconds": 13.78427914699978
+}
