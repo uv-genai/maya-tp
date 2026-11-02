@@ -10,12 +10,45 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
   any pack works — see **Choosing a model** below)
 - Engine built on **both** hosts with TP2:
   ```sh
-  cmake -S . -B build-hip -DSTRATA_ENABLE_HIP=ON -DSTRATA_PREFILL_MMQ=ON -DSTRATA_ENABLE_TP2_RDMA=ON
+  cmake -S . -B build-hip -DCMAKE_HIP_ARCHITECTURES=gfx1151 \
+    -DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF \
+    -DSTRATA_PREFILL_MMQ=ON -DSTRATA_ENABLE_TP2_RDMA=ON
   cmake --build build-hip --target maya -j"$(nproc)"
   ```
 - SSH from rank 1 to rank 0 (`strix-halo-1.local`)
 
 **Roles:** rank 0 = API server (`strix-halo-1` / 192.168.1.22), rank 1 = worker (`strix-halo-2` / this host).
+
+## Development pair: production and review builds
+
+At the completed 2026-11-02 integration checkpoint, source `main` includes semantic integration
+through upstream v1.1.46; the latest published fork release is still v1.1.42. The development pair
+intentionally has two runtime sets:
+
+- Canonical `build-hip/maya` on both hosts and rank0 `/tmp/maya-tp2`: restored production binary,
+  MD5 `5a52cd27167523b6ea4b0f0bde93f503`.
+- `/home/ugo/software/project-maya-upstream-review/build-hip/maya` on both hosts: validated review
+  binary, MD5 `b398d4a0711430edd6a28b95264c7293`.
+
+The remote canonical source remains `777cc92` with protected user edits. Do not pull/reset or rebuild
+that checkout to validate newer source. For review launches, run both rank scripts from their review
+trees, with the same model/pack selection. Rank0 uses the base config's `exe`; rank1 uses `ENGINE`
+or its checkout's `build-hip/maya`. If selecting paths explicitly, set both accordingly. Only the
+Maya-S review config is permanent; M/L validation used temporary configs. Verify both executable
+hashes before a future test. A newer source checkout does not imply its configured binary was rebuilt.
+The [completion report](upstream/COMPLETION-2026-11-02.md) records the restoration and validation limits.
+
+## Process ownership and validation
+
+The user starts their own processes. Coding agents may clean up only their recorded validation
+PIDs/process groups, stopping their server before its engine. A prior permission to use the hosts
+does not authorize future cleanup of user processes or inspection/control of unrelated services.
+
+`acceptance.sh` and `bench_mtp.py` currently use name-wide process cleanup when starting a pair.
+They require explicitly reserved, free hosts; an agent must not run them against user processes.
+Owned-process cleanup is tracked in [#83](https://github.com/uv-genai/maya-tp/issues/83).
+The API probes below use an already-running pair; the benchmark/recovery harnesses start and stop
+engines and must be scheduled accordingly.
 
 ## Choosing a model
 
@@ -251,10 +284,15 @@ leave `MAYA_GLM_NO_MTP` unset. For paired CLI requests, set `MAYA_TP_MTP=1` on b
 MTP uses greedy verification with a fixed draft width (default 2); rank 0 sends anchor/draft token IDs,
 accepted tokens, and the continue/stop decision over the bootstrap control channel. Tensors stay on RDMA.
 Thinking-budget forces and client cancellation use this same round protocol. Both hosts need matching binaries.
+For a numeric reasoning cap independent of context length, see
+[Limiting GLM thinking](SETTINGS.md#limiting-glm-thinking-for-a-coding-agent).
 
-The [warm resident-pair comparison](benchmarks/tp2-mtp-2026-10-30/RESULTS.md) measured
-38.255 ms/token without MTP versus 52.235 with MTP on a fixed 256-token continuation.
-Re-run with `.venv/bin/python tools/tp2/bench_mtp.py --output /tmp/mtp-comparison` (stops existing engines).
+The [corrected resident-pair review](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md) measured
+25.82 tok/s ordinary versus 28.60 with one draft on the technical prompt (+10.8%), and 25.86 versus
+33.53 with two drafts on code (+29.6%). Seven drafts slowed the technical workload. The older
+[MTP comparison](benchmarks/tp2-mtp-2026-10-30/RESULTS.md) predates numerical fixes and is historical.
+Re-run with `.venv/bin/python tools/tp2/bench_mtp.py --output /tmp/mtp-comparison` on reserved free hosts
+(see [process ownership](#process-ownership-and-validation)).
 Add `--model Maya-M` / `--pack PATH` (or `MAYA_MODEL` / `MAYA_PACK`) to target another pack; keep
 `--output` unique per run.
 
@@ -277,11 +315,13 @@ The installed `~/.config/llama-swap/config.yaml` (on **strix-halo-1**) uses
 `tools/tp2/rank1.sh` over SSH on strix-halo-2, then runs `tools/tp2/rank0.sh` locally in the foreground.
 `tools/tp2/tp2-swap.sh` delegates to this same wrapper.
 
-**Rank0 must have the model-aware launchers** (`tools/llama-swap/tp2.sh`, `tools/tp2/model_env.sh`,
-`rank0.sh`, `rank1.sh` from current main). Deploy by copying those files only — **never** `git pull` /
-reset the remote `7ee8f27` checkout. Without them, `tp2.sh` rejects `--model` with the old usage line.
+**Rank0 must have model-aware launchers** (`tools/llama-swap/tp2.sh`, `tools/tp2/model_env.sh`,
+`rank0.sh`, `rank1.sh`). The protected canonical checkout is `777cc92`; model-aware launcher files were
+deployed separately. Do not pull/reset it or copy files as routine validation setup. Use isolated
+review trees when testing newer launchers; a production deployment is a separate requested action.
 
-Current live entries (user-configured on strix-halo-1; backups beside the file):
+The user-configured entries preserved at the integration checkpoint were as follows; this is a
+configuration snapshot, not an instruction to inspect or manage the user's running service:
 
 ```yaml
 models:
@@ -349,7 +389,11 @@ MTP verification currently uses greedy sampling under TP2.
 | `ibv_post_send failed` | RDMA link down | `ip link show`, reload `thunderbolt_ibverbs` |
 | Pair parity < 100% | Slicing bug | `greedy_parity.py`; try `MAYA_TP_NOSLICE=1` |
 
-## Performance reference (measured)
+## Historical performance reference (before numerical fixes)
+
+The early figures below describe the 2026-10-29/30 implementation. Use the
+[corrected review](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md) and
+[current README measurements](../README.md#measured-performance) for performance comparisons.
 
 Controlled bench (no-MTP, 32 tokens, same prompt, warm engine), 2026-10-29/30 — **Maya-S**:
 
@@ -372,7 +416,9 @@ AR cost ≈ 5 ms/tok (90 exchanges × ~55 µs). Link is fine (6 µs RTT, 37 Gb/s
 
 End-to-end + microbench: `.venv/bin/python tools/calibrate_glm_tp.py --pack …`.
 
-**CI:** `check_hip_compat.py` + `serve` (464) + `tools` (614+) green. Single-host with TP flags off is unchanged (mirroring and reuse gates are `tp_world>1` / serve-only).
+**Latest integration CI:** HIP mapping, 605 server tests (11 skips) and 679 tools tests (33 skips)
+passed at the v1.1.46 checkpoint. See the [completion report](upstream/COMPLETION-2026-11-02.md) for
+exact-head/main CI and the separate unresolved DeepSeek GPU limitations.
 
 ## Monitoring
 
@@ -385,7 +431,8 @@ End-to-end + microbench: `.venv/bin/python tools/calibrate_glm_tp.py --pack …`
 
 ```sh
 # rebuild the AR microbench (needs STRATA_ENABLE_TP2_RDMA=ON in that build dir)
-cmake -S . -B build-tp2 -DSTRATA_ENABLE_HIP=ON -DSTRATA_PREFILL_MMQ=ON \
+cmake -S . -B build-tp2 -DCMAKE_HIP_ARCHITECTURES=gfx1151 \
+  -DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF -DSTRATA_PREFILL_MMQ=ON \
   -DSTRATA_ENABLE_TP2_RDMA=ON -DSTRATA_BUILD_TESTS=ON
 cmake --build build-tp2 --target tp_comm_rdma_test -j"$(nproc)"
 

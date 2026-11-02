@@ -1,5 +1,9 @@
 # Experimental Maya on RX 7900 XT / XTX, R9700 / RX 9070 and Strix Halo / Gorgon Halo
 
+> **Inherited upstream HIP reference.** Maya-TP targets gfx1151 Linux and two-host RDMA; use
+> [TP2-RUN.md](TP2-RUN.md) for its build/launch procedure. Other architectures, Windows, same-host
+> multi-GPU and CPU vision examples below are upstream context, not fork TP2 validation.
+
 This branch adds a Linux HIP build and installer path for Maya's GLM-5.3-Flash
 engine on `gfx1100`, `gfx1201` and `gfx1151` (Strix Halo, Gorgon Halo). It uses one GPU, or two supported GPUs that split the
 layers (see [Two GPUs](#two-gpus)), and serves text. Images are not enabled by this installer;

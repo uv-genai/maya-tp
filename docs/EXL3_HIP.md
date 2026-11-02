@@ -1,5 +1,10 @@
 # Experimental EXL3 prefill on HIP
 
+> **Inherited upstream experiment.** The examples and kernel/full-model claims below are historical,
+> not Maya-TP DeepSeek/EXL3 end-to-end validation. The fork validates GLM Maya-S/M/L TP2 on gfx1151;
+> full DeepSeek WMMA failures remain tracked in [#68](https://github.com/uv-genai/maya-tp/issues/68).
+> See [the documentation index](README.md) for current scope.
+
 The portable HIP implementations of `exl3::set_gate_up`, `set_down`, and `gemm_rows` reuse the existing eight-activation `block_gemv` decoder. They replace the previous no-op HIP branches. They use FP32 FMA arithmetic, not AMD matrix instructions; there is room for further optimization. The FP16 input adapter is separate from the original decode input structure. CUDA keeps its existing tensor-core implementation.
 
 ## Current limits

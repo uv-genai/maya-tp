@@ -1,5 +1,8 @@
 # Maya on an NVIDIA DGX Spark (GB10) and Grace
 
+> **Inherited upstream platform reference.** DGX Spark/NVIDIA measurements below do not describe
+> Maya-TP, which targets HIP/ROCm on gfx1151 Linux with two-host RDMA. See [TP2-RUN.md](TP2-RUN.md).
+
 A single DGX Spark runs Maya-S (GLM-5.3-Flash) at its full context, with every expert in the GPU's own pool. The
 catch is that a DGX Spark has no VRAM: the GB10 draws on the system's RAM, so the expert pool, the prompt buffers and
 the desktop all share the same 120 GB. This page is what a bring-up needs to know about that, what the aarch64 port

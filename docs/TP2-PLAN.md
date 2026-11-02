@@ -1,9 +1,14 @@
 # TP2 Implementation Plan — Maya GLM Maya-S on Two Strix Halo Hosts
 
+> **Historical initial plan.** Phases 1–7 and opt-in TP2 MTP are complete. #10/#11 remain open;
+> #12/#13 are complete. Original branch/process constraints below belong to that planning session.
+> Current work and safeguards live in [Handoff §30](../Handoff.md#30-current-restart-state--documentation-audit-2026-11-02-82),
+> [AGENTS.md](../AGENTS.md) and [TP2-RUN.md](TP2-RUN.md).
+
 Implements [TP2-DESIGN.md](TP2-DESIGN.md); background in [TP2-ANALYSIS.md](TP2-ANALYSIS.md).  
 **Rule for all phases in this session:** no code and no processes until the user says the benchmark is done. This file is the plan of record.
 
-**Status (2026-10-30, historical):** Phases 1–7 landed through **v1.1.37** (see [CHANGELOG.md](../CHANGELOG.md), [TP2-RUN.md](TP2-RUN.md), issues #2–#9). Not from the original plan: serve call-mirroring rides the **bootstrap TCP** socket (no separate control port/token); `MAYA_TP_AR_FP16` / `PREFILL_ROWS` / `OVERLAP` were **not** implemented (see SETTINGS). Remaining work is GitHub **#10–#13**, not this plan.
+**Status (2026-10-30, historical):** Phases 1–7 landed through **v1.1.37** (see [CHANGELOG.md](../CHANGELOG.md), [TP2-RUN.md](TP2-RUN.md), issues #2–#9). Not from the original plan: serve call-mirroring rides the **bootstrap TCP** socket (no separate control port/token); `MAYA_TP_AR_FP16` / `PREFILL_ROWS` / `OVERLAP` were **not** implemented (see SETTINGS). At that checkpoint follow-up work was tracked in **#10–#13**; use the current status above rather than treating that range as still open.
 
 **Target commit discipline:** branch `tp2` (this tree is already on `tp2`); one PR per phase after Phase 3 when hardware runs are allowed.
 

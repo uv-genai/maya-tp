@@ -1,12 +1,12 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read Handoff.md, especially §§18,21,23,27–29 and latest §29.30, then AGENTS.md.
+Read AGENTS.md, then Handoff.md §30 for current state. §§18,21,23,27–29 retain historical evidence.
 
-## Completed task and closeout check
+## Completed integration
 
 Requested upstream v1.1.37–v1.1.46 integration and production restoration are complete. Tags were handled ONE AT A TIME with semantic review, affected validation, exact-final-head and post-merge main CI before proceeding. All10tags are ancestors of main. Final PR81/1139fa27d7731941b187de57093c3abe424a5e1f; finalb5e46b21e8dd855563dae54d3ddd9897bc9b723a CI41350489382/41350494526 andpost-main41351082604 PASS. #78/#80closed. Reports: docs/upstream/INTEGRATION-2026-11-01.md, v1.1.37…46.md, COMPLETION-2026-11-02.md andcompletion-2026-11-02/completion.json.
 
-Before a final closeout response, confirm final documentation-checkpoint main CI and issues77/36closure; latest SHA/run/outcome are recorded in #77. If77/36alreadyclosed andCIpassed, nothing remains from this task. No further GPU tests, tag integration, release or production deployment is required without a new request. No active integration batches/builds/tests;46batch22871EXIT0.
+Final documentation checkpoint dede882111be994b3e913463c8fa6b211f34633d passed main CI41352750402. Issues #77/#36 are closed. Nothing remains from the integration task. No further GPU tests, tag integration, release or production deployment is required without a new request. The integration validation batches ended;46batch22871EXIT0. Documentation audit #82 corrected stale guides and process-ownership rules; #83 tracks legacy harness cleanup.
 
 No release/tag was created. VERSION remains numeric1.1.42; legacyforkv1.1.42 is immutable64719953312df98c9fdf53a10198c106cb195345. Futureforktags use tp-vMAJOR.MINOR.PATCH; upstreamtags are namespaced upstream/v*. Push only origin uv-genai/maya-tp, never upstream.
 
@@ -14,16 +14,13 @@ No release/tag was created. VERSION remains numeric1.1.42; legacyforkv1.1.42 is 
 
 Production original GLM **5a52cd27167523b6ea4b0f0bde93f503** restored at localcanonical build-hip/maya, remotecanonical build-hip/maya andrank0/tmp/maya-tp2. BOTHreviewworktrees retain GLM **b398d4a0711430edd6a28b95264c7293** (enginecode6a2fbe1) andDS4 **51749e860763aea34847b183de95a933** (hostcode5b13c83). Reviewsource can follow finalmain docs without rebuilding unchanged engine code. Accepted46backups BOTHhosts: /tmp/maya-upstream-v46-baseline/maya andmaya-ds4-accepted. The LOCAL maya-ds4 in that folder is olderpre46controlcd177 forELFproof, notaccepted46hostbuild.
 
-The permanent self-contained **Sreviewconfig** points at review/build-hip/maya on BOTHhosts. M/Lvalidation used explicit temporaryconfigs. For futureM/Lreview launches select the same model/pack/config on both ranks, with config.exe pointing at the review binary; a canonicalconfig still targets the restored productionbinary. Do not assume permanentM/Lreviewconfigs exist.
+The permanent self-contained **Sreviewconfig** points at review/build-hip/maya on BOTHhosts. M/Lvalidation used explicit temporaryconfigs. For futureM/Lreview launches select the same model/pack/config on both ranks. Rank0 uses config.exe; rank1 uses ENGINE or its checkout's build-hip/maya, so run from the review trees or select both paths explicitly. A canonicalconfig still targets the restored productionbinary. Do not assume permanentM/Lreviewconfigs exist.
 
-Protected remote canonical /home/ugo/software/project-maya remains777cc92eeab582688c54ae78fcd214427453ccc4 with user maya.py/tuning/rank1 edits andtwoLconfigbackups. NO pull/reset/rebuild there. Userdiffs/stageddiffs/configs/backups/YAML/daemon match exactly before/afterrestoration; raw snapshots committed. Daemon175392 andsix-entryYAML withLcontext524288 preserved. YAML SHA256c5392d8c696f5ff8869510057427675b18f8a3cb482d0a136012495151297a20. Engines/testserver stopped after validation/restoration; llama-swap ready to load production on request. Inspect current live state before future disruption; existing session authorization was “Hosts are free; you may stop the pair for validation.”
+Protected remote canonical /home/ugo/software/project-maya was777cc92eeab582688c54ae78fcd214427453ccc4 at restoration, with user maya.py/tuning/rank1 edits andtwoLconfigbackups. NO pull/reset/rebuild there. Userdiffs/stageddiffs/configs/backups/YAML/daemon matched exactly before/afterrestoration; raw snapshots committed. These are historical preservation records, not live service status. Only agent-started validation processes were stopped; the user launches their processes themselves.
 
-This is strix-halo-2 rank1. SSH ONLY strix-halo-1.local rank0. Never nestedSSH or llama-swap wrapper overSSH. Stop rank0server BEFORE engine:
-```
-ssh strix-halo-1.local 'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'
-pkill -9 -x maya
-```
-Never broad pkill-f-server.py or /dev/tcp bootstrap probes. Start rank1first, then rank0 directSSH fully redirected. Restart BOTH after poisoned communication. For new engine validation, match selected binaries on both hosts and explicitly manage canonical-versus-review deployment; the current split is intentional.
+This is strix-halo-2 rank1. SSH ONLY strix-halo-1.local rank0; never nestedSSH. The user clarified: **stop only processes you started**. Record validation PIDs/process groups; stop the owned rank0 server before its owned engine to prevent respawn. Never use name-wide pkill or port-wide killing. Do not inspect or manage unrelated services, including llama-swap, without a task explicitly requesting it. Prior host-validation permission is not standing authorization to stop user processes. Legacy acceptance.sh/bench_mtp.py use broad cleanup (#83); do not run them against user processes.
+
+Never use /dev/tcp bootstrap probes. Start rank1first, then rank0 directSSH fully redirected. A poisoned communicator requires restarting BOTH owned validation ranks. For new engine validation, match selected binaries on both hosts and explicitly select canonical-versus-review paths; the current split is intentional.
 
 ## Validation and limits
 

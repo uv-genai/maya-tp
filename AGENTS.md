@@ -47,7 +47,22 @@ or create a release merely because an upstream tag was merged.
 | `CMakeLists.txt`, `cmake/` | Engine build; HIP backend in `cmake/hip_backend.cmake` |
 | `docs/` | SETTINGS, SETUP, MODELS, AMD_* — trust code/CI over prose |
 
-Configs are `maya-<quant>[-hip].json` (gitignored). Build dirs: `build/` (CUDA), `build-hip/` (HIP).
+Configs are `maya-<quant>[-hip].json` (gitignored). Use `build-hip/` for this fork;
+inherited upstream references to `build/` describe its other build configurations.
+
+## Process and deployment ownership
+
+The user launches their own processes. Agents may stop only validation processes they started,
+identified by recorded PIDs/process groups and launch logs. Stop an owned server before its owned
+engine so it cannot respawn. Do not use name-wide `pkill`, port-wide killing, or service-manager
+commands to clear the hosts. Do not inspect or manage unrelated services, including llama-swap,
+unless the current task explicitly requests it. Earlier validation permission is not standing
+authorization to stop user processes.
+
+Read the current state in `Handoff.md` before deploying: the remote canonical checkout contains
+protected user edits, and restored production binaries intentionally differ from retained review
+builds. Use isolated review trees and explicit configs for future validation; do not pull/reset,
+rebuild or overwrite the protected production checkout as routine test setup.
 
 ## Commands (CI / local, no GPU)
 
@@ -88,13 +103,14 @@ Installer builds set `STRATA_BUILD_TESTS=OFF`. Prefer `./maya.sh` over raw cmake
 
 ## Engine build (CMake)
 
-- **CUDA or HIP, never both.** Options accept `STRATA_*` or `MAYA_*` (`MAYA_X` sets `STRATA_X` in CMake; runtime env aliases are `MAYA_*` → `STRATA_*`).
+- **Build HIP only:** `-DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF`, targeting `gfx1151`. Options accept `STRATA_*` or `MAYA_*` (`MAYA_X` sets `STRATA_X` in CMake; runtime env aliases are `MAYA_*` → `STRATA_*`).
 - **HIP requires MMQ:** `-DSTRATA_ENABLE_HIP=ON -DSTRATA_PREFILL_MMQ=ON` (`./maya.sh --backend hip` sets this).
 - Enable tests only when you need C++ suites: `-DSTRATA_BUILD_TESTS=ON`.
-- CUDA: default arch is `120`; min compute capability **6.0** (Pascal experimental; Volta+ supported). HIP: wave32 RDNA3/4 (`gfx1100`, `gfx1201`, `gfx1151`, …) with optional wave64 CDNA path — see `cmake/hip_backend.cmake`.
+- The inherited HIP backend contains other architecture paths; this fork's build and measurement target is `gfx1151` — see `cmake/hip_backend.cmake`.
 - Many kernel tests are **parity binaries**; run them as `build*/glm_*_parity --selftest` (and `ctest` where registered).
 
-Manual HIP configure example is in `docs/AMD_RDNA4.md`.
+The gfx1151 RDMA configure example is in `docs/TP2-RUN.md`. `docs/AMD_RDNA4.md` is an inherited
+gfx1201 reference, not this fork's target build recipe.
 
 ## Conventions that are easy to miss
 
@@ -111,12 +127,18 @@ Manual HIP configure example is in `docs/AMD_RDNA4.md`.
 
 - Base on `main`; one topic per PR.
 - Perf / output-affecting changes: measure before/after on the same harness; note if answers change (expert placement can flip bits).
-- AMD / HIP: accepted only with your measurements once NVIDIA still builds and behaves the same.
+- Engine/performance changes require gfx1151 HIP measurements. Preserve inherited CUDA behavior when editing shared code; NVIDIA builds and measurements are outside this fork's validation scope.
 - CI must pass: HIP map check + `serve` + `tools` tests. GPU parity suites run on maintainers' machines before merge.
 
 ## Session handoff
 
 `Handoff.md` is the **live** restart document (state, issue map, performance, gotchas, how to run). `Handoff-Prompt.md` is the prompt to give a fresh session. **Keep `Handoff.md` current** — update it whenever state changes, and comment on the relevant issue.
+
+`README.md`, this file and the fork's operational docs are fork-owned. Merge applicable upstream
+documentation semantically; do not replace them wholesale. Review upstream tags one at a time and
+finish affected validation plus exact-head and post-merge CI before the next tag. Historical design
+documents and measurement reports describe their dated checkpoints; [docs/README.md](docs/README.md)
+identifies the current guides. The requested v1.1.37–v1.1.46 integration is complete.
 
 ## Key references
 

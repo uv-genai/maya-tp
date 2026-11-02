@@ -4,6 +4,11 @@ The setup in detail: what its first run does, starting again and updating, its o
 fails. Back to the
 [README](../README.md).
 
+**Maya-TP:** use HIP/ROCm on gfx1151 Linux and [TP2-RUN.md](TP2-RUN.md) for the two-host RDMA
+build and launch. Other platforms and same-host multi-GPU examples below describe inherited
+upstream behavior. The fork's validated TP2/MTP models are GLM Maya-S/M/L; DeepSeek has known
+[gfx1151 parity failures](https://github.com/uv-genai/maya-tp/issues/68).
+
 ## What the first run does
 
 It first asks which model to set up:
@@ -120,6 +125,11 @@ engine keeps its conversation where there is time for that).
 downloads the new code (git), compiles only the engine files that changed and loads the same model again - the model
 is not downloaded again, and your settings stay. By hand: `git pull`, then `./setup.sh`.
 (The check asks GitHub for the latest release, at most every six hours; `MAYA_UPDATE_CHECK=0` turns it off.)
+
+These update steps apply to a clean installation. On the development pair, the rank0 canonical
+checkout has protected user edits and intentionally restored production binaries. Do not update or
+rebuild it as part of routine validation; use the isolated review trees described in
+[the runbook](TP2-RUN.md#development-pair-production-and-review-builds).
 
 **Maya-TP release names:** future fork releases use `tp-vMAJOR.MINOR.PATCH`; existing published
 `v*` tags stay unchanged. Installs at v1.1.42 or earlier need a one-time `git pull --ff-only`

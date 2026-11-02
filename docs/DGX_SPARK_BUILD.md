@@ -1,5 +1,8 @@
 # The DGX Spark build: what we changed, where it comes from, what others did
 
+> **Inherited upstream platform reference.** This aarch64/NVIDIA bring-up is outside Maya-TP's
+> gfx1151 HIP/Linux target. Use [TP2-RUN.md](TP2-RUN.md) for this fork's two-host RDMA build.
+
 *The aarch64 port for the NVIDIA DGX Spark (GB10) and Grace, by carlos patriawan
 ([@xcpatr9231975](https://github.com/xcpatr9231975)), 2026-10-24.*
 
