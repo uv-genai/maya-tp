@@ -1,0 +1,617 @@
+{
+  "model": "xs",
+  "mode": "single",
+  "engine_sha256": "a0dcc1cb91e9e52fa365291d68eef8203af714d8222e77e49d72741a4331ddc2",
+  "context": 32768,
+  "temperature": 0,
+  "max_tokens": 64,
+  "cases": [
+    {
+      "name": "arithmetic",
+      "prompt": "Return only the integer result: 7853 - 2769.",
+      "expected": 5084,
+      "answer": "5084",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 3,
+        "total_tokens": 21,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 18,
+        "prompt_ms": 553.6,
+        "prompt_per_token_ms": 30.756,
+        "prompt_per_second": 32.5,
+        "predicted_n": 3,
+        "predicted_ms": 101.4,
+        "predicted_per_token_ms": 33.8,
+        "predicted_per_second": 29.6,
+        "draft_n": 3,
+        "draft_n_accepted": 2
+      }
+    },
+    {
+      "name": "multiply",
+      "prompt": "Return only the integer result: 37 * 24.",
+      "expected": 888,
+      "answer": "888",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 16,
+        "completion_tokens": 2,
+        "total_tokens": 18,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 16,
+        "prompt_ms": 238.1,
+        "prompt_per_token_ms": 14.881,
+        "prompt_per_second": 67.2,
+        "predicted_n": 2,
+        "predicted_ms": 106.5,
+        "predicted_per_token_ms": 53.25,
+        "predicted_per_second": 18.8,
+        "draft_n": 4,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "division",
+      "prompt": "Return only the integer result: 924 / 7.",
+      "expected": 132,
+      "answer": "132",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 16,
+        "completion_tokens": 2,
+        "total_tokens": 18,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 16,
+        "prompt_ms": 228.4,
+        "prompt_per_token_ms": 14.275,
+        "prompt_per_second": 70.1,
+        "predicted_n": 2,
+        "predicted_ms": 95.0,
+        "predicted_per_token_ms": 47.5,
+        "predicted_per_second": 21.1,
+        "draft_n": 3,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "hex",
+      "prompt": "Return only the decimal integer corresponding to hexadecimal 0x7F.",
+      "expected": 127,
+      "answer": "127",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 2,
+        "total_tokens": 20,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 18,
+        "prompt_ms": 287.9,
+        "prompt_per_token_ms": 15.994,
+        "prompt_per_second": 62.5,
+        "predicted_n": 2,
+        "predicted_ms": 86.6,
+        "predicted_per_token_ms": 43.3,
+        "predicted_per_second": 23.1,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "binary",
+      "prompt": "Return only the decimal integer corresponding to binary 101101.",
+      "expected": 45,
+      "answer": "45",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 16,
+        "completion_tokens": 2,
+        "total_tokens": 18,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 16,
+        "prompt_ms": 230.3,
+        "prompt_per_token_ms": 14.394,
+        "prompt_per_second": 69.5,
+        "predicted_n": 2,
+        "predicted_ms": 87.4,
+        "predicted_per_token_ms": 43.7,
+        "predicted_per_second": 22.9,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "bitand",
+      "prompt": "Return only the decimal integer result of 45 bitwise AND 27.",
+      "expected": 9,
+      "answer": "45 & 27 = 9",
+      "passes_simple_check": false,
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 8,
+        "total_tokens": 27,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 19,
+        "prompt_ms": 307.1,
+        "prompt_per_token_ms": 16.163,
+        "prompt_per_second": 61.9,
+        "predicted_n": 8,
+        "predicted_ms": 399.8,
+        "predicted_per_token_ms": 49.975,
+        "predicted_per_second": 20.0,
+        "draft_n": 7,
+        "draft_n_accepted": 3
+      }
+    },
+    {
+      "name": "modulo",
+      "prompt": "Return only the integer result of 113 modulo 8.",
+      "expected": 1,
+      "answer": "1",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 16,
+        "completion_tokens": 2,
+        "total_tokens": 18,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 16,
+        "prompt_ms": 239.8,
+        "prompt_per_token_ms": 14.988,
+        "prompt_per_second": 66.7,
+        "predicted_n": 2,
+        "predicted_ms": 85.9,
+        "predicted_per_token_ms": 42.95,
+        "predicted_per_second": 23.3,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "sequence",
+      "prompt": "Return only the next integer in the sequence: 2, 5, 10, 17, 26, ...",
+      "expected": 37,
+      "answer": "37",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 29,
+        "completion_tokens": 2,
+        "total_tokens": 31,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 29,
+        "prompt_ms": 395.9,
+        "prompt_per_token_ms": 13.652,
+        "prompt_per_second": 73.3,
+        "predicted_n": 2,
+        "predicted_ms": 87.6,
+        "predicted_per_token_ms": 43.8,
+        "predicted_per_second": 22.8,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "list_comp",
+      "prompt": "In Python, what is [x*x for x in range(5) if x%2 == 0]? Return only a JSON array.",
+      "expected": [
+        0,
+        4,
+        16
+      ],
+      "answer": "[0, 4, 16]",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 34,
+        "completion_tokens": 10,
+        "total_tokens": 44,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 34,
+        "prompt_ms": 486.8,
+        "prompt_per_token_ms": 14.318,
+        "prompt_per_second": 69.8,
+        "predicted_n": 10,
+        "predicted_ms": 205.4,
+        "predicted_per_token_ms": 20.54,
+        "predicted_per_second": 48.7,
+        "draft_n": 8,
+        "draft_n_accepted": 8
+      }
+    },
+    {
+      "name": "slice",
+      "prompt": "In Python, what is list(range(8))[1:7:2]? Return only a JSON array.",
+      "expected": [
+        1,
+        3,
+        5
+      ],
+      "answer": "[1, 3, 5]",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 28,
+        "completion_tokens": 10,
+        "total_tokens": 38,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 28,
+        "prompt_ms": 353.9,
+        "prompt_per_token_ms": 12.639,
+        "prompt_per_second": 79.1,
+        "predicted_n": 10,
+        "predicted_ms": 208.5,
+        "predicted_per_token_ms": 20.85,
+        "predicted_per_second": 48.0,
+        "draft_n": 8,
+        "draft_n_accepted": 8
+      }
+    },
+    {
+      "name": "sorted_unique",
+      "prompt": "Return only a JSON array containing the distinct values of [3, 1, 3, 2, 1] in ascending order.",
+      "expected": [
+        1,
+        2,
+        3
+      ],
+      "answer": "[1, 2, 3]",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 33,
+        "completion_tokens": 10,
+        "total_tokens": 43,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 33,
+        "prompt_ms": 408.1,
+        "prompt_per_token_ms": 12.367,
+        "prompt_per_second": 80.9,
+        "predicted_n": 10,
+        "predicted_ms": 211.2,
+        "predicted_per_token_ms": 21.12,
+        "predicted_per_second": 47.3,
+        "draft_n": 9,
+        "draft_n_accepted": 8
+      }
+    },
+    {
+      "name": "json_count",
+      "prompt": "Return only a JSON object with keys \"count\" and \"total\", where count is 4 and total is 19.",
+      "expected": {
+        "count": 4,
+        "total": 19
+      },
+      "answer": "```json\n{\"count\": 4, \"total\": 19}\n```",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 29,
+        "completion_tokens": 17,
+        "total_tokens": 46,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 29,
+        "prompt_ms": 395.1,
+        "prompt_per_token_ms": 13.624,
+        "prompt_per_second": 73.4,
+        "predicted_n": 17,
+        "predicted_ms": 439.6,
+        "predicted_per_token_ms": 25.859,
+        "predicted_per_second": 38.7,
+        "draft_n": 19,
+        "draft_n_accepted": 13
+      }
+    },
+    {
+      "name": "json_nested",
+      "prompt": "Return only a JSON object with key \"items\" containing the array [1, 2], and key \"ok\" containing true.",
+      "expected": {
+        "items": [
+          1,
+          2
+        ],
+        "ok": true
+      },
+      "answer": "{\"items\":[1,2],\"ok\":true}",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 31,
+        "completion_tokens": 12,
+        "total_tokens": 43,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 31,
+        "prompt_ms": 417.2,
+        "prompt_per_token_ms": 13.458,
+        "prompt_per_second": 74.3,
+        "predicted_n": 12,
+        "predicted_ms": 316.8,
+        "predicted_per_token_ms": 26.4,
+        "predicted_per_second": 37.9,
+        "draft_n": 13,
+        "draft_n_accepted": 9
+      }
+    },
+    {
+      "name": "syllogism",
+      "prompt": "All ravens are birds. No birds are mammals. Can any raven be a mammal? Return only YES or NO.",
+      "expected": "NO",
+      "answer": "NO",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 29,
+        "completion_tokens": 2,
+        "total_tokens": 31,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 29,
+        "prompt_ms": 408.0,
+        "prompt_per_token_ms": 14.069,
+        "prompt_per_second": 71.1,
+        "predicted_n": 2,
+        "predicted_ms": 85.2,
+        "predicted_per_token_ms": 42.6,
+        "predicted_per_second": 23.5,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "logic",
+      "prompt": "If the server is down then requests fail. The server is down. Must requests fail? Return only YES or NO.",
+      "expected": "YES",
+      "answer": "YES",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 28,
+        "completion_tokens": 2,
+        "total_tokens": 30,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 28,
+        "prompt_ms": 375.7,
+        "prompt_per_token_ms": 13.418,
+        "prompt_per_second": 74.5,
+        "predicted_n": 2,
+        "predicted_ms": 93.8,
+        "predicted_per_token_ms": 46.9,
+        "predicted_per_second": 21.3,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "date",
+      "prompt": "In a non-leap year, how many days are there in February? Return only the integer.",
+      "expected": 28,
+      "answer": "28",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 24,
+        "completion_tokens": 2,
+        "total_tokens": 26,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 24,
+        "prompt_ms": 343.6,
+        "prompt_per_token_ms": 14.317,
+        "prompt_per_second": 69.8,
+        "predicted_n": 2,
+        "predicted_ms": 86.0,
+        "predicted_per_token_ms": 43.0,
+        "predicted_per_second": 23.3,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "units",
+      "prompt": "Return only the number of bytes in 3 KiB, where 1 KiB is 1024 bytes.",
+      "expected": 3072,
+      "answer": "3072",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 25,
+        "completion_tokens": 3,
+        "total_tokens": 28,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 25,
+        "prompt_ms": 359.4,
+        "prompt_per_token_ms": 14.376,
+        "prompt_per_second": 69.6,
+        "predicted_n": 3,
+        "predicted_ms": 94.4,
+        "predicted_per_token_ms": 31.467,
+        "predicted_per_second": 31.8,
+        "draft_n": 3,
+        "draft_n_accepted": 2
+      }
+    },
+    {
+      "name": "len",
+      "prompt": "In Python, what is len({\"a\": 1, \"b\": 2, \"c\": 3})? Return only the integer.",
+      "expected": 3,
+      "answer": "3",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 34,
+        "completion_tokens": 2,
+        "total_tokens": 36,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 34,
+        "prompt_ms": 469.9,
+        "prompt_per_token_ms": 13.821,
+        "prompt_per_second": 72.4,
+        "predicted_n": 2,
+        "predicted_ms": 95.7,
+        "predicted_per_token_ms": 47.85,
+        "predicted_per_second": 20.9,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "sum",
+      "prompt": "Return only the integer sum of the numbers 1 through 10 inclusive.",
+      "expected": 55,
+      "answer": "55",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 2,
+        "total_tokens": 21,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 19,
+        "prompt_ms": 296.8,
+        "prompt_per_token_ms": 15.621,
+        "prompt_per_second": 64.0,
+        "predicted_n": 2,
+        "predicted_ms": 87.2,
+        "predicted_per_token_ms": 43.6,
+        "predicted_per_second": 22.9,
+        "draft_n": 2,
+        "draft_n_accepted": 1
+      }
+    },
+    {
+      "name": "integer_div",
+      "prompt": "In Python, what is 23 // 4? Return only the integer.",
+      "expected": 5,
+      "answer": "5",
+      "passes_simple_check": true,
+      "usage": {
+        "prompt_tokens": 20,
+        "completion_tokens": 2,
+        "total_tokens": 22,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 20,
+        "prompt_ms": 308.0,
+        "prompt_per_token_ms": 15.4,
+        "prompt_per_second": 64.9,
+        "predicted_n": 2,
+        "predicted_ms": 98.9,
+        "predicted_per_token_ms": 49.45,
+        "predicted_per_second": 20.2,
+        "draft_n": 3,
+        "draft_n_accepted": 1
+      }
+    }
+  ],
+  "engine": {
+    "model": "deepseek-v4.1-flash",
+    "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+    "max_context": 32768,
+    "images": false,
+    "version": "ds4-0.1",
+    "context": 32768,
+    "kv": "fp4",
+    "kv_resident": 32768,
+    "expert_slots": 14784,
+    "engine_kind": "ds4",
+    "cpu_experts": 576,
+    "ram_experts": 0,
+    "cpu_threads": 14,
+    "engine": "ds4-0.1",
+    "engram_layers": 2,
+    "engram_lookups": 48,
+    "lookup": 0,
+    "logprobs": 20,
+    "maya_version": "1.1.43",
+    "trained_context": 1048576,
+    "dspark": true,
+    "speculation": [
+      "DSpark"
+    ]
+  }
+}

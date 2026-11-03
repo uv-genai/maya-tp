@@ -1412,8 +1412,9 @@ no binaries, model processes or production configs were changed by the planning 
 
 **Current state:** experimental two-host target inference, chunked prefill,
 DSpark and prompt lookup have been implemented and exercised on XS and S.
-They are not yet approved for production: sampled and failure coverage,
-performance measurements, operations and final CI remain in progress. Working
+They are not yet approved for production: numerical/quality review and
+fully warm/peak-budget validation remain open, and the user must review and
+test the candidate before any promotion. Working
 branch `feat/deepseek-tp2` (see `git log` for the latest checkpoint); no production binary
 or config has been promoted. The retained `be3fd7a` review engine is
 `/tmp/ds4-tp2-be3-engine`, with matching worker copy
@@ -1429,8 +1430,15 @@ and its worker copy `/tmp/ds4-tp2-114-current-engine` have SHA-256
 The earlier benchmark build had SHA-256
 `31b2e21d529f5de3016c7ce58a3bab704f052ab5d22beea62b64829680a81fb1`.
 
-**Active owned process:** none. The test-only split-replay build completed;
-its log is `/tmp/ds4-tp2-110-split-replay-build.log`.
+**Active owned process:** none. The exact-head gfx1151 build and ordered HIP
+mapping, server (618 tests, 11 skipped) and tools (707 tests, 3 skipped)
+checks passed for `52cf519`. The XS exact-head API smoke passed DSpark on/off
+and sampled lookup; both ranks exited. Review engine SHA-256
+`a0dcc1cb91e9e52fa365291d68eef8203af714d8222e77e49d72741a4331ddc2`:
+`/tmp/maya-ds4-tp2-113-point-build/maya-ds4`, worker copy
+`/tmp/ds4-tp2-verified-engine` on strix-halo-1. Paths are temporary; verify the
+hash before use. The test-only split-replay build log is
+`/tmp/ds4-tp2-110-split-replay-build.log`.
 It independently checks pack/partition/build identities, then the test
 communicator uses its documented synthetic wire identity. It has a 3 GiB
 per-host memory guard. The preceding strict test failed at 257 because the
@@ -1448,6 +1456,11 @@ window/chunk top-token agreement and exact whole/split logits; all ranks exited.
 XS and S also passed those checks on the 3,204-token fixture and all ranks exited.
 A test-only supported 256+1 split replay was added to `ds4_tp_text_rdma_test.cpp`.
 Both XS and S passed with rank and replay max logit deltas 0; all ranks exited.
+An additional 20-case short objective cross-path check passed 19/20 strict
+format checks on each XS path, and 19/20 single-host versus 20/20 TP on S;
+the only strict misses gave the correct bitwise result with extra text.
+All owned processes exited. Raw outputs and limitations are in
+`docs/validation/deepseek-tp2-control-2026-11-03/cross-path-extended.md`.
 XS and S each passed eight simple cross-path
 sanity cases on one host and two hosts; 5/8 XS and 7/8 S answers were
 text-identical, with remaining differences in JSON formatting or verifier
