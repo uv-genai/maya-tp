@@ -1477,3 +1477,9 @@ Stop server before engine once the harness ends, checking PID/start times. The u
 worker verification API and its model-backed test are in development; isolated remote build
 session 45669, log `/tmp/ds4-tp2-113-worker-build.log`. No two-host model execution exists yet.
 User processes stay untouched.
+
+Update: the Maya-S prefill harness finished and its owned server and engine exited. The six
+fresh-prompt samples are in `s-prefill-reference.json`: 2K 92.0/125.6/140.7 and 8K
+265.1/286.0/258.9 tokens/s, all with zero cached prompt tokens. The uncommitted P5 worker
+verification test compiled but detected a drafter mismatch after a partially accepted window;
+investigation is ongoing, and this worker API must not be treated as validated.

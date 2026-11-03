@@ -77,6 +77,13 @@ The 2K rates were 121.7/237.6/249.1 tokens/s and 8K rates 376.6/388.8/390.0 toke
 sample was cold relative to the later trials, so these are not interchangeable. Raw measurements:
 `xs-prefill-reference.json`. The owned prefill server/engine were stopped after this run.
 
+The same fresh-prompt harness measured Maya-S at 262144 context with DSpark enabled:
+2K source-token prompts ran at 92.0, 125.6 and 140.7 tokens/s; 8K prompts ran at
+265.1, 286.0 and 258.9 tokens/s. Each request reported zero cached prompt tokens.
+These are single-host measurements, not TP2 performance; raw results and engine
+residency telemetry are in `s-prefill-reference.json`. The owned server and engine
+were stopped after the run.
+
 A separate one-host Maya-S load with 524288 context, DSpark on, vision off and three input IDs
 reported 9,832 of 15,744 experts in GPU slots, 5,912 on the CPU lane (~65.1 GB in model files),
 9.22 GB weights and 0.49 GB caches; the one-token output is a load smoke test, not a throughput
