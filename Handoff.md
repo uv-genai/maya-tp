@@ -2504,3 +2504,20 @@ managed launches, config fields and overrides.
 **Active owned model processes** are none. Validation for this workstream
 uses fake processes and preflight checks. The user performs the next actual
 model launch and inference tests.
+
+
+The user confirmed the normal entry point is llama-swap on
+`strix-halo-1.local`. Issue #119 added `maya-deepseek-xs-mtp` and
+`maya-deepseek-s-mtp` to `/home/ugo/.config/llama-swap/config.yaml` there.
+Both entries invoke the isolated review wrapper with `${PORT}`, use
+`stop-pid ${PID}`, proxy to `127.0.0.1:${PORT}`, enable DSpark and explicitly
+select context 262144. They select `Maya-XS` and `Maya-S` respectively.
+The wrapper starts rank 1 on strix-halo-2 automatically.
+
+The YAML was backed up as
+`/home/ugo/.config/llama-swap/config.yaml.before-deepseek-tp2-119-20261103-225121`.
+Parsed validation confirmed all seven previous entries and all global settings
+were preserved, and the two new aliases select separate model packs and the
+intended launch/stop commands. The current file has nine model entries.
+The guide and staged YAML fragment now use the requested alias names. The
+user performs inference testing through those entries.

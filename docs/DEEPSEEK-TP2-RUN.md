@@ -229,11 +229,11 @@ are documented by llama-swap. [llama-swap command documentation](https://github.
 ```yaml
 healthCheckTimeout: 1800
 models:
-  deepseek-maya-xs-tp2:
+  maya-deepseek-xs-mtp:
     cmd: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh run ${PORT} --model Maya-XS
     cmdStop: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh stop-pid ${PID}
     checkEndpoint: /health
-  deepseek-maya-s-tp2:
+  maya-deepseek-s-mtp:
     cmd: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh run ${PORT} --model Maya-S
     cmdStop: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh stop-pid ${PID}
     checkEndpoint: /health

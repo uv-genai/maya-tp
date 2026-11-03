@@ -8,7 +8,10 @@ The user authorized implementation and validation of DeepSeek TP2 and DSpark on
 `feat/deepseek-tp2`. Experimental target inference, chunked prefill, DSpark and prompt lookup
 have been exercised on XS and S. Numerical/quality and resource review remain open.
 The user will test the new launchers through llama-swap. Read §43 and #118 for
-the staged runtime, config choices and ownership-safe stop actions.
+the staged runtime, config choices and ownership-safe stop actions. Issue #119
+installed `maya-deepseek-xs-mtp` and `maya-deepseek-s-mtp` in llama-swap on
+strix-halo-1.local. The user launches from that host and will report inference
+results.
 Read the current-state summary at the start of Handoff.md §42, the implementation plan and phase issues #110–#116.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
 procedure is in [docs/DEEPSEEK-TP2-RUN.md](docs/DEEPSEEK-TP2-RUN.md); no production promotion
