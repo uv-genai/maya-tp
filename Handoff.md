@@ -1429,12 +1429,32 @@ and its worker copy `/tmp/ds4-tp2-114-current-engine` have SHA-256
 The earlier benchmark build had SHA-256
 `31b2e21d529f5de3016c7ce58a3bab704f052ab5d22beea62b64829680a81fb1`.
 
-**Active owned process:** none. XS and S each passed eight simple cross-path
+**Active owned process:** none. The test-only split-replay build completed;
+its log is `/tmp/ds4-tp2-110-split-replay-build.log`.
+It independently checks pack/partition/build identities, then the test
+communicator uses its documented synthetic wire identity. It has a 3 GiB
+per-host memory guard. The preceding strict test failed at 257 because the
+unsupported direct whole feed and supported 256+1 split had max logit delta
+1.059103, although their top token matched; its logs are saved as
+`docs/validation/deepseek-tp2-control-2026-11-03/sweep-xs-whole257-failure-rank*.txt`.
+The XS rerun recorded that diagnostic without demanding exact unsupported-call
+logits and passed rank and window/chunk top-token agreement at all six lengths.
+At 512 tokens both paths selected 9857 and whole/split logits matched exactly.
+S also passed the six top-token checks; at 512 both paths selected 271 and
+whole/split logits matched. Its unsupported 257-token direct whole call differed
+from the supported split by max 3.5900075 in logits while keeping the same top.
+The XS and S 545-token formatted prompt checks passed rank agreement,
+window/chunk top-token agreement and exact whole/split logits; all ranks exited.
+XS and S also passed those checks on the 3,204-token fixture and all ranks exited.
+A test-only supported 256+1 split replay was added to `ds4_tp_text_rdma_test.cpp`.
+Both XS and S passed with rank and replay max logit deltas 0; all ranks exited.
+XS and S each passed eight simple cross-path
 sanity cases on one host and two hosts; 5/8 XS and 7/8 S answers were
 text-identical, with remaining differences in JSON formatting or verifier
 wording. All owned processes exited. The single-host runs used 8 GiB reserve,
-zero read-ahead and a 3 GiB memory guard. This small check does not resolve
-the synthetic 512-token chunk/window discrepancy. Evidence:
+zero read-ahead and a 3 GiB memory guard. The later current-build sweep no
+longer reproduces the earlier synthetic 512-token chunk/window top-token
+discrepancy; substantial full-logit differences remain. Evidence:
 `docs/validation/deepseek-tp2-control-2026-11-03/cross-path-sanity.md`.
 The cold/second-start comparisons used only
 manifest-verified model source pages evicted via per-file `POSIX_FADV_DONTNEED`,

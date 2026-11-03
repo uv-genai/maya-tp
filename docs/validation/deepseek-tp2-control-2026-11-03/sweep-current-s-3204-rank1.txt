@@ -1,0 +1,6 @@
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+ds4: the experts VRAM leaves over (~169.0 GB) are read in place from the model's files (--mmap-experts on) (118.8 GB of RAM free to keep them: the most-routed 0.0 GB read ahead; prompts in chunks of 256)
+ds4 tp2: rank 1 loaded 84509982720 routed expert bytes (7014400 pinned staging bytes); awaiting peer attachment
+rank model loaded; prompt=3204
+rank=1 prefill length=3204 pair_max=0 window_max=1.8526626 chunk_top=5 window_top=5 window_s=39.5453 chunk_s=16.6804
+rank=1 whole length=3204 pair_max=0 split_max=0 whole_top=5 split_top=5

@@ -170,6 +170,33 @@ int ds4_tp_text_rdma_test(int argc,char** argv) {
                 CHECK(whole_pair<=1e-5f && w==a);
                 if (std::getenv("DS4_TP_TEST_REQUIRE_SPLIT_PARITY")) CHECK(whole_delta<=1e-5f);
             }
+            if (length>chunk && std::getenv("DS4_TP_TEST_COMPARE_SPLIT_REPLAY")) {
+                CHECK(reset());
+                std::vector<float> replay;
+                for (int at=0;at<length;) {
+                    const int n=std::min(chunk,length-at); const bool last=at+n==length;
+                    CHECK(comm->BeginOperation(++sequence,&error));
+                    CHECK(model.feed(tokens.data()+at,n,last?1:0,error));
+                    if (last) {
+                        CHECK(model.logits(replay) && replay.size()==vocab);
+                        CHECK(hipMemcpyAsync(device,replay.data(),bytes,hipMemcpyHostToDevice,stream)==hipSuccess);
+                        const float* remote=comm->ExchangePartial(device,bytes,stream,&error); CHECK(remote);
+                        CHECK(hipMemcpyAsync(other.data(),remote,bytes,hipMemcpyDeviceToHost,stream)==hipSuccess);
+                        CHECK(hipStreamSynchronize(stream)==hipSuccess);
+                    }
+                    CHECK(model.tp_worker_synchronize(error) && comm->CheckQueued(&error) && comm->EndOperation(sequence,&error));
+                    at+=n;
+                }
+                float replay_delta=0, replay_pair=0;
+                for (std::size_t i=0;i<vocab;++i) {
+                    CHECK(std::isfinite(replay[i]) && std::isfinite(other[i]));
+                    replay_delta=std::max(replay_delta,std::fabs(replay[i]-actual[i]));
+                    replay_pair=std::max(replay_pair,std::fabs(replay[i]-other[i]));
+                }
+                std::fprintf(stderr,"rank=%ld split replay length=%d pair_max=%.8g replay_max=%.8g\n",
+                             rank,length,replay_pair,replay_delta);
+                CHECK(replay_pair<=1e-5f && replay_delta<=1e-5f);
+            }
             CHECK(pair_delta<=1e-5f && a==b);
         }
         CHECK(reset());

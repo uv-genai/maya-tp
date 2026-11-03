@@ -27,6 +27,7 @@ All owned processes exited. [XS single](quality-xs-single.json),
 [S TP2](quality-s-tp.json).
 
 These are eight easy, short cases, one run each. They can reveal obvious
-failures but do not establish general quality or exact numerical equivalence,
-and do not resolve the synthetic 512-token chunk/window top-token discrepancy
-or the longer-answer differences in [chunk review](chunk-review.md).
+failures but do not establish general quality or exact numerical equivalence.
+The earlier synthetic 512-token top-token discrepancy was not reproduced in
+the [current window/chunk sweep](window-chunk-current.md); full-logit and
+longer-answer differences remain in [chunk review](chunk-review.md).

@@ -1,0 +1,13 @@
+{
+  "build_digest": "f06ad48c9cc471fb6a08f61424504aa740109a07261d828bb0b65eab14badfb3",
+  "geometry": {
+    "hidden_size": 5120,
+    "moe_intermediate_size": 2304,
+    "n_routed_experts": 384,
+    "num_attention_heads": 64,
+    "num_hidden_layers": 40,
+    "o_groups": 8
+  },
+  "model_digest": "e8d41763b86d0ed5430202521f42c1089205d3bf14afc2e0308ca82e1d481c71",
+  "partition_digest": "b71b12627fd73832ac3ebace373bcd574b63f46f021104d711de5f9900304e94"
+}
