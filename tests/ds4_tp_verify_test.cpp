@@ -11,6 +11,7 @@ int ds4_tp_dense_load_test(int argc, char** argv);
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
 int ds4_tp_pair_smoke(int argc, char** argv);
 int ds4_tp_expert_rdma_test(int argc, char** argv);
+int ds4_tp_dense_rdma_test(int argc, char** argv);
 #endif
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
 int main(int argc,char** argv) {
@@ -19,6 +20,7 @@ int main(int argc,char** argv) {
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
     if (argc > 1 && std::string(argv[1])=="--rdma") return ds4_tp_pair_smoke(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--rdma-expert") return ds4_tp_expert_rdma_test(argc,argv);
+    if (argc > 1 && std::string(argv[1])=="--rdma-dense") return ds4_tp_dense_rdma_test(argc,argv);
 #endif
     if(argc!=3 || (std::string(argv[2])!="on" && std::string(argv[2])!="none" && std::string(argv[2])!="off" && std::string(argv[2])!="dispatch")) {
         std::fprintf(stderr,"usage: pack-dir on|none|off|dispatch (none/dispatch reserve worker rollback buffers)\n"); return 2;

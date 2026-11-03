@@ -1528,6 +1528,11 @@ and the full single-GPU expert within 1.2e-8. See
 `docs/validation/deepseek-tp2-control-2026-11-03/rdma-expert-xs.md`. This is one routed expert,
 not an end-to-end TP model, and uses synthetic test handshake identities.
 
+Two individual XS Q6_K attention projections also passed two-host tests: gathered `wq_b` output
+matched a full GEMV exactly, while summed `wo_b` partials differed by at most 1.2e-7. See
+`docs/validation/deepseek-tp2-control-2026-11-03/rdma-dense-xs.md`. These are synthetic activations
+through individual matrices, not full attention or an integrated model.
+
 An owned replicated-XS paired control/RDMA smoke on port 18722 completed and both owned ranks
 exited. The adaptive-lane attempt produced a 5.6557 maximum logit difference and the hosts chose
 different CPU/stream splits. With identical fixed CPU execution, a rerun passed: all 129,280
