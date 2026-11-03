@@ -1,4 +1,5 @@
 #include "../src/ds4/ds4_tp_channel.hpp"
+#include "../src/ds4/ds4_tp_worker.hpp"
 
 #include <cstring>
 #include <cstdio>
@@ -13,10 +14,12 @@ public:
     std::size_t offset = 0, recv_calls = 0;
     std::string order;
     bool fail_send = false;
+    bool fail_queued = false;
+    int begins = 0, ends = 0;
     std::uint32_t rank() const noexcept override { return rank_value; }
     std::uint32_t world_size() const noexcept override { return 2; }
-    bool BeginOperation(std::uint64_t, std::string*) override { return true; }
-    bool EndOperation(std::uint64_t, std::string*) override { return true; }
+    bool BeginOperation(std::uint64_t, std::string*) override { ++begins; return true; }
+    bool EndOperation(std::uint64_t, std::string*) override { ++ends; return true; }
     bool SendControl(const void* data, std::size_t n, std::string* e) override {
         order += 'S';
         if (fail_send) { *e = "send failed"; return false; }
@@ -31,7 +34,7 @@ public:
     bool StartPartial(const float*, std::size_t, hipStream_t, std::string*) override { return false; }
     const float* FinishPartial(std::size_t, std::string*) override { return nullptr; }
     bool QueuePartial(std::size_t, QueuedPartial*, std::string*) override { return false; }
-    bool CheckQueued(std::string*) override { return true; }
+    bool CheckQueued(std::string* e) override { if (fail_queued) { *e = "queued peer failure"; return false; } return true; }
 };
 
 int main() {
@@ -60,5 +63,31 @@ int main() {
     CHECK(!receive_message(oversized,100,decoded,error) && oversized.recv_calls==1);
     Fake truncated; truncated.inbox=channel.sent; truncated.inbox.pop_back();
     CHECK(!receive_message(truncated,100,decoded,error) && error=="receive failed");
+    Fake worker_comm; worker_comm.rank_value=1;
+    for (const Control& c : {Control{Command::Feed,1,0,{1,2}}, Control{Command::Verify,2,2,{3,4,5}},
+                             Control{Command::Verdict,3,4,{1,6}}, Control{Command::Shutdown,4,4,{}}}) {
+        std::vector<std::uint8_t> frame; CHECK(encode_control(c,16,frame,error));
+        worker_comm.inbox.insert(worker_comm.inbox.end(),frame.begin(),frame.end());
+    }
+    Worker worker(worker_comm,32,100,16); int calls=0;
+    auto handle=[&](const Control&,std::string&) { ++calls; return true; };
+    CHECK(worker.run_one(handle,error) && worker.state().position()==2);
+    CHECK(worker.run_one(handle,error) && worker.state().awaiting_verdict());
+    CHECK(worker.run_one(handle,error) && worker.state().position()==4);
+    CHECK(worker.run_one(handle,error) && worker.state().stopped());
+    CHECK(calls==4 && worker_comm.begins==4 && worker_comm.ends==4);
+    const auto calls_before=worker_comm.recv_calls;
+    CHECK(!worker.run_one(handle,error) && worker_comm.recv_calls==calls_before);
+    Fake failed; failed.rank_value=1; CHECK(encode_control(Control{Command::Step,1,0,{1}},16,failed.inbox,error));
+    failed.fail_queued=true; Worker failed_worker(failed,32,100,16); calls=0;
+    CHECK(!failed_worker.run_one(handle,error) && error=="queued peer failure");
+    CHECK(failed_worker.state().failed() && calls==1 && failed.ends==0);
+    const auto recv_before=failed.recv_calls;
+    CHECK(!failed_worker.run_one(handle,error) && error=="queued peer failure" && failed.recv_calls==recv_before && calls==1);
+    Fake disconnected; disconnected.rank_value=1; Worker dead(disconnected,32,100,16);
+    CHECK(!dead.run_one(handle,error) && error=="receive failed");
+    CHECK(!dead.run_one(handle,error) && error=="receive failed" && disconnected.recv_calls==1);
+    Fake wrong_rank; Worker not_worker(wrong_rank,32,100,16);
+    CHECK(!not_worker.run_one(handle,error) && wrong_rank.recv_calls==0 && not_worker.state().failed());
     std::puts("DeepSeek TP2 channel: identity ordering, bounded receive and transport errors passed");
 }

@@ -57,10 +57,7 @@ public:
         if (!failure_.empty()) { error = failure_; return false; }
         if (!pending_) { error = "ds4 tp2 worker: no operation in progress"; return false; }
         pending_ = false;
-        if (!success) {
-            failure_ = cause.empty() ? "ds4 tp2 worker: operation failed" : cause;
-            error = failure_; return false;
-        }
+        if (!success) return fail(cause, error);
         switch (active_.command) {
             case Command::Feed: case Command::Step: position_ += active_.words.size(); break;
             case Command::Verify: awaiting_verdict_ = true; offered_ = active_.words.size() - 1; break;
@@ -76,6 +73,15 @@ public:
     bool awaiting_verdict() const { return awaiting_verdict_; }
     bool failed() const { return !failure_.empty(); }
     bool stopped() const { return stopped_; }
+    const std::string& failure() const { return failure_; }
+
+    // A failed receive or operation is fatal to the pair. Never replace the
+    // first cause or allow another operation on this state.
+    bool fail(const std::string& cause, std::string& error) {
+        if (failure_.empty()) failure_ = cause.empty() ? "ds4 tp2 worker: operation failed" : cause;
+        pending_ = false;
+        error = failure_; return false;
+    }
 
 private:
     std::uint64_t context_, position_ = 0, next_sequence_ = 1;
