@@ -4,8 +4,13 @@ Read [AGENTS.md](AGENTS.md), then [Handoff.md §33](Handoff.md#33-prefill-promot
 
 ## Active DeepSeek performance investigation
 
-Read Handoff.md §35 and issues #100/#101. The user's DeepSeek Maya-XS server on port 8000 is
-user-owned: do not stop/restart it. DSpark is enabled; the 600-second calibration watchdog failure
+For the remote GLM startup repair and Maya-L cold-load investigation, read Handoff.md §§38–39
+and issues #104–#105. The user reports that everything is working; Maya-L has completed TP2
+requests. The cold-loading slowdown remains under investigation.
+
+Read Handoff.md §§35–37 and issues #100–#103. The user's model processes are user-owned: do not
+stop/restart them. DSpark is enabled; Maya-S ran slowly with heavy storage
+reads and memory pressure, tracked in #102. The 600-second calibration watchdog failure
 is separately tracked. The upstream 43.2/453 figures were for a different quant/hardware and an
 8K prefill with greedy, thinking-off answers. The user authorized benchmark requests; session6443 completed successfully. See §35 and
 `docs/benchmarks/deepseek-maya-xs-2026-11-02/`. Read from any repository, but only open issues on uv-genai/maya-tp.

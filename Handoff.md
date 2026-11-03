@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-02 · Current state: **§35**, DeepSeek performance investigation; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-03 · Current state: **§§38–39**, remote GLM startup repair and Maya-L timeout; §§36–37 cover DeepSeek; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -1325,3 +1325,65 @@ User requested one final coding prompt (thread-safe Python LRU cache and tests).
 greedy/thinking off, 38 uncached prompt tokens took 1438.8 ms; 512 output tokens took 12333.8 ms
 (41.5 tok/s), 408/436 drafts accepted. The output hit the token limit and was incomplete. The user
 server stayed healthy and idle. Timing data is in `docs/benchmarks/deepseek-maya-xs-2026-11-02/coding-last-summary.json`.
+
+## 36. DeepSeek Maya-S slow decode (#102, 2026-11-02)
+
+The user started a single-host DeepSeek V4.1 Flash **Maya-S** server on localhost port 8000.
+It is user-owned: do not stop or restart it. The active `maya-ds4-hip.json` selects the Maya-S pack,
+262144 context and `--dspark on`. Health is good and `/metrics` reports DSpark enabled. One completed
+request generated 507 tokens in 125.140 s (4.05 tok/s), with 262 of 332 DSpark drafts accepted.
+At startup 9,779 of 15,744 experts occupied GPU slots; 5,965 experts (~65.8 GB) were on the CPU
+lane. A later active-request metric reported approximately 370 MB/token of process storage reads;
+this counter measures all process reads and does not prove every byte was an expert read. At the
+same time `/proc/meminfo` reported under 1 GB available. Unified-memory pressure and storage reads
+are strong bottleneck candidates, not yet a proven complete breakdown. The server was not changed.
+Issue #102 remains open for investigation; do not assume the smaller Maya-XS results in §35 apply
+without qualification to this larger quant. No new validation requests were sent during this diagnosis.
+
+## 37. DeepSeek XS llama-swap selection (#103, 2026-11-02)
+
+The shared installer config had been overwritten for Maya-S, so llama-swap's `maya-deepseek-xs`
+entry actually started Maya-S. Saved separate `maya-ds4-maya-xs-hip.json` and
+`maya-ds4-maya-s-hip.json` configs and restored `maya-ds4-hip.json` to XS. Once llama-swap had no
+child processes, updated its XS entry to reference the XS-specific config so a future installer run
+cannot silently redirect that entry. YAML backup: `~/.config/llama-swap/config.yaml.before-deepseek-xs-103`.
+Both configs' pack paths, tokenizer directories and source manifests were checked; XS sets DSpark on.
+The user launches models; a fresh actual XS startup has not yet been validated in this session.
+
+## 38. Remote GLM startup repair (#104, 2026-11-03)
+
+The user reported llama-swap GLM startup failure on strix-halo-1. Its `~/maya-tp2-swap.log`
+showed `AttributeError: module 'maya_names' has no attribute 'export_env'` in `child_env`.
+The promoted remote `serve/server.py` expected newer helpers than the remote
+`tools/maya_names.py`, which was missing `both_names`, `lookup` and `export_env`; the earlier
+selective GLM server deployment appears to have omitted that dependency. Updated only that remote
+helper to the matching local version after confirming the difference was exactly those functions.
+Backup is `/home/ugo/software/project-maya/tools/maya_names.py.before-104` on strix-halo-1.
+Remote child environment initialization passed for the S and L configs, alias precedence passed,
+and `serve.test_tp2_peer_loss` passed (3 tests). No user process was stopped; a rank1 Maya-L process
+was observed waiting on strix-halo-2 after the failed launch. Full llama-swap/TP2 startup remains
+unverified and must be checked by the user starting their model. Issue #104 remains open pending it.
+
+## 39. Maya-L startup exceeds timeout (#105, 2026-11-03)
+
+Following #104, S and M reached ready but L repeatedly timed out at 600 seconds. Latest rank0
+`maya-maya-l-hip.log` showed expert pool warming at 80% after 534 seconds; rank1 completed its
+76.4 GB pool in 252 seconds. Both GLM binaries still have user-accepted MD5
+`cbd9e99a6a49e9107b0db3190a40766a`. While remote llama-swap had no child process, changed its
+`healthCheckTimeout` from 600 to 1800 seconds; backup on strix-halo-1 is
+`~/.config/llama-swap/config.yaml.before-maya-l-timeout-105`. This mitigates the timeout only;
+why rank0 loading is slow remains unestablished. Await user retry and verify ready. No user process
+was stopped by the agent. Issue #105 stays open.
+
+Live #105 diagnosis: the user restarted Maya-L at 00:48 on Nov 3. Rank0 NVMe was 97–98% busy
+with ~38,600 reads/s averaging 4 KiB (~158 MB/s); engine `/proc/<pid>/io` showed ~146 MB/s
+physical reads. An idle 1 GiB direct sequential read of the same shard completed in under a second,
+so the warmup's strided mmap access matters. A prelaunch fincore sample showed only ~29 GB of
+156 GB of GGUFs resident. Earlier logs show warmups of 198–204 s but also older 394–561 s runs;
+cache state is a plausible contributor but the reason for its change is not established. The
+user-owned launch must be left alone; it was still loading at the last observation.
+
+Subsequent update: Maya-L reached ready and completed requests through llama-swap, and the user
+reports everything is working well. The 1800-second timeout is a workaround; the cold-loading
+slowdown remains unresolved. The user requested merging the DeepSeek investigation branch into
+main and will perform the post-merge tests (#106). Do not stop the user-owned pair.
