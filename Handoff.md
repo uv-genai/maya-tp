@@ -1456,6 +1456,14 @@ window/chunk top-token agreement and exact whole/split logits; all ranks exited.
 XS and S also passed those checks on the 3,204-token fixture and all ranks exited.
 A test-only supported 256+1 split replay was added to `ds4_tp_text_rdma_test.cpp`.
 Both XS and S passed with rank and replay max logit deltas 0; all ranks exited.
+Three identical requests per XS/S single-host and TP2 configuration
+produced identical answers within each configuration. Requests 2/3 on both
+TP2 models had zero new rank-0 Engram row reads and zero recorded physical
+read_bytes on both ranks, with prompt reuse 0. Single-host still read data
+while Engram misses were zero and prompt reuse was 27 tokens. This is warmed
+request working-set evidence, with startup and peak-budget scope separate.
+All owned processes exited. Evidence is in
+`docs/benchmarks/deepseek-tp2-review-2026-11-03/request-working-set.md`.
 An extended XS/S DSpark rollback sweep crossed position 4096 from a
 4,095-token prefix. Both models passed all 16 acceptance counts with exact
 subsequent logits, five matching draft token IDs and confidence differences
