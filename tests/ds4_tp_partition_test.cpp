@@ -3,6 +3,7 @@
 #include <array>
 #include <climits>
 #include <cstdio>
+#include <limits>
 #include <string>
 
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "line %d: %s\n", __LINE__, #x); return 1; } } while (0)
@@ -10,6 +11,7 @@
 int main() {
     using strata::ds4::tp2::Range;
     using strata::ds4::tp2::expert_ranges;
+    using strata::ds4::tp2::expert_spans;
     std::array<Range, 2> p{};
     std::string error;
     CHECK(expert_ranges(2304, 256, 0, p, error));
@@ -38,5 +40,19 @@ int main() {
     }
     CHECK(expert_ranges(INT_MAX, 1, INT_MAX, p, error));
     CHECK(p[0].count + p[1].count == INT_MAX);
+    // Actual Maya-S layer-0 IQ2_S gate/up and IQ3_S down row sizes from the pack.
+    strata::ds4::tp2::ExpertSpans a{}, b{};
+    CHECK(expert_ranges(2304, 256, 0, p, error));
+    CHECK(expert_spans(2304, 5120, 256, p[0], 1640, 1640, 990, a, error));
+    CHECK(expert_spans(2304, 5120, 256, p[1], 1640, 1640, 990, b, error));
+    CHECK(a.gate_offset == 0 && a.gate_bytes == 2099200 && b.gate_offset == a.gate_bytes);
+    CHECK(a.up_offset == 0 && a.up_bytes == a.gate_bytes && b.up_offset == a.up_bytes);
+    CHECK(a.down_row_offset == 0 && a.down_row_bytes == 550 && b.down_row_offset == 550);
+    CHECK(b.down_row_bytes == 440 && a.down_source_stride == 990 && a.down_rows == 5120);
+    CHECK(a.compact_bytes + b.compact_bytes == 2 * 3778560 + 5068800);
+    CHECK(!expert_spans(2304, 5120, 256, {128, 1024}, 1640, 1640, 990, a, error));
+    CHECK(!expert_spans(2304, 5120, 256, {0, 1280}, 1640, 1640, 991, a, error));
+    CHECK(!expert_spans(2304, 5120, 256, {0, 1280}, std::numeric_limits<std::size_t>::max(),
+                        1640, 990, a, error));
     std::puts("DeepSeek TP2 whole-block ranges: geometry, alternation, coverage and invalid inputs passed");
 }
