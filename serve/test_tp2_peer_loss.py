@@ -25,7 +25,7 @@ class PeerLoss(unittest.TestCase):
         script.write_text(f'''#!{sys.executable}
 import sys
 from pathlib import Path
-print('INFO engine_kind=glm-fast tp_world={world} tp_rank=0', flush=True)
+print('INFO engine_kind=glm-fast tp_world={world} tp_rank=0 tp_prefill_chunk=256', flush=True)
 print('READY 4096 stop' + (' multi={multi}' if {multi} else ''), flush=True)
 for line in sys.stdin:
     if line.startswith('QUIT'):
@@ -77,6 +77,15 @@ for line in sys.stdin:
                 self.assertNotIn('later shutdown error', engine.info['tp_error'])
                 self.assertEqual(len(seen.read_text().splitlines()), 1)
 
+    def test_raw_peer_close_is_sticky_even_before_the_pair_down_notice(self):
+        engine, seen = self.engine(error='verbs peer closed the bootstrap connection')
+        with self.assertRaisesRegex(ValueError, 'TP2 pair down.*verbs peer closed the bootstrap connection'):
+            self.generate(engine)
+        self.assertEqual(engine.info.get('tp_pair'), 'down')
+        with self.assertRaisesRegex(ValueError, 'TP2 pair down.*verbs peer closed the bootstrap connection'):
+            self.generate(engine)
+        self.assertEqual(len(seen.read_text().splitlines()), 1)
+
     def test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior(self):
         for world, error in ((1, POISON), (2, 'out of GPU memory')):
             with self.subTest(world=world, error=error):
@@ -103,6 +112,8 @@ for line in sys.stdin:
         with urllib.request.urlopen(base + '/health', timeout=10) as response:
             health = json.load(response)
         self.assertEqual((health['status'], health['tp']['peer']), ('degraded', 'down'))
+        self.assertEqual(health['tp']['prefill_chunk'], 256)
+        self.assertIn(POISON, health['tp']['error'])
         self.assertEqual(len(seen.read_text().splitlines()), 1)
 
 

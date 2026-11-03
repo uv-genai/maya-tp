@@ -30,6 +30,7 @@ def main():
     ap.add_argument("--output", required=True, type=Path, help="New JSON file; never overwritten")
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--tokens", type=int, default=256)
+    ap.add_argument("--save-answers", action="store_true", help="include generated text for qualitative comparison")
     a = ap.parse_args()
     if a.runs < 1 or a.tokens < 1:
         ap.error("--runs and --tokens must be positive")
@@ -67,6 +68,7 @@ def main():
                 result["samples"].append({"run": run + 1, "case": name,
                     "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
                     "answer_sha256": hashlib.sha256(answer.encode()).hexdigest(),
+                    **({"answer": answer} if a.save_answers else {}),
                     "wall_s": wall, "usage": response.get("usage"), "timings": response.get("timings"),
                     "finish_reason": response["choices"][0].get("finish_reason"),
                     "engine": engine, "tiers": (after.get("tiers") or {}).get("now")})

@@ -16,3 +16,11 @@ also matched on this prompt. All owned processes exited. This single short CLI
 fixture is not a throughput comparison or a replacement for serve, cancellation,
 peer-loss and long-context regression checks. Logs use
 `/tmp/ds4-tp2-glm-{simple,mtp}-rank{0,1}.log` on their respective hosts.
+
+An isolated GLM HTTP pair using the same review binary and MTP width 2 then
+completed a request with actual MTP acceptance. A streaming request was
+cancelled after 3,008 of 3,256 prefill tokens; a follow-up completed and health
+remained up. The driver then killed only its recorded worker at the same point
+in a separate prefill. Health became degraded and later requests retained
+`verbs communicator is poisoned: verbs peer closed the bootstrap connection`.
+The server and worker exited. Logs use `/tmp/ds4-tp2-114-glm-http-*`.

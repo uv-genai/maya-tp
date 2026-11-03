@@ -721,7 +721,8 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
           Lookup* lk, DraftCost* dc) {
     std::vector<int> eos = parse_ids(eos_list);
     for (const std::string& l : m.info_lines()) std::printf("%s\n", l.c_str());
-    if (m.tp2_driving()) std::printf("INFO tp_world=2 tp_rank=0 tp_pair=up\n");
+    std::printf("INFO lookup=%d\n",lk ? 1 : 0);
+    if (m.tp2_driving()) std::printf("INFO tp_world=2 tp_rank=0 tp_pair=up tp_prefill_chunk=%d\n",m.prompt_chunk());
     std::printf("INFO logprobs=%d\n", strata::ds4::kTopLogprobs);   // (GEN logprobs=<k>: LP lines, k at most this)
     if (m.seq_count() > 1)   // (--parallel: n conversations at once, GEN rid=<id>)
         std::printf("READY %lld stop multi=%d\n", (long long) m.max_context(), m.seq_count());
@@ -3520,6 +3521,7 @@ int main(int argc, char** argv) {
     std::shared_ptr<strata::net::Communicator> tp2_comm;
     std::string tp2_error;
     bool tp2_dspark=false;
+    int tp2_lookup=0;
     std::atomic<bool> tp2_notified{false};
     const auto tp2_notify=[&](const std::string& why) {
         if (tp2_notified.exchange(true)) return;
@@ -3529,15 +3531,23 @@ int main(int argc, char** argv) {
     };
     if (tp2_rank>=0) {
         const char* requested=std::getenv("MAYA_DS4_TP2_DSPARK");
+        const char* requested_chunk=std::getenv("MAYA_DS4_TP2_CHUNK");
+        const char* requested_lookup=std::getenv("MAYA_DS4_TP2_LOOKUP");
         if (!requested || (std::strcmp(requested,"0")!=0 && std::strcmp(requested,"1")!=0) ||
             tp2_host.empty() || tp2_port==0 || tp2_rdma.empty() || tp2_budget==0 ||
             (tp2_rank==0 ? (!serve_mode || tp2_worker) : (!tp2_worker || serve_mode)) ||
             !ids_s.empty() || !ppl.empty() || !prof_run.empty() || !spec_eval_path.empty() ||
             !enc_rgb.empty() || !images.empty() || describe || multi_check || parts_check || sampler_n>0 ||
-            suffix_draft!=0 || o.seqs!=1) {
+            o.seqs!=1) {
             std::fprintf(stderr,"maya-ds4: unsupported or incomplete DeepSeek TP2 rank configuration\n"); return 2;
         }
         tp2_dspark=std::strcmp(requested,"1")==0;
+        if (!strata::ds4::tp2::preflight_chunk(requested_chunk,o.prefill_chunk,o.tp2_chunk_enabled,tp2_error)) {
+            std::fprintf(stderr,"maya-ds4: %s\n",tp2_error.c_str()); return 2;
+        }
+        if (!strata::ds4::tp2::preflight_lookup(requested_lookup,suffix_draft,tp2_rank,tp2_lookup,tp2_error)) {
+            std::fprintf(stderr,"maya-ds4: %s\n",tp2_error.c_str()); return 2;
+        }
         if (o.dspark != (tp2_rank==0 && tp2_dspark)) {
             std::fprintf(stderr,"maya-ds4: DeepSeek TP2 drafter selection differs from preflight\n"); return 2;
         }
@@ -3572,15 +3582,18 @@ int main(int argc, char** argv) {
         tp2_identity.protocol=1; tp2_identity.world=2; tp2_identity.rank=cfg.rank;
         tp2_identity.hidden=g.hidden; tp2_identity.layers=g.layers; tp2_identity.experts=g.experts;
         tp2_identity.expert_width=g.expert_width; tp2_identity.max_context=static_cast<std::uint64_t>(m.max_context());
-        tp2_identity.feature_flags=tp2_dspark ? 1 : 0; tp2_identity.max_partial_bytes=tp2_comm->MaxPartialBytes();
+        tp2_identity.feature_flags=(tp2_dspark ? 1ull : 0ull) |
+            (static_cast<std::uint64_t>(o.prefill_chunk)<<16) | (static_cast<std::uint64_t>(tp2_lookup)<<32);
+        tp2_identity.max_partial_bytes=tp2_comm->MaxPartialBytes();
         strata::ds4::tp2::Identity peer; std::uint64_t limit=0;
         if (!strata::ds4::tp2::exchange_identity(*tp2_comm,tp2_identity,peer,limit,err) ||
             !m.tp2_attach(*tp2_comm,static_cast<std::size_t>(limit),err,tp2_rank==0)) {
             std::fprintf(stderr,"maya-ds4: %s\n",err.c_str()); return 1;
         }
         if (tp2_rank==1) {
-            strata::ds4::tp2::Worker worker(*tp2_comm,static_cast<std::uint64_t>(m.max_context()),m.vocab(),16);
-            strata::ds4::tp2::ModelWorker<strata::ds4::Model> adapter(m); std::uint64_t processed=0;
+            const std::uint32_t max_words=o.tp2_chunk_enabled ? static_cast<std::uint32_t>(m.prompt_chunk()) : 16;
+            strata::ds4::tp2::Worker worker(*tp2_comm,static_cast<std::uint64_t>(m.max_context()),m.vocab(),max_words);
+            strata::ds4::tp2::ModelWorker<strata::ds4::Model> adapter(m,o.tp2_chunk_enabled); std::uint64_t processed=0;
             while (!worker.state().stopped()) {
                 if (!worker.run_one([&](const strata::ds4::tp2::Control& c,std::string& e) { return adapter.execute(c,e); },err)) {
                     std::fprintf(stderr,"maya-ds4 worker: %s\n",err.c_str()); return 1;
@@ -3588,7 +3601,7 @@ int main(int argc, char** argv) {
                 ++processed;
             }
             if (!strata::ds4::tp2::send_message(*tp2_comm,{strata::ds4::tp2::Command::Shutdown,processed+1,
-                    static_cast<std::uint64_t>(m.pos()),{}},16,err)) {
+                    static_cast<std::uint64_t>(m.pos()),{}},max_words,err)) {
                 std::fprintf(stderr,"maya-ds4 worker: %s\n",err.c_str()); return 1;
             }
             return 0;

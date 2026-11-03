@@ -917,7 +917,7 @@ class StrataEngine:
                 cause = line[8:].strip() or "mirror send failed"
                 self._tp_pair_down(cause)
                 print("[maya] TP2 pair down: " + cause +
-                      " - restart both ranks (rank1.sh then rank0.sh)", flush=True)
+                      " - restart both ranks, worker first", flush=True)
                 continue
             if line.startswith("ERR "):
                 fields = line.split(None, 2)
@@ -971,7 +971,7 @@ class StrataEngine:
             cause = line[8:].strip() or "mirror send failed"
             self._tp_pair_down(cause)
             print("[maya] TP2 pair down: " + cause +
-                  " - restart both ranks (tools/tp2/rank1.sh then rank0.sh)", flush=True)
+                  " - restart both ranks, worker first", flush=True)
             return True
         return False
 
@@ -1276,9 +1276,12 @@ class StrataEngine:
     def _request_error(self, message: str) -> ValueError:
         # A queued collective can notice peer loss before the next mirror send. Its communicator is
         # already unusable; make health/restart guards sticky immediately, preserving the cause.
-        if int(self.info.get("tp_world", 1) or 1) > 1 and \
-                message.startswith(("verbs communicator is poisoned", "TP2 pair down")):
-            message = self._tp_pair_down(message)
+        if int(self.info.get("tp_world", 1) or 1) > 1:
+            if self.info.get("tp_pair") == "down":
+                message = self.info.get("tp_error", message)
+            elif message.startswith(("verbs communicator is poisoned", "verbs peer closed the bootstrap connection",
+                                     "TP2 pair down")):
+                message = self._tp_pair_down(message)
         return ValueError(message)
 
     def generate(self, ids, max_new, sampling, cancel, embeddings=None):
@@ -2029,6 +2032,22 @@ class Detokenizer:
             return ""
         delta, self.sent = text[self.sent:], len(text)
         return delta
+
+
+def config_display_label(cfg: dict):
+    label = cfg.get("model_label")
+    return label.strip() if isinstance(label, str) and label.strip() else maya_quants.config_label(cfg)
+
+
+def deepseek_lookup_enabled(info: dict, args: list) -> bool:
+    """Prefer the engine's actual lookup state to a wrapper's command line."""
+    reported = info.get("lookup")
+    if isinstance(reported, int):
+        return reported > 0
+    try:
+        return int(models.flag(args, "--suffix-draft", "3")) > 0
+    except ValueError:
+        return True
 
 
 def speculation_modes(info: dict, dspark=None, lookup=None) -> list:
@@ -5028,9 +5047,10 @@ def make_handler(svc: Service):
                         svc.default_effort) or svc.default_effort
                     if getattr(svc.template, "forced_thinking", False):
                         rec["reasoning_effort"] = QWEN_EFFORT.get(rec["reasoning_effort"], rec["reasoning_effort"])
-                tp_world = int(getattr(svc.engine, "info", {}).get("tp_world", 1) or 1)
-                tp_rank = int(getattr(svc.engine, "info", {}).get("tp_rank", 0) or 0)
-                tp_peer = "down" if getattr(svc.engine, "info", {}).get("tp_pair") == "down" else (
+                tp_info = getattr(svc.engine, "info", {}) or {}
+                tp_world = int(tp_info.get("tp_world", 1) or 1)
+                tp_rank = int(tp_info.get("tp_rank", 0) or 0)
+                tp_peer = "down" if tp_info.get("tp_pair") == "down" else (
                     "up" if tp_world > 1 and tp_rank == 0 else None)
                 # TP2 with a dead rank 1 is degraded, not ok: /health must not lie (issue #6)
                 if tp_peer == "down":
@@ -5048,6 +5068,10 @@ def make_handler(svc: Service):
                                  "images": svc.vision is not None, "api_key": bool(svc.api_key), "defaults": rec,
                                  "version": MAYA_VERSION, "mcp_tools": bool(svc.mcp), "unloaded": svc.unloaded,
                                  "tp": {"world_size": tp_world, "rank": tp_rank,
+                                        **({"prefill_chunk": tp_info["tp_prefill_chunk"]}
+                                           if isinstance(tp_info.get("tp_prefill_chunk"), int) else {}),
+                                        **({"error": tp_info["tp_error"]}
+                                           if tp_peer == "down" and tp_info.get("tp_error") else {}),
                                         **({"peer": tp_peer} if tp_peer else {})}})
             elif path == "/api/context":
                 # the dashboard's Context size: the range, the measured cost of the current size, a reload's state
@@ -6146,7 +6170,7 @@ def main() -> int:
     svc.gpu_index = (gpu_list(cfg) or [0])[0]           # the Monitor reads the card the engine runs on (issue #51)
     svc.gpu_indices = gpu_list(cfg)                     # ... or every card of a layer split (issue #112)
     svc.backend = cfg.get("backend")                    # the Monitor's GPU reader: sysfs on AMD/HIP, NVML otherwise
-    svc.model_label = maya_quants.config_label(cfg)     # (configs of every release: by their installer record)
+    svc.model_label = config_display_label(cfg)
     if a.config:
         svc.config_path = str(Path(a.config).resolve())  # a context change from the dashboard is saved there
         p = Path(svc.config_path)                        # the tokens it serves, and what its API would have charged
@@ -6164,10 +6188,7 @@ def main() -> int:
         #  has them; MiniMax's says so itself, INFO dspark=)
         if models.family(cfg) == "deepseek":
             svc.dspark = models.flag(args, "--dspark", "on") not in ("off", "none") and models.ds4_has_drafter(cfg)
-            try:
-                svc.lookup = int(models.flag(args, "--suffix-draft", "3")) > 0
-            except ValueError:
-                svc.lookup = True
+            svc.lookup = deepseek_lookup_enabled((getattr(svc.engine, "info", {}) or {}), args)
     if a.config:                                        # the Chat settings shared with other apps, from last time
         svc.shared_path = str(Path(a.config).with_suffix("")) + ".shared-settings.json"
         try:

@@ -38,7 +38,7 @@ int ds4_tp_text_rdma_test(int argc,char** argv) {
               setenv("DS4_CHUNK_MIN","17",1)==0); }
     strata::ds4::Options o; o.pack=reference?argv[2]:argv[6]; o.max_context=32768; o.gpus={0};
     o.reserve_mib=1024; o.tp=1; o.threads=false; o.vision=false; o.dspark=false; o.lookup=false;
-    o.prefill_chunk=chunk; o.tp2_chunk_test=!reference && chunk>0;
+    o.prefill_chunk=chunk; o.tp2_chunk_enabled=!reference && chunk>0;
     o.expert_cache=false; o.mmap_experts=1; o.profile_readonly=true; o.cpu_threads=14;
     o.vram_experts=reference?1.0:0.0;
     if (!reference) { o.tp2_rank=static_cast<int>(rank); o.tp2_expert_budget=90ull<<30; o.tp_worker_verify=true; }

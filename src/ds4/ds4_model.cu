@@ -1276,7 +1276,7 @@ struct Model::Impl {
     bool prompt_par = false;          // the prompt path's chunks (a thread a GPU), as --tp / --threads asked
     bool tp_load_only(std::string& err) const {
         if (o.tp2_rank<0) return false;
-        err="ds4 tp2: experimental rank is load-only; distributed execution is not enabled";
+        err="ds4 tp2: rank is not attached to a healthy peer";
         return true;
     }
 #if defined(STRATA_DS4_TP2_RDMA)
@@ -2408,12 +2408,6 @@ struct Model::Impl {
         prof_marks = std::move(retry);
     }
     void dump_layer(Dev& d, const float* h, int il, int64_t p0, int T) {
-        if (const char* selected=std::getenv("DS4_TP_TEST_TRACE_POS")) {
-            char* end=nullptr; const long long pos=std::strtoll(selected,&end,10);
-            if (!*selected || !end || *end || pos<p0 || pos>=p0+T) return;
-            h+=static_cast<std::size_t>(pos-p0)*g.hc*g.dim;
-            p0=pos; T=1;
-        }
         std::vector<float> v((size_t) T * g.hc * g.dim);
         cudaSetDevice(d.id);
         cudaMemcpyAsync(v.data(), h, v.size() * 4, cudaMemcpyDeviceToHost, d.st);
@@ -2422,24 +2416,6 @@ struct Model::Impl {
         const int64_t hdr[3] = {il, p0, T};
         std::fwrite(hdr, 8, 3, dump_l);
         std::fwrite(v.data(), 4, v.size(), dump_l);
-        std::fflush(dump_l);
-    }
-    // Test-only probe, padded to dump_layer's row format so the same reader can
-    // compare the attention inputs from window and chunk execution.
-    void dump_tp_attention_input(Dev& d, const float* x, int width, int stage, int64_t p0, int T) {
-        if (!dump_l || !o.tp2_chunk_test || width<=0 || width>g.hc*g.dim) return;
-        const char* selected=std::getenv("DS4_TP_TEST_TRACE_POS");
-        if (!selected) return;
-        char* end=nullptr; const long long pos=std::strtoll(selected,&end,10);
-        if (!*selected || !end || *end || pos<p0 || pos>=p0+T) return;
-        std::vector<float> v(static_cast<std::size_t>(g.hc)*g.dim,0.0f);
-        cudaSetDevice(d.id);
-        cudaMemcpyAsync(v.data(),x+static_cast<std::size_t>(pos-p0)*width,
-                        static_cast<std::size_t>(width)*sizeof(float),cudaMemcpyDeviceToHost,d.st);
-        cudaStreamSynchronize(d.st);
-        const long long hdr[]={stage,pos,1};
-        std::fwrite(hdr,8,3,dump_l);
-        std::fwrite(v.data(),4,v.size(),dump_l);
         std::fflush(dump_l);
     }
 
@@ -3405,8 +3381,8 @@ struct Model::Impl {
 
 #if defined(STRATA_USE_HIP)
     // Install a complete rank's routed experts after ordinary dense/KV setup.
-    // The model remains load-only until its distributed execution path is
-    // explicitly enabled; no CPU fallback or partial pool is permitted.
+    // Execution starts only after peer attachment; no routed-expert CPU
+    // fallback or partial pool is permitted.
     bool install_tp_rank_experts(std::string& err) {
         if (devs.size()!=1 || g.nl<=0 || g.n_exp<=0 || o.reserve_mib<0 ||
             static_cast<std::uint64_t>(o.reserve_mib)>std::numeric_limits<std::size_t>::max()/(1ull<<20)) {
@@ -3460,7 +3436,7 @@ struct Model::Impl {
         }
         d.experts+=loader->bytes();
         std::fprintf(stderr,"ds4 tp2: rank %d loaded %zu routed expert bytes (%zu pinned staging bytes); "
-                            "experimental load only\n",o.tp2_rank,loader->bytes(),loader->staging_bytes());
+                            "awaiting peer attachment\n",o.tp2_rank,loader->bytes(),loader->staging_bytes());
         tp_rank_experts=std::move(loader);
         return true;
     }
@@ -3480,19 +3456,20 @@ struct Model::Impl {
             test_drafter=o.tp2_rank==0 && o.dspark;
             const char* flow=std::getenv("DS4_FLOW");
             const char* yoco=std::getenv("DS4_YOCO");
-            test_chunk=o.tp2_chunk_test && o.prefill_chunk>=256 && o.prefill_chunk%16==0 &&
+            test_chunk=o.tp2_chunk_enabled && o.prefill_chunk>=256 && o.prefill_chunk%16==0 &&
                        flow && std::strcmp(flow,"0")==0 && yoco && std::strcmp(yoco,"0")==0 &&
                        std::getenv("DS4_CHUNK")==nullptr;
 #endif
             if (o.tp2_expert_budget==0 || o.reserve_mib<0 ||
                 static_cast<std::uint64_t>(o.reserve_mib)>std::numeric_limits<std::size_t>::max()/(1ull<<20) ||
                 !lane_env_off() || o.gpus.size()!=1 || o.tp!=1 ||
-                (o.tp2_chunk_test ? !test_chunk : o.prefill_chunk!=0) ||
-                o.vision || o.vision_only || (o.dspark && !test_drafter) || o.lookup || o.seqs!=1 || o.expert_cache ||
+                (o.tp2_chunk_enabled ? !test_chunk : o.prefill_chunk!=0) ||
+                o.vision || o.vision_only || (o.dspark && !test_drafter) || (o.lookup && o.tp2_rank!=0) ||
+                o.seqs!=1 || o.expert_cache ||
                 o.mmap_experts!=1 || o.vram_experts!=(test_drafter?1.0:0.0) || o.ssd_cache_gb!=0.0 ||
                 !o.profile_readonly || !o.ablate.empty() || !host_free_on || sync_decode) {
-                err="ds4 tp2: experimental rank loading needs one GPU, window prefill, no speculation, vision, "
-                    "expert cache or host fallback, mmap experts, DS4_STREAM=0 and read-only profile";
+                err="ds4 tp2: invalid rank settings: use one GPU, validated prefill, drafter on rank 0 only, "
+                    "vision/expert cache off, lookup on rank 0 only, mmap experts, DS4_STREAM=0 and a read-only profile";
                 return false;
             }
 #endif
@@ -3503,7 +3480,9 @@ struct Model::Impl {
         // each start measures its own and keeps them to itself (a pack that must not change: a run's own store instead)
         const char* lt_store = std::getenv("STRATA_DS4_LT_STORE");
         if (lt_store == nullptr) lt_store = std::getenv("DS4_LT_STORE");
-        lt::set_store(lt_store != nullptr ? lt_store : (o.pack + "/lt-picks.txt").c_str());
+        // TP2 ranks may read existing tuning, but review/paired launches must
+        // not silently append to either host's model pack.
+        lt::set_store(lt_store != nullptr ? lt_store : (o.pack + "/lt-picks.txt").c_str(), o.tp2_rank>=0);
         g.from(pk);
 #if defined(STRATA_DS4_TP2_RDMA)
         if (o.tp2_rank>=0 && o.dspark && g.n_mtp<=0) { err="ds4 tp2: test drafter is missing"; return false; }
@@ -16401,8 +16380,6 @@ struct Model::Impl {
         const int D = g.dim, H = g.hc, HD = g.hd, NHL = l.ahn, HQ = NHL * HD, OG = l.ogn, FF = l.ffn;
         const ArGroup& ab = groups[(size_t) L0.grp].arb;
         const float* freqs = l.ratio ? d.freqs_comp : d.freqs_win;
-        if (dump_l != nullptr && mi==0 && o.tp2_chunk_test && std::getenv("DS4_TP_TEST_TRACE_POS"))
-            dump_layer(d,c.h,2000+l.il,p0,T);
         // Engram, in slabs of 256 tokens
         if (l.eg >= 0) {
             const int cols = (pk.eg_ngram - 1) * pk.eg_heads, ehd = pk.eg_hd;
@@ -16419,17 +16396,12 @@ struct Model::Impl {
                 engram_gate(c.h + (size_t) s0 * H * D, c.eg_kv, l.eg_w, H, D, ns, g.eps, s);
             }
         }
-        if (dump_l != nullptr && mi==0 && o.tp2_chunk_test && std::getenv("DS4_TP_TEST_TRACE_POS"))
-            dump_layer(d,c.h,3000+l.il,p0,T);
         // attention
         if (!hc_mix_chunk(d, c, c.h, l.hca_fn, T, c.mix, err)) return false;
         hc_split(c.mix, l.hca_scale, l.hca_base, H, g.sinkhorn, g.hc_eps, T, c.a_pre, c.a_post, c.a_comb, s);
         hc_pre_norm(c.h, c.pre, l.attn_norm, D, H, T, g.eps, c.x, s);
-        if (mi==0 && l.il==0) dump_tp_attention_input(d,c.x,D,4000,p0,T);
         x3::rows_f16(c.x, D, nullptr, T, D, c.x16, s);
-        const bool match_test_projections=o.tp2_chunk_test && !kv_only &&
-                                          std::getenv("DS4_TP_TEST_MATCH_PROJECTIONS");
-        if (match_test_projections) {
+        if (o.tp2_chunk_enabled && !kv_only) {
             for (int at=0;at<T;at+=kWin) {
                 const int n=std::min(kWin,T-at);
                 x3::MvJob jobs[4];
@@ -16445,10 +16417,6 @@ struct Model::Impl {
                 return false;
             if (l.kv_src && !gemm(d, c, l.c_wkv, c.x16, D, T, c.ckr, HD, 0.0f, err)) return false;
             if (l.kv_src && l.ratio > 1 && !gemm(d, c, l.c_wgate, c.x16, D, T, c.cgr, HD, 0.0f, err)) return false;
-        }
-        if (!kv_only && mi==0 && l.il==0) {
-            dump_tp_attention_input(d,c.qr,g.q_lora,5000,p0,T);
-            dump_tp_attention_input(d,c.kvr,HD,6000,p0,T);
         }
         prof_mark(d, 4);
         const bool snap = !kv_only && wp.snap_t >= 0 && mi == 0 && L0.snap_win != nullptr;
@@ -16678,12 +16646,10 @@ struct Model::Impl {
         } else if (nm > 1)
             chunk_allreduce(d, c, ab, mi, T * D, s);
 #if defined(STRATA_DS4_TP2_RDMA)
-        if (o.tp2_rank>=0 && o.tp2_chunk_test && !tp_test_sum(c.acc,T,D,s,err)) return false;
+        if (o.tp2_rank>=0 && o.tp2_chunk_enabled && !tp_test_sum(c.acc,T,D,s,err)) return false;
 #endif
         ablate(d, c.acc, T, s);
         hc_post_inplace(c.acc, c.h, c.a_post, c.a_comb, D, H, T, s);
-        if (dump_l != nullptr && mi==0 && o.tp2_chunk_test && std::getenv("DS4_TP_TEST_TRACE_POS"))
-            dump_layer(d,c.h,1000+l.il,p0,T);
         prof_mark(d, 1);
         kick(s);   // (the attention submitted while the host queues the routing)
         // the MoE
@@ -16700,8 +16666,8 @@ struct Model::Impl {
                   c.ridx + (size_t) r0 * kPicks, c.rw + (size_t) r0 * kPicks, s, l.gate_bias_vl, vl ? &vb : nullptr);
         }
 #if defined(STRATA_DS4_TP2_RDMA)
-        if (o.tp2_rank>=0 && o.tp2_chunk_test && !tp_test_route_arrays(c.ridx,c.rw,l,T,s,err)) return false;
-        if (o.tp2_rank>=0 && o.tp2_chunk_test && c.flow)
+        if (o.tp2_rank>=0 && o.tp2_chunk_enabled && !tp_test_route_arrays(c.ridx,c.rw,l,T,s,err)) return false;
+        if (o.tp2_rank>=0 && o.tp2_chunk_enabled && c.flow)
             return tp_test_fail("ds4 tp2: chunk flow is unsupported",err);
 #endif
         const int n_vs = L0.pv_n + (int) L0.host_list.size();
@@ -16808,7 +16774,7 @@ struct Model::Impl {
         if (!run_vram(d, c, L0, l, l, b.data(), v_done, L0.pv_n, T, err)) return false;
         if (nm > 1) chunk_allreduce(d, c, ab, mi, T * D, s);
 #if defined(STRATA_DS4_TP2_RDMA)
-        if (o.tp2_rank>=0 && o.tp2_chunk_test && !tp_test_sum(c.acc,T,D,s,err)) return false;
+        if (o.tp2_rank>=0 && o.tp2_chunk_enabled && !tp_test_sum(c.acc,T,D,s,err)) return false;
 #endif
         ablate(d, c.acc, T, s);
         hc_post_inplace(c.acc, c.h, c.f_post, c.f_comb, D, H, T, s);
@@ -18322,7 +18288,7 @@ struct Model::Impl {
             // TP control feeds at most `chunk` rows per operation. Use the
             // same boundaries when a test feeds the whole prompt at once;
             // balancing a remainder changes the batch arithmetic and output.
-            const int w = o.tp2_rank>=0 && o.tp2_chunk_test ? chunk : (a1 - a0 + nc - 1) / nc;
+            const int w = o.tp2_rank>=0 && o.tp2_chunk_enabled ? chunk : (a1 - a0 + nc - 1) / nc;
             for (int x = a0; x < a1; x += w) fp.ends.push_back(std::min(x + w, a1));
             per = std::max(per, w);
         };
@@ -18352,7 +18318,7 @@ struct Model::Impl {
     // after: a piece of a longer prompt (whole: none), its tokens still to come in later feeds (plan_chunks)
     bool forward_chunks(const int* tk, int n, int logits_rows, std::string& err, int snap_slot = -1,
                         const FeedPlan* whole = nullptr, int k0 = 0, int k1 = 0, int after = 0) {
-        if (o.tp2_rank>=0 && !o.tp2_chunk_test) { (void)tp_load_only(err); return false; }
+        if (o.tp2_rank>=0 && !o.tp2_chunk_enabled) { (void)tp_load_only(err); return false; }
         if (tp_unready(err)) return false;
         if (lend_broken) {
             err = kLendBroken;
@@ -19665,7 +19631,7 @@ struct Model::Impl {
         const auto bytes=static_cast<std::size_t>(rows)*static_cast<std::size_t>(width)*sizeof(float);
         if (bytes>tp_test_limit) return tp_test_fail("ds4 tp2: reduction exceeds negotiated limit",err);
 #if defined(STRATA_DS4_TP2_TESTING)
-        if (o.tp2_chunk_test && o.tp2_rank==0 && rows>kWin) {
+        if (o.tp2_chunk_enabled && o.tp2_rank==0 && rows>kWin) {
             static bool marked=false;
             const char* path=marked ? nullptr : std::getenv("DS4_TP_TEST_PARTIAL_MARKER");
             if (path) if (std::FILE* f=std::fopen(path,"wx")) {
@@ -19682,7 +19648,7 @@ struct Model::Impl {
     }
     bool tp_test_route_arrays(const void* ids, const void* weights, const Layer& l, int rows,
                               cudaStream_t stream, std::string& err) {
-        const int max_rows=o.tp2_chunk_test ? chunk : kWin;
+        const int max_rows=o.tp2_chunk_enabled ? chunk : kWin;
         if (!tp_test_comm || !ids || !weights || rows<1 || rows>max_rows || l.k_exp<1 || l.k_exp>kPicks)
             return tp_test_fail("ds4 tp2: invalid router geometry",err);
         const auto n=static_cast<std::size_t>(rows)*kPicks, bytes=n*sizeof(std::uint32_t);
@@ -19753,8 +19719,6 @@ struct Model::Impl {
         const bool ma =
             multi_attn && wp.nrow > 0 && d.mext != nullptr && ma_plan(wp.rseq, wp.rpos, T, g.win, l.mtp, d.mplan);
         prof_mark(d, 0);
-        if (dump_l != nullptr && mi==0 && o.tp2_chunk_test && std::getenv("DS4_TP_TEST_TRACE_POS"))
-            dump_layer(d,d.h,2000+l.il,p0,T);
         // Engram
         if (l.eg >= 0) {
             const int cols = (pk.eg_ngram - 1) * pk.eg_heads, ehd = pk.eg_hd;
@@ -19772,8 +19736,6 @@ struct Model::Impl {
             if (!mv(d, {job(l.eg_wkv, d.eg_x, d.eg_kv, T, (size_t) cols * ehd, (size_t) (H + 1) * D)}, err)) return false;
             engram_gate(d.h, d.eg_kv, l.eg_w, H, D, T, g.eps, s);
         }
-        if (dump_l != nullptr && mi==0 && o.tp2_chunk_test && std::getenv("DS4_TP_TEST_TRACE_POS"))
-            dump_layer(d,d.h,3000+l.il,p0,T);
         // attention
         // (hc_side: hc_mix + hc_split on st2 beside the attention - the pre norm takes the lagged pre, a_post / a_comb /
         // a_pre are read from the attention's hc_post on, where st waits for them)
@@ -19801,15 +19763,10 @@ struct Model::Impl {
             if (hs) CK(cudaEventRecord(d.hc_done, d.st2));
             hc_pre_norm(d.h, d.pre, l.attn_norm, D, H, T, g.eps, d.x, s);
         }
-        if (mi==0 && l.il==0) dump_tp_attention_input(d,d.x,D,4000,p0,T);
         {
             x3::MvJob j[4];
             const int nj = attn_in_jobs(l, d.x, d.qr, d.kvr, d.ckr, d.cgr, T, j);
             if (!mv_n(d, j, nj, err, fuse ? &xq8 : nullptr)) return false;
-        }
-        if (mi==0 && l.il==0) {
-            dump_tp_attention_input(d,d.qr,g.q_lora,5000,p0,T);
-            dump_tp_attention_input(d,d.kvr,HD,6000,p0,T);
         }
         Finish fq;
         fq.w = l.q_norm;
@@ -20710,8 +20667,8 @@ bool Model::tp2_attach(strata::net::Communicator& comm, std::size_t limit, std::
         err="ds4 tp2: invalid test communicator binding"; return false;
     }
     std::uint32_t rows=0;
-    const auto requested=static_cast<std::uint32_t>(p_->o.tp2_chunk_test ? p_->o.prefill_chunk : kWin);
-    if (p_->o.tp2_chunk_test && p_->chunk!=p_->o.prefill_chunk) {
+    const auto requested=static_cast<std::uint32_t>(p_->o.tp2_chunk_enabled ? p_->o.prefill_chunk : kWin);
+    if (p_->o.tp2_chunk_enabled && p_->chunk!=p_->o.prefill_chunk) {
         err="ds4 tp2: allocated chunk differs from the requested size"; return false;
     }
     if (!tp2::chunk_rows(requested,static_cast<std::uint32_t>(p_->g.dim),limit,rows,err)) return false;
@@ -20769,7 +20726,7 @@ bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, in
 #if defined(STRATA_DS4_TP2_RDMA)
     if (p.tp_test_controller && !p.tp_test_inside) {
         if (p.tp_unready(err)) return false;
-        const int cap=p.o.tp2_chunk_test ? p.chunk : kWin;
+        const int cap=p.o.tp2_chunk_enabled ? p.chunk : kWin;
         if (!tokens || n<1 || n>cap || logits_rows<0 || logits_rows>1) {
             err="ds4 tp2: test controller feed exceeds its row or logit bound"; return false;
         }
@@ -20792,7 +20749,7 @@ bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, in
     p.halted = false;
     p.fed_n = n;
 #if defined(STRATA_DS4_TP2_RDMA)
-    if (p.o.tp2_rank>=0 && p.o.tp2_chunk_test && n>kWin) {
+    if (p.o.tp2_rank>=0 && p.o.tp2_chunk_enabled && n>kWin) {
         // A unilateral cancel/yield inside a chunk would strand the other rank
         // in a collective. The serving loop observes cancellation between
         // bounded feeds and then sends a mirrored reset to both ranks.
@@ -20836,7 +20793,7 @@ bool Model::feed_mark(const int* tokens, int n, int logits_rows, int slot, std::
     return ok;
 }
 int Model::feed_unit() const {
-    if (p_->o.tp2_rank>=0 && p_->o.tp2_chunk_test) return p_->chunk;
+    if (p_->o.tp2_rank>=0 && p_->o.tp2_chunk_enabled) return p_->chunk;
     return p_->chunk > 0 ? std::max(p_->chunk, (int) p_->o.max_context) : kWin;
 }
 bool Model::feed_plan(int n, int logits_rows, int slot, FeedPlan& plan) {

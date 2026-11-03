@@ -24,6 +24,21 @@ int main() {
     CHECK(!preflight_identity((root/"one").string(),nullptr,a.c_str(),b.c_str(),c.c_str(),id,error));
     CHECK(!preflight_identity((root/"one").string(),(root/"one").c_str(),a.c_str(),"invalid",c.c_str(),id,error));
     CHECK(id.partition_digest==saved.partition_digest);
+    bool chunk=false;
+    CHECK(preflight_chunk("0",0,chunk,error) && !chunk);
+    CHECK(preflight_chunk("256",256,chunk,error) && chunk);
+    CHECK(!preflight_chunk(nullptr,256,chunk,error) && chunk);
+    CHECK(!preflight_chunk("128",128,chunk,error) && chunk);
+    CHECK(!preflight_chunk("256",0,chunk,error) && chunk);
+    CHECK(!preflight_chunk("0",256,chunk,error) && chunk);
+    int lookup=0;
+    CHECK(preflight_lookup("0",0,0,lookup,error) && lookup==0);
+    CHECK(preflight_lookup("3",3,0,lookup,error) && lookup==3);
+    CHECK(preflight_lookup("3",0,1,lookup,error) && lookup==3);
+    CHECK(!preflight_lookup(nullptr,0,0,lookup,error) && lookup==3);
+    CHECK(!preflight_lookup("2",2,0,lookup,error) && lookup==3);
+    CHECK(!preflight_lookup("3",0,0,lookup,error) && lookup==3);
+    CHECK(!preflight_lookup("3",3,1,lookup,error) && lookup==3);
     std::filesystem::remove_all(root);
     std::puts("DeepSeek TP2 preflight: identity parsing and pack binding passed");
 }

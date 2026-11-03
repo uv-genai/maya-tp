@@ -52,12 +52,11 @@ struct Options {
     // Internal worker option: reserve target verification rollback state even
     // when the drafter and prompt lookup are owned by the other rank.
     bool tp_worker_verify = false;
-    // Internal experimental two-host rank loading. It is not a runnable mode
-    // until the distributed computation boundary is installed.
+    // Two-host rank loading and its bounded prefill mode.
     int tp2_rank = -1;
     std::size_t tp2_expert_budget = 0;
-    // Review-only opt-in until chunked TP2 prefill passes its parity gates.
-    bool tp2_chunk_test = false;
+    // Set only after validating matching two-host configuration.
+    bool tp2_chunk_enabled = false;
     float dspark_conf = 0.5f;         // a draft is verified while its confidence (sigmoid) is at least this
     // prompt lookup (ds4_main's --suffix-draft): its verify windows run without the drafter too - their buffers (the
     // rows and states a rejected draft undoes) are allocated with the drafter, or with this

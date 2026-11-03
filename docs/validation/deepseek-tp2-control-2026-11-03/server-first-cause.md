@@ -46,3 +46,41 @@ The process-stopping model hooks were then placed behind a test-only compile
 definition. Both the test binary and regular engine built, the hook strings
 were absent from the regular engine, and the guarded rollback test passed again
 with the same first-cause and later-operation checks.
+
+An isolated HTTP pair with the experimental 256-row launcher option then
+completed a 545-token request with 64 output tokens (25/29 DSpark drafts
+accepted). The driver closed a 3,204-token streaming request; the engine
+reported cancellation while reading the prompt. A follow-up request completed
+and health still reported the pair up. The owned server was stopped before
+its verified worker; all owned processes exited. This is one cancellation
+smoke, not a complete failure or performance suite.
+After adding the negotiated prefill size to health and rebuilding, the same
+isolated HTTP check passed again; `/health.tp.prefill_chunk` reported 256,
+cancellation occurred during prefill, and a follow-up succeeded with the
+pair up. All owned processes exited.
+The same rebuilt-engine check also passed on Maya-S: health reported 256,
+the 545-token request accepted 29/39 drafts, a 3,204-token request cancelled
+during prefill, and a follow-up completed with the pair up. All owned
+processes exited.
+# HTTP peer loss during chunked prefill
+
+With the generated dedicated config, an isolated XS HTTP pair used 256-row
+prefill, DSpark and lookup. The test observed 256 of 3,204 prompt tokens read,
+verified its recorded remote worker PID and executable, and killed that worker.
+The first request failed; health became degraded and retained the first
+`verbs peer closed the bootstrap connection` cause; a subsequent request was
+rejected. The initial run returned the bare cause in the first response.
+After fixing server handling of a raw bootstrap peer-close, the same test
+passed again: the first response and subsequent response both reported the
+same sticky TP2 pair-down cause. The five focused peer-loss unit tests passed.
+The driver stopped its server and both owned processes exited. Logs use
+`/tmp/ds4-tp2-114-active-loss{,-v2}-*`. This is a prefill fault, not a live
+HTTP injection at every speculation boundary.
+
+DeepSeek TP2 now opens the HIP Lt tuning store read-only: existing picks are
+read, but newly measured picks are kept only in the process. A standalone
+gfx1151 test confirmed read-only mode leaves a file empty and the normal mode
+still appends. A checked-identity XS pair then tuned 11 real shapes on each
+rank with separate empty stores, which both remained zero bytes; the full
+16-position rollback/DSpark check also passed. Both ranks exited. Logs use
+`/tmp/ds4-tp2-114-lt-{store-test,readonly-rank0,readonly-rank1}.log`.

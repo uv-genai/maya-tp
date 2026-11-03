@@ -1,12 +1,16 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then [Handoff.md §§33–39](Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33). Earlier handoff sections are dated history and may describe superseded processes, issues, binaries or pending steps.
+Read [AGENTS.md](AGENTS.md), then the current state in [Handoff.md §42](Handoff.md#42-deepseek-tp2-implementation-in-progress-110116-2026-11-03). Earlier handoff entries are dated history and may describe superseded processes, issues, binaries or pending steps.
 
 ## Current GLM and DeepSeek state
 
-The user authorized DeepSeek two-host implementation; P1 is active on `feat/deepseek-tp2`.
-Read Handoff.md §42, the implementation plan and #112 before proceeding. An owned model copy may
-still be running; verify it and preserve user-owned processes. Later phase issues are not yet done.
+The user authorized implementation and validation of DeepSeek TP2 and DSpark on
+`feat/deepseek-tp2`. Experimental target inference, chunked prefill, DSpark and prompt lookup
+have been exercised on XS and S; sampling, failure, performance and operations gates remain open.
+Read the latest entries in Handoff.md §42, the implementation plan and phase issues #110–#116.
+Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
+procedure is in [docs/DEEPSEEK-TP2-RUN.md](docs/DEEPSEEK-TP2-RUN.md); no production promotion
+has been authorized.
 
 For the remote GLM startup repair and Maya-L cold-load investigation, read Handoff.md §§38–39
 and issues #104–#105. The user reports that everything is working; Maya-L has completed TP2

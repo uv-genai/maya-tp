@@ -40,6 +40,10 @@ def parser():
     p.add_argument("--gpu", type=bounded(0, 255), default=0)
     p.add_argument("--cpu-threads", type=bounded(1, 1024), default=14)
     p.add_argument("--dspark", choices=("on", "off"), default="on")
+    p.add_argument("--suffix-draft", type=int, choices=(0, 3), default=0,
+                   help="experimental synchronized prompt lookup (0: off; 3: minimum match length)")
+    p.add_argument("--prefill-chunk", type=int, choices=(0, 256), default=0,
+                   help="experimental synchronized prefill rows (0: window-only; 256: chunked)")
     return p
 
 
@@ -61,17 +65,27 @@ def prepare_launch(opts, environ):
     if env.get("DS4_STREAM", "0") != "0":
         raise IdentityError("DeepSeek TP2 requires DS4_STREAM=0")
     env["DS4_STREAM"] = "0"
+    if opts.prefill_chunk:
+        for name in ("DS4_FLOW", "DS4_YOCO"):
+            if env.get(name, "0") != "0":
+                raise IdentityError(f"DeepSeek TP2 chunk prefill requires {name}=0")
+            env[name] = "0"
+        if "DS4_CHUNK" in env:
+            raise IdentityError("DeepSeek TP2 chunk prefill does not support DS4_CHUNK")
     env.setdefault("MAYA_TP_BOOTSTRAP_TIMEOUT", "900")
     env["MAYA_DS4_TP2_PACK"] = pack
     env["MAYA_DS4_TP2_DSPARK"] = "1" if opts.dspark == "on" else "0"
+    env["MAYA_DS4_TP2_CHUNK"] = str(opts.prefill_chunk)
+    env["MAYA_DS4_TP2_LOOKUP"] = str(opts.suffix_draft)
     for kind in ("model", "partition", "build"):
         env["MAYA_DS4_TP2_" + kind.upper() + "_DIGEST"] = identity[kind + "_digest"]
     draft = opts.rank == 0 and opts.dspark == "on"
     args = [engine, "--pack", pack, "--gpus", str(opts.gpu), "--max-context", str(opts.context),
             "--reserve-mib", str(opts.reserve_mib), "--cpu-threads", str(opts.cpu_threads),
-            "--tp", "1", "--threads", "off", "--prefill-chunk", "0", "--vision", "off",
+            "--tp", "1", "--threads", "off", "--prefill-chunk", str(opts.prefill_chunk), "--vision", "off",
             "--mmap-experts", "on", "--no-expert-cache", "--profile-readonly", "--vram-experts",
-            "1" if draft else "0", "--suffix-draft", "0", "--dspark", "on" if draft else "none",
+            "1" if draft else "0", "--suffix-draft", str(opts.suffix_draft if opts.rank == 0 else 0),
+            "--dspark", "on" if draft else "none",
             "--tp2-rank", str(opts.rank), "--tp2-host", opts.host, "--tp2-port", str(opts.port),
             "--tp2-rdma-device", opts.rdma_device, "--tp2-expert-budget-mib", str(opts.expert_budget_mib)]
     args.append("--serve" if opts.rank == 0 else "--tp2-worker")

@@ -39,7 +39,7 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
     std::int64_t context=0; CHECK(ds4_tp_test_context(context,error));
     strata::ds4::Options o; o.pack=argv[6]; o.max_context=context; o.gpus={0}; o.reserve_mib=1024;
     o.tp=1; o.threads=false; o.vision=false; o.dspark=rank==0; o.lookup=false; o.prefill_chunk=chunk;
-    o.tp2_chunk_test=chunk>0;
+    o.tp2_chunk_enabled=chunk>0;
     o.expert_cache=false; o.mmap_experts=1; o.profile_readonly=true; o.cpu_threads=14; o.vram_experts=rank==0?1:0;
     o.tp2_rank=static_cast<int>(rank); o.tp2_expert_budget=90ull<<30; o.tp_worker_verify=true;
     strata::ds4::Model model; CHECK(model.load(o,error)); CHECK(model.has_drafter()==(rank==0));

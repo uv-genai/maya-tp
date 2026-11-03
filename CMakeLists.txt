@@ -664,6 +664,12 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
       target_compile_options(maya-ds4 PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include format>")
     endif()
     if(STRATA_BUILD_TESTS AND STRATA_ENABLE_HIP)
+      if(STRATA_HIPBLASLT_AVAILABLE)
+        # Explicit GPU integration test; never registered as unattended ctest.
+        add_executable(ds4_lt_store_test tests/ds4_lt_store_test.cpp src/ds4/ds4_lt.cu)
+        target_include_directories(ds4_lt_store_test PRIVATE ${_strata_gpu_include_directories})
+        target_link_libraries(ds4_lt_store_test PRIVATE ${_strata_gpu_runtime_target} roc::hipblaslt)
+      endif()
       # Requires an explicit real DeepSeek pack; never registered as unattended ctest.
       add_executable(ds4_tp_upload_real_test tests/ds4_tp_upload_real_test.cpp)
       target_link_libraries(ds4_tp_upload_real_test PRIVATE hip::host)

@@ -110,7 +110,7 @@ deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya
 | MTP | Opt-in, greedy TP2 verification, configurable fixed width of 1–8 drafts |
 | Conversations | One active sequence; cached follow-ups and cancellation tested |
 | Model selection | Launchers take `--model` / `--pack` / `--config` (or `MAYA_*` env) — [choosing a model](docs/TP2-RUN.md#choosing-a-model) |
-| Other model families | DeepSeek and MiniMax engines are inherited; this project's published TP2 validation covers GLM |
+| Other model families | Published TP2 validation covers GLM. DeepSeek TP2 and DSpark are experimental on the development branch; see the [review guide](docs/DEEPSEEK-TP2-RUN.md). MiniMax TP2 is not validated. |
 | Deferred work | [Multi-sequence TP2](https://github.com/uv-genai/maya-tp/issues/11), [vision](https://github.com/uv-genai/maya-tp/issues/16) and [gather-based reduction](https://github.com/uv-genai/maya-tp/issues/10); DFlash under TP2 remains gated |
 
 ## Set up the pair

@@ -1,5 +1,10 @@
 # Experimental DeepSeek TP2 chunk prefill
 
+This is a chronological record. The current experimental launcher exposes
+256-row prefill explicitly; later XS and S HTTP cancellation and sampled
+DSpark smoke tests are recorded in `Handoff.md` and adjacent reports. The
+single-host numerical differences below remain a limitation.
+
 Issue #110. This review-only path is not enabled by the launcher. It uses
 256-row buffers, disables flow and prompt skipping, compares router choices,
 and exchanges attention and MoE partials before residual updates. The first

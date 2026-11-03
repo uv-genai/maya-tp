@@ -1408,7 +1408,15 @@ The user requested an implementation plan. See
 approach remains subject to P1 feasibility. The user subsequently authorized implementation;
 no binaries, model processes or production configs were changed by the planning work.
 
-## 42. DeepSeek TP2 P1 in progress (#112, 2026-11-03)
+## 42. DeepSeek TP2 implementation in progress (#110–#116, 2026-11-03)
+
+**Current state:** experimental two-host target inference, chunked prefill,
+DSpark and prompt lookup have been implemented and exercised on XS and S.
+They are not yet approved for production: sampled and failure coverage,
+performance measurements, operations and final CI remain in progress. The
+chronological entries below describe earlier checkpoints; statements at those
+checkpoints about missing implementation or incomplete copies are historical.
+The latest activity and owned-process records appear at the end of this section.
 
 Working branch `feat/deepseek-tp2`; design and plan committed as `231a48b`. Both hosts were free of
 model processes when P1 began; their llama-swap daemons remain user-owned. Pack inventory and an
@@ -1695,6 +1703,119 @@ GEN. The first multi-request test exposed a trailing newline; after trimming
 the cause, all four `serve.test_tp2_peer_loss` tests pass, including an earlier
 pair-down cause followed by a different error. See
 `docs/validation/deepseek-tp2-control-2026-11-03/server-first-cause.md`.
+An XS 262,144-context review pair is running sampled lookup, one-token
+logprobs, and the P1 reference/prefill measurement harnesses. Local driver
+session 72257, server PID/log `/tmp/ds4-tp2-116-xs-bench-server.{pid,log}`,
+engine log `/tmp/ds4-tp2-116-xs-bench-engine.log`, remote worker PID/log
+`/tmp/ds4-tp2-116-xs-bench-rank1.{pid,log}`. The run uses a generated
+config and stops only its recorded processes.
+Sampled XS lookup at temperature 0.2 kept lookup drafts for all three seeds;
+the one-token logprobs request passed. The benchmark correctly stopped before
+recording samples because the generated config had no model label. Both
+owned processes exited. An optional explicit display label was added to the
+config generator and server, without fabricating installer metadata; rerun
+measurements with a fresh output file and verify the actual pack identity.
+The fresh rerun is in local session 76046 with recorded server and worker
+PIDs/logs under `/tmp/ds4-tp2-116-xs-bench-v2-*`; it uses the explicit
+`DeepSeek V4.1 · Maya-XS` display label and checked pack manifest.
+A read-only telemetry sampler is attached as local session 92077 and exits
+when the owned server exits; its output is
+`/tmp/ds4-tp2-116-xs-bench-v2-telemetry.jsonl`.
+That run and sampler exited successfully. XS TP2 8K prefill was
+201.0/199.9/203.5 tok/s versus earlier single-host 376.6/388.8/390.0;
+short-prompt answers had different hashes in all nine comparisons. Raw data
+is in `docs/benchmarks/deepseek-tp2-review-2026-11-03/`. The older baseline
+used vision on; this is not an exact same-configuration comparison.
+The full-window XS rollback test is running in local session 38214, remote
+worker PID/log `/tmp/ds4-tp2-113-rollback-full-xs-rank1.{pid,log}`, local log
+`/tmp/ds4-tp2-113-rollback-full-xs-rank0.log`. It uses 256-row prefill,
+a 127-token prefix and forced acceptance counts 0–15.
+The XS run passed every count with exact subsequent logits and matching five
+DSpark draft IDs/confidences; both ranks exited. The same full-window test on
+Maya-S runs as local session 9137, with remote owned worker PID/log
+`/tmp/ds4-tp2-113-rollback-full-s-rank1.{pid,log}` and local log
+`/tmp/ds4-tp2-113-rollback-full-s-rank0.log`.
+The S sweep passed all 16 acceptance counts with exact next logits and
+matching subsequent DSpark drafts; both ranks exited. Evidence is in
+`docs/validation/deepseek-tp2-control-2026-11-03/sharded-rollback.md`.
+The S 262,144-context sampled-lookup and three-run reference/prefill benchmark
+is running under local session 36758; server PID/log and remote owned worker
+PID/log use `/tmp/ds4-tp2-116-s-bench-*`. The benchmark saves answer text for
+quality review and stops only its own server and worker.
+Its read-only telemetry sampler is local session 52529 and exits with the
+server; output `/tmp/ds4-tp2-116-s-bench-telemetry.jsonl`.
+The S benchmark and sampler completed successfully. TP2 decode was 24.2–30.0
+tok/s across nine prompts versus 2.6–7.7 in the earlier storage-pressured
+single-host run; TP2 8K prefill was 187.7–190.9 versus 258.9–286.0 tok/s.
+All matching answer hashes differed, and the saved 256-token answers were
+truncated. Evidence and qualifications are in
+`docs/benchmarks/deepseek-tp2-review-2026-11-03/README.md`.
+During validation, the DeepSeek HIP Lt tuner may append to the pack's
+`lt-picks.txt` despite `--profile-readonly`; the S files on both hosts have
+mtime 2026-11-03 16:42 and size 2251 bytes. Preserve their contents rather
+than guessing at a rollback. For future isolated review runs, copy any
+existing picks to a new `/tmp` file per host and set `MAYA_DS4_LT_STORE` to
+that file before launching; this isolates further tuning writes. The active
+S benchmark was already launched using the pack defaults.
+An unbuilt change makes DeepSeek TP2's Lt store read-only while still
+reading existing picks; single-host DeepSeek and MiniMax retain their current
+behavior. HIP mapping passes; a fresh gfx1151 engine build and actual
+file-integrity check are required after the running benchmark.
+The isolated rebuild is running under local session 85260, log
+`/tmp/ds4-tp2-114-lt-store-build.log`; the earlier benchmark executable was
+preserved as `/tmp/ds4-tp2-116-benchmark-engine`.
+The engine and verification-test targets built. The same multi-target make
+invocation initially reported no rule for the newly added Lt test after CMake
+regenerated; building `ds4_lt_store_test` separately succeeded (log
+`/tmp/ds4-tp2-114-lt-store-test-build.log`). Its GPU run awaits the GLM test.
+An isolated GLM TP2/MTP HTTP cancellation and worker-loss regression is
+running concurrently with that CPU build. Driver session 98949, server PID/log
+`/tmp/ds4-tp2-114-glm-http-server.{pid,log}`, engine log
+`/tmp/ds4-tp2-114-glm-http-engine.log`, and remote owned worker PID/log
+`/tmp/ds4-tp2-114-glm-http-rank1.{pid,log}`. Its driver checks the recorded
+worker executable before signaling that PID.
+The GLM HTTP regression passed: real MTP acceptance, cancellation during
+prefill and a successful follow-up, then owned-worker loss during a separate
+prefill with the original poisoned-communicator cause retained in health and
+later requests. Both owned processes exited. Evidence is in
+`docs/validation/deepseek-tp2-control-2026-11-03/glm-regression.md`.
+The standalone gfx1151 HIP Lt test passed both read-only and writable stores
+with real GEMM candidates (log `/tmp/ds4-tp2-114-lt-store-test.log`); the
+two-rank model-level file-integrity check remains next.
+The two-rank XS check is running under local session 70451, remote owned
+worker PID/log `/tmp/ds4-tp2-114-lt-readonly-rank1.{pid,log}` and local log
+`/tmp/ds4-tp2-114-lt-readonly-rank0.log`. Each rank has a newly created empty
+`/tmp/ds4-tp2-114-lt-rank{0,1}-picks.txt` store and verbose Lt logging; verify
+that real tuning happened and neither store changed when it exits.
+That check passed: each rank tuned 11 real hipBLASLt shapes while its empty
+store remained zero bytes, and all 16 rollback/DSpark checks passed again.
+Both owned ranks exited. The standalone test also confirmed writable mode
+still appends. The rebuilt engine SHA-256 is
+`31b2e21d529f5de3016c7ce58a3bab704f052ab5d22beea62b64829680a81fb1`.
+The rebuilt engine is now running an S TP2 benchmark with DSpark and lookup
+off at configured context 262144, using the same prompt harness. Local driver
+session 31639, server and remote owned worker PID/logs under
+`/tmp/ds4-tp2-116-s-off-*`. This also exercises the rebuilt launcher through
+HTTP; the benchmark will stop its own processes.
+Its read-only telemetry sampler is local session 81602 and exits with the
+server; output `/tmp/ds4-tp2-116-s-off-telemetry.jsonl`.
+The S speculation-off benchmark completed: 17.6–19.9 tok/s decode and
+190.5–192.7 tok/s 8K prefill; both ranks and sampler exited. A matching
+DSpark-on/lookup-off S run on the same binary is active under local driver
+session 97608, with server/worker PID/logs under `/tmp/ds4-tp2-116-s-on-*`.
+Its read-only telemetry sampler is local session 29015; it exits with the
+server and writes `/tmp/ds4-tp2-116-s-on-telemetry.jsonl`.
+Server and remote worker start-time ticks are recorded in the matching
+`*-server.start` and `*-rank1.start` files.
+The same-binary S comparison completed: lookup off in both cases, all nine
+answers matched, DSpark on decode 21.8–30.4 versus off 17.6–19.9 tok/s, and
+8K prefill about 191–193 tok/s in both. All six prefill prompt hashes matched.
+Both pairs and samplers exited; raw evidence and limitations are in the
+review benchmark report.
+The equivalent XS TP2 speculation-off run is active under local driver
+session 45477, with server and remote owned worker PID/logs under
+`/tmp/ds4-tp2-116-xs-off-*`. Read-only telemetry sampler session 34861 exits
+with the server. A same-binary DSpark-on/lookup-off run follows.
 Ordered HIP/server/tools CI passed: HIP mappings, 614 server tests (11 skipped)
 and 698 tools tests (3 skipped). Logs use prefix `/tmp/ds4-tp2-114-ci-`.
 A real XS model-loss test stopped its owned worker
@@ -1966,3 +2087,104 @@ first peer-close cause retained, later operations rejected, all owned processes
 exited. Logs `/tmp/ds4-tp2-114-guard-rollback-rank{0,1}.log` and remote
 monitor `/tmp/ds4-tp2-114-guard-rollback-monitor.log`. HTTP cancellation and
 remaining operational gates stay open.
+
+Checkpoint `4b58729` records the guarded verify, verdict and rollback fault
+tests. Chunk-prefill integration has begun: the internal option is renamed
+`tp2_chunk_enabled`, the validated window-equivalent input projections are
+always used in that mode, and temporary numerical tracing was removed. The
+isolated test build passed (log `/tmp/ds4-tp2-110-deterministic-build.log`).
+The XS 545-token whole/split check passed without a projection test knob:
+full-logit delta 0 and the 64-token continuation matched its controlled
+reference. Logs `/tmp/ds4-tp2-110-deterministic-rank{0,1}.log`. The same-mode
+real-identity DSpark check passed 64 tokens with 41/111 drafts accepted; logs
+`/tmp/ds4-tp2-113-deterministic-rank{0,1}.log`. Integration is in progress:
+the launcher now accepts explicit 0 or 256 rows, binds the requested size,
+and rejects conflicting flow/YOCO settings; its focused Python tests passed.
+Engine preflight validates the requested size, includes it in peer feature
+identity, and bounds the worker control path. Host preflight/identity tests
+and the isolated `maya-ds4` build passed; CLI rejected a mismatched launcher
+and engine chunk setting before loading. An isolated HTTP chunk/cancellation
+test is running in session 50921, with driver PID/log
+`/tmp/ds4-tp2-114-chunk-http-driver.{pid,log}`, server PID/log
+`/tmp/ds4-tp2-114-chunk-http-server.{pid,log}`, engine log
+`/tmp/ds4-tp2-114-chunk-http-engine.log`, and remote worker PID/log
+`/tmp/ds4-tp2-114-chunk-http-rank1.{pid,log}`. The test passed: a 545-token
+request generated 64 tokens (25/29 DSpark drafts accepted), a 3,204-token
+streaming request was cancelled during prefill, and a follow-up completed with
+the pair healthy. The driver stopped its server before its verified worker;
+all owned processes exited. This is one smoke test, not final performance or
+all API/failure gates. Do not deploy these changes.
+
+The isolated serving integration now advertises `tp_prefill_chunk` in engine
+INFO and `/health.tp.prefill_chunk`, and corrects the misleading rank
+"load-only" startup message. Focused launcher, peer-loss/health, preflight,
+identity and HIP mapping tests passed. Test and engine rebuilds passed (log
+`/tmp/ds4-tp2-110-health-build.log`). A real paired mismatch test is running:
+rank 0 requests 256 rows, rank 1 requests window-only. Both rejected before
+inference with `context or requested features mismatch` and exited; logs
+`/tmp/ds4-tp2-110-mismatch-rank{0,1}.log`. The rebuilt-engine HTTP
+health/cancellation test passed with `/health.tp.prefill_chunk=256`, the
+545-token request, cancellation during the 3,204-token prefill, and a healthy
+follow-up. The driver stopped its server and verified worker; all owned
+processes exited. Logs `/tmp/ds4-tp2-114-health-http-*`. The same HTTP check
+also passed on Maya-S: 545-token request, 29/39 DSpark drafts accepted,
+3,204-token prefill cancellation, and a healthy follow-up; all owned processes
+exited. Logs `/tmp/ds4-tp2-114-s-http-*`. Experimental prompt lookup is now
+being wired: launcher choices are 0 or 3, only rank 0 owns lookup, its value
+is bound in peer identity, and engine INFO reports actual lookup to metrics.
+Focused launcher/dashboard/preflight/identity tests passed. The engine/test
+build passed (log `/tmp/ds4-tp2-113-lookup-build.log`), and a mismatched local
+lookup preflight was rejected before loading. A real-identity lookup-only HTTP
+pair passed: lookup-off/on responses matched exactly for one repetitive XS
+prompt, and two internal lookup-on engine continuations accepted 90/92 and
+81/81 drafts. Health reported 256 and metrics reported Lookup without DSpark.
+All owned processes exited. Evidence:
+`docs/validation/deepseek-tp2-control-2026-11-03/lookup-http.md`. Lookup with
+DSpark, sampling, S, failures and broader quality remain open; the option is
+experimental and defaults off. An XS HTTP test with lookup and DSpark enabled
+also passed: lookup-off/on responses matched, and one internal lookup-on
+continuation kept 82/92 lookup drafts and 15/15 DSpark drafts. Metrics
+reported both modes, and all owned processes exited. Logs use
+`/tmp/ds4-tp2-113-combined-http-*`. The equivalent Maya-S combined test is
+running with driver/server/worker PIDs and logs under
+`/tmp/ds4-tp2-113-s-lookup-http-*`. The Maya-S combined test passed as well:
+lookup-off/on responses matched; one internal continuation kept 82/92 lookup
+drafts and 15/15 DSpark drafts. Sampling and failure tests remain open.
+An XS real-identity startup with mismatched lookup settings (3 on rank 0,
+0 on rank 1) was rejected by both ranks before inference; both exited. Logs
+`/tmp/ds4-tp2-113-lookup-mismatch-rank{0,1}.log`.
+An XS sampled DSpark test with chunked prefill and checked identities is
+running under local session 23767, with logs
+`/tmp/ds4-tp2-113-sample-chunk-xs-rank{0,1}.log` and remote owned worker PID
+`/tmp/ds4-tp2-113-sample-chunk-xs-rank1.pid`.
+That run passed: 1,000 plain vs 50 speculative draws after a 19-token chunked
+prefill gave p=0.612 for sampled proposals (35/250 accepted) and p=0.527 for
+point proposals with penalties (8/250 accepted); seed replay also matched.
+Both owned ranks exited. The equivalent Maya-S run is active under local
+session 96004 and remote PID `/tmp/ds4-tp2-113-sample-chunk-s-rank1.pid`,
+with logs `/tmp/ds4-tp2-113-sample-chunk-s-rank{0,1}.log`.
+The Maya-S run passed the same smoke: sampled-q p=0.0129 (26/250 accepted)
+and point-q with penalties p=0.365 (15/250 accepted), with seed replay.
+These small samples cannot rule out subtle distribution errors. Both owned
+ranks exited.
+`tools/ds4/tp2_config.py` now prints a dedicated rank-0 API config using
+explicit pack, manifest, executable and feature choices. Its focused tests
+passed; a generated config will be exercised in the next real HTTP loss test.
+The preliminary review procedure is in `docs/DEEPSEEK-TP2-RUN.md`. Server
+health now exposes the first sticky TP failure as `tp.error`; the peer-loss
+unit suite passed. These remain uncommitted experimental changes.
+An isolated XS HTTP active peer-loss test is running with the generated
+config, local driver session 44866, server PID/log
+`/tmp/ds4-tp2-114-active-loss-server.{pid,log}` and remote owned worker
+`/tmp/ds4-tp2-114-active-loss-rank1.{pid,log}`. Its driver verifies the
+worker executable before targeting its recorded PID during prefill.
+It killed the owned worker at 256/3,204 prefill tokens. Health went degraded
+with the original peer-close cause and a later request was rejected. The
+first response carried the raw cause without pair-down context, so server
+error handling was tightened and a fifth peer-loss unit test passed. The
+repeat runs in local session 45718, with server and worker PID/logs under
+`/tmp/ds4-tp2-114-active-loss-v2-*`; the first pair has exited.
+The repeat passed: the first HTTP error, degraded health and later error all
+retained the peer-close cause with pair-down context. Its server and worker
+exited. Evidence is in
+`docs/validation/deepseek-tp2-control-2026-11-03/server-first-cause.md`.

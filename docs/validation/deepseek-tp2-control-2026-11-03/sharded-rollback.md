@@ -113,3 +113,12 @@ checks allocation and a short execution at that setting.
 An XS 3,204-token real-format prompt also passed a real-identity DSpark check:
 64 target-only tokens matched, with 38/124 drafts accepted over 25 rounds.
 Both ranks shut down. This remains shorter than a full long-context test.
+
+Finally, checked-identity XS and S pairs used 256-row chunk prefill for a
+127-token prefix and a full 16-row forced verification window. For every
+acceptance count 0 through 15, both models gave exactly matching next logits
+and the same five subsequent DSpark draft IDs and confidences as their
+target-only continuation. This crosses the 128-token state boundary at all
+rejection positions. All owned ranks exited; logs use
+`/tmp/ds4-tp2-113-rollback-full-{xs,s}-rank{0,1}.log`. This does not test a
+filled long context or arbitrary failure timing.

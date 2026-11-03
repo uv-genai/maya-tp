@@ -51,6 +51,8 @@ int main() {
     x = b; ++x.layers; CHECK(rejected(x));
     x = b; ++x.max_context; CHECK(rejected(x));
     x = b; x.feature_flags = 0; CHECK(rejected(x));
+    x = b; x.feature_flags |= (256ull << 16); CHECK(rejected(x));
+    x = b; x.feature_flags |= (3ull << 32); CHECK(rejected(x));
     x = b; x.max_partial_bytes = 0; CHECK(rejected(x));
     std::puts("DeepSeek TP2 identity: matching peers, negotiated window and mismatch rejection passed");
 }

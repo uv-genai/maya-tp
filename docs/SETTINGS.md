@@ -17,6 +17,20 @@ server settings under `MAYA_GLM_RESPONSES_*`, with defaults and units in
 [Responses settings](RESPONSES.md#settings-and-metrics). They can be set in the same
 config `env` block; response storage and background work remain request opt-ins.
 
+### Experimental DeepSeek TP2 launch settings
+
+Use the explicit options in the [DeepSeek TP2 review guide](DEEPSEEK-TP2-RUN.md).
+`tp2_rank.py` sets the internal `MAYA_DS4_TP2_PACK`, `MAYA_DS4_TP2_DSPARK`,
+`MAYA_DS4_TP2_CHUNK`, `MAYA_DS4_TP2_LOOKUP`, and
+`MAYA_DS4_TP2_{MODEL,PARTITION,BUILD}_DIGEST` values from its checked local
+manifest and launch options. They are launch bindings, not user tuning knobs;
+do not set them by hand. Chunk prefill additionally requires `DS4_STREAM=0`,
+`DS4_FLOW=0`, `DS4_YOCO=0` and no `DS4_CHUNK`; the launcher enforces these
+constraints. The `DS4_DSPARK_SAMPLE` environment variable is an inherited
+test-only sampled-draft experiment, not a recommended production setting.
+DeepSeek TP2 ranks read the selected Lt store but do not append new picks;
+single-host behavior is unchanged.
+
 The engine sizes itself: it splits the layers across the GPUs it is given (up to 16; with more than two, each GPU
 takes layers in proportion to its free VRAM), fills each GPU's free VRAM with experts, sizes its RAM tier from the
 free RAM, and measures the CPU against the PCIe link at start to decide how many RAM experts the CPU computes itself.

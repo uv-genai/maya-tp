@@ -29,18 +29,18 @@ int ds4_tp_model_load_test(int argc, char** argv) {
     }
     {
         auto bad=o; bad.reserve_mib=-1; strata::ds4::Model m;
-        CHECK(!m.load(bad,error) && error.find("experimental rank loading")!=std::string::npos);
+        CHECK(!m.load(bad,error) && error.find("invalid rank settings")!=std::string::npos);
     }
     {
         auto bad=o; bad.dspark=true; strata::ds4::Model m;
-        CHECK(!m.load(bad,error) && error.find("experimental rank loading")!=std::string::npos);
+        CHECK(!m.load(bad,error) && error.find("invalid rank settings")!=std::string::npos);
     }
     strata::ds4::Model m;
     error.clear(); CHECK(m.load(o,error));
     const int token=1; std::vector<float> logits;
-    CHECK(!m.feed(&token,1,1,error) && error.find("load-only")!=std::string::npos);
-    CHECK(!m.step(token,true,error) && error.find("load-only")!=std::string::npos);
-    CHECK(!m.tp_verify_begin(&token,1,error) && error.find("load-only")!=std::string::npos);
+    CHECK(!m.feed(&token,1,1,error) && error.find("not attached")!=std::string::npos);
+    CHECK(!m.step(token,true,error) && error.find("not attached")!=std::string::npos);
+    CHECK(!m.tp_verify_begin(&token,1,error) && error.find("not attached")!=std::string::npos);
     CHECK(m.sample(0,1,0,0,0,0)==-1 && !m.logits(logits) && !m.restore(0));
     CHECK(m.pos()==0);
     std::printf("rank=%ld model loaded; inference and state restoration rejected\n",rank);
