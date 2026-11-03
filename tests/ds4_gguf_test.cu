@@ -18,6 +18,9 @@
 #include "../src/ds4/ds4_pcie.cuh"
 #include "../src/ds4/ds4_q6k.cuh"
 #include "../src/ds4/ds4_tp_pack.hpp"
+#if defined(STRATA_USE_HIP)
+#include "../src/ds4/ds4_tp_upload.cuh"
+#endif
 
 #include "ggml.h"   // (the low-bit types' reference values: ggml's own dequantize_row_*)
 
@@ -29,6 +32,7 @@
 #include <cmath>
 #include <cstdio>
 #include <functional>
+#include <limits>
 #include <thread>
 #include <cstdlib>
 #include <cstring>
@@ -944,7 +948,32 @@ void test_tp_expert_slices(int D, int F, int tg, int td, cudaStream_t stream) {
             std::array<tp::Bytes,3> dst{tp::Bytes(packed).subspan(layout.trellis[0],sp.gate_bytes),
                 tp::Bytes(packed).subspan(layout.trellis[1],sp.up_bytes), tp::Bytes(packed).subspan(layout.trellis[2],dn)};
             if (!tp::pack_expert(sp,src,dst,err)) { ok=false; break; }
-            uint8_t* gpu=dev(packed); std::vector<float> h;
+            uint8_t* gpu=nullptr;
+#if defined(STRATA_USE_HIP)
+            tp::DeviceExpertLayout device_layout;
+            if (!tp::device_expert_layout(sp,device_layout,err) || device_layout.bytes!=packed.size() ||
+                device_layout.offsets[1]!=layout.trellis[1] || device_layout.offsets[2]!=layout.trellis[2]) {
+                ok=false; break;
+            }
+            CU(cudaMalloc(&gpu,packed.size()));
+            tp::DeviceExpertLayout rejected{{{7,8,9}},10};
+            auto overflow=sp; overflow.gate_bytes=std::numeric_limits<size_t>::max();
+            if (tp::device_expert_layout(overflow,rejected,err) || rejected.bytes!=10) ok=false;
+            overflow=sp; overflow.down_rows=std::numeric_limits<size_t>::max();
+            if (tp::device_expert_layout(overflow,rejected,err) || rejected.bytes!=10) ok=false;
+            if (tp::upload_expert(sp,src,gpu,packed.size()-1,stream,rejected,err) || rejected.bytes!=10) ok=false;
+            auto too_short=src; too_short[0]=src[0].first(0);
+            if (tp::upload_expert(sp,too_short,gpu,packed.size(),stream,rejected,err) || rejected.bytes!=10) ok=false;
+            CU(cudaMemsetAsync(gpu,0,packed.size(),stream));
+            if (!tp::upload_expert(sp,src,gpu,packed.size(),stream,device_layout,err)) {
+                ok=false; cudaFree(gpu); break;
+            }
+            CU(cudaStreamSynchronize(stream));
+            if (host(gpu,packed.size())!=packed) ok=false;
+#else
+            gpu=dev(packed);
+#endif
+            std::vector<float> h;
             auto part=run(layout,gpu,ranges[rank].count,h); cudaFree(gpu);
             for (int i=0;i<ranges[rank].count;++i) {
                 const float ref=full_h[(size_t) ranges[rank].begin+i];

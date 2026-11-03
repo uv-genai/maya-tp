@@ -651,6 +651,9 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
       target_link_libraries(maya-ds4 PRIVATE strata_mmq)
     endif()
     if(STRATA_BUILD_TESTS AND STRATA_ENABLE_HIP)
+      # Requires an explicit real DeepSeek pack; never registered as unattended ctest.
+      add_executable(ds4_tp_upload_real_test tests/ds4_tp_upload_real_test.cpp)
+      target_link_libraries(ds4_tp_upload_real_test PRIVATE hip::host)
       # Model-backed TP worker verification test; requires a user-supplied pack.
       add_executable(ds4_tp_verify_test tests/ds4_tp_verify_test.cpp src/ds4/ds4_model.cu src/ds4/ds4_kernels.cu
                      src/ds4/ds4_vision.cu src/ds4/ds4_gguf.cu src/ds4/ds4_gguf_cpu.cpp src/ds4/ds4_iq.cu
