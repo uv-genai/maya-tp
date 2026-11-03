@@ -1612,3 +1612,30 @@ Each emitted the same 64 tokens as its target-only pair, and all owned ranks
 exited. Logs: `/tmp/ds4-tp2-113-dspark-real-{xs,s}-rank0.log` remotely and
 corresponding rank1 logs locally. These are isolated tests with synthetic
 identity, not serving; sampled acceptance and the remaining gates are next.
+
+The first sampled DSpark check was inconclusive because its chosen context had
+only one meaningful chi-square group; both ranks exited. A revised XS smoke
+selected a non-degenerate context using plain draws and passed: 1,000 target
+versus 50 speculative first-token draws in sampled-q mode yielded p=0.8221;
+point-q with penalties yielded p=0.4542. The first S point-q context observed
+no accepts; a stronger test selected a context using independent target draws,
+then required acceptance. On XS sampled-q and point-q-with-penalties yielded
+p=0.8221 and p=0.7247 (11 and 71 accepted drafts); on S p=0.7755 and p=0.1919
+(2 and 36 accepted). Each used 1,000 target and 50 speculative samples per
+mode, and three fixed seed/counter replays matched. All owned ranks exited.
+These are statistical smoke tests, not proofs of distributional equivalence.
+
+P6 (#114): an isolated test exposed `control recv: Resource temporarily
+unavailable` when the peer closed because `recv` returned zero with stale errno.
+A narrow fix reports the peer-closed bootstrap cause on zero. Two-host control
+EOF with sticky Worker cause, collective peer loss with sticky poison, queued
+control coexistence and typed worker dispatch all passed; host socket-state and
+`serve.test_tp2_peer_loss` passed too. All owned test processes exited. See
+`docs/validation/deepseek-tp2-control-2026-11-03/control-eof.md`. Full DeepSeek
+API pair-down behavior remains to be integrated and tested.
+
+P3 (#111): `tools/ds4/tp2_identity.py` is an uncommitted, stdlib pack identity
+helper under test. It hashes pack metadata and each indexed source, produces a
+path-independent shared digest and checks local file identity before reuse.
+Eight synthetic unit tests pass. It is not yet validated on full packs or wired
+to rank startup; user-facing serving must not use synthetic test identities.

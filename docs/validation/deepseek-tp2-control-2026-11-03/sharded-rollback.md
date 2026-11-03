@@ -38,3 +38,18 @@ review executable SHA-256 was
 `e54e280cc101f26f915fb360af9f0f8a039e6cefabe46ae53e54785788bf0348`.
 All owned ranks exited. These are short greedy tests; sampled acceptance,
 long-context boundaries, performance and production serving remain open.
+
+Sampled speculative decoding was also checked with a short “Name a fruit”
+chat fixture. For each model and mode, a context was selected from a fixed set
+using independent plain target draws; point-q mode additionally required the
+point draft to have at least 10% observed target support. Each comparison used
+1,000 target samples and 50 speculative first-token samples. On XS, sampled-q
+gave chi-square p=0.8221 (3 groups, 11 accepted of 250 proposed drafts), and
+point-q with penalties gave p=0.7247 (3 groups, 71 accepted). On S, the same
+checks gave p=0.7755 (3 groups, 2 accepted) and p=0.1919 (3 groups, 36
+accepted), respectively. The first three seed/counter trials in each mode were
+replayed and reproduced drafts, confidences and verdicts. The test binary was
+`e6d62bbb93631da4a4b248ab01d492033860dd9129f3e3a224558d986787d160`.
+An earlier S point-q context had zero observed accepts; it is retained as a
+coverage limitation, not treated as a distribution failure. These small samples
+cannot prove distributional equivalence. All owned processes exited.
