@@ -42,6 +42,17 @@ int main() {
     }
     CHECK(expert_ranges(INT_MAX, 1, INT_MAX, p, error));
     CHECK(p[0].count + p[1].count == INT_MAX);
+    std::array<strata::ds4::tp2::RankGeometry, 2> ranks{};
+    CHECK(strata::ds4::tp2::rank_geometry(2304, 256, 0, 64, 8, ranks, error));
+    CHECK(ranks[0].experts.count == 1280 && ranks[1].experts.count == 1024);
+    CHECK(ranks[0].attention_heads.begin == 0 && ranks[0].attention_heads.count == 32);
+    CHECK(ranks[1].attention_heads.begin == 32 && ranks[1].attention_heads.count == 32);
+    CHECK(ranks[0].output_groups.begin == 0 && ranks[0].output_groups.count == 4);
+    CHECK(ranks[1].output_groups.begin == 4 && ranks[1].output_groups.count == 4);
+    for (const auto dims : {std::array<int, 2>{0, 8}, {63, 8}, {64, 3}, {62, 8}, {2, 4}}) {
+        CHECK(!strata::ds4::tp2::rank_geometry(2304, 256, 0, dims[0], dims[1], ranks, error));
+        CHECK(!error.empty() && ranks[0].attention_heads.count == 32 && ranks[1].output_groups.begin == 4);
+    }
     // Actual Maya-S layer-0 IQ2_S gate/up and IQ3_S down row sizes from the pack.
     strata::ds4::tp2::ExpertSpans a{}, b{};
     CHECK(expert_ranges(2304, 256, 0, p, error));

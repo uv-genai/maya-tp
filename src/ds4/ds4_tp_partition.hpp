@@ -13,6 +13,12 @@ struct Range {
     int count = 0;
 };
 
+struct RankGeometry {
+    Range experts;
+    Range attention_heads;
+    Range output_groups;
+};
+
 // Split a full FFN width into two contiguous ranges of whole quantization blocks.
 // The extra block goes to alternating ranks so odd block counts balance across
 // layers. The caller must supply a block compatible with every sliced tensor's
@@ -27,6 +33,28 @@ inline bool expert_ranges(int width, int block, int layer, std::array<Range, 2>&
     const int cut = rank0_blocks * block;  // <= width, so cannot overflow a positive int.
     const std::array<Range, 2> ranges{{{0, cut}, {cut, width - cut}}};
     out = ranges;
+    error.clear();
+    return true;
+}
+
+// Partition the rank-local dimensions together, so the attention head and
+// output-projection group boundaries cannot accidentally describe different
+// fractions of the layer. All output is committed only after validation.
+inline bool rank_geometry(int width, int block, int layer, int heads, int groups,
+                          std::array<RankGeometry, 2>& out, std::string& error) {
+    std::array<Range, 2> experts;
+    if (!expert_ranges(width, block, layer, experts, error)) return false;
+    if (heads < 2 || groups < 2 || heads % 2 != 0 || groups % 2 != 0 || heads % groups != 0) {
+        error = "ds4 tp2: attention heads and output groups must split evenly into matching groups";
+        return false;
+    }
+    std::array<RankGeometry, 2> result{};
+    for (int rank = 0; rank < 2; ++rank) {
+        result[rank].experts = experts[rank];
+        result[rank].attention_heads = {rank * (heads / 2), heads / 2};
+        result[rank].output_groups = {rank * (groups / 2), groups / 2};
+    }
+    out = result;
     error.clear();
     return true;
 }

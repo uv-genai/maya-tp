@@ -21,13 +21,15 @@ int main(int argc, char** argv) {
     const int layer=std::atoi(argv[2]), expert=std::atoi(argv[3]);
     CHECK(layer >= 0 && expert >= 0);
     std::ifstream cfg(pack/"ds4.txt"); CHECK(cfg.good());
-    std::string key, value, dir; int width=0, hidden=0;
+    std::string key, value, dir; int width=0, hidden=0, heads=0, groups=0;
     while (std::getline(cfg,value)) {
         auto p=value.find(' '); if(p==std::string::npos) continue;
         key=value.substr(0,p); auto v=value.substr(p+1);
         if(key=="model_dir") dir=v;
         else if(key=="moe_intermediate_size") width=std::stoi(v);
         else if(key=="hidden_size") hidden=std::stoi(v);
+        else if(key=="num_attention_heads") heads=std::stoi(v);
+        else if(key=="o_groups") groups=std::stoi(v);
     }
     CHECK(!dir.empty() && width>0 && hidden>0);
     struct Tensor { int file=-1; std::uint64_t offset=0, size=0; int a=0,b=0; };
@@ -59,11 +61,11 @@ int main(int argc, char** argv) {
     CHECK(tensor[0].size%width==0 && tensor[1].size%width==0 && tensor[2].size%hidden==0);
     const auto gate_row=tensor[0].size/width, up_row=tensor[1].size/width, down_row=tensor[2].size/hidden;
     const std::array<ConstBytes,3> src{source[0],source[1],source[2]};
-    std::array<Range,2> ranges; CHECK(expert_ranges(width,256,layer,ranges,error));
+    std::array<RankGeometry,2> ranks; CHECK(rank_geometry(width,256,layer,heads,groups,ranks,error));
     std::array<std::vector<std::uint8_t>,3> restored{std::vector<std::uint8_t>(source[0].size()),
         std::vector<std::uint8_t>(source[1].size()),std::vector<std::uint8_t>(source[2].size())};
     for(int rank=0;rank<2;++rank) {
-        ExpertSpans s; CHECK(expert_spans(width,hidden,256,ranges[rank],gate_row,up_row,down_row,s,error));
+        ExpertSpans s; CHECK(expert_spans(width,hidden,256,ranks[rank].experts,gate_row,up_row,down_row,s,error));
         std::array<std::vector<std::uint8_t>,3> part{std::vector<std::uint8_t>(s.gate_bytes),
             std::vector<std::uint8_t>(s.up_bytes),std::vector<std::uint8_t>(s.down_row_bytes*s.down_rows)};
         CHECK(pack_expert(s,src,{Bytes(part[0]),Bytes(part[1]),Bytes(part[2])},error));
@@ -74,5 +76,6 @@ int main(int argc, char** argv) {
                         restored[2].begin()+row*s.down_source_stride+s.down_row_offset);
     }
     CHECK(restored==source);
-    std::printf("real expert layer=%d id=%d: both rank slices reconstruct all three quantized tensors\n",layer,expert);
+    std::printf("real expert layer=%d id=%d: %d heads and %d groups/rank; rank slices reconstruct all three quantized tensors\n",
+                layer,expert,ranks[0].attention_heads.count,ranks[0].output_groups.count);
 }

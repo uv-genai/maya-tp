@@ -1484,3 +1484,7 @@ differed and are not evidence of a rollback failure; see
 not validate long contexts or two-host inference. Review sources/build remain isolated under
 `/tmp/ds4-tp2-review-115-{src,build}` on strix-halo-1. No two-host DeepSeek model execution
 exists yet; user processes remain untouched.
+
+P2 now checks a joint two-rank geometry for expert blocks, attention heads and output groups.
+The host test and real XS/S expert reconstructions passed with 32 heads and four output groups
+per rank. This is partition validation, not rank-local model loading or GPU inference.
