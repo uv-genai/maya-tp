@@ -1,4 +1,4 @@
-# Sharded DeepSeek worker rollback, no drafter
+# Sharded DeepSeek worker rollback and DSpark
 
 Issue #113. On two gfx1151 hosts, the isolated test executable (SHA-256
 `2434aa83ab462fd3fa59b20d3cdc1454d1a8d86f7d5214516a87c606b215fc11`)
@@ -53,3 +53,14 @@ replayed and reproduced drafts, confidences and verdicts. The test binary was
 An earlier S point-q context had zero observed accepts; it is retained as a
 coverage limitation, not treated as a distribution failure. These small samples
 cannot prove distributional equivalence. All owned processes exited.
+
+An additional XS test used independently verified matching pack, partition and
+binary digests and a 127-token synthetic prompt. For forced acceptance counts
+0 through 3, the verification and rollback crossed the 128-token ring and
+compressor boundary. Each next-token full logit vector matched the target-only
+continuation exactly; all five subsequent rank-0 DSpark drafts and their
+confidences also matched within 1e-4. Both ranks shut down cleanly. The review
+binary SHA-256 was
+`478af130683ca0558f12d1471ee913f160ab1c05092ce50c76dfce3a5a432c2f`.
+This does not cover longer contexts, Maya-S at this boundary, lookup, or every
+failure mode; the phase gate remains open.

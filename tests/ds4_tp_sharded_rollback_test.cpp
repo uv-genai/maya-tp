@@ -5,6 +5,7 @@
 #include "../src/ds4/ds4_tp_model_worker.hpp"
 #include "../src/ds4/ds4_tp_worker.hpp"
 #include "strata/net/verbs.hpp"
+#include "ds4_tp_test_identity.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -22,7 +23,8 @@ int ds4_tp_sharded_rollback_test(int argc,char** argv) {
     const long rank=std::strtol(argv[2],&end,10); if (!*argv[2] || *end || rank<0 || rank>1) return 2;
     const long port=std::strtol(argv[4],&end,10); if (!*argv[4] || *end || port<1 || port>65535) return 2;
     CHECK(setenv("DS4_STREAM","0",1)==0);
-    strata::ds4::Options o; o.pack=argv[6]; o.max_context=32768; o.gpus={0}; o.reserve_mib=1024;
+    std::int64_t context=0; CHECK(ds4_tp_test_context(context,error));
+    strata::ds4::Options o; o.pack=argv[6]; o.max_context=context; o.gpus={0}; o.reserve_mib=1024;
     o.tp=1; o.threads=false; o.vision=false; o.dspark=dspark && rank==0; o.lookup=false; o.prefill_chunk=0;
     o.expert_cache=false; o.mmap_experts=1; o.profile_readonly=true; o.cpu_threads=14; o.vram_experts=0;
     o.tp2_rank=static_cast<int>(rank); o.tp2_expert_budget=90ull<<30; o.tp_worker_verify=true;
@@ -34,13 +36,14 @@ int ds4_tp_sharded_rollback_test(int argc,char** argv) {
     cfg.bootstrap_port=static_cast<std::uint16_t>(port); cfg.rdma_device=argv[5];
     auto comm=strata::net::CreateIbrverbsCommunicator(cfg,&error); CHECK(comm);
     Identity id; id.protocol=1; id.world=2; id.rank=cfg.rank; id.hidden=5120; id.layers=40; id.experts=384;
-    id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
-    id.model_digest[0]=1; id.partition_digest[0]=2; id.build_digest[0]=3;
+    id.expert_width=2304; id.max_context=static_cast<std::uint64_t>(context); id.feature_flags=1;
+    id.max_partial_bytes=comm->MaxPartialBytes();
+    CHECK(ds4_tp_test_identity(id,error));
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
     CHECK(model.tp2_attach(*comm,static_cast<std::size_t>(limit),error));
     std::uint64_t sequence=0;
     if (rank==1) {
-        Worker worker(*comm,32768,static_cast<std::uint32_t>(model.vocab()),16);
+        Worker worker(*comm,static_cast<std::uint64_t>(context),static_cast<std::uint32_t>(model.vocab()),16);
         ModelWorker<strata::ds4::Model> adapter(model); std::uint64_t processed=0;
         while (!worker.state().stopped()) {
             CHECK(worker.run_one([&](const Control& c,std::string& e){return adapter.execute(c,e);},error)); ++processed;
@@ -64,10 +67,27 @@ int ds4_tp_sharded_rollback_test(int argc,char** argv) {
         if (!ok || !model.tp_worker_synchronize(error) || !comm->CheckQueued(&error) || !comm->EndOperation(sequence,&error)) return false;
         return true;
     };
-    const std::vector<std::uint32_t> prompt={5,6,7}, window={8,9,10,11}; const std::uint32_t probe=12;
+    int prompt_len=3;
+    if (const char* v=std::getenv("DS4_TP_TEST_PROMPT_LEN")) {
+        char* end=nullptr; const long n=std::strtol(v,&end,10);
+        CHECK(*v && end && !*end && n>=1 && n<=512); prompt_len=static_cast<int>(n);
+    }
+    std::vector<std::uint32_t> prompt;
+    for (int i=0;i<prompt_len;++i) prompt.push_back(static_cast<std::uint32_t>(5+i%3));
+    const std::vector<std::uint32_t> window={8,9,10,11}; const std::uint32_t probe=12;
+    const auto feed_prompt=[&]() {
+        for (std::size_t at=0;at<prompt.size();) {
+            const auto end_at=std::min(prompt.size(),at+std::size_t{16});
+            const std::vector<std::uint32_t> part(prompt.begin()+static_cast<std::ptrdiff_t>(at),
+                                                   prompt.begin()+static_cast<std::ptrdiff_t>(end_at));
+            if (!execute(Command::Feed,part,false,static_cast<std::uint64_t>(model.pos()))) return false;
+            at=end_at;
+        }
+        return true;
+    };
     for (int accepted=0;accepted<=3;++accepted) {
         CHECK(execute(Command::Reset,{},false,0));
-        CHECK(execute(Command::Feed,prompt,false,static_cast<std::uint64_t>(model.pos())));
+        CHECK(feed_prompt());
         const std::vector<std::uint32_t> kept(window.begin(),window.begin()+accepted+1);
         CHECK(execute(Command::Feed,kept,false,static_cast<std::uint64_t>(model.pos())));
         std::vector<int> baseline_drafts; std::vector<float> baseline_conf;
@@ -75,7 +95,7 @@ int ds4_tp_sharded_rollback_test(int argc,char** argv) {
         CHECK(execute(Command::Step,{probe},true,static_cast<std::uint64_t>(model.pos())));
         std::vector<float> baseline; CHECK(model.logits(baseline) && !baseline.empty());
         CHECK(execute(Command::Reset,{},false,0));
-        CHECK(execute(Command::Feed,prompt,false,static_cast<std::uint64_t>(model.pos())));
+        CHECK(feed_prompt());
         const auto start=static_cast<std::uint64_t>(model.pos());
         CHECK(execute(Command::Verify,window,false,start));
         CHECK(execute(Command::Verdict,{static_cast<std::uint32_t>(accepted),probe},false,start+1+accepted));
