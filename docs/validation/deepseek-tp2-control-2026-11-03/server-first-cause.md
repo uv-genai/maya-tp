@@ -17,3 +17,12 @@ rank-1 process was terminated during generation. Rank 0 reported the original
 `verbs peer closed the bootstrap connection` cause and subsequent model step
 and feed calls returned the same cause without entering another operation.
 Both owned ranks exited; this exercised model control and RDMA, not HTTP.
+
+An isolated HTTP test then loaded the experimental XS pair with checked
+identities, completed a 38-prompt-token, 64-output-token chat request with
+30/36 DSpark drafts accepted, and stopped only its recorded idle worker.
+Health changed to degraded/down without another request; the next completion
+was rejected with the original peer-closed cause. The driver stopped its HTTP
+server, and all owned processes exited. Its first attempt completed the HTTP
+request but did not inject loss because it looked for a remote PID file on the
+local host; the corrected retry produced the failure result above.

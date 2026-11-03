@@ -1730,3 +1730,19 @@ real two-host idle peer loss, and an RDMA/control coexistence test with a queued
 frame all passed. The experimental server now has a one-shot idle watcher;
 its isolated build passed, log `/tmp/ds4-tp2-111-startup-build2.log`, and
 needs actual API validation.
+
+The first owned XS HTTP test completed a 64-token API request and shut down
+cleanly, but its idle-loss check did not run because the driver looked for the
+remote PID file locally. The corrected retry completed 64 tokens (30/36 drafts
+accepted), stopped its recorded idle worker and observed degraded/down health
+without another request. A later request was rejected with the original
+peer-closed cause. The server, engine and worker exited. Logs use prefix
+`/tmp/ds4-tp2-114-http-`.
+
+P4 (#110) has uncommitted review-only chunk execution changes: deterministic
+bounded feed, route checks and attention/MoE reductions. The isolated test
+binary built and host worker/row-bound tests pass. A paired XS full-logit and
+continuation comparison is running with a 256-row chunk: local PID 270351,
+session 7044; remote PID 102364, session 55885; logs use prefix
+`/tmp/ds4-tp2-110-chunk-xs-`. It uses synthetic handshake identities and the
+earlier single-host text reference. This path is not enabled by the launcher.
