@@ -20718,11 +20718,11 @@ bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, 
     return p_->verify(y, d, t, tp, tk, mp, seed, counter, accepted, next, err);
 }
 bool Model::tp_verify_begin(const int* tokens, int count, std::string& err) {
-    if (p_->tp_load_only(err)) return false;
+    if (p_->tp_unready(err)) return false;
     return p_->tp_verify_begin(tokens, count, err);
 }
 bool Model::tp_verify_commit(int accepted, std::string& err) {
-    if (p_->tp_load_only(err)) return false;
+    if (p_->tp_unready(err)) return false;
     return p_->tp_verify_commit(accepted, err);
 }
 bool Model::tp_worker_reset(std::string& err) { return p_->reset_checked(err); }

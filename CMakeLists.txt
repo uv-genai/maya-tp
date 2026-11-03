@@ -668,7 +668,8 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
       if(STRATA_ENABLE_TP2_RDMA)
         target_sources(ds4_tp_verify_test PRIVATE tests/ds4_tp_pair_smoke.cpp tests/ds4_tp_expert_rdma_test.cu
                        tests/ds4_tp_dense_rdma_test.cu tests/ds4_tp_model_rdma_test.cpp
-                       tests/ds4_tp_text_rdma_test.cpp tests/ds4_tp_sharded_control_test.cpp)
+                       tests/ds4_tp_text_rdma_test.cpp tests/ds4_tp_sharded_control_test.cpp
+                       tests/ds4_tp_sharded_rollback_test.cpp)
         target_compile_definitions(ds4_tp_verify_test PRIVATE STRATA_DS4_TP2_TEST_RDMA)
         target_link_libraries(ds4_tp_verify_test PRIVATE strata_net)
       endif()

@@ -1594,3 +1594,10 @@ typed worker feed/step/reset/shutdown tests passed: XS reproduced the previous
 All four owned ranks exited. Logs: `/tmp/ds4-tp2-control-{xs,s}-rank0.log` on
 strix-halo-1 and the corresponding rank1 logs locally. The numerical execution
 remains test-only; speculative rollback and DSpark gates are next.
+
+P5 (#113): the sharded XS and S verify/commit tests passed acceptance counts 0–3
+over a four-token window, with identical next logits to target-only continuations;
+all owned ranks exited. Logs are `/tmp/ds4-tp2-113-rollback-{xs,s}-rank0.log` on
+strix-halo-1 and corresponding rank1 logs locally. A test-only rank-0 DSpark load
+is being prepared to repeat the rollback checks with actual draft state. Test
+execution and identities are not production.

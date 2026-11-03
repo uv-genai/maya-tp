@@ -16,6 +16,7 @@ int ds4_tp_dense_rdma_test(int argc, char** argv);
 int ds4_tp_model_rdma_test(int argc, char** argv);
 int ds4_tp_text_rdma_test(int argc, char** argv);
 int ds4_tp_sharded_control_test(int argc, char** argv);
+int ds4_tp_sharded_rollback_test(int argc, char** argv);
 #endif
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
 int main(int argc,char** argv) {
@@ -31,6 +32,7 @@ int main(int argc,char** argv) {
     if (argc > 1 && (std::string(argv[1])=="--text-reference" || std::string(argv[1])=="--text-model"))
         return ds4_tp_text_rdma_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--sharded-control") return ds4_tp_sharded_control_test(argc,argv);
+    if (argc > 1 && std::string(argv[1])=="--sharded-rollback") return ds4_tp_sharded_rollback_test(argc,argv);
 #endif
     if(argc!=3 || (std::string(argv[2])!="on" && std::string(argv[2])!="none" && std::string(argv[2])!="off" && std::string(argv[2])!="dispatch")) {
         std::fprintf(stderr,"usage: pack-dir on|none|off|dispatch (none/dispatch reserve worker rollback buffers)\n"); return 2;
