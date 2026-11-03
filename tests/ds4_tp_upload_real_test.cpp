@@ -1,5 +1,6 @@
 // Upload real pack expert slices to a GPU and compare them to CPU-packed bytes.
 #include "../src/ds4/ds4_tp_upload.cuh"
+#include "../src/ds4/ds4_tp_expert_pool.cuh"
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -61,6 +62,8 @@ int main(int argc, char** argv) {
     const std::array<ConstBytes,3> src{source[0],source[1],source[2]};
     std::array<Range,2> ranges; CHECK(expert_ranges(width,256,layer,ranges,error));
     hipStream_t stream=nullptr; CHECK(hipStreamCreate(&stream)==hipSuccess);
+    std::vector<ExpertSpans> plans;
+    std::vector<std::vector<std::uint8_t>> expected_parts;
     for (int rank=0;rank<2;++rank) {
         ExpertSpans sp; CHECK(expert_spans(width,hidden,256,ranges[rank],tensors[0].size/width,
                                            tensors[1].size/width,tensors[2].size/hidden,sp,error));
@@ -75,8 +78,41 @@ int main(int argc, char** argv) {
         CHECK(hipMemcpyAsync(actual.data(),gpu,layout.bytes,hipMemcpyDeviceToHost,stream)==hipSuccess);
         CHECK(hipStreamSynchronize(stream)==hipSuccess);
         CHECK(expected==actual); CHECK(hipFree(gpu)==hipSuccess);
+        plans.push_back(sp); expected_parts.push_back(std::move(expected));
         std::printf("layer=%d expert=%d rank=%d width=%d device_bytes=%zu: exact GPU slice\n",
                     layer,expert,rank,ranges[rank].count,layout.bytes);
     }
     CHECK(hipStreamDestroy(stream)==hipSuccess);
+    {
+        RankExpertPool too_small;
+        CHECK(!too_small.allocate(0,plans,1,error));
+        CHECK(!too_small.ready() && too_small.data(0)==nullptr && !too_small.failure().empty());
+    }
+    {
+        RankExpertPool pool;
+        const auto total=expected_parts[0].size()+expected_parts[1].size();
+        CHECK(pool.allocate(0,plans,total,error) && pool.bytes()==total);
+        CHECK(pool.staging_bytes()==std::max(expected_parts[0].size(),expected_parts[1].size()));
+        CHECK(!pool.ready() && pool.data(0)==nullptr);
+        CHECK(pool.upload(0,src,error) && !pool.ready() && pool.data(0)==nullptr);
+        CHECK(pool.upload(1,src,error) && pool.ready());
+        for (int rank=0;rank<2;++rank) {
+            std::vector<std::uint8_t> got(expected_parts[rank].size());
+            CHECK(hipMemcpy(got.data(),pool.data(rank),got.size(),hipMemcpyDeviceToHost)==hipSuccess);
+            CHECK(got==expected_parts[rank]);
+        }
+        CHECK(pool.data(2)==nullptr);
+        std::printf("layer=%d expert=%d: bounded GPU pool loaded both checked slices (%zu bytes)\n",layer,expert,total);
+        CHECK(!pool.upload(0,src,error) && !pool.ready() && pool.data(0)==nullptr);
+        const std::string first=error;
+        CHECK(!pool.upload(1,src,error) && error==first);
+    }
+    {
+        RankExpertPool poisoned;
+        CHECK(poisoned.allocate(0,{plans[0]},expected_parts[0].size(),error));
+        auto bad=src; bad[0]=src[0].first(0);
+        CHECK(!poisoned.upload(0,bad,error) && !poisoned.ready());
+        const std::string first=error;
+        CHECK(!poisoned.upload(0,src,error) && error==first && poisoned.data(0)==nullptr);
+    }
 }

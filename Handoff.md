@@ -1489,8 +1489,9 @@ P2 now checks a joint two-rank geometry for expert blocks, attention heads and o
 The host test and real XS/S expert reconstructions passed with 32 heads and four output groups
 per rank. A separate HIP uploader now transfers a rank's sliced expert directly into a compact
 device layout; real XS/S expert-byte checks and synthetic quantized arithmetic passed on gfx1151
-(`docs/validation/deepseek-tp2-control-2026-11-03/expert-upload.md`). It is not connected to the
-model loader and does not establish full rank allocation or distributed inference.
+(`docs/validation/deepseek-tp2-control-2026-11-03/expert-upload.md`). A bounded, fail-closed GPU
+expert pool was also checked with sampled XS/S slices. Neither component is connected to the model
+loader; the checks do not establish full rank allocation or distributed inference.
 
 The Maya-S directory was absent on strix-halo-1. An owned rsync is copying it into that new
 directory for future paired tests, using `--ignore-existing --partial-dir=.rsync-partial` so it
