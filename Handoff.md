@@ -1498,13 +1498,14 @@ or a whole rank-owned matrix. XS Q6_K, S Q8_0 and BF16 byte checks and invalid-m
 passed on gfx1151; the existing XS DSpark regression passed. It is not connected to the model
 engine. See `docs/validation/deepseek-tp2-control-2026-11-03/dense-loader.md`.
 
-The Maya-S directory was absent on strix-halo-1. An owned rsync is copying it into that new
-directory for future paired tests, using `--ignore-existing --partial-dir=.rsync-partial` so it
-does not overwrite existing files. Local parent PID 201366, rsync PID 201384 (start 2026-11-03
-11:40:08 AWST), exec session 19376, log `/tmp/ds4-tp2-115-s-copy.log`. At ~111 MB/s the ~317 GiB
-transfer was estimated to take ~50 minutes. Recheck PID/start/command before acting; don't use
-the remote S pack until the transfer and content verification complete. Shared DSpark and vision
-files already exist remotely. User-owned processes remain untouched.
+The Maya-S directory was absent on strix-halo-1. An owned rsync copied it into that new
+directory using `--ignore-existing --partial-dir=.rsync-partial`; it exited successfully after
+transferring 339,486,892,688 bytes (log `/tmp/ds4-tp2-115-s-copy.log`). SHA-256 verification of
+all six shards, the shared DSpark and vision files and pack metadata matched on both hosts
+(16 files; `/tmp/ds4-tp2-115-s-sha-local.txt` and `/tmp/ds4-tp2-115-s-sha-remote.txt`).
+The copied pack passed the isolated engine's `--pack-info`, which reported three DSpark blocks,
+supported tensor types and all indexed files present; log `/tmp/ds4-tp2-115-s-packinfo.log` on
+strix-halo-1. The checksum and rsync processes exited. User-owned processes remain untouched.
 
 The pack-backed rank-expert loader passed 385-expert XS/S tests for both rank assignments, a
 single-host DSpark regression, and full XS expert-pool loads on both hosts (#115). Full XS rank
@@ -1512,7 +1513,7 @@ allocations were 54,814,310,400 and 54,751,395,840 GPU bytes, with 4,249,600 pin
 bytes each; both owned test processes exited. See
 `docs/validation/deepseek-tp2-control-2026-11-03/rank-expert-loader.md`. This covers routed
 expert slices only; the loader is not connected to inference and does not establish full-rank fit.
-The S copy is still in progress; full S checks require completed transfer and content verification.
+The S copy and content verification have completed; paired S checks remain.
 
 Both Maya-S routed-expert rank pools loaded sequentially on the source host (strix-halo-2): each
 held all 15,360 expert slices in 84,509,982,720 GPU bytes, with 7,014,400 bytes of pinned staging.
@@ -1553,4 +1554,43 @@ sequentially on the source host with 5.22 GB dense weights and 84.51 GB expert s
 leaving about 35 GiB free. Guard checks, the existing single-host XS DSpark regression,
 and the HIP mapping check passed. This is load-only, not TP inference. Details:
 `docs/validation/deepseek-tp2-control-2026-11-03/rank-model-loading.md`. The S rsync
-remains in progress; verify the destination pack before paired S tests.
+and content verification have completed; paired S tests remain.
+
+The first experimental XS model-pair execution on bootstrap port 18730 failed parity.
+Both ranks agreed exactly on routes and logits, but maximum logit differences from a
+single-host reference were 14.5–18.7, with a different top token at the fourth position.
+Both owned ranks exited. Logs are `/tmp/ds4-tp2-110-tp-xs-rank0.log` on strix-halo-1
+and `/tmp/ds4-tp2-110-tp-xs-rank1.log` locally. The experimental execution code is
+uncommitted and restricted to the review test executable; trace the first divergent
+layer before enabling anything. The second owned pair exited with the same failure.
+Its reference and rank-0 traces are `/tmp/ds4-tp2-110-reference-layer.bin` and
+`/tmp/ds4-tp2-110-rank0-layer.bin` on strix-halo-1. Attention residuals match within
+1.8e-7 through layer 2; the next attention sees a 0.00665 maximum difference, so
+inspect the preceding expert block and its routes. The matching pair on port 18732
+also exited. Its route trace shows the first material residual difference occurs
+on prompt row 2 after layer 2, with the same selected experts and near-identical
+weights as the reference. Route order changes in layer 3 and some choices diverge
+later. Both rank processes on port 18733 exited. Their layer-2 intermediates show
+the routed expert hidden and reduced partials match within 2.4e-7 and 6e-8. The
+shared Q6_K projection's per-32 Q8 input crosses a boundary at row 2 index 4921:
+the reference ratio is 3.4999928 and the pair's is 3.5000079, rounding 3 versus 4.
+The shared output then differs by up to 0.00036; later routing and logits diverge.
+An isolated reference override confirmed the cause: using the pair's layer-2 FFN
+input reduced row 2's residual difference after layer 2 to 1.79e-7, and it stayed
+below 3e-7 through layer 4 before another boundary diverged. The override process
+exited; data and log are under `/tmp/ds4-tp2-110-reference-override*` remotely.
+This synthetic-token exact-logit comparison remains failed. The pair implementation
+is test-only and no end-to-end gate has passed; compare actual text prompts next.
+The ordered HIP map, 613 server tests (11 skipped), 687 tools tests (3 skipped),
+and focused TP peer-loss regression passed. The test-only eBPF chat comparison
+completed and both owned ranks exited. Both ranks' logits agreed within 1e-5;
+63/64 teacher-forced top IDs matched the single-host reference. The pair and
+reference generated 64-token introductions with a 55-token common prefix and
+different coherent continuations. Details and limitations are in
+`docs/validation/deepseek-tp2-control-2026-11-03/model-pair-numerics.md`.
+The Maya-S copy passed SHA-256 and pack checks on both hosts. Sharded XS and S
+typed worker feed/step/reset/shutdown tests passed: XS reproduced the previous
+64-token pair sequence; S produced a coherent 64-token eBPF introduction.
+All four owned ranks exited. Logs: `/tmp/ds4-tp2-control-{xs,s}-rank0.log` on
+strix-halo-1 and the corresponding rank1 logs locally. The numerical execution
+remains test-only; speculative rollback and DSpark gates are next.

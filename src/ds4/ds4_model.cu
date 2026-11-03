@@ -52,6 +52,10 @@
 #include "strata/kernels/sampler.hpp"
 #include "strata/platform/dedicated.hpp"
 #include "strata/platform/idle_gate.hpp"
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#include "strata/net/communicator.hpp"
+#include "strata/net/tp_kernels.hpp"
+#endif
 
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
@@ -1270,6 +1274,22 @@ struct Model::Impl {
         err="ds4 tp2: experimental rank is load-only; distributed execution is not enabled";
         return true;
     }
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+    strata::net::Communicator* tp_test_comm=nullptr;
+    std::size_t tp_test_limit=0;
+    std::string tp_test_failure;
+    std::FILE* tp_route_dump=std::getenv("DS4_TP_TEST_DUMP_ROUTES") ?
+        std::fopen(std::getenv("DS4_TP_TEST_DUMP_ROUTES"),"wb") : nullptr;
+#endif
+    bool tp_unready(std::string& err) const {
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+        if (o.tp2_rank>=0 && tp_test_comm!=nullptr) {
+            if (tp_test_failure.empty()) return false;
+            err=tp_test_failure; return true;
+        }
+#endif
+        return tp_load_only(err);
+    }
     unsigned win_seq = 0;             // the windows the threads ran (the hand-offs' seq)
     std::atomic<unsigned> win_now{0};   // (the last decode window's win_seq, for the copy threads)
     // the chunked prompt path (threads mode): chunk tokens a pass, runs shorter than chunk_min in windows
@@ -2480,6 +2500,9 @@ struct Model::Impl {
             if (host_pinned) cudaHostUnregister(m.first);
             os::anon_free(m.first, m.second);
         }
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+        if (tp_route_dump) std::fclose(tp_route_dump);
+#endif
     }
     std::vector<std::pair<void*, size_t>> host_maps;
     bool host_pinned = false;   // host_maps page-locked (chunk > 0, when the OS let them all be: #521)
@@ -18786,7 +18809,7 @@ struct Model::Impl {
     }
 
     bool forward(const int* tk, int T, int logits_rows, std::string& err, int seed_rows = -1) {
-        if (tp_load_only(err)) return false;
+        if (tp_unready(err)) return false;
         if (lend_broken) {
             err = kLendBroken;
             return false;
@@ -19514,6 +19537,64 @@ struct Model::Impl {
         return true;
     }
 
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+    bool tp_test_fail(const std::string& cause, std::string& err) {
+        if (tp_test_failure.empty()) tp_test_failure=cause.empty()?"ds4 tp2: test collective failed":cause;
+        err=tp_test_failure; return false;
+    }
+    bool tp_test_sum(float* data, int rows, int width, cudaStream_t stream, std::string& err) {
+        if (!tp_test_comm || rows<1 || width<1 || static_cast<std::size_t>(rows)>
+            std::numeric_limits<std::size_t>::max()/sizeof(float)/static_cast<std::size_t>(width))
+            return tp_test_fail("ds4 tp2: invalid test reduction",err);
+        const auto bytes=static_cast<std::size_t>(rows)*static_cast<std::size_t>(width)*sizeof(float);
+        if (bytes>tp_test_limit) return tp_test_fail("ds4 tp2: reduction exceeds negotiated limit",err);
+        const float* other=tp_test_comm->ExchangePartial(data,bytes,stream,&err);
+        if (!other) return tp_test_fail(err,err);
+        strata::net::AddRowsBroadcast(other,data,static_cast<std::uint32_t>(rows),
+                                      static_cast<std::uint32_t>(width),1,stream);
+        if (cudaGetLastError()!=cudaSuccess) return tp_test_fail("ds4 tp2: reduction kernel failed",err);
+        return true;
+    }
+    bool tp_test_routes(Dev& d, const Layer& l, int rows, cudaStream_t stream, std::string& err) {
+        if (!tp_test_comm || rows<1 || rows>kWin || l.k_exp<1 || l.k_exp>kPicks)
+            return tp_test_fail("ds4 tp2: invalid router geometry",err);
+        const auto n=static_cast<std::size_t>(rows)*kPicks, bytes=n*sizeof(std::uint32_t);
+        if (bytes>tp_test_limit) return tp_test_fail("ds4 tp2: router exceeds negotiated limit",err);
+        std::vector<std::uint32_t> here(n), peer(n);
+        const void* arrays[2]={d.ridx,d.rw};
+        for (int field=0;field<2;++field) {
+            const float* other=tp_test_comm->ExchangePartial(reinterpret_cast<const float*>(arrays[field]),bytes,stream,&err);
+            if (!other) return tp_test_fail(err,err);
+            if (cudaMemcpyAsync(here.data(),arrays[field],bytes,cudaMemcpyDeviceToHost,stream)!=cudaSuccess ||
+                cudaMemcpyAsync(peer.data(),other,bytes,cudaMemcpyDeviceToHost,stream)!=cudaSuccess ||
+                cudaStreamSynchronize(stream)!=cudaSuccess)
+                return tp_test_fail("ds4 tp2: router comparison copy failed",err);
+            for (int row=0;row<rows;++row) for (int pick=0;pick<l.k_exp;++pick) {
+                const auto i=static_cast<std::size_t>(row)*kPicks+pick;
+                if (here[i]!=peer[i]) return tp_test_fail("ds4 tp2: router disagreement at layer "+
+                    std::to_string(l.il)+" row "+std::to_string(row)+" pick "+std::to_string(pick),err);
+            }
+        }
+        return true;
+    }
+    bool tp_test_dump_routes(Dev& d, const Layer& l, int64_t pos, int rows, cudaStream_t stream, std::string& err) {
+        if (!tp_route_dump) return true;
+        const auto n=static_cast<std::size_t>(rows)*kPicks;
+        std::vector<int> ids(n); std::vector<float> weights(n);
+        if (cudaMemcpyAsync(ids.data(),d.ridx,n*sizeof(int),cudaMemcpyDeviceToHost,stream)!=cudaSuccess ||
+            cudaMemcpyAsync(weights.data(),d.rw,n*sizeof(float),cudaMemcpyDeviceToHost,stream)!=cudaSuccess ||
+            cudaStreamSynchronize(stream)!=cudaSuccess) {
+            err="ds4 tp2: route trace copy failed"; return false;
+        }
+        const int64_t header[4]={l.il,pos,rows,l.k_exp};
+        if (std::fwrite(header,sizeof(header),1,tp_route_dump)!=1 ||
+            std::fwrite(ids.data(),sizeof(int),n,tp_route_dump)!=n ||
+            std::fwrite(weights.data(),sizeof(float),n,tp_route_dump)!=n || std::fflush(tp_route_dump)!=0) {
+            err="ds4 tp2: route trace write failed"; return false;
+        }
+        return true;
+    }
+#endif
     // layer L0 for the window, as group member mi (its share of the heads, of the output projection and of the FFNs;
     // the partial sums all-reduced across the group)
     bool layer(Layer& L0, int mi, int64_t p0, int T, const WinPlan& wp, std::string& err) {
@@ -19522,6 +19603,10 @@ struct Model::Impl {
         cudaSetDevice(d.id);
         cudaStream_t s = d.st;
         const int nm = L0.nm;
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+        if (o.tp2_rank>=0 && (!tp_test_comm || l.mtp || nm!=1 || !wp.async))
+            return tp_test_fail("ds4 tp2: unsupported test layer execution",err);
+#endif
         // (DS4_HC_FUSE: a decoded token's split and norm in one launch on st, so its mixes are not beside it; =2 a
         // window's rows too)
         const bool fuse = hc_fuse && !l.mtp && (T == 1 || (hc_fuse_win && T <= kWin));
@@ -19647,6 +19732,9 @@ struct Model::Impl {
             if (!mv(d, {job(l.wo_b, d.oa, d.ao, T, (size_t) OG * g.o_lora, D)}, err)) return false;
         } else CK(cudaMemsetAsync(d.ao, 0, (size_t) T * D * sizeof(*d.ao), s));   // (no heads: nothing to add)
         if (nm > 1) allreduce(d.ao, T * D, ag, mi, ++d.ar_seq, d.xcnt, s);
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+        if (o.tp2_rank>=0 && !tp_test_sum(d.ao,T,D,s,err)) return false;
+#endif
         if (hs) CK(cudaStreamWaitEvent(s, d.hc_done, 0));
         ablate(d, d.ao, T, s);
         hc_post(d.ao, d.h, d.a_post, d.a_comb, D, H, T, d.h2, s);
@@ -19740,6 +19828,10 @@ struct Model::Impl {
                               na[0], na[1], lead && self_answer ? resps + slot : nullptr, d.cpu_any,
                               lane_done);
             }
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+            if (o.tp2_rank>=0 && !tp_test_routes(d,l,T,s,err)) return false;
+            if (!tp_test_dump_routes(d,l,p0,T,s,err)) return false;
+#endif
             {
                 x3::MvJob js[2] = {job(l.s1, d.x, d.sg, T, D, FF), job(l.s3, d.x, d.su, T, D, FF)};
                 if (!mv_n(d, js, 2, err, ffn_q8)) return false;
@@ -19835,6 +19927,9 @@ struct Model::Impl {
             if (mi == 0) st.experts += (int64_t) T * l.k_exp;
             if (mi == 0 && l.mtp) st.draft_experts += (int64_t) T * l.k_exp;
             if (nm > 1) allreduce(d.moe_out, T * D, ag, mi, ++d.ar_seq, d.xcnt, s);
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+            if (o.tp2_rank>=0 && !tp_test_sum(d.moe_out,T,D,s,err)) return false;
+#endif
             if (hs) CK(cudaStreamWaitEvent(s, d.hc_done, 0));
             ablate(d, d.moe_out, T, s);
             hc_post(d.moe_out, d.h, d.f_post, d.f_comb, D, H, T, d.h2, s);
@@ -20465,11 +20560,21 @@ struct Model::Impl {
 Model::Model() : p_(new Impl) {}
 Model::~Model() = default;
 bool Model::load(const Options& o, std::string& err) { return p_->load(o, err); }
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+bool Model::tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err) {
+    if (p_->o.tp2_rank<0 || !p_->tp_rank_experts || p_->tp_test_comm || p_->devs.size()!=1 ||
+        comm.world_size()!=2 || comm.rank()!=static_cast<std::uint32_t>(p_->o.tp2_rank) ||
+        comm.device_index()!=p_->devs[0].id || limit==0 || limit>comm.MaxPartialBytes()) {
+        err="ds4 tp2: invalid test communicator binding"; return false;
+    }
+    p_->tp_test_comm=&comm; p_->tp_test_limit=limit; err.clear(); return true;
+}
+#endif
 bool Model::step(int token, bool logits, std::string& err) { return p_->step(token, logits, err); }
 std::string Model::where() const { return p_->where(); }
 bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, int after) {
     Impl& p = *p_;
-    if (p.tp_load_only(err)) return false;
+    if (p.tp_unready(err)) return false;
     if (!feed_release(err)) return false;   // (another read: a prompt's room kept between its parts handed back first)
     p.main_at.store("reading a prompt", std::memory_order_relaxed);
     p.pm.last = -1;
@@ -20564,7 +20669,8 @@ int Model::fed() const { return p_->fed_n; }
 bool Model::cancelled() const { return p_->halted; }
 void Model::begin_request() { p_->begin_request(); }
 int Model::sample(float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter) {
-    if (p_->o.tp2_rank>=0) return -1;
+    std::string err;
+    if (p_->tp_unready(err) || p_->o.tp2_rank==1) return -1;
     return p_->sample(t, tp, tk, mp, seed, counter);
 }
 void Model::set_penalties(int last_n, float repeat, float freq, float present) {
@@ -20581,7 +20687,8 @@ void Model::set_logprobs(int k, int force) {
 }
 const std::vector<LogprobRow>& Model::logprobs() const { return p_->lp_rows; }
 bool Model::logits(std::vector<float>& out) {
-    if (p_->o.tp2_rank>=0) { out.clear(); return false; }
+    std::string err;
+    if (p_->tp_unready(err)) { out.clear(); return false; }
     return p_->logits(out);
 }
 int Model::image_token() const { return p_->img_tok; }
