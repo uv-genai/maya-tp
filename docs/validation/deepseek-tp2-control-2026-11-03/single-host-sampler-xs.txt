@@ -1,0 +1,5 @@
+sampler-test T 1.00 top_k 64 top_p 1.00 min_p 0.00: 1000 plain draws of 33 tokens (the most drawn 40%), 50 drafted rounds (drawn drafts, the first kept 21 times): chi-square 5.0 over 4 groups, p 0.1714 (the plain halves: p 0.3470) - the same distribution
+sampler-test T 0.80 top_k 20 top_p 0.95 min_p 0.00: 1000 plain draws of 6 tokens (the most drawn 48%), 50 drafted rounds (drawn drafts, the first kept 13 times): chi-square 4.8 over 4 groups, p 0.1874 (the plain halves: p 0.9905) - the same distribution
+sampler-test T 0.70 top_k 40 top_p 0.90 min_p 0.05: 1000 plain draws of 5 tokens (the most drawn 53%), 50 drafted rounds (drawn drafts, the first kept 8 times): chi-square 5.1 over 4 groups, p 0.1623 (the plain halves: p 0.7253) - the same distribution
+sampler-test T 0.80 top_k 20 top_p 0.95 min_p 0.00 penalties: 1000 plain draws of 10 tokens (the most drawn 53%), 50 drafted rounds (argmax drafts, the first kept 0 times): chi-square 3.6 over 4 groups, p 0.3087 (the plain halves: p 0.7313) - the same distribution
+sampler-test: speculative sampling gave the model's own draws in every chain

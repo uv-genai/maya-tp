@@ -13,3 +13,8 @@ Both completed 64 tokens with identical token-file SHA256
 `381baeb7bfea390e05fa6488507a4c43dcd5b845ffc556799aed32b44df67c89` and 33/37 DSpark drafts
 accepted. The CMake-registered host partition properties test passed in the candidate build.
 The paired-host TP2 model path and actual uneven-group GPU behavior remain unvalidated.
+
+The candidate also passed `--sampler-test 50` with the same pack, 32768 context and input IDs,
+covering four sampling chains including penalties. The 50 speculative rounds per chain are a
+small statistical smoke check, not proof of distribution equivalence. Output is in
+`single-host-sampler-xs.txt`. This still exercises only the one-host path.
