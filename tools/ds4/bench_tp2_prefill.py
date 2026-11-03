@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""Measure fresh DeepSeek prefill samples with deterministic synthetic prompts."""
+import argparse
+import hashlib
+import json
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from strata_tokenizer import Tokenizer  # noqa: E402
+from bench_tp2_reference import call  # noqa: E402
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--url", required=True)
+    ap.add_argument("--label", required=True)
+    ap.add_argument("--dspark", required=True, choices=("on", "off"))
+    ap.add_argument("--tokenizer", required=True, type=Path)
+    ap.add_argument("--output", required=True, type=Path)
+    ap.add_argument("--runs", type=int, default=3)
+    args = ap.parse_args()
+    if args.runs < 1 or args.runs > 20:
+        ap.error("--runs must be between 1 and 20")
+    tokenizer = Tokenizer.from_dir(args.tokenizer)
+    # Unique indexed text avoids sending the same prefix in successive trials.
+    corpus = "\n".join(f"Reference segment {i:06d}: evaluate the recorded measurements, explain the outcome, "
+                       f"and check the assumptions for case {i * 17 + 3}." for i in range(5000 * args.runs))
+    ids = tokenizer.encode(corpus)
+    if len(ids) < args.runs * 12288:
+        raise RuntimeError("synthetic corpus tokenized to fewer tokens than expected")
+    with args.output.open("x", encoding="utf-8") as out:
+        result = {"url": args.url, "label": args.label, "dspark": args.dspark, "samples": []}
+        def save():
+            out.seek(0); json.dump(result, out, indent=2); out.write("\n"); out.truncate(); out.flush()
+        save()
+        for run in range(args.runs):
+            for source_tokens, offset in ((2048, 0), (8192, 3072)):
+                prompt = tokenizer.decode(ids[run * 12288 + offset:run * 12288 + offset + source_tokens])
+                state = call(args.url, "/metrics", timeout=5)
+                engine, live = state.get("engine") or {}, state.get("live") or {}
+                if engine.get("model_label") != args.label or engine.get("dspark") is not (args.dspark == "on"):
+                    raise RuntimeError("model label or DSpark state does not match expected configuration")
+                if live.get("active") or live.get("queued"):
+                    raise RuntimeError("server is busy; no further request sent")
+                payload = {"model": engine["model"], "messages": [{"role": "user", "content": prompt}],
+                           "max_tokens": 1, "temperature": 0, "top_p": 1, "stream": False,
+                           "chat_template_kwargs": {"enable_thinking": False}}
+                started = time.monotonic()
+                response = call(args.url, "/v1/chat/completions", payload)
+                wall = time.monotonic() - started
+                after = call(args.url, "/metrics", timeout=5)
+                result["samples"].append({"run": run + 1, "source_tokens": source_tokens,
+                    "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+                    "wall_s": wall, "usage": response.get("usage"),
+                    "timings": response.get("timings"), "engine": engine,
+                    "tiers": (after.get("tiers") or {}).get("now")})
+                save()
+                print(f"run {run + 1}, {source_tokens} source tokens", flush=True)
+
+
+if __name__ == "__main__":
+    main()
