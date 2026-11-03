@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-03 · Current state: **§43**, DeepSeek launch scripts ready for user testing; §42 records implementation and staged validation; §§38–41 record GLM startup and DeepSeek design/plan; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-04 · Current state: **§44**, queued DeepSeek TP2 candidate passed the XS single-host performance gate and is staged for user testing; §43 records the launchers; §42 records implementation and earlier validation; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2521,3 +2521,53 @@ were preserved, and the two new aliases select separate model packs and the
 intended launch/stop commands. The current file has nine model entries.
 The guide and staged YAML fragment now use the requested alias names. The
 user performs inference testing through those entries.
+
+## 44. DeepSeek queued-collective performance correction (#120)
+
+The user requires a focused correctness check and performance above single-host
+XS, followed by user testing. Avoid repeating the broad validation campaigns.
+The candidate uses GLM's existing QueuePartial/StagePartial/WaitValue reduction
+sequence. Router IDs and weights share one queued exchange per layer and a GPU
+comparison. A sticky mapped failure flag is checked after the operation drains;
+queued transport failure is checked first to preserve its original cause.
+
+The focused GPU padding/mismatch/first-cause check, five server peer-loss tests
+and HIP mapping check passed. In a paired XS API check, DSpark off/on returned
+identical 256-token text with zero/positive draft counters respectively.
+The Release gfx1151 build passed. The full repository suites were deliberately
+left to the earlier checkpoint, following the user's focused-validation request.
+
+XS generation passed the controlled performance gate on the same candidate
+binary, context 262144, DSpark on and 256-row prefill buffers. Each prompt had
+two 512-token measured responses after warmup, with temperature 0 and lookup off.
+
+| Prompt | Single-host tok/s | TP2 tok/s | Median gain |
+| --- | ---: | ---: | ---: |
+| Python CSV module | 33.1–33.7 | 40.9–42.0 | 24.1% |
+| eBPF tutorial | 28.0–28.2 | 33.9–35.2 | 23.0% |
+
+Both arms reported all 15,360 routed experts resident and zero CPU experts.
+Second-repeat disk traffic was zero. The original single-host config's large
+default prefill allocation hit the memory guard, so both arms use 256-row
+buffers. Single-host retains its existing threads-on setting; TP2 uses the
+controller's required threads-off setting. Answers and draft acceptance differ
+between single-host and TP2, so these are end-to-end comparisons. Evidence and
+raw responses are in `docs/benchmarks/deepseek-tp2-queued-2026-11-04/`.
+
+The measured engine SHA-256 is
+`a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102`.
+It is staged on both hosts as
+`/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/maya-ds4`.
+Both review launcher JSONs now select that path. Their previous copies are
+`maya-ds4-tp2-maya-{xs,s}.json.before-queued-120-20261104` beside the configs.
+The user starts the existing `maya-deepseek-xs-mtp` and `maya-deepseek-s-mtp`
+llama-swap entries on strix-halo-1; the worker starts automatically.
+Maya-S GPU inference on this candidate awaits the user's testing. Issues #120
+and #116 remain open for that feedback. Numerical/quality and resource review
+in #110/#112 also remain open.
+
+**Active owned model processes** are none. Benchmark driver session 91457 exited
+successfully; both recorded API servers and the recorded remote worker exited.
+PID/start-time and log files remain under
+`/tmp/ds4-tp2-queued-perf-xs-{single,tp}-*`. The canonical production binaries
+and the earlier review engine remain available at their recorded paths.

@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then the current state in Handoff.md §§42–43. The new rank/llama-swap launchers and staged user-test runtime are described in §43. Earlier handoff entries are dated history and may describe superseded processes, issues, binaries or pending steps.
+Read [AGENTS.md](AGENTS.md), then the current state in Handoff.md §§42–44. The queued DeepSeek candidate, measured XS speedup and user-testing handoff are in §44. Rank/llama-swap launchers are described in §43. Earlier handoff entries are dated history and may describe superseded processes, issues, binaries or pending steps.
 
 ## Current GLM and DeepSeek state
 
@@ -11,7 +11,13 @@ The user will test the new launchers through llama-swap. Read §43 and #118 for
 the staged runtime, config choices and ownership-safe stop actions. Issue #119
 installed `maya-deepseek-xs-mtp` and `maya-deepseek-s-mtp` in llama-swap on
 strix-halo-1.local. The user launches from that host and will report inference
-results.
+results. Issue #120 replaces blocking collectives with GLM's queued GPU/RDMA
+sequence and GPU router comparison. XS generation measured 23–24% above the
+same single-host build on two prompts. Both review configs select the measured
+versioned binary. Focused correctness checks passed; Maya-S inference and
+broader user workloads await the user's feedback. Do not restart the broad
+validation campaign; the user explicitly requested a few checks and then testing
+through the existing entries. No owned validation processes remain.
 Read the current-state summary at the start of Handoff.md §42, the implementation plan and phase issues #110–#116.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
 procedure is in [docs/DEEPSEEK-TP2-RUN.md](docs/DEEPSEEK-TP2-RUN.md); no production promotion

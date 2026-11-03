@@ -1282,6 +1282,8 @@ struct Model::Impl {
 #if defined(STRATA_DS4_TP2_RDMA)
     strata::net::Communicator* tp_test_comm=nullptr;
     std::size_t tp_test_limit=0;
+    std::uint32_t* tp_route_buffer=nullptr;
+    std::uint32_t* tp_route_failure=nullptr;
     std::string tp_test_failure;
     std::unique_ptr<tp2::Controller> tp_test_controller;
     bool tp_test_inside=false;
@@ -8956,6 +8958,14 @@ struct Model::Impl {
             CK(cudaSetDevice(d.id));
             CK(cudaDeviceSynchronize());
         }
+#if defined(STRATA_DS4_TP2_RDMA)
+        if (tp_test_comm) {
+            if (!tp_test_comm->CheckQueued(&err)) return tp_test_fail(err,err);
+            if (tp_route_failure && *tp_route_failure != 0)
+                return tp_test_fail("ds4 tp2: router disagreement at layer " +
+                                    std::to_string(*tp_route_failure-1),err);
+        }
+#endif
         return true;
     }
 
@@ -19639,9 +19649,13 @@ struct Model::Impl {
             }
         }
 #endif
-        const float* other=tp_test_comm->ExchangePartial(data,bytes,stream,&err);
-        if (!other) return tp_test_fail(err,err);
-        strata::net::AddRowsBroadcast(other,data,static_cast<std::uint32_t>(rows),
+        // Use the same GPU staging/wait sequence as GLM TpContext::all_reduce.
+        strata::net::Communicator::QueuedPartial queued;
+        if (!tp_test_comm->QueuePartial(bytes,&queued,&err)) return tp_test_fail(err,err);
+        strata::net::StagePartial(data,queued.send,bytes/sizeof(float),queued.arrivals,
+                                  queued.ready,queued.value,stream);
+        strata::net::WaitValue(queued.arrived,queued.value,queued.wait_ticks,queued.timed_out,stream);
+        strata::net::AddRowsBroadcast(queued.peer,data,static_cast<std::uint32_t>(rows),
                                       static_cast<std::uint32_t>(width),1,stream);
         if (cudaGetLastError()!=cudaSuccess) return tp_test_fail("ds4 tp2: reduction kernel failed",err);
         return true;
@@ -19649,25 +19663,22 @@ struct Model::Impl {
     bool tp_test_route_arrays(const void* ids, const void* weights, const Layer& l, int rows,
                               cudaStream_t stream, std::string& err) {
         const int max_rows=o.tp2_chunk_enabled ? chunk : kWin;
-        if (!tp_test_comm || !ids || !weights || rows<1 || rows>max_rows || l.k_exp<1 || l.k_exp>kPicks)
+        if (!tp_test_comm || !tp_route_buffer || !tp_route_failure || !ids || !weights ||
+            rows<1 || rows>max_rows || l.k_exp<1 || l.k_exp>kPicks)
             return tp_test_fail("ds4 tp2: invalid router geometry",err);
         const auto n=static_cast<std::size_t>(rows)*kPicks, bytes=n*sizeof(std::uint32_t);
-        if (bytes>tp_test_limit) return tp_test_fail("ds4 tp2: router exceeds negotiated limit",err);
-        std::vector<std::uint32_t> here(n), peer(n);
-        const void* arrays[2]={ids,weights};
-        for (int field=0;field<2;++field) {
-            const float* other=tp_test_comm->ExchangePartial(reinterpret_cast<const float*>(arrays[field]),bytes,stream,&err);
-            if (!other) return tp_test_fail(err,err);
-            if (cudaMemcpyAsync(here.data(),arrays[field],bytes,cudaMemcpyDeviceToHost,stream)!=cudaSuccess ||
-                cudaMemcpyAsync(peer.data(),other,bytes,cudaMemcpyDeviceToHost,stream)!=cudaSuccess ||
-                cudaStreamSynchronize(stream)!=cudaSuccess)
-                return tp_test_fail("ds4 tp2: router comparison copy failed",err);
-            for (int row=0;row<rows;++row) for (int pick=0;pick<l.k_exp;++pick) {
-                const auto i=static_cast<std::size_t>(row)*kPicks+pick;
-                if (here[i]!=peer[i]) return tp_test_fail("ds4 tp2: router disagreement at layer "+
-                    std::to_string(l.il)+" row "+std::to_string(row)+" pick "+std::to_string(pick),err);
-            }
-        }
+        if (bytes>tp_test_limit/2) return tp_test_fail("ds4 tp2: router exceeds negotiated limit",err);
+        CK(cudaMemcpyAsync(tp_route_buffer,ids,bytes,cudaMemcpyDeviceToDevice,stream));
+        CK(cudaMemcpyAsync(tp_route_buffer+n,weights,bytes,cudaMemcpyDeviceToDevice,stream));
+        strata::net::Communicator::QueuedPartial queued;
+        if (!tp_test_comm->QueuePartial(bytes*2,&queued,&err)) return tp_test_fail(err,err);
+        strata::net::StagePartial(reinterpret_cast<const float*>(tp_route_buffer),queued.send,n*2,
+                                  queued.arrivals,queued.ready,queued.value,stream);
+        strata::net::WaitValue(queued.arrived,queued.value,queued.wait_ticks,queued.timed_out,stream);
+        strata::net::CompareRows(tp_route_buffer,reinterpret_cast<const std::uint32_t*>(queued.peer),
+                                static_cast<std::uint32_t>(rows*2),kPicks,l.k_exp,
+                                static_cast<std::uint32_t>(l.il+1),tp_route_failure,stream);
+        if (cudaGetLastError()!=cudaSuccess) return tp_test_fail("ds4 tp2: router comparison launch failed",err);
         return true;
     }
     bool tp_test_routes(Dev& d, const Layer& l, int rows, cudaStream_t stream, std::string& err) {
@@ -20673,6 +20684,8 @@ bool Model::tp2_attach(strata::net::Communicator& comm, std::size_t limit, std::
     }
     if (!tp2::chunk_rows(requested,static_cast<std::uint32_t>(p_->g.dim),limit,rows,err)) return false;
     if (rows<requested) { err="ds4 tp2: requested chunk does not fit the negotiated receive window"; return false; }
+    if (!p_->dalloc(p_->devs[0],p_->tp_route_buffer,static_cast<std::size_t>(requested)*kPicks*2,err) ||
+        !p_->hmap(p_->tp_route_failure,1,err)) return false;
     p_->tp_test_comm=&comm; p_->tp_test_limit=limit;
     if (control_rank0) p_->tp_test_controller=std::make_unique<tp2::Controller>(
         comm,static_cast<std::uint64_t>(p_->o.max_context),static_cast<std::uint32_t>(p_->g.vocab),requested);

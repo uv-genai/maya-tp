@@ -1,6 +1,9 @@
 // Model-backed worker verification rollback parity. Requires a real pack + GPU.
 #include "../src/ds4/ds4_model.hpp"
 #include "../src/ds4/ds4_tp_model_worker.hpp"
+#if defined(STRATA_DS4_TP2_RDMA)
+#include "strata/net/tp_kernels.hpp"
+#endif
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -22,7 +25,36 @@ int ds4_tp_sharded_dspark_test(int argc, char** argv);
 int ds4_tp_sharded_sample_test(int argc, char** argv);
 #endif
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
+#if defined(STRATA_DS4_TP2_RDMA)
+static int compare_rows_test() {
+    std::string error;
+    hipStream_t stream=nullptr;
+    std::uint32_t *device=nullptr, *failure=nullptr;
+    CHECK(hipStreamCreate(&stream)==hipSuccess);
+    CHECK(hipMalloc(&device,32*sizeof(std::uint32_t))==hipSuccess);
+    CHECK(hipHostMalloc(&failure,sizeof(std::uint32_t),hipHostMallocMapped)==hipSuccess);
+    *failure=0;
+    std::uint32_t rows[32]={};
+    rows[16+7]=1; // Padding must not cause disagreement.
+    CHECK(hipMemcpyAsync(device,rows,sizeof(rows),hipMemcpyHostToDevice,stream)==hipSuccess);
+    strata::net::CompareRows(device,device+16,2,8,6,3,failure,stream);
+    CHECK(hipStreamSynchronize(stream)==hipSuccess && *failure==0);
+    rows[16+8+5]=1;
+    CHECK(hipMemcpyAsync(device,rows,sizeof(rows),hipMemcpyHostToDevice,stream)==hipSuccess);
+    strata::net::CompareRows(device,device+16,2,8,6,3,failure,stream);
+    CHECK(hipStreamSynchronize(stream)==hipSuccess && *failure==3);
+    strata::net::CompareRows(device,device+16,2,8,6,7,failure,stream);
+    CHECK(hipStreamSynchronize(stream)==hipSuccess && *failure==3);
+    CHECK(hipFreeHost(failure)==hipSuccess && hipFree(device)==hipSuccess);
+    CHECK(hipStreamDestroy(stream)==hipSuccess);
+    std::puts("GPU route comparison padding, mismatch and first cause passed");
+    return 0;
+}
+#endif
 int main(int argc,char** argv) {
+#if defined(STRATA_DS4_TP2_RDMA)
+    if (argc==2 && std::string(argv[1])=="--tp-compare-rows") return compare_rows_test();
+#endif
     if (argc > 1 && std::string(argv[1])=="--single-prefill-compare") return ds4_single_prefill_compare_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--rank-load") return ds4_tp_rank_load_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--dense-load") return ds4_tp_dense_load_test(argc,argv);

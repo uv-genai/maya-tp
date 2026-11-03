@@ -242,3 +242,8 @@ models:
 Use the two entries with llama-swap's normal one-model-at-a-time behavior.
 The review configs use bootstrap port 18525, leaving the established GLM
 bootstrap selection separate. The user controls loading and inference testing.
+
+The 2026-11-04 review configs select the queued-collective candidate on both
+hosts. XS measured 23–24% higher generation throughput than the same single-host
+build on two prompts at 262144 context. Maya-S inference on this candidate
+awaits user testing. [Measurements and validation scope](benchmarks/deepseek-tp2-queued-2026-11-04/README.md).

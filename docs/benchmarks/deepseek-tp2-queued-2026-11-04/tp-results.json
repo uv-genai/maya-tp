@@ -1,0 +1,480 @@
+{
+  "model": "xs",
+  "mode": "tp",
+  "engine_sha256": "a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102",
+  "context": 262144,
+  "temperature": 0,
+  "lookup": 0,
+  "runs": [
+    {
+      "name": "python",
+      "repeat": 1,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a complete Python module that parses a CSV file into a list of dictionaries, with type hints, detailed docstrings, error handling, usage examples, and a unittest suite. Explain each part."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-aeb9491796ee40b994a3492f",
+        "object": "chat.completion",
+        "created": 1793721862,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# Complete Python CSV Parser Module\n\nBelow is a complete, production-ready module with type hints, docstrings, error handling, usage examples, and a full test suite. I'll explain each part afterward.\n\n## Module: `csv_parser.py`\n\n```python\n\"\"\"\ncsv_parser.py\n=============\n\nA small, robust utility for parsing CSV files into a list of dictionaries.\n\nEach row is represented as a ``dict`` mapping column names (from the header\nrow) to string values. Empty fields are returned as empty strings.\n\nPublic API\n----------\n- ``parse_csv(path, *, delimiter=',', encoding='utf-8', skip_empty_rows=True)``\n    Parse a CSV file and return a list of dictionaries.\n- ``parse_csv_string(text, *, delimiter=',', skip_empty_rows=True)``\n    Parse CSV content from a string (useful for testing).\n- ``CSVParseError``\n    Raised when the CSV file cannot be read or is malformed.\n\nExample\n-------\n>>> from csv_parser import parse_csv\n>>> rows = parse_csv(\"data.csv\")\n>>> rows[0][\"name\"]\n'Alice'\n\"\"\"\n\nfrom __future__ import annotations\n\nimport csv\nimport io\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Optional, Union\n\n__all__ = [\"parse_csv\", \"parse_csv_string\", \"CSVParseError\"]\n\n\n# ---------------------------------------------------------------------------\n# Exceptions\n# ---------------------------------------------------------------------------\nclass CSVParseError(Exception):\n    \"\"\"Raised when a CSV file cannot be parsed.\n\n    Attributes:\n        message: Human-readable description of the failure.\n        path:    Optional path to the offending file (if applicable).\n    \"\"\"\n\n    def __init__(self, message: str, path: Optional[Union[str, Path]] = None) -> None:\n        self.message = message\n        self.path = path\n        super().__init__(message)\n\n    def __str__(self) -> str:\n        if self.path is not None:\n            return f\"{self.message} (file: {self.path})\"\n        return self.message\n\n\n# ---------------------------------------------------------------------------\n# Public functions\n# ---------------------------------------------------------------------------\ndef parse_csv(\n    path: Union[str, Path],\n    *,\n    delimiter: str = \",\",\n    encoding: str = \"utf-8\",\n    skip_empty_rows: bool = True,\n) -> List[Dict[str, str]]:\n    \"\"\"Parse a CSV file into a list of dictionaries.\n\n    Args:\n        path: Path"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 44,
+          "completion_tokens": 512,
+          "total_tokens": 556,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 44,
+          "prompt_ms": 555.1,
+          "prompt_per_token_ms": 12.616,
+          "prompt_per_second": 79.3,
+          "predicted_n": 512,
+          "predicted_ms": 12183.8,
+          "predicted_per_token_ms": 23.796,
+          "predicted_per_second": 42.0,
+          "draft_n": 416,
+          "draft_n_accepted": 345
+        }
+      },
+      "wall_s": 12.744639254000504,
+      "tiers": {
+        "tok_s": 42.02,
+        "ms_tok": 23.8,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.43,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 54.81,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 38223.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 75456.0,
+        "eg_lookup_hits": 37233.0,
+        "eg_lookup_reads": 38223.0,
+        "disk_mb": 0.098,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 158.0,
+        "draft_ms": 1519.422,
+        "verify_ms": 9892.742,
+        "drafts": 0.829,
+        "draft_acc": 345.0,
+        "draft_off": 416.0,
+        "time": 1793721875.478918
+      }
+    },
+    {
+      "name": "ebpf",
+      "repeat": 1,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-9a1e40552adf428aade18843",
+        "object": "chat.completion",
+        "created": 1793721875,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide to Using eBPF\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. It's used for networking, security, tracing, and observability.\n\nThis tutorial will guide you through eBPF from basics to practical examples.\n\n---\n\n## Part 1: Understanding eBPF Fundamentals\n\n### What is eBPF?\n\neBPF programs are:\n- **Compiled** to bytecode\n- **Verified** by the kernel for safety\n- **Executed** in a sandboxed environment\n- **Attached** to kernel events (syscalls, network packets, tracepoints, etc.)\n\n### Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| **Program** | The eBPF bytecode you write |\n| **Hook/Attachment Point** | Where the program runs (kprobe, tracepoint, etc.) |\n| **Map** | Key-value storage shared between kernel and userspace |\n| **Helper Functions** | Kernel-provided functions callable from eBPF |\n| **BTF** | BPF Type Format for portability |\n\n### eBPF Program Types\n\n- `kprobe` / `kretprobe` \u2014 kernel function entry/exit\n- `tracepoint` \u2014 kernel tracepoints\n- `socket` \u2014 network socket filters\n- `XDP` \u2014 packet processing at driver level\n- `tc` \u2014 traffic control\n- `perf_event` \u2014 performance events\n\n---\n\n## Part 2: Setting Up Your Environment\n\n### Prerequisites\n\n```bash\n# Ubuntu/Debian\nsudo apt install -y clang llvm libbpf-dev linux-tools-common \\\n    linux-tools-generic linux-headers-$(uname -r) \\\n    libelf-dev pkg-config build-essential\n\n# Fedora/RHEL\nsudo dnf install -y clang llvm libbpf-devel libbpf \\\n    kernel-devel-$(uname -r) elfutils-libelf-devel\n```\n\n### Verify Kernel Support\n\n```bash\n# Check kernel version (need 4.4+, ideally 5.4+)\nuname -r\n\n# Check BPF syscall availability\ngrep -i bpf /proc/kallsyms | head\n\n# Check BTF support (for CO"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 512,
+          "total_tokens": 531,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 403.4,
+          "prompt_per_token_ms": 21.232,
+          "prompt_per_second": 47.1,
+          "predicted_n": 512,
+          "predicted_ms": 14561.5,
+          "predicted_per_token_ms": 28.44,
+          "predicted_per_second": 35.2,
+          "draft_n": 336,
+          "draft_n_accepted": 282
+        }
+      },
+      "wall_s": 14.96924720799143,
+      "tiers": {
+        "tok_s": 35.16,
+        "ms_tok": 28.44,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.436,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 54.81,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 49551.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 103488.0,
+        "eg_lookup_hits": 53937.0,
+        "eg_lookup_reads": 49551.0,
+        "disk_mb": 0.092,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 200.0,
+        "draft_ms": 1928.664,
+        "verify_ms": 10050.254,
+        "drafts": 0.839,
+        "draft_acc": 282.0,
+        "draft_off": 336.0,
+        "time": 1793721890.4490952
+      }
+    },
+    {
+      "name": "python",
+      "repeat": 2,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a complete Python module that parses a CSV file into a list of dictionaries, with type hints, detailed docstrings, error handling, usage examples, and a unittest suite. Explain each part."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-1e1d0c8d773748668b99839c",
+        "object": "chat.completion",
+        "created": 1793721890,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# Complete Python CSV Parser Module\n\nBelow is a complete, production-ready module with type hints, docstrings, error handling, usage examples, and a full test suite. I'll explain each part afterward.\n\n## Module: `csv_parser.py`\n\n```python\n\"\"\"\ncsv_parser.py\n=============\n\nA small, robust utility for parsing CSV files into a list of dictionaries.\n\nEach row is represented as a ``dict`` mapping column names (from the header\nrow) to string values. Empty fields are returned as empty strings.\n\nPublic API\n----------\n- ``parse_csv(path, *, delimiter=',', encoding='utf-8', skip_empty_rows=True)``\n    Parse a CSV file and return a list of dictionaries.\n- ``parse_csv_string(text, *, delimiter=',', skip_empty_rows=True)``\n    Parse CSV content from a string (useful for testing).\n- ``CSVParseError``\n    Raised when the CSV file cannot be read or is malformed.\n\nExample\n-------\n>>> from csv_parser import parse_csv\n>>> rows = parse_csv(\"data.csv\")\n>>> rows[0][\"name\"]\n'Alice'\n\"\"\"\n\nfrom __future__ import annotations\n\nimport csv\nimport io\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Optional, Union\n\n__all__ = [\"parse_csv\", \"parse_csv_string\", \"CSVParseError\"]\n\n\n# ---------------------------------------------------------------------------\n# Exceptions\n# ---------------------------------------------------------------------------\nclass CSVParseError(Exception):\n    \"\"\"Raised when a CSV file cannot be parsed.\n\n    Attributes:\n        message: Human-readable description of the failure.\n        path:    Optional path to the offending file (if applicable).\n    \"\"\"\n\n    def __init__(self, message: str, path: Optional[Union[str, Path]] = None) -> None:\n        self.message = message\n        self.path = path\n        super().__init__(message)\n\n    def __str__(self) -> str:\n        if self.path is not None:\n            return f\"{self.message} (file: {self.path})\"\n        return self.message\n\n\n# ---------------------------------------------------------------------------\n# Public functions\n# ---------------------------------------------------------------------------\ndef parse_csv(\n    path: Union[str, Path],\n    *,\n    delimiter: str = \",\",\n    encoding: str = \"utf-8\",\n    skip_empty_rows: bool = True,\n) -> List[Dict[str, str]]:\n    \"\"\"Parse a CSV file into a list of dictionaries.\n\n    Args:\n        path: Path"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 44,
+          "completion_tokens": 512,
+          "total_tokens": 556,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 44,
+          "prompt_ms": 554.8,
+          "prompt_per_token_ms": 12.609,
+          "prompt_per_second": 79.3,
+          "predicted_n": 512,
+          "predicted_ms": 12504.4,
+          "predicted_per_token_ms": 24.423,
+          "predicted_per_second": 40.9,
+          "draft_n": 416,
+          "draft_n_accepted": 345
+        }
+      },
+      "wall_s": 13.065446781009086,
+      "tiers": {
+        "tok_s": 40.95,
+        "ms_tok": 24.42,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.005,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 54.81,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 49551.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 133536.0,
+        "eg_lookup_hits": 83985.0,
+        "eg_lookup_reads": 49551.0,
+        "disk_mb": 0.0,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 158.0,
+        "draft_ms": 1519.311,
+        "verify_ms": 10211.795,
+        "drafts": 0.829,
+        "draft_acc": 345.0,
+        "draft_off": 416.0,
+        "time": 1793721903.5136557
+      }
+    },
+    {
+      "name": "ebpf",
+      "repeat": 2,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-b1fda76c7a704748aaaad8c4",
+        "object": "chat.completion",
+        "created": 1793721903,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide to Using eBPF\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. It's used for networking, security, tracing, and observability.\n\nThis tutorial will guide you through eBPF from basics to practical examples.\n\n---\n\n## Part 1: Understanding eBPF Fundamentals\n\n### What is eBPF?\n\neBPF programs are:\n- **Compiled** to bytecode\n- **Verified** by the kernel for safety\n- **Executed** in a sandboxed environment\n- **Attached** to kernel events (syscalls, network packets, tracepoints, etc.)\n\n### Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| **Program** | The eBPF bytecode you write |\n| **Hook/Attachment Point** | Where the program runs (kprobe, tracepoint, etc.) |\n| **Map** | Key-value storage shared between kernel and userspace |\n| **Helper Functions** | Kernel-provided functions callable from eBPF |\n| **BTF** | BPF Type Format for portability |\n\n### eBPF Program Types\n\n- `kprobe` / `kretprobe` \u2014 kernel function entry/exit\n- `tracepoint` \u2014 kernel tracepoints\n- `socket` \u2014 network socket filters\n- `XDP` \u2014 packet processing at driver level\n- `tc` \u2014 traffic control\n- `perf_event` \u2014 performance events\n\n---\n\n## Part 2: Setting Up Your Environment\n\n### Prerequisites\n\n```bash\n# Ubuntu/Debian\nsudo apt install -y clang llvm libbpf-dev linux-tools-common \\\n    linux-tools-generic linux-headers-$(uname -r) \\\n    libelf-dev pkg-config build-essential\n\n# Fedora/RHEL\nsudo dnf install -y clang llvm libbpf-devel libbpf \\\n    kernel-devel-$(uname -r) elfutils-libelf-devel\n```\n\n### Verify Kernel Support\n\n```bash\n# Check kernel version (need 4.4+, ideally 5.4+)\nuname -r\n\n# Check BPF syscall availability\ngrep -i bpf /proc/kallsyms | head\n\n# Check BTF support (for CO"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 512,
+          "total_tokens": 531,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 403.4,
+          "prompt_per_token_ms": 21.232,
+          "prompt_per_second": 47.1,
+          "predicted_n": 512,
+          "predicted_ms": 15121.9,
+          "predicted_per_token_ms": 29.535,
+          "predicted_per_second": 33.9,
+          "draft_n": 336,
+          "draft_n_accepted": 282
+        }
+      },
+      "wall_s": 15.531101699001738,
+      "tiers": {
+        "tok_s": 33.86,
+        "ms_tok": 29.53,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.005,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 54.81,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 49551.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 161568.0,
+        "eg_lookup_hits": 112017.0,
+        "eg_lookup_reads": 49551.0,
+        "disk_mb": 0.0,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 200.0,
+        "draft_ms": 1928.721,
+        "verify_ms": 10635.113,
+        "drafts": 0.839,
+        "draft_acc": 282.0,
+        "draft_off": 336.0,
+        "time": 1793721919.0447285
+      }
+    }
+  ],
+  "engine": {
+    "model": "deepseek-v4.1-flash",
+    "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+    "max_context": 262144,
+    "images": false,
+    "version": "ds4-0.1",
+    "context": 262144,
+    "kv": "fp4",
+    "kv_resident": 262144,
+    "expert_slots": 15360,
+    "engine_kind": "ds4",
+    "cpu_experts": 0,
+    "ram_experts": 0,
+    "cpu_threads": 14,
+    "engine": "ds4-0.1",
+    "engram_layers": 2,
+    "engram_lookups": 48,
+    "lookup": 0,
+    "tp_world": 2,
+    "tp_rank": 0,
+    "tp_pair": "up",
+    "tp_prefill_chunk": 256,
+    "logprobs": 20,
+    "maya_version": "1.1.43",
+    "trained_context": 1048576,
+    "dspark": true,
+    "speculation": [
+      "DSpark"
+    ]
+  },
+  "correctness": {
+    "on": {
+      "id": "chatcmpl-535d512a59c4425da9373952",
+      "object": "chat.completion",
+      "created": 1793721835,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Complete Python CSV Parser Module\n\nBelow is a complete, production-ready module with type hints, docstrings, error handling, usage examples, and a full test suite. I'll explain each part afterward.\n\n## Module: `csv_parser.py`\n\n```python\n\"\"\"\ncsv_parser.py\n=============\n\nA small, robust utility for parsing CSV files into a list of dictionaries.\n\nEach row is represented as a ``dict`` mapping column names (from the header\nrow) to string values. Empty fields are returned as empty strings.\n\nPublic API\n----------\n- ``parse_csv(path, *, delimiter=',', encoding='utf-8', skip_empty_rows=True)``\n    Parse a CSV file and return a list of dictionaries.\n- ``parse_csv_string(text, *, delimiter=',', skip_empty_rows=True)``\n    Parse CSV content from a string (useful for testing).\n- ``CSVParseError``\n    Raised when the CSV file cannot be read or is malformed.\n\nExample\n-------\n>>> from csv_parser import parse_csv\n>>> rows = parse_csv(\"data.csv\")\n>>> rows[0][\"name\"]\n'Alice'\n\"\"\"\n\nfrom __future__ import annotations\n\nimport csv\nimport io\nfrom pathlib import Path\nfrom"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 44,
+        "completion_tokens": 256,
+        "total_tokens": 300,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 44,
+        "prompt_ms": 806.8,
+        "prompt_per_token_ms": 18.336,
+        "prompt_per_second": 54.5,
+        "predicted_n": 256,
+        "predicted_ms": 7245.0,
+        "predicted_per_token_ms": 28.301,
+        "predicted_per_second": 35.3,
+        "draft_n": 197,
+        "draft_n_accepted": 151
+      }
+    },
+    "off": {
+      "id": "chatcmpl-9e4af03b74b7481d8767b144",
+      "object": "chat.completion",
+      "created": 1793721843,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# Complete Python CSV Parser Module\n\nBelow is a complete, production-ready module with type hints, docstrings, error handling, usage examples, and a full test suite. I'll explain each part afterward.\n\n## Module: `csv_parser.py`\n\n```python\n\"\"\"\ncsv_parser.py\n=============\n\nA small, robust utility for parsing CSV files into a list of dictionaries.\n\nEach row is represented as a ``dict`` mapping column names (from the header\nrow) to string values. Empty fields are returned as empty strings.\n\nPublic API\n----------\n- ``parse_csv(path, *, delimiter=',', encoding='utf-8', skip_empty_rows=True)``\n    Parse a CSV file and return a list of dictionaries.\n- ``parse_csv_string(text, *, delimiter=',', skip_empty_rows=True)``\n    Parse CSV content from a string (useful for testing).\n- ``CSVParseError``\n    Raised when the CSV file cannot be read or is malformed.\n\nExample\n-------\n>>> from csv_parser import parse_csv\n>>> rows = parse_csv(\"data.csv\")\n>>> rows[0][\"name\"]\n'Alice'\n\"\"\"\n\nfrom __future__ import annotations\n\nimport csv\nimport io\nfrom pathlib import Path\nfrom"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 44,
+        "completion_tokens": 256,
+        "total_tokens": 300,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 44,
+        "prompt_ms": 554.8,
+        "prompt_per_token_ms": 12.609,
+        "prompt_per_second": 79.3,
+        "predicted_n": 256,
+        "predicted_ms": 10633.4,
+        "predicted_per_token_ms": 41.537,
+        "predicted_per_second": 24.1,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      }
+    }
+  }
+}

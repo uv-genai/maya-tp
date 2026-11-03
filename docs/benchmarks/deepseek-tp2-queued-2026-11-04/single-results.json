@@ -1,0 +1,400 @@
+{
+  "model": "xs",
+  "mode": "single",
+  "engine_sha256": "a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102",
+  "context": 262144,
+  "temperature": 0,
+  "lookup": 0,
+  "runs": [
+    {
+      "name": "python",
+      "repeat": 1,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a complete Python module that parses a CSV file into a list of dictionaries, with type hints, detailed docstrings, error handling, usage examples, and a unittest suite. Explain each part."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-57e7cd09c81f4138bd3e7920",
+        "object": "chat.completion",
+        "created": 1793721716,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# Complete Python CSV Parser Module\n\nBelow is a complete, production-ready module with type hints, docstrings, error handling, usage examples, and a full test suite. I'll explain each part afterward.\n\n## Module: `csv_parser.py`\n\n```python\n\"\"\"\ncsv_parser.py\n=============\n\nA robust CSV-to-dict parser with type hints, error handling, and validation.\n\nThis module provides a single public function, :func:`parse_csv`, which reads\na CSV file and returns a list of dictionaries, one per row, keyed by the\nheader row. It supports:\n\n- Custom delimiters (default: comma)\n- Custom quoting (default: double-quote)\n- Optional header row (default: first row is header)\n- Optional type coercion (int, float, str, bool)\n- Optional strict mode (raise on malformed rows)\n- Optional encoding (default: UTF-8)\n\nExample\n-------\n>>> rows = parse_csv(\"data.csv\")\n>>> rows[0][\"name\"]\n'Alice'\n\n>>> rows = parse_csv(\"data.csv\", coerce={\"age\": int, \"score\": float})\n>>> rows[0][\"age\"]\n30\n\"\"\"\n\nfrom __future__ import annotations\n\nimport csv\nimport os\nfrom typing import Any, Callable, Dict, List, Optional, Union\n\n# Type alias for a single parsed row.\nRow = Dict[str, Any]\n\n# Type alias for a coercion mapping: column name -> callable.\nCoercionMap = Dict[str, Callable[[str], Any]]\n\n\nclass CSVParseError(Exception):\n    \"\"\"Base exception raised for CSV parsing failures.\"\"\"\n\n\nclass CSVFileNotFoundError(CSVParseError):\n    \"\"\"Raised when the CSV file does not exist.\"\"\"\n\n\nclass CSVEmptyFileError(CSVParseError):\n    \"\"\"Raised when the CSV file is empty (no header row).\"\"\"\n\n\nclass CSVHeaderError(CSVParseError):\n    \"\"\"Raised when the header row is malformed (e.g., duplicate names).\"\"\"\n\n\nclass CSVRowError(CSVParseError):\n    \"\"\"Raised when a data row has the wrong number of fields (strict mode).\"\"\"\n\n\ndef parse_csv(\n    path: Union[str, os.PathLike],\n    *,\n    delimiter: str = \",\",\n    quotechar: str = '\"',\n    encoding: str = \"utf-8\",\n    has_header: bool = True,\n    coerce: Optional[CoercionMap] = None,\n    strict"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 44,
+          "completion_tokens": 512,
+          "total_tokens": 556,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 44,
+          "prompt_ms": 822.8,
+          "prompt_per_token_ms": 18.7,
+          "prompt_per_second": 53.5,
+          "predicted_n": 512,
+          "predicted_ms": 15470.5,
+          "predicted_per_token_ms": 30.216,
+          "predicted_per_second": 33.1,
+          "draft_n": 394,
+          "draft_n_accepted": 320
+        }
+      },
+      "wall_s": 16.30256201000884,
+      "tiers": {
+        "tok_s": 33.1,
+        "ms_tok": 30.22,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.646,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 109.57,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 37775.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 61536.0,
+        "eg_lookup_hits": 23761.0,
+        "eg_lookup_reads": 37775.0,
+        "disk_mb": 0.206,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 178.0,
+        "draft_ms": 1811.426,
+        "verify_ms": 12315.385,
+        "drafts": 0.812,
+        "draft_acc": 320.0,
+        "draft_off": 394.0,
+        "time": 1793721733.2034156
+      }
+    },
+    {
+      "name": "ebpf",
+      "repeat": 1,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-78f46e6397084821b1cc5c29",
+        "object": "chat.completion",
+        "created": 1793721733,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide to Using eBPF\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. It enables safe, efficient tracing, monitoring, and networking capabilities.\n\nThis tutorial will guide you through the fundamentals of eBPF and show you how to write and run your first eBPF programs.\n\n---\n\n## Prerequisites\n\nBefore starting, ensure you have:\n\n- A Linux system with kernel 4.4+ (5.x+ recommended)\n- Root access (or appropriate capabilities)\n- Basic knowledge of C programming\n- Familiarity with the command line\n\nInstall required tools:\n\n```bash\n# On Ubuntu/Debian\nsudo apt install clang llvm libbpf-dev linux-tools-generic linux-tools-$(uname -r) \\\n                 libelf-dev pkg-config build-essential\n\n# On Fedora/RHEL\nsudo dnf install clang llvm libbpf-devel bpftool libbpf-tools\n```\n\nVerify BPF support:\n\n```bash\nsudo bpftool feature probe\n```\n\n---\n\n## Understanding eBPF Architecture\n\neBPF programs have two main components:\n\n1. **Kernel-side program**: The eBPF bytecode that runs in the kernel\n2. **User-space program**: The loader/controller that attaches the program and reads results\n\nThe workflow:\n```\n[User Program] \u2192 [BPF Syscall] \u2192 [Kernel eBPF Program] \u2192 [Maps/Output]\n```\n\n---\n\n## Your First eBPF Program: Hello World\n\nLet's start with a simple program that traces `execve` syscalls.\n\n### Step 1: Write the eBPF program\n\nCreate `hello.bpf.c`:\n\n```c\n// hello.bpf.c\n#include <linux/bpf.h>\n#include <bpf/bpf_helpers.h>\n\n// Map to store counter\nstruct {\n    __uint(type, BPF_MAP_TYPE_ARRAY);\n    __uint(max_entries, 1);\n    __type(key, __u32);\n    __type(value, __u64);\n} exec_counter SEC(\".maps\");\n\n// Tracepoint handler\nSEC(\"tracepoint/syscalls/sys_enter_execve\")\nint trace_execve(void *ctx) {\n    __u32 key = 0;\n    __u64 *counter = bpf"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 512,
+          "total_tokens": 531,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 571.0,
+          "prompt_per_token_ms": 30.053,
+          "prompt_per_second": 33.3,
+          "predicted_n": 512,
+          "predicted_ms": 18294.4,
+          "predicted_per_token_ms": 35.731,
+          "predicted_per_second": 28.0,
+          "draft_n": 317,
+          "draft_n_accepted": 252
+        }
+      },
+      "wall_s": 18.874457596000866,
+      "tiers": {
+        "tok_s": 27.99,
+        "ms_tok": 35.73,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.604,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 109.57,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 49615.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 90096.0,
+        "eg_lookup_hits": 40481.0,
+        "eg_lookup_reads": 49615.0,
+        "disk_mb": 0.256,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 213.0,
+        "draft_ms": 2141.912,
+        "verify_ms": 11476.568,
+        "drafts": 0.795,
+        "draft_acc": 252.0,
+        "draft_off": 317.0,
+        "time": 1793721752.0787501
+      }
+    },
+    {
+      "name": "python",
+      "repeat": 2,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write a complete Python module that parses a CSV file into a list of dictionaries, with type hints, detailed docstrings, error handling, usage examples, and a unittest suite. Explain each part."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-20536e5af7324a5a91c48685",
+        "object": "chat.completion",
+        "created": 1793721752,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# Complete Python CSV Parser Module\n\nBelow is a complete, production-ready module with type hints, docstrings, error handling, usage examples, and a full test suite. I'll explain each part afterward.\n\n## Module: `csv_parser.py`\n\n```python\n\"\"\"\ncsv_parser.py\n=============\n\nA robust CSV-to-dict parser with type hints, error handling, and validation.\n\nThis module provides a single public function, :func:`parse_csv`, which reads\na CSV file and returns a list of dictionaries, one per row, keyed by the\nheader row. It supports:\n\n- Custom delimiters (default: comma)\n- Custom quoting (default: double-quote)\n- Optional header row (default: first row is header)\n- Optional type coercion (int, float, str, bool)\n- Optional strict mode (raise on malformed rows)\n- Optional encoding (default: UTF-8)\n\nExample\n-------\n>>> rows = parse_csv(\"data.csv\")\n>>> rows[0][\"name\"]\n'Alice'\n\n>>> rows = parse_csv(\"data.csv\", coerce={\"age\": int, \"score\": float})\n>>> rows[0][\"age\"]\n30\n\"\"\"\n\nfrom __future__ import annotations\n\nimport csv\nimport os\nfrom typing import Any, Callable, Dict, List, Optional, Union\n\n# Type alias for a single parsed row.\nRow = Dict[str, Any]\n\n# Type alias for a coercion mapping: column name -> callable.\nCoercionMap = Dict[str, Callable[[str], Any]]\n\n\nclass CSVParseError(Exception):\n    \"\"\"Base exception raised for CSV parsing failures.\"\"\"\n\n\nclass CSVFileNotFoundError(CSVParseError):\n    \"\"\"Raised when the CSV file does not exist.\"\"\"\n\n\nclass CSVEmptyFileError(CSVParseError):\n    \"\"\"Raised when the CSV file is empty (no header row).\"\"\"\n\n\nclass CSVHeaderError(CSVParseError):\n    \"\"\"Raised when the header row is malformed (e.g., duplicate names).\"\"\"\n\n\nclass CSVRowError(CSVParseError):\n    \"\"\"Raised when a data row has the wrong number of fields (strict mode).\"\"\"\n\n\ndef parse_csv(\n    path: Union[str, os.PathLike],\n    *,\n    delimiter: str = \",\",\n    quotechar: str = '\"',\n    encoding: str = \"utf-8\",\n    has_header: bool = True,\n    coerce: Optional[CoercionMap] = None,\n    strict"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 44,
+          "completion_tokens": 512,
+          "total_tokens": 556,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 44,
+          "prompt_ms": 821.4,
+          "prompt_per_token_ms": 18.668,
+          "prompt_per_second": 53.6,
+          "predicted_n": 512,
+          "predicted_ms": 15186.2,
+          "predicted_per_token_ms": 29.661,
+          "predicted_per_second": 33.7,
+          "draft_n": 394,
+          "draft_n_accepted": 320
+        }
+      },
+      "wall_s": 16.016868933002115,
+      "tiers": {
+        "tok_s": 33.71,
+        "ms_tok": 29.66,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.006,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 109.57,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 49615.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 120288.0,
+        "eg_lookup_hits": 70673.0,
+        "eg_lookup_reads": 49615.0,
+        "disk_mb": 0.0,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 178.0,
+        "draft_ms": 1810.379,
+        "verify_ms": 12051.455,
+        "drafts": 0.812,
+        "draft_acc": 320.0,
+        "draft_off": 394.0,
+        "time": 1793721768.0958357
+      }
+    },
+    {
+      "name": "ebpf",
+      "repeat": 2,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 512,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-2410561f6b3f47ff9e7b3cfb",
+        "object": "chat.completion",
+        "created": 1793721768,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide to Using eBPF\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. It enables safe, efficient tracing, monitoring, and networking capabilities.\n\nThis tutorial will guide you through the fundamentals of eBPF and show you how to write and run your first eBPF programs.\n\n---\n\n## Prerequisites\n\nBefore starting, ensure you have:\n\n- A Linux system with kernel 4.4+ (5.x+ recommended)\n- Root access (or appropriate capabilities)\n- Basic knowledge of C programming\n- Familiarity with the command line\n\nInstall required tools:\n\n```bash\n# On Ubuntu/Debian\nsudo apt install clang llvm libbpf-dev linux-tools-generic linux-tools-$(uname -r) \\\n                 libelf-dev pkg-config build-essential\n\n# On Fedora/RHEL\nsudo dnf install clang llvm libbpf-devel bpftool libbpf-tools\n```\n\nVerify BPF support:\n\n```bash\nsudo bpftool feature probe\n```\n\n---\n\n## Understanding eBPF Architecture\n\neBPF programs have two main components:\n\n1. **Kernel-side program**: The eBPF bytecode that runs in the kernel\n2. **User-space program**: The loader/controller that attaches the program and reads results\n\nThe workflow:\n```\n[User Program] \u2192 [BPF Syscall] \u2192 [Kernel eBPF Program] \u2192 [Maps/Output]\n```\n\n---\n\n## Your First eBPF Program: Hello World\n\nLet's start with a simple program that traces `execve` syscalls.\n\n### Step 1: Write the eBPF program\n\nCreate `hello.bpf.c`:\n\n```c\n// hello.bpf.c\n#include <linux/bpf.h>\n#include <bpf/bpf_helpers.h>\n\n// Map to store counter\nstruct {\n    __uint(type, BPF_MAP_TYPE_ARRAY);\n    __uint(max_entries, 1);\n    __type(key, __u32);\n    __type(value, __u64);\n} exec_counter SEC(\".maps\");\n\n// Tracepoint handler\nSEC(\"tracepoint/syscalls/sys_enter_execve\")\nint trace_execve(void *ctx) {\n    __u32 key = 0;\n    __u64 *counter = bpf"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 512,
+          "total_tokens": 531,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 588.3,
+          "prompt_per_token_ms": 30.963,
+          "prompt_per_second": 32.3,
+          "predicted_n": 512,
+          "predicted_ms": 18137.8,
+          "predicted_per_token_ms": 35.425,
+          "predicted_per_second": 28.2,
+          "draft_n": 317,
+          "draft_n_accepted": 252
+        }
+      },
+      "wall_s": 18.735841074987547,
+      "tiers": {
+        "tok_s": 28.23,
+        "ms_tok": 35.43,
+        "vram_hit": 1.0,
+        "cpu": 0.0,
+        "ram": 0.0,
+        "promo": 0.0,
+        "engram_ms": 0.007,
+        "vram_used": 15360.0,
+        "ram_used": 0.0,
+        "cpu_n": 0.0,
+        "vram_gb": 109.57,
+        "ram_gb": 0.0,
+        "disk_gb": 0.0,
+        "eg_cache_rows": 49615.0,
+        "eg_cache_cap": 1016800.0,
+        "eg_cache_row_bytes": 264.0,
+        "eg_lookup_rows": 148848.0,
+        "eg_lookup_hits": 99233.0,
+        "eg_lookup_reads": 49615.0,
+        "disk_mb": 0.0,
+        "disk": 0.0,
+        "ram_fetch": 0.0,
+        "draft_rounds": 213.0,
+        "draft_ms": 2141.37,
+        "verify_ms": 11355.769,
+        "drafts": 0.795,
+        "draft_acc": 252.0,
+        "draft_off": 317.0,
+        "time": 1793721786.8327055
+      }
+    }
+  ],
+  "engine": {
+    "model": "deepseek-v4.1-flash",
+    "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+    "max_context": 262144,
+    "images": false,
+    "version": "ds4-0.1",
+    "context": 262144,
+    "kv": "fp4",
+    "kv_resident": 262144,
+    "expert_slots": 15360,
+    "engine_kind": "ds4",
+    "cpu_experts": 0,
+    "ram_experts": 0,
+    "cpu_threads": 14,
+    "engine": "ds4-0.1",
+    "engram_layers": 2,
+    "engram_lookups": 48,
+    "lookup": 0,
+    "logprobs": 20,
+    "maya_version": "1.1.43",
+    "trained_context": 1048576,
+    "dspark": true,
+    "speculation": [
+      "DSpark"
+    ]
+  }
+}

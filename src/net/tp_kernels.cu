@@ -65,6 +65,18 @@ __global__ void AddRowsBroadcastKernel(const float* addend, float* residual, uin
     residual[(size_t) t * streams * hidden + i] += addend[(size_t) t * hidden + i % hidden];
 }
 
+__global__ void CompareRowsKernel(const uint32_t* local, const uint32_t* peer,
+                                  uint32_t rows, uint32_t stride, uint32_t active,
+                                  uint32_t tag, uint32_t* failure) {
+    const size_t index = (size_t) blockIdx.x * blockDim.x + threadIdx.x;
+    if (index >= (size_t) rows * active) return;
+    const size_t offset = (index / active) * stride + index % active;
+    if (local[offset] != peer[offset]) {
+        atomicCAS(failure, 0u, tag);
+        __threadfence_system();
+    }
+}
+
 __global__ void AddRowsBroadcastVec4Kernel(const float4* addend, float4* residual, uint32_t hidden4,
                                            uint32_t streams) {
     const uint32_t t = blockIdx.x;
@@ -119,6 +131,14 @@ void AddRowsBroadcast(const float* addend, float* residual, uint32_t rows, uint3
     }
     hipLaunchKernelGGL(AddRowsBroadcastKernel, dim3(rows, Blocks((size_t) streams * hidden)), dim3(kThreads), 0,
                        stream, addend, residual, hidden, streams);
+}
+
+void CompareRows(const uint32_t* local, const uint32_t* peer,
+                 uint32_t rows, uint32_t stride, uint32_t active,
+                 uint32_t tag, uint32_t* failure, hipStream_t stream) {
+    if (rows == 0 || active == 0) return;
+    hipLaunchKernelGGL(CompareRowsKernel, dim3(Blocks((size_t) rows * active)), dim3(kThreads), 0,
+                       stream, local, peer, rows, stride, active, tag, failure);
 }
 
 }  // namespace strata::net
