@@ -14,6 +14,11 @@ int main() {
     CHECK(bytes.size() == kControlHeaderBytes + 12 && bytes[0] == 'D' && bytes[1] == 'S' &&
           bytes[2] == '4' && bytes[3] == '2' && bytes[16] == 1 && bytes[23] == 8 &&
           bytes[24] == 0x11 && bytes[31] == 0x88);
+    std::size_t frame_bytes = 0;
+    CHECK(control_frame_size(std::span(bytes).first(kControlHeaderBytes), 100, frame_bytes, error));
+    CHECK(frame_bytes == bytes.size());
+    CHECK(!control_frame_size(std::span(bytes).first(kControlHeaderBytes - 1), 100, frame_bytes, error));
+    CHECK(!control_frame_size(std::span(bytes).first(kControlHeaderBytes), 2, frame_bytes, error));
     Control out{Command::Reset, 7, 9, {}};
     CHECK(decode_control(bytes, 100, out, error));
     CHECK(out.command == in.command && out.sequence == in.sequence && out.position == in.position && out.words == in.words);

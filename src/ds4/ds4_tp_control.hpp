@@ -56,6 +56,22 @@ inline std::uint64_t get64(std::span<const std::uint8_t> b, std::size_t off) {
     return (static_cast<std::uint64_t>(get32(b, off)) << 32) | get32(b, off+4);
 }
 
+// Called on exactly the fixed header before a transport allocates or receives
+// the body. A peer controls the length; never allocate from it unchecked.
+inline bool control_frame_size(std::span<const std::uint8_t> header, std::uint32_t max_words,
+                               std::size_t& frame_bytes, std::string& error) {
+    if (header.size() != kControlHeaderBytes || get32(header, 0) != kControlMagic ||
+        get32(header, 4) != kControlVersion) {
+        error = "ds4 tp2 control: truncated header or incompatible protocol"; return false;
+    }
+    const auto words = get32(header, 12);
+    if (max_words == 0 || max_words > kControlMaxWords || words > max_words) {
+        error = "ds4 tp2 control: invalid frame length"; return false;
+    }
+    frame_bytes = kControlHeaderBytes + static_cast<std::size_t>(words) * 4;
+    error.clear(); return true;
+}
+
 inline bool encode_control(const Control& c, std::uint32_t max_words, std::vector<std::uint8_t>& out,
                            std::string& error) {
     if (!valid_control(c, max_words, error)) return false;
@@ -69,12 +85,13 @@ inline bool encode_control(const Control& c, std::uint32_t max_words, std::vecto
 
 inline bool decode_control(std::span<const std::uint8_t> b, std::uint32_t max_words, Control& out,
                            std::string& error) {
-    if (b.size() < kControlHeaderBytes || get32(b, 0) != kControlMagic || get32(b, 4) != kControlVersion) {
+    if (b.size() < kControlHeaderBytes) {
         error = "ds4 tp2 control: truncated header or incompatible protocol"; return false;
     }
+    std::size_t expected_bytes = 0;
+    if (!control_frame_size(b.first(kControlHeaderBytes), max_words, expected_bytes, error)) return false;
     const std::uint32_t n = get32(b, 12);
-    if (max_words == 0 || max_words > kControlMaxWords || n > max_words ||
-        b.size() != kControlHeaderBytes + static_cast<std::size_t>(n) * 4) {
+    if (b.size() != expected_bytes) {
         error = "ds4 tp2 control: invalid frame length"; return false;
     }
     Control c;
