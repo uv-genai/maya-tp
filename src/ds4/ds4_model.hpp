@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
 namespace strata::net { class Communicator; }
 #endif
 namespace strata::ds4 {
@@ -171,7 +171,7 @@ public:
     Model();
     ~Model();
     bool load(const Options& o, std::string& err);
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     // Test-only, non-owning; the communicator and its active operation scope
     // must outlive all model calls. Caller must first validate both identities.
     bool tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err,

@@ -52,7 +52,7 @@
 #include "strata/kernels/sampler.hpp"
 #include "strata/platform/dedicated.hpp"
 #include "strata/platform/idle_gate.hpp"
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
 #include "ds4_tp_controller.hpp"
 #include "strata/net/communicator.hpp"
 #include "strata/net/tp_kernels.hpp"
@@ -1275,7 +1275,7 @@ struct Model::Impl {
         err="ds4 tp2: experimental rank is load-only; distributed execution is not enabled";
         return true;
     }
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     strata::net::Communicator* tp_test_comm=nullptr;
     std::size_t tp_test_limit=0;
     std::string tp_test_failure;
@@ -1285,7 +1285,7 @@ struct Model::Impl {
         std::fopen(std::getenv("DS4_TP_TEST_DUMP_ROUTES"),"wb") : nullptr;
 #endif
     bool tp_unready(std::string& err) const {
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
         if (o.tp2_rank>=0 && tp_test_comm!=nullptr) {
             if (tp_test_failure.empty()) return false;
             err=tp_test_failure; return true;
@@ -2503,7 +2503,7 @@ struct Model::Impl {
             if (host_pinned) cudaHostUnregister(m.first);
             os::anon_free(m.first, m.second);
         }
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
         if (tp_route_dump) std::fclose(tp_route_dump);
 #endif
     }
@@ -3439,7 +3439,7 @@ struct Model::Impl {
             err="ds4 tp2: rank loading requires HIP"; return false;
 #else
             bool test_drafter=false;
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
             test_drafter=o.tp2_rank==0 && o.dspark;
 #endif
             if (o.tp2_expert_budget==0 || o.reserve_mib<0 ||
@@ -3462,7 +3462,7 @@ struct Model::Impl {
         if (lt_store == nullptr) lt_store = std::getenv("DS4_LT_STORE");
         lt::set_store(lt_store != nullptr ? lt_store : (o.pack + "/lt-picks.txt").c_str());
         g.from(pk);
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
         if (o.tp2_rank>=0 && o.dspark && g.n_mtp<=0) { err="ds4 tp2: test drafter is missing"; return false; }
 #endif
         if (g.dim == 0 || g.nl == 0 || (int) g.ratios.size() < g.nl) {
@@ -4581,7 +4581,7 @@ struct Model::Impl {
         if (helper_id >= 0 && !helper_select(err)) return false;
         if (!load_experts(err)) return false;
 #if defined(STRATA_USE_HIP)
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
         if (o.tp2_rank>=0 && o.dspark)
             for (const Layer& l:L)
                 if (l.mtp && l.n_vram<l.n_exp) { err="ds4 tp2: test drafter experts do not fit"; return false; }
@@ -6909,7 +6909,7 @@ struct Model::Impl {
             // such a quant runs on one GPU, so the group's one member)
             for (Layer& l : L)
                 if (l.grp == (int) gi && l.n_cls > 1) {
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
                     if (o.tp2_rank>=0 && !l.mtp) {
                         err="ds4 tp2: mixed trunk expert layouts are unsupported"; return false;
                     }
@@ -6998,7 +6998,7 @@ struct Model::Impl {
                     if (mine > 0) mslots[mi] = mroom[mi] * mean / mine;
                 }
             double budget = *std::min_element(mslots.begin(), mslots.end());
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
             // Routed trunk shards are installed separately. Reserve the legacy
             // placement budget for rank 0's unsharded DSpark experts only.
             if (o.tp2_rank>=0) budget=0;
@@ -19563,7 +19563,7 @@ struct Model::Impl {
         return true;
     }
 
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     bool tp_test_fail(const std::string& cause, std::string& err) {
         if (tp_test_failure.empty()) tp_test_failure=cause.empty()?"ds4 tp2: test collective failed":cause;
         err=tp_test_failure; return false;
@@ -19629,7 +19629,7 @@ struct Model::Impl {
         cudaSetDevice(d.id);
         cudaStream_t s = d.st;
         const int nm = L0.nm;
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
         if (o.tp2_rank>=0 && (!tp_test_comm || (l.mtp && o.tp2_rank!=0) ||
                              (!l.mtp && (nm!=1 || !wp.async))))
             return tp_test_fail("ds4 tp2: unsupported test layer execution",err);
@@ -19759,7 +19759,7 @@ struct Model::Impl {
             if (!mv(d, {job(l.wo_b, d.oa, d.ao, T, (size_t) OG * g.o_lora, D)}, err)) return false;
         } else CK(cudaMemsetAsync(d.ao, 0, (size_t) T * D * sizeof(*d.ao), s));   // (no heads: nothing to add)
         if (nm > 1) allreduce(d.ao, T * D, ag, mi, ++d.ar_seq, d.xcnt, s);
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
         if (o.tp2_rank>=0 && !l.mtp && !tp_test_sum(d.ao,T,D,s,err)) return false;
 #endif
         if (hs) CK(cudaStreamWaitEvent(s, d.hc_done, 0));
@@ -19855,7 +19855,7 @@ struct Model::Impl {
                               na[0], na[1], lead && self_answer ? resps + slot : nullptr, d.cpu_any,
                               lane_done);
             }
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
             if (o.tp2_rank>=0 && !l.mtp && !tp_test_routes(d,l,T,s,err)) return false;
             if (!tp_test_dump_routes(d,l,p0,T,s,err)) return false;
 #endif
@@ -19954,7 +19954,7 @@ struct Model::Impl {
             if (mi == 0) st.experts += (int64_t) T * l.k_exp;
             if (mi == 0 && l.mtp) st.draft_experts += (int64_t) T * l.k_exp;
             if (nm > 1) allreduce(d.moe_out, T * D, ag, mi, ++d.ar_seq, d.xcnt, s);
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
             if (o.tp2_rank>=0 && !l.mtp && !tp_test_sum(d.moe_out,T,D,s,err)) return false;
 #endif
             if (hs) CK(cudaStreamWaitEvent(s, d.hc_done, 0));
@@ -20587,7 +20587,7 @@ struct Model::Impl {
 Model::Model() : p_(new Impl) {}
 Model::~Model() = default;
 bool Model::load(const Options& o, std::string& err) { return p_->load(o, err); }
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
 bool Model::tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err,
                             bool control_rank0) {
     if (p_->o.tp2_rank<0 || !p_->tp_rank_experts || p_->tp_test_comm || p_->devs.size()!=1 ||
@@ -20611,7 +20611,7 @@ bool Model::tp2_shutdown_test(std::string& err) {
 }
 #endif
 bool Model::step(int token, bool logits, std::string& err) {
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     if (p_->tp_test_controller && !p_->tp_test_inside) {
         if (p_->tp_unready(err)) return false;
         const bool ok=p_->tp_test_controller->run(tp2::Command::Step,static_cast<std::uint64_t>(p_->pos),
@@ -20627,7 +20627,7 @@ bool Model::step(int token, bool logits, std::string& err) {
 std::string Model::where() const { return p_->where(); }
 bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, int after) {
     Impl& p = *p_;
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     if (p.tp_test_controller && !p.tp_test_inside) {
         if (p.tp_unready(err)) return false;
         if (!tokens || n<1 || n>kWin || logits_rows<0 || logits_rows>1) {
@@ -20662,7 +20662,7 @@ bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, in
 }
 bool Model::feed_mark(const int* tokens, int n, int logits_rows, int slot, std::string& err) {
     Impl& p = *p_;
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     if (p.tp_test_controller) { err="ds4 tp2: checkpoints are not supported"; return false; }
 #endif
     if (p.tp_load_only(err)) return false;
@@ -20790,7 +20790,7 @@ bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, 
                    int& accepted, int& next, std::string& err) {
     if (p_->tp_unready(err)) return false;
     if (p_->o.tp2_rank==1) { err="ds4 tp2: only rank 0 may decide a verdict"; return false; }
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     if (p_->tp_test_controller) {
         std::vector<std::uint32_t> words; words.reserve(d.size()+1);
         words.push_back(static_cast<std::uint32_t>(y));
@@ -20852,7 +20852,7 @@ bool Model::verify_multi(int i, const std::vector<int>& d, float t, float tp, in
     return p_->verify_multi(i, d, t, tp, tk, mp, seed, counter, accepted, next, err);
 }
 void Model::reset() {
-#if defined(STRATA_DS4_TP2_TEST_RDMA)
+#if defined(STRATA_DS4_TP2_RDMA)
     if (p_->tp_test_controller) {
         std::string err;
         if (p_->tp_unready(err)) return;

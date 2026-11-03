@@ -1678,3 +1678,22 @@ down both ranks. Logs `/tmp/ds4-tp2-111-real-dspark-xs-rank0.log` and remote
 `/tmp/ds4-tp2-111-real-dspark-xs-rank1.log`. All owned test processes exited.
 The test launcher binds the checked pack to the test arguments but is not a
 production launcher; production startup is still guarded and unwired.
+
+P3 review-binary linkage in progress (uncommitted): the DeepSeek TP transport
+macro is shared between the test and isolated `maya-ds4` targets; there is
+still no rank entry point. The first build failed because CMake de-duplicated
+two `-include` switches. A grouped option corrected the generated C++ flags;
+the isolated `maya-ds4` and companion test targets built, log
+`/tmp/ds4-tp2-111-main-build2.log`. Single-host XS DSpark regression matched
+the earlier 64-token SHA-256
+`381baeb7bfea390e05fa6488507a4c43dcd5b845ffc556799aed32b44df67c89`
+and accepted 33 of 37 drafts. The owned process exited; output and log are
+`/tmp/ds4-tp2-111-single-host.tokens` and `/tmp/ds4-tp2-111-single-host.log`.
+
+P6 (#114): an uncommitted server change retains the first `TP2_DOWN` or
+poisoned-communicator cause and returns it on later requests before any new
+GEN. The first multi-request test exposed a trailing newline; after trimming
+the cause, all four `serve.test_tp2_peer_loss` tests pass, including an earlier
+pair-down cause followed by a different error. See
+`docs/validation/deepseek-tp2-control-2026-11-03/server-first-cause.md`.
+Real DeepSeek API peer-loss injection and GLM GPU regression remain open.

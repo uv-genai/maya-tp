@@ -650,6 +650,15 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
     if(STRATA_ENABLE_HIP)
       target_link_libraries(maya-ds4 PRIVATE strata_mmq)
     endif()
+    if(STRATA_ENABLE_TP2_RDMA)
+      # Compile the DeepSeek transport into the isolated review binary. Rank
+      # entry points remain guarded until configuration and startup are wired.
+      target_compile_definitions(maya-ds4 PRIVATE STRATA_DS4_TP2_RDMA)
+      target_link_libraries(maya-ds4 PRIVATE strata_net)
+      # Keep this pair grouped: the HIP compatibility shim also uses
+      # -include and CMake otherwise de-duplicates the second switch.
+      target_compile_options(maya-ds4 PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include format>")
+    endif()
     if(STRATA_BUILD_TESTS AND STRATA_ENABLE_HIP)
       # Requires an explicit real DeepSeek pack; never registered as unattended ctest.
       add_executable(ds4_tp_upload_real_test tests/ds4_tp_upload_real_test.cpp)
@@ -671,7 +680,7 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
                        tests/ds4_tp_text_rdma_test.cpp tests/ds4_tp_sharded_control_test.cpp
                        tests/ds4_tp_sharded_rollback_test.cpp tests/ds4_tp_sharded_dspark_test.cpp
                        tests/ds4_tp_sharded_sample_test.cpp)
-        target_compile_definitions(ds4_tp_verify_test PRIVATE STRATA_DS4_TP2_TEST_RDMA)
+        target_compile_definitions(ds4_tp_verify_test PRIVATE STRATA_DS4_TP2_RDMA)
         target_link_libraries(ds4_tp_verify_test PRIVATE strata_net)
       endif()
     endif()
