@@ -1415,9 +1415,11 @@ DSpark and prompt lookup have been implemented and exercised on XS and S.
 They are not yet approved for production: sampled and failure coverage,
 performance measurements, operations and final CI remain in progress. Working
 branch `feat/deepseek-tp2` (see `git log` for the latest checkpoint); no production binary
-or config has been promoted. The latest tested review engine is
+or config has been promoted. The `fed8567` review engine is
 `/tmp/maya-ds4-tp2-113-point-build/maya-ds4`, with matching worker copy
-`/tmp/ds4-tp2-113-point-engine` on strix-halo-1; their SHA-256 is
+`/tmp/ds4-tp2-final-engine` on strix-halo-1; their SHA-256 is
+`195a12a4fc390d3f7a43f1548d7618adc8f6661582818d06018ffb9fbe3fa9ae`.
+The earlier fully tested sampled-lookup build had SHA-256
 `d13f478d0702cebb35a40c99cdf0918787fa4079fa8de02cf4166a12663e203e`.
 The earlier `a34d616` long-test engine at `/tmp/maya-ds4-tp2-p1-build/maya-ds4`
 and its worker copy `/tmp/ds4-tp2-114-current-engine` have SHA-256
@@ -1425,7 +1427,13 @@ and its worker copy `/tmp/ds4-tp2-114-current-engine` have SHA-256
 The earlier benchmark build had SHA-256
 `31b2e21d529f5de3016c7ce58a3bab704f052ab5d22beea62b64829680a81fb1`.
 
-**Active owned process:** none. The larger S sampled test passed all three
+**Active owned process:** none on the GPUs. The `fed8567` XS paired smoke passed
+with 0 vs 88/100 DSpark drafts accepted/offered and identical 128-token greedy
+answers, plus 163/164 sampled lookup drafts accepted/offered; both owned ranks
+exited. Ordered host CI for `fed8567` runs in local session 70339
+(`/tmp/ds4-tp2-final-{hip,serve,tools}.log`).
+
+The larger S sampled test passed all three
 modes (10,000 plain vs 500 speculative): sampled-drafter p=0.6686, point with
 penalties p=0.9782, and lookup after stale q p=0.9369. The rebuilt XS and S
 pairs each passed all 16 forced rollback positions with matching next logits
@@ -1467,8 +1475,8 @@ parameters and counter recur. The implementation explicitly marks lookup
 proposals as point distributions and adds a paired regression that deliberately
 leaves sampled q cached. The completed long run was on checkpoint `a34d616` and
 does not include this later change. Main, HIP model and regression syntax checks
-passed. The isolated gfx1151 build `/tmp/maya-ds4-tp2-113-point-build` completed
-(log `/tmp/ds4-tp2-113-point-build.log`); engine SHA-256
+passed. The earlier isolated gfx1151 build (log `/tmp/ds4-tp2-113-point-build.log`)
+had engine SHA-256
 `d13f478d0702cebb35a40c99cdf0918787fa4079fa8de02cf4166a12663e203e`, paired
 test SHA-256 `cc1736ab4be89d97a8897f7aadb0ece8be02c250ac04872712fd94c04bae2814`.
 The new-build XS 50-trial test passed drawn, penalty and stale-q lookup modes;
@@ -1503,8 +1511,9 @@ read-only safeguard passed real GPU and paired-model tests. Raw results and
 qualifications: `docs/benchmarks/deepseek-tp2-review-2026-11-03/README.md`
 and `docs/validation/deepseek-tp2-control-2026-11-03/`.
 
-**Next:** commit the validated changes, then run final exact-head
-HIP/server/tools CI and a paired GPU smoke. Single-host and TP2 output
+**Next:** finish ordered host CI and record its result in the phase issues;
+if this handoff is committed afterward, repeat exact-head checks on the new
+commit. Single-host and TP2 output
 differences remain documented; do not claim exact cross-path equivalence or
 eliminated disk I/O. #115 (partition and rank loading) and #111 (RDMA/control
 lifecycle) are closed after their gates passed; #110, #112–#114, #116 and
