@@ -23,7 +23,16 @@ the same review executable returned partition fingerprint
 and executable SHA-256
 `59b50149213fd42c3e2e3126f6b40f410846747ed93c9c4b249d5102f56a516f`.
 Its geometry vectors match the C++ partition unit tests; this is still
-preflight evidence, not a handshake using these values.
+preflight evidence for that particular model executable.
+
+A separate two-host RDMA channel test exchanged preflight-derived S model,
+partition and test-binary fingerprints successfully. Both ranks rejected an
+XS/S mismatch and, separately, matching S packs with deliberately different
+test executable bytes. A model-backed XS DSpark run then used the preflight
+values for its handshake, accepted 41 of 106 drafts and matched the earlier
+target-only 64-token sequence. All owned test processes exited. The test
+launcher binds the preflight pack to the test's model argument; this does not
+replace production startup integration.
 
 The cache rehashes metadata but uses file identity and timestamps to detect
 subsequent source changes; it assumes a trusted local manifest and filesystem.

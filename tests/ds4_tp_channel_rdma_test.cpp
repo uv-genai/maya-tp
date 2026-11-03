@@ -1,6 +1,7 @@
 // Two-host integration: control data arriving while RDMA waits is not EOF.
 #include "../src/ds4/ds4_tp_channel.hpp"
 #include "../src/ds4/ds4_tp_worker.hpp"
+#include "ds4_tp_test_identity.hpp"
 #include "strata/net/verbs.hpp"
 #include <hip/hip_runtime.h>
 #include <chrono>
@@ -12,11 +13,14 @@ using namespace strata::ds4::tp2;
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "line %d: %s; %s\n", __LINE__, #x, error.c_str()); return 1; } } while (0)
 int main(int argc, char** argv) {
     std::string error;
-    if (argc != 5 && argc != 6) { std::fprintf(stderr, "usage: rank bootstrap-host port rdma-device [peer-loss|control-eof|worker]\n"); return 2; }
+    if (argc != 5 && argc != 6) { std::fprintf(stderr, "usage: rank bootstrap-host port rdma-device [peer-loss|control-eof|worker|identity|identity-reject|identity-reject-build]\n"); return 2; }
     const bool peer_loss = argc == 6 && std::string(argv[5]) == "peer-loss";
     const bool control_eof = argc == 6 && std::string(argv[5]) == "control-eof";
     const bool worker_mode = argc == 6 && std::string(argv[5]) == "worker";
-    if (argc == 6 && !peer_loss && !control_eof && !worker_mode) return 2;
+    const bool identity_mode = argc == 6 && std::string(argv[5]) == "identity";
+    const bool identity_reject = argc == 6 && std::string(argv[5]) == "identity-reject";
+    const bool build_reject = argc == 6 && std::string(argv[5]) == "identity-reject-build";
+    if (argc == 6 && !peer_loss && !control_eof && !worker_mode && !identity_mode && !identity_reject && !build_reject) return 2;
     strata::net::IbrverbsConfig cfg;
     cfg.rank = static_cast<std::uint32_t>(std::atoi(argv[1]));
     cfg.bootstrap_host = argv[2]; cfg.bootstrap_port = static_cast<std::uint16_t>(std::atoi(argv[3]));
@@ -25,10 +29,20 @@ int main(int argc, char** argv) {
     Identity me; me.protocol=1; me.world=2; me.rank=cfg.rank; me.hidden=5120; me.layers=40;
     me.experts=384; me.expert_width=2304; me.max_context=262144;
     me.max_partial_bytes=comm->MaxPartialBytes();
-    me.model_digest[0]=1; me.partition_digest[0]=2; me.build_digest[0]=3;
+    CHECK(ds4_tp_test_identity(me,error));
     Identity peer; std::uint64_t limit=0;
-    CHECK(exchange_identity(*comm, me, peer, limit, error));
+    const bool agreed=exchange_identity(*comm, me, peer, limit, error);
+    if (identity_reject) {
+        CHECK(!agreed && error.find("mismatched model identity")!=std::string::npos);
+        std::puts("DeepSeek TP2 mismatched preflight identities rejected"); return 0;
+    }
+    if (build_reject) {
+        CHECK(!agreed && error.find("mismatched build identity")!=std::string::npos);
+        std::puts("DeepSeek TP2 mismatched executable identities rejected"); return 0;
+    }
+    CHECK(agreed);
     CHECK(peer.rank == 1u - cfg.rank && limit > 0);
+    if (identity_mode) { std::puts("DeepSeek TP2 preflight identities agreed"); return 0; }
     if ((peer_loss && cfg.rank==1) || (control_eof && cfg.rank==0)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         std::printf("rank %u: intentionally closing owned test peer\n",cfg.rank);

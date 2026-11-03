@@ -5,6 +5,7 @@
 #include "../src/ds4/ds4_tp_model_worker.hpp"
 #include "../src/ds4/ds4_tp_worker.hpp"
 #include "strata/net/verbs.hpp"
+#include "ds4_tp_test_identity.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -35,7 +36,7 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
     auto comm=strata::net::CreateIbrverbsCommunicator(cfg,&error); CHECK(comm);
     Identity id; id.protocol=1; id.world=2; id.rank=cfg.rank; id.hidden=5120; id.layers=40; id.experts=384;
     id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
-    id.model_digest[0]=1; id.partition_digest[0]=2; id.build_digest[0]=3;
+    CHECK(ds4_tp_test_identity(id,error));
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
     CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error,rank==0));
     if (rank==1) {

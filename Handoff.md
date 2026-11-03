@@ -1668,3 +1668,13 @@ are `/tmp/ds4-tp2-113-controller-s-rank0.log` and remote
 production. The preflight helper now computes model, partition and binary
 digests and returned matching S values independently on the two hosts. Real
 startup and handshake integration remain open.
+
+P3 actual-identity handshake test (uncommitted): both hosts prepared and
+exchanged matching S content/partition/binary fingerprints, then rejected an
+XS/S model mismatch and a separate executable mismatch on both sides before
+model collectives. A full XS DSpark model run used the real preflight values,
+accepted 41 of 106 drafts, matched its target-only 64-token sequence and shut
+down both ranks. Logs `/tmp/ds4-tp2-111-real-dspark-xs-rank0.log` and remote
+`/tmp/ds4-tp2-111-real-dspark-xs-rank1.log`. All owned test processes exited.
+The test launcher binds the checked pack to the test arguments but is not a
+production launcher; production startup is still guarded and unwired.

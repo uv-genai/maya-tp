@@ -11,6 +11,14 @@ int main() {
     a.model_digest[0] = 1; a.partition_digest[0] = 2; a.build_digest[0] = 3;
     Identity b = a; b.rank = 1; b.max_partial_bytes = 524288;
     std::uint64_t limit = 0; std::string error;
+    std::array<std::uint8_t,32> digest{};
+    CHECK(parse_digest("0c4933e6b70f53f7eff163a4053f8970fce470cacc4065983ebe28bd507c57af",digest,error));
+    CHECK(digest[0]==0x0c && digest[1]==0x49 && digest[31]==0xaf);
+    const auto saved=digest;
+    for (const std::string& invalid : {std::string(64,'0'), std::string(63,'1'), std::string(65,'1'),
+                                      std::string(63,'1')+"A", std::string(63,'1')+"g"}) {
+        CHECK(!parse_digest(invalid,digest,error) && digest==saved && !error.empty());
+    }
     auto wire = encode_identity(b);
     CHECK(wire.size() == kIdentityBytes && wire[0] == 'D' && wire[1] == 'S' && wire[2] == 'I' && wire[3] == 'D');
     Identity decoded;

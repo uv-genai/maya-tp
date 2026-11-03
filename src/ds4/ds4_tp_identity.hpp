@@ -8,6 +8,7 @@
 #include <array>
 #include <cstdint>
 #include <string>
+#include <string_view>
 
 namespace strata::ds4::tp2 {
 
@@ -53,6 +54,25 @@ inline bool decode_identity(std::span<const std::uint8_t> b, Identity& out, std:
 
 inline bool nonzero(const std::array<std::uint8_t, 32>& digest) {
     return std::any_of(digest.begin(), digest.end(), [](auto b) { return b != 0; });
+}
+
+// Parse the lowercase SHA-256 emitted by the preflight helper. Do not accept
+// partial values or change the caller's digest on malformed input.
+inline bool parse_digest(std::string_view text, std::array<std::uint8_t, 32>& out, std::string& error) {
+    const auto nibble = [](char c) -> int {
+        if (c >= '0' && c <= '9') return c - '0';
+        if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+        return -1;
+    };
+    if (text.size() != 64) { error = "ds4 tp2: invalid SHA-256 identity"; return false; }
+    std::array<std::uint8_t, 32> parsed{};
+    for (std::size_t i = 0; i < parsed.size(); ++i) {
+        const int hi = nibble(text[i * 2]), lo = nibble(text[i * 2 + 1]);
+        if (hi < 0 || lo < 0) { error = "ds4 tp2: invalid SHA-256 identity"; return false; }
+        parsed[i] = static_cast<std::uint8_t>((hi << 4) | lo);
+    }
+    if (!nonzero(parsed)) { error = "ds4 tp2: zero SHA-256 identity"; return false; }
+    out = parsed; error.clear(); return true;
 }
 
 // Both peers must compute this before model collectives. Return the smaller
