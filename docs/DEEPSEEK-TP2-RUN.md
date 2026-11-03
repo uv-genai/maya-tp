@@ -105,3 +105,71 @@ The resident expert split does not imply that Engram and all model I/O have
 been eliminated. See the [validation evidence](validation/deepseek-tp2-control-2026-11-03/)
 and [implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md) for current
 gates and limitations.
+
+## Promotion and rollback
+
+The candidate remains experimental while the numerical review in #110 and the
+remaining validation in #116 are open. The user should review and test it
+before deciding whether to promote it. The steps below are a procedure for that
+decision; they do not change the active setup by themselves.
+
+Before a change, record the exact commands and environment used to start both
+previous ranks, including their binary paths and hashes, local pack and manifest
+paths, context, RDMA device, bootstrap port and feature settings. Preserve the
+previous server config at a separate path and keep the previous executables and
+packs available on both hosts. Check that the two previous ranks' selections
+match. For a single-host DeepSeek setup, preserve its original server config,
+executable and launch command instead. GLM has separate executables and configs.
+
+After the user accepts the candidate, install a **versioned copy** on each host,
+using a directory dedicated to locally managed releases. This example refuses to
+reuse a filename containing different bytes. Set `TP2_ENGINE` independently to
+the reviewed local executable on each host, and choose the same release directory
+convention; the directory itself may be different on the two hosts.
+
+```sh
+TP2_RELEASE_DIR=/absolute/path/to/deepseek-releases
+stage_tp2_release() {
+  TP2_SHA=$(sha256sum -- "$TP2_ENGINE") || return 1
+  TP2_SHA=${TP2_SHA%% *}
+  mkdir -p -- "$TP2_RELEASE_DIR" || return 1
+  TP2_VERSIONED_ENGINE="$TP2_RELEASE_DIR/maya-ds4-$TP2_SHA"
+  if test -L "$TP2_VERSIONED_ENGINE"; then
+    printf '%s\n' 'Release path is a symlink; stop.' >&2
+    return 1
+  fi
+  if test -e "$TP2_VERSIONED_ENGINE"; then
+    TP2_EXISTING_SHA=$(sha256sum -- "$TP2_VERSIONED_ENGINE") || return 1
+    test "${TP2_EXISTING_SHA%% *}" = "$TP2_SHA" || {
+      printf '%s\n' 'Existing release file has the wrong hash; stop.' >&2
+      return 1
+    }
+  else
+    install -m 0755 -- "$TP2_ENGINE" "$TP2_VERSIONED_ENGINE" || return 1
+  fi
+  TP2_INSTALLED_SHA=$(sha256sum -- "$TP2_VERSIONED_ENGINE") || return 1
+  test "${TP2_INSTALLED_SHA%% *}" = "$TP2_SHA" || {
+    printf '%s\n' 'Installed release hash does not match; stop.' >&2
+    return 1
+  }
+  printf 'Release SHA-256: %s\nBinary: %s\n' "$TP2_SHA" "$TP2_VERSIONED_ENGINE"
+}
+stage_tp2_release
+```
+
+Compare the printed SHA-256 on both hosts with the reviewed build's hash. Set
+`TP2_ENGINE` to the versioned path on **each** host, and generate a **new**
+server config using the earlier instructions, retaining the previous config
+unchanged. Record the new worker command and config path with the release hash.
+Both ranks must use the same pack contents, context and feature selections;
+local paths and RDMA device names can differ. The user then stops their old
+server and worker in their usual controlled manner and starts the new worker,
+followed by the server, as shown above. Verify `/health` reports the peer up,
+the expected chunk setting and the selected model, then send a test request.
+
+To roll back, the user stops the new server first and then its worker. Start the
+previous configuration using the recorded commands, original binary paths and
+matching rank settings; for a prior single-host setup, start its original
+server command and config. Verify health and a test request. Do not mix a new
+rank with an old rank or reuse a poisoned pair. Keep the versioned candidate and
+its config separate until the user has finished comparing or troubleshooting.
