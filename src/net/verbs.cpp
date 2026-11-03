@@ -727,7 +727,11 @@ public:
         continue;
       }
       if (n < 0 && errno == EINTR) continue;
-      if (n <= 0) {
+      if (n == 0) {
+        SetError(error, "verbs peer closed the bootstrap connection");
+        return false;
+      }
+      if (n < 0) {
         SetError(error, SystemError("control recv"));
         return false;
       }
