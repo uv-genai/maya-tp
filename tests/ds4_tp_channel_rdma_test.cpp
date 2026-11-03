@@ -1,5 +1,6 @@
 // Two-host integration: control data arriving while RDMA waits is not EOF.
 #include "../src/ds4/ds4_tp_channel.hpp"
+#include "../src/ds4/ds4_tp_worker.hpp"
 #include "strata/net/verbs.hpp"
 #include <hip/hip_runtime.h>
 #include <chrono>
@@ -11,9 +12,10 @@ using namespace strata::ds4::tp2;
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "line %d: %s; %s\n", __LINE__, #x, error.c_str()); return 1; } } while (0)
 int main(int argc, char** argv) {
     std::string error;
-    if (argc != 5 && argc != 6) { std::fprintf(stderr, "usage: rank bootstrap-host port rdma-device [peer-loss]\n"); return 2; }
+    if (argc != 5 && argc != 6) { std::fprintf(stderr, "usage: rank bootstrap-host port rdma-device [peer-loss|worker]\n"); return 2; }
     const bool peer_loss = argc == 6 && std::string(argv[5]) == "peer-loss";
-    if (argc == 6 && !peer_loss) return 2;
+    const bool worker_mode = argc == 6 && std::string(argv[5]) == "worker";
+    if (argc == 6 && !peer_loss && !worker_mode) return 2;
     strata::net::IbrverbsConfig cfg;
     cfg.rank = static_cast<std::uint32_t>(std::atoi(argv[1]));
     cfg.bootstrap_host = argv[2]; cfg.bootstrap_port = static_cast<std::uint16_t>(std::atoi(argv[3]));
@@ -36,6 +38,39 @@ int main(int argc, char** argv) {
     CHECK(hipMalloc(&device, sizeof(float))==hipSuccess);
     float local=static_cast<float>(cfg.rank + 1);
     CHECK(hipMemcpy(device,&local,sizeof(float),hipMemcpyHostToDevice)==hipSuccess);
+    if (worker_mode) {
+        if (cfg.rank == 1) {
+            Worker worker(*comm, 32, 100, 16);
+            auto handler = [&](const Control& c, std::string& e) {
+                if (c.command == Command::Shutdown) return true;
+                if (c.command != Command::Step) { e="unexpected worker command"; return false; }
+                const float* p=comm->ExchangePartial(device,sizeof(float),stream,&e);
+                if (!p) return false;
+                float v=0;
+                if (hipMemcpyAsync(&v,p,sizeof(float),hipMemcpyDeviceToHost,stream)!=hipSuccess ||
+                    hipStreamSynchronize(stream)!=hipSuccess || v!=1.0f) { e="worker partial mismatch"; return false; }
+                return true;
+            };
+            CHECK(worker.run_one(handler,error) && worker.state().position()==1);
+            CHECK(worker.run_one(handler,error) && worker.state().stopped());
+            CHECK(send_message(*comm, Control{Command::Verdict,3,1,{0,43}},16,error));
+        } else {
+            CHECK(send_message(*comm, Control{Command::Step,1,0,{42}},16,error));
+            CHECK(comm->BeginOperation(1,&error));
+            const float* p=comm->ExchangePartial(device,sizeof(float),stream,&error); CHECK(p);
+            float v=0;
+            CHECK(hipMemcpyAsync(&v,p,sizeof(float),hipMemcpyDeviceToHost,stream)==hipSuccess);
+            CHECK(hipStreamSynchronize(stream)==hipSuccess && v==2.0f);
+            CHECK(comm->CheckQueued(&error) && comm->EndOperation(1,&error));
+            CHECK(send_message(*comm, Control{Command::Shutdown,2,1,{}},16,error));
+            CHECK(comm->BeginOperation(2,&error) && comm->CheckQueued(&error) && comm->EndOperation(2,&error));
+            Control ack; CHECK(receive_message(*comm,16,ack,error));
+            CHECK(ack.command==Command::Verdict && ack.sequence==3 && ack.words==std::vector<std::uint32_t>({0,43}));
+        }
+        CHECK(hipFree(device)==hipSuccess && hipStreamDestroy(stream)==hipSuccess);
+        std::printf("DeepSeek TP2 worker/RDMA dispatch passed, rank %u\n", cfg.rank);
+        return 0;
+    }
     CHECK(comm->BeginOperation(1,&error));
     if (cfg.rank==0 && !peer_loss) {
         CHECK(send_message(*comm, Control{Command::Step, 1, 0, {42}}, 16, error));

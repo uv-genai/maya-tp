@@ -17,6 +17,9 @@ for the collective. Both ranks complete the collective and rank 1 reads the queu
 * Socketpair tests exercise non-consuming peek, suppression of a readable-data busy loop, clean
   half-close, and (where `POLLRDHUP` is available) half-close with unread data. The Python
   `serve.test_tp2_peer_loss` regression passed all three tests.
+* The test's `worker` mode exercised a typed step, an actual scoped two-rank GPU partial exchange,
+  transactional worker position, shutdown and acknowledgement over the real RDMA communicator.
+  Both ranks passed (`worker-rank*.txt`). The callback is synthetic, not a DeepSeek model layer.
 
 This validates the transport/control race and peer-loss behavior, not DeepSeek distributed inference
 or the full GLM TP2/MTP model. The latter still needs isolated paired model validation before merge.
