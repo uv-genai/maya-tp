@@ -1421,6 +1421,9 @@ bootstrap poison bug was reproduced with the old transport and fixed in real pai
 real peer loss still retains the sticky original cause. See
 `docs/validation/deepseek-tp2-control-2026-11-03/`. These changes are not a substitute for full
 GLM model regression or DeepSeek distributed execution and DSpark validation.
+`ecbe2e6` adds a tested logical worker control/verify state machine; `91e6c54` adds a checked
+host expert-slice packer. `279a04d` adds a real-pack byte-reconstruction test, which passed for
+XS experts on layers 0 and 1 on strix-halo-1. None of these establish GPU computation parity.
 
 An owned rsync started to copy Maya-XS, shared Engram, DSpark and vision into the previously absent
 `/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/` on strix-halo-1. Local shell
@@ -1444,5 +1447,13 @@ model transfer is active. After it completed, an isolated XS server (PIDs 176926
 nine prompt samples and was stopped. Results are in `xs-single-reference.json` in the benchmark
 directory. An isolated Maya-S reference server was then started as PID 177990, with engine PID
 177992 and process group 177990, on local port 18701; config `/tmp/ds4-p1-s-112.json`, server log
-`/tmp/ds4-p1-s-server-112.log`. These are owned test processes; check their current PID/start time
-before stopping, and stop server before engine. User-owned llama-swap daemons remain untouched.
+`/tmp/ds4-p1-s-server-112.log`. Those owned test processes were stopped server first after the run.
+User-owned llama-swap daemons remain untouched.
+Maya-S reference harness was exec session 29729, log `/tmp/ds4-p1-s-bench-112.log`; it completed
+nine samples and the owned S server/engine were subsequently stopped. Its JSON is in the same
+benchmark directory. An isolated
+remote source/build for the uncommitted `ds4_model.cu` two-way partition integration is at
+`/tmp/ds4-tp2-review-115-{src,build}` on strix-halo-1; build session 64518 and log
+`/tmp/ds4-tp2-review-115-build.log`. Its input `ds4_model.cu` SHA256 is
+`8d05ce349b8a444242d8e428d2c87b0d6bd2470ba1f004a89d7815965bcca034`. Do not claim this change
+compiled or passed GPU tests until the build and validation complete.

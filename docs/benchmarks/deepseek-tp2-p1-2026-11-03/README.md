@@ -55,3 +55,10 @@ prose 26.0/29.2/30.0 and HTML 42.8/46.9/47.3. Python and HTML answer hashes matc
 prose had two distinct hashes. These are warm-up/short-prompt samples, not a cold-load study,
 long-prefill result or bit-exact determinism guarantee. The owned server and engine were stopped
 after the run, without touching user-owned services.
+
+The same nine-prompt harness then ran on Maya-S with the same context, sampling, DSpark and
+profile-readonly settings. Decode rates in tokens/s were Python 5.6/6.0/7.7, prose 2.6/5.3/7.3 and
+HTML 3.0/5.3/7.2. Per-request process read counters ranged from ~128 to ~479 MB/token and the
+rates rose as the cache warmed. These counters cover all process storage reads, not only experts.
+The prompt outputs were not fully bit-stable across repeats. Raw data: `s-single-reference.json`.
+The owned S server and engine were stopped after the run.
