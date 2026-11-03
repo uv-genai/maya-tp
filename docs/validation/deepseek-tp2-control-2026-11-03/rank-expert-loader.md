@@ -33,3 +33,12 @@ processes exited. The second host's S pack was still being copied.
 The XS and S expert totals agree with the earlier logical estimates, but do not
 establish complete rank fit or inferencing. An isolated single-host XS DSpark
 verification regression also passed after the loader was added.
+
+The S transfer to the previously absent directory on strix-halo-1 subsequently
+completed without overwriting existing files. SHA-256 hashes matched the source
+host for 16 files: the six indexed GGUF shards, shared DSpark and vision files,
+and pack/tokenizer metadata. See `maya-s-sha256.txt`. The isolated `maya-ds4
+--pack-info` also reported every indexed file present and long enough, supported
+tensor types, and three drafter blocks. It reports 161.28 GB of Engram tables in
+the model files: having all expert shards resident does not by itself mean the
+model avoids disk reads. Paired S inference remains to be tested.
