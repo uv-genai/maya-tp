@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 int ds4_tp_rank_load_test(int argc, char** argv);
+int ds4_tp_dense_load_test(int argc, char** argv);
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
 int ds4_tp_pair_smoke(int argc, char** argv);
 int ds4_tp_expert_rdma_test(int argc, char** argv);
@@ -14,6 +15,7 @@ int ds4_tp_expert_rdma_test(int argc, char** argv);
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
 int main(int argc,char** argv) {
     if (argc > 1 && std::string(argv[1])=="--rank-load") return ds4_tp_rank_load_test(argc,argv);
+    if (argc > 1 && std::string(argv[1])=="--dense-load") return ds4_tp_dense_load_test(argc,argv);
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
     if (argc > 1 && std::string(argv[1])=="--rdma") return ds4_tp_pair_smoke(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--rdma-expert") return ds4_tp_expert_rdma_test(argc,argv);

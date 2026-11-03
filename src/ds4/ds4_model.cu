@@ -41,6 +41,7 @@
 #include "ds4_tp_partition.hpp"
 #if defined(STRATA_USE_HIP)
 #include "ds4_tp_expert_pool.cuh"
+#include "ds4_tp_dense_loader.hpp"
 #include "ds4_tp_rank_loader.hpp"
 #endif
 #include "ds4_vision.cuh"
@@ -664,6 +665,91 @@ std::size_t RankExpertLoader::staging_bytes() const { return p_->pool.ready()?p_
 const RankExpertEntry* RankExpertLoader::entry(std::size_t i) const {
     return p_->pool.ready() && i<p_->entries.size() ? &p_->entries[i] : nullptr;
 }
+
+struct RankDenseLoader::Impl {
+    Pack pack;
+    RankDenseEntry entry;
+    int device=-1;
+    void* memory=nullptr;
+    bool attempted=false, ready=false;
+    ~Impl() {
+        if (memory!=nullptr) { (void) hipSetDevice(device); (void) hipFree(memory); }
+    }
+};
+
+RankDenseLoader::RankDenseLoader() : p_(new Impl) {}
+RankDenseLoader::~RankDenseLoader() = default;
+
+bool RankDenseLoader::load(const std::string& path, const std::string& name, int device, int rank,
+                           DenseAxis axis, std::size_t budget, std::string& error) {
+    Impl& p=*p_;
+    if (p.attempted) { error="ds4 tp2 dense loader: loader already used"; return false; }
+    p.attempted=true;
+    if (path.empty() || name.empty() || device<0 || rank<0 || rank>1 || budget==0 ||
+        (axis!=DenseAxis::Whole && axis!=DenseAxis::Output && axis!=DenseAxis::Input)) {
+        error="ds4 tp2 dense loader: invalid request"; return false;
+    }
+    if (!p.pack.load(path,error)) return false;
+    const Tensor* t=p.pack.get(name);
+    if (!p.pack.gguf || t==nullptr || t->shape.size()!=2 || t->shape[0]<=0 || t->shape[1]<=0 ||
+        t->shape[0]>INT_MAX || t->shape[1]>INT_MAX || t->file<0 ||
+        static_cast<std::size_t>(t->file)>=p.pack.maps.size()) {
+        error="ds4 tp2 dense loader: missing or invalid matrix "+name; return false;
+    }
+    RankDenseEntry e;
+    e.full_n=static_cast<int>(t->shape[0]); e.full_k=static_cast<int>(t->shape[1]);
+    int block=1, block_bytes=2;
+    if (t->dtype=="Q8_0") {
+        e.encoding=DenseEncoding::Q8_0; block=32; block_bytes=gg::kQ8Bytes;
+    } else if (t->dtype!="BF16") {
+        e.gg_type=-1;
+        for (int ty : {10,11,12,13,14,16,17,18,19,20,21,22,23,29})
+            if (t->dtype==gg::type_name(ty)) { e.gg_type=ty; break; }
+        if (e.gg_type<0 || (block=gg::iq::block_values(e.gg_type))<=0 ||
+            (block_bytes=gg::iq::block_bytes(e.gg_type))<=0) {
+            error="ds4 tp2 dense loader: unsupported matrix type "+t->dtype; return false;
+        }
+        e.encoding=DenseEncoding::Ggml;
+    }
+    if (e.full_k%block!=0 || (axis==DenseAxis::Output && e.full_n%2!=0) ||
+        (axis==DenseAxis::Input && (e.full_k%2!=0 || (e.full_k/2)%block!=0))) {
+        error="ds4 tp2 dense loader: matrix dimensions do not split in complete blocks"; return false;
+    }
+    e.n=axis==DenseAxis::Output ? e.full_n/2 : e.full_n;
+    e.k=axis==DenseAxis::Input ? e.full_k/2 : e.full_k;
+    e.row_begin=axis==DenseAxis::Output ? rank*e.n : 0;
+    e.column_begin=axis==DenseAxis::Input ? rank*e.k : 0;
+    const std::size_t full_row=static_cast<std::size_t>(e.full_k/block)*block_bytes;
+    e.row_bytes=static_cast<std::size_t>(e.k/block)*block_bytes;
+    const auto max=std::numeric_limits<std::size_t>::max();
+    if (!full_row || !e.row_bytes || static_cast<std::size_t>(e.full_n)>max/full_row ||
+        static_cast<std::size_t>(e.n)>max/e.row_bytes || e.row_bytes>INT_MAX) {
+        error="ds4 tp2 dense loader: matrix size overflows"; return false;
+    }
+    e.bytes=static_cast<std::size_t>(e.n)*e.row_bytes;
+    const auto& mapping=p.pack.maps[static_cast<std::size_t>(t->file)];
+    if (t->bytes!=static_cast<std::size_t>(e.full_n)*full_row || t->off>mapping.second ||
+        t->bytes>mapping.second-t->off || e.bytes>budget) {
+        error="ds4 tp2 dense loader: matrix file bounds or rank budget invalid"; return false;
+    }
+    const std::size_t col_offset=static_cast<std::size_t>(e.column_begin/block)*block_bytes;
+    const auto* src=mapping.first+static_cast<std::size_t>(t->off);
+    std::vector<std::uint8_t> stage(e.bytes);
+    for (int r=0;r<e.n;++r)
+        std::memcpy(stage.data()+static_cast<std::size_t>(r)*e.row_bytes,
+                    src+static_cast<std::size_t>(e.row_begin+r)*full_row+col_offset,e.row_bytes);
+    p.device=device;
+    hipError_t st=hipSetDevice(device);
+    if (st==hipSuccess) st=hipMalloc(&p.memory,e.bytes);
+    if (st==hipSuccess) st=hipMemcpy(p.memory,stage.data(),e.bytes,hipMemcpyHostToDevice);
+    if (st!=hipSuccess) {
+        error=std::string("ds4 tp2 dense loader: ")+hipGetErrorString(st); return false;
+    }
+    e.device=static_cast<const std::uint8_t*>(p.memory); p.entry=e; p.ready=true;
+    error.clear(); return true;
+}
+
+const RankDenseEntry* RankDenseLoader::entry() const { return p_->ready?&p_->entry:nullptr; }
 } // namespace tp2
 #endif
 namespace {

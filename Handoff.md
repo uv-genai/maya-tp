@@ -1493,6 +1493,11 @@ device layout; real XS/S expert-byte checks and synthetic quantized arithmetic p
 expert pool was also checked with sampled XS/S slices. Neither component is connected to the model
 loader; the checks do not establish full rank allocation or distributed inference.
 
+A pack-backed dense loader also validates and uploads rank-local input or output matrix slices,
+or a whole rank-owned matrix. XS Q6_K, S Q8_0 and BF16 byte checks and invalid-metadata checks
+passed on gfx1151; the existing XS DSpark regression passed. It is not connected to the model
+engine. See `docs/validation/deepseek-tp2-control-2026-11-03/dense-loader.md`.
+
 The Maya-S directory was absent on strix-halo-1. An owned rsync is copying it into that new
 directory for future paired tests, using `--ignore-existing --partial-dir=.rsync-partial` so it
 does not overwrite existing files. Local parent PID 201366, rsync PID 201384 (start 2026-11-03
