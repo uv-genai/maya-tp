@@ -1,0 +1,76 @@
+// Model-backed worker verification rollback parity. Requires a real pack + GPU.
+#include "../src/ds4/ds4_model.hpp"
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <string>
+#include <vector>
+#define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
+int main(int argc,char** argv) {
+    if(argc!=3 || (std::string(argv[2])!="on" && std::string(argv[2])!="none" && std::string(argv[2])!="off")) {
+        std::fprintf(stderr,"usage: pack-dir on|none|off (none reserves worker rollback buffers; off disables all speculation)\n"); return 2;
+    }
+    std::string error;
+    strata::ds4::Options o; o.pack=argv[1]; o.max_context=32768; o.gpus={0}; o.reserve_mib=1024;
+    o.tp=1; o.threads=true; o.vision=false; o.profile_readonly=true; o.profile=o.pack+"/expert-profile.bin";
+    o.prefill_chunk=0; // Compare the same window path as speculative verification.
+    o.dspark=std::string(argv[2])=="on";
+    o.tp_worker_verify=std::string(argv[2])=="none";
+    strata::ds4::Model m; CHECK(m.load(o,error));
+    const int prompt[]={5,6,7}, window[]={8,9,10}, probe=11;
+    CHECK(!m.tp_verify_commit(0,error));
+    CHECK(!m.tp_verify_begin(window,1,error));
+    if (!o.dspark && !o.tp_worker_verify) {
+        CHECK(!m.tp_verify_begin(window,3,error));
+        CHECK(error.find("rollback buffers")!=std::string::npos);
+        int accepted=-1, next=-1;
+        CHECK(!m.verify(window[0],{window[1]},0.0f,1.0f,0,0.0f,0,0,accepted,next,error));
+        CHECK(error.find("rollback buffers")!=std::string::npos);
+        CHECK(m.pos()==0);
+        std::puts("DeepSeek worker correctly rejected verification without rollback buffers");
+        return 0;
+    }
+    for(int accepted=0;accepted<=2;++accepted) {
+        std::vector<float> reference, actual, ref_conf, actual_conf;
+        std::vector<int> ref_drafts, actual_drafts;
+        m.reset(); CHECK(m.feed(prompt,3,0,error));
+        CHECK(m.feed(window,accepted+1,0,error));
+        const auto position=m.pos(); CHECK(position==4+accepted);
+        if(m.has_drafter()) CHECK(m.draft(probe,ref_drafts,ref_conf,error));
+        CHECK(m.feed(&probe,1,1,error)); CHECK(m.logits(reference));
+        m.reset(); CHECK(m.feed(prompt,3,0,error));
+        CHECK(m.tp_verify_begin(window,3,error)); CHECK(m.pos()==6);
+        CHECK(!m.tp_verify_begin(window,3,error));
+        CHECK(!m.tp_verify_commit(-1,error));
+        CHECK(!m.tp_verify_commit(3,error));
+        CHECK(m.pos()==6);
+        CHECK(m.tp_verify_commit(accepted,error) && m.pos()==position);
+        CHECK(!m.tp_verify_commit(0,error));
+        if(m.has_drafter()) CHECK(m.draft(probe,actual_drafts,actual_conf,error));
+        if (ref_drafts!=actual_drafts || ref_conf.size()!=actual_conf.size()) {
+            std::fprintf(stderr,"accepted=%d draft mismatch: reference",accepted);
+            for (auto t:ref_drafts) std::fprintf(stderr," %d",t);
+            std::fprintf(stderr,"; worker");
+            for (auto t:actual_drafts) std::fprintf(stderr," %d",t);
+            std::fprintf(stderr,"\n");
+        }
+        bool drafts_match = ref_drafts==actual_drafts && ref_conf.size()==actual_conf.size();
+        if (drafts_match) for(std::size_t i=0;i<ref_conf.size();++i)
+            drafts_match = drafts_match && std::fabs(ref_conf[i]-actual_conf[i])<=1e-4f;
+        CHECK(m.feed(&probe,1,1,error)); CHECK(m.logits(actual));
+        CHECK(reference.size()==actual.size() && !reference.empty());
+        float max_delta=0;
+        for(std::size_t i=0;i<reference.size();++i) {
+            CHECK(std::isfinite(reference[i]) && std::isfinite(actual[i]));
+            max_delta=std::max(max_delta,std::fabs(reference[i]-actual[i]));
+        }
+        std::printf("accepted=%d logits max_abs=%.8g drafts=%zu\n",accepted,max_delta,actual_drafts.size());
+        CHECK(max_delta<=1e-3f);
+        CHECK(drafts_match);
+    }
+    // A failed begin cannot be committed; the model is discarded/reset.
+    m.reset(); const int invalid[]={8,-1};
+    CHECK(!m.tp_verify_begin(invalid,2,error)); CHECK(!m.tp_verify_commit(0,error));
+    m.reset(); CHECK(m.pos()==0);
+    std::puts("DeepSeek worker verify/commit model state parity passed");
+}

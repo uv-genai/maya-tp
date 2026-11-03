@@ -1216,7 +1216,7 @@ struct Model::Impl {
     static bool helper_copy_fail(int, void*, const void*, size_t) { return false; }   // (DS4_FLOW_HELPER_FAIL=copy)
     bool spec_win = false;            // the window being run is a draft's verification (layer() keeps backups)
     // verify windows run: for the DSpark drafter's drafts, or for prompt lookup's (Options::lookup) without it
-    bool spec_bufs() const { return g.n_mtp > 0 || o.lookup; }
+    bool spec_bufs() const { return g.n_mtp > 0 || o.lookup || o.tp_worker_verify; }
     float* h_taps = nullptr;          // pinned [kWin][targets][dim]: the last window's taps (each block device's seeding
                                       // read it: Dev::ev_seed; the next window's taps wait for every one, wait_seed)
     float* d_confv = nullptr;         // on the head device
@@ -1431,6 +1431,9 @@ struct Model::Impl {
     Exl3Lane lane_x;                            // (cpu_experts' view of them, ds4_cpu_exl3.hpp)
     // the state
     int64_t pos = 0;
+    int64_t tp_verify_p0 = -1;       // pending worker verify window; -1 when none
+    int tp_verify_count = 0;
+    bool tp_verify_ready = false;
     std::vector<int32_t> toks, ctoks;
     struct Check {                    // the state at a position: every window ring, the compressors' partial groups
         int64_t pos = -1;
@@ -8549,6 +8552,9 @@ struct Model::Impl {
 
     void reset() {
         pos = 0;
+        tp_verify_p0 = -1;
+        tp_verify_count = 0;
+        tp_verify_ready = false;
         toks.clear();
         ctoks.clear();
         slot_held = false;
@@ -15720,10 +15726,14 @@ struct Model::Impl {
     // The caller owns the window's position and must finish it before another
     // model operation. Kept separate so a TP worker can execute this same
     // trunk operation and wait for the authoritative rank-0 verdict.
-    bool verify_target_window(const int* tokens, int count, std::string& err) {
+    bool verify_target_window(const int* tokens, int count, std::string& err, int logits_rows = -1) {
+        if (!spec_bufs()) {
+            err = "speculative verification requires rollback buffers";
+            return false;
+        }
         spec_win = true;
         const double tv = now_ms();
-        const bool ok = forward(tokens, count, count, err, 0);
+        const bool ok = forward(tokens, count, logits_rows < 0 ? count : logits_rows, err, 0);
         st.verify_ms += now_ms() - tv;
         spec_win = false;
         return ok;
@@ -15746,6 +15756,32 @@ struct Model::Impl {
             ++st.draft_reached[i];
             if (i < accepted) ++st.draft_kept[i];
         }
+        return true;
+    }
+
+    bool tp_verify_begin(const int* tokens, int count, std::string& err) {
+        if (!spec_bufs()) {
+            err = "TP worker verification requires speculative rollback buffers";
+            return false;
+        }
+        if (tp_verify_p0 >= 0 || tokens == nullptr || count < 2 || count > kWin) {
+            err = "invalid or overlapping TP worker verification window";
+            return false;
+        }
+        // Mark before execution: even a partial failure must not allow another
+        // window without discarding/resetting the model and restarting the pair.
+        tp_verify_p0 = pos;
+        tp_verify_count = count;
+        tp_verify_ready = verify_target_window(tokens, count, err, 0);
+        return tp_verify_ready;
+    }
+
+    bool tp_verify_commit(int accepted, std::string& err) {
+        if (tp_verify_p0 < 0 || !tp_verify_ready) { err = "no completed TP worker verification window"; return false; }
+        if (!commit_verify_window(tp_verify_p0, tp_verify_count, accepted, err)) return false;
+        tp_verify_p0 = -1;
+        tp_verify_count = 0;
+        tp_verify_ready = false;
         return true;
     }
 
@@ -20246,6 +20282,12 @@ bool Model::draft(int y, std::vector<int>& d, std::vector<float>& c, std::string
 bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter,
                    int& accepted, int& next, std::string& err) {
     return p_->verify(y, d, t, tp, tk, mp, seed, counter, accepted, next, err);
+}
+bool Model::tp_verify_begin(const int* tokens, int count, std::string& err) {
+    return p_->tp_verify_begin(tokens, count, err);
+}
+bool Model::tp_verify_commit(int accepted, std::string& err) {
+    return p_->tp_verify_commit(accepted, err);
 }
 int Model::verify_max() const { return kWin; }
 bool Model::drafts_sampled() const { return p_->drafts_q; }

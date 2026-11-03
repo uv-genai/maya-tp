@@ -46,6 +46,9 @@ struct Options {
     double ssd_cache_gb = 0.0;
     int ssd_policy = 0;
     bool dspark = true;              // load the DSpark drafter (the checkpoint's mtp.* blocks) for speculative decoding
+    // Internal worker option: reserve target verification rollback state even
+    // when the drafter and prompt lookup are owned by the other rank.
+    bool tp_worker_verify = false;
     float dspark_conf = 0.5f;         // a draft is verified while its confidence (sigmoid) is at least this
     // prompt lookup (ds4_main's --suffix-draft): its verify windows run without the drafter too - their buffers (the
     // rows and states a rejected draft undoes) are allocated with the drafter, or with this
@@ -201,6 +204,12 @@ public:
                float top_p = 1.0f, int top_k = 0, float min_p = 0.0f, uint64_t seed = 0, uint64_t counter = 0);
     bool verify(int y, const std::vector<int>& drafts, float temperature, float top_p, int top_k, float min_p,
                 uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err);
+    /// Worker-only split verification. The caller must exclusively own this
+    /// model: after begin, issue only commit (or discard/reset the model on
+    /// failure). No worker-side sampling or next-token choice occurs here.
+    /// A transport/model failure requires the paired engines to be restarted.
+    bool tp_verify_begin(const int* tokens, int count, std::string& err);
+    bool tp_verify_commit(int accepted, std::string& err);
     /// A verify window's tokens at most (y and the drafts after it); verify() takes drafts from any source - those not
     /// the drafter's own draws as a point each (q 1)
     int verify_max() const;

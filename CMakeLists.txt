@@ -648,6 +648,18 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
     if(STRATA_ENABLE_HIP)
       target_link_libraries(maya-ds4 PRIVATE strata_mmq)
     endif()
+    if(STRATA_BUILD_TESTS AND STRATA_ENABLE_HIP)
+      # Model-backed TP worker verification test; requires a user-supplied pack.
+      add_executable(ds4_tp_verify_test tests/ds4_tp_verify_test.cpp src/ds4/ds4_model.cu src/ds4/ds4_kernels.cu
+                     src/ds4/ds4_vision.cu src/ds4/ds4_gguf.cu src/ds4/ds4_gguf_cpu.cpp src/ds4/ds4_iq.cu
+                     src/ds4/ds4_iq_cpu.cpp src/ds4/ds4_lt.cu src/ds4/ds4_host_ar.cpp src/ds4/ds4_packinfo.cpp)
+      target_include_directories(ds4_tp_verify_test PRIVATE ${_strata_gpu_include_directories} third_party/ggml)
+      target_link_libraries(ds4_tp_verify_test PRIVATE strata_kernels strata_kernels_cpu strata_spec strata_mmq
+                            ${_strata_gpu_runtime_target} ${_strata_gpu_blas_target})
+      if(STRATA_HIPBLASLT_AVAILABLE)
+        target_link_libraries(ds4_tp_verify_test PRIVATE roc::hipblaslt)
+      endif()
+    endif()
     if(NOT WIN32)   # mmap / mbind (NUMA)
       add_executable(ds4_cpu_bench tests/ds4_cpu_bench.cpp)
       target_link_libraries(ds4_cpu_bench PRIVATE strata_kernels_cpu)

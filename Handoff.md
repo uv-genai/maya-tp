@@ -1470,16 +1470,17 @@ hosts; all seven digests matched. The results are in the P1 benchmark directory'
 `xs-source-sha256.txt`. This establishes copy equality at measurement time, not upstream provenance.
 
 P5 refactor `b383b0e` separates target-window execution from DSpark commit/rollback. Isolated
-gfx1151 build and single-host greedy plus small sampled checks passed. The owned XS prefill server
-and harness completed six samples and were stopped. The owned Maya-S prefill server is PID 186852,
-engine 186854, port 18701; harness exec session 77648, log `/tmp/ds4-p1-s-prefill-112.log`.
-Stop server before engine once the harness ends, checking PID/start times. The uncommitted P5
-worker verification API and its model-backed test are in development; isolated remote build
-session 45669, log `/tmp/ds4-tp2-113-worker-build.log`. No two-host model execution exists yet.
-User processes stay untouched.
+gfx1151 build and single-host greedy plus small sampled checks passed. Both the XS and Maya-S
+prefill harnesses completed and their owned servers and engines exited. Maya-S fresh-prompt
+samples are in `s-prefill-reference.json`: 2K 92.0/125.6/140.7 and 8K 265.1/286.0/258.9
+tokens/s, all with zero cached prompt tokens.
 
-Update: the Maya-S prefill harness finished and its owned server and engine exited. The six
-fresh-prompt samples are in `s-prefill-reference.json`: 2K 92.0/125.6/140.7 and 8K
-265.1/286.0/258.9 tokens/s, all with zero cached prompt tokens. The uncommitted P5 worker
-verification test compiled but detected a drafter mismatch after a partially accepted window;
-investigation is ongoing, and this worker API must not be treated as validated.
+The P5 worker-only verify/commit API and internal rollback-buffer reservation have been tested
+against the real XS pack on one gfx1151 host, using matched window paths. The three-token
+zero/partial/full acceptance cases matched subsequent target logits and DSpark drafts, and
+missing buffers and invalid verdicts were rejected. Initial mixed chunk/window comparisons
+differed and are not evidence of a rollback failure; see
+`docs/validation/deepseek-tp2-control-2026-11-03/worker-verify-single-host.md`. These checks do
+not validate long contexts or two-host inference. Review sources/build remain isolated under
+`/tmp/ds4-tp2-review-115-{src,build}` on strix-halo-1. No two-host DeepSeek model execution
+exists yet; user processes remain untouched.
