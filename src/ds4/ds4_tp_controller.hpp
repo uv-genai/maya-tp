@@ -25,6 +25,9 @@ public:
         if (state_.stopped()) { error = "ds4 tp2 controller: shut down"; return false; }
         if (comm_.world_size() != 2 || comm_.rank() != 0)
             return state_.fail("ds4 tp2 controller: expected rank 0 of 2", error);
+        // A monitor may already have poisoned the pair while it was idle.
+        // Check before writing the next command, retaining its first cause.
+        if (!comm_.CheckPeer(&error)) return state_.fail(error,error);
         Control c{command, sequence_, position, std::move(words)};
         if (!state_.begin(c, error)) return false;
         if (!send_message(comm_, c, max_words_, error) || !comm_.BeginOperation(sequence_, &error))

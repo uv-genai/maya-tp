@@ -898,6 +898,22 @@ public:
     return true;
   }
 
+  [[nodiscard]] bool CheckPeer(std::string* error) override {
+    std::lock_guard lock(mutex_);
+    if (poisoned_) { PoisonedError(error); return false; }
+    if (!control_ || !control_->valid()) {
+      Poison(error, "verbs control channel is unavailable"); return false;
+    }
+    // Ask only for hangup/error, never read or consume queued control data.
+    pollfd fd{.fd=control_->fd(), .events=control_poll_events(true), .revents=0};
+    const int result=::poll(&fd,1,0);
+    if (result<0 && errno!=EINTR) { Poison(error,SystemError("verbs peer poll")); return false; }
+    if (result>0 && control_socket_state(fd.fd,fd.revents)==ControlSocketState::closed) {
+      Poison(error,"verbs peer closed the bootstrap connection"); return false;
+    }
+    return true;
+  }
+
 private:
   struct Job {
     hipEvent_t ready{nullptr};

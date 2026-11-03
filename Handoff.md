@@ -1708,5 +1708,26 @@ Real DeepSeek API peer-loss injection and GLM GPU regression remain open.
 Uncommitted controller integration: attach/shutdown methods have been renamed
 for eventual engine use, a one-shot failure callback and explicit post-shutdown
 guard have been added, and the real loss test now checks callback count/cause.
-The isolated test and engine build is owned session 91570; log
-`/tmp/ds4-tp2-111-api-build.log`. These changes need paired GPU validation.
+The isolated test and engine build passed, log
+`/tmp/ds4-tp2-111-api-build.log`. Paired XS GPU validation matched the earlier
+64 tokens, cleanly shut down, rejected a post-shutdown step and invoked no
+failure callback. Both ranks exited; logs use prefix
+`/tmp/ds4-tp2-111-callback-normal-`. The live loss callback test is now active:
+the owned worker during generation. The callback was invoked exactly once
+with the original cause; the rank, worker and monitor all exited. Logs use
+prefix `/tmp/ds4-tp2-114-callback-`.
+An uncommitted experimental `tools/ds4/tp2_rank.py` prepares pack/partition/
+binary identity and rank-specific arguments, with 14 focused launcher/identity
+tests passing. Experimental rank startup, worker dispatch and serving hooks
+have built. An isolated paired serving-protocol test is running: local driver
+PID 265670/session 3997, local engine PID 265675, remote worker PID
+101043/session 57077. Logs use prefix `/tmp/ds4-tp2-111-serve-`. It will check
+two greedy requests, actual DSpark acceptance and coordinated shutdown. Do not
+use these for user serving until all remaining gates are complete.
+
+P6 idle liveness: uncommitted `Communicator::CheckPeer` polls without consuming
+control data and poisons on peer close. Host socket-state and controller tests,
+real two-host idle peer loss, and an RDMA/control coexistence test with a queued
+frame all passed. The experimental server now has a one-shot idle watcher;
+its isolated build passed, log `/tmp/ds4-tp2-111-startup-build2.log`, and
+needs actual API validation.

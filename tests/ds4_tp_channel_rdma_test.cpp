@@ -13,14 +13,15 @@ using namespace strata::ds4::tp2;
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr, "line %d: %s; %s\n", __LINE__, #x, error.c_str()); return 1; } } while (0)
 int main(int argc, char** argv) {
     std::string error;
-    if (argc != 5 && argc != 6) { std::fprintf(stderr, "usage: rank bootstrap-host port rdma-device [peer-loss|control-eof|worker|identity|identity-reject|identity-reject-build]\n"); return 2; }
+    if (argc != 5 && argc != 6) { std::fprintf(stderr, "usage: rank bootstrap-host port rdma-device [peer-loss|idle-loss|control-eof|worker|identity|identity-reject|identity-reject-build]\n"); return 2; }
     const bool peer_loss = argc == 6 && std::string(argv[5]) == "peer-loss";
+    const bool idle_loss = argc == 6 && std::string(argv[5]) == "idle-loss";
     const bool control_eof = argc == 6 && std::string(argv[5]) == "control-eof";
     const bool worker_mode = argc == 6 && std::string(argv[5]) == "worker";
     const bool identity_mode = argc == 6 && std::string(argv[5]) == "identity";
     const bool identity_reject = argc == 6 && std::string(argv[5]) == "identity-reject";
     const bool build_reject = argc == 6 && std::string(argv[5]) == "identity-reject-build";
-    if (argc == 6 && !peer_loss && !control_eof && !worker_mode && !identity_mode && !identity_reject && !build_reject) return 2;
+    if (argc == 6 && !peer_loss && !idle_loss && !control_eof && !worker_mode && !identity_mode && !identity_reject && !build_reject) return 2;
     strata::net::IbrverbsConfig cfg;
     cfg.rank = static_cast<std::uint32_t>(std::atoi(argv[1]));
     cfg.bootstrap_host = argv[2]; cfg.bootstrap_port = static_cast<std::uint16_t>(std::atoi(argv[3]));
@@ -43,10 +44,21 @@ int main(int argc, char** argv) {
     CHECK(agreed);
     CHECK(peer.rank == 1u - cfg.rank && limit > 0);
     if (identity_mode) { std::puts("DeepSeek TP2 preflight identities agreed"); return 0; }
-    if ((peer_loss && cfg.rank==1) || (control_eof && cfg.rank==0)) {
+    if (((peer_loss || idle_loss) && cfg.rank==1) || (control_eof && cfg.rank==0)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         std::printf("rank %u: intentionally closing owned test peer\n",cfg.rank);
         return 0;
+    }
+    if (idle_loss) {
+        bool alive=true;
+        for (int i=0;i<250 && alive;++i) {
+            alive=comm->CheckPeer(&error);
+            if (alive) std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+        CHECK(!alive && error.find("peer closed the bootstrap connection")!=std::string::npos);
+        error.clear(); CHECK(!comm->BeginOperation(1,&error));
+        CHECK(error.find("poisoned")!=std::string::npos && error.find("peer closed the bootstrap connection")!=std::string::npos);
+        std::puts("DeepSeek TP2 idle peer loss detected with sticky original cause"); return 0;
     }
     if (control_eof) {
         Worker worker(*comm,32,100,16);
@@ -121,6 +133,8 @@ int main(int argc, char** argv) {
     CHECK(comm->CheckQueued(&error)); CHECK(comm->EndOperation(1,&error));
     Control message;
     if (cfg.rank==1) {
+        // The idle liveness probe must not consume this already queued frame.
+        CHECK(comm->CheckPeer(&error));
         CHECK(receive_message(*comm,16,message,error));
         CHECK(message.command==Command::Step && message.words==std::vector<std::uint32_t>{42});
         CHECK(send_message(*comm, Control{Command::Verdict, 2, 0, {0,43}}, 16, error));

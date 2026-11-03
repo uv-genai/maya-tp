@@ -16,6 +16,7 @@ public:
     std::string order;
     bool fail_send = false;
     bool fail_queued = false;
+    bool fail_peer = false;
     bool fail_begin = false, fail_end = false;
     int begins = 0, ends = 0;
     std::uint32_t rank() const noexcept override { return rank_value; }
@@ -41,6 +42,7 @@ public:
     const float* FinishPartial(std::size_t, std::string*) override { return nullptr; }
     bool QueuePartial(std::size_t, QueuedPartial*, std::string*) override { return false; }
     bool CheckQueued(std::string* e) override { if (fail_queued) { *e = "queued peer failure"; return false; } return true; }
+    bool CheckPeer(std::string* e) override { if (fail_peer) { *e = "idle peer failure"; return false; } return true; }
 };
 
 int main() {
@@ -135,5 +137,8 @@ int main() {
     Fake not_leader; not_leader.rank_value=1;
     Controller wrong_leader(not_leader,32,100,16);
     CHECK(!wrong_leader.run(Command::Step,0,{1},handle,error) && not_leader.sent.empty());
+    Fake idle; idle.fail_peer=true; Controller idle_guard(idle,32,100,16);
+    CHECK(!idle_guard.run(Command::Step,0,{1},handle,error) && error=="idle peer failure");
+    CHECK(idle.sent.empty() && idle.begins==0);
     std::puts("DeepSeek TP2 channel: identity ordering, bounded receive and transport errors passed");
 }
