@@ -1456,6 +1456,11 @@ window/chunk top-token agreement and exact whole/split logits; all ranks exited.
 XS and S also passed those checks on the 3,204-token fixture and all ranks exited.
 A test-only supported 256+1 split replay was added to `ds4_tp_text_rdma_test.cpp`.
 Both XS and S passed with rank and replay max logit deltas 0; all ranks exited.
+GPU busy and rank-0 Engram lookup deltas were sampled once for XS/S on
+single-host and TP2. Logical Engram reads, process-wide physical I/O and
+device-wide busy are distinct; placement and cache differed, and the samples
+are not a general speedup claim. All owned processes exited. Evidence:
+`docs/benchmarks/deepseek-tp2-review-2026-11-03/utilization-engram.md`.
 The review guide now includes a versioned-binary promotion and rollback
 procedure. Its staging shell snippet passed isolated install, repeat,
 conflicting-file and symlink-rejection checks. No deployment was performed.
