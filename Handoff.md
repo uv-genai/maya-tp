@@ -1415,8 +1415,8 @@ DSpark and prompt lookup have been implemented and exercised on XS and S.
 They are not yet approved for production: sampled and failure coverage,
 performance measurements, operations and final CI remain in progress. Working
 branch `feat/deepseek-tp2` (see `git log` for the latest checkpoint); no production binary
-or config has been promoted. The `be3fd7a` review engine is
-`/tmp/maya-ds4-tp2-113-point-build/maya-ds4`, with matching worker copy
+or config has been promoted. The retained `be3fd7a` review engine is
+`/tmp/ds4-tp2-be3-engine`, with matching worker copy
 `/tmp/ds4-tp2-coldwarm-engine` on strix-halo-1; their SHA-256 is
 `bf1adc9fcf81f5478f5774b1fb961e3c950d0816fd28fa055128c70c548236f4`.
 The previous `fed8567` smoke engine had SHA-256
@@ -1452,6 +1452,13 @@ answers, plus 163/164 sampled lookup drafts accepted/offered; both owned ranks
 exited. Ordered host CI for `fed8567` passed: HIP mapping, 618 server tests
 (11 skipped) and 707 tools tests (3 skipped); logs use
 `/tmp/ds4-tp2-final-{hip,serve,tools}.log`.
+The `69b63c7` XS smoke also passed with matching greedy answers, 88/100 DSpark
+drafts and 165/166 sampled lookup drafts accepted; both ranks exited. Its
+retained lead `/tmp/ds4-tp2-69-engine` and worker `/tmp/ds4-tp2-exact-engine`
+have SHA-256 `cac60c7939efb8fb89b878d07450e2619ef12bcd1ad017efb50e2324db6b597e`.
+Ordered host CI for `69b63c7` also passed: HIP mapping, 618 server tests
+(11 skipped) and 707 tools tests (3 skipped), with logs under
+`/tmp/ds4-tp2-latest-{hip,serve,tools}.log`.
 
 The larger S sampled test passed all three
 modes (10,000 plain vs 500 speculative): sampled-drafter p=0.6686, point with
