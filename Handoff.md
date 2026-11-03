@@ -1468,3 +1468,12 @@ single-host checks, not DeepSeek TP2 model validation. Evidence is in the P1 ben
 Owned full SHA-256 comparisons of the seven XS indexed source files completed successfully on both
 hosts; all seven digests matched. The results are in the P1 benchmark directory's
 `xs-source-sha256.txt`. This establishes copy equality at measurement time, not upstream provenance.
+
+P5 refactor `b383b0e` separates target-window execution from DSpark commit/rollback. Isolated
+gfx1151 build and single-host greedy plus small sampled checks passed. The owned XS prefill server
+and harness completed six samples and were stopped. The owned Maya-S prefill server is PID 186852,
+engine 186854, port 18701; harness exec session 77648, log `/tmp/ds4-p1-s-prefill-112.log`.
+Stop server before engine once the harness ends, checking PID/start times. The uncommitted P5
+worker verification API and its model-backed test are in development; isolated remote build
+session 45669, log `/tmp/ds4-tp2-113-worker-build.log`. No two-host model execution exists yet.
+User processes stay untouched.

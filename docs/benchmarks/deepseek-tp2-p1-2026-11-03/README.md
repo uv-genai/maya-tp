@@ -21,6 +21,13 @@ Rotating 5+4 quant blocks across equally sized layers suggests a rough half of r
 per rank, but the actual per-layer formats, rank placement, scratch, context, OS headroom and
 Engram cache must be measured. The complete Engram data and all model memory are not shown to fit.
 
+Capacity implication: the 169.02 GB Maya-S trunk experts plus the 161.28 GB Engram tables alone
+total 330.30 GB, exceeding the two hosts' combined ~265.3 GB physical RAM before dense weights,
+KV, DSpark, scratch or OS memory. Thus both entire datasets cannot be simultaneously resident on
+this pair. A TP design can still keep the sliced experts and a useful Engram working set resident,
+but whether this is fast enough, and whether page/file reads disappear for a particular workload,
+requires measurement. Byte totals are decimal GB; the host totals come from `MemTotal`.
+
 `tools/ds4/estimate_tp2_experts.py` uses each indexed trunk expert tensor's actual byte count and
 rotates a 5+4 split by layer, assuming 256-value blocks and proportional tensor bytes. It reports
 Maya-S 84.510 GB per rank (169.020 GB total) and Maya-XS 54.814/54.751 GB (109.566 GB total).
@@ -63,6 +70,12 @@ HTML 3.0/5.3/7.2. Per-request process read counters ranged from ~128 to ~479 MB/
 rates rose as the cache warmed. These counters cover all process storage reads, not only experts.
 The prompt outputs were not fully bit-stable across repeats. Raw data: `s-single-reference.json`.
 The owned S server and engine were stopped after the run.
+
+`tools/ds4/bench_tp2_prefill.py` generated six distinct synthetic prompts on XS, three each
+with 2048 and 8192 source tokens; API prompt lengths were 2052 and 8196 with zero cached tokens.
+The 2K rates were 121.7/237.6/249.1 tokens/s and 8K rates 376.6/388.8/390.0 tokens/s. The first
+sample was cold relative to the later trials, so these are not interchangeable. Raw measurements:
+`xs-prefill-reference.json`. The owned prefill server/engine were stopped after this run.
 
 A separate one-host Maya-S load with 524288 context, DSpark on, vision off and three input IDs
 reported 9,832 of 15,744 experts in GPU slots, 5,912 on the CPU lane (~65.1 GB in model files),
