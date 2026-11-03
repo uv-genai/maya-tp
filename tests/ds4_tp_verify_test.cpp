@@ -32,7 +32,9 @@ int main(int argc,char** argv) {
     if (argc > 1 && (std::string(argv[1])=="--text-reference" || std::string(argv[1])=="--text-model"))
         return ds4_tp_text_rdma_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--sharded-control") return ds4_tp_sharded_control_test(argc,argv);
-    if (argc > 1 && std::string(argv[1])=="--sharded-rollback") return ds4_tp_sharded_rollback_test(argc,argv);
+    if (argc > 1 && (std::string(argv[1])=="--sharded-rollback" ||
+                     std::string(argv[1])=="--sharded-rollback-dspark"))
+        return ds4_tp_sharded_rollback_test(argc,argv);
 #endif
     if(argc!=3 || (std::string(argv[2])!="on" && std::string(argv[2])!="none" && std::string(argv[2])!="off" && std::string(argv[2])!="dispatch")) {
         std::fprintf(stderr,"usage: pack-dir on|none|off|dispatch (none/dispatch reserve worker rollback buffers)\n"); return 2;

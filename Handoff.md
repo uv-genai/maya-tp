@@ -1598,6 +1598,10 @@ remains test-only; speculative rollback and DSpark gates are next.
 P5 (#113): the sharded XS and S verify/commit tests passed acceptance counts 0–3
 over a four-token window, with identical next logits to target-only continuations;
 all owned ranks exited. Logs are `/tmp/ds4-tp2-113-rollback-{xs,s}-rank0.log` on
-strix-halo-1 and corresponding rank1 logs locally. A test-only rank-0 DSpark load
-is being prepared to repeat the rollback checks with actual draft state. Test
-execution and identities are not production.
+strix-halo-1 and corresponding rank1 logs locally. With a resident DSpark drafter
+on rank 0 only, the XS and S pairs passed all four cases: next logits matched
+exactly, and five next drafts and confidences matched the target-only path
+(1e-4 confidence tolerance). All owned ranks exited. Logs are
+`/tmp/ds4-tp2-113-dspark-{xs,s}-rank0.log` remotely and corresponding rank1 logs
+locally. Test execution and identities are not production; actual acceptance
+decisions are next.

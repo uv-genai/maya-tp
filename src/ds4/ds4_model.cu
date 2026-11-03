@@ -3435,11 +3435,15 @@ struct Model::Impl {
 #if !defined(STRATA_USE_HIP)
             err="ds4 tp2: rank loading requires HIP"; return false;
 #else
+            bool test_drafter=false;
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+            test_drafter=o.tp2_rank==0 && o.dspark;
+#endif
             if (o.tp2_expert_budget==0 || o.reserve_mib<0 ||
                 static_cast<std::uint64_t>(o.reserve_mib)>std::numeric_limits<std::size_t>::max()/(1ull<<20) ||
                 !lane_env_off() || o.gpus.size()!=1 || o.tp!=1 || o.prefill_chunk!=0 ||
-                o.vision || o.vision_only || o.dspark || o.lookup || o.seqs!=1 || o.expert_cache ||
-                o.mmap_experts!=1 || o.vram_experts!=0.0 || o.ssd_cache_gb!=0.0 ||
+                o.vision || o.vision_only || (o.dspark && !test_drafter) || o.lookup || o.seqs!=1 || o.expert_cache ||
+                o.mmap_experts!=1 || o.vram_experts!=(test_drafter?1.0:0.0) || o.ssd_cache_gb!=0.0 ||
                 !o.profile_readonly || !o.ablate.empty() || !host_free_on || sync_decode) {
                 err="ds4 tp2: experimental rank loading needs one GPU, window prefill, no speculation, vision, "
                     "expert cache or host fallback, mmap experts, DS4_STREAM=0 and read-only profile";
@@ -3455,6 +3459,9 @@ struct Model::Impl {
         if (lt_store == nullptr) lt_store = std::getenv("DS4_LT_STORE");
         lt::set_store(lt_store != nullptr ? lt_store : (o.pack + "/lt-picks.txt").c_str());
         g.from(pk);
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+        if (o.tp2_rank>=0 && o.dspark && g.n_mtp<=0) { err="ds4 tp2: test drafter is missing"; return false; }
+#endif
         if (g.dim == 0 || g.nl == 0 || (int) g.ratios.size() < g.nl) {
             err = o.pack + "/ds4.txt: incomplete geometry";
             return false;
@@ -4571,6 +4578,11 @@ struct Model::Impl {
         if (helper_id >= 0 && !helper_select(err)) return false;
         if (!load_experts(err)) return false;
 #if defined(STRATA_USE_HIP)
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+        if (o.tp2_rank>=0 && o.dspark)
+            for (const Layer& l:L)
+                if (l.mtp && l.n_vram<l.n_exp) { err="ds4 tp2: test drafter experts do not fit"; return false; }
+#endif
         if (o.tp2_rank>=0 && !install_tp_rank_experts(err)) return false;
 #endif
         if (copy_swap && copy_mode) {   // (DS4_COPY_SWAP: after the copies)
@@ -6894,6 +6906,11 @@ struct Model::Impl {
             // such a quant runs on one GPU, so the group's one member)
             for (Layer& l : L)
                 if (l.grp == (int) gi && l.n_cls > 1) {
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+                    if (o.tp2_rank>=0 && !l.mtp) {
+                        err="ds4 tp2: mixed trunk expert layouts are unsupported"; return false;
+                    }
+#endif
                     double b = 0;
                     for (int e = 0; e < l.n_exp; ++e) b += (double) align256(l.cblob[l.cls[(size_t) e]]);
                     if (b > mroom[0]) {
@@ -6977,7 +6994,12 @@ struct Model::Impl {
                         }
                     if (mine > 0) mslots[mi] = mroom[mi] * mean / mine;
                 }
-            const double budget = *std::min_element(mslots.begin(), mslots.end());
+            double budget = *std::min_element(mslots.begin(), mslots.end());
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+            // Routed trunk shards are installed separately. Reserve the legacy
+            // placement budget for rank 0's unsharded DSpark experts only.
+            if (o.tp2_rank>=0) budget=0;
+#endif
             double want = 0, seen = 0;
             for (const Layer& l : L)
                 if (l.grp == (int) gi && !l.mtp && l.n_cls == 1) {
@@ -15471,7 +15493,8 @@ struct Model::Impl {
 
     bool draft(int y, std::vector<int>& out, std::vector<float>& conf, std::string& err, float temperature, float top_p,
                int top_k, float min_p, uint64_t seed, uint64_t counter) {
-        if (tp_load_only(err)) return false;
+        if (tp_unready(err)) return false;
+        if (o.tp2_rank==1) { err="ds4 tp2: only rank 0 may draft"; return false; }
         const double t0 = now_ms();
         // (with penalties the drafts are the drafter's argmax: its own draws know no history - verify() is as exact)
         drafts_q = temperature > 0.0f && sample_drafts && pen_n <= 0;
@@ -19604,7 +19627,8 @@ struct Model::Impl {
         cudaStream_t s = d.st;
         const int nm = L0.nm;
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
-        if (o.tp2_rank>=0 && (!tp_test_comm || l.mtp || nm!=1 || !wp.async))
+        if (o.tp2_rank>=0 && (!tp_test_comm || (l.mtp && o.tp2_rank!=0) ||
+                             (!l.mtp && (nm!=1 || !wp.async))))
             return tp_test_fail("ds4 tp2: unsupported test layer execution",err);
 #endif
         // (DS4_HC_FUSE: a decoded token's split and norm in one launch on st, so its mixes are not beside it; =2 a
@@ -19733,7 +19757,7 @@ struct Model::Impl {
         } else CK(cudaMemsetAsync(d.ao, 0, (size_t) T * D * sizeof(*d.ao), s));   // (no heads: nothing to add)
         if (nm > 1) allreduce(d.ao, T * D, ag, mi, ++d.ar_seq, d.xcnt, s);
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
-        if (o.tp2_rank>=0 && !tp_test_sum(d.ao,T,D,s,err)) return false;
+        if (o.tp2_rank>=0 && !l.mtp && !tp_test_sum(d.ao,T,D,s,err)) return false;
 #endif
         if (hs) CK(cudaStreamWaitEvent(s, d.hc_done, 0));
         ablate(d, d.ao, T, s);
@@ -19829,7 +19853,7 @@ struct Model::Impl {
                               lane_done);
             }
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
-            if (o.tp2_rank>=0 && !tp_test_routes(d,l,T,s,err)) return false;
+            if (o.tp2_rank>=0 && !l.mtp && !tp_test_routes(d,l,T,s,err)) return false;
             if (!tp_test_dump_routes(d,l,p0,T,s,err)) return false;
 #endif
             {
@@ -19928,7 +19952,7 @@ struct Model::Impl {
             if (mi == 0 && l.mtp) st.draft_experts += (int64_t) T * l.k_exp;
             if (nm > 1) allreduce(d.moe_out, T * D, ag, mi, ++d.ar_seq, d.xcnt, s);
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
-            if (o.tp2_rank>=0 && !tp_test_sum(d.moe_out,T,D,s,err)) return false;
+            if (o.tp2_rank>=0 && !l.mtp && !tp_test_sum(d.moe_out,T,D,s,err)) return false;
 #endif
             if (hs) CK(cudaStreamWaitEvent(s, d.hc_done, 0));
             ablate(d, d.moe_out, T, s);

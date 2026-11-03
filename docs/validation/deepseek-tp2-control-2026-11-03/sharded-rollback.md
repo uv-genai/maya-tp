@@ -18,3 +18,13 @@ The test uses a short synthetic token fixture and deliberately has no DSpark
 or lookup drafter. It does not cover actual draft proposals, sampling, rejection
 positions in a longer window, long-context compressor boundaries, failures or
 serving integration.
+
+The same forced-verdict test was subsequently repeated with all three DSpark
+blocks and their routed experts resident on rank 0; rank 1 had no drafter but
+reserved target rollback state. For both XS and S, each acceptance count again
+left exactly matching next logits. At each count the subsequent five DSpark
+draft IDs matched the target-only path, and confidence values matched within
+1e-4. The review binary SHA-256 was
+`c0889ebec9251913f838ddfcfd6ab41f2ad609372ae98212399202089c71d715`.
+All owned ranks exited. These are forced verdicts; actual acceptance sampling,
+long windows and production DSpark serving remain untested.
