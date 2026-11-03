@@ -1415,9 +1415,11 @@ DSpark and prompt lookup have been implemented and exercised on XS and S.
 They are not yet approved for production: sampled and failure coverage,
 performance measurements, operations and final CI remain in progress. Working
 branch `feat/deepseek-tp2` (see `git log` for the latest checkpoint); no production binary
-or config has been promoted. The `fed8567` review engine is
+or config has been promoted. The `be3fd7a` review engine is
 `/tmp/maya-ds4-tp2-113-point-build/maya-ds4`, with matching worker copy
-`/tmp/ds4-tp2-final-engine` on strix-halo-1; their SHA-256 is
+`/tmp/ds4-tp2-coldwarm-engine` on strix-halo-1; their SHA-256 is
+`bf1adc9fcf81f5478f5774b1fb961e3c950d0816fd28fa055128c70c548236f4`.
+The previous `fed8567` smoke engine had SHA-256
 `195a12a4fc390d3f7a43f1548d7618adc8f6661582818d06018ffb9fbe3fa9ae`.
 The earlier fully tested sampled-lookup build had SHA-256
 `d13f478d0702cebb35a40c99cdf0918787fa4079fa8de02cf4166a12663e203e`.
@@ -1427,11 +1429,29 @@ and its worker copy `/tmp/ds4-tp2-114-current-engine` have SHA-256
 The earlier benchmark build had SHA-256
 `31b2e21d529f5de3016c7ce58a3bab704f052ab5d22beea62b64829680a81fb1`.
 
-**Active owned process:** none on the GPUs. The `fed8567` XS paired smoke passed
+**Active owned process:** none. The cold/second-start comparisons used only
+manifest-verified model source pages evicted via per-file `POSIX_FADV_DONTNEED`,
+with sampled `mincore`; no system-wide cache drop was used.
+The XS and S paired cold/warmer comparisons passed and all pairs exited:
+startup was 46.17/46.67 s for XS and 91.30/67.20 s for S. Answers matched
+within each pair, but sampled cache was only partially resident before the
+second launch and both runs had substantial physical reads. Raw results are
+`docs/benchmarks/deepseek-tp2-review-2026-11-03/{xs,s}-tp-coldwarm.json`.
+The guarded single-host XS and S runs also passed, with startup of 25.03/23.03 s
+and 27.05/27.03 s respectively and matching answers within each model. Before
+the second launch 0/448 XS and 17/512 S sampled pages were resident, so they
+cannot be called fully warm-cache measurements. Single-host S request-time
+process reads were 48.83/45.78 GiB versus roughly 0.18–0.19 GiB per rank for
+the paired requests; reserve, expert placement and memory pressure differed.
+All owned processes exited. Raw results are
+`docs/benchmarks/deepseek-tp2-review-2026-11-03/{xs,s}-single-coldwarm.json`.
+
+The `fed8567` XS paired smoke passed
 with 0 vs 88/100 DSpark drafts accepted/offered and identical 128-token greedy
 answers, plus 163/164 sampled lookup drafts accepted/offered; both owned ranks
-exited. Ordered host CI for `fed8567` runs in local session 70339
-(`/tmp/ds4-tp2-final-{hip,serve,tools}.log`).
+exited. Ordered host CI for `fed8567` passed: HIP mapping, 618 server tests
+(11 skipped) and 707 tools tests (3 skipped); logs use
+`/tmp/ds4-tp2-final-{hip,serve,tools}.log`.
 
 The larger S sampled test passed all three
 modes (10,000 plain vs 500 speculative): sampled-drafter p=0.6686, point with
@@ -1511,13 +1531,12 @@ read-only safeguard passed real GPU and paired-model tests. Raw results and
 qualifications: `docs/benchmarks/deepseek-tp2-review-2026-11-03/README.md`
 and `docs/validation/deepseek-tp2-control-2026-11-03/`.
 
-**Next:** finish ordered host CI and record its result in the phase issues;
-if this handoff is committed afterward, repeat exact-head checks on the new
-commit. Single-host and TP2 output
+**Final validation:** consult #116 for ordered host CI and paired GPU smoke on
+the latest commit. Single-host and TP2 output
 differences remain documented; do not claim exact cross-path equivalence or
 eliminated disk I/O. #115 (partition and rank loading) and #111 (RDMA/control
-lifecycle) are closed after their gates passed; #110, #112–#114, #116 and
-#117 remain open. Existing user processes and the
+lifecycle) are closed after their gates passed. Check GitHub for the current
+states of #110, #112–#114, #116 and #117. Existing user processes and the
 remote production checkout remain protected.
 
 The entries below are a historical work log, not an ordered list of currently

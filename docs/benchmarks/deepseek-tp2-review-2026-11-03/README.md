@@ -21,6 +21,69 @@ complete whole-request measurement. Minimum sampled host `MemAvailable` was
 The sampler and both owned ranks exited. Raw [request results](s-tp-long-prefill.json)
 and [telemetry](s-tp-long-telemetry.jsonl) retain the measurements.
 
+## Cold and warmer-cache startup
+
+An isolated XS pair at context 32,768 used the same engine (SHA-256
+`bf1adc9fcf81f5478f5774b1fb961e3c950d0816fd28fa055128c70c548236f4`), DSpark,
+256-row prefill, lookup off and the same 256-token Python request for two
+consecutive launches. Before the first, `POSIX_FADV_DONTNEED` was applied only
+to the manifest-verified model source files on each host. A `mincore` sample
+found 0/448 resident pages on each host afterward, down from 93/448 and 95/448.
+These samples do not prove every page was evicted. After the first pair exited,
+92/448 and 102/448 sampled pages were resident; the second run therefore had a
+warmer, but far from fully resident, cache.
+
+| XS pair | Pair startup | Rank 0 process reads by ready | Rank 1 process reads by ready | Decode |
+| --- | ---: | ---: | ---: | ---: |
+| Cold sample | 46.17 s | 112.54 GiB | 108.53 GiB | 25.4 tok/s |
+| Warmer sample | 46.67 s | 95.83 GiB | 108.45 GiB | 26.3 tok/s |
+
+The answers matched exactly, with 178/213 DSpark drafts accepted in each run.
+The startup interval starts before worker launch and ends when health reports
+the pair ready. Process `read_bytes` covers all physical reads charged to each
+engine, not only model shards or Engram, and request-time reads were another
+0.15–0.18 GiB per rank. Each condition has one run. The result is not proof
+that a warmer cache cannot improve other workloads or that model I/O is gone.
+All owned processes exited. [Raw XS results](xs-tp-coldwarm.json),
+[cold worker log](xs-tp-cold-worker.txt), [warmer worker log](xs-tp-warm-worker.txt).
+
+The same check on Maya-S found 0/512 sampled pages resident on either host
+after targeted eviction; after the cold pair exited, 22/512 and 15/512 sampled
+pages were resident. Cold and second-launch startup were 91.30 and 67.20 s.
+Process reads by ready were 174.30/166.03 GiB and 173.47/165.94 GiB for
+ranks 0/1 respectively. The answers matched, with 185/211 drafts accepted
+each time; decode was 20.8 and 21.9 tok/s. The second launch's shorter time
+does not establish why it was faster, especially with so little sampled cache
+resident and nearly unchanged physical reads. Both pairs exited. [Raw S results](s-tp-coldwarm.json),
+[cold worker log](s-tp-cold-worker.txt), [warmer worker log](s-tp-warm-worker.txt).
+
+For a guarded XS single-host control with the same model, prompt, sampling,
+context, engine and DSpark setting, the reserve was 8,192 MiB and expert
+read-ahead was capped at zero to preserve memory headroom. Startup took 25.03
+and 23.03 s; process reads by ready were 110.71 and 110.47 GiB, with another
+0.54–0.55 GiB during each request. Decode was 35.9 and 36.0 tok/s, and both
+single-host answers matched with 175/208 drafts accepted. After the first
+process exited, 0/448 sampled source pages were resident, so the second run
+is not a fully warm-cache measurement. Its answer differed from the paired
+answer despite a matching opening. The single-host and pair configurations
+also differ in expert placement and reserve, so this is not an isolated TP
+overhead measurement. The single-host engine reported 14,784 GPU expert slots
+and 576 CPU experts. [Raw single-host XS results](xs-single-coldwarm.json).
+
+The same guarded single-host control on S took 27.05 and 27.03 s to start,
+with 129.90 and 129.33 GiB of engine process reads by ready. The 256-token
+requests incurred another 48.83 and 45.78 GiB of process reads, respectively,
+and decoded at 15.3 and 16.0 tok/s. Answers matched between these two S
+single-host runs, with 185/219 drafts accepted each time; their answer differed
+from the paired answer. Targeted eviction left 0/512 sampled pages resident
+before the first start; after it exited, 17/512 were resident, so the second
+start was not a fully warm-cache test. In the paired S runs above, each rank
+incurred approximately 0.18–0.19 GiB of process reads during the same request.
+The different reserve, placement and memory pressure are part of this
+comparison; the counters do not identify which specific data was read. Both
+owned single-host processes exited. The single-host engine reported 9,063 GPU
+expert slots and 6,297 CPU experts. [Raw single-host S results](s-single-coldwarm.json).
+
 ## Earlier XS and S comparisons
 
 The XS pair used matching checked pack and executable identities, gfx1151 on
