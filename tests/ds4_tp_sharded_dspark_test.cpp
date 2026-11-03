@@ -8,6 +8,7 @@
 #include "ds4_tp_test_identity.hpp"
 #include <algorithm>
 #include <cmath>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstdint>
@@ -57,12 +58,33 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
         Worker worker(*comm,static_cast<std::uint64_t>(context),static_cast<std::uint32_t>(model.vocab()),chunk>0?chunk:16);
         ModelWorker<strata::ds4::Model> adapter(model,chunk>0); std::uint64_t processed=0;
         while (!worker.state().stopped()) {
-            CHECK(worker.run_one([&](const Control& c,std::string& e){return adapter.execute(c,e);},error)); ++processed;
+            CHECK(worker.run_one([&](const Control& c,std::string& e) {
+                const char* stop=std::getenv("DS4_TP_TEST_STOP_COMMAND");
+                if (stop && ((std::string(stop)=="verify" && c.command==Command::Verify) ||
+                             (std::string(stop)=="verdict" && c.command==Command::Verdict))) {
+                    std::fprintf(stderr,"DS4_TEST_STOP %s\n",stop); std::fflush(stderr);
+                    std::raise(SIGSTOP); // The owned monitor kills this stopped test worker.
+                }
+                return adapter.execute(c,e);
+            },error)); ++processed;
         }
         CHECK(worker.state().position()==static_cast<std::uint64_t>(model.pos()));
         CHECK(send_message(*comm,{Command::Shutdown,processed+1,static_cast<std::uint64_t>(model.pos()),{}},chunk>0?chunk:16,error));
         std::printf("rank 1: DSpark worker stopped at position %lld\n",static_cast<long long>(model.pos())); return 0;
     }
+    int notifications=0; std::string notified;
+    model.tp2_set_failure_handler([&](const std::string& cause) { ++notifications; notified=cause; });
+    const bool expect_loss=std::getenv("DS4_TP_TEST_EXPECT_SPEC_LOSS")!=nullptr;
+    const auto check_loss=[&]() {
+        const std::string first=error;
+        if (first.find("peer closed the bootstrap connection")==std::string::npos) return false;
+        error.clear();
+        if (model.step(prompt[0],true,error) || error!=first) return false;
+        if (model.feed(prompt.data(),1,1,error) || error!=first) return false;
+        if (notifications!=1 || notified!=first || model.tp2_failure()!=first) return false;
+        std::printf("rank 0 preserved first speculative peer-loss cause and rejected later operations: %s\n",first.c_str());
+        return true;
+    };
     const auto feed_prompt=[&]() {
         for (std::size_t at=0;at<prompt.size();) {
             const auto last=std::min(prompt.size(),at+static_cast<std::size_t>(model.feed_unit()));
@@ -115,7 +137,9 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
         for (int t:drafts) CHECK(t>=0 && t<model.vocab());
         const auto start=static_cast<std::uint64_t>(model.pos());
         int accepted=-1,next=-1;
-        CHECK(model.verify(y,drafts,0,1,0,0,0,0,accepted,next,error));
+        if (!model.verify(y,drafts,0,1,0,0,0,0,accepted,next,error)) {
+            CHECK(expect_loss && check_loss()); return 0;
+        }
         CHECK(accepted>=0 && static_cast<std::size_t>(accepted)<=drafts.size() && next>=0 && next<model.vocab());
         CHECK(model.pos()==static_cast<std::int64_t>(start+1+accepted));
         generated.push_back(y);
@@ -127,6 +151,7 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
         std::fprintf(stderr,"DSpark round=%zu offered=%zu accepted=%d emitted=%zu/%zu\n",rounds,drafts.size(),accepted,generated.size(),count);
         if (generated.back()==1) break;
     }
+    CHECK(!expect_loss);
     CHECK(expected.empty() || generated==expected);
     CHECK(target_only || (rounds>0 && offered>0 && kept>0));
     CHECK(model.tp2_shutdown(error));

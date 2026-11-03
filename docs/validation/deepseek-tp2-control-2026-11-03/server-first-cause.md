@@ -33,4 +33,16 @@ and terminated only that worker. The lead retained the original `verbs peer
 closed the bootstrap connection` cause, invoked its failure callback once,
 and rejected later feed and step operations with the same cause. The lead
 test and monitor exited successfully. This checks a chunk-prefill operation;
-verify, verdict, rollback and HTTP cancellation failure cases remain open.
+the subsequent cases below exercise speculative failure points separately.
+
+Three further real-identity XS model tests stopped and terminated their own
+worker at the verify command, at the verdict command, and during rollback
+after ring restoration was queued but before compressor restoration. In each
+case an owned monitor checked the stopped worker's executable and PID before
+terminating it. The lead retained the first peer-close cause, notified once,
+and rejected later feed and step operations with the same cause. These tests
+do not substitute for HTTP cancellation or the remaining operational gates.
+The process-stopping model hooks were then placed behind a test-only compile
+definition. Both the test binary and regular engine built, the hook strings
+were absent from the regular engine, and the guarded rollback test passed again
+with the same first-cause and later-operation checks.

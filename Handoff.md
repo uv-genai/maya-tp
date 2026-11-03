@@ -1943,3 +1943,26 @@ cause. Both test and monitor exited. Logs
 `/tmp/ds4-tp2-114-prefill-rank{0,1}.log` and
 `/tmp/ds4-tp2-114-prefill-monitor.log`. The marker and assertion remain
 uncommitted test-only changes; other failure points still need testing.
+The prefill loss test and report were committed as `3df544a`. A new test-only
+speculative failure harness is running: its own worker stops itself on the
+first verify command, then an owned remote monitor verifies the executable and
+kills that stopped PID. Lead/worker logs and PIDs use
+`/tmp/ds4-tp2-114-verify-rank{0,1}.{pid,log}`; monitor PID/log on strix-halo-1
+uses `/tmp/ds4-tp2-114-verify-monitor.{pid,log}`. The verify injection passed:
+the first peer-close cause was retained and later feed/step calls rejected;
+the lead and monitor exited. The verdict-boundary injection also passed with
+the same sticky cause and rejection of later operations; logs
+`/tmp/ds4-tp2-114-verdict-rank{0,1}.log` and remote monitor
+`/tmp/ds4-tp2-114-verdict-monitor.log`. The rollback injection also passed:
+rank 1 stopped after queuing ring restoration and before compressor restoration,
+then the owned monitor verified and killed it. The lead retained the first
+peer-close cause and rejected later feed/step calls. Logs
+`/tmp/ds4-tp2-114-rollback-rank{0,1}.log` and remote monitor
+`/tmp/ds4-tp2-114-rollback-monitor.log`. The stop hooks are now guarded by
+`STRATA_DS4_TP2_TESTING`; test and isolated engine builds passed (log
+`/tmp/ds4-tp2-114-test-guard-build.log`), and their strings are absent from
+the regular `maya-ds4` binary. The guarded rollback injection passed again:
+first peer-close cause retained, later operations rejected, all owned processes
+exited. Logs `/tmp/ds4-tp2-114-guard-rollback-rank{0,1}.log` and remote
+monitor `/tmp/ds4-tp2-114-guard-rollback-monitor.log`. HTTP cancellation and
+remaining operational gates stay open.

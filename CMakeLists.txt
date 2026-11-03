@@ -685,7 +685,7 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
                        tests/ds4_tp_text_rdma_test.cpp tests/ds4_tp_sharded_control_test.cpp
                        tests/ds4_tp_sharded_rollback_test.cpp tests/ds4_tp_sharded_dspark_test.cpp
                        tests/ds4_tp_sharded_sample_test.cpp)
-        target_compile_definitions(ds4_tp_verify_test PRIVATE STRATA_DS4_TP2_RDMA)
+        target_compile_definitions(ds4_tp_verify_test PRIVATE STRATA_DS4_TP2_RDMA STRATA_DS4_TP2_TESTING)
         target_link_libraries(ds4_tp_verify_test PRIVATE strata_net)
       endif()
     endif()

@@ -71,6 +71,9 @@
 #include <chrono>
 #include <climits>
 #include <cmath>
+#if defined(STRATA_DS4_TP2_TESTING)
+#include <csignal>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -16288,6 +16291,12 @@ struct Model::Impl {
                 cudaSetDevice(devs[di].id);
                 ring_restore_batch(rb[di], p0, g.win, keep, T, g.hd, devs[di].st);
             }
+#if defined(STRATA_DS4_TP2_TESTING)
+        if (o.tp2_rank==1 && std::getenv("DS4_TP_TEST_STOP_ROLLBACK")) {
+            std::fprintf(stderr,"DS4_TEST_STOP rollback\n"); std::fflush(stderr);
+            std::raise(SIGSTOP); // The owned fault-injection monitor kills this test worker.
+        }
+#endif
         // the compressors' state: the same, one launch a device (two copies and a launch a layer and member were
         // ~0.3 ms of the host's before the next draft)
         std::vector<CompBatch> cb(devs.size());
@@ -19655,6 +19664,7 @@ struct Model::Impl {
             return tp_test_fail("ds4 tp2: invalid test reduction",err);
         const auto bytes=static_cast<std::size_t>(rows)*static_cast<std::size_t>(width)*sizeof(float);
         if (bytes>tp_test_limit) return tp_test_fail("ds4 tp2: reduction exceeds negotiated limit",err);
+#if defined(STRATA_DS4_TP2_TESTING)
         if (o.tp2_chunk_test && o.tp2_rank==0 && rows>kWin) {
             static bool marked=false;
             const char* path=marked ? nullptr : std::getenv("DS4_TP_TEST_PARTIAL_MARKER");
@@ -19662,6 +19672,7 @@ struct Model::Impl {
                 std::fprintf(f,"chunk reduction rows=%d\n",rows); std::fclose(f); marked=true;
             }
         }
+#endif
         const float* other=tp_test_comm->ExchangePartial(data,bytes,stream,&err);
         if (!other) return tp_test_fail(err,err);
         strata::net::AddRowsBroadcast(other,data,static_cast<std::uint32_t>(rows),
