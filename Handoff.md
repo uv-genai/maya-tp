@@ -1696,4 +1696,17 @@ GEN. The first multi-request test exposed a trailing newline; after trimming
 the cause, all four `serve.test_tp2_peer_loss` tests pass, including an earlier
 pair-down cause followed by a different error. See
 `docs/validation/deepseek-tp2-control-2026-11-03/server-first-cause.md`.
+Ordered HIP/server/tools CI passed: HIP mappings, 614 server tests (11 skipped)
+and 698 tools tests (3 skipped). Logs use prefix `/tmp/ds4-tp2-114-ci-`.
+A real XS model-loss test stopped its owned worker
+during generation; rank 0 preserved `verbs peer closed the bootstrap
+connection` and rejected subsequent step/feed with the same cause. Both ranks
+and their monitor exited. Logs are `/tmp/ds4-tp2-114-model-loss-rank0.log`
+and the corresponding remote rank1 log.
 Real DeepSeek API peer-loss injection and GLM GPU regression remain open.
+
+Uncommitted controller integration: attach/shutdown methods have been renamed
+for eventual engine use, a one-shot failure callback and explicit post-shutdown
+guard have been added, and the real loss test now checks callback count/cause.
+The isolated test and engine build is owned session 91570; log
+`/tmp/ds4-tp2-111-api-build.log`. These changes need paired GPU validation.

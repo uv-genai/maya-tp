@@ -914,8 +914,9 @@ class StrataEngine:
                 continue
             # Engine-wide lines (STAT, NOTE, TP2 pair-down) are handled even without multi
             if line.startswith("TP2_DOWN"):
-                self.info["tp_pair"] = "down"
-                print("[maya] TP2 pair down: " + (line[8:].strip() or "mirror send failed") +
+                cause = line[8:].strip() or "mirror send failed"
+                self._tp_pair_down(cause)
+                print("[maya] TP2 pair down: " + cause +
                       " - restart both ranks (rank1.sh then rank0.sh)", flush=True)
                 continue
             if line.startswith("ERR "):
@@ -967,8 +968,9 @@ class StrataEngine:
             return True
         if line.startswith("TP2_DOWN"):
             # Rank 0 lost rank 1's control socket (issue #6). Sticky until both ranks restart.
-            self.info["tp_pair"] = "down"
-            print("[maya] TP2 pair down: " + (line[8:].strip() or "mirror send failed") +
+            cause = line[8:].strip() or "mirror send failed"
+            self._tp_pair_down(cause)
+            print("[maya] TP2 pair down: " + cause +
                   " - restart both ranks (tools/tp2/rank1.sh then rank0.sh)", flush=True)
             return True
         return False
@@ -1260,14 +1262,23 @@ class StrataEngine:
         on = sampling.get("experimental_speed_projection")
         return f" cvec={int(on)}" if isinstance(on, bool) else ""
 
+    def _tp_pair_down(self, cause: str) -> str:
+        cause = cause.strip()
+        message = cause if cause.startswith("TP2 pair down") else "TP2 pair down: " + cause
+        if "restart both ranks" not in message:
+            message += "; restart both ranks"
+        # The pump and request thread can both report the same failure. The
+        # first one retains the cause and blocks all later writes to the pair.
+        first = self.info.setdefault("tp_error", message)
+        self.info["tp_pair"] = "down"
+        return first
+
     def _request_error(self, message: str) -> ValueError:
         # A queued collective can notice peer loss before the next mirror send. Its communicator is
         # already unusable; make health/restart guards sticky immediately, preserving the cause.
         if int(self.info.get("tp_world", 1) or 1) > 1 and \
                 message.startswith(("verbs communicator is poisoned", "TP2 pair down")):
-            self.info["tp_pair"] = "down"
-            if not message.startswith("TP2 pair down"):
-                message = "TP2 pair down: " + message + "; restart both ranks"
+            message = self._tp_pair_down(message)
         return ValueError(message)
 
     def generate(self, ids, max_new, sampling, cancel, embeddings=None):
@@ -1275,7 +1286,7 @@ class StrataEngine:
         the HTTP layer turns it into an SSE comment, which keeps clients' watchdogs calm and notices a client that
         has gone.  A consumer that stops early (or `cancel`) makes the engine STOP, so it does not run to max_new."""
         if getattr(self, "info", {}).get("tp_pair") == "down":
-            raise ValueError("TP2 pair down: restart both ranks")
+            raise ValueError(self.info.get("tp_error", "TP2 pair down: restart both ranks"))
         if self.multi:
             yield from self._generate_multi(ids, max_new, sampling, cancel, embeddings)
             return
