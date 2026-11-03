@@ -15716,6 +15716,39 @@ struct Model::Impl {
         return tok_back(d);
     }
 
+    // Execute a speculative target window without deciding which rows commit.
+    // The caller owns the window's position and must finish it before another
+    // model operation. Kept separate so a TP worker can execute this same
+    // trunk operation and wait for the authoritative rank-0 verdict.
+    bool verify_target_window(const int* tokens, int count, std::string& err) {
+        spec_win = true;
+        const double tv = now_ms();
+        const bool ok = forward(tokens, count, count, err, 0);
+        st.verify_ms += now_ms() - tv;
+        spec_win = false;
+        return ok;
+    }
+
+    // Commit the input token plus an accepted draft prefix. The caller must
+    // have run verify_target_window at p0 and must provide a checked verdict.
+    bool commit_verify_window(int64_t p0, int count, int accepted, std::string& err) {
+        if (count < 1 || count > kWin || accepted < 0 || accepted >= count || pos != p0 + count) {
+            err = "invalid speculative verification commit";
+            return false;
+        }
+        drafts_q = false;
+        rollback(p0, count, accepted + 1);
+        if (!seed_drafter(p0, accepted + 1, 0, err)) return false;
+        const int offered = count - 1;
+        st.drafts_offered += offered;
+        st.drafts_accepted += accepted;
+        for (int i = 0; i < offered && i <= accepted && i < 8; ++i) {
+            ++st.draft_reached[i];
+            if (i < accepted) ++st.draft_kept[i];
+        }
+        return true;
+    }
+
     // [y, drafts] at positions pos ..: the trunk's verdict, its next token, and the state back to what it kept.
     // Greedy: the drafts the trunk's argmax agrees with.  Sampled: the speculative-sampling rule over the request's own
     // chain (top_k, top_p, min_p, temperature): draft d stands with probability min(1, p(d) / q(d)), q the distribution
@@ -15729,12 +15762,7 @@ struct Model::Impl {
         int tk[kWin];
         tk[0] = y;
         for (int i = 0; i < n; ++i) tk[i + 1] = drafts[(size_t) i];
-        spec_win = true;
-        const double tv = now_ms();
-        const bool ok = forward(tk, T, T, err, 0);   // (a window streams nothing - the lane is a decoded token's)
-        st.verify_ms += now_ms() - tv;
-        spec_win = false;
-        if (!ok) return false;
+        if (!verify_target_window(tk, T, err)) return false; // (a window streams nothing)
         Dev& hd = devs[(size_t) head_dev];
         cudaSetDevice(hd.id);
         int m = 0;
@@ -15791,16 +15819,8 @@ struct Model::Impl {
             tk[m] = next;
             lp_pick(hd.logits, m + 1, tk, p0 + 1);
         }
-        drafts_q = false;
-        rollback(p0, T, m + 1);
-        if (!seed_drafter(p0, m + 1, 0, err)) return false;
+        if (!commit_verify_window(p0, T, m, err)) return false;
         accepted = m;
-        st.drafts_offered += n;
-        st.drafts_accepted += m;
-        for (int i = 0; i < n && i <= m && i < 8; ++i) {
-            ++st.draft_reached[i];
-            if (i < m) ++st.draft_kept[i];
-        }
         return true;
     }
 
