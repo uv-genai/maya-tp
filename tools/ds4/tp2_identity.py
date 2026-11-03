@@ -80,6 +80,42 @@ def _digest(value):
     return hashlib.sha256(data).hexdigest()
 
 
+def partition_identity(raw):
+    """Describe the C++ rank_geometry contract from the actual pack metadata."""
+    try:
+        lines = raw.decode("utf-8").splitlines()
+    except UnicodeDecodeError as exc:
+        raise IdentityError("ds4.txt is not UTF-8") from exc
+    keys = ("hidden_size", "num_hidden_layers", "num_attention_heads", "o_groups",
+            "n_routed_experts", "moe_intermediate_size")
+    values = {}
+    for line in lines:
+        parts = line.split()
+        if not parts or parts[0] not in keys:
+            continue
+        if len(parts) != 2 or parts[0] in values or not parts[1].isascii() or not parts[1].isdigit():
+            raise IdentityError("invalid or duplicate partition geometry")
+        values[parts[0]] = int(parts[1])
+    if set(values) != set(keys) or any(not 0 < v <= 1048576 for v in values.values()):
+        raise IdentityError("incomplete or invalid partition geometry")
+    width = values["moe_intermediate_size"]
+    layers = values["num_hidden_layers"]
+    heads = values["num_attention_heads"]
+    groups = values["o_groups"]
+    block = 256
+    if (layers > 4096 or width % block or width // block < 2 or heads < 2 or groups < 2
+            or heads % 2 or groups % 2 or heads % groups):
+        raise IdentityError("unsupported partition geometry")
+    rank_layers = []
+    for layer in range(layers):
+        blocks = width // block
+        cut = (blocks // 2 + (blocks % 2 if layer % 2 == 0 else 0)) * block
+        rank_layers.append([[0, cut, 0, heads // 2, 0, groups // 2],
+                            [cut, width - cut, heads // 2, heads // 2, groups // 2, groups // 2]])
+    description = {"version": 1, "world": 2, "block": block, "geometry": values, "layers": rank_layers}
+    return _digest(description), description
+
+
 def _model_config(raw):
     try:
         lines = raw.decode("utf-8").splitlines()
@@ -251,11 +287,28 @@ def check_manifest(manifest, pack):
     return identity
 
 
+def prepare_identity(manifest, pack, executable):
+    """Prepare handshake data after validating the local pack and executable."""
+    model_digest = check_manifest(manifest, pack)
+    exe = Path(executable).resolve(strict=True)
+    if not os.access(exe, os.X_OK):
+        raise IdentityError("engine executable is not executable")
+    build_digest, exe_stat, _ = _stable_read(exe)
+    _, _, config = _stable_read(Path(pack) / "ds4.txt", True)
+    partition_digest, description = partition_identity(config)
+    # Detect concurrent changes while the executable and geometry were read.
+    if check_manifest(manifest, pack) != model_digest or _path_signature(exe) != exe_stat:
+        raise IdentityError("identity inputs changed during preflight")
+    return {"model_digest": model_digest, "partition_digest": partition_digest,
+            "build_digest": build_digest, "geometry": description["geometry"]}
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("action", choices=("create", "check"))
+    p.add_argument("action", choices=("create", "check", "prepare"))
     p.add_argument("--pack", required=True)
     p.add_argument("--manifest", required=True)
+    p.add_argument("--executable", help="engine binary to hash for prepare")
     a = p.parse_args(argv)
     try:
         if a.action == "create":
@@ -283,7 +336,13 @@ def main(argv=None):
             data = manifest_path.read_text(encoding="utf-8")
             if len(data.encode("utf-8")) > MAX_META:
                 raise IdentityError("manifest is too large")
-            print(check_manifest(json.loads(data), a.pack))
+            manifest = json.loads(data)
+            if a.action == "prepare":
+                if not a.executable:
+                    raise IdentityError("prepare requires --executable")
+                print(json.dumps(prepare_identity(manifest, a.pack, a.executable), sort_keys=True))
+            else:
+                print(check_manifest(manifest, a.pack))
         return 0
     except (OSError, ValueError, KeyError, TypeError) as exc:
         print(f"ds4 tp2 identity: {exc}", file=sys.stderr)

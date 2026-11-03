@@ -1,5 +1,6 @@
 #include "../src/ds4/ds4_tp_channel.hpp"
 #include "../src/ds4/ds4_tp_worker.hpp"
+#include "../src/ds4/ds4_tp_controller.hpp"
 
 #include <cstring>
 #include <cstdio>
@@ -15,11 +16,16 @@ public:
     std::string order;
     bool fail_send = false;
     bool fail_queued = false;
+    bool fail_begin = false, fail_end = false;
     int begins = 0, ends = 0;
     std::uint32_t rank() const noexcept override { return rank_value; }
     std::uint32_t world_size() const noexcept override { return 2; }
-    bool BeginOperation(std::uint64_t, std::string*) override { ++begins; return true; }
-    bool EndOperation(std::uint64_t, std::string*) override { ++ends; return true; }
+    bool BeginOperation(std::uint64_t, std::string* e) override {
+        ++begins; if (fail_begin) { *e="begin failed"; return false; } return true;
+    }
+    bool EndOperation(std::uint64_t, std::string* e) override {
+        ++ends; if (fail_end) { *e="end failed"; return false; } return true;
+    }
     bool SendControl(const void* data, std::size_t n, std::string* e) override {
         order += 'S';
         if (fail_send) { *e = "send failed"; return false; }
@@ -89,5 +95,45 @@ int main() {
     CHECK(!dead.run_one(handle,error) && error=="receive failed" && disconnected.recv_calls==1);
     Fake wrong_rank; Worker not_worker(wrong_rank,32,100,16);
     CHECK(!not_worker.run_one(handle,error) && wrong_rank.recv_calls==0 && not_worker.state().failed());
+    Fake leader;
+    CHECK(encode_control(Control{Command::Shutdown,5,4,{}},16,leader.inbox,error));
+    Controller controller(leader,32,100,16); calls=0;
+    CHECK(controller.run(Command::Feed,0,{1,2},handle,error));
+    CHECK(controller.run(Command::Verify,2,{3,4,5},handle,error));
+    CHECK(controller.state().awaiting_verdict());
+    CHECK(controller.run(Command::Verdict,4,{1,6},handle,error));
+    CHECK(controller.run(Command::Shutdown,4,{},handle,error));
+    CHECK(controller.state().stopped() && controller.state().position()==4);
+    CHECK(calls==4 && leader.begins==4 && leader.ends==4 && leader.recv_calls==1);
+    Fake failed_leader; failed_leader.fail_queued=true;
+    Controller broken(failed_leader,32,100,16); calls=0;
+    CHECK(!broken.run(Command::Step,0,{1},handle,error) && error=="queued peer failure");
+    const auto sent_before=failed_leader.sent.size();
+    CHECK(!broken.run(Command::Step,0,{1},handle,error) && error=="queued peer failure");
+    CHECK(failed_leader.sent.size()==sent_before && calls==1 && failed_leader.ends==0);
+    Fake bad_verdict; Controller guarded(bad_verdict,32,100,16);
+    CHECK(guarded.run(Command::Verify,0,{1,2},handle,error));
+    const auto verify_bytes=bad_verdict.sent.size();
+    CHECK(!guarded.run(Command::Step,0,{1},handle,error));
+    CHECK(guarded.state().failed() && bad_verdict.sent.size()==verify_bytes);
+    Fake bad_ack;
+    CHECK(encode_control(Control{Command::Shutdown,2,1,{}},16,bad_ack.inbox,error));
+    Controller ack_guard(bad_ack,32,100,16);
+    CHECK(!ack_guard.run(Command::Shutdown,0,{},handle,error));
+    CHECK(ack_guard.state().failed() && error.find("acknowledgement")!=std::string::npos);
+    for (int point=0;point<4;++point) {
+        Fake fault; fault.fail_send=point==0; fault.fail_begin=point==1; fault.fail_end=point==3;
+        Controller guarded_fault(fault,32,100,16); int ran=0;
+        const auto operation=[&](const Control&,std::string& e) {
+            ++ran; if (point==2) { e="model failed"; return false; } return true;
+        };
+        CHECK(!guarded_fault.run(Command::Step,0,{1},operation,error));
+        const std::string first=error; const auto bytes=fault.sent.size();
+        CHECK(!guarded_fault.run(Command::Step,0,{1},operation,error) && error==first);
+        CHECK(fault.sent.size()==bytes && ran==(point<2?0:1));
+    }
+    Fake not_leader; not_leader.rank_value=1;
+    Controller wrong_leader(not_leader,32,100,16);
+    CHECK(!wrong_leader.run(Command::Step,0,{1},handle,error) && not_leader.sent.empty());
     std::puts("DeepSeek TP2 channel: identity ordering, bounded receive and transport errors passed");
 }

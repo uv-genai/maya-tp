@@ -37,7 +37,7 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
     id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
     id.model_digest[0]=1; id.partition_digest[0]=2; id.build_digest[0]=3;
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
-    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error));
+    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error,rank==0));
     if (rank==1) {
         Worker worker(*comm,32768,static_cast<std::uint32_t>(model.vocab()),16);
         ModelWorker<strata::ds4::Model> adapter(model); std::uint64_t processed=0;
@@ -48,18 +48,9 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
         CHECK(send_message(*comm,{Command::Shutdown,processed+1,static_cast<std::uint64_t>(model.pos()),{}},16,error));
         std::printf("rank 1: DSpark worker stopped at position %lld\n",static_cast<long long>(model.pos())); return 0;
     }
-    std::uint64_t sequence=0;
-    auto begin=[&](Command cmd,const std::vector<std::uint32_t>& words,std::uint64_t position)->bool {
-        return send_message(*comm,{cmd,++sequence,position,words},16,error) && comm->BeginOperation(sequence,&error);
-    };
-    auto finish=[&]()->bool {
-        return model.tp_worker_synchronize(error) && comm->CheckQueued(&error) && comm->EndOperation(sequence,&error);
-    };
     for (std::size_t at=0;at<prompt.size();) {
         const auto last=std::min(prompt.size(),at+std::size_t{16});
-        std::vector<std::uint32_t> words(prompt.begin()+static_cast<std::ptrdiff_t>(at),prompt.begin()+static_cast<std::ptrdiff_t>(last));
-        CHECK(begin(Command::Feed,words,static_cast<std::uint64_t>(model.pos())));
-        CHECK(model.feed(prompt.data()+at,static_cast<int>(last-at),last==prompt.size()?1:0,error)); CHECK(finish()); at=last;
+        CHECK(model.feed(prompt.data()+at,static_cast<int>(last-at),last==prompt.size()?1:0,error)); at=last;
     }
     std::vector<int> generated; int y=model.sample(0,1,0,0,0,0); CHECK(y>=0 && y<model.vocab());
     std::size_t rounds=0,offered=0,kept=0;
@@ -71,20 +62,15 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
         drafts.resize(std::min(drafts.size(),expected.size()-generated.size()-1));
         const auto eos=std::find(drafts.begin(),drafts.end(),1); if (eos!=drafts.end()) drafts.erase(eos+1,drafts.end());
         if (drafts.empty()) {
-            CHECK(begin(Command::Step,{static_cast<std::uint32_t>(y)},static_cast<std::uint64_t>(model.pos())));
-            CHECK(model.step(y,true,error)); CHECK(finish()); generated.push_back(y);
+            CHECK(model.step(y,true,error)); generated.push_back(y);
             y=model.sample(0,1,0,0,0,0); CHECK(y>=0 && y<model.vocab()); continue;
         }
-        std::vector<std::uint32_t> words; words.push_back(static_cast<std::uint32_t>(y));
-        for (int t:drafts) { CHECK(t>=0 && t<model.vocab()); words.push_back(static_cast<std::uint32_t>(t)); }
+        for (int t:drafts) CHECK(t>=0 && t<model.vocab());
         const auto start=static_cast<std::uint64_t>(model.pos());
-        CHECK(begin(Command::Verify,words,start));
         int accepted=-1,next=-1;
-        CHECK(model.verify(y,drafts,0,1,0,0,0,0,accepted,next,error)); CHECK(finish());
+        CHECK(model.verify(y,drafts,0,1,0,0,0,0,accepted,next,error));
         CHECK(accepted>=0 && static_cast<std::size_t>(accepted)<=drafts.size() && next>=0 && next<model.vocab());
         CHECK(model.pos()==static_cast<std::int64_t>(start+1+accepted));
-        CHECK(begin(Command::Verdict,{static_cast<std::uint32_t>(accepted),static_cast<std::uint32_t>(next)},
-                    static_cast<std::uint64_t>(model.pos()))); CHECK(finish());
         generated.push_back(y);
         for (int j=0;j<accepted;++j) generated.push_back(drafts[static_cast<std::size_t>(j)]);
         CHECK(generated.size()<=expected.size());
@@ -95,9 +81,7 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
         if (generated.back()==1) break;
     }
     CHECK(generated==expected && rounds>0 && offered>0 && kept>0);
-    CHECK(begin(Command::Shutdown,{},static_cast<std::uint64_t>(model.pos()))); CHECK(finish());
-    Control done; CHECK(receive_message(*comm,16,done,error));
-    CHECK(done.command==Command::Shutdown && done.sequence==sequence+1 && done.position==static_cast<std::uint64_t>(model.pos()));
+    CHECK(model.tp2_shutdown_test(error));
     std::ofstream out(argv[9]); CHECK(out.good()); for (int t:generated) out<<t<<' '; out<<'\n'; CHECK(out.good());
     std::printf("DSpark generated=%zu rounds=%zu offered=%zu accepted=%zu; target-only sequence matched\n",generated.size(),rounds,offered,kept);
     return 0;

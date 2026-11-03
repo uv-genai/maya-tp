@@ -10,6 +10,38 @@ from tools.ds4 import tp2_identity as identity
 
 
 class DeepSeekTP2IdentityTest(unittest.TestCase):
+    def test_partition_identity_covers_both_alternating_rank_slices(self):
+        config = (b"hidden_size 5120\nnum_hidden_layers 2\nnum_attention_heads 64\n"
+                  b"o_groups 8\nn_routed_experts 384\nmoe_intermediate_size 2304\n")
+        digest, plan = identity.partition_identity(config)
+        self.assertRegex(digest, r"^[0-9a-f]{64}$")
+        self.assertEqual(plan["layers"][0], [[0, 1280, 0, 32, 0, 4], [1280, 1024, 32, 32, 4, 4]])
+        self.assertEqual(plan["layers"][1], [[0, 1024, 0, 32, 0, 4], [1024, 1280, 32, 32, 4, 4]])
+        self.assertNotEqual(digest, identity.partition_identity(config.replace(b"5120", b"4096"))[0])
+        for bad in (config.replace(b"2304", b"2305"), config.replace(b"o_groups 8", b"o_groups 7"),
+                    config + b"hidden_size 5120\n", config.replace(b"num_hidden_layers 2\n", b"")):
+            with self.subTest(bad=bad), self.assertRaises(identity.IdentityError):
+                identity.partition_identity(bad)
+
+    def test_prepare_binds_pack_partition_and_executable(self):
+        pack = self.make_pack("a")
+        with (pack / "ds4.txt").open("a") as f:
+            f.write("num_hidden_layers 2\nnum_attention_heads 64\no_groups 8\n"
+                    "n_routed_experts 384\nmoe_intermediate_size 2304\n")
+        manifest = identity.create_manifest(pack)
+        exe = self.base / "engine"
+        exe.write_bytes(b"one engine")
+        exe.chmod(0o700)
+        prepared = identity.prepare_identity(manifest, pack, exe)
+        self.assertEqual(prepared["model_digest"], manifest["identity"])
+        self.assertEqual(prepared["geometry"]["moe_intermediate_size"], 2304)
+        self.assertRegex(prepared["partition_digest"], r"^[0-9a-f]{64}$")
+        exe.write_bytes(b"other engine")
+        self.assertNotEqual(prepared["build_digest"], identity.prepare_identity(manifest, pack, exe)["build_digest"])
+        (pack.parent / "weights.gguf").write_bytes(b"different source")
+        with self.assertRaises(identity.IdentityError):
+            identity.prepare_identity(manifest, pack, exe)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.base = Path(self.tmp.name)

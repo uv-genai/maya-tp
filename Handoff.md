@@ -1637,7 +1637,7 @@ API pair-down behavior remains to be integrated and tested.
 P3 (#111): `tools/ds4/tp2_identity.py` is a stdlib pack identity
 helper under test. It hashes pack metadata and each indexed source, produces a
 path-independent shared digest and checks local file identity before reuse.
-Nine synthetic unit tests pass. Independent full XS hashes produced the same
+Eleven synthetic unit tests pass. Independent full XS hashes produced the same
 identity on both hosts (`0c4933e6b70f53f7eff163a4053f8970fce470cacc4065983ebe28bd507c57af`),
 each cached check passed, and a deliberately modified source signature was
 rejected. Independent full S hashes matched on both hosts
@@ -1649,7 +1649,22 @@ at the corresponding `-remote.manifest` paths. The cache assumes a trusted
 filesystem and manifest. The helper is not yet wired to rank startup;
 user-facing serving must not use synthetic test identities.
 
-P3 controller integration is in progress: its host channel test passes, and
-test-only model wrappers for feed, step, reset and speculative verdicts are
-being built. They are not yet GPU validated or enabled for production. An
-owned build is session 86215, log `/tmp/ds4-tp2-111-controller-build.log`.
+P3 controller integration is in progress: its host channel tests pass. A
+test-only paired XS GPU run of ordinary feed, decode, reset and shutdown
+matched the earlier 64-token pair sequence and explicitly rejected unsupported
+checkpoint requests; both ranks exited. Logs are
+`/tmp/ds4-tp2-111-controller-xs-rank0b.log` and remote
+`/tmp/ds4-tp2-111-controller-xs-rank1b.log`. A previous pair was stopped by its
+recorded PIDs because its 10.77 bootstrap address did not connect; the passing
+retry used 192.168.1.92 for control and usb4_rdma5 for data.
+
+Test-only DSpark model-wrapper validation on XS accepted 41 of 106 drafts and
+matched the target-only pair's 64-token sequence. Both ranks exited; logs are
+`/tmp/ds4-tp2-113-controller-xs-rank0.log` and remote
+`/tmp/ds4-tp2-113-controller-xs-rank1.log`. The S run accepted 41 of 113
+drafts and matched its target-only 64-token sequence; both ranks exited. Logs
+are `/tmp/ds4-tp2-113-controller-s-rank0.log` and remote
+`/tmp/ds4-tp2-113-controller-s-rank1.log`. The wrappers are not enabled for
+production. The preflight helper now computes model, partition and binary
+digests and returned matching S values independently on the two hosts. Real
+startup and handshake integration remain open.

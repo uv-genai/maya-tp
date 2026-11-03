@@ -174,7 +174,9 @@ public:
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
     // Test-only, non-owning; the communicator and its active operation scope
     // must outlive all model calls. Caller must first validate both identities.
-    bool tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err);
+    bool tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err,
+                         bool control_rank0 = false);
+    bool tp2_shutdown_test(std::string& err);
 #endif
 
     /// Feeds `token` at position pos(); with logits, the next token's logits are left on the head's device.

@@ -16,6 +16,15 @@ checks on each host succeeded; an intentionally altered cached source
 signature was rejected. Nine synthetic tests also cover changed files and
 metadata, redirects, invalid spans and atomic no-overwrite publication.
 
+The helper also derives a partition fingerprint from pack geometry and hashes
+the selected engine executable. On both hosts, preflight for the S pack and
+the same review executable returned partition fingerprint
+`b71b12627fd73832ac3ebace373bcd574b63f46f021104d711de5f9900304e94`
+and executable SHA-256
+`59b50149213fd42c3e2e3126f6b40f410846747ed93c9c4b249d5102f56a516f`.
+Its geometry vectors match the C++ partition unit tests; this is still
+preflight evidence, not a handshake using these values.
+
 The cache rehashes metadata but uses file identity and timestamps to detect
 subsequent source changes; it assumes a trusted local manifest and filesystem.
 It is not protection against a malicious actor or a change between the final

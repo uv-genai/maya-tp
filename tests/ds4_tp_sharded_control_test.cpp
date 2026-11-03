@@ -44,8 +44,7 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
     id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
     id.model_digest[0]=1; id.partition_digest[0]=2; id.build_digest[0]=3;
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
-    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error));
-    std::uint64_t sequence=0;
+    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error,rank==0));
     if (rank==1) {
         Worker worker(*comm,32768,static_cast<std::uint32_t>(model.vocab()),16);
         ModelWorker<strata::ds4::Model> adapter(model);
@@ -60,17 +59,17 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
         std::printf("rank 1 worker stopped at position %lld\n",static_cast<long long>(model.pos()));
         return 0;
     }
+    CHECK(!model.feed_mark(prompt.data(),1,1,1,error));
+    CHECK(error.find("checkpoints are not supported")!=std::string::npos && model.pos()==0);
     auto execute=[&](Command command,const std::vector<std::uint32_t>& words,bool logits)->bool {
-        Control c{command,++sequence,command==Command::Reset ? 0u : static_cast<std::uint64_t>(model.pos()),words};
-        if (!send_message(*comm,c,16,error) || !comm->BeginOperation(sequence,&error)) return false;
-        bool ok=false;
         if (command==Command::Feed) {
-            std::vector<int> ts(words.begin(),words.end()); ok=model.feed(ts.data(),static_cast<int>(ts.size()),logits?1:0,error);
-        } else if (command==Command::Step) ok=model.step(static_cast<int>(words[0]),logits,error);
-        else if (command==Command::Reset) ok=model.tp_worker_reset(error);
-        else if (command==Command::Shutdown) ok=true;
-        if (!ok || !model.tp_worker_synchronize(error) || !comm->CheckQueued(&error) || !comm->EndOperation(sequence,&error)) return false;
-        return true;
+            std::vector<int> ts(words.begin(),words.end());
+            return model.feed(ts.data(),static_cast<int>(ts.size()),logits?1:0,error);
+        }
+        if (command==Command::Step) return model.step(static_cast<int>(words[0]),logits,error);
+        if (command==Command::Reset) { model.reset(); return model.pos()==0; }
+        if (command==Command::Shutdown) return model.tp2_shutdown_test(error);
+        return false;
     };
     auto feed_prompt=[&]()->bool {
         for (std::size_t at=0;at<prompt.size();) {
@@ -95,8 +94,6 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
     CHECK(!generated.empty() && execute(Command::Reset,{},false) && model.pos()==0 && feed_prompt());
     CHECK(model.sample(0,1,0,0,0,0)==generated[0]);
     CHECK(execute(Command::Shutdown,{},false));
-    Control done; CHECK(receive_message(*comm,16,done,error));
-    CHECK(done.command==Command::Shutdown && done.sequence==sequence+1 && done.position==static_cast<std::uint64_t>(model.pos()));
     std::ofstream out(argv[9]); CHECK(out.good()); for (int token:generated) out<<token<<' '; out<<'\n'; CHECK(out.good());
     std::printf("rank 0 typed control: prompt=%zu generated=%zu position=%lld%s\n",prompt.size(),generated.size(),
                 static_cast<long long>(model.pos()),expected.empty()?"":"; previous pair sequence matched");

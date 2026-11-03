@@ -53,6 +53,7 @@
 #include "strata/platform/dedicated.hpp"
 #include "strata/platform/idle_gate.hpp"
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
+#include "ds4_tp_controller.hpp"
 #include "strata/net/communicator.hpp"
 #include "strata/net/tp_kernels.hpp"
 #endif
@@ -1278,6 +1279,8 @@ struct Model::Impl {
     strata::net::Communicator* tp_test_comm=nullptr;
     std::size_t tp_test_limit=0;
     std::string tp_test_failure;
+    std::unique_ptr<tp2::Controller> tp_test_controller;
+    bool tp_test_inside=false;
     std::FILE* tp_route_dump=std::getenv("DS4_TP_TEST_DUMP_ROUTES") ?
         std::fopen(std::getenv("DS4_TP_TEST_DUMP_ROUTES"),"wb") : nullptr;
 #endif
@@ -20585,19 +20588,63 @@ Model::Model() : p_(new Impl) {}
 Model::~Model() = default;
 bool Model::load(const Options& o, std::string& err) { return p_->load(o, err); }
 #if defined(STRATA_DS4_TP2_TEST_RDMA)
-bool Model::tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err) {
+bool Model::tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err,
+                            bool control_rank0) {
     if (p_->o.tp2_rank<0 || !p_->tp_rank_experts || p_->tp_test_comm || p_->devs.size()!=1 ||
         comm.world_size()!=2 || comm.rank()!=static_cast<std::uint32_t>(p_->o.tp2_rank) ||
-        comm.device_index()!=p_->devs[0].id || limit==0 || limit>comm.MaxPartialBytes()) {
+        comm.device_index()!=p_->devs[0].id || limit==0 || limit>comm.MaxPartialBytes() ||
+        (control_rank0 && p_->o.tp2_rank!=0)) {
         err="ds4 tp2: invalid test communicator binding"; return false;
     }
-    p_->tp_test_comm=&comm; p_->tp_test_limit=limit; err.clear(); return true;
+    p_->tp_test_comm=&comm; p_->tp_test_limit=limit;
+    if (control_rank0) p_->tp_test_controller=std::make_unique<tp2::Controller>(
+        comm,static_cast<std::uint64_t>(p_->o.max_context),static_cast<std::uint32_t>(p_->g.vocab),kWin);
+    err.clear(); return true;
+}
+bool Model::tp2_shutdown_test(std::string& err) {
+    if (!p_->tp_test_controller) { err="ds4 tp2: no test controller"; return false; }
+    if (p_->tp_unready(err)) return false;
+    const bool ok=p_->tp_test_controller->run(tp2::Command::Shutdown,static_cast<std::uint64_t>(p_->pos),{},
+        [&](const tp2::Control&,std::string& e) { return p_->tp_worker_synchronize(e); },err);
+    if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+    return ok;
 }
 #endif
-bool Model::step(int token, bool logits, std::string& err) { return p_->step(token, logits, err); }
+bool Model::step(int token, bool logits, std::string& err) {
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+    if (p_->tp_test_controller && !p_->tp_test_inside) {
+        if (p_->tp_unready(err)) return false;
+        const bool ok=p_->tp_test_controller->run(tp2::Command::Step,static_cast<std::uint64_t>(p_->pos),
+            {static_cast<std::uint32_t>(token)},[&](const tp2::Control&,std::string& e) {
+                return p_->step(token,logits,e) && p_->tp_worker_synchronize(e);
+            },err);
+        if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+        return ok;
+    }
+#endif
+    return p_->step(token, logits, err);
+}
 std::string Model::where() const { return p_->where(); }
 bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, int after) {
     Impl& p = *p_;
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+    if (p.tp_test_controller && !p.tp_test_inside) {
+        if (p.tp_unready(err)) return false;
+        if (!tokens || n<1 || n>kWin || logits_rows<0 || logits_rows>1) {
+            err="ds4 tp2: test controller requires 1..16 tokens and at most one logit row"; return false;
+        }
+        std::vector<std::uint32_t> words(tokens,tokens+n);
+        const bool ok=p.tp_test_controller->run(tp2::Command::Feed,static_cast<std::uint64_t>(p.pos),std::move(words),
+            [&](const tp2::Control&,std::string& e) {
+                p.tp_test_inside=true;
+                const bool fed=feed(tokens,n,logits_rows,e,after);
+                p.tp_test_inside=false;
+                return fed && p.tp_worker_synchronize(e);
+            },err);
+        if (!ok && p.tp_test_failure.empty()) p.tp_test_failure=err;
+        return ok;
+    }
+#endif
     if (p.tp_unready(err)) return false;
     if (!feed_release(err)) return false;   // (another read: a prompt's room kept between its parts handed back first)
     p.main_at.store("reading a prompt", std::memory_order_relaxed);
@@ -20615,6 +20662,9 @@ bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, in
 }
 bool Model::feed_mark(const int* tokens, int n, int logits_rows, int slot, std::string& err) {
     Impl& p = *p_;
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+    if (p.tp_test_controller) { err="ds4 tp2: checkpoints are not supported"; return false; }
+#endif
     if (p.tp_load_only(err)) return false;
     if (!feed_release(err)) return false;   // (another read: a prompt's room kept between its parts handed back first)
     p.main_at.store("reading a prompt", std::memory_order_relaxed);
@@ -20740,6 +20790,22 @@ bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, 
                    int& accepted, int& next, std::string& err) {
     if (p_->tp_unready(err)) return false;
     if (p_->o.tp2_rank==1) { err="ds4 tp2: only rank 0 may decide a verdict"; return false; }
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+    if (p_->tp_test_controller) {
+        std::vector<std::uint32_t> words; words.reserve(d.size()+1);
+        words.push_back(static_cast<std::uint32_t>(y));
+        for (int token:d) words.push_back(static_cast<std::uint32_t>(token));
+        bool ok=p_->tp_test_controller->run(tp2::Command::Verify,static_cast<std::uint64_t>(p_->pos),std::move(words),
+            [&](const tp2::Control&,std::string& e) {
+                return p_->verify(y,d,t,tp,tk,mp,seed,counter,accepted,next,e) && p_->tp_worker_synchronize(e);
+            },err);
+        if (ok) ok=p_->tp_test_controller->run(tp2::Command::Verdict,static_cast<std::uint64_t>(p_->pos),
+            {static_cast<std::uint32_t>(accepted),static_cast<std::uint32_t>(next)},
+            [&](const tp2::Control&,std::string& e) { return p_->tp_worker_synchronize(e); },err);
+        if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+        return ok;
+    }
+#endif
     return p_->verify(y, d, t, tp, tk, mp, seed, counter, accepted, next, err);
 }
 bool Model::tp_verify_begin(const int* tokens, int count, std::string& err) {
@@ -20785,15 +20851,27 @@ bool Model::verify_multi(int i, const std::vector<int>& d, float t, float tp, in
     if (p_->tp_load_only(err)) return false;
     return p_->verify_multi(i, d, t, tp, tk, mp, seed, counter, accepted, next, err);
 }
-void Model::reset() { p_->reset(); }
+void Model::reset() {
+#if defined(STRATA_DS4_TP2_TEST_RDMA)
+    if (p_->tp_test_controller) {
+        std::string err;
+        if (p_->tp_unready(err)) return;
+        const bool ok=p_->tp_test_controller->run(tp2::Command::Reset,0,{},
+            [&](const tp2::Control&,std::string& e) { return p_->reset_checked(e) && p_->tp_worker_synchronize(e); },err);
+        if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+        return;
+    }
+#endif
+    p_->reset();
+}
 void Model::checkpoint(int slot) { if (p_->o.tp2_rank<0) p_->checkpoint(slot); }
 bool Model::restore(int64_t limit) { return p_->o.tp2_rank<0 && p_->restore(limit); }
 void Model::pin() { if (p_->o.tp2_rank<0) p_->pin(); }
 void Model::mark(bool shared) { if (p_->o.tp2_rank<0) p_->mark(shared); }
-int Model::marks_cap() const { return Impl::marks_cap(); }
+int Model::marks_cap() const { return p_->o.tp2_rank>=0 ? 0 : Impl::marks_cap(); }
 size_t Model::check_bytes() const { return p_->check_bytes(); }
 std::vector<int64_t> Model::check_positions() const { return p_->check_positions(); }
-int64_t Model::restorable(int64_t limit) const { return p_->restorable(limit); }
+int64_t Model::restorable(int64_t limit) const { return p_->o.tp2_rank>=0 ? -1 : p_->restorable(limit); }
 uint64_t Model::slot_save(std::vector<uint8_t>& out, std::string& err, const std::vector<PicMark>& pics) {
     if (p_->tp_load_only(err)) return 0;
     return p_->slot_save(out, err, pics);
