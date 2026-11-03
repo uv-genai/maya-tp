@@ -1,0 +1,166 @@
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+ds4: the experts VRAM leaves over (~58.3 GB) are read in place from the model's files (--mmap-experts on) (118.0 GB of RAM free to keep them: the most-routed 0.0 GB read ahead; prompts in chunks of 256)
+ds4 tp2: rank 0 loaded 84509982720 routed expert bytes (7014400 pinned staging bytes); awaiting peer attachment
+rank 0: sampled DSpark test loaded
+sample mode=0 candidate=5 unique=10 top=9102/10000
+sample mode=0 candidate=35 unique=40 top=3328/10000
+sample mode=0 trials=10/500
+sample mode=0 trials=20/500
+sample mode=0 trials=30/500
+sample mode=0 trials=40/500
+sample mode=0 trials=50/500
+sample mode=0 trials=60/500
+sample mode=0 trials=70/500
+sample mode=0 trials=80/500
+sample mode=0 trials=90/500
+sample mode=0 trials=100/500
+sample mode=0 trials=110/500
+sample mode=0 trials=120/500
+sample mode=0 trials=130/500
+sample mode=0 trials=140/500
+sample mode=0 trials=150/500
+sample mode=0 trials=160/500
+sample mode=0 trials=170/500
+sample mode=0 trials=180/500
+sample mode=0 trials=190/500
+sample mode=0 trials=200/500
+sample mode=0 trials=210/500
+sample mode=0 trials=220/500
+sample mode=0 trials=230/500
+sample mode=0 trials=240/500
+sample mode=0 trials=250/500
+sample mode=0 trials=260/500
+sample mode=0 trials=270/500
+sample mode=0 trials=280/500
+sample mode=0 trials=290/500
+sample mode=0 trials=300/500
+sample mode=0 trials=310/500
+sample mode=0 trials=320/500
+sample mode=0 trials=330/500
+sample mode=0 trials=340/500
+sample mode=0 trials=350/500
+sample mode=0 trials=360/500
+sample mode=0 trials=370/500
+sample mode=0 trials=380/500
+sample mode=0 trials=390/500
+sample mode=0 trials=400/500
+sample mode=0 trials=410/500
+sample mode=0 trials=420/500
+sample mode=0 trials=430/500
+sample mode=0 trials=440/500
+sample mode=0 trials=450/500
+sample mode=0 trials=460/500
+sample mode=0 trials=470/500
+sample mode=0 trials=480/500
+sample mode=0 trials=490/500
+sample mode=0 trials=500/500
+mode=drawn plain=10000 speculative=500 groups=11 chi2=7.5922 p=0.6686 offered=2500 accepted=345
+sample mode=1 candidate=5 unique=18 top=6964/10000
+sample mode=1 candidate=5 point-draft target support=24/10000
+sample mode=1 candidate=35 unique=40 top=3403/10000
+sample mode=1 candidate=35 point-draft target support=3403/10000
+sample mode=1 trials=10/500
+sample mode=1 trials=20/500
+sample mode=1 trials=30/500
+sample mode=1 trials=40/500
+sample mode=1 trials=50/500
+sample mode=1 trials=60/500
+sample mode=1 trials=70/500
+sample mode=1 trials=80/500
+sample mode=1 trials=90/500
+sample mode=1 trials=100/500
+sample mode=1 trials=110/500
+sample mode=1 trials=120/500
+sample mode=1 trials=130/500
+sample mode=1 trials=140/500
+sample mode=1 trials=150/500
+sample mode=1 trials=160/500
+sample mode=1 trials=170/500
+sample mode=1 trials=180/500
+sample mode=1 trials=190/500
+sample mode=1 trials=200/500
+sample mode=1 trials=210/500
+sample mode=1 trials=220/500
+sample mode=1 trials=230/500
+sample mode=1 trials=240/500
+sample mode=1 trials=250/500
+sample mode=1 trials=260/500
+sample mode=1 trials=270/500
+sample mode=1 trials=280/500
+sample mode=1 trials=290/500
+sample mode=1 trials=300/500
+sample mode=1 trials=310/500
+sample mode=1 trials=320/500
+sample mode=1 trials=330/500
+sample mode=1 trials=340/500
+sample mode=1 trials=350/500
+sample mode=1 trials=360/500
+sample mode=1 trials=370/500
+sample mode=1 trials=380/500
+sample mode=1 trials=390/500
+sample mode=1 trials=400/500
+sample mode=1 trials=410/500
+sample mode=1 trials=420/500
+sample mode=1 trials=430/500
+sample mode=1 trials=440/500
+sample mode=1 trials=450/500
+sample mode=1 trials=460/500
+sample mode=1 trials=470/500
+sample mode=1 trials=480/500
+sample mode=1 trials=490/500
+sample mode=1 trials=500/500
+mode=point+penalties plain=10000 speculative=500 groups=11 chi2=3.1294 p=0.978213 offered=2500 accepted=174
+sample mode=2 candidate=5 unique=10 top=9102/10000
+sample mode=2 candidate=35 unique=40 top=3328/10000
+sample mode=2 trials=10/500
+sample mode=2 trials=20/500
+sample mode=2 trials=30/500
+sample mode=2 trials=40/500
+sample mode=2 trials=50/500
+sample mode=2 trials=60/500
+sample mode=2 trials=70/500
+sample mode=2 trials=80/500
+sample mode=2 trials=90/500
+sample mode=2 trials=100/500
+sample mode=2 trials=110/500
+sample mode=2 trials=120/500
+sample mode=2 trials=130/500
+sample mode=2 trials=140/500
+sample mode=2 trials=150/500
+sample mode=2 trials=160/500
+sample mode=2 trials=170/500
+sample mode=2 trials=180/500
+sample mode=2 trials=190/500
+sample mode=2 trials=200/500
+sample mode=2 trials=210/500
+sample mode=2 trials=220/500
+sample mode=2 trials=230/500
+sample mode=2 trials=240/500
+sample mode=2 trials=250/500
+sample mode=2 trials=260/500
+sample mode=2 trials=270/500
+sample mode=2 trials=280/500
+sample mode=2 trials=290/500
+sample mode=2 trials=300/500
+sample mode=2 trials=310/500
+sample mode=2 trials=320/500
+sample mode=2 trials=330/500
+sample mode=2 trials=340/500
+sample mode=2 trials=350/500
+sample mode=2 trials=360/500
+sample mode=2 trials=370/500
+sample mode=2 trials=380/500
+sample mode=2 trials=390/500
+sample mode=2 trials=400/500
+sample mode=2 trials=410/500
+sample mode=2 trials=420/500
+sample mode=2 trials=430/500
+sample mode=2 trials=440/500
+sample mode=2 trials=450/500
+sample mode=2 trials=460/500
+sample mode=2 trials=470/500
+sample mode=2 trials=480/500
+sample mode=2 trials=490/500
+sample mode=2 trials=500/500
+mode=lookup-stale-q plain=10000 speculative=500 groups=11 chi2=4.2196 p=0.936899 offered=500 accepted=172
+lookup stale-q control: 19 of 32 verdicts differed

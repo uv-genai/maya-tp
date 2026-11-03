@@ -16177,7 +16177,7 @@ struct Model::Impl {
     // it was drawn from (the drafter's argmax: a point at d, so p(d)), a rejected one is replaced by a draw from the
     // residual max(0, p - q) - so each kept token is distributed as the trunk's own draw.
     bool verify(int y, const std::vector<int>& drafts, float temperature, float top_p, int top_k, float min_p,
-                uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err) {
+                uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err, bool point_proposal) {
         const int n = (int) std::min<size_t>(drafts.size(), (size_t) kWin - 1);
         const int T = n + 1, V = g.vocab;
         const int64_t p0 = pos;
@@ -16205,7 +16205,7 @@ struct Model::Impl {
             // (never d itself): each row a token distributed as the model's own draw at that position, p through the
             // request's chain - the top_k / top_p / min_p cut included (the drafter's argmax can lie outside it: p(d) 0,
             // never kept); past the first rejection the rows do not count
-            const bool own = drafts_q && dq_temp == temperature && dq_top_p == top_p && dq_top_k == top_k &&
+            const bool own = !point_proposal && drafts_q && dq_temp == temperature && dq_top_p == top_p && dq_top_k == top_k &&
                              dq_min_p == min_p && dq_seed == seed && dq_counter == counter;
             if (!own) {   // the drafter's argmax: q a point at each draft
                 for (int i = 0; i < n; ++i) {
@@ -20899,7 +20899,7 @@ bool Model::draft(int y, std::vector<int>& d, std::vector<float>& c, std::string
     return p_->draft(y, d, c, err, t, tp, tk, mp, seed, counter);
 }
 bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter,
-                   int& accepted, int& next, std::string& err) {
+                   int& accepted, int& next, std::string& err, bool point_proposal) {
     if (p_->tp_unready(err)) return false;
     if (p_->o.tp2_rank==1) { err="ds4 tp2: only rank 0 may decide a verdict"; return false; }
 #if defined(STRATA_DS4_TP2_RDMA)
@@ -20909,7 +20909,7 @@ bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, 
         for (int token:d) words.push_back(static_cast<std::uint32_t>(token));
         bool ok=p_->tp_test_controller->run(tp2::Command::Verify,static_cast<std::uint64_t>(p_->pos),std::move(words),
             [&](const tp2::Control&,std::string& e) {
-                return p_->verify(y,d,t,tp,tk,mp,seed,counter,accepted,next,e) && p_->tp_worker_synchronize(e);
+                return p_->verify(y,d,t,tp,tk,mp,seed,counter,accepted,next,e,point_proposal) && p_->tp_worker_synchronize(e);
             },err);
         if (ok) ok=p_->tp_test_controller->run(tp2::Command::Verdict,static_cast<std::uint64_t>(p_->pos),
             {static_cast<std::uint32_t>(accepted),static_cast<std::uint32_t>(next)},
@@ -20918,7 +20918,7 @@ bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, 
         return ok;
     }
 #endif
-    return p_->verify(y, d, t, tp, tk, mp, seed, counter, accepted, next, err);
+    return p_->verify(y, d, t, tp, tk, mp, seed, counter, accepted, next, err, point_proposal);
 }
 bool Model::tp_verify_begin(const int* tokens, int count, std::string& err) {
     if (p_->tp_unready(err)) return false;

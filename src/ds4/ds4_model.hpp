@@ -225,8 +225,11 @@ public:
     int draft_block() const;
     bool draft(int y, std::vector<int>& drafts, std::vector<float>& conf, std::string& err, float temperature = 0.0f,
                float top_p = 1.0f, int top_k = 0, float min_p = 0.0f, uint64_t seed = 0, uint64_t counter = 0);
+    /// Set point_proposal for externally supplied drafts (such as prompt lookup):
+    /// their q is a point mass even if a previous sampled drafter left q cached.
     bool verify(int y, const std::vector<int>& drafts, float temperature, float top_p, int top_k, float min_p,
-                uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err);
+                uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err,
+                bool point_proposal = false);
     /// Worker-only split verification. The caller must exclusively own this
     /// model: after begin, issue only commit (or discard/reset the model on
     /// failure). No worker-side sampling or next-token choice occurs here.

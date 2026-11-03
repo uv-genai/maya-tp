@@ -427,7 +427,7 @@ bool round(strata::ds4::Model& m, int tok, int room, bool spec, float conf_min, 
         if (keep > 0) {
             drafts.resize((size_t) keep);
             int acc = 0, next = -1;
-            if (!m.verify(tok, drafts, temperature, top_p, top_k, min_p, seed, counter, acc, next, err)) return false;
+            if (!m.verify(tok, drafts, temperature, top_p, top_k, min_p, seed, counter, acc, next, err, from_lk)) return false;
             if (rl.on()) rl.note(pos0, from_lk, from_lk ? keep : made, keep, acc, conf);
             counter += (unsigned long long) acc + 1;
             for (int i = 0; i < acc; ++i) out.push_back(drafts[(size_t) i]);
@@ -461,7 +461,7 @@ bool round(strata::ds4::Model& m, int tok, int room, bool spec, float conf_min, 
         if (pk.lookup && pk.t > 1) {
             const std::vector<int> drafts(lk->buf.begin(), lk->buf.begin() + (pk.t - 1));
             int acc = 0, next = -1;
-            if (!m.verify(tok, drafts, temperature, top_p, top_k, min_p, seed, counter, acc, next, err)) return false;
+            if (!m.verify(tok, drafts, temperature, top_p, top_k, min_p, seed, counter, acc, next, err, true)) return false;
             if (rl.on()) rl.note(pos0, true, k, (int) drafts.size(), acc, {});
             counter += (unsigned long long) acc + 1;
             for (int i = 0; i < acc; ++i) out.push_back(drafts[(size_t) i]);

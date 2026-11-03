@@ -106,9 +106,10 @@ int ds4_tp_sharded_sample_test(int argc,char** argv) {
     };
     constexpr float temp=1.f,top_p=1.f,min_p=0.f; constexpr int top_k=40; constexpr std::uint64_t seed=0x734d26a5ULL;
     CHECK(reset_feed(true)); const int greedy=model.sample(0,1,0,0,0,0); CHECK(greedy>=0 && greedy<model.vocab());
-    for (int mode=0;mode<2;++mode) {
-        model.set_penalties(mode?64:0,mode?1.3f:1.f,mode?.1f:0.f,mode?.1f:0.f);
-        int y=-1; std::vector<int> plain;
+    for (int mode=0;mode<3;++mode) {
+        const bool penalties=mode==1, lookup=mode==2;
+        model.set_penalties(penalties?64:0,penalties?1.3f:1.f,penalties?.1f:0.f,penalties?.1f:0.f);
+        int y=-1, point=-1; std::vector<int> plain;
         // Pick the first predetermined continuation with enough probability
         // mass outside its most common token for the chi-square smoke to have
         // at least two meaningful groups. Selection uses only plain draws.
@@ -120,12 +121,13 @@ int ds4_tp_sharded_sample_test(int argc,char** argv) {
                 const int t=model.sample(temp,top_p,top_k,min_p,seed,i); CHECK(t>=0 && t<model.vocab());
                 plain.push_back(t); ++counts[t];
             }
-            int max_count=0; for (const auto& [_,n]:counts) max_count=std::max(max_count,n);
+            int max_count=0;
+            for (const auto& [token,n]:counts) if (n>max_count) { max_count=n; point=token; }
             std::fprintf(stderr,"sample mode=%d candidate=%d unique=%zu top=%d/%zu\n",mode,candidate,counts.size(),max_count,plain.size());
             const bool varied=max_count>=static_cast<int>(plain.size()*15/100) &&
                               max_count<=static_cast<int>(plain.size()*85/100);
             if (!varied) continue;
-            if (mode==1) {
+            if (penalties) {
                 // Point-q with penalties may always propose a target-impossible
                 // token in a particular context. Probe its first deterministic
                 // draft, and require at least 10% target mass in independent
@@ -139,11 +141,17 @@ int ds4_tp_sharded_sample_test(int argc,char** argv) {
             }
             y=candidate; break;
         }
-        CHECK(y>=0);
-        auto trial=[&](std::uint64_t ctr,Trial& out)->bool {
+        CHECK(y>=0 && point>=0);
+        auto trial=[&](std::uint64_t ctr,Trial& out,bool stale_control=false)->bool {
             if (!reset_feed(false) || !model.draft(y,out.drafts,out.confidence,error,temp,top_p,top_k,min_p,seed,ctr)) return false;
             out.sampled=model.drafts_sampled();
-            if (out.sampled!=(mode==0)) { error="unexpected sampled-draft mode"; return false; }
+            if (out.sampled!=!penalties) { error="unexpected sampled-draft mode"; return false; }
+            if (lookup) {
+                // Leave a matching sampled-q cache in place, then verify an
+                // independently chosen lookup token as a point proposal.
+                out.drafts.assign(1,point);
+                out.confidence.assign(1,1.0f);
+            }
             if (out.drafts.empty()) {
                 if (!begin(Command::Step,{static_cast<std::uint32_t>(y)},static_cast<std::uint64_t>(model.pos())) ||
                     !model.step(y,true,error) || !finish()) return false;
@@ -154,7 +162,8 @@ int ds4_tp_sharded_sample_test(int argc,char** argv) {
             for (int t:out.drafts) { if (t<0 || t>=model.vocab()) { error="invalid draft"; return false; } words.push_back(static_cast<std::uint32_t>(t)); }
             const auto at=static_cast<std::uint64_t>(model.pos());
             if (!begin(Command::Verify,words,at) ||
-                !model.verify(y,out.drafts,temp,top_p,top_k,min_p,seed,ctr,out.accepted,out.next,error) || !finish()) return false;
+                !model.verify(y,out.drafts,temp,top_p,top_k,min_p,seed,ctr,out.accepted,out.next,error,
+                              lookup && !stale_control) || !finish()) return false;
             if (out.accepted<0 || static_cast<std::size_t>(out.accepted)>out.drafts.size() || out.next<0 || out.next>=model.vocab()) {
                 error="invalid sampled verdict"; return false;
             }
@@ -162,7 +171,7 @@ int ds4_tp_sharded_sample_test(int argc,char** argv) {
                        static_cast<std::uint64_t>(model.pos())) || !finish()) return false;
             out.first=out.accepted>0?out.drafts[0]:out.next; return true;
         };
-        std::vector<int> spec; spec.reserve(trials); int kept=0,offered=0;
+        std::vector<int> spec; spec.reserve(trials); int kept=0,offered=0,control_differences=0;
         for (long i=0;i<trials;++i) {
             const auto ctr=(1ull<<32)+static_cast<std::uint64_t>(i)*64; Trial t;
             CHECK(trial(ctr,t)); spec.push_back(t.first); offered+=static_cast<int>(t.drafts.size()); kept+=t.accepted;
@@ -172,11 +181,17 @@ int ds4_tp_sharded_sample_test(int argc,char** argv) {
                       again.sampled==t.sampled && again.confidence.size()==t.confidence.size());
                 for (std::size_t j=0;j<t.confidence.size();++j) CHECK(std::fabs(t.confidence[j]-again.confidence[j])<=1e-6f);
             }
+            if (lookup && i<32) {
+                Trial stale; CHECK(trial(ctr,stale,true));
+                if (stale.first!=t.first || stale.accepted!=t.accepted || stale.next!=t.next) ++control_differences;
+            }
             if ((i+1)%10==0) std::fprintf(stderr,"sample mode=%d trials=%ld/%ld\n",mode,i+1,trials);
         }
         const Chi x=compare(plain,spec);
         std::printf("mode=%s plain=%zu speculative=%zu groups=%d chi2=%.5g p=%.6g offered=%d accepted=%d\n",
-                    mode?"point+penalties":"drawn",plain.size(),spec.size(),x.groups,x.x,x.p,offered,kept); std::fflush(stdout);
+                    lookup?"lookup-stale-q":penalties?"point+penalties":"drawn",
+                    plain.size(),spec.size(),x.groups,x.x,x.p,offered,kept); std::fflush(stdout);
+        if (lookup) std::printf("lookup stale-q control: %d of 32 verdicts differed\n",control_differences);
         CHECK(offered>0 && kept>0 && x.groups>=2 && x.p>=.001);
     }
     CHECK(begin(Command::Shutdown,{},static_cast<std::uint64_t>(model.pos())) && finish());
