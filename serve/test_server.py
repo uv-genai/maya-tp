@@ -642,6 +642,16 @@ class SamplingKeys(unittest.TestCase):
             self.assertFalse([k for k in self.keys(temperature=0, strata_tune={"suffix_draft": bad})
                               if k.startswith("suffix_draft=")], bad)
 
+    def test_deepseek_spec_control_keeps_model_family_semantics(self):
+        for value, want in ((0, "spec=0"), (1, "spec=1"), (2, "spec=2")):
+            sampling = {"temperature": 0, "strata_tune": {"spec": value}}
+            self.assertIn(want, StrataEngine.sampling_keys(sampling, "ds4").split())
+        for bad in (-1, 17, True, 0.0, "0"):
+            sampling = {"strata_tune": {"spec": bad}}
+            self.assertFalse([k for k in StrataEngine.sampling_keys(sampling, "ds4").split()
+                              if k.startswith("spec=")], bad)
+        self.assertNotIn("spec=0", StrataEngine.sampling_keys({"strata_tune": {"spec": 0}}, "glm-fast").split())
+
     def test_read_chunks_tune_key(self):
         # setup's calibration of the disk reads' size (#67): 1-16 pieces, nothing else
         self.assertIn("read_chunks=4", self.keys(temperature=0, strata_tune={"read_chunks": 4}))

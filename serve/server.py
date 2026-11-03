@@ -1133,7 +1133,7 @@ class StrataEngine:
         hist.append(st)
 
     @staticmethod
-    def sampling_keys(sampling: dict) -> str:
+    def sampling_keys(sampling: dict, engine_kind: str | None = None) -> str:
         keys = ""
         t = sampling.get("temperature")
         tb, te = sampling.get("_think_budget"), sampling.get("_think_end")   # the run config's (StrataService.run)
@@ -1164,8 +1164,8 @@ class StrataEngine:
             mf = tune.get("miss_skip_from")   # ... and its first layer (STRATA_GLM_MISS_SKIP_FROM)
             if isinstance(mf, int) and not isinstance(mf, bool) and 0 <= mf <= 1000:
                 tune_keys += f" miss_skip_from={mf}"
-            sw = tune.get("spec")   # the GLM engine's DFlash decode: its verify window (the anchor and drafts), 2..16;
-            if isinstance(sw, int) and not isinstance(sw, bool) and 1 <= sw <= 16:   # 1: no drafting (the token loop)
+            sw = tune.get("spec")   # GLM: 1 disables drafting; DeepSeek: 0 disables, positive enables it.
+            if isinstance(sw, int) and not isinstance(sw, bool) and (0 if engine_kind == "ds4" else 1) <= sw <= 16:
                 tune_keys += f" spec={sw}"
             sn = tune.get("spec_n_min")   # ... drafts it keeps whatever their confidence
             if isinstance(sn, int) and not isinstance(sn, bool) and 0 <= sn <= 15:
@@ -1296,8 +1296,8 @@ class StrataEngine:
         self.progress = None
         self.prefill_tok_s_mean = None
         # an image request takes the same sampling keys as text (#75: it used to decode greedily whatever was asked)
-        head = f"GENI {int(max_new)}{self.sampling_keys(sampling or {})} {embeddings}" if embeddings else \
-            f"GEN {int(max_new)}{self.sampling_keys(sampling or {})}"
+        keys = self.sampling_keys(sampling or {}, (getattr(self, "info", {}) or {}).get("engine_kind"))
+        head = f"GENI {int(max_new)}{keys} {embeddings}" if embeddings else f"GEN {int(max_new)}{keys}"
         try:
             self.proc.stdin.write(f"{head} {','.join(str(int(t)) for t in ids)}\n")
             self.proc.stdin.flush()
@@ -1487,7 +1487,7 @@ class StrataEngine:
         self._tls.rid = rid
         self.progress = None
         self.prefill_tok_s_mean = None
-        keys = self.sampling_keys(sampling or {}) + f" rid={rid}"
+        keys = self.sampling_keys(sampling or {}, (getattr(self, "info", {}) or {}).get("engine_kind")) + f" rid={rid}"
         head = f"GENI {int(max_new)}{keys} {embeddings}" if embeddings else f"GEN {int(max_new)}{keys}"
         done = False
         try:
@@ -2073,10 +2073,18 @@ def speculation_modes(info: dict, dspark=None, lookup=None) -> list:
     return modes
 
 
-def request_spec_off(sampling) -> bool:
-    """A request that switches drafting off for itself (the GLM engine's spec=1: the plain token loop)."""
+def request_spec_off(sampling, engine_kind=None, lookup_enabled=False) -> bool:
+    """Whether a request disables its configured speculative sources."""
     tune = (sampling or {}).get("strata_tune")
-    return isinstance(tune, dict) and tune.get("spec") == 1 and not isinstance(tune.get("spec"), bool)
+    if not isinstance(tune, dict) or not isinstance(tune.get("spec"), int) or isinstance(tune["spec"], bool):
+        return False
+    if engine_kind == "ds4":
+        # spec=0 disables DSpark only. Lookup can still draft unless the
+        # engine did not start it or this request also turns it off.
+        suffix = tune.get("suffix_draft")
+        lookup = lookup_enabled and not (isinstance(suffix, int) and not isinstance(suffix, bool) and suffix == 0)
+        return tune.get("spec") == 0 and not lookup
+    return tune.get("spec") == 1
 
 
 class RequestStat:
@@ -2085,7 +2093,7 @@ class RequestStat:
 
     def __init__(self):
         self.first_token = None
-        self.spec_off = False                           # it asked for no drafting (spec=1)
+        self.spec_off = False                           # it asked for no configured drafting sources
         self.base = None                                # (time, generated) at the window's start: the rate counts from it
         self.samples = collections.deque(maxlen=4096)   # the samples inside the window, oldest first
 
@@ -3720,7 +3728,8 @@ class Service:
         engine_last0 = getattr(self.engine, "last", None)
         counted, my_started, my_first, queued = False, time.time(), None, False
         stat = RequestStat()                            # this request's live figures
-        stat.spec_off = request_spec_off(sampling)
+        info = getattr(self.engine, "info", {}) or {}
+        stat.spec_off = request_spec_off(sampling, info.get("engine_kind"), bool(info.get("lookup")))
         with self.status_lock:
             self.status["queued"] += 1
             queued = True                               # counted as waiting until its turn comes (below, or in finally)

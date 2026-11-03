@@ -31,6 +31,13 @@ test-only sampled-draft experiment, not a recommended production setting.
 DeepSeek TP2 ranks read the selected Lt store but do not append new picks;
 single-host behavior is unchanged.
 
+For a DeepSeek API request, `"strata_tune": {"spec": 0}` disables DSpark for
+that request, and `"spec": 1` enables it when the engine has loaded a drafter.
+Prompt lookup is separate: when the engine has been started with lookup,
+`"suffix_draft": 0` disables it for the request and `1` enables it. These
+request values do not load a missing drafter or lookup at runtime. GLM's
+`spec` value instead specifies its verification window, where `1` means off.
+
 The engine sizes itself: it splits the layers across the GPUs it is given (up to 16; with more than two, each GPU
 takes layers in proportion to its free VRAM), fills each GPU's free VRAM with experts, sizes its RAM tier from the
 free RAM, and measures the CPU against the PCIe link at start to decide how many RAM experts the CPU computes itself.
@@ -1155,7 +1162,7 @@ lead's requests take them and each pick's sum joins the lead's CPU part once, be
 | --- | --- | --- |
 | `MAYA_DS4_HELPER` | off | the helper's visible GPU index (not one of `--gpus`); with `MAYA_DS4_HELPER_GB`. Linux only (tested); Windows + AMD untested |
 | `MAYA_DS4_HELPER_GB` | - | its experts' pool, GB |
-| `MAYA_DS4_WARM_CAP_GB` | - | required with the helper: the load's experts in host RAM, GB, beside the pool (an integrated GPU's pool is host RAM too); ignored under `DS4_REQUIRE_ALL_RAM=1` (every expert in RAM) |
+| `MAYA_DS4_WARM_CAP_GB` | - | Caps experts read ahead or copied into host RAM at load, in GB; `0` disables that warm-up. Required with the helper to budget RAM beside its pool (an integrated GPU's pool is host RAM too). A lower cap can reduce memory pressure but increase later storage reads. Ignored under `DS4_REQUIRE_ALL_RAM=1` (every expert in RAM). See [#117](https://github.com/uv-genai/maya-tp/issues/117). |
 | `MAYA_DS4_HELPER_CHECK` | off | `1`: at load, two tokens per expert format through the helper against the CPU lane, and its grouped window path against its per-token one, bit for bit |
 
 A prompt's experts that VRAM does not hold are read from the model's files as the prompt picks them (the flow), those

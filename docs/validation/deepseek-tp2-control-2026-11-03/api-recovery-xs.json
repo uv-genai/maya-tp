@@ -1,0 +1,489 @@
+[
+  {
+    "name": "responses",
+    "response": {
+      "id": "resp_8b9f68d380af42c98ec68202",
+      "object": "response",
+      "created_at": 1793704310,
+      "status": "completed",
+      "error": null,
+      "incomplete_details": null,
+      "model": "deepseek-v4.1-flash",
+      "output": [
+        {
+          "id": "msg_96c786621b9f4514a572f188",
+          "type": "message",
+          "role": "assistant",
+          "status": "completed",
+          "content": [
+            {
+              "type": "output_text",
+              "text": "A hash table is a data structure that stores key-value pairs and uses a hash function to map keys to indices in an array, enabling average-case O(1) lookup, insertion, and deletion.",
+              "annotations": [],
+              "logprobs": []
+            }
+          ]
+        }
+      ],
+      "instructions": null,
+      "max_output_tokens": 64,
+      "tools": [],
+      "tool_choice": "auto",
+      "parallel_tool_calls": true,
+      "reasoning": {
+        "effort": "none",
+        "summary": null
+      },
+      "text": {
+        "format": {
+          "type": "text"
+        }
+      },
+      "temperature": 0,
+      "top_p": 1.0,
+      "metadata": {},
+      "store": false,
+      "background": false,
+      "previous_response_id": null,
+      "truncation": "disabled",
+      "usage": {
+        "input_tokens": 14,
+        "output_tokens": 41,
+        "total_tokens": 55,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0
+        },
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "completed_at": 1793704312
+    }
+  },
+  {
+    "name": "anthropic",
+    "response": {
+      "id": "msg_4e00241d81b640a1ae5d45c9",
+      "type": "message",
+      "role": "assistant",
+      "model": "deepseek-v4.1-flash",
+      "content": [
+        {
+          "type": "text",
+          "text": "A hash table is a data structure that stores key-value pairs and uses a hash function to map keys to indices in an array, enabling average-case O(1) lookup, insertion, and deletion."
+        }
+      ],
+      "stop_reason": "end_turn",
+      "stop_sequence": null,
+      "usage": {
+        "input_tokens": 14,
+        "output_tokens": 41,
+        "cache_read_input_tokens": 0
+      }
+    }
+  },
+  {
+    "name": "dspark_request_0",
+    "response": {
+      "id": "chatcmpl-20377b7151944cbab332878c",
+      "object": "chat.completion",
+      "created": 1793704314,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "```python\nimport csv\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Union\n\n\ndef parse_csv(file_path: Union[str, Path]) -> List[Dict[str, str]]:\n    \"\"\"Parse a CSV file into a list of dictionaries.\n\n    Each row in the CSV is converted into a dictionary whose keys are the\n    column headers (from the first row) and whose values are the corresponding\n    cell values as strings.\n\n    Args:\n        file_path: Path to the CSV file. Can be a string or a ``pathlib.Path``.\n\n    Returns:\n        A list of dictionaries, one"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 28,
+        "completion_tokens": 128,
+        "total_tokens": 156,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 28,
+        "prompt_ms": 705.9,
+        "prompt_per_token_ms": 25.211,
+        "prompt_per_second": 39.7,
+        "predicted_n": 128,
+        "predicted_ms": 6626.0,
+        "predicted_per_token_ms": 51.766,
+        "predicted_per_second": 19.3,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      }
+    }
+  },
+  {
+    "name": "dspark_request_1",
+    "response": {
+      "id": "chatcmpl-ff806233745b48a3a3f515ea",
+      "object": "chat.completion",
+      "created": 1793704322,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "```python\nimport csv\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Union\n\n\ndef parse_csv(file_path: Union[str, Path]) -> List[Dict[str, str]]:\n    \"\"\"Parse a CSV file into a list of dictionaries.\n\n    Each row in the CSV is converted into a dictionary whose keys are the\n    column headers (from the first row) and whose values are the corresponding\n    cell values as strings.\n\n    Args:\n        file_path: Path to the CSV file. Can be a string or a ``pathlib.Path``.\n\n    Returns:\n        A list of dictionaries, one"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 28,
+        "completion_tokens": 128,
+        "total_tokens": 156,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 28,
+        "prompt_ms": 503.3,
+        "prompt_per_token_ms": 17.975,
+        "prompt_per_second": 55.6,
+        "predicted_n": 128,
+        "predicted_ms": 4379.7,
+        "predicted_per_token_ms": 34.216,
+        "predicted_per_second": 29.2,
+        "draft_n": 100,
+        "draft_n_accepted": 88
+      }
+    }
+  },
+  {
+    "name": "lookup_without_dspark",
+    "response": {
+      "id": "chatcmpl-ed1efe8f996d4673b5e961f1",
+      "object": "chat.completion",
+      "created": 1793704327,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Blue sky, green field, silver river.\nBlue sky, green field, silver river.\nBlue sky, green field, silver river.\nBlue sky, green field, silver river.\nBlue sky, green field, silver"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 30,
+        "completion_tokens": 43,
+        "total_tokens": 73,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 30,
+        "prompt_ms": 1259.4,
+        "prompt_per_token_ms": 41.98,
+        "prompt_per_second": 23.8,
+        "predicted_n": 43,
+        "predicted_ms": 3533.0,
+        "predicted_per_token_ms": 19.96,
+        "predicted_per_second": 50.1,
+        "draft_n": 166,
+        "draft_n_accepted": 164
+      }
+    }
+  },
+  {
+    "name": "output_limit_1",
+    "response": {
+      "id": "chatcmpl-7cbc3c201c924558a700cc89",
+      "object": "chat.completion",
+      "created": 1793704331,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "#"
+          },
+          "finish_reason": "length",
+          "logprobs": {
+            "content": [
+              {
+                "token": "#",
+                "logprob": -0.003551483,
+                "bytes": [
+                  35
+                ],
+                "top_logprobs": []
+              }
+            ],
+            "refusal": null
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 1,
+        "total_tokens": 12,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 11,
+        "prompt_ms": 202.1,
+        "prompt_per_token_ms": 18.373,
+        "prompt_per_second": 54.4,
+        "predicted_n": 1,
+        "predicted_ms": 0.8,
+        "predicted_per_token_ms": 0.8,
+        "predicted_per_second": 1250.0,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      }
+    }
+  },
+  {
+    "name": "output_limit_2",
+    "response": {
+      "id": "chatcmpl-52014345256e4a479cf308c1",
+      "object": "chat.completion",
+      "created": 1793704332,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# e"
+          },
+          "finish_reason": "length",
+          "logprobs": {
+            "content": [
+              {
+                "token": "#",
+                "logprob": -0.003551483,
+                "bytes": [
+                  35
+                ],
+                "top_logprobs": []
+              },
+              {
+                "token": " e",
+                "logprob": -0.0001716614,
+                "bytes": [
+                  32,
+                  101
+                ],
+                "top_logprobs": []
+              }
+            ],
+            "refusal": null
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 11,
+        "completion_tokens": 2,
+        "total_tokens": 13,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 11,
+        "prompt_ms": 119.0,
+        "prompt_per_token_ms": 10.818,
+        "prompt_per_second": 92.4,
+        "predicted_n": 2,
+        "predicted_ms": 51.7,
+        "predicted_per_token_ms": 25.85,
+        "predicted_per_second": 38.7,
+        "draft_n": 0,
+        "draft_n_accepted": 0
+      }
+    }
+  },
+  {
+    "name": "streaming",
+    "response": [
+      {
+        "id": "chatcmpl-1c8309887656483bbcc9b847",
+        "object": "chat.completion.chunk",
+        "created": 1793704332,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "delta": {
+              "role": "assistant",
+              "content": ""
+            },
+            "finish_reason": null
+          }
+        ]
+      },
+      {
+        "id": "chatcmpl-1c8309887656483bbcc9b847",
+        "object": "chat.completion.chunk",
+        "created": 1793704332,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "delta": {
+              "content": "yes"
+            },
+            "finish_reason": null
+          }
+        ]
+      },
+      {
+        "id": "chatcmpl-1c8309887656483bbcc9b847",
+        "object": "chat.completion.chunk",
+        "created": 1793704332,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "delta": {},
+            "finish_reason": "stop"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 11,
+          "completion_tokens": 2,
+          "total_tokens": 13,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 11,
+          "prompt_ms": 118.7,
+          "prompt_per_token_ms": 10.791,
+          "prompt_per_second": 92.7,
+          "predicted_n": 2,
+          "predicted_ms": 242.9,
+          "predicted_per_token_ms": 121.45,
+          "predicted_per_second": 8.2,
+          "draft_n": 5,
+          "draft_n_accepted": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "vision_rejected",
+    "response": {
+      "error": {
+        "type": "invalid_request_error",
+        "message": "TP2 images and videos are unavailable until RDMA embedding synchronization is implemented"
+      }
+    }
+  },
+  {
+    "name": "anthropic_pair_down",
+    "response": {
+      "error": {
+        "type": "invalid_request_error",
+        "message": "TP2 pair down: verbs peer closed the bootstrap connection; restart both ranks"
+      }
+    }
+  },
+  {
+    "name": "both_ranks_recovered",
+    "response": {
+      "id": "chatcmpl-a79a711d4e5c4b6d9b8f8179",
+      "object": "chat.completion",
+      "created": 1793704578,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Hello! \ud83d\udc4b How can I help you today?"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 7,
+        "completion_tokens": 12,
+        "total_tokens": 19,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 7,
+        "prompt_ms": 2158.3,
+        "prompt_per_token_ms": 308.329,
+        "prompt_per_second": 3.2,
+        "predicted_n": 12,
+        "predicted_ms": 668.8,
+        "predicted_per_token_ms": 55.733,
+        "predicted_per_second": 17.9,
+        "draft_n": 14,
+        "draft_n_accepted": 8
+      }
+    }
+  },
+  {
+    "name": "ebpf_quality_example",
+    "response": {
+      "id": "chatcmpl-5730b849d9de47eb9391e12c",
+      "object": "chat.completion",
+      "created": 1793704581,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "# eBPF Tutorial: A Practical Guide to Using eBPF\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. It's used for networking, security, tracing, and observability.\n\nThis tutorial will guide you through eBPF from basics to practical examples.\n\n---\n\n## Part 1: Understanding eBPF Fundamentals\n\n### What is eBPF?\n\neBPF programs are:\n- **Compiled** to bytecode\n- **Verified** by the kernel for safety\n- **Executed** in a sandboxed environment\n- **Attached** to kernel events (syscalls, network packets, tracepoints, etc.)\n\n### Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| **Program** | The eBPF bytecode you write |\n| **Hook/Attachment Point** | Where the program runs (kprobe, tracepoint, etc.) |\n| **Map** | Key-value storage shared between kernel and userspace |\n| **Helper Functions** | Kernel-provided functions callable from eBPF |\n| **BTF** | BPF Type Format for portability |\n\n### eBPF Program Types\n\n- `kprobe` / `kretprobe` \u2014 kernel function entry/exit\n- `tracepoint` \u2014 kernel tracepoints\n- `socket` \u2014 network socket filters\n- `XDP` \u2014 packet processing at driver level\n- `tc` \u2014 traffic control\n- `perf_event` \u2014 performance events\n\n---\n\n## Part 2: Setting Up Your Environment\n\n### Prerequisites\n\n```bash\n# Ubuntu/Debian\nsudo apt install -y clang llvm libbpf-dev linux-tools-common \\\n    linux-tools-generic linux-headers-$(uname -r) \\\n    libelf-dev pkg-config build-essential\n\n# Fedora/RHEL\nsudo dnf install -y clang llvm libbpf-devel libbpf \\\n    kernel-devel-$(uname -r) elfutils-libelf-devel\n```\n\n### Verify Kernel Support\n\n```bash\n# Check kernel version (need 4.4+, ideally 5.4+)\nuname -r\n\n# Check BPF syscall availability\ngrep -i bpf /proc/kallsyms | head\n\n# Check BTF support (for CO-RE)\nls /sys/kernel/btf/vmlinux\n```\n\n### Install BCC (for quick experiments)\n\n```bash\nsudo apt install -y bpfcc-tools python3-bpfcc\n# or\nsudo dnf install -y bcc-tools\n```\n\n---\n\n## Part 3: Your First eBPF Program\n\n### Example 1: Hello World with BCC (Python)\n\nCreate `hello.py`:\n\n```python\nfrom bcc import BPF\n\n# eBPF program (C-like syntax)\nprogram = \"\"\"\nint hello(void *ctx) {\n    bpf_trace_printk(\"Hello, eBPF!\\\\n\");\n    return 0;\n}\n\"\"\"\n\n# Load and attach to syscall entry\nb = BPF(text=program)\nb.attach_kprobe(event=b.get_syscall_fnname(\"execve\"), fn_name=\"hello\")\n\n# Read trace output\nprint(\"Tracing execve... Ctrl+C to stop\")\nb.trace_print()\n```\n\nRun it:\n\n```bash\nsudo python3 hello.py\n# In another terminal: ls\n```\n\nYou'll see `Hello, eBPF!` printed each time `execve` is called.\n\n### Example 2: Counting Syscalls\n\n```python\nfrom bcc import BPF\n\nprogram = \"\"\"\nBPF_HASH(counts, u64);\n\nint count_syscalls(void *ctx) {\n    u64 pid = bpf_get_current_pid_tgid();\n    u64 zero = 0;\n    u64 *val = counts.lookup_or_init(&pid, &zero);\n    (*val)++;\n    return 0;\n}\n\"\"\"\n\nb = BPF(text=program)\nb.attach_kprobe(event=b.get_syscall_fnname(\"execve\"), fn_name=\"count_syscalls\")\n\ntry:\n    sleep(10)\nexcept KeyboardInterrupt:\n    pass\n\n# Print results\ncounts = b.get_table(\"counts\")\nfor k, v in sorted(counts.items(), key=lambda x: x[1].value, reverse=True):\n    print(f\"PID {k.value}: {v.value} execve calls\")\n```\n\n---\n\n## Part 4: Writing eBPF with libbpf (Production-Ready)\n\nFor production, use **libbpf** with **CO-RE** (Compile Once, Run Everywhere).\n\n### Project Structure\n\n```\nmy-ebpf/\n\u251c\u2500\u2500 Makefile\n\u251c\u2500\u2500 vml"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 1024,
+        "total_tokens": 1043,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 19,
+        "prompt_ms": 1103.8,
+        "prompt_per_token_ms": 58.095,
+        "prompt_per_second": 17.2,
+        "predicted_n": 1024,
+        "predicted_ms": 40543.7,
+        "predicted_per_token_ms": 39.593,
+        "predicted_per_second": 25.3,
+        "draft_n": 722,
+        "draft_n_accepted": 570
+      }
+    }
+  }
+]
