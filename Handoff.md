@@ -1427,7 +1427,9 @@ The reference API harness is `tools/ds4/bench_tp2_reference.py` (`0570a8e`); its
 but it has not yet been run against a model. `tools/ds4/estimate_tp2_experts.py` (`408c0b5`) estimates
 logical routed expert tensor bytes for alternating 5+4 blocks: Maya-S ~84.510 GB/rank, XS
 ~54.814/54.751 GB. These exclude other allocations and do not prove fit or correct kernel layout.
-An isolated clean `maya-ds4` build is in progress in `/tmp/maya-ds4-tp2-p1-build`, exec session
-33901, log `/tmp/maya-ds4-tp2-p1-engine-build.log`. Ordered HIP mapping/server/tools checks are in
-exec session 16023 with `/tmp/ds4-p1-{hip,serve,tools}-112.log`; check their exit before claiming
-success. Do not run model performance tests while the model transfer or build is active.
+An isolated clean `maya-ds4` build passed in `/tmp/maya-ds4-tp2-p1-build`, log
+`/tmp/maya-ds4-tp2-p1-engine-build.log`. Its MD5 is `40b27560ae45924879fed5c5ef2808a7`; a matching
+review copy is on strix-halo-1 at `/tmp/maya-ds4-tp2-p1-review-112`, not in the production tree.
+The ordered HIP mapping, 613 server tests (11 skipped) and 687 tools tests (3 skipped) passed;
+logs are `/tmp/ds4-p1-{hip,serve,tools}-112.log`. Do not run model performance tests while the
+model transfer is active.
