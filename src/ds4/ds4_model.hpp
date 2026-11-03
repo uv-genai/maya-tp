@@ -210,6 +210,10 @@ public:
     /// A transport/model failure requires the paired engines to be restarted.
     bool tp_verify_begin(const int* tokens, int count, std::string& err);
     bool tp_verify_commit(int accepted, std::string& err);
+    /// Internal worker boundaries: check reset and all device work before a
+    /// control operation is acknowledged to the paired rank.
+    bool tp_worker_reset(std::string& err);
+    bool tp_worker_synchronize(std::string& err);
     /// A verify window's tokens at most (y and the drafts after it); verify() takes drafts from any source - those not
     /// the drafter's own draws as a point each (q 1)
     int verify_max() const;

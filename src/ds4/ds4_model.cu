@@ -8550,7 +8550,7 @@ struct Model::Impl {
         return sqs.empty() || s == sq_bound ? toks : sqs[(size_t) s].toks;
     }
 
-    void reset() {
+    bool reset_checked(std::string& err) {
         pos = 0;
         tp_verify_p0 = -1;
         tp_verify_count = 0;
@@ -8564,15 +8564,25 @@ struct Model::Impl {
             for (int m = 0; m < l0.nm; ++m) {
                 Layer& l = member(l0, m);
                 Dev& d = devs[(size_t) l.dev];
-                cudaSetDevice(d.id);
-                cudaMemsetAsync(l.win, 0, (size_t) g.win * win_rb(), d.st);
-                if (l.c_kv) cudaMemsetAsync(l.c_kv, 0, (size_t) l.ratio * g.hd * 4, d.st);
-                if (l.c_score) cudaMemsetAsync(l.c_score, 0, (size_t) l.ratio * g.hd * 4, d.st);
+                CK(cudaSetDevice(d.id));
+                CK(cudaMemsetAsync(l.win, 0, (size_t) g.win * win_rb(), d.st));
+                if (l.c_kv) CK(cudaMemsetAsync(l.c_kv, 0, (size_t) l.ratio * g.hd * 4, d.st));
+                if (l.c_score) CK(cudaMemsetAsync(l.c_score, 0, (size_t) l.ratio * g.hd * 4, d.st));
             }
         for (Dev& d : devs) {
-            cudaSetDevice(d.id);
-            cudaStreamSynchronize(d.st);
+            CK(cudaSetDevice(d.id));
+            CK(cudaStreamSynchronize(d.st));
         }
+        return true;
+    }
+    void reset() { std::string ignored; (void) reset_checked(ignored); }
+
+    bool tp_worker_synchronize(std::string& err) {
+        for (Dev& d : devs) {
+            CK(cudaSetDevice(d.id));
+            CK(cudaDeviceSynchronize());
+        }
+        return true;
     }
 
     // the state at pos into checkpoint `slot` (the window rings and the compressors' partial groups: the rest of the
@@ -20289,6 +20299,8 @@ bool Model::tp_verify_begin(const int* tokens, int count, std::string& err) {
 bool Model::tp_verify_commit(int accepted, std::string& err) {
     return p_->tp_verify_commit(accepted, err);
 }
+bool Model::tp_worker_reset(std::string& err) { return p_->reset_checked(err); }
+bool Model::tp_worker_synchronize(std::string& err) { return p_->tp_worker_synchronize(err); }
 int Model::verify_max() const { return kWin; }
 bool Model::drafts_sampled() const { return p_->drafts_q; }
 int64_t Model::pos() const { return p_->pos; }

@@ -1488,3 +1488,11 @@ exists yet; user processes remain untouched.
 P2 now checks a joint two-rank geometry for expert blocks, attention heads and output groups.
 The host test and real XS/S expert reconstructions passed with 32 heads and four output groups
 per rank. This is partition validation, not rank-local model loading or GPU inference.
+
+P4 has a fail-closed model-operation adapter for feed, step, verify, verdict, reset and shutdown.
+It requires window-only prefill, validates the model's position and drains device work at operation
+boundaries. Fake-model sequencing/failure tests and an isolated real-XS model dispatch passed;
+the short DSpark and no-drafter verify parity checks also passed after this change. This adapter
+does not yet perform model partitioning or distributed reductions. A paired real-model control
+smoke is next. Standard HIP mapping, 613 server tests (11 skipped) and 687 tools tests (3 skipped)
+also passed in this work session.

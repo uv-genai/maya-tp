@@ -1,5 +1,6 @@
 // Model-backed worker verification rollback parity. Requires a real pack + GPU.
 #include "../src/ds4/ds4_model.hpp"
+#include "../src/ds4/ds4_tp_model_worker.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -7,16 +8,28 @@
 #include <vector>
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
 int main(int argc,char** argv) {
-    if(argc!=3 || (std::string(argv[2])!="on" && std::string(argv[2])!="none" && std::string(argv[2])!="off")) {
-        std::fprintf(stderr,"usage: pack-dir on|none|off (none reserves worker rollback buffers; off disables all speculation)\n"); return 2;
+    if(argc!=3 || (std::string(argv[2])!="on" && std::string(argv[2])!="none" && std::string(argv[2])!="off" && std::string(argv[2])!="dispatch")) {
+        std::fprintf(stderr,"usage: pack-dir on|none|off|dispatch (none/dispatch reserve worker rollback buffers)\n"); return 2;
     }
     std::string error;
     strata::ds4::Options o; o.pack=argv[1]; o.max_context=32768; o.gpus={0}; o.reserve_mib=1024;
     o.tp=1; o.threads=true; o.vision=false; o.profile_readonly=true; o.profile=o.pack+"/expert-profile.bin";
     o.prefill_chunk=0; // Compare the same window path as speculative verification.
     o.dspark=std::string(argv[2])=="on";
-    o.tp_worker_verify=std::string(argv[2])=="none";
+    o.tp_worker_verify=std::string(argv[2])=="none" || std::string(argv[2])=="dispatch";
     strata::ds4::Model m; CHECK(m.load(o,error));
+    if (std::string(argv[2])=="dispatch") {
+        using namespace strata::ds4::tp2;
+        ModelWorker<strata::ds4::Model> worker(m);
+        CHECK(worker.execute({Command::Feed,1,0,{5,6,7}},error) && m.pos()==3);
+        CHECK(worker.execute({Command::Step,2,3,{8}},error) && m.pos()==4);
+        CHECK(worker.execute({Command::Verify,3,4,{9,10,11}},error) && m.pos()==7);
+        CHECK(worker.execute({Command::Verdict,4,6,{1,12}},error) && m.pos()==6);
+        CHECK(worker.execute({Command::Reset,5,0,{}},error) && m.pos()==0);
+        CHECK(worker.execute({Command::Shutdown,6,0,{}},error));
+        std::puts("DeepSeek real model worker dispatch passed");
+        return 0;
+    }
     const int prompt[]={5,6,7}, window[]={8,9,10}, probe=11;
     CHECK(!m.tp_verify_commit(0,error));
     CHECK(!m.tp_verify_begin(window,1,error));
