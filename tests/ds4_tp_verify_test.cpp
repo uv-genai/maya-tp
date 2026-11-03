@@ -9,6 +9,7 @@
 int ds4_tp_rank_load_test(int argc, char** argv);
 int ds4_tp_dense_load_test(int argc, char** argv);
 int ds4_tp_model_load_test(int argc, char** argv);
+int ds4_single_prefill_compare_test(int argc, char** argv);
 #if defined(STRATA_DS4_TP2_RDMA)
 int ds4_tp_pair_smoke(int argc, char** argv);
 int ds4_tp_expert_rdma_test(int argc, char** argv);
@@ -22,6 +23,7 @@ int ds4_tp_sharded_sample_test(int argc, char** argv);
 #endif
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
 int main(int argc,char** argv) {
+    if (argc > 1 && std::string(argv[1])=="--single-prefill-compare") return ds4_single_prefill_compare_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--rank-load") return ds4_tp_rank_load_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--dense-load") return ds4_tp_dense_load_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--rank-model-load") return ds4_tp_model_load_test(argc,argv);

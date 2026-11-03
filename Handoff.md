@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-03 · Current state: **§42**, DeepSeek TP2 P1; §§38–41 record GLM startup and DeepSeek design/plan; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-03 · Current state: **§42**, DeepSeek TP2 implementation and staged validation; §§38–41 record GLM startup and DeepSeek design/plan; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -1679,9 +1679,8 @@ down both ranks. Logs `/tmp/ds4-tp2-111-real-dspark-xs-rank0.log` and remote
 The test launcher binds the checked pack to the test arguments but is not a
 production launcher; production startup is still guarded and unwired.
 
-P3 review-binary linkage in progress (uncommitted): the DeepSeek TP transport
-macro is shared between the test and isolated `maya-ds4` targets; there is
-still no rank entry point. The first build failed because CMake de-duplicated
+P3 review-binary linkage: the DeepSeek TP transport macro is shared between
+the test and isolated `maya-ds4` targets. The first build failed because CMake de-duplicated
 two `-include` switches. A grouped option corrected the generated C++ flags;
 the isolated `maya-ds4` and companion test targets built, log
 `/tmp/ds4-tp2-111-main-build2.log`. Single-host XS DSpark regression matched
@@ -1690,7 +1689,7 @@ the earlier 64-token SHA-256
 and accepted 33 of 37 drafts. The owned process exited; output and log are
 `/tmp/ds4-tp2-111-single-host.tokens` and `/tmp/ds4-tp2-111-single-host.log`.
 
-P6 (#114): an uncommitted server change retains the first `TP2_DOWN` or
+P6 (#114): the server retains the first `TP2_DOWN` or
 poisoned-communicator cause and returns it on later requests before any new
 GEN. The first multi-request test exposed a trailing newline; after trimming
 the cause, all four `serve.test_tp2_peer_loss` tests pass, including an earlier
@@ -1703,7 +1702,7 @@ during generation; rank 0 preserved `verbs peer closed the bootstrap
 connection` and rejected subsequent step/feed with the same cause. Both ranks
 and their monitor exited. Logs are `/tmp/ds4-tp2-114-model-loss-rank0.log`
 and the corresponding remote rank1 log.
-Real DeepSeek API peer-loss injection and GLM GPU regression remain open.
+Other DeepSeek failure timings and GLM GPU regression remain open.
 
 Controller integration: attach/shutdown methods have been renamed
 for eventual engine use, a one-shot failure callback and explicit post-shutdown
@@ -1712,7 +1711,7 @@ The isolated test and engine build passed, log
 `/tmp/ds4-tp2-111-api-build.log`. Paired XS GPU validation matched the earlier
 64 tokens, cleanly shut down, rejected a post-shutdown step and invoked no
 failure callback. Both ranks exited; logs use prefix
-`/tmp/ds4-tp2-111-callback-normal-`. The live loss callback test is now active:
+`/tmp/ds4-tp2-111-callback-normal-`. The live loss callback test stopped
 the owned worker during generation. The callback was invoked exactly once
 with the original cause; the rank, worker and monitor all exited. Logs use
 prefix `/tmp/ds4-tp2-114-callback-`.
@@ -1727,9 +1726,9 @@ Do not use these for user serving until all remaining gates are complete.
 P6 idle liveness: `Communicator::CheckPeer` polls without consuming
 control data and poisons on peer close. Host socket-state and controller tests,
 real two-host idle peer loss, and an RDMA/control coexistence test with a queued
-frame all passed. The experimental server now has a one-shot idle watcher;
+frame all passed. The experimental server has a one-shot idle watcher;
 its isolated build passed, log `/tmp/ds4-tp2-111-startup-build2.log`, and
-needs actual API validation.
+its idle HTTP failure check is described below.
 
 The first owned XS HTTP test completed a 64-token API request and shut down
 cleanly, but its idle-loss check did not run because the driver looked for the
@@ -1741,8 +1740,194 @@ peer-closed cause. The server, engine and worker exited. Logs use prefix
 
 P4 (#110) has uncommitted review-only chunk execution changes: deterministic
 bounded feed, route checks and attention/MoE reductions. The isolated test
-binary built and host worker/row-bound tests pass. A paired XS full-logit and
-continuation comparison is running with a 256-row chunk: local PID 270351,
-session 7044; remote PID 102364, session 55885; logs use prefix
-`/tmp/ds4-tp2-110-chunk-xs-`. It uses synthetic handshake identities and the
-earlier single-host text reference. This path is not enabled by the launcher.
+binary built and host worker/row-bound tests pass. The first paired XS test
+failed before logits because `forward_chunks` still had a load-only guard;
+both ranks exited. Logs use prefix `/tmp/ds4-tp2-110-chunk-xs-`. The guard was
+narrowed to the explicitly enabled, bound review path and the paired test
+passed: both ranks' full logits agreed within 1e-5 over 64 rows, their greedy
+continuation matched the earlier window pair, and 63/64 reference top IDs
+matched single-host (max logit difference 4.64711, RMS 0.404073). Both ranks
+exited; logs prefix `/tmp/ds4-tp2-110-chunk-xs-v2-`. It used synthetic
+handshake identities. See
+`docs/validation/deepseek-tp2-control-2026-11-03/chunk-review.md`. This path
+is not enabled by the launcher. A controller test with actual preflight
+identities matched the 64-token window pair, deferred a cancellation callback
+during the chunk, reset/replayed and acknowledged shutdown. Both ranks exited;
+logs prefix `/tmp/ds4-tp2-110-control-xs-`. HTTP cancellation remains untested.
+A DSpark-after-chunk XS test accepted 41/106 drafts and matched the target-only
+64-token pair; both ranks shut down. Logs prefix `/tmp/ds4-tp2-110-dspark-xs-`.
+The paired XS sweep at 17, 128, 129 and 256 tokens passed: the ranks' final-row
+logits matched exactly and chunk/window top IDs matched at each length; max
+absolute chunk/window logit differences were 2.5441, 7.7584, 3.6343 and
+3.2556. The subsequent 64-token reference test passed. Both ranks exited;
+logs prefix `/tmp/ds4-tp2-110-sweep-xs-`. This does not prove long-context or
+quality equivalence.
+An extended two-feed XS sweep passed through 257 tokens (rank logits matched,
+chunk/window top ID 1192, max logit difference 5.7510), but **failed at 512**:
+the ranks agreed with each other while chunk prefill chose EOS ID 1 and window
+prefill chose ID 9857, max logit difference 7.4473. Both ranks exited. Logs
+prefix `/tmp/ds4-tp2-110-multi-xs-`. Chunking stays disabled in the launcher;
+trace the first divergence and do not weaken the test to claim parity.
+An instrumented 512-token XS pair reproduced the failure and showed that a
+whole two-chunk feed and two separate feeds were identical at every traced
+layer and in all final logits (top ID 1). Both ranks exited. Logs prefix
+`/tmp/ds4-tp2-110-trace-xs-`; position 511 residuals and analysis are in
+`/tmp/ds4-tp2-110-trace-pos511.bin` and
+`/tmp/ds4-tp2-110-trace-analysis.txt`. The trace did not include matching
+attention-stage records for the chunk path; instrumentation is being extended
+to locate the first window/chunk divergence. The owned one-host diagnostic
+exited successfully and found the existing single-host window and chunk paths
+also differ on this repeated-special-token fixture: window top 19851, chunk
+EOS 1, max logit difference 8.5022. Log
+`/tmp/ds4-tp2-110-single-compare.log`. This is not a correctness result for a
+realistic long prompt. Rerun the matching-attention pair and test real text.
+The matching-stage rerun has now exited: the window/chunk difference is
+already 0.01365 maximum after layer 0 attention and grows to 5.116 after
+layer 39; the two chunk-call shapes remain identical at every traced stage.
+Analysis: `/tmp/ds4-tp2-110-attention-analysis.txt`. An owned single-host
+545-token real eBPF prompt comparison exited successfully: one-host window
+and chunk selected top token 5, max logit delta 3.6831. Log
+`/tmp/ds4-tp2-110-real-single.log`. The paired comparison used PIDs
+in `/tmp/ds4-tp2-110-real-rank0.pid` and the same path on strix-halo-1; logs
+use `/tmp/ds4-tp2-110-real-rank{0,1}.log` on their respective hosts. It used
+synthetic test identities, not the serving launcher. Both ranks exited cleanly
+and matched all final logits exactly; chunk and window selected token 5 (`#`),
+max window/chunk logit delta 4.3801. The single-host repeat exited; same-path
+single/pair comparisons gave window max/RMS 3.9863/0.8676 (top-10 overlap
+10/10), chunk 3.9327/0.7978 (8/10). Full logits and analysis use
+`/tmp/ds4-tp2-110-real-{single,pair}.logits` and
+`/tmp/ds4-tp2-110-real-logits-analysis.txt`. The P4 gate remains open.
+An XS DSpark rollback test at position 127 with independently checked
+identities passed forced acceptance 0..3 across the 128-token boundary: each
+next full logit vector was identical to target-only, and all five drafts and
+confidences matched. Both ranks shut down; logs use
+`/tmp/ds4-tp2-113-boundary-rank{0,1}.log` on their respective hosts. This is
+supplemental evidence, not a P5 gate pass; the harness and report are in
+`4ae9925` (#113). Layer 0 has no Engram input.
+Test-only tracing now records residuals before and after Engram as well as
+after attention; it compiled and linked. The paired 512-token trace has exited
+with the same retained gate failure. At layer 0 the window and chunk inputs
+and post-Engram values were identical; their post-attention maximum difference
+was 0.0136465. Analysis: `/tmp/ds4-tp2-110-inputs-analysis.txt`. The owned
+single-host 545-token chunk-reference continuation completed 64 tokens;
+`/tmp/ds4-tp2-110-real-reference.bin` contains its tokens and logits. The
+paired continuation comparison exited cleanly: rank logits agreed within
+1e-5, 59/64 teacher-forced top IDs matched the single-host reference (max
+delta 7.9736, RMS 0.4767), and independently generated greedy outputs shared
+12 initial tokens before diverging into two coherent tutorial openings. Logs:
+`/tmp/ds4-tp2-110-cont-rank{0,1}.log` on their respective hosts. This is one
+prompt, not a quality or exact-equivalence guarantee. A further test-only
+layer-0 attention-input/projection probe compiled and linked in
+`/tmp/maya-ds4-tp2-p1-build` (log
+`/tmp/ds4-tp2-110-attention-probe-build.log`). The paired 512-token run
+completed with the retained synthetic gate failure. The normalized input
+matched exactly, while low-rank query and key/value projections differed by at
+most 0.0005835 and 0.0005542; analysis is
+`/tmp/ds4-tp2-110-math-analysis.txt`. A review-only option to use the window
+projection math for the chunk built (log
+`/tmp/ds4-tp2-110-matched-projection-build.log`). Its paired test exited 0:
+layer-0 query and KV projections became bit-identical and at 512 tokens both
+chunk and window selected 9857; the ranks' logits were identical, although
+chunk/window max logit difference remained 6.8618. This is an experiment, not
+a production fix. Logs: `/tmp/ds4-tp2-110-projection-rank{0,1}.log` on their
+respective hosts; trace `/tmp/ds4-tp2-110-trace-projection.bin`. Extend the
+sweep and test realistic prompts, DSpark, Maya-S and performance. The expanded
+XS matched-projection sweep passed top IDs at 17, 128, 129, 256, 257 and 512;
+rank logits matched exactly. Its short 64-row follow-up matched 63 single-host
+top IDs. Both ranks exited; logs are
+`/tmp/ds4-tp2-110-match-sweep-rank{0,1}.log` on their respective hosts.
+The text harness now includes per-mode timing, and the probe's disabled path
+avoids an environment lookup in single-host execution. Those changes are being
+linked in the isolated test binary. The baseline 545-token timing pair exited
+cleanly: lead-rank window 9.1835 s, chunk 2.9061 s, one sample including the
+harness's synchronization and final logit exchange. Logs:
+`/tmp/ds4-tp2-110-timing-base-rank{0,1}.log` on their respective hosts. The
+same fixture with matched projections also exited cleanly: window 6.7692 s,
+chunk 3.2084 s, pair logits identical and chunk/window both top 5. Logs:
+`/tmp/ds4-tp2-110-timing-match-rank{0,1}.log`. These are single samples; the
+window timings vary substantially, so they do not establish a reliable
+performance difference. The matched mode still needs long-continuation,
+DSpark, S, cancellation, failure and context tests.
+Its 545-token paired continuation test exited cleanly: rank logits matched,
+61/64 teacher-forced top IDs matched single-host (max/RMS 4.9847/0.4413), and
+greedy continuations shared 21 initial tokens and then diverged coherently.
+Logs: `/tmp/ds4-tp2-110-match-cont-rank{0,1}.log`. A DSpark pair with real
+identities failed against its generated target-only sequence at output index
+19, after six rounds and 13 accepted drafts; the worker observed peer close
+after the lead test exited. Both ranks exited. Logs:
+`/tmp/ds4-tp2-113-long-rank{0,1}.log`. A rebuilt diagnostic is running to
+compare a fixed probe's full logits before and after resetting and replaying
+the committed history on mismatch. It reproduced the mismatch (actual 2572,
+expected 24353); after reset and replay, the next token was again 2572, and a
+fixed probe's full logits matched the speculative state exactly (max/RMS 0).
+Both ranks exited, with synchronized shutdown for the diagnostic. Logs:
+`/tmp/ds4-tp2-113-replay-rank{0,1}.log`. This rules out a committed-state
+difference for that probe only; the two target-only execution setups still
+differ. The DSpark-loaded pair without any drafts generated 64 tokens and
+exited cleanly: it shared 19 tokens with the old direct-feed reference and
+chose the same 2572 at position 19 as the speculative run. Code inspection
+found the likely test mismatch: a whole 545-token feed is balanced into
+182+182+181 rows by `plan_chunks`, whereas the controller sends 256+256+33.
+An independent controller pair without a loaded drafter generated exactly the
+same 64 tokens as the drafter-loaded, no-draft pair. Both differ from the
+direct-feed reference at position 19. The feed shapes differ, and the direct
+harness also ran a teacher-forced phase before greedy generation, so the
+specific cause is isolated below. The corrected-reference DSpark run passed:
+it generated the same 64 target-only tokens, accepting 41/111 drafts over 23
+rounds, and both ranks shut down. Logs:
+`/tmp/ds4-tp2-113-corrected-rank{0,1}.log`; reference:
+`/tmp/ds4-tp2-113-control-rank0.tokens`. Retain the original failed comparison
+and numerical difference in the evidence. A test-only greedy-only whole/split
+run exited successfully: whole vs split max logit delta 4.2774 (top token 5
+in both); the whole-feed continuation matched the prior direct-feed result and
+differed from the controlled split at token 19. Logs:
+`/tmp/ds4-tp2-110-shape-rank{0,1}.log`. A review-only change makes TP chunk
+planning use fixed-size boundaries like controller feeds; it built (log
+`/tmp/ds4-tp2-110-fixed-chunks-build.log`). The 545-token test passed with
+identical full logits for whole and split feeds and identical 64-token greedy
+continuations; both ranks exited. Logs:
+`/tmp/ds4-tp2-110-fixed-rank{0,1}.log`. Test DSpark, both quantizations and
+the remaining gates before enabling it. The changed-binary XS DSpark test
+passed against the controlled 545-token reference (64 matching tokens,
+41/111 accepted); both ranks shut down. Logs
+`/tmp/ds4-tp2-113-fixed-rank{0,1}.log` on their respective hosts. A Maya-S
+545-token whole/split test passed: whole/split and pair full-logit deltas were
+0, and 64 tokens were generated. Each rank loaded 84,509,982,720 expert
+bytes; logs `/tmp/ds4-tp2-110-s-shape-rank{0,1}.log`. The real-identity S
+controller test ran against that continuation, with PIDs/logs
+`/tmp/ds4-tp2-110-s-control-rank{0,1}.{pid,log}` on their respective hosts.
+That real-identity controller test passed all 64 tokens, deferred cancellation,
+reset/replayed and shut down on both ranks. The real-identity S DSpark test
+against the same continuation also passed: all 64 tokens matched, 40/116
+drafts accepted over 24 rounds, and both ranks shut down. Logs
+`/tmp/ds4-tp2-113-s-fixed-rank{0,1}.log` on their respective hosts. A
+real-identity S controller test at configured context 524288 passed all 64
+tokens and coordinated shutdown, matching its 32K-configured reference. Logs:
+`/tmp/ds4-tp2-112-s-512k-rank{0,1}.log`. The corresponding DSpark test also
+passed the same 64 tokens, accepting 40/116 drafts, and shut both ranks down;
+logs `/tmp/ds4-tp2-112-s-512k-dspark-rank{0,1}.log`. During loading, after
+the lead had loaded, system `free` reported 100 GiB used and 23 GiB available
+on the lead; the worker was still loading, with 92 GiB used and 31 GiB
+available. These are host snapshots, not isolated process or peak figures.
+The prompt is only 545 tokens, so this checks allocation/startup, not a full
+512K-token context.
+
+The ordered HIP mapping/server/tools checkpoint passed: HIP mapping, 614
+server tests (11 skips), and 701 tools tests (3 skips).
+Logs `/tmp/ds4-tp2-checkpoint-{hip,serve,tools}.log`. An XS 3,204-token
+real-format prompt passed: rank and whole/split full-logit deltas 0, window and
+chunk top token 5, and 64 generated tokens; both ranks exited. Logs
+`/tmp/ds4-tp2-110-3204-rank{0,1}.log`. This was a correctness run while CPU
+tests were active, not a performance measurement. Fixture:
+`tests/fixtures/ds4-ebpf-3204.tokens`. A real-identity XS DSpark comparison
+against its continuation passed all 64 tokens, accepted 38/124 drafts over
+25 rounds and shut down both ranks. Logs
+`/tmp/ds4-tp2-113-3204-rank{0,1}.log`. The isolated GLM `maya` target built
+and was copied to `/tmp/ds4-tp2-glm-review` on strix-halo-1; hashes match
+`467170ceb00479d390ed6b12e11a8c15804fcc4abc7e0564c1be7f8bbc1c7a0c`.
+An ownership-safe GLM TP2 regression passed: both ranks generated the same
+32 tokens with MTP off and on, and the two modes matched each other. MTP
+accepted 20/21 drafts. All owned ranks exited; report
+`docs/validation/deepseek-tp2-control-2026-11-03/glm-regression.md`.
+This short CLI test does not cover serve, cancellation or peer loss; avoid
+the destructive repository harnesses for remaining tests.

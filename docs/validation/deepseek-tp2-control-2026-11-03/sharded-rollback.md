@@ -64,3 +64,52 @@ binary SHA-256 was
 `478af130683ca0558f12d1471ee913f160ab1c05092ce50c76dfce3a5a432c2f`.
 This does not cover longer contexts, Maya-S at this boundary, lookup, or every
 failure mode; the phase gate remains open.
+
+A subsequent real-identity XS run used experimental matched-projection chunk
+prefill on a valid 545-token eBPF prompt and compared greedy DSpark generation
+against a separately recorded target-only pair. It **failed** at output index
+19, after six rounds offered 30 drafts and accepted 13: the next DSpark token
+differed from the target-only token. The lead exited, and the worker observed
+peer close and exited. This may reflect speculative state or numerical
+differences in multi-row verification; the cause has not been established.
+It blocks the relevant long-prompt DSpark gate.
+The diagnostic rerun reproduced the mismatch (actual token 2572, reference
+24353). After a synchronized reset and replay of the committed prompt and 19
+generated tokens, the next token was again 2572. Feeding the same probe before
+and after replay produced identical full logits (max and RMS 0). The worker
+acknowledged shutdown. This is evidence that this specific committed state
+survived rollback; it does not establish why the separately run target-only
+pair chose a different next token or prove all rollback states correct.
+Code inspection identified a likely mismatch in the comparison: the direct
+545-token target-only feed was balanced into chunks of 182+182+181, while the
+controller-based DSpark test fed 256+256+33. Those execution shapes may have
+different numerical results. An identical-boundary target-only comparison is
+required before interpreting the failed output check. A subsequent controlled
+run with the drafter loaded but never invoked generated 64 tokens; its first
+19 matched the direct-feed reference, and its next token was 2572, identical
+to the speculative and replay result. A no-drafter controlled comparison is
+still required to isolate the effect of the feed boundaries. That independent
+no-drafter controlled run then produced exactly the same 64 tokens as the
+drafter-loaded no-draft run; both first differed from the direct-feed sequence
+at token 19 (2572 versus 24353). The original comparison used mismatched
+execution setups. A later whole/split test found a 4.2774 maximum final-logit
+difference, and whole-feed greedy with no prior teacher-forced phase exactly
+reproduced the direct-feed continuation. This isolates chunk shape as the
+cause of the reference mismatch. Against the
+corrected controlled target-only reference, DSpark then generated all 64
+tokens exactly, accepting 41 of 111 drafts over 23 rounds. Both ranks shut down
+cleanly. This is one XS prompt and does not close the remaining phase gates.
+After the fixed-boundary review change, the same real-identity DSpark test
+again matched all 64 reference tokens, with 41/111 drafts accepted over 23
+rounds and coordinated shutdown. The review binary SHA-256 was
+`072670e7bc1a4c558568697a5aaec903a006afce8d051eecb4a19210ecdc6a46`.
+On Maya-S, the same changed binary and real identities matched all 64 tokens
+of its controlled 545-token prompt, accepted 40/116 drafts over 24 rounds, and
+shut down both ranks. This is one prompt, not the full phase gate.
+The S pair also passed at configured context 524288 with this 545-token prompt:
+all 64 tokens matched the target-only reference and 40/116 drafts were accepted.
+Both ranks shut down. The prompt did not fill a 512K context, so this only
+checks allocation and a short execution at that setting.
+An XS 3,204-token real-format prompt also passed a real-identity DSpark check:
+64 target-only tokens matched, with 38/124 drafts accepted over 25 rounds.
+Both ranks shut down. This remains shorter than a full long-context test.

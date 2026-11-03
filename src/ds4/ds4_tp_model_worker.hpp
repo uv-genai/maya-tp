@@ -16,7 +16,7 @@ namespace strata::ds4::tp2 {
 // until both ranks negotiate chunking and collective order.
 template <class ModelT> class ModelWorker {
 public:
-    explicit ModelWorker(ModelT& model) : model_(model) {}
+    explicit ModelWorker(ModelT& model, bool allow_chunks=false) : model_(model), allow_chunks_(allow_chunks) {}
 
     bool execute(const Control& c, std::string& error) {
         if (!failure_.empty()) { error = failure_; return false; }
@@ -53,7 +53,7 @@ public:
         bool ok = false;
         switch (c.command) {
             case Command::Feed:
-                if (model_.prompt_chunk() != 0)
+                if (model_.prompt_chunk() != 0 && !allow_chunks_)
                     return fail("ds4 tp2 model worker: feed requires window-only prefill");
                 ok = model_.feed(tokens.data(), static_cast<int>(tokens.size()), 0, why);
                 break;
@@ -93,6 +93,7 @@ public:
 
 private:
     ModelT& model_;
+    bool allow_chunks_ = false;
     std::uint64_t verify_start_ = 0;
     std::uint32_t verify_count_ = 0;
     bool pending_ = false, stopped_ = false;

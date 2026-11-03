@@ -56,6 +56,8 @@ struct Options {
     // until the distributed computation boundary is installed.
     int tp2_rank = -1;
     std::size_t tp2_expert_budget = 0;
+    // Review-only opt-in until chunked TP2 prefill passes its parity gates.
+    bool tp2_chunk_test = false;
     float dspark_conf = 0.5f;         // a draft is verified while its confidence (sigmoid) is at least this
     // prompt lookup (ds4_main's --suffix-draft): its verify windows run without the drafter too - their buffers (the
     // rows and states a rejected draft undoes) are allocated with the drafter, or with this

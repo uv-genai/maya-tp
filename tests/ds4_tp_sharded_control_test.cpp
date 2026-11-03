@@ -24,14 +24,19 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
     const long rank=std::strtol(argv[2],&end,10); if (!*argv[2] || *end || rank<0 || rank>1) return 2;
     const long port=std::strtol(argv[4],&end,10); if (!*argv[4] || *end || port<1 || port>65535) return 2;
     std::vector<int> prompt, expected;
-    { std::ifstream f(argv[7]); CHECK(f.good()); int token; while (f>>token) prompt.push_back(token); CHECK(f.eof() && !prompt.empty() && prompt.size()<=1024); }
+    { std::ifstream f(argv[7]); CHECK(f.good()); int token; while (f>>token) prompt.push_back(token); CHECK(f.eof() && !prompt.empty() && prompt.size()<=32768); }
     if (std::string(argv[8])!="-") {
         std::ifstream f(argv[8]); CHECK(f.good()); int token; while (f>>token) expected.push_back(token);
         CHECK(f.eof() && !expected.empty() && expected.size()<=256);
     }
     CHECK(setenv("DS4_STREAM","0",1)==0);
-    strata::ds4::Options o; o.pack=argv[6]; o.max_context=32768; o.gpus={0}; o.reserve_mib=1024;
-    o.tp=1; o.threads=false; o.vision=false; o.dspark=false; o.lookup=false; o.prefill_chunk=0;
+    const char* chunk_env=std::getenv("DS4_TP_TEST_CHUNK");
+    const int chunk=chunk_env ? std::atoi(chunk_env) : 0;
+    if (chunk_env) { CHECK(chunk>=256 && chunk%16==0); CHECK(setenv("DS4_FLOW","0",1)==0); CHECK(setenv("DS4_YOCO","0",1)==0); }
+    std::int64_t context=0; CHECK(ds4_tp_test_context(context,error));
+    strata::ds4::Options o; o.pack=argv[6]; o.max_context=context; o.gpus={0}; o.reserve_mib=1024;
+    o.tp=1; o.threads=false; o.vision=false; o.dspark=false; o.lookup=false; o.prefill_chunk=chunk;
+    o.tp2_chunk_test=chunk>0;
     o.expert_cache=false; o.mmap_experts=1; o.profile_readonly=true; o.cpu_threads=14; o.vram_experts=0;
     o.tp2_rank=static_cast<int>(rank); o.tp2_expert_budget=90ull<<30; o.tp_worker_verify=true;
     strata::ds4::Model model; CHECK(model.load(o,error));
@@ -42,15 +47,17 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
     cfg.bootstrap_port=static_cast<std::uint16_t>(port); cfg.rdma_device=argv[5];
     auto comm=strata::net::CreateIbrverbsCommunicator(cfg,&error); CHECK(comm);
     Identity id; id.protocol=1; id.world=2; id.rank=cfg.rank; id.hidden=5120; id.layers=40; id.experts=384;
-    id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
+    id.expert_width=2304; id.max_context=static_cast<std::uint64_t>(context);
+    id.feature_flags=1|(static_cast<std::uint64_t>(chunk)<<16);
+    id.max_partial_bytes=comm->MaxPartialBytes();
     CHECK(ds4_tp_test_identity(id,error));
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
     CHECK(model.tp2_attach(*comm,static_cast<std::size_t>(limit),error,rank==0));
     int notifications=0; std::string notified;
     if (rank==0) model.tp2_set_failure_handler([&](const std::string& cause) { ++notifications; notified=cause; });
     if (rank==1) {
-        Worker worker(*comm,32768,static_cast<std::uint32_t>(model.vocab()),16);
-        ModelWorker<strata::ds4::Model> adapter(model);
+        Worker worker(*comm,static_cast<std::uint64_t>(context),static_cast<std::uint32_t>(model.vocab()),chunk>0?chunk:16);
+        ModelWorker<strata::ds4::Model> adapter(model,chunk>0);
         std::uint64_t processed=0;
         while (!worker.state().stopped()) {
             CHECK(worker.run_one([&](const Control& c,std::string& e){return adapter.execute(c,e);},error));
@@ -58,7 +65,7 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
         }
         CHECK(worker.state().position()==static_cast<std::uint64_t>(model.pos()));
         CHECK(send_message(*comm,{Command::Shutdown,processed+1,
-              static_cast<std::uint64_t>(model.pos()),{}},16,error));
+              static_cast<std::uint64_t>(model.pos()),{}},chunk>0?chunk:16,error));
         std::printf("rank 1 worker stopped at position %lld\n",static_cast<long long>(model.pos()));
         return 0;
     }
@@ -76,14 +83,17 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
     };
     auto feed_prompt=[&]()->bool {
         for (std::size_t at=0;at<prompt.size();) {
-            const auto end_at=std::min(prompt.size(),at+std::size_t{16});
+            const auto end_at=std::min(prompt.size(),at+static_cast<std::size_t>(model.feed_unit()));
             std::vector<std::uint32_t> words(prompt.begin()+static_cast<std::ptrdiff_t>(at),prompt.begin()+static_cast<std::ptrdiff_t>(end_at));
             if (!execute(Command::Feed,words,end_at==prompt.size())) return false;
             at=end_at;
         }
         return true;
     };
+    int cancel_checks=0;
+    if (chunk>0) model.set_cancel([&] { ++cancel_checks; return true; });
     CHECK(feed_prompt());
+    if (chunk>0) { CHECK(cancel_checks==0 && !model.cancelled()); model.set_cancel(nullptr); }
     std::vector<int> generated; const auto count=expected.empty()?std::size_t{64}:expected.size();
     const bool expect_loss=std::getenv("DS4_TP_TEST_EXPECT_LOSS")!=nullptr;
     for (std::size_t i=0;i<count;++i) {

@@ -48,6 +48,11 @@ int main() {
         CHECK(!w.execute({Command::Step,2,0,{1}},error) && error==first && m.calls==0);
     }
     {
+        FakeModel m; m.chunk=128; ModelWorker<FakeModel> w(m,true);
+        CHECK(w.execute({Command::Feed,1,0,std::vector<std::uint32_t>(20,1)},error));
+        CHECK(m.at==20 && m.calls==1 && m.syncs==1);
+    }
+    {
         FakeModel m; ModelWorker<FakeModel> w(m);
         CHECK(w.execute({Command::Verify,1,0,{1,2,3}},error));
         CHECK(!w.execute({Command::Verdict,2,1,{2,4}},error));
