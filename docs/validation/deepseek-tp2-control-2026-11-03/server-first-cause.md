@@ -26,3 +26,11 @@ was rejected with the original peer-closed cause. The driver stopped its HTTP
 server, and all owned processes exited. Its first attempt completed the HTTP
 request but did not inject loss because it looked for a remote PID file on the
 local host; the corrected retry produced the failure result above.
+
+In an isolated real-identity XS model test, an owned monitor waited for a
+256-row chunk-reduction marker, verified the recorded worker's executable,
+and terminated only that worker. The lead retained the original `verbs peer
+closed the bootstrap connection` cause, invoked its failure callback once,
+and rejected later feed and step operations with the same cause. The lead
+test and monitor exited successfully. This checks a chunk-prefill operation;
+verify, verdict, rollback and HTTP cancellation failure cases remain open.

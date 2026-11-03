@@ -19655,6 +19655,13 @@ struct Model::Impl {
             return tp_test_fail("ds4 tp2: invalid test reduction",err);
         const auto bytes=static_cast<std::size_t>(rows)*static_cast<std::size_t>(width)*sizeof(float);
         if (bytes>tp_test_limit) return tp_test_fail("ds4 tp2: reduction exceeds negotiated limit",err);
+        if (o.tp2_chunk_test && o.tp2_rank==0 && rows>kWin) {
+            static bool marked=false;
+            const char* path=marked ? nullptr : std::getenv("DS4_TP_TEST_PARTIAL_MARKER");
+            if (path) if (std::FILE* f=std::fopen(path,"wx")) {
+                std::fprintf(f,"chunk reduction rows=%d\n",rows); std::fclose(f); marked=true;
+            }
+        }
         const float* other=tp_test_comm->ExchangePartial(data,bytes,stream,&err);
         if (!other) return tp_test_fail(err,err);
         strata::net::AddRowsBroadcast(other,data,static_cast<std::uint32_t>(rows),

@@ -1931,3 +1931,15 @@ accepted 20/21 drafts. All owned ranks exited; report
 `docs/validation/deepseek-tp2-control-2026-11-03/glm-regression.md`.
 This short CLI test does not cover serve, cancellation or peer loss; avoid
 the destructive repository harnesses for remaining tests.
+
+Checkpoint `3f3c983` records the gated DeepSeek chunk work, evidence, and
+GLM CLI regression. The launcher remains window-only. A test-only marker and
+prefill-loss assertion built (log `/tmp/ds4-tp2-114-prefill-loss-build.log`).
+The paired injection test passed: after the monitor saw a 256-row reduction
+marker, it terminated only the recorded worker after verifying its isolated
+executable. The lead retained `verbs peer closed the bootstrap connection`,
+reported the failure once, and rejected subsequent feed and step with the same
+cause. Both test and monitor exited. Logs
+`/tmp/ds4-tp2-114-prefill-rank{0,1}.log` and
+`/tmp/ds4-tp2-114-prefill-monitor.log`. The marker and assertion remain
+uncommitted test-only changes; other failure points still need testing.

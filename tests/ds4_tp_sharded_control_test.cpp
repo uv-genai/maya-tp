@@ -92,7 +92,20 @@ int ds4_tp_sharded_control_test(int argc,char** argv) {
     };
     int cancel_checks=0;
     if (chunk>0) model.set_cancel([&] { ++cancel_checks; return true; });
-    CHECK(feed_prompt());
+    const bool prefill_loss=std::getenv("DS4_TP_TEST_EXPECT_PREFILL_LOSS")!=nullptr;
+    const bool fed=feed_prompt();
+    if (prefill_loss) {
+        CHECK(!fed);
+        const std::string first=error;
+        CHECK(first.find("peer closed the bootstrap connection")!=std::string::npos);
+        error.clear();
+        CHECK(!model.step(prompt[0],true,error) && error==first);
+        CHECK(!model.feed(prompt.data(),1,1,error) && error==first);
+        CHECK(notifications==1 && notified==first && model.tp2_failure()==first);
+        std::printf("rank 0 preserved first prefill peer-loss cause and rejected later operations: %s\n",first.c_str());
+        return 0;
+    }
+    CHECK(fed);
     if (chunk>0) { CHECK(cancel_checks==0 && !model.cancelled()); model.set_cancel(nullptr); }
     std::vector<int> generated; const auto count=expected.empty()?std::size_t{64}:expected.size();
     const bool expect_loss=std::getenv("DS4_TP_TEST_EXPECT_LOSS")!=nullptr;
