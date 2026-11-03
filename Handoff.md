@@ -1456,6 +1456,13 @@ window/chunk top-token agreement and exact whole/split logits; all ranks exited.
 XS and S also passed those checks on the 3,204-token fixture and all ranks exited.
 A test-only supported 256+1 split replay was added to `ds4_tp_text_rdma_test.cpp`.
 Both XS and S passed with rank and replay max logit deltas 0; all ranks exited.
+The isolated attention arithmetic investigation traced the first layer-0
+query projection difference to per-32 Q8 versus FP16 GEMM arithmetic. An
+independent CPU reference found the chunk projection closer to the dequantized
+weights on the captured vector. Matching all attention projections reintroduced
+EOS on the 512-token synthetic fixture, so those substitutions remain confined
+to the diagnostic worktree. Both ranks exited. Evidence is in
+`docs/validation/deepseek-tp2-control-2026-11-03/attention-arithmetic.md`.
 GPU busy and rank-0 Engram lookup deltas were sampled once for XS/S on
 single-host and TP2. Logical Engram reads, process-wide physical I/O and
 device-wide busy are distinct; placement and cache differed, and the samples

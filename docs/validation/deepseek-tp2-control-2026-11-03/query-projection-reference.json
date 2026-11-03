@@ -1,0 +1,30 @@
+{
+  "tensor": "layers.0.attn.wq_b.weight",
+  "dtype": "Q6_K",
+  "rank": 0,
+  "shape": [
+    16384,
+    1280
+  ],
+  "input_position": 16,
+  "window_vs_full_fp64": {
+    "max_abs": 0.05466408480036433,
+    "rms": 0.006743648022989485
+  },
+  "chunk_vs_full_fp64": {
+    "max_abs": 0.001484603952643937,
+    "rms": 0.00024267878479816314
+  },
+  "window_vs_q8_cpu": {
+    "max_abs": 1.8175317819668635e-06,
+    "rms": 9.679133804421724e-08
+  },
+  "chunk_vs_fp16_cpu": {
+    "max_abs": 9.307736036134884e-06,
+    "rms": 4.3914545483508204e-07
+  },
+  "window_vs_chunk": {
+    "max_abs": 0.0547868013381958,
+    "rms": 0.006753065048107773
+  }
+}
