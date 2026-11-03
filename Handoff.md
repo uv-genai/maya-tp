@@ -1429,7 +1429,14 @@ and its worker copy `/tmp/ds4-tp2-114-current-engine` have SHA-256
 The earlier benchmark build had SHA-256
 `31b2e21d529f5de3016c7ce58a3bab704f052ab5d22beea62b64829680a81fb1`.
 
-**Active owned process:** none. The cold/second-start comparisons used only
+**Active owned process:** none. XS and S each passed eight simple cross-path
+sanity cases on one host and two hosts; 5/8 XS and 7/8 S answers were
+text-identical, with remaining differences in JSON formatting or verifier
+wording. All owned processes exited. The single-host runs used 8 GiB reserve,
+zero read-ahead and a 3 GiB memory guard. This small check does not resolve
+the synthetic 512-token chunk/window discrepancy. Evidence:
+`docs/validation/deepseek-tp2-control-2026-11-03/cross-path-sanity.md`.
+The cold/second-start comparisons used only
 manifest-verified model source pages evicted via per-file `POSIX_FADV_DONTNEED`,
 with sampled `mincore`; no system-wide cache drop was used.
 The XS and S paired cold/warmer comparisons passed and all pairs exited:

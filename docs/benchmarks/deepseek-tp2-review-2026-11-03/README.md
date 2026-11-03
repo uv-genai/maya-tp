@@ -1,6 +1,8 @@
 # DeepSeek TP2 review measurements, 2026-11-03
 
 Experimental work under #116; this is not a release or production promotion.
+For eight short objective cross-path checks on both models, see the
+[sanity report](../../validation/deepseek-tp2-control-2026-11-03/cross-path-sanity.md).
 
 ## Filled-context functional check
 
