@@ -1517,6 +1517,12 @@ does not yet perform model partitioning or distributed reductions. A paired real
 smoke is next. Standard HIP mapping, 613 server tests (11 skipped) and 687 tools tests (3 skipped)
 also passed in this work session.
 
+A real XS expert was also run as rank-local FFN slices on both hosts and its partials summed over
+RDMA. Layer 0's 1280/1024 and layer 1's 1024/1280 slices matched each other exactly after reduction
+and the full single-GPU expert within 1.2e-8. See
+`docs/validation/deepseek-tp2-control-2026-11-03/rdma-expert-xs.md`. This is one routed expert,
+not an end-to-end TP model, and uses synthetic test handshake identities.
+
 An owned replicated-XS paired control/RDMA smoke on port 18722 completed and both owned ranks
 exited. The adaptive-lane attempt produced a 5.6557 maximum logit difference and the hosts chose
 different CPU/stream splits. With identical fixed CPU execution, a rerun passed: all 129,280
