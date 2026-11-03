@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-03 · Current state: **§§38–41**, GLM startup and DeepSeek two-host design/plan; §§36–37 cover DeepSeek performance; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-03 · Current state: **§42**, DeepSeek TP2 P1; §§38–41 record GLM startup and DeepSeek design/plan; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -1405,5 +1405,21 @@ The user requested an implementation plan. See
 [DeepSeek TP2/DSpark implementation plan](docs/DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md), based on
 [the analysis/design](docs/DEEPSEEK-TP2-ANALYSIS-DESIGN.md). Seven independently tracked phases are
 #112, #115, #111, #110, #113, #114 and #116 in plan order. The proposed uneven tensor-slicing
-approach remains subject to P1 feasibility; the user has not requested implementation to start.
-No binaries, model processes or production configs were changed by the planning work.
+approach remains subject to P1 feasibility. The user subsequently authorized implementation;
+no binaries, model processes or production configs were changed by the planning work.
+
+## 42. DeepSeek TP2 P1 in progress (#112, 2026-11-03)
+
+Working branch `feat/deepseek-tp2`; design and plan committed as `231a48b`. Both hosts were free of
+model processes when P1 began; their llama-swap daemons remain user-owned. Pack inventory and an
+isolated two-host RDMA smoke/benchmark are in `docs/benchmarks/deepseek-tp2-p1-2026-11-03/`.
+Both ranks passed the transport test; P1 capacity, single-host reference and architecture gates
+remain open. No DeepSeek TP2 implementation exists yet.
+
+An owned rsync started to copy Maya-XS, shared Engram, DSpark and vision into the previously absent
+`/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/` on strix-halo-1. Local shell
+PID 155996, rsync PID 156005 and SSH PID 156006 were recorded at launch; unified exec session 64870,
+log `/tmp/ds4-p1-copy-112.log`. Recheck PIDs/start times before acting. The copy was initially
+~110 MB/s, about 43 minutes; it is incomplete until rsync exits successfully and the remote pack is
+checked. Do not benchmark storage while it runs. Do not treat incomplete files as a usable pack.
+An isolated transport build is at `/tmp/maya-ds4-tp2-p1-build`; its temporary test ranks have exited.

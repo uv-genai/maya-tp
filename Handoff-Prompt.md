@@ -4,6 +4,10 @@ Read [AGENTS.md](AGENTS.md), then [Handoff.md §§33–39](Handoff.md#33-prefill
 
 ## Current GLM and DeepSeek state
 
+The user authorized DeepSeek two-host implementation; P1 is active on `feat/deepseek-tp2`.
+Read Handoff.md §42, the implementation plan and #112 before proceeding. An owned model copy may
+still be running; verify it and preserve user-owned processes. Later phase issues are not yet done.
+
 For the remote GLM startup repair and Maya-L cold-load investigation, read Handoff.md §§38–39
 and issues #104–#105. The user reports that everything is working; Maya-L has completed TP2
 requests. The cold-loading slowdown remains under investigation.

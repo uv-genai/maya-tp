@@ -1,0 +1,11 @@
+rdma_ready rdma_device=usb4_rdma5 port=1 link=roce_v2 gid_index=1 mtu=4096 rank 1/2
+tp_comm_rdma_test OK  100 exchanges in 91.2 ms (911.81 us/exchange both ways)
+bench hidden=5120  row=20.0 KiB  big=2457 rows (48.0 MiB)
+bench blocking  2000 x 20.0 KiB: 35.39 us/exchange
+bench blocking BW  200 x 48.0 MiB: 27.37 Gb/s one-way (14705.88 us/exchange)
+bench queued latency  2000 x 20.0 KiB: 42.87 us/exchange
+bench queued bandwidth  200 x 48.0 MiB (pipelined): 26.77 Gb/s one-way (15038.94 us/exchange)
+allreduce rows=1 bytes=20480 n=2000 min_us=37.2 p50_us=39.9 mean_us=40.3 p99_us=44.7
+allreduce rows=2 bytes=40960 n=2000 min_us=55.3 p50_us=58.1 mean_us=58.5 p99_us=63.5
+allreduce rows=8 bytes=163840 n=2000 min_us=70.0 p50_us=76.4 mean_us=120.7 p99_us=950.1
+allreduce rows=512 bytes=10485760 n=2000 min_us=2531.1 p50_us=2919.0 mean_us=3092.3 p99_us=4816.8
