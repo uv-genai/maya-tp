@@ -1,5 +1,9 @@
 # Experimental DeepSeek TP model numerics
 
+> This dated report records an early test-only checkpoint. The experimental
+> serving path was implemented later; use the [current review guide](../../DEEPSEEK-TP2-RUN.md)
+> and [handoff](../../../Handoff.md) for present capabilities.
+
 Issue #110. The review test executable can bind a sharded XS model to the TP2
 RDMA communicator. This is **test-only** and uses a synthetic identity. It sums
 attention and shared/routed expert partials before their residual updates, and

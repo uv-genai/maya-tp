@@ -1,6 +1,9 @@
 # DeepSeek two-host parallelism and DSpark: analysis and design
 
-Status: design proposal, 2026-11-03. Tracking: [#108](https://github.com/uv-genai/maya-tp/issues/108).
+Status: historical design proposal, written before the experimental implementation on 2026-11-03.
+Tracking: [#108](https://github.com/uv-genai/maya-tp/issues/108). The code descriptions and
+unverified assumptions below describe that earlier checkpoint; see the [review guide](DEEPSEEK-TP2-RUN.md),
+[implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md) and [handoff](../Handoff.md) for current status.
 Scope: DeepSeek V4.1 Flash on two gfx1151 Strix Halo hosts connected by USB4 RDMA, with the
 existing DSpark drafter. This is not an implementation, a measured performance claim, or a phased
 implementation plan. GLM TP2/MTP and existing single-host DeepSeek remain supported unchanged.
@@ -21,7 +24,7 @@ all of Maya-S, its Engram data, context, drafter, and runtime scratch fit simult
 pair, or that storage reads will disappear. Capacity and throughput must be measured with the
 actual pack and context; do not derive speed from aggregate advertised memory or link bandwidth.
 
-## Current code and boundary
+## Code and boundary at the design checkpoint
 
 * `src/ds4/ds4_model.cu` and `ds4_model.hpp` implement the DeepSeek engine independently of GLM.
   A block includes Engram on selected layers, hyper-connection mixing, attention with a sliding

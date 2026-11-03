@@ -1,9 +1,11 @@
 # DeepSeek two-host tensor parallelism and DSpark: implementation plan
 
-Status: implementation in progress, 2026-11-03. Planning [#109](https://github.com/uv-genai/maya-tp/issues/109);
-background and design rationale: [analysis/design](DEEPSEEK-TP2-ANALYSIS-DESIGN.md). This is a
-plan, not evidence of implemented support. Phase issues and `Handoff.md` track current progress;
-DeepSeek two-host model inference is not yet implemented.
+Status: implementation and validation in progress, 2026-11-03. Experimental two-host DeepSeek
+inference and DSpark are implemented; validation and production promotion remain open. See the
+[operating guide](DEEPSEEK-TP2-RUN.md), phase issues and `Handoff.md` for current capabilities,
+limitations and evidence. Planning [#109](https://github.com/uv-genai/maya-tp/issues/109) and the
+[analysis/design](DEEPSEEK-TP2-ANALYSIS-DESIGN.md) record the original assumptions; the phase
+descriptions below are the intended gates, not proof that every gate has passed.
 
 ## Goal and boundaries
 

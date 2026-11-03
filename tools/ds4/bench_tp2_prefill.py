@@ -47,7 +47,9 @@ def main():
     if len(ids) < args.runs * stride:
         raise RuntimeError("synthetic corpus tokenized to fewer tokens than expected")
     with args.output.open("x", encoding="utf-8") as out:
-        result = {"url": args.url, "label": args.label, "dspark": args.dspark, "samples": []}
+        result = {"url": args.url, "label": args.label, "dspark": args.dspark,
+                  "source_lengths": lengths, "max_tokens": args.output_tokens,
+                  "timeout_s": args.timeout, "samples": []}
         def save():
             out.seek(0); json.dump(result, out, indent=2); out.write("\n"); out.truncate(); out.flush()
         save()

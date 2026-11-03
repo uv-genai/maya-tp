@@ -1,5 +1,9 @@
 # TP pair-down first cause
 
+> This report records successive dated checks. Experimental DeepSeek TP2
+> serving was added after the initial test-only checkpoint; the
+> [current review guide](../../DEEPSEEK-TP2-RUN.md) describes its operation.
+
 Issue #114. The server retains the first fatal TP pair-down message, whether it
 arrives as `TP2_DOWN` or a poisoned-communicator `ERR`, and returns it on later
 requests before writing another `GEN`. Later errors cannot replace that cause.

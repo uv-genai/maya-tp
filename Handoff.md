@@ -1413,10 +1413,107 @@ no binaries, model processes or production configs were changed by the planning 
 **Current state:** experimental two-host target inference, chunked prefill,
 DSpark and prompt lookup have been implemented and exercised on XS and S.
 They are not yet approved for production: sampled and failure coverage,
-performance measurements, operations and final CI remain in progress. The
-chronological entries below describe earlier checkpoints; statements at those
-checkpoints about missing implementation or incomplete copies are historical.
-The latest activity and owned-process records appear at the end of this section.
+performance measurements, operations and final CI remain in progress. Working
+branch `feat/deepseek-tp2` (see `git log` for the latest checkpoint); no production binary
+or config has been promoted. The latest tested review engine is
+`/tmp/maya-ds4-tp2-113-point-build/maya-ds4`, with matching worker copy
+`/tmp/ds4-tp2-113-point-engine` on strix-halo-1; their SHA-256 is
+`d13f478d0702cebb35a40c99cdf0918787fa4079fa8de02cf4166a12663e203e`.
+The earlier `a34d616` long-test engine at `/tmp/maya-ds4-tp2-p1-build/maya-ds4`
+and its worker copy `/tmp/ds4-tp2-114-current-engine` have SHA-256
+`f5d2ed9cf6714b38bc8320eb5e0d11658a67b7e60d0a6f57a30cdb74f050bff7`.
+The earlier benchmark build had SHA-256
+`31b2e21d529f5de3016c7ce58a3bab704f052ab5d22beea62b64829680a81fb1`.
+
+**Active owned process:** none. The larger S sampled test passed all three
+modes (10,000 plain vs 500 speculative): sampled-drafter p=0.6686, point with
+penalties p=0.9782, and lookup after stale q p=0.9369. The rebuilt XS and S
+pairs each passed all 16 forced rollback positions with matching next logits
+and five matching DSpark drafts at each position. All owned test ranks exited.
+
+**Completed API/recovery check:** the XS test passed Responses, Anthropic,
+DSpark request off/on, lookup alone, output limits, streaming, media
+rejection, sticky Anthropic peer loss and a fresh two-rank restart. Both owned
+ranks exited. The 1,024-token eBPF example hit its limit; it is a partial
+quality sample. Evidence: `docs/validation/deepseek-tp2-control-2026-11-03/api-recovery-xs.md`.
+
+**Completed long-context check:** the preceding owned Maya-S pair and sampler
+have exited. With checkpoint `a34d616` and configured context 524,288, a
+32,772-token prompt generated 32 tokens and accepted 15/18 DSpark drafts; a
+524,004-token prompt generated 32 and accepted 12/13 drafts. Results and
+sampled telemetry are `docs/benchmarks/deepseek-tp2-review-2026-11-03/s-tp-long-*`.
+The ordered host checks and an isolated engine build ran concurrently with
+portions of this test, so do not treat its timing as a clean performance
+measurement: HIP mapping and 617 server tests
+(11 skipped) passed, followed by 707 tools tests (3 skipped). Logs use
+`/tmp/ds4-tp2-116-ci-{hip,serve,tools}.log`. The same-process Maya-S single-host DSpark parity
+test and guarded single-host
+DSpark-on/off controls have exited. Parity logs
+use `/tmp/ds4-tp2-113-s-single-spec-parity*`; control PID/log/config and
+engine log use
+`/tmp/ds4-tp2-116-s-safe-single-{on,off}-*`. On completed an 8K prefill in
+809 seconds; off ran the short decode controls only. The tests used 8192 MiB
+reserve, `MAYA_DS4_WARM_CAP_GB=0`, separate `/tmp` tuning stores, and a
+3 GiB available-memory guard. The original uncapped attempt was stopped during
+startup at ~127 MB available; memory recovered. Single-host read-ahead pressure
+is tracked as #117. Separate on/off launches produced different S answers;
+same-process fresh-prompt checks matched all 64 greedy tokens on both 19- and
+545-token prompts, accepting 38/47 and 30/35 drafts. This narrows but does not
+prove the cause of the separate-launch differences.
+
+**Sampled-lookup follow-up:** an audit found that lookup-only sampled verification
+could reuse stale sampled-drafter q after an unverified draft if the sampling
+parameters and counter recur. The implementation explicitly marks lookup
+proposals as point distributions and adds a paired regression that deliberately
+leaves sampled q cached. The completed long run was on checkpoint `a34d616` and
+does not include this later change. Main, HIP model and regression syntax checks
+passed. The isolated gfx1151 build `/tmp/maya-ds4-tp2-113-point-build` completed
+(log `/tmp/ds4-tp2-113-point-build.log`); engine SHA-256
+`d13f478d0702cebb35a40c99cdf0918787fa4079fa8de02cf4166a12663e203e`, paired
+test SHA-256 `cc1736ab4be89d97a8897f7aadb0ece8be02c250ac04872712fd94c04bae2814`.
+The new-build XS 50-trial test passed drawn, penalty and stale-q lookup modes;
+the lookup comparison had p=0.5444, 15/50 accepted, and a deliberately stale-q
+control changed 23/32 verdicts. The S test also passed: lookup p=0.3873,
+15/50 accepted, stale-q control differed 19/32. Both pairs exited. Results
+and limitations are in `docs/validation/deepseek-tp2-control-2026-11-03/sampled-lookup-proposal.md`.
+Never overwrite an active rank executable. The prepared
+`/tmp/ds4-tp2-114-api-recovery.py` and
+`/tmp/ds4-tp2-113-sample-500-driver.py` use the new build. The latter accepts
+trial count (50–1000) and model (`s` or `xs`). The prepared
+`/tmp/ds4-tp2-113-rollback-point-driver.py` accepts a model and repeats all 16
+rollback positions. All use isolated files, recorded PIDs and a 3 GiB guard.
+Details and progress are tracked in #113.
+
+**API follow-up (#114):** the implementation forwards per-request
+`strata_tune.spec=0` to DeepSeek and reports `spec=1` as enabled for that
+family, preserving GLM's existing 1=off convention. DeepSeek lookup remains a
+separate source, so the monitor does not report all speculation off while
+lookup remains enabled. Sixty-one focused sampling-key/dashboard tests passed
+(`/tmp/ds4-tp2-114-spec-tests-v2.log`), as did the full 618-test server suite
+(11 skipped; `/tmp/ds4-tp2-114-server-suite.log`). The completed API test
+verified per-request DSpark off/on counts, monitor status and greedy equality
+on the rebuilt pair; the long-context test had loaded earlier Python code.
+
+**Completed:** XS and S TP2 with DSpark on/off produced identical outputs on
+nine fixed prompts per model; same-binary S decode was 21.8–30.4 tok/s on
+versus 17.6–19.9 off, XS 24.6–35.7 versus 17.1–23.4. GLM TP2/MTP HTTP
+cancellation and peer-loss regression passed. Both XS and S passed all 16
+forced rollback positions across the 128-token boundary. The Lt-store
+read-only safeguard passed real GPU and paired-model tests. Raw results and
+qualifications: `docs/benchmarks/deepseek-tp2-review-2026-11-03/README.md`
+and `docs/validation/deepseek-tp2-control-2026-11-03/`.
+
+**Next:** commit the validated changes, then run final exact-head
+HIP/server/tools CI and a paired GPU smoke. Single-host and TP2 output
+differences remain documented; do not claim exact cross-path equivalence or
+eliminated disk I/O. #115 (partition and rank loading) and #111 (RDMA/control
+lifecycle) are closed after their gates passed; #110, #112–#114, #116 and
+#117 remain open. Existing user processes and the
+remote production checkout remain protected.
+
+The entries below are a historical work log, not an ordered list of currently
+running processes. Earlier statements about missing implementation, active
+tests, or incomplete copies may be superseded by the current state above.
 
 Working branch `feat/deepseek-tp2`; design and plan committed as `231a48b`. Both hosts were free of
 model processes when P1 began; their llama-swap daemons remain user-owned. Pack inventory and an
@@ -1816,6 +1913,70 @@ The equivalent XS TP2 speculation-off run is active under local driver
 session 45477, with server and remote owned worker PID/logs under
 `/tmp/ds4-tp2-116-xs-off-*`. Read-only telemetry sampler session 34861 exits
 with the server. A same-binary DSpark-on/lookup-off run follows.
+Checkpoint `a34d616` records the current experimental integration and staged
+validation; #111 was subsequently closed. Do not treat
+the checkpoint as final validation or a production promotion.
+The XS speculation-off run completed (17.1–23.4 tok/s decode, 200.0–204.0
+tok/s 8K prefill); both owned ranks and sampler exited. Its same-binary
+DSpark-on/lookup-off counterpart is active in local driver session 78161,
+with server/worker PID/logs under `/tmp/ds4-tp2-116-xs-on-*`; read-only
+telemetry sampler session 26070 exits with that server.
+The XS DSpark-on run completed: all nine answers matched off, decode was
+24.6–35.7 versus 17.1–23.4 tok/s, and 8K prefill was about 199–204 tok/s in
+both modes. All six prefill prompt hashes matched. Both pairs and samplers
+exited; raw results are in the review benchmark report.
+An isolated same-build XS single-host run with DSpark on and lookup off is
+active under local session 49294; server PID/log and output use
+`/tmp/ds4-tp2-116-xs-single-on-*`. Its Lt picks were copied to a separate
+`/tmp` store so single-host tuning cannot append to the model pack. The
+controlled settings disable flow and vision and use 256-row prefill; they
+are not a claim about the best single-host settings.
+Read-only telemetry sampler session 50360 follows that owned server and exits
+with it, writing `/tmp/ds4-tp2-116-xs-single-on-telemetry.jsonl`.
+The XS single-host DSpark-on run completed: one sample per prompt at
+38.0/28.9/45.6 tok/s decode and 174.8/181.7 tok/s 2K/8K prefill. All three
+answers differed from the TP2 run; their openings remain coherent. Its server
+and sampler exited. The single-host DSpark-off counterpart is active under
+local session 54726, with PID/logs under `/tmp/ds4-tp2-116-xs-single-off-*`
+and a separate temporary Lt store.
+Read-only sampler session 66813 follows that server and exits with it.
+The XS single-host off run completed: all three answers matched its on run,
+with 20.3 tok/s on each prompt off versus 38.0/28.9/45.6 on; 8K prefill was
+182.0 off versus 181.7 on. Its owned server and sampler exited. An isolated
+same-build S single-host DSpark-on run is active under local session 48370,
+with PID/logs under `/tmp/ds4-tp2-116-s-single-on-*` and a separate temporary
+Lt store. Read-only sampler session 80549 exits with the server.
+The S single-host load was stopped via its recorded server PID while starting:
+`MemAvailable` fell to about 127 MB and swap was in use. The server, its
+engine and sampler exited; available memory subsequently recovered to about
+120 GiB. No benchmark samples were produced. Do not repeat this exact
+configuration; find and validate a safe memory/readahead setting first.
+The retry is active under local session 31888 with an isolated config,
+`MAYA_DS4_WARM_CAP_GB=0`, 8192 MiB reserve and a 3 GiB MemAvailable guard
+that targets only its own recorded server and engine. PID/logs use
+`/tmp/ds4-tp2-116-s-safe-single-on-*`. Its safety-constrained settings differ
+from the TP2 runs and must be disclosed in any comparison.
+Read-only sampler session 85845 follows the retry and exits with its server.
+The guarded retry completed its three decode requests and the 2K prefill;
+available memory remains about 6 GiB. Its flow-disabled 2K prefill took about
+194 seconds, so the 8K request can take many minutes. This constrained run
+is not representative of optimized/default single-host prefill.
+The independent single-host unified-memory/read-ahead problem is tracked in
+[#117](https://github.com/uv-genai/maya-tp/issues/117); its proposed cause
+remains a hypothesis, and no production single-host fix has been made.
+The guarded S DSpark-on run finished: decode 15.7/8.9/10.9 tok/s, 2K/8K
+prefill 10.6/10.1 tok/s under its flow-disabled, zero-warm-up settings; the
+server and sampler exited and available memory recovered. The short
+DSpark-off control is active as local driver session 40466 and sampler 65489,
+with PID/logs under `/tmp/ds4-tp2-116-s-safe-single-off-*`. Prefill is not
+repeated in this control.
+The off control completed and exited. All three on/off answers differed
+across separate processes; expert placement differed because the off process
+did not load the drafter. A same-process comparison is needed before drawing
+conclusions about speculative decoding. The same-process check subsequently
+passed both 19- and 545-token prompts, matching 64 greedy tokens each with
+38/47 and 30/35 DSpark drafts accepted; its engine exited. Evidence is in
+`/tmp/ds4-tp2-113-s-single-spec-parity-*`.
 Ordered HIP/server/tools CI passed: HIP mappings, 614 server tests (11 skipped)
 and 698 tools tests (3 skipped). Logs use prefix `/tmp/ds4-tp2-114-ci-`.
 A real XS model-loss test stopped its owned worker

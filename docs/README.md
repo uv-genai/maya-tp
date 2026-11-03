@@ -38,6 +38,8 @@ tracked in [#83](https://github.com/uv-genai/maya-tp/issues/83).
 [original prompt](../initial-prompt.md) describe the initial plan. Their original no-process
 instructions, MTP restrictions and proposed settings do not describe the completed implementation.
 Use the current guides above and GitHub issue states for ongoing work.
+The [DeepSeek analysis and design](DEEPSEEK-TP2-ANALYSIS-DESIGN.md) similarly records its initial
+pre-implementation assumptions; the DeepSeek review guide describes the experimental implementation.
 
 `benchmarks/`, `validation/`, `upstream/v1.1.*` and `../bench/results/` contain dated measurements,
 controls, failures and per-tag evidence. They are historical records. A report's old build hash,

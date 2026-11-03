@@ -36,7 +36,9 @@ class PrefillTest(unittest.TestCase):
                     '--source-tokens', '3', '--source-tokens', '5', '--timeout', '1200', '--output-tokens', '32']
             with patch.object(sys, 'argv', args), contextlib.redirect_stdout(io.StringIO()):
                 bench.main()
-            samples = json.loads(out.read_text())['samples']
+            result = json.loads(out.read_text())
+            self.assertEqual((result['source_lengths'], result['max_tokens'], result['timeout_s']), ([3, 5], 32, 1200))
+            samples = result['samples']
             self.assertEqual([s['source_tokens'] for s in samples], [3, 5])
             self.assertEqual(prompts, [('0,1,2', 1200, 32), ('1027,1028,1029,1030,1031', 1200, 32)])
             with patch.object(sys, 'argv', args), self.assertRaises(FileExistsError):

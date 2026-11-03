@@ -7,7 +7,7 @@ Read [AGENTS.md](AGENTS.md), then the current state in [Handoff.md §42](Handoff
 The user authorized implementation and validation of DeepSeek TP2 and DSpark on
 `feat/deepseek-tp2`. Experimental target inference, chunked prefill, DSpark and prompt lookup
 have been exercised on XS and S; sampling, failure, performance and operations gates remain open.
-Read the latest entries in Handoff.md §42, the implementation plan and phase issues #110–#116.
+Read the current-state summary at the start of Handoff.md §42, the implementation plan and phase issues #110–#116.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
 procedure is in [docs/DEEPSEEK-TP2-RUN.md](docs/DEEPSEEK-TP2-RUN.md); no production promotion
 has been authorized.
@@ -31,7 +31,7 @@ post-merge test results (#106). Treat model processes as user-owned and do not s
 - The user tested Maya-S, Maya-M and Maya-L through llama-swap and reported working prefill and generation. Their eBPF tutorial prompt averaged 30, 32 and 28 generation tok/s respectively; [report and raw results](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
 - The promoted `build-hip/maya` on both hosts has MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
-- The checkpoint tag is `tp-v1.1.43`, with numeric VERSION `1.1.43`; no GitHub release was requested. No further prefill investigation or deployment is requested. Push only to `origin`.
+- The checkpoint tag is `tp-v1.1.43`, with numeric VERSION `1.1.43`; no GitHub release was requested. No further GLM prefill investigation or deployment is requested. Push only to `origin`.
 
 ## Operating rules
 
