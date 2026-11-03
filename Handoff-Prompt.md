@@ -1,26 +1,27 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then [Handoff.md §33](Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33). Sections 10–32 of the handoff are dated history and may describe superseded processes, issues, binaries or pending steps.
+Read [AGENTS.md](AGENTS.md), then [Handoff.md §§33–39](Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33). Earlier handoff sections are dated history and may describe superseded processes, issues, binaries or pending steps.
 
-## Active DeepSeek performance investigation
+## Current GLM and DeepSeek state
 
 For the remote GLM startup repair and Maya-L cold-load investigation, read Handoff.md §§38–39
 and issues #104–#105. The user reports that everything is working; Maya-L has completed TP2
 requests. The cold-loading slowdown remains under investigation.
 
-Read Handoff.md §§35–37 and issues #100–#103. The user's model processes are user-owned: do not
-stop/restart them. DSpark is enabled; Maya-S ran slowly with heavy storage
-reads and memory pressure, tracked in #102. The 600-second calibration watchdog failure
-is separately tracked. The upstream 43.2/453 figures were for a different quant/hardware and an
-8K prefill with greedy, thinking-off answers. The user authorized benchmark requests; session6443 completed successfully. See §35 and
-`docs/benchmarks/deepseek-maya-xs-2026-11-02/`. Read from any repository, but only open issues on uv-genai/maya-tp.
-The HIP setup fix #98 merged in PR #99 and the user successfully started DeepSeek.
+Read Handoff.md §§35–37 and issues #100–#103. DeepSeek Maya-XS measurements and comparison
+limitations are in `docs/benchmarks/deepseek-maya-xs-2026-11-02/`; the DSpark calibration watchdog
+is tracked in #101. The larger DeepSeek Maya-S ran slowly with memory pressure and heavy storage
+reads (#102). Separate XS and S configs prevent the llama-swap XS entry from silently selecting S
+(#103). Read from any repository, but open issues only on uv-genai/maya-tp.
+
+The DeepSeek investigation branch was merged into `main` at `76e0279`; the user will report
+post-merge test results (#106). Treat model processes as user-owned and do not stop or restart them.
 
 ## Current state
 
 - PR [#94](https://github.com/uv-genai/maya-tp/pull/94) merged as `6f85d3036a1010b3a2f1b0cfca2105b3f28fdb94`. It includes HIP APU complete-pool sizing, TP2 startup scratch bounded by the existing receive window, and gfx1151/hipBLASLt 100401 DSA projection tuning. Issues #33, #90, #91 and #93 are closed at the user's request.
 - The user tested Maya-S, Maya-M and Maya-L through llama-swap and reported working prefill and generation. Their eBPF tutorial prompt averaged 30, 32 and 28 generation tok/s respectively; [report and raw results](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
-- The promoted `build-hip/maya` on both hosts has MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. The original rank0 llama-swap configuration was restored; the user restarts and launches their own services. Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
+- The promoted `build-hip/maya` on both hosts has MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
 - The checkpoint tag is `tp-v1.1.43`, with numeric VERSION `1.1.43`; no GitHub release was requested. No further prefill investigation or deployment is requested. Push only to `origin`.
 
