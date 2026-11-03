@@ -657,7 +657,8 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
       # Model-backed TP worker verification test; requires a user-supplied pack.
       add_executable(ds4_tp_verify_test tests/ds4_tp_verify_test.cpp src/ds4/ds4_model.cu src/ds4/ds4_kernels.cu
                      src/ds4/ds4_vision.cu src/ds4/ds4_gguf.cu src/ds4/ds4_gguf_cpu.cpp src/ds4/ds4_iq.cu
-                     src/ds4/ds4_iq_cpu.cpp src/ds4/ds4_lt.cu src/ds4/ds4_host_ar.cpp src/ds4/ds4_packinfo.cpp)
+                     src/ds4/ds4_iq_cpu.cpp src/ds4/ds4_lt.cu src/ds4/ds4_host_ar.cpp src/ds4/ds4_packinfo.cpp
+                     tests/ds4_tp_rank_load_test.cpp)
       target_include_directories(ds4_tp_verify_test PRIVATE ${_strata_gpu_include_directories} third_party/ggml)
       target_link_libraries(ds4_tp_verify_test PRIVATE strata_kernels strata_kernels_cpu strata_spec strata_mmq
                             ${_strata_gpu_runtime_target} ${_strata_gpu_blas_target})

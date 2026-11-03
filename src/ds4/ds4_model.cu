@@ -39,6 +39,10 @@
 #include "ds4_ram_slice.hpp"
 #include "ds4_store.hpp"
 #include "ds4_tp_partition.hpp"
+#if defined(STRATA_USE_HIP)
+#include "ds4_tp_expert_pool.cuh"
+#include "ds4_tp_rank_loader.hpp"
+#endif
 #include "ds4_vision.cuh"
 #include "strata/kernels/cpu/exl3_cpu.hpp"
 #include "strata/kernels/exl3.hpp"
@@ -66,6 +70,7 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <limits>
 #include <future>
 #include <map>
 #include <mutex>
@@ -558,6 +563,108 @@ struct Geo {
                     ? (int) ratios.size() - nl : 0;
     }
 };
+
+} // namespace
+#if defined(STRATA_USE_HIP)
+namespace tp2 {
+
+struct RankExpertLoader::Impl {
+    Pack pack;
+    Geo geo;
+    RankExpertPool pool; // destroyed before the mapped pack
+    std::vector<RankExpertEntry> entries;
+    bool attempted=false;
+};
+
+RankExpertLoader::RankExpertLoader() : p_(new Impl) {}
+RankExpertLoader::~RankExpertLoader() = default;
+
+bool RankExpertLoader::load(const std::string& path, int device, int rank, std::size_t budget,
+                            std::size_t max_experts, std::string& error,
+                            std::function<void(std::size_t,std::size_t)> progress) {
+    Impl& p=*p_;
+    if (p.attempted) { error="ds4 tp2 rank loader: loader already used"; return false; }
+    p.attempted=true;
+    if (path.empty() || device<0 || rank<0 || rank>1 || budget==0) {
+        error="ds4 tp2 rank loader: invalid pack, rank, device or budget"; return false;
+    }
+    if (!p.pack.load(path,error)) return false;
+    p.geo.from(p.pack);
+    const Geo& g=p.geo;
+    if (!p.pack.gguf || g.nl<=0 || g.nl>256 || g.n_exp<=0 || g.n_exp>4096 || g.dim<=0 || g.ff<=0) {
+        error="ds4 tp2 rank loader: unsupported pack format or geometry"; return false;
+    }
+    const std::size_t total=static_cast<std::size_t>(g.nl)*static_cast<std::size_t>(g.n_exp);
+    const std::size_t count=max_experts==0 ? total : std::min(max_experts,total);
+    std::vector<ExpertSpans> spans; spans.reserve(count);
+    std::vector<std::array<ConstBytes,3>> sources; sources.reserve(count);
+    p.entries.reserve(count);
+    const char* roles[3]={"w1","w3","w2"};
+    auto type_of=[](const std::string& dtype) {
+        for (int t : {gg::kTypeMXFP4,10,11,12,13,14,16,17,18,19,20,21,22,23,29})
+            if (dtype==gg::type_name(t)) return t;
+        return -1;
+    };
+    for (std::size_t i=0;i<count;++i) {
+        const int layer=static_cast<int>(i/static_cast<std::size_t>(g.n_exp));
+        const int expert=static_cast<int>(i%static_cast<std::size_t>(g.n_exp));
+        std::array<RankGeometry,2> geometry;
+        if (!rank_geometry(g.ff,256,layer,g.heads,g.o_groups,geometry,error)) return false;
+        const auto part=geometry[static_cast<std::size_t>(rank)].experts;
+        std::array<ConstBytes,3> source;
+        std::array<std::size_t,3> row{};
+        std::string gate_type;
+        for (int r=0;r<3;++r) {
+            const std::string name="layers."+std::to_string(layer)+".ffn.experts."+
+                                   std::to_string(expert)+"."+roles[r]+".weight";
+            const Tensor* t=p.pack.get(name);
+            const int ty=t==nullptr ? -1 : type_of(t->dtype);
+            const int rows=r<2?g.ff:g.dim, cols=r<2?g.dim:g.ff;
+            if (t==nullptr || ty<0 || !gg::expert_type_ok(ty) || gg::type_block(ty)<=0 ||
+                256%gg::type_block(ty)!=0 || cols%gg::type_block(ty)!=0 ||
+                t->shape.size()!=2 || t->shape[0]!=rows || t->shape[1]!=cols ||
+                t->file<0 || static_cast<std::size_t>(t->file)>=p.pack.maps.size()) {
+                error="ds4 tp2 rank loader: unsupported or missing tensor "+name; return false;
+            }
+            row[r]=gg::type_row_bytes(ty,cols);
+            const auto& mapping=p.pack.maps[static_cast<std::size_t>(t->file)];
+            if (!row[r] || static_cast<std::uint64_t>(rows)>std::numeric_limits<std::uint64_t>::max()/row[r] ||
+                t->bytes!=static_cast<std::uint64_t>(rows)*row[r] || t->off>mapping.second ||
+                t->bytes>mapping.second-t->off) {
+                error="ds4 tp2 rank loader: tensor lies outside its file or has invalid bytes: "+name; return false;
+            }
+            if (r==0) gate_type=t->dtype;
+            if (r==1 && t->dtype!=gate_type) {
+                error="ds4 tp2 rank loader: gate and up types differ: "+name; return false;
+            }
+            source[r]=ConstBytes(mapping.first+static_cast<std::size_t>(t->off),static_cast<std::size_t>(t->bytes));
+        }
+        ExpertSpans span;
+        if (!expert_spans(g.ff,g.dim,256,part,row[0],row[1],row[2],span,error)) return false;
+        DeviceExpertLayout layout;
+        if (!device_expert_layout(span,layout,error)) return false;
+        spans.push_back(span); sources.push_back(source);
+        p.entries.push_back({layer,expert,part.begin,part.count,layout.offsets,layout.bytes,nullptr});
+    }
+    if (!p.pool.allocate(device,spans,budget,error)) return false;
+    for (std::size_t i=0;i<count;++i) {
+        if (!p.pool.upload(i,sources[i],error)) return false;
+        if (progress && ((i+1)%256==0 || i+1==count)) progress(i+1,count);
+    }
+    if (!p.pool.ready()) { error="ds4 tp2 rank loader: incomplete expert pool"; return false; }
+    for (std::size_t i=0;i<count;++i) p.entries[i].device=p.pool.data(i);
+    error.clear(); return true;
+}
+
+std::size_t RankExpertLoader::size() const { return p_->pool.ready()?p_->entries.size():0; }
+std::size_t RankExpertLoader::bytes() const { return p_->pool.ready()?p_->pool.bytes():0; }
+std::size_t RankExpertLoader::staging_bytes() const { return p_->pool.ready()?p_->pool.staging_bytes():0; }
+const RankExpertEntry* RankExpertLoader::entry(std::size_t i) const {
+    return p_->pool.ready() && i<p_->entries.size() ? &p_->entries[i] : nullptr;
+}
+} // namespace tp2
+#endif
+namespace {
 
 // DeepSeek's precompute_freqs_cis frequencies (YaRN when original_seq_len > 0), in F32 as torch computes them
 std::vector<float> rope_freqs(int dim, int original, double base, double factor, double beta_fast, double beta_slow) {

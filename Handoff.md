@@ -1501,6 +1501,14 @@ transfer was estimated to take ~50 minutes. Recheck PID/start/command before act
 the remote S pack until the transfer and content verification complete. Shared DSpark and vision
 files already exist remotely. User-owned processes remain untouched.
 
+The pack-backed rank-expert loader passed 385-expert XS/S tests for both rank assignments, a
+single-host DSpark regression, and full XS expert-pool loads on both hosts (#115). Full XS rank
+allocations were 54,814,310,400 and 54,751,395,840 GPU bytes, with 4,249,600 pinned staging
+bytes each; both owned test processes exited. See
+`docs/validation/deepseek-tp2-control-2026-11-03/rank-expert-loader.md`. This covers routed
+expert slices only; the loader is not connected to inference and does not establish full-rank fit.
+The S copy is still in progress; full S checks require completed transfer and content verification.
+
 P4 has a fail-closed model-operation adapter for feed, step, verify, verdict, reset and shutdown.
 It requires window-only prefill, validates the model's position and drains device work at operation
 boundaries. Fake-model sequencing/failure tests and an isolated real-XS model dispatch passed;
