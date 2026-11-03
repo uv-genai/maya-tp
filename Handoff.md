@@ -1465,8 +1465,6 @@ GPU slots and 5912 on the CPU lane; the latter is a small statistical smoke test
 single-host checks, not DeepSeek TP2 model validation. Evidence is in the P1 benchmark directory and
 `docs/validation/deepseek-tp2-control-2026-11-03/`.
 
-Owned full SHA-256 comparisons of the seven XS indexed source files are running on both hosts using
-`/tmp/ds4-hash-sources-112.py`. Local exec session 46539/PID 183041, output/log
-`/tmp/ds4-hash-local-112.{txt,log}`; remote exec session 48209/PID 69929, output/log
-`/tmp/ds4-hash-remote-112.{txt,log}`. Compare results only after both commands exit successfully.
-They read the model disks heavily; defer storage performance measurements until finished.
+Owned full SHA-256 comparisons of the seven XS indexed source files completed successfully on both
+hosts; all seven digests matched. The results are in the P1 benchmark directory's
+`xs-source-sha256.txt`. This establishes copy equality at measurement time, not upstream provenance.

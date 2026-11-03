@@ -37,10 +37,11 @@ model latency; the ~40 µs single-row measurement makes an illustrative 80-reduc
 budget about 3.2 ms/token before model compute or other synchronization. Overlap and actual
 schedules must be measured; numbers do not predict DeepSeek tokens/s.
 
-An owned rsync is copying Maya-XS plus shared Engram, DSpark and vision files to the previously
-absent matching models directory on strix-halo-1. It is a preparation step, not verified pack
-integrity or an inference result. Single-host comparisons must wait until this disk/network load
-ends. User-owned llama-swap daemons were not stopped. Long-running copy details are in the handoff.
+An owned rsync copied Maya-XS plus shared Engram, DSpark and vision files to the previously absent
+matching models directory on strix-halo-1. Afterwards, SHA-256 hashes of all seven indexed XS
+source files matched across the hosts; see `xs-source-sha256.txt`. This proves equality between
+those copies at the measurement time, not authenticity against an upstream release. User-owned
+llama-swap daemons were not stopped.
 
 `tools/ds4/bench_tp2_reference.py` is the reference API harness: it requires an explicit server,
 model label, DSpark state and new output path, and checks the server is idle before each request.
