@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-04 · Current state: **§44**, queued DeepSeek TP2 candidate passed the XS single-host performance gate and is staged for user testing; §43 records the launchers; §42 records implementation and earlier validation; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-04 · Current state: **§44**, queued DeepSeek TP2 passed the XS single-host performance gate; the user reports Maya-S eBPF generation slightly above 30 tok/s with prefill similar to XS; §43 records the launchers; §42 records implementation and earlier validation; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2562,9 +2562,12 @@ Both review launcher JSONs now select that path. Their previous copies are
 `maya-ds4-tp2-maya-{xs,s}.json.before-queued-120-20261104` beside the configs.
 The user starts the existing `maya-deepseek-xs-mtp` and `maya-deepseek-s-mtp`
 llama-swap entries on strix-halo-1; the worker starts automatically.
-Maya-S GPU inference on this candidate awaits the user's testing. Issues #120
-and #116 remain open for that feedback. Numerical/quality and resource review
-in #110/#112 also remain open.
+The user tested Maya-S and reports a larger relative speedup than XS, with eBPF
+generation slightly above 30 tok/s and prefill similar to XS. Exact prefill
+rates and a matched single-host baseline were not supplied, so this user report
+has no computed speedup percentage. Issue #120 is complete with that feedback;
+#116 retains the broader review, including numerical/quality and resource
+questions in #110/#112.
 
 **Active owned model processes** are none. Benchmark driver session 91457 exited
 successfully; both recorded API servers and the recorded remote worker exited.

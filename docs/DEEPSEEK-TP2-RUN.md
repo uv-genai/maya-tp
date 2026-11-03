@@ -245,5 +245,6 @@ bootstrap selection separate. The user controls loading and inference testing.
 
 The 2026-11-04 review configs select the queued-collective candidate on both
 hosts. XS measured 23–24% higher generation throughput than the same single-host
-build on two prompts at 262144 context. Maya-S inference on this candidate
-awaits user testing. [Measurements and validation scope](benchmarks/deepseek-tp2-queued-2026-11-04/README.md).
+build on two prompts at 262144 context. The user reports Maya-S eBPF generation
+slightly above 30 tok/s with prefill similar to XS and a larger relative speedup.
+[Measurements and validation scope](benchmarks/deepseek-tp2-queued-2026-11-04/README.md).

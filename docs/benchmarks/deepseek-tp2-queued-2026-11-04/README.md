@@ -1,4 +1,4 @@
-# DeepSeek XS queued TP2 performance
+# DeepSeek queued TP2 performance
 
 2026-11-04, issue #120. The user requested focused correctness checks and
 generation above the same single-host build before handing back testing.
@@ -50,7 +50,15 @@ tutorial to explain how to use eBPF.” They encoded to 44 and 19 prompt tokens.
 These are end-to-end DSpark comparisons. Single-host and TP2 responses and
 draft acceptance differed, so the measured gain includes that effect.
 The short prompts measure generation and provide limited prefill evidence.
-Maya-S inference and the user's longer workloads await user testing.
+The user's longer workloads remain part of ongoing review.
+
+## User-reported Maya-S result
+
+On 2026-11-04, the user reported Maya-S eBPF generation slightly above 30 tok/s,
+prefill similar to XS and a larger relative speedup. This records their
+llama-swap test of the staged candidate. Exact prefill rates, response length,
+repeat count and a matched single-host baseline were not supplied, so no
+Maya-S speedup percentage is calculated.
 
 ## Focused validation
 
@@ -81,5 +89,6 @@ Both hosts select the measured binary at
 `/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/maya-ds4`.
 The two existing aliases `maya-deepseek-xs-mtp` and `maya-deepseek-s-mtp` load
 their distinct packs through this binary. Launcher config backups have suffix
-`.before-queued-120-20261104`. The user performs the next launches through
-llama-swap on strix-halo-1. Issues #120 and #116 remain open for feedback.
+`.before-queued-120-20261104`. The user launches through llama-swap on
+strix-halo-1. Issue #120 is complete with the user's Maya-S feedback; #116
+retains broader numerical/quality and resource review.

@@ -11,7 +11,7 @@ model descriptions retained from Project Maya are upstream references, not fork 
 | Project scope and measured results | [README](../README.md) |
 | Pair setup, model/executable selection, MTP and recovery | [TP2 runbook](TP2-RUN.md) |
 | Experimental DeepSeek two-host review | [DeepSeek TP2 review guide](DEEPSEEK-TP2-RUN.md) |
-| Experimental DeepSeek TP2 measurements | [Queued-collective XS comparison](benchmarks/deepseek-tp2-queued-2026-11-04/README.md), [earlier review benchmark](benchmarks/deepseek-tp2-review-2026-11-03/README.md) |
+| Experimental DeepSeek TP2 measurements | [Queued-collective comparison and user results](benchmarks/deepseek-tp2-queued-2026-11-04/README.md), [earlier review benchmark](benchmarks/deepseek-tp2-review-2026-11-03/README.md) |
 | Installer and clean-install updates | [Setup](SETUP.md) |
 | Model catalog and fork validation limits | [Models](MODELS.md) |
 | Runtime settings, thinking budgets and default-off options | [Settings](SETTINGS.md) |
