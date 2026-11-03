@@ -1544,3 +1544,13 @@ different CPU/stream splits. With identical fixed CPU execution, a rerun passed:
 subsequent logits matched exactly after a partial speculative verdict. See
 `docs/validation/deepseek-tp2-control-2026-11-03/replicated-model-smoke.md`. These use full
 replicated models and synthetic test identities, not TP model inference or production negotiation.
+
+The experimental DeepSeek model loader now installs complete rank-local attention,
+shared-expert and routed-expert slices, but deliberately rejects inference and restore
+until the distributed execution path is connected. Both XS ranks loaded on the two
+hosts with 4.22 GB dense weights and 54.81/54.75 GB expert shards; both S ranks loaded
+sequentially on the source host with 5.22 GB dense weights and 84.51 GB expert shards,
+leaving about 35 GiB free. Guard checks, the existing single-host XS DSpark regression,
+and the HIP mapping check passed. This is load-only, not TP inference. Details:
+`docs/validation/deepseek-tp2-control-2026-11-03/rank-model-loading.md`. The S rsync
+remains in progress; verify the destination pack before paired S tests.

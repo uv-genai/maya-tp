@@ -1255,6 +1255,9 @@ struct Model::Impl {
     std::string abl_what;
     Pack pk;
     Geo g;
+#if defined(STRATA_USE_HIP)
+    std::unique_ptr<tp2::RankExpertLoader> tp_rank_experts;
+#endif
     std::vector<Dev> devs;
     std::vector<Layer> L;
     std::vector<Src> srcs;
@@ -1262,6 +1265,11 @@ struct Model::Impl {
     std::vector<std::unique_ptr<Worker>> workers;   // threads mode: one per device
     bool par = false;                 // threads mode (the windows: decode)
     bool prompt_par = false;          // the prompt path's chunks (a thread a GPU), as --tp / --threads asked
+    bool tp_load_only(std::string& err) const {
+        if (o.tp2_rank<0) return false;
+        err="ds4 tp2: experimental rank is load-only; distributed execution is not enabled";
+        return true;
+    }
     unsigned win_seq = 0;             // the windows the threads ran (the hand-offs' seq)
     std::atomic<unsigned> win_now{0};   // (the last decode window's win_seq, for the copy threads)
     // the chunked prompt path (threads mode): chunk tokens a pass, runs shorter than chunk_min in windows
@@ -3333,9 +3341,89 @@ struct Model::Impl {
         }
     }
 
+#if defined(STRATA_USE_HIP)
+    // Install a complete rank's routed experts after ordinary dense/KV setup.
+    // The model remains load-only until its distributed execution path is
+    // explicitly enabled; no CPU fallback or partial pool is permitted.
+    bool install_tp_rank_experts(std::string& err) {
+        if (devs.size()!=1 || g.nl<=0 || g.n_exp<=0 || o.reserve_mib<0 ||
+            static_cast<std::uint64_t>(o.reserve_mib)>std::numeric_limits<std::size_t>::max()/(1ull<<20)) {
+            err="ds4 tp2: invalid device or memory reserve"; return false;
+        }
+        Dev& d=devs[0];
+        CK(cudaSetDevice(d.id));
+        std::size_t free=0,total=0;
+        CK(mem_info(&free,&total));
+        const auto reserve=static_cast<std::size_t>(o.reserve_mib)*(std::size_t{1}<<20);
+        if (free<=reserve) { err="ds4 tp2: no GPU room after reserve"; return false; }
+        const auto budget=std::min(o.tp2_expert_budget,free-reserve);
+        auto loader=std::make_unique<tp2::RankExpertLoader>();
+        if (!loader->load(o.pack,d.id,o.tp2_rank,budget,0,err,
+                          [this](std::size_t done,std::size_t count) {
+                              if (o.verbose && (done==count || done%2048==0))
+                                  std::fprintf(stderr,"ds4 tp2: rank %d experts %zu/%zu\n",o.tp2_rank,done,count);
+                          })) return false;
+        const auto expected=static_cast<std::size_t>(g.nl)*static_cast<std::size_t>(g.n_exp);
+        if (loader->size()!=expected) { err="ds4 tp2: incomplete expert rank"; return false; }
+        for (int il=0;il<g.nl;++il) {
+            Layer& l=L[static_cast<std::size_t>(il)];
+            const auto base=static_cast<std::size_t>(il)*static_cast<std::size_t>(g.n_exp);
+            const auto* first=loader->entry(base);
+            if (l.nm!=1 || l.n_exp!=g.n_exp || l.n_cls>1 || l.vram_tab==nullptr || !first ||
+                first->layer!=il || first->expert!=0 || first->ff_begin!=l.ff0 || first->ff_count!=l.ffn) {
+                err="ds4 tp2: expert rank does not match layer "+std::to_string(il); return false;
+            }
+            std::vector<unsigned long long> table(static_cast<std::size_t>(g.n_exp));
+            for (int ex=0;ex<g.n_exp;++ex) {
+                const auto* e=loader->entry(base+static_cast<std::size_t>(ex));
+                if (!e || e->layer!=il || e->expert!=ex || e->ff_begin!=l.ff0 || e->ff_count!=l.ffn ||
+                    e->bytes!=first->bytes || e->offsets!=first->offsets || e->gg_types!=first->gg_types ||
+                    e->device!=first->device+static_cast<std::size_t>(ex)*first->bytes) {
+                    err="ds4 tp2: inconsistent expert layout in layer "+std::to_string(il); return false;
+                }
+                table[static_cast<std::size_t>(ex)]=reinterpret_cast<unsigned long long>(e->device);
+            }
+            for (int r=0;r<3;++r) {
+                l.lay.trellis[r]=first->offsets[r];
+                l.lay.suh[r]=l.lay.svh[r]=first->offsets[r];
+                l.lay.gg_type[r]=first->gg_types[r];
+            }
+            l.blob=l.hblob=first->bytes;
+            l.vram_base=const_cast<std::uint8_t*>(first->device);
+            l.n_vram=l.n_slots=l.n_main=l.pv_n=g.n_exp;
+            l.spare_vram=-1; l.rc_n=0;
+            l.slot.resize(static_cast<std::size_t>(g.n_exp));
+            for (int ex=0;ex<g.n_exp;++ex) l.slot[static_cast<std::size_t>(ex)]=ex;
+            CK(cudaMemcpy(l.vram_tab,table.data(),table.size()*sizeof(table[0]),cudaMemcpyHostToDevice));
+        }
+        d.experts+=loader->bytes();
+        std::fprintf(stderr,"ds4 tp2: rank %d loaded %zu routed expert bytes (%zu pinned staging bytes); "
+                            "experimental load only\n",o.tp2_rank,loader->bytes(),loader->staging_bytes());
+        tp_rank_experts=std::move(loader);
+        return true;
+    }
+#endif
+
     // ---- loading
     bool load(const Options& opt, std::string& err) {
         o = opt;
+        if (o.tp2_rank < -1 || o.tp2_rank > 1) { err="ds4 tp2: invalid rank"; return false; }
+        if (o.tp2_rank >= 0) {
+#if !defined(STRATA_USE_HIP)
+            err="ds4 tp2: rank loading requires HIP"; return false;
+#else
+            if (o.tp2_expert_budget==0 || o.reserve_mib<0 ||
+                static_cast<std::uint64_t>(o.reserve_mib)>std::numeric_limits<std::size_t>::max()/(1ull<<20) ||
+                !lane_env_off() || o.gpus.size()!=1 || o.tp!=1 || o.prefill_chunk!=0 ||
+                o.vision || o.vision_only || o.dspark || o.lookup || o.seqs!=1 || o.expert_cache ||
+                o.mmap_experts!=1 || o.vram_experts!=0.0 || o.ssd_cache_gb!=0.0 ||
+                !o.profile_readonly || !o.ablate.empty() || !host_free_on || sync_decode) {
+                err="ds4 tp2: experimental rank loading needs one GPU, window prefill, no speculation, vision, "
+                    "expert cache or host fallback, mmap experts, DS4_STREAM=0 and read-only profile";
+                return false;
+            }
+#endif
+        }
         const double t0 = now_ms();
         if (!pk.load(o.pack, err)) return false;
         // (AMD: the prompt GEMMs' measured kernels) the pack's lt-picks.txt, or MAYA_DS4_LT_STORE's file - empty: none,
@@ -3366,7 +3454,9 @@ struct Model::Impl {
         if (ids.empty())
             for (int i = 0; i < ndev; ++i) ids.push_back(i);
         if (!helper_parse(ndev, ids, err)) return false;   // (DS4_HELPER: off the layer devices before any of them)
+        if (o.tp2_rank>=0 && helper_id>=0) { err="ds4 tp2: helper GPU is unsupported"; return false; }
         if (const char* v = ds4_env("DS4_WARM_CAP_GB")) warm_cap = std::max(0.0, std::atof(v)) * 1e9;
+        if (o.tp2_rank>=0) warm_cap=0;
         devs.resize(ids.size());
         if (prof_on) prof_pool.resize((size_t) ndev);
         for (size_t i = 0; i < ids.size(); ++i) {
@@ -3913,6 +4003,19 @@ struct Model::Impl {
             l.ah0 = l.og0 = 0;
             l.ahn = g.heads;
             l.ogn = g.o_groups;
+            if (o.tp2_rank>=0 && !l.mtp) {
+                std::array<tp2::RankGeometry,2> geometry;
+                if (l.nm!=1 || l.lay.fmt!=gg::kFmtMXFP4 ||
+                    !tp2::rank_geometry(g.ff,256,l.il,g.heads,g.o_groups,geometry,err)) {
+                    if (err.empty()) err="ds4 tp2: unsupported rank layer geometry";
+                    return false;
+                }
+                const auto& part=geometry[static_cast<std::size_t>(o.tp2_rank)];
+                l.ff0=part.experts.begin; l.ffn=part.experts.count;
+                l.ah0=part.attention_heads.begin; l.ahn=part.attention_heads.count;
+                l.og0=part.output_groups.begin; l.ogn=part.output_groups.count;
+                continue;
+            }
             if (l.nm == 1) continue;
             const int na = head_members(l.nm);
             if (g.heads % na != 0 || g.o_groups % na != 0 || g.ff % 128 != 0 || g.ff / 128 < l.nm) {
@@ -4444,6 +4547,9 @@ struct Model::Impl {
         if (!place_experts(err)) return false;
         if (helper_id >= 0 && !helper_select(err)) return false;
         if (!load_experts(err)) return false;
+#if defined(STRATA_USE_HIP)
+        if (o.tp2_rank>=0 && !install_tp_rank_experts(err)) return false;
+#endif
         if (copy_swap && copy_mode) {   // (DS4_COPY_SWAP: after the copies)
             if (const char* v = cs_env("COPY_SWAP_MARGIN")) cs_margin = (float) std::atof(v);
             if (const char* v = cs_env("COPY_SWAP_EVERY")) cs_every = std::max(1, std::atoi(v));
@@ -6222,11 +6328,14 @@ struct Model::Impl {
             if (l.dev != di) continue;
             // (a group's member: its share of the heads (wq_b columns, the sinks), of wo_a's groups and wo_b's rows,
             // of the shared expert's FFN; the rest whole)
-            const int nm = l0.nm, na = g.heads / std::max(1, l.ahn), ha = l.ah0 / std::max(1, l.ahn);
+            const bool remote_rank = o.tp2_rank>=0 && !l.mtp;
+            const int nm = remote_rank ? 2 : l0.nm;
+            const int part = remote_rank ? o.tp2_rank : mi;
+            const int na = g.heads / std::max(1, l.ahn), ha = l.ah0 / std::max(1, l.ahn);
             const std::string& P = l.name;
             // (DS4_TP_GGUF_UNEVEN: the shared expert split at the member's own FFN range, as the routed experts -
             //  which needs it as wide as theirs)
-            const int sr0 = nm > 1 && tp_uneven && l0.lay.fmt == gg::kFmtMXFP4 ? l.ff0 : -1;
+            const int sr0 = (remote_rank || (nm > 1 && tp_uneven)) && l0.lay.fmt == gg::kFmtMXFP4 ? l.ff0 : -1;
             if (sr0 >= 0) {
                 const Tensor* sw = pk.get(P + "ffn.shared_experts.w1.weight");
                 if (sw == nullptr || sw->shape.size() != 2 || (int) sw->shape[0] != g.ff) {
@@ -6256,12 +6365,12 @@ struct Model::Impl {
                       f32(d, P + "ffn.gate.bias", l.gate_bias, err, acct, (size_t) l.n_exp) &&
                       (l.mtp || img_tok < 0 || pk.get(P + "ffn.gate.bias_vl") == nullptr ||
                        f32(d, P + "ffn.gate.bias_vl", l.gate_bias_vl, err, acct, (size_t) l.n_exp)) &&
-                      mat(d, P + "ffn.shared_experts.w1", l.s1, err, &sp, mi, nm, true, l.il % nm, sr0, l.ffn) &&
-                      mat(d, P + "ffn.shared_experts.w2", l.s2, err, &sp, mi, nm, false, l.il % nm, sr0, l.ffn) &&
-                      mat(d, P + "ffn.shared_experts.w3", l.s3, err, &sp, mi, nm, true, l.il % nm, sr0, l.ffn);
+                      mat(d, P + "ffn.shared_experts.w1", l.s1, err, &sp, part, nm, true, l.il % nm, sr0, l.ffn) &&
+                      mat(d, P + "ffn.shared_experts.w2", l.s2, err, &sp, part, nm, false, l.il % nm, sr0, l.ffn) &&
+                      mat(d, P + "ffn.shared_experts.w3", l.s3, err, &sp, part, nm, true, l.il % nm, sr0, l.ffn);
             if (!ok) return false;
             // (decode's shared expert runs with the routed experts' FF as its rows' stride: the same width a member)
-            if (nm > 1 && tp_uneven && (l.s1.n != l.ffn || l.s3.n != l.ffn || l.s2.k != l.ffn)) {
+            if ((remote_rank || (nm > 1 && tp_uneven)) && (l.s1.n != l.ffn || l.s3.n != l.ffn || l.s2.k != l.ffn)) {
                 err = "layer " + std::to_string(l.il) + ": the shared expert's part (" + std::to_string(l.s1.n) +
                       ") is not the member's FFN range (" + std::to_string(l.ffn) + ")";
                 return false;
@@ -15339,6 +15448,7 @@ struct Model::Impl {
 
     bool draft(int y, std::vector<int>& out, std::vector<float>& conf, std::string& err, float temperature, float top_p,
                int top_k, float min_p, uint64_t seed, uint64_t counter) {
+        if (tp_load_only(err)) return false;
         const double t0 = now_ms();
         // (with penalties the drafts are the drafter's argmax: its own draws know no history - verify() is as exact)
         drafts_q = temperature > 0.0f && sample_drafts && pen_n <= 0;
@@ -18104,6 +18214,7 @@ struct Model::Impl {
     // after: a piece of a longer prompt (whole: none), its tokens still to come in later feeds (plan_chunks)
     bool forward_chunks(const int* tk, int n, int logits_rows, std::string& err, int snap_slot = -1,
                         const FeedPlan* whole = nullptr, int k0 = 0, int k1 = 0, int after = 0) {
+        if (tp_load_only(err)) return false;
         if (lend_broken) {
             err = kLendBroken;
             return false;
@@ -18675,6 +18786,7 @@ struct Model::Impl {
     }
 
     bool forward(const int* tk, int T, int logits_rows, std::string& err, int seed_rows = -1) {
+        if (tp_load_only(err)) return false;
         if (lend_broken) {
             err = kLendBroken;
             return false;
@@ -19909,6 +20021,7 @@ struct Model::Impl {
     // `spec` each run is a verify window (its backups kept, its drafter rings left for verify_multi to seed with the
     // rows it keeps), without it every row seeds its conversation's drafter rings here
     bool step_runs(const int* sv, const int* const* toks, const int* lens, int n, bool spec, std::string& err) {
+        if (tp_load_only(err)) return false;
         if (sqs.empty()) {
             err = "one conversation (no --parallel)";
             return false;
@@ -20356,6 +20469,7 @@ bool Model::step(int token, bool logits, std::string& err) { return p_->step(tok
 std::string Model::where() const { return p_->where(); }
 bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, int after) {
     Impl& p = *p_;
+    if (p.tp_load_only(err)) return false;
     if (!feed_release(err)) return false;   // (another read: a prompt's room kept between its parts handed back first)
     p.main_at.store("reading a prompt", std::memory_order_relaxed);
     p.pm.last = -1;
@@ -20372,6 +20486,7 @@ bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, in
 }
 bool Model::feed_mark(const int* tokens, int n, int logits_rows, int slot, std::string& err) {
     Impl& p = *p_;
+    if (p.tp_load_only(err)) return false;
     if (!feed_release(err)) return false;   // (another read: a prompt's room kept between its parts handed back first)
     p.main_at.store("reading a prompt", std::memory_order_relaxed);
     p.pm.last = -1;
@@ -20423,6 +20538,7 @@ bool Model::feed_release(std::string& err) {
 }
 bool Model::feed_part(const FeedPlan& plan, const int* tokens, int k0, int k1, std::string& err) {
     Impl& p = *p_;
+    if (p.tp_load_only(err)) return false;
     const int nk = (int) plan.ends.size();
     if (plan.at < 0 || k0 < 0 || k1 <= k0 || k1 > nk) {
         err = "feed_part: chunks the plan does not have";
@@ -20448,6 +20564,7 @@ int Model::fed() const { return p_->fed_n; }
 bool Model::cancelled() const { return p_->halted; }
 void Model::begin_request() { p_->begin_request(); }
 int Model::sample(float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter) {
+    if (p_->o.tp2_rank>=0) return -1;
     return p_->sample(t, tp, tk, mp, seed, counter);
 }
 void Model::set_penalties(int last_n, float repeat, float freq, float present) {
@@ -20463,10 +20580,14 @@ void Model::set_logprobs(int k, int force) {
     if (k < 0) p_->lp_rows.clear();
 }
 const std::vector<LogprobRow>& Model::logprobs() const { return p_->lp_rows; }
-bool Model::logits(std::vector<float>& out) { return p_->logits(out); }
+bool Model::logits(std::vector<float>& out) {
+    if (p_->o.tp2_rank>=0) { out.clear(); return false; }
+    return p_->logits(out);
+}
 int Model::image_token() const { return p_->img_tok; }
 int Model::dim() const { return p_->g.dim; }
 bool Model::encode_image(const uint8_t* rgb, int width, int height, std::vector<uint16_t>& span, std::string& err) {
+    if (p_->tp_load_only(err)) return false;
     return p_->encode_image(rgb, width, height, span, err);
 }
 void Model::vision_hold() { p_->vis_hold = true; }
@@ -20486,12 +20607,15 @@ bool Model::draft(int y, std::vector<int>& d, std::vector<float>& c, std::string
 }
 bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter,
                    int& accepted, int& next, std::string& err) {
+    if (p_->tp_load_only(err)) return false;
     return p_->verify(y, d, t, tp, tk, mp, seed, counter, accepted, next, err);
 }
 bool Model::tp_verify_begin(const int* tokens, int count, std::string& err) {
+    if (p_->tp_load_only(err)) return false;
     return p_->tp_verify_begin(tokens, count, err);
 }
 bool Model::tp_verify_commit(int accepted, std::string& err) {
+    if (p_->tp_load_only(err)) return false;
     return p_->tp_verify_commit(accepted, err);
 }
 bool Model::tp_worker_reset(std::string& err) { return p_->reset_checked(err); }
@@ -20512,6 +20636,7 @@ bool Model::step_multi(const int* seqs, const int* tokens, int n, std::string& e
     return p_->step_multi(seqs, tokens, n, err);
 }
 int Model::sample_multi(int row, float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter) {
+    if (p_->o.tp2_rank>=0) return -1;
     return p_->sample_multi(row, t, tp, tk, mp, seed, counter);
 }
 bool Model::step_multi_spec(const int* seqs, const int* const* toks, const int* lens, int n, std::string& err) {
@@ -20520,25 +20645,29 @@ bool Model::step_multi_spec(const int* seqs, const int* const* toks, const int* 
 bool Model::can_draft_multi(const int* seqs, int n) const { return p_->can_draft_multi(seqs, n); }
 bool Model::draft_multi(const int* seqs, const int* ys, int n, std::vector<std::vector<int>>& d,
                         std::vector<std::vector<float>>& c, std::string& err) {
+    if (p_->tp_load_only(err)) return false;
     return p_->draft_multi(seqs, ys, n, d, c, err);
 }
 bool Model::verify_multi(int i, const std::vector<int>& d, float t, float tp, int tk, float mp, uint64_t seed,
                          uint64_t counter, int& accepted, int& next, std::string& err) {
+    if (p_->tp_load_only(err)) return false;
     return p_->verify_multi(i, d, t, tp, tk, mp, seed, counter, accepted, next, err);
 }
 void Model::reset() { p_->reset(); }
-void Model::checkpoint(int slot) { p_->checkpoint(slot); }
-bool Model::restore(int64_t limit) { return p_->restore(limit); }
-void Model::pin() { p_->pin(); }
-void Model::mark(bool shared) { p_->mark(shared); }
+void Model::checkpoint(int slot) { if (p_->o.tp2_rank<0) p_->checkpoint(slot); }
+bool Model::restore(int64_t limit) { return p_->o.tp2_rank<0 && p_->restore(limit); }
+void Model::pin() { if (p_->o.tp2_rank<0) p_->pin(); }
+void Model::mark(bool shared) { if (p_->o.tp2_rank<0) p_->mark(shared); }
 int Model::marks_cap() const { return Impl::marks_cap(); }
 size_t Model::check_bytes() const { return p_->check_bytes(); }
 std::vector<int64_t> Model::check_positions() const { return p_->check_positions(); }
 int64_t Model::restorable(int64_t limit) const { return p_->restorable(limit); }
 uint64_t Model::slot_save(std::vector<uint8_t>& out, std::string& err, const std::vector<PicMark>& pics) {
+    if (p_->tp_load_only(err)) return 0;
     return p_->slot_save(out, err, pics);
 }
 bool Model::slot_load(const uint8_t* data, size_t bytes, int64_t n_pos, std::string& err, std::vector<PicMark>* pics) {
+    if (p_->tp_load_only(err)) return false;
     return p_->slot_load(data, bytes, n_pos, err, pics);
 }
 std::string Model::slot_identity() const { return p_->slot_identity(); }
