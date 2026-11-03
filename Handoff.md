@@ -1456,6 +1456,12 @@ window/chunk top-token agreement and exact whole/split logits; all ranks exited.
 XS and S also passed those checks on the 3,204-token fixture and all ranks exited.
 A test-only supported 256+1 split replay was added to `ds4_tp_text_rdma_test.cpp`.
 Both XS and S passed with rank and replay max logit deltas 0; all ranks exited.
+An extended XS/S DSpark rollback sweep crossed position 4096 from a
+4,095-token prefix. Both models passed all 16 acceptance counts with exact
+subsequent logits, five matching draft token IDs and confidence differences
+within 0.0001. All ranks exited. HIP mapping, 618 server tests (11 skips) and
+707 tools tests (3 skips) passed after the test-only prefix-bound change.
+Evidence is in `docs/validation/deepseek-tp2-control-2026-11-03/rollback-4k.md`.
 The isolated attention arithmetic investigation traced the first layer-0
 query projection difference to per-32 Q8 versus FP16 GEMM arithmetic. An
 independent CPU reference found the chunk projection closer to the dequantized

@@ -3,8 +3,10 @@
 Issue #110. An isolated gfx1151 test build from `8efd8ab` traced the same
 absolute position on the checked XS pair after 16-row window prefill and
 256-row chunk prefill. Each host's pack and executable identities were checked
-before launch. The model test used its documented synthetic communicator
-identity. All owned diagnostic ranks exited.
+before launch. The captured build and model identity binds the baseline vectors
+to that diagnostic executable and XS pack. The model test used its documented
+synthetic communicator identity. All owned diagnostic ranks exited.
+[Captured identity](attention-substage-identity.json).
 
 At position 16 in a 17-token fixture, normalized attention input and normalized
 low-rank query were identical. The next `wq_b` projection differed by maximum

@@ -76,7 +76,8 @@ int ds4_tp_sharded_rollback_test(int argc,char** argv) {
     int prompt_len=3;
     if (const char* v=std::getenv("DS4_TP_TEST_PROMPT_LEN")) {
         char* end=nullptr; const long n=std::strtol(v,&end,10);
-        CHECK(*v && end && !*end && n>=1 && n<=512); prompt_len=static_cast<int>(n);
+        CHECK(*v && end && !*end && n>=1 && n<=8192 && n<=context-32);
+        prompt_len=static_cast<int>(n);
     }
     std::vector<std::uint32_t> prompt;
     for (int i=0;i<prompt_len;++i) prompt.push_back(static_cast<std::uint32_t>(5+i%3));
@@ -88,6 +89,8 @@ int ds4_tp_sharded_rollback_test(int argc,char** argv) {
     std::vector<std::uint32_t> window;
     for (int i=0;i<verify_rows;++i) window.push_back(static_cast<std::uint32_t>(8+i));
     const std::uint32_t probe=static_cast<std::uint32_t>(8+verify_rows);
+    std::fprintf(stderr,"rollback prefix=%d verify_rows=%d context=%lld\n",
+                 prompt_len,verify_rows,static_cast<long long>(context));
     const auto feed_prompt=[&]() {
         for (std::size_t at=0;at<prompt.size();) {
             const auto end_at=std::min(prompt.size(),at+static_cast<std::size_t>(max_words));
