@@ -1,0 +1,148 @@
+{
+  "model": "s",
+  "mode": "tp",
+  "engine_sha256": "a0dcc1cb91e9e52fa365291d68eef8203af714d8222e77e49d72741a4331ddc2",
+  "context": 32768,
+  "temperature": 0,
+  "max_tokens": 512,
+  "cases": [
+    {
+      "name": "merge_intervals",
+      "prompt": "Write a Python function merge_intervals(intervals). Input is a list of [start, end] integer pairs with start <= end, in any order. Return a list of merged [start, end] pairs sorted by start. Overlapping intervals and intervals that touch at an endpoint must be merged. Do not mutate the input. Return only Python code in a fenced code block.",
+      "expected": null,
+      "answer": "```python\ndef merge_intervals(intervals):\n    if not intervals:\n        return []\n    sorted_intervals = sorted([list(iv) for iv in intervals], key=lambda x: (x[0], x[1]))\n    merged = [sorted_intervals[0][:]]\n    for start, end in sorted_intervals[1:]:\n        last = merged[-1]\n        if start <= last[1]:\n            if end > last[1]:\n                last[1] = end\n        else:\n            merged.append([start, end])\n    return merged\n```",
+      "usage": {
+        "prompt_tokens": 82,
+        "completion_tokens": 120,
+        "total_tokens": 202,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 82,
+        "prompt_ms": 2211.8,
+        "prompt_per_token_ms": 26.973,
+        "prompt_per_second": 37.1,
+        "predicted_n": 120,
+        "predicted_ms": 5220.8,
+        "predicted_per_token_ms": 43.507,
+        "predicted_per_second": 23.0,
+        "draft_n": 109,
+        "draft_n_accepted": 96
+      }
+    },
+    {
+      "name": "balanced",
+      "prompt": "Write a Python function balanced(s) that returns True if all brackets (), [] and {} in string s are properly nested and matched, otherwise False. Ignore all other characters. Return only Python code in a fenced code block.",
+      "expected": null,
+      "answer": "```python\ndef balanced(s):\n    stack = []\n    pairs = {')': '(', ']': '[', '}': '{'}\n    for ch in s:\n        if ch in '([{':\n            stack.append(ch)\n        elif ch in ')]}':\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack\n```",
+      "usage": {
+        "prompt_tokens": 50,
+        "completion_tokens": 80,
+        "total_tokens": 130,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 50,
+        "prompt_ms": 906.5,
+        "prompt_per_token_ms": 18.13,
+        "prompt_per_second": 55.2,
+        "predicted_n": 80,
+        "predicted_ms": 3596.2,
+        "predicted_per_token_ms": 44.953,
+        "predicted_per_second": 22.2,
+        "draft_n": 67,
+        "draft_n_accepted": 66
+      }
+    },
+    {
+      "name": "find_subsequence",
+      "prompt": "Write a Python function find_subsequence(haystack, needle) that returns the index of the first occurrence of the string needle in the string haystack, or -1 when absent. The empty needle occurs at index 0. Return only Python code in a fenced code block.",
+      "expected": null,
+      "answer": "```python\ndef find_subsequence(haystack, needle):\n    return haystack.find(needle)\n```",
+      "usage": {
+        "prompt_tokens": 61,
+        "completion_tokens": 24,
+        "total_tokens": 85,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 61,
+        "prompt_ms": 956.8,
+        "prompt_per_token_ms": 15.685,
+        "prompt_per_second": 63.8,
+        "predicted_n": 24,
+        "predicted_ms": 1300.0,
+        "predicted_per_token_ms": 54.167,
+        "predicted_per_second": 18.5,
+        "draft_n": 23,
+        "draft_n_accepted": 18
+      }
+    },
+    {
+      "name": "run_length",
+      "prompt": "Write a Python function run_length(s) that returns a list of [character, count] pairs for each consecutive run in string s, in order. For example, aaabbc becomes [[\"a\", 3], [\"b\", 2], [\"c\", 1]]. The empty string returns an empty list. Return only Python code in a fenced code block.",
+      "expected": null,
+      "answer": "```python\ndef run_length(s):\n    result = []\n    for ch in s:\n        if result and result[-1][0] == ch:\n            result[-1][1] += 1\n        else:\n            result.append([ch, 1])\n    return result\n```",
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 60,
+        "total_tokens": 139,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 79,
+        "prompt_ms": 856.7,
+        "prompt_per_token_ms": 10.844,
+        "prompt_per_second": 92.2,
+        "predicted_n": 60,
+        "predicted_ms": 1735.2,
+        "predicted_per_token_ms": 28.92,
+        "predicted_per_second": 34.6,
+        "draft_n": 53,
+        "draft_n_accepted": 49
+      }
+    }
+  ],
+  "engine": {
+    "model": "deepseek-v4.1-flash",
+    "model_label": "DeepSeek V4.1 \u00b7 Maya-S",
+    "max_context": 32768,
+    "images": false,
+    "version": "ds4-0.1",
+    "context": 32768,
+    "kv": "fp4",
+    "kv_resident": 32768,
+    "expert_slots": 15360,
+    "engine_kind": "ds4",
+    "cpu_experts": 0,
+    "ram_experts": 0,
+    "cpu_threads": 14,
+    "engine": "ds4-0.1",
+    "engram_layers": 2,
+    "engram_lookups": 48,
+    "lookup": 0,
+    "tp_world": 2,
+    "tp_rank": 0,
+    "tp_pair": "up",
+    "tp_prefill_chunk": 256,
+    "logprobs": 20,
+    "maya_version": "1.1.43",
+    "trained_context": 1048576,
+    "dspark": true,
+    "speculation": [
+      "DSpark"
+    ]
+  }
+}

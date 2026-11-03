@@ -1,0 +1,70 @@
+{
+  "model": "xs",
+  "mode": "single",
+  "engine_sha256": "a0dcc1cb91e9e52fa365291d68eef8203af714d8222e77e49d72741a4331ddc2",
+  "cases": [
+    {
+      "name": "merge_intervals",
+      "evaluation": {
+        "cases": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "passed": 6,
+        "total": 6,
+        "all_passed": true
+      }
+    },
+    {
+      "name": "balanced",
+      "evaluation": {
+        "cases": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "passed": 6,
+        "total": 6,
+        "all_passed": true
+      }
+    },
+    {
+      "name": "find_subsequence",
+      "evaluation": {
+        "cases": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "passed": 6,
+        "total": 6,
+        "all_passed": true
+      }
+    },
+    {
+      "name": "run_length",
+      "evaluation": {
+        "cases": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "passed": 5,
+        "total": 5,
+        "all_passed": true
+      }
+    }
+  ]
+}

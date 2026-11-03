@@ -1456,6 +1456,11 @@ window/chunk top-token agreement and exact whole/split logits; all ranks exited.
 XS and S also passed those checks on the 3,204-token fixture and all ranks exited.
 A test-only supported 256+1 split replay was added to `ds4_tp_text_rdma_test.cpp`.
 Both XS and S passed with rank and replay max logit deltas 0; all ranks exited.
+A four-task coding comparison on XS and S single-host and TP2 passed all
+23 fixed functional and edge cases on every path, using sandboxed generated
+code; implementations differed in 2/4 XS and 1/4 S tasks. All processes
+exited. This small sample does not establish general equivalence. Evidence:
+`docs/validation/deepseek-tp2-control-2026-11-03/coding-comparison.md`.
 An additional 20-case short objective cross-path check passed 19/20 strict
 format checks on each XS path, and 19/20 single-host versus 20/20 TP on S;
 the only strict misses gave the correct bitwise result with extra text.
