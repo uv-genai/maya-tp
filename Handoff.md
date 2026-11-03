@@ -1496,3 +1496,10 @@ the short DSpark and no-drafter verify parity checks also passed after this chan
 does not yet perform model partitioning or distributed reductions. A paired real-model control
 smoke is next. Standard HIP mapping, 613 server tests (11 skipped) and 687 tools tests (3 skipped)
 also passed in this work session.
+
+An owned replicated-XS paired control/RDMA smoke on port 18722 completed and both owned ranks
+exited. The adaptive-lane attempt produced a 5.6557 maximum logit difference and the hosts chose
+different CPU/stream splits. With identical fixed CPU execution, a rerun passed: all 129,280
+subsequent logits matched exactly after a partial speculative verdict. See
+`docs/validation/deepseek-tp2-control-2026-11-03/replicated-model-smoke.md`. These use full
+replicated models and synthetic test identities, not TP model inference or production negotiation.

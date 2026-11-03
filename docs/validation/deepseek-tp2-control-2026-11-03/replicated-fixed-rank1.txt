@@ -1,0 +1,7 @@
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+ds4: prompts run in windows of 16 tokens (--prefill-chunk 0): long prompts prefill far slower than in
+     chunks (a 7-GPU RTX 3090 rig, Maya-S read in place: 8K / 32K tokens 115 / 99 tokens/s,
+     461 / 1010 in chunks of 8192) - leave --prefill-chunk out for chunks
+ds4: the experts VRAM leaves over (~109.6 GB) are read in place from the model's files (--mmap-experts on) (120.5 GB of RAM free to keep them: the most-routed 109.6 GB read ahead; prompts in chunks of 0)
+rank 1: replicated XS model loaded, establishing test pair
+rank 1: replicated DeepSeek control smoke, 129280 logits, max_abs=0
