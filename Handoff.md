@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-03 · Current state: **§42**, DeepSeek TP2 implementation and staged validation; §§38–41 record GLM startup and DeepSeek design/plan; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-03 · Current state: **§43**, DeepSeek launch scripts ready for user testing; §42 records implementation and staged validation; §§38–41 record GLM startup and DeepSeek design/plan; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2458,3 +2458,49 @@ The repeat passed: the first HTTP error, degraded health and later error all
 retained the peer-close cause with pair-down context. Its server and worker
 exited. Evidence is in
 `docs/validation/deepseek-tp2-control-2026-11-03/server-first-cause.md`.
+
+
+## 43. DeepSeek TP2 launchers ready for user testing (#118, 2026-11-03)
+
+The user requested the GLM-style rank scripts and a port-based llama-swap
+wrapper, and will perform inference testing themselves. The new entry points
+are `tools/ds4/rank0.sh`, `tools/ds4/rank1.sh` and
+`tools/llama-swap/tp2-ds4.sh`, backed by `tools/ds4/tp2_launch.py`.
+Per-model launcher configs select the pack, checked local manifest and engine.
+Common context and feature choices are forwarded to both ranks. The pair
+supervisor checks peer identities before model loading and records its process
+ownership. `stop PORT` and llama-swap's `stop-pid ${PID}` request shutdown
+through the owned control socket. API shutdown precedes cleanup of verified
+child engines and the remote worker. Failed ranks require a fresh paired run.
+
+An isolated runtime is staged on both hosts at
+`/home/ugo/software/project-maya-ds4-tp2-review`. It has matching reviewed
+engine SHA-256 `a0dcc1cb91e9e52fa365291d68eef8203af714d8222e77e49d72741a4331ddc2`,
+per-host XS/S manifests and `maya-ds4-tp2-maya-{xs,s}.json` configs.
+Rank 0 is strix-halo-1, rank 1 is strix-halo-2, bootstrap port 18525,
+RDMA device usb4_rdma5, context 262144, DSpark on, prefill chunk 256,
+lookup off and expert budget 92160 MiB. The runtime reuses each host's
+existing virtualenv. The selected context matches the existing single-host
+DeepSeek configs. User examples and a ready YAML fragment are staged in
+`llama-swap-deepseek-tp2.yaml` under that runtime.
+
+Fourteen process/config tests pass in both staged runtimes, covering duplicate
+starts, mismatched identities, child exec transitions and PID reuse,
+server/worker failure, restart, cleanup ordering and unrelated-process
+preservation. Both hosts' pack, partition and executable preflights agreed.
+Ordered repository checks passed HIP mapping, 618 server tests (11 skips)
+and 721 tools tests (3 skips). Logs are recorded in #118 and
+`/tmp/ds4-tp2-launch-ci-{hip,serve,tools}.log`.
+
+The user can run on strix-halo-1 with
+`/home/ugo/software/project-maya-ds4-tp2-review/tools/llama-swap/tp2-ds4.sh run 18080 --model Maya-XS`,
+or `--model Maya-S`. Manual rank scripts are available in that runtime's
+`tools/ds4/`. The llama-swap stop command uses `stop-pid ${PID}` because its
+stop-command macro is the supervisor PID. Runtime logs are under
+`~/.cache/maya/deepseek-tp2/PORT/run-*`, with the `latest` file identifying
+the selected run directory. The operations guide documents standalone and
+managed launches, config fields and overrides.
+
+**Active owned model processes** are none. Validation for this workstream
+uses fake processes and preflight checks. The user performs the next actual
+model launch and inference tests.

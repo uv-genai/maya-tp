@@ -1,0 +1,18 @@
+{
+  "pack": "/absolute/path/to/Maya-XS/maya-ds4",
+  "manifest": "manifests/maya-xs.json",
+  "engine": "build-hip/maya-ds4",
+  "model_label": "DeepSeek V4.1 · Maya-XS",
+  "host": "strix-halo-1.local",
+  "peer": "strix-halo-2.local",
+  "peer_root": "/absolute/path/to/project-maya",
+  "port": 18525,
+  "rdma_device": "usb4_rdma5",
+  "context": 262144,
+  "expert_budget_mib": 92160,
+  "reserve_mib": 1024,
+  "cpu_threads": 14,
+  "prefill_chunk": 256,
+  "dspark": "on",
+  "suffix_draft": 0
+}

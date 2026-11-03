@@ -113,6 +113,11 @@ deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya
 | Other model families | Published TP2 validation covers GLM. DeepSeek TP2 and DSpark are experimental on the development branch; see the [review guide](docs/DEEPSEEK-TP2-RUN.md). MiniMax TP2 is not validated. |
 | Deferred work | [Multi-sequence TP2](https://github.com/uv-genai/maya-tp/issues/11), [vision](https://github.com/uv-genai/maya-tp/issues/16) and [gather-based reduction](https://github.com/uv-genai/maya-tp/issues/10); DFlash under TP2 remains gated |
 
+DeepSeek review launchers are available as `tools/ds4/rank0.sh`,
+`tools/ds4/rank1.sh` and `tools/llama-swap/tp2-ds4.sh run PORT --model NAME`.
+Per-model configs and the PID-scoped llama-swap stop command are documented in
+the DeepSeek guide. [DeepSeek launcher setup](docs/DEEPSEEK-TP2-RUN.md#rank-scripts-and-llama-swap).
+
 ## Set up the pair
 
 Both hosts need a gfx1151-capable ROCm/HIP toolchain, C++20 compiler, CMake, Python 3.10+ with venv,

@@ -173,3 +173,72 @@ matching rank settings; for a prior single-host setup, start its original
 server command and config. Verify health and a test request. Do not mix a new
 rank with an old rank or reuse a poisoned pair. Keep the versioned candidate and
 its config separate until the user has finished comparing or troubleshooting.
+
+## Rank scripts and llama-swap
+
+`tools/ds4/rank0.sh [PORT]` starts the HTTP API and rank-0 engine. Start
+`tools/ds4/rank1.sh` on the worker host first. Both scripts select a launcher
+JSON with `--config PATH` or `--model NAME`. For example, `--model Maya-XS`
+selects `maya-ds4-tp2-maya-xs.json` beside the repository root. With neither
+option, `MAYA_DS4_TP2_CONFIG` supplies the path, falling back to
+`maya-ds4-tp2.json`. Keep one local checked manifest per model on each host.
+
+The example config gives the schema. Paths to pack, manifest and engine are
+resolved relative to that config file. Common model, context, bootstrap and
+feature settings apply to both ranks. Optional `rank0` and `rank1` objects
+can override local paths, `rdma_device`, `gpu`, `cpu_threads`,
+`expert_budget_mib`, `reserve_mib` and `env`. Use absolute rank-1 paths when
+the peer has a different directory layout. `peer_root` selects the peer's
+runtime checkout and `peer_python` optionally selects its Python executable.
+[Example configuration](../tools/ds4/tp2-launch.example.json).
+
+```sh
+# On rank 1
+./tools/ds4/rank1.sh --model Maya-XS
+# On rank 0
+./tools/ds4/rank0.sh 18080 --model Maya-XS
+```
+
+For an SSH-managed pair, run the single wrapper on the API host. It checks
+both ranks' pack, partition and executable identities before starting model
+loading, then starts the worker and API supervisor. It returns an error if
+another pair owns its API or bootstrap port. A worker failure ends the pair.
+A new launch starts both ranks afresh.
+
+```sh
+./tools/llama-swap/tp2-ds4.sh run 18080 --model Maya-XS
+./tools/llama-swap/tp2-ds4.sh stop 18080
+```
+
+Overrides `--context N`, `--dspark on|off`, `--prefill-chunk 0|256` and
+`--suffix-draft 0|3` apply to both ranks. `--peer HOST` overrides the SSH
+host. The foreground supervisor handles SIGTERM, SIGINT and SIGHUP. Shutdown
+ends the API supervisor, cleans up its recorded child engines, then closes
+the remote worker's control pipe. The remote supervisor also stops its worker
+when that pipe closes. Cleanup checks recorded process start times and
+executable paths. Runtime logs and ownership records are stored under
+`~/.cache/maya/deepseek-tp2/PORT/run-*`, with a `latest` file giving the current
+run directory. `--state-dir PATH` selects another runtime-state root and must
+be passed to the corresponding stop command.
+
+For llama-swap, `${PORT}` belongs in `cmd` and `${PID}` identifies the
+foreground supervisor in `cmdStop`. The PID stop action verifies its recorded
+identity and requests shutdown through that pair's control socket. These macros
+are documented by llama-swap. [llama-swap command documentation](https://github.com/mostlygeek/llama-swap/blob/main/docs/kb/guides/model-runtime/writing-cmd.md).
+
+```yaml
+healthCheckTimeout: 1800
+models:
+  deepseek-maya-xs-tp2:
+    cmd: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh run ${PORT} --model Maya-XS
+    cmdStop: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh stop-pid ${PID}
+    checkEndpoint: /health
+  deepseek-maya-s-tp2:
+    cmd: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh run ${PORT} --model Maya-S
+    cmdStop: /absolute/path/to/project-maya/tools/llama-swap/tp2-ds4.sh stop-pid ${PID}
+    checkEndpoint: /health
+```
+
+Use the two entries with llama-swap's normal one-model-at-a-time behavior.
+The review configs use bootstrap port 18525, leaving the established GLM
+bootstrap selection separate. The user controls loading and inference testing.

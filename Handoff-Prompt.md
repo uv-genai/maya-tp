@@ -1,12 +1,14 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then the current state in [Handoff.md §42](Handoff.md#42-deepseek-tp2-implementation-in-progress-110116-2026-11-03). Earlier handoff entries are dated history and may describe superseded processes, issues, binaries or pending steps.
+Read [AGENTS.md](AGENTS.md), then the current state in Handoff.md §§42–43. The new rank/llama-swap launchers and staged user-test runtime are described in §43. Earlier handoff entries are dated history and may describe superseded processes, issues, binaries or pending steps.
 
 ## Current GLM and DeepSeek state
 
 The user authorized implementation and validation of DeepSeek TP2 and DSpark on
 `feat/deepseek-tp2`. Experimental target inference, chunked prefill, DSpark and prompt lookup
-have been exercised on XS and S; sampling, failure, performance and operations gates remain open.
+have been exercised on XS and S. Numerical/quality and resource review remain open.
+The user will test the new launchers through llama-swap. Read §43 and #118 for
+the staged runtime, config choices and ownership-safe stop actions.
 Read the current-state summary at the start of Handoff.md §42, the implementation plan and phase issues #110–#116.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
 procedure is in [docs/DEEPSEEK-TP2-RUN.md](docs/DEEPSEEK-TP2-RUN.md); no production promotion

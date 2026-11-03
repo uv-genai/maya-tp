@@ -126,7 +126,10 @@ gfx1201 reference, not this fork's target build recipe.
 
 DeepSeek TP2 is a separate experimental path: `tools/ds4/tp2_rank.py` requires an explicit
 pack, local checked manifest and engine; `tools/ds4/tp2_config.py` prints a dedicated rank-0
-server config. Keep model contents, executable, context and feature choices matched on both
+server config. `tools/ds4/rank0.sh` and `rank1.sh` read per-model launcher JSON;
+`tools/llama-swap/tp2-ds4.sh run PORT --model NAME` manages a pair over SSH. Its
+`stop PORT` and `stop-pid PID` actions use owned control sockets and recorded
+identities. Keep model contents, executable, context and feature choices matched on both
 ranks. See `docs/DEEPSEEK-TP2-RUN.md` and the current gates in `Handoff.md`; do not treat
 the review path as a production promotion or use the GLM launchers for the DeepSeek engine.
 

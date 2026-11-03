@@ -1786,3 +1786,14 @@ experts on multiple local GPUs is outside this fork's gfx1151 target and was not
 `MAYA_DS4_CHUNK_GFX11` defaults to **0** (preserve the existing plan). Set `4096` to cap DeepSeek's automatic GGUF borrowed-memory chunk choice on gfx1151. Values of at least 16 round down to a multiple of 16 when they reduce a larger plan; invalid, overflow, negative and 1–15 values leave the plan unchanged. `MAYA_` takes precedence over `STRATA_DS4_CHUNK_GFX11`, then legacy `DS4_CHUNK_GFX11`; JSON config uses the same aliases. An explicit `DS4_CHUNK` remains explicit.
 
 Upstream reports a 16K-prompt improvement with 4096, but this fork has no local DeepSeek measurement yet ([#79](https://github.com/uv-genai/maya-tp/issues/79)); no speedup is claimed. The optional cap and its boundaries are tested; full DS4 WMMA parity remains tracked in [#68](https://github.com/uv-genai/maya-tp/issues/68), and the separate tail-drain port in [#75](https://github.com/uv-genai/maya-tp/issues/75). GLM TP2 uses its own planner and tuning.
+
+### DeepSeek TP2 launcher selection
+
+`MAYA_DS4_TP2_CONFIG` selects the launcher JSON used by
+`tools/ds4/rank0.sh`, `tools/ds4/rank1.sh` and
+`tools/llama-swap/tp2-ds4.sh`. Explicit `--config PATH` and `--model NAME`
+take precedence. The fallback is `maya-ds4-tp2.json` beside the runtime
+checkout. A model selection such as `Maya-XS` resolves to
+`maya-ds4-tp2-maya-xs.json`. Common context and speculation choices are
+forwarded to both ranks. The launcher schema and stop actions are described
+in the DeepSeek operations guide. [DeepSeek TP2 guide](DEEPSEEK-TP2-RUN.md).
