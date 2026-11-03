@@ -11,6 +11,20 @@ int main() {
     a.model_digest[0] = 1; a.partition_digest[0] = 2; a.build_digest[0] = 3;
     Identity b = a; b.rank = 1; b.max_partial_bytes = 524288;
     std::uint64_t limit = 0; std::string error;
+    auto wire = encode_identity(b);
+    CHECK(wire.size() == kIdentityBytes && wire[0] == 'D' && wire[1] == 'S' && wire[2] == 'I' && wire[3] == 'D');
+    Identity decoded;
+    CHECK(decode_identity(wire, decoded, error));
+    CHECK(decoded.rank == b.rank && decoded.model_digest == b.model_digest &&
+          decoded.partition_digest == b.partition_digest && decoded.build_digest == b.build_digest &&
+          decoded.max_partial_bytes == b.max_partial_bytes && decoded.max_context == b.max_context);
+    for (std::size_t n = 0; n < wire.size(); ++n) {
+        decoded.rank = 42;
+        CHECK(!decode_identity(std::span(wire).first(n), decoded, error) && decoded.rank == 42);
+    }
+    auto broken = wire; broken[0] ^= 1; CHECK(!decode_identity(broken, decoded, error));
+    broken = wire; broken[7] = 2; CHECK(!decode_identity(broken, decoded, error));
+    broken = wire; broken.push_back(0); CHECK(!decode_identity(broken, decoded, error));
     CHECK(agree_identity(a, b, limit, error) && limit == 524288 && error.empty());
     CHECK(agree_identity(b, a, limit, error) && limit == 524288);
     auto rejected = [&](const Identity& x) {

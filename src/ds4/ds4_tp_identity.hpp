@@ -2,6 +2,8 @@
 // and execution identity, not physical per-rank paths or rank-local allocations.
 #pragma once
 
+#include "ds4_tp_control.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -18,14 +20,45 @@ struct Identity {
     std::array<std::uint8_t, 32> model_digest{}, partition_digest{}, build_digest{};
 };
 
+inline constexpr std::uint32_t kIdentityMagic = 0x44534944u; // DSID
+inline constexpr std::uint32_t kIdentityVersion = 1;
+inline constexpr std::size_t kIdentityBytes = 156;
+
+inline std::vector<std::uint8_t> encode_identity(const Identity& id) {
+    std::vector<std::uint8_t> b;
+    b.reserve(kIdentityBytes);
+    put32(b, kIdentityMagic); put32(b, kIdentityVersion);
+    put32(b, id.protocol); put32(b, id.world); put32(b, id.rank); put32(b, id.hidden);
+    put32(b, id.layers); put32(b, id.experts); put32(b, id.expert_width);
+    put64(b, id.max_context); put64(b, id.feature_flags); put64(b, id.max_partial_bytes);
+    for (const auto* d : {&id.model_digest, &id.partition_digest, &id.build_digest})
+        b.insert(b.end(), d->begin(), d->end());
+    return b;
+}
+
+inline bool decode_identity(std::span<const std::uint8_t> b, Identity& out, std::string& error) {
+    if (b.size() != kIdentityBytes || get32(b, 0) != kIdentityMagic || get32(b, 4) != kIdentityVersion) {
+        error = "ds4 tp2: invalid identity frame"; return false;
+    }
+    Identity id;
+    id.protocol = get32(b, 8); id.world = get32(b, 12); id.rank = get32(b, 16);
+    id.hidden = get32(b, 20); id.layers = get32(b, 24); id.experts = get32(b, 28);
+    id.expert_width = get32(b, 32); id.max_context = get64(b, 36);
+    id.feature_flags = get64(b, 44); id.max_partial_bytes = get64(b, 52);
+    std::copy_n(b.begin() + 60, 32, id.model_digest.begin());
+    std::copy_n(b.begin() + 92, 32, id.partition_digest.begin());
+    std::copy_n(b.begin() + 124, 32, id.build_digest.begin());
+    out = id; error.clear(); return true;
+}
+
 inline bool nonzero(const std::array<std::uint8_t, 32>& digest) {
     return std::any_of(digest.begin(), digest.end(), [](auto b) { return b != 0; });
 }
 
 // Both peers must compute this before model collectives. Return the smaller
 // RDMA payload limit; the caller must agree a row/chunk size within that limit.
-// Identity must be exchanged via a separately versioned, bounded wire codec;
-// this in-memory struct must never be sent as raw bytes.
+// Exchange with encode_identity/decode_identity; never send this in-memory
+// struct as raw bytes.
 inline bool agree_identity(const Identity& local, const Identity& peer, std::uint64_t& max_partial,
                            std::string& error) {
     const auto fail = [&](const char* message) { error = message; return false; };
