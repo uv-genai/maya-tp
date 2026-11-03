@@ -29,6 +29,8 @@ int main() {
                 CHECK(p[0].count % block == 0 && p[1].count % block == 0);
                 CHECK(p[0].count + p[1].count == width);
                 CHECK(p[0].count - p[1].count <= block && p[1].count - p[0].count <= block);
+                if (blocks % 2) CHECK((layer % 2 == 0) == (p[0].count > p[1].count));
+                else CHECK(p[0].count == p[1].count);
             }
         }
     }

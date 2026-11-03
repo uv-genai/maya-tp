@@ -38,6 +38,7 @@
 #include "ds4_prompt_mem.hpp"
 #include "ds4_ram_slice.hpp"
 #include "ds4_store.hpp"
+#include "ds4_tp_partition.hpp"
 #include "ds4_vision.cuh"
 #include "strata/kernels/cpu/exl3_cpu.hpp"
 #include "strata/kernels/exl3.hpp"
@@ -3754,6 +3755,13 @@ struct Model::Impl {
                         }
                         x.ff0 = g.ff / sum * before;
                         x.ffn = g.ff / sum * (*w)[(size_t) m];
+                    } else if (l.nm == 2) {
+                        // Keep two-way GGUF partition geometry shared with the
+                        // distributed path; validate before building any layout.
+                        std::array<tp2::Range, 2> ranges;
+                        if (!tp2::expert_ranges(g.ff, tp_blk, l.il, ranges, err)) return false;
+                        x.ff0 = ranges[(size_t) m].begin;
+                        x.ffn = ranges[(size_t) m].count;
                     } else
                         splitb(g.ff, tp_blk, l.nm, m, x.ff0, x.ffn, l.il % l.nm);
                 } else if (gguf_x) {
