@@ -46,5 +46,12 @@ ends. User-owned llama-swap daemons were not stopped. Long-running copy details 
 model label, DSpark state and new output path, and checks the server is idle before each request.
 It records prompt/answer hashes, timings, usage and engine/tier snapshots. Its three fixed short
 prompts are not a substitute for the planned long-prefill or paired-model measurements. A mock
-HTTP check exercised sample capture and rejection of an existing output and DSpark mismatch;
-no actual model measurements have yet been collected with it.
+HTTP check exercised sample capture and rejection of an existing output and DSpark mismatch.
+
+After the copy completed, an owned isolated Maya-XS server with the review binary, 262144 context,
+DSpark on and profile writes disabled ran three repetitions of each reference prompt. The nine
+samples are in `xs-single-reference.json`. Decode rates in tokens/s were Python 35.7/39.9/41.0,
+prose 26.0/29.2/30.0 and HTML 42.8/46.9/47.3. Python and HTML answer hashes matched across repeats;
+prose had two distinct hashes. These are warm-up/short-prompt samples, not a cold-load study,
+long-prefill result or bit-exact determinism guarantee. The owned server and engine were stopped
+after the run, without touching user-owned services.

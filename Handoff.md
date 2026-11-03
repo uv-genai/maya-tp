@@ -1414,14 +1414,22 @@ Working branch `feat/deepseek-tp2`; design and plan committed as `231a48b`. Both
 model processes when P1 began; their llama-swap daemons remain user-owned. Pack inventory and an
 isolated two-host RDMA smoke/benchmark are in `docs/benchmarks/deepseek-tp2-p1-2026-11-03/`.
 Both ranks passed the transport test; P1 capacity, single-host reference and architecture gates
-remain open. No DeepSeek TP2 implementation exists yet.
+remain open. DeepSeek TP2 engine execution is not implemented yet. P2/P3 foundational helpers and
+tests are in `2b6d544`–`e84734e` (#115/#111): whole-block ranges, expert byte spans, identity,
+bounded control codec/channel and the shared transport's control-data-versus-EOF fix. The exact
+bootstrap poison bug was reproduced with the old transport and fixed in real paired RDMA tests;
+real peer loss still retains the sticky original cause. See
+`docs/validation/deepseek-tp2-control-2026-11-03/`. These changes are not a substitute for full
+GLM model regression or DeepSeek distributed execution and DSpark validation.
 
 An owned rsync started to copy Maya-XS, shared Engram, DSpark and vision into the previously absent
 `/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/` on strix-halo-1. Local shell
 PID 155996, rsync PID 156005 and SSH PID 156006 were recorded at launch; unified exec session 64870,
 log `/tmp/ds4-p1-copy-112.log`. Recheck PIDs/start times before acting. The copy was initially
 ~110 MB/s, about 43 minutes; it is incomplete until rsync exits successfully and the remote pack is
-checked. Do not benchmark storage while it runs. Do not treat incomplete files as a usable pack.
+checked. The copy subsequently completed with exit 0; rsync's size/mtime dry-run was clean and
+remote `--pack-info` found all seven indexed files, but full cryptographic content comparison has
+not yet been done.
 An isolated transport build is at `/tmp/maya-ds4-tp2-p1-build`; its temporary test ranks have exited.
 The reference API harness is `tools/ds4/bench_tp2_reference.py` (`0570a8e`); its mock checks passed,
 but it has not yet been run against a model. `tools/ds4/estimate_tp2_experts.py` (`408c0b5`) estimates
@@ -1432,4 +1440,9 @@ An isolated clean `maya-ds4` build passed in `/tmp/maya-ds4-tp2-p1-build`, log
 review copy is on strix-halo-1 at `/tmp/maya-ds4-tp2-p1-review-112`, not in the production tree.
 The ordered HIP mapping, 613 server tests (11 skipped) and 687 tools tests (3 skipped) passed;
 logs are `/tmp/ds4-p1-{hip,serve,tools}-112.log`. Do not run model performance tests while the
-model transfer is active.
+model transfer is active. After it completed, an isolated XS server (PIDs 176926/176928) completed
+nine prompt samples and was stopped. Results are in `xs-single-reference.json` in the benchmark
+directory. An isolated Maya-S reference server was then started as PID 177990, with engine PID
+177992 and process group 177990, on local port 18701; config `/tmp/ds4-p1-s-112.json`, server log
+`/tmp/ds4-p1-s-server-112.log`. These are owned test processes; check their current PID/start time
+before stopping, and stop server before engine. User-owned llama-swap daemons remain untouched.
