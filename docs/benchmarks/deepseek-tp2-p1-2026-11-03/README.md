@@ -21,6 +21,13 @@ Rotating 5+4 quant blocks across equally sized layers suggests a rough half of r
 per rank, but the actual per-layer formats, rank placement, scratch, context, OS headroom and
 Engram cache must be measured. The complete Engram data and all model memory are not shown to fit.
 
+`tools/ds4/estimate_tp2_experts.py` uses each indexed trunk expert tensor's actual byte count and
+rotates a 5+4 split by layer, assuming 256-value blocks and proportional tensor bytes. It reports
+Maya-S 84.510 GB per rank (169.020 GB total) and Maya-XS 54.814/54.751 GB (109.566 GB total).
+This is a logical-data estimate, not a tested loader: verify each quant format's block/layout and
+include padding and all non-expert allocations before treating it as a capacity result. Synthetic
+checks covered even rotated totals and rejection of a missing tensor.
+
 An isolated `tp_comm_rdma_test` was built from commit `231a48b` source using HIP gfx1151 and
 `STRATA_ENABLE_TP2_RDMA=ON`. Both hosts ran the same executable with `--hidden 5120 --exchanges 100
 --bench` on port 18672; see the rank logs. Both reported success. For a 20,480-byte row, queued
