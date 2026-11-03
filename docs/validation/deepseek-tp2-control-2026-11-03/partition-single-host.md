@@ -18,3 +18,9 @@ The candidate also passed `--sampler-test 50` with the same pack, 32768 context 
 covering four sampling chains including penalties. The 50 speculative rounds per chain are a
 small statistical smoke check, not proof of distribution equivalence. Output is in
 `single-host-sampler-xs.txt`. This still exercises only the one-host path.
+
+`ds4_gguf_test --tp-slices` passed on gfx1151 for synthetic quantized experts at D=5120/F=2304:
+IQ1_S/IQ1_S, IQ1_S/IQ2_XXS, IQ2_S/IQ3_S and IQ2_XXS/IQ3_XXS. It compares full gate/up activations
+and full down output with the sum of independently packed 5+4 and 4+5 block slices, using numerical
+tolerances. Raw output: `expert-slices-gfx1151.txt`. This is one GPU and synthetic weights, not a
+two-rank collective, real model output, prefill validation or bit-exactness claim.

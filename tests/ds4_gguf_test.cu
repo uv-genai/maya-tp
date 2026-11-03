@@ -17,6 +17,7 @@
 #include "../src/ds4/ds4_markov_q8.hpp"
 #include "../src/ds4/ds4_pcie.cuh"
 #include "../src/ds4/ds4_q6k.cuh"
+#include "../src/ds4/ds4_tp_pack.hpp"
 
 #include "ggml.h"   // (the low-bit types' reference values: ggml's own dequantize_row_*)
 
@@ -897,6 +898,67 @@ QExperts make_q(int D, int F, int n_exp, int tg, int td) {
         }
     E.dev = dev(E.host);
     return E;
+}
+
+// Compare a full low-bit expert against two separately packed FFN bands.
+// This exercises local GPU arithmetic; it does not use or validate RDMA.
+void test_tp_expert_slices(int D, int F, int tg, int td, cudaStream_t stream) {
+    namespace tp = strata::ds4::tp2;
+    QExperts e = make_q(D, F, 1, tg, td);
+    const auto gr = gg::type_row_bytes(tg, D), dr = gg::type_row_bytes(td, F);
+    std::array<tp::ConstBytes, 3> src{
+        tp::ConstBytes(e.mat(0, 0), (size_t) F * gr), tp::ConstBytes(e.mat(0, 1), (size_t) F * gr),
+        tp::ConstBytes(e.mat(0, 2), (size_t) D * dr)};
+    std::vector<float> x((size_t) D), zeros((size_t) D, 0.0f);
+    for (auto& v : x) v = frand();
+    float* dx = dev(x); float* dz = dev(zeros); int* flag = dev(std::vector<int>{0});
+    float* weights = dev(std::vector<float>{0.75f});
+    auto run = [&](const x3::ExpertLayout& layout, uint8_t* blob, int f, std::vector<float>& h) {
+        auto* ptr = dev(std::vector<unsigned long long>{(unsigned long long) blob});
+        float* dh = dev(std::vector<float>((size_t) f));
+        float* dy = dev(std::vector<float>((size_t) D));
+        x3::MoeArgs a; a.plan_ptr=ptr; a.plan_w=weights; a.cpu_part=dz; a.cpu_flag=flag;
+        a.lay=layout; a.k=1; a.n_embd=D; a.n_ff=f; a.limit=10.0f;
+        gg::moe_gate_up(a, dx, dh, stream); gg::moe_down(a, dh, dz, dy, stream);
+        CU(cudaStreamSynchronize(stream));
+        h=host(dh, (size_t) f); auto y=host(dy, (size_t) D);
+        cudaFree(ptr); cudaFree(dh); cudaFree(dy); return y;
+    };
+    std::vector<float> full_h;
+    auto full = run(e.lay,e.dev,F,full_h);
+    bool ok = true;
+    std::string err;
+    for (int layer=0; layer<2; ++layer) {
+        std::array<tp::Range,2> ranges{};
+        if (!tp::expert_ranges(F,256,layer,ranges,err)) { ok=false; break; }
+        std::vector<float> sum((size_t) D, 0.0f);
+        for (int rank=0; rank<2; ++rank) {
+            tp::ExpertSpans sp;
+            if (!tp::expert_spans(F,D,256,ranges[rank],gr,gr,dr,sp,err)) { ok=false; break; }
+            x3::ExpertLayout layout=e.lay;
+            layout.trellis[0]=0;
+            layout.trellis[1]=(sp.gate_bytes+255)/256*256;
+            layout.trellis[2]=(layout.trellis[1]+sp.up_bytes+255)/256*256;
+            const size_t dn=sp.down_row_bytes*sp.down_rows;
+            std::vector<uint8_t> packed((layout.trellis[2]+dn+255)/256*256);
+            std::array<tp::Bytes,3> dst{tp::Bytes(packed).subspan(layout.trellis[0],sp.gate_bytes),
+                tp::Bytes(packed).subspan(layout.trellis[1],sp.up_bytes), tp::Bytes(packed).subspan(layout.trellis[2],dn)};
+            if (!tp::pack_expert(sp,src,dst,err)) { ok=false; break; }
+            uint8_t* gpu=dev(packed); std::vector<float> h;
+            auto part=run(layout,gpu,ranges[rank].count,h); cudaFree(gpu);
+            for (int i=0;i<ranges[rank].count;++i) {
+                const float ref=full_h[(size_t) ranges[rank].begin+i];
+                if (!std::isfinite(h[(size_t)i]) || std::fabs(h[(size_t)i]-ref)>1e-4f+1e-4f*std::fabs(ref)) ok=false;
+            }
+            for (int i=0;i<D;++i) sum[(size_t)i]+=part[(size_t)i];
+        }
+        for (int i=0;i<D;++i)
+            if (!std::isfinite(sum[(size_t)i]) || std::fabs(sum[(size_t)i]-full[(size_t)i])>1e-3f+1e-3f*std::fabs(full[(size_t)i])) ok=false;
+    }
+    if (!ok) ++g_fail;
+    std::printf("TP2 expert bands %s/%s D=%d F=%d: %s%s%s\n",tn(tg),tn(td),D,F,ok?"ok":"FAIL",
+                err.empty()?"":" ",err.c_str());
+    cudaFree(dx); cudaFree(dz); cudaFree(flag); cudaFree(weights); cudaFree(e.dev);
 }
 
 // test_experts' checks for low-bit experts: the token path, the window (bit for bit the token path's), the prompt sets
@@ -2977,6 +3039,17 @@ int main(int argc, char** argv) {
     cudaStream_t s;
     CU(cudaStreamCreate(&s));
     if (!gg::prepare(s)) return 1;
+    if (argc >= 2 && std::strcmp(argv[1], "--tp-slices") == 0) {
+        for (const auto& pr : {std::pair{gg::iq::kIQ1_S,gg::iq::kIQ1_S},
+                              std::pair{gg::iq::kIQ1_S,gg::iq::kIQ2_XXS},
+                              std::pair{gg::iq::kIQ2_S,gg::iq::kIQ3_S},
+                              std::pair{gg::iq::kIQ2_XXS,gg::iq::kIQ3_XXS}})
+            test_tp_expert_slices(5120,2304,pr.first,pr.second,s);
+        if (gg::launch_errors()!=0) ++g_fail;
+        CU(cudaStreamDestroy(s));
+        std::printf("%s (%d failed)\n",g_fail?"FAILED":"ALL OK",g_fail);
+        return g_fail?1:0;
+    }
     if (argc >= 2 && std::strcmp(argv[1], "--real") == 0) {   // --real <ggml type> <k> <file> <offset> <rows> [label]
         if (argc < 7) return 2;
         const int t = std::atoi(argv[2]), k = std::atoi(argv[3]), n = std::atoi(argv[6]);

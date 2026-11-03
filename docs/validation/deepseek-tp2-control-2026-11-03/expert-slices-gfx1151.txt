@@ -1,0 +1,5 @@
+TP2 expert bands IQ1_S/IQ1_S D=5120 F=2304: ok
+TP2 expert bands IQ1_S/IQ2_XXS D=5120 F=2304: ok
+TP2 expert bands IQ2_S/IQ3_S D=5120 F=2304: ok
+TP2 expert bands IQ2_XXS/IQ3_XXS D=5120 F=2304: ok
+ALL OK (0 failed)
