@@ -20738,7 +20738,8 @@ bool Model::draft(int y, std::vector<int>& d, std::vector<float>& c, std::string
 }
 bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter,
                    int& accepted, int& next, std::string& err) {
-    if (p_->tp_load_only(err)) return false;
+    if (p_->tp_unready(err)) return false;
+    if (p_->o.tp2_rank==1) { err="ds4 tp2: only rank 0 may decide a verdict"; return false; }
     return p_->verify(y, d, t, tp, tk, mp, seed, counter, accepted, next, err);
 }
 bool Model::tp_verify_begin(const int* tokens, int count, std::string& err) {

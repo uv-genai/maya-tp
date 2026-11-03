@@ -28,3 +28,13 @@ draft IDs matched the target-only path, and confidence values matched within
 `c0889ebec9251913f838ddfcfd6ab41f2ad609372ae98212399202089c71d715`.
 All owned ranks exited. These are forced verdicts; actual acceptance sampling,
 long windows and production DSpark serving remain untested.
+
+Actual greedy DSpark proposals and rank-0 decisions were then exercised on the
+eBPF chat prompt. The worker executed each target verify window and committed
+the authoritative typed verdict. On XS, 22 rounds offered 106 drafts and
+accepted 41; on S, 23 rounds offered 113 and accepted 41. Each generated the
+same 64-token sequence as its corresponding target-only sharded pair. The
+review executable SHA-256 was
+`e54e280cc101f26f915fb360af9f0f8a039e6cefabe46ae53e54785788bf0348`.
+All owned ranks exited. These are short greedy tests; sampled acceptance,
+long-context boundaries, performance and production serving remain open.

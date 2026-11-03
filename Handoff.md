@@ -1605,3 +1605,10 @@ exactly, and five next drafts and confidences matched the target-only path
 `/tmp/ds4-tp2-113-dspark-{xs,s}-rank0.log` remotely and corresponding rank1 logs
 locally. Test execution and identities are not production; actual acceptance
 decisions are next.
+
+Real greedy DSpark acceptance passed on XS and S: XS offered 106 drafts and
+accepted 41 across 22 rounds; S offered 113 and accepted 41 across 23 rounds.
+Each emitted the same 64 tokens as its target-only pair, and all owned ranks
+exited. Logs: `/tmp/ds4-tp2-113-dspark-real-{xs,s}-rank0.log` remotely and
+corresponding rank1 logs locally. These are isolated tests with synthetic
+identity, not serving; sampled acceptance and the remaining gates are next.
