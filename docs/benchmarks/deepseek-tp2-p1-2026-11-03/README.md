@@ -34,3 +34,10 @@ An owned rsync is copying Maya-XS plus shared Engram, DSpark and vision files to
 absent matching models directory on strix-halo-1. It is a preparation step, not verified pack
 integrity or an inference result. Single-host comparisons must wait until this disk/network load
 ends. User-owned llama-swap daemons were not stopped. Long-running copy details are in the handoff.
+
+`tools/ds4/bench_tp2_reference.py` is the reference API harness: it requires an explicit server,
+model label, DSpark state and new output path, and checks the server is idle before each request.
+It records prompt/answer hashes, timings, usage and engine/tier snapshots. Its three fixed short
+prompts are not a substitute for the planned long-prefill or paired-model measurements. A mock
+HTTP check exercised sample capture and rejection of an existing output and DSpark mismatch;
+no actual model measurements have yet been collected with it.
