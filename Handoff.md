@@ -1514,6 +1514,11 @@ bytes each; both owned test processes exited. See
 expert slices only; the loader is not connected to inference and does not establish full-rank fit.
 The S copy is still in progress; full S checks require completed transfer and content verification.
 
+Both Maya-S routed-expert rank pools loaded sequentially on the source host (strix-halo-2): each
+held all 15,360 expert slices in 84,509,982,720 GPU bytes, with 7,014,400 bytes of pinned staging.
+Both owned test processes exited. This excludes dense weights, KV, Engram and DSpark; it does not
+prove full-model fit or paired inference. See the rank-expert loader validation report and logs.
+
 P4 has a fail-closed model-operation adapter for feed, step, verify, verdict, reset and shutdown.
 It requires window-only prefill, validates the model's position and drains device work at operation
 boundaries. Fake-model sequencing/failure tests and an isolated real-XS model dispatch passed;

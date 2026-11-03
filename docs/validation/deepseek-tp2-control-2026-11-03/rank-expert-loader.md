@@ -23,7 +23,13 @@ different cache conditions and a concurrent model-file transfer; they are not
 production model load times. Logs: `rank-load-xs-rank0.txt` and
 `rank-load-xs-rank1.txt`. Both owned test processes exited.
 
-The XS whole-expert totals agree with the earlier logical estimate, but do not
+The same test then loaded all 15,360 S expert slices for each rank, sequentially
+on the source host. Each rank's GPU allocation was 84,509,982,720 bytes with
+7,014,400 bytes of pinned staging. First and final slices matched source bytes;
+wall times were 56.37 and 53.87 seconds under the test's cache and transfer
+conditions. See `rank-load-s-rank0.txt` and `rank-load-s-rank1.txt`. Both owned
+processes exited. The second host's S pack was still being copied.
+
+The XS and S expert totals agree with the earlier logical estimates, but do not
 establish complete rank fit or inferencing. An isolated single-host XS DSpark
-verification regression also passed after the loader was added. The corresponding
-S full-rank checks await the second host's model copy and integrity verification.
+verification regression also passed after the loader was added.
