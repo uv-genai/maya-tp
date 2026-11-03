@@ -179,6 +179,8 @@ target_link_libraries(strata-dequant PRIVATE strata_artifact)
 # this file is now nothing but the CLI entry point, and its inherited guard spells that as a "selftest"
 target_compile_definitions(strata-dequant PRIVATE STRATA_DEQUANT_SELFTEST)
 if(STRATA_BUILD_TESTS)
+  add_executable(ds4_tp_identity_test tests/ds4_tp_identity_test.cpp)
+  add_test(NAME ds4_tp_identity_test COMMAND ds4_tp_identity_test)
   add_executable(ds4_tp_control_test tests/ds4_tp_control_test.cpp)
   add_test(NAME ds4_tp_control_test COMMAND ds4_tp_control_test)
   add_executable(ds4_tp_partition_test tests/ds4_tp_partition_test.cpp)
