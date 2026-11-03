@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-03 · Current state: **§§38–39**, remote GLM startup repair and Maya-L timeout; §§36–37 cover DeepSeek; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-03 · Current state: **§§38–41**, GLM startup and DeepSeek two-host design/plan; §§36–37 cover DeepSeek performance; §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -1389,3 +1389,21 @@ reports everything is working well. The 1800-second timeout is a workaround; the
 slowdown remains unresolved. The user requested merging the DeepSeek investigation branch into
 main. It was fast-forwarded and pushed as `76e0279`; post-merge tests are awaiting the user's report
 (#106). Do not stop user-owned processes.
+
+## 40. DeepSeek two-host design (#108, 2026-11-03)
+
+The user requested analysis and design only, with implementation planning deferred. See
+[DeepSeek TP2 and DSpark analysis/design](docs/DEEPSEEK-TP2-ANALYSIS-DESIGN.md). It compares
+uneven tensor slicing, whole-expert ownership and layer splitting, describes distributed DSpark
+state and failure contracts, and identifies measurement and correctness gates. DeepSeek's existing
+`--tp` is same-host grouping; two-host support is not implemented. Maya-S's 2304-wide expert FFN
+cannot be split evenly into two 256-aligned bands. No binaries or user processes were changed.
+
+## 41. DeepSeek two-host implementation plan (#109, 2026-11-03)
+
+The user requested an implementation plan. See
+[DeepSeek TP2/DSpark implementation plan](docs/DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md), based on
+[the analysis/design](docs/DEEPSEEK-TP2-ANALYSIS-DESIGN.md). Seven independently tracked phases are
+#112, #115, #111, #110, #113, #114 and #116 in plan order. The proposed uneven tensor-slicing
+approach remains subject to P1 feasibility; the user has not requested implementation to start.
+No binaries, model processes or production configs were changed by the planning work.
