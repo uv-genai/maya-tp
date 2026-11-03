@@ -1634,8 +1634,22 @@ control coexistence and typed worker dispatch all passed; host socket-state and
 `docs/validation/deepseek-tp2-control-2026-11-03/control-eof.md`. Full DeepSeek
 API pair-down behavior remains to be integrated and tested.
 
-P3 (#111): `tools/ds4/tp2_identity.py` is an uncommitted, stdlib pack identity
+P3 (#111): `tools/ds4/tp2_identity.py` is a stdlib pack identity
 helper under test. It hashes pack metadata and each indexed source, produces a
 path-independent shared digest and checks local file identity before reuse.
-Eight synthetic unit tests pass. It is not yet validated on full packs or wired
-to rank startup; user-facing serving must not use synthetic test identities.
+Nine synthetic unit tests pass. Independent full XS hashes produced the same
+identity on both hosts (`0c4933e6b70f53f7eff163a4053f8970fce470cacc4065983ebe28bd507c57af`),
+each cached check passed, and a deliberately modified source signature was
+rejected. Independent full S hashes matched on both hosts
+(`e8d41763b86d0ed5430202521f42c1089205d3bf14afc2e0308ca82e1d481c71`),
+and cached checks passed. Both hash processes exited. See
+`docs/validation/deepseek-tp2-control-2026-11-03/pack-identity.md`; local
+manifests are in `/tmp/ds4-tp2-111-{xs,s}-local.manifest` and remote manifests
+at the corresponding `-remote.manifest` paths. The cache assumes a trusted
+filesystem and manifest. The helper is not yet wired to rank startup;
+user-facing serving must not use synthetic test identities.
+
+P3 controller integration is in progress: its host channel test passes, and
+test-only model wrappers for feed, step, reset and speculative verdicts are
+being built. They are not yet GPU validated or enabled for production. An
+owned build is session 86215, log `/tmp/ds4-tp2-111-controller-build.log`.
