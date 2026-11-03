@@ -1281,12 +1281,20 @@ struct Model::Impl {
     std::string tp_test_failure;
     std::unique_ptr<tp2::Controller> tp_test_controller;
     bool tp_test_inside=false;
+    bool tp_test_stopped=false;
+    std::function<void(const std::string&)> tp_test_on_failure;
+    void tp_record_failure(const std::string& cause) {
+        if (!tp_test_failure.empty()) return;
+        tp_test_failure=cause.empty()?"ds4 tp2: operation failed":cause;
+        if (tp_test_on_failure) tp_test_on_failure(tp_test_failure);
+    }
     std::FILE* tp_route_dump=std::getenv("DS4_TP_TEST_DUMP_ROUTES") ?
         std::fopen(std::getenv("DS4_TP_TEST_DUMP_ROUTES"),"wb") : nullptr;
 #endif
     bool tp_unready(std::string& err) const {
 #if defined(STRATA_DS4_TP2_RDMA)
         if (o.tp2_rank>=0 && tp_test_comm!=nullptr) {
+            if (tp_test_stopped) { err="ds4 tp2: pair shut down"; return true; }
             if (tp_test_failure.empty()) return false;
             err=tp_test_failure; return true;
         }
@@ -19565,7 +19573,7 @@ struct Model::Impl {
 
 #if defined(STRATA_DS4_TP2_RDMA)
     bool tp_test_fail(const std::string& cause, std::string& err) {
-        if (tp_test_failure.empty()) tp_test_failure=cause.empty()?"ds4 tp2: test collective failed":cause;
+        tp_record_failure(cause);
         err=tp_test_failure; return false;
     }
     bool tp_test_sum(float* data, int rows, int width, cudaStream_t stream, std::string& err) {
@@ -20588,7 +20596,7 @@ Model::Model() : p_(new Impl) {}
 Model::~Model() = default;
 bool Model::load(const Options& o, std::string& err) { return p_->load(o, err); }
 #if defined(STRATA_DS4_TP2_RDMA)
-bool Model::tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err,
+bool Model::tp2_attach(strata::net::Communicator& comm, std::size_t limit, std::string& err,
                             bool control_rank0) {
     if (p_->o.tp2_rank<0 || !p_->tp_rank_experts || p_->tp_test_comm || p_->devs.size()!=1 ||
         comm.world_size()!=2 || comm.rank()!=static_cast<std::uint32_t>(p_->o.tp2_rank) ||
@@ -20601,15 +20609,34 @@ bool Model::tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, 
         comm,static_cast<std::uint64_t>(p_->o.max_context),static_cast<std::uint32_t>(p_->g.vocab),kWin);
     err.clear(); return true;
 }
-bool Model::tp2_shutdown_test(std::string& err) {
+bool Model::tp2_shutdown(std::string& err) {
     if (!p_->tp_test_controller) { err="ds4 tp2: no test controller"; return false; }
     if (p_->tp_unready(err)) return false;
     const bool ok=p_->tp_test_controller->run(tp2::Command::Shutdown,static_cast<std::uint64_t>(p_->pos),{},
         [&](const tp2::Control&,std::string& e) { return p_->tp_worker_synchronize(e); },err);
-    if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+    if (!ok) p_->tp_record_failure(err);
+    else p_->tp_test_stopped=true;
     return ok;
 }
+void Model::tp2_set_failure_handler(std::function<void(const std::string&)> handler) {
+    p_->tp_test_on_failure=std::move(handler);
+}
 #endif
+bool Model::tp2_driving() const {
+#if defined(STRATA_DS4_TP2_RDMA)
+    return p_->tp_test_controller!=nullptr;
+#else
+    return false;
+#endif
+}
+std::string Model::tp2_failure() const {
+#if defined(STRATA_DS4_TP2_RDMA)
+    return p_->tp_test_failure;
+#else
+    return {};
+#endif
+}
+Tp2Geometry Model::tp2_geometry() const { return {p_->g.dim,p_->g.nl,p_->g.n_exp,p_->g.ff}; }
 bool Model::step(int token, bool logits, std::string& err) {
 #if defined(STRATA_DS4_TP2_RDMA)
     if (p_->tp_test_controller && !p_->tp_test_inside) {
@@ -20618,7 +20645,7 @@ bool Model::step(int token, bool logits, std::string& err) {
             {static_cast<std::uint32_t>(token)},[&](const tp2::Control&,std::string& e) {
                 return p_->step(token,logits,e) && p_->tp_worker_synchronize(e);
             },err);
-        if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+        if (!ok) p_->tp_record_failure(err);
         return ok;
     }
 #endif
@@ -20641,7 +20668,7 @@ bool Model::feed(const int* tokens, int n, int logits_rows, std::string& err, in
                 p.tp_test_inside=false;
                 return fed && p.tp_worker_synchronize(e);
             },err);
-        if (!ok && p.tp_test_failure.empty()) p.tp_test_failure=err;
+        if (!ok) p.tp_record_failure(err);
         return ok;
     }
 #endif
@@ -20802,7 +20829,7 @@ bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, 
         if (ok) ok=p_->tp_test_controller->run(tp2::Command::Verdict,static_cast<std::uint64_t>(p_->pos),
             {static_cast<std::uint32_t>(accepted),static_cast<std::uint32_t>(next)},
             [&](const tp2::Control&,std::string& e) { return p_->tp_worker_synchronize(e); },err);
-        if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+        if (!ok) p_->tp_record_failure(err);
         return ok;
     }
 #endif
@@ -20858,7 +20885,7 @@ void Model::reset() {
         if (p_->tp_unready(err)) return;
         const bool ok=p_->tp_test_controller->run(tp2::Command::Reset,0,{},
             [&](const tp2::Control&,std::string& e) { return p_->reset_checked(e) && p_->tp_worker_synchronize(e); },err);
-        if (!ok && p_->tp_test_failure.empty()) p_->tp_test_failure=err;
+        if (!ok) p_->tp_record_failure(err);
         return;
     }
 #endif

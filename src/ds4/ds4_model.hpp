@@ -166,18 +166,26 @@ struct Stats {
     int64_t eg_ahead = 0;   // a prompt read in parts: Engram lookups of its next part's first chunk read ahead
 };
 
+struct Tp2Geometry {
+    int hidden = 0, layers = 0, experts = 0, expert_width = 0;
+};
+
 class Model {
 public:
     Model();
     ~Model();
     bool load(const Options& o, std::string& err);
 #if defined(STRATA_DS4_TP2_RDMA)
-    // Test-only, non-owning; the communicator and its active operation scope
-    // must outlive all model calls. Caller must first validate both identities.
-    bool tp2_attach_test(strata::net::Communicator& comm, std::size_t limit, std::string& err,
+    // Non-owning; the communicator must outlive all model calls. The caller
+    // must validate both identities before attaching either rank.
+    bool tp2_attach(strata::net::Communicator& comm, std::size_t limit, std::string& err,
                          bool control_rank0 = false);
-    bool tp2_shutdown_test(std::string& err);
+    bool tp2_shutdown(std::string& err);
+    void tp2_set_failure_handler(std::function<void(const std::string&)> handler);
 #endif
+    bool tp2_driving() const;
+    std::string tp2_failure() const;
+    Tp2Geometry tp2_geometry() const;
 
     /// Feeds `token` at position pos(); with logits, the next token's logits are left on the head's device.
     bool step(int token, bool logits, std::string& err);

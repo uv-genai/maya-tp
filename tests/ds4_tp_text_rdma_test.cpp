@@ -72,7 +72,7 @@ int ds4_tp_text_rdma_test(int argc,char** argv) {
     id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
     id.model_digest[0]=1; id.partition_digest[0]=2; id.build_digest[0]=3; // synthetic test identity
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
-    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error));
+    CHECK(model.tp2_attach(*comm,static_cast<std::size_t>(limit),error));
     const std::size_t bytes=vocab*sizeof(float); CHECK(bytes<=limit);
     hipStream_t stream=nullptr; float* device=nullptr;
     CHECK(hipStreamCreate(&stream)==hipSuccess && hipMalloc(&device,bytes)==hipSuccess);

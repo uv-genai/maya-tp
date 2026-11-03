@@ -57,7 +57,7 @@ int ds4_tp_model_rdma_test(int argc,char** argv) {
     id.experts=384; id.expert_width=2304; id.max_context=32768; id.feature_flags=1;
     id.max_partial_bytes=comm->MaxPartialBytes(); id.model_digest[0]=1; id.partition_digest[0]=2; id.build_digest[0]=3;
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
-    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error));
+    CHECK(model.tp2_attach(*comm,static_cast<std::size_t>(limit),error));
     const int probe=5; CHECK(!model.feed_mark(&probe,1,1,0,error));
     CHECK(!model.tp_verify_begin(&probe,1,error) && !model.restore(0));
     error.clear();

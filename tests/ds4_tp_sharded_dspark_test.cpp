@@ -38,7 +38,7 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
     id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
     CHECK(ds4_tp_test_identity(id,error));
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
-    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error,rank==0));
+    CHECK(model.tp2_attach(*comm,static_cast<std::size_t>(limit),error,rank==0));
     if (rank==1) {
         Worker worker(*comm,32768,static_cast<std::uint32_t>(model.vocab()),16);
         ModelWorker<strata::ds4::Model> adapter(model); std::uint64_t processed=0;
@@ -82,7 +82,7 @@ int ds4_tp_sharded_dspark_test(int argc,char** argv) {
         if (generated.back()==1) break;
     }
     CHECK(generated==expected && rounds>0 && offered>0 && kept>0);
-    CHECK(model.tp2_shutdown_test(error));
+    CHECK(model.tp2_shutdown(error));
     std::ofstream out(argv[9]); CHECK(out.good()); for (int t:generated) out<<t<<' '; out<<'\n'; CHECK(out.good());
     std::printf("DSpark generated=%zu rounds=%zu offered=%zu accepted=%zu; target-only sequence matched\n",generated.size(),rounds,offered,kept);
     return 0;

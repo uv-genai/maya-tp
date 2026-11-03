@@ -74,7 +74,7 @@ int ds4_tp_sharded_sample_test(int argc,char** argv) {
     id.expert_width=2304; id.max_context=32768; id.feature_flags=1; id.max_partial_bytes=comm->MaxPartialBytes();
     id.model_digest[0]=1; id.partition_digest[0]=2; id.build_digest[0]=3;
     Identity peer; std::uint64_t limit=0; CHECK(exchange_identity(*comm,id,peer,limit,error));
-    CHECK(model.tp2_attach_test(*comm,static_cast<std::size_t>(limit),error));
+    CHECK(model.tp2_attach(*comm,static_cast<std::size_t>(limit),error));
     if (rank==1) {
         Worker worker(*comm,32768,static_cast<std::uint32_t>(model.vocab()),16);
         ModelWorker<strata::ds4::Model> adapter(model); std::uint64_t processed=0;

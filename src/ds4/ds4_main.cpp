@@ -34,6 +34,13 @@
 #include "strata/platform/idle_gate.hpp"
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/suffix_drafter.hpp"
+#if defined(STRATA_DS4_TP2_RDMA)
+#include "ds4_tp_channel.hpp"
+#include "ds4_tp_model_worker.hpp"
+#include "ds4_tp_preflight.hpp"
+#include "ds4_tp_worker.hpp"
+#include "strata/net/verbs.hpp"
+#endif
 
 #include <cuda_profiler_api.h>
 
@@ -714,6 +721,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
           Lookup* lk, DraftCost* dc) {
     std::vector<int> eos = parse_ids(eos_list);
     for (const std::string& l : m.info_lines()) std::printf("%s\n", l.c_str());
+    if (m.tp2_driving()) std::printf("INFO tp_world=2 tp_rank=0 tp_pair=up\n");
     std::printf("INFO logprobs=%d\n", strata::ds4::kTopLogprobs);   // (GEN logprobs=<k>: LP lines, k at most this)
     if (m.seq_count() > 1)   // (--parallel: n conversations at once, GEN rid=<id>)
         std::printf("READY %lld stop multi=%d\n", (long long) m.max_context(), m.seq_count());
@@ -1624,7 +1632,8 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                     ok = ok && m.feed(r.ids.data() + P.done + n - 1, 1, 1, err);
                 }
             } else {
-                ok = fin ? m.feed_mark(r.ids.data() + P.done, (int) n, 1, 1, err)
+                ok = fin ? (m.tp2_driving() ? m.feed(r.ids.data() + P.done, (int) n, 1, err)
+                                            : m.feed_mark(r.ids.data() + P.done, (int) n, 1, 1, err))
                          : m.feed(r.ids.data() + P.done, (int) n, 0, err, (int) (upto - P.done - n));
                 if (ok) took = (size_t) m.fed();
             }
@@ -3321,6 +3330,12 @@ int main(int argc, char** argv) {
     int sampler_n = 0;
     std::string images, enc_rgb, enc_out;
     int enc_w = 0, enc_h = 0;
+#if defined(STRATA_DS4_TP2_RDMA)
+    int tp2_rank=-1, tp2_port=0;
+    std::size_t tp2_budget=0;
+    bool tp2_worker=false;
+    std::string tp2_host, tp2_rdma;
+#endif
     for (int i = 1; i < argc; ++i) {
         const std::string a = argv[i];
         auto val = [&](const char* what) -> std::string {
@@ -3419,6 +3434,14 @@ int main(int argc, char** argv) {
         else if (a == "--profile-readonly") o.profile_readonly = true;
         else if (a == "--spec-eval") spec_eval_path = val("--spec-eval");
         else if (a == "--sampler-test") sampler_n = (int) num("--sampler-test", 50, 1e6, true);
+#if defined(STRATA_DS4_TP2_RDMA)
+        else if (a == "--tp2-rank") tp2_rank=(int)num("--tp2-rank",0,1,true);
+        else if (a == "--tp2-host") tp2_host=val("--tp2-host");
+        else if (a == "--tp2-port") tp2_port=(int)num("--tp2-port",1,65535,true);
+        else if (a == "--tp2-rdma-device") tp2_rdma=val("--tp2-rdma-device");
+        else if (a == "--tp2-expert-budget-mib") tp2_budget=static_cast<std::size_t>(num("--tp2-expert-budget-mib",1,1048576,true))<<20;
+        else if (a == "--tp2-worker") tp2_worker=true;
+#endif
         else if (a == "--layer-split") (void) val("--layer-split");   // the server's (this engine balances its own split)
         else if (a == "--help" || a == "-h") {
             usage();
@@ -3449,7 +3472,11 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "--sampler-test needs --ids (a prompt whose next tokens are open)\n");
         return 2;
     }
-    if (o.pack.empty() || (!serve_mode && ids_s.empty() && enc_rgb.empty() && ppl.empty() && prof_run.empty() &&
+    bool worker_entry=false;
+#if defined(STRATA_DS4_TP2_RDMA)
+    worker_entry=tp2_worker;
+#endif
+    if (o.pack.empty() || (!worker_entry && !serve_mode && ids_s.empty() && enc_rgb.empty() && ppl.empty() && prof_run.empty() &&
                            spec_eval_path.empty())) {
         usage();
         return 2;
@@ -3488,6 +3515,44 @@ int main(int argc, char** argv) {
 #endif
     }
     o.vision_only = !enc_rgb.empty();
+#if defined(STRATA_DS4_TP2_RDMA)
+    strata::ds4::tp2::Identity tp2_identity;
+    std::shared_ptr<strata::net::Communicator> tp2_comm;
+    std::string tp2_error;
+    bool tp2_dspark=false;
+    std::atomic<bool> tp2_notified{false};
+    const auto tp2_notify=[&](const std::string& why) {
+        if (tp2_notified.exchange(true)) return;
+        std::string text=why;
+        for (char& c:text) if (c=='\n' || c=='\r') c=' ';
+        std::printf("TP2_DOWN %s\n",text.c_str()); std::fflush(stdout);
+    };
+    if (tp2_rank>=0) {
+        const char* requested=std::getenv("MAYA_DS4_TP2_DSPARK");
+        if (!requested || (std::strcmp(requested,"0")!=0 && std::strcmp(requested,"1")!=0) ||
+            tp2_host.empty() || tp2_port==0 || tp2_rdma.empty() || tp2_budget==0 ||
+            (tp2_rank==0 ? (!serve_mode || tp2_worker) : (!tp2_worker || serve_mode)) ||
+            !ids_s.empty() || !ppl.empty() || !prof_run.empty() || !spec_eval_path.empty() ||
+            !enc_rgb.empty() || !images.empty() || describe || multi_check || parts_check || sampler_n>0 ||
+            suffix_draft!=0 || o.seqs!=1) {
+            std::fprintf(stderr,"maya-ds4: unsupported or incomplete DeepSeek TP2 rank configuration\n"); return 2;
+        }
+        tp2_dspark=std::strcmp(requested,"1")==0;
+        if (o.dspark != (tp2_rank==0 && tp2_dspark)) {
+            std::fprintf(stderr,"maya-ds4: DeepSeek TP2 drafter selection differs from preflight\n"); return 2;
+        }
+        const char* keep=std::getenv("STRATA_DS4_SLOT_KEEP");
+        if (keep && std::atoi(keep)!=0) { std::fprintf(stderr,"maya-ds4: DeepSeek TP2 does not support conversation slots\n"); return 2; }
+        if (!strata::ds4::tp2::preflight_identity(o.pack,std::getenv("MAYA_DS4_TP2_PACK"),
+                std::getenv("MAYA_DS4_TP2_MODEL_DIGEST"),std::getenv("MAYA_DS4_TP2_PARTITION_DIGEST"),
+                std::getenv("MAYA_DS4_TP2_BUILD_DIGEST"),tp2_identity,tp2_error)) {
+            std::fprintf(stderr,"maya-ds4: %s\n",tp2_error.c_str()); return 2;
+        }
+        o.tp2_rank=tp2_rank; o.tp2_expert_budget=tp2_budget; o.tp_worker_verify=true;
+    } else if (tp2_worker || tp2_port || !tp2_host.empty() || !tp2_rdma.empty() || tp2_budget) {
+        std::fprintf(stderr,"maya-ds4: DeepSeek TP2 options require --tp2-rank\n"); return 2;
+    }
+#endif
     strata::ds4::Model m;
     std::string err;
     o.lookup = suffix_draft > 0;   // (its verify windows' buffers, with no drafter too)
@@ -3495,6 +3560,42 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "maya-ds4: %s\n", err.c_str());
         return 1;
     }
+#if defined(STRATA_DS4_TP2_RDMA)
+    if (tp2_rank>=0) {
+        strata::net::IbrverbsConfig cfg;
+        cfg.rank=static_cast<std::uint32_t>(tp2_rank); cfg.bootstrap_host=tp2_host;
+        cfg.bootstrap_port=static_cast<std::uint16_t>(tp2_port); cfg.rdma_device=tp2_rdma;
+        cfg.device_index=static_cast<std::uint32_t>(o.gpus.at(0));
+        tp2_comm=strata::net::CreateIbrverbsCommunicator(cfg,&err);
+        if (!tp2_comm) { std::fprintf(stderr,"maya-ds4: %s\n",err.c_str()); return 1; }
+        const auto g=m.tp2_geometry();
+        tp2_identity.protocol=1; tp2_identity.world=2; tp2_identity.rank=cfg.rank;
+        tp2_identity.hidden=g.hidden; tp2_identity.layers=g.layers; tp2_identity.experts=g.experts;
+        tp2_identity.expert_width=g.expert_width; tp2_identity.max_context=static_cast<std::uint64_t>(m.max_context());
+        tp2_identity.feature_flags=tp2_dspark ? 1 : 0; tp2_identity.max_partial_bytes=tp2_comm->MaxPartialBytes();
+        strata::ds4::tp2::Identity peer; std::uint64_t limit=0;
+        if (!strata::ds4::tp2::exchange_identity(*tp2_comm,tp2_identity,peer,limit,err) ||
+            !m.tp2_attach(*tp2_comm,static_cast<std::size_t>(limit),err,tp2_rank==0)) {
+            std::fprintf(stderr,"maya-ds4: %s\n",err.c_str()); return 1;
+        }
+        if (tp2_rank==1) {
+            strata::ds4::tp2::Worker worker(*tp2_comm,static_cast<std::uint64_t>(m.max_context()),m.vocab(),16);
+            strata::ds4::tp2::ModelWorker<strata::ds4::Model> adapter(m); std::uint64_t processed=0;
+            while (!worker.state().stopped()) {
+                if (!worker.run_one([&](const strata::ds4::tp2::Control& c,std::string& e) { return adapter.execute(c,e); },err)) {
+                    std::fprintf(stderr,"maya-ds4 worker: %s\n",err.c_str()); return 1;
+                }
+                ++processed;
+            }
+            if (!strata::ds4::tp2::send_message(*tp2_comm,{strata::ds4::tp2::Command::Shutdown,processed+1,
+                    static_cast<std::uint64_t>(m.pos()),{}},16,err)) {
+                std::fprintf(stderr,"maya-ds4 worker: %s\n",err.c_str()); return 1;
+            }
+            return 0;
+        }
+        m.tp2_set_failure_handler(tp2_notify);
+    }
+#endif
     if (!o.vision_only) std::fprintf(stderr, "%s", m.describe().c_str());
     if (dspark_on_asked && !o.vision_only && !m.has_drafter())
         std::fprintf(stderr, "maya-ds4: warning: --dspark on, but this pack has no DSpark drafter blocks (mtp.* tensors): "
@@ -3511,7 +3612,24 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "maya-ds4: DS4_DRAFT_COST: no DSpark drafter loaded, nothing to size\n");
     if (serve_mode) {
         g_vram_gpus = o.gpus;
-        return serve(m, eos, spec, o.dspark_conf, o.pack, lk.get(), dc.get());
+#if defined(STRATA_DS4_TP2_RDMA)
+        std::jthread tp2_watch;
+        if (tp2_rank==0) tp2_watch=std::jthread([&](std::stop_token stop) {
+            while (!stop.stop_requested()) {
+                std::string why;
+                if (!tp2_comm->CheckPeer(&why)) { tp2_notify(why); return; }
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+        });
+#endif
+        const int result=serve(m, eos, spec, o.dspark_conf, o.pack, lk.get(), dc.get());
+#if defined(STRATA_DS4_TP2_RDMA)
+        if (tp2_watch.joinable()) { tp2_watch.request_stop(); tp2_watch.join(); }
+        if (tp2_rank==0 && !tp2_notified.load() && m.tp2_failure().empty() && !m.tp2_shutdown(err)) {
+            std::fprintf(stderr,"maya-ds4: %s\n",err.c_str()); return 1;
+        }
+#endif
+        return result;
     }
     if (!prof_run.empty()) return profile_run(m, prof_run, o.profile_out);
     if (!spec_eval_path.empty()) return spec_eval(m, spec_eval_path, n > 0 ? n : 256, temp, cli_seed);

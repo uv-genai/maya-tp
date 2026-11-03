@@ -1705,7 +1705,7 @@ and their monitor exited. Logs are `/tmp/ds4-tp2-114-model-loss-rank0.log`
 and the corresponding remote rank1 log.
 Real DeepSeek API peer-loss injection and GLM GPU regression remain open.
 
-Uncommitted controller integration: attach/shutdown methods have been renamed
+Controller integration: attach/shutdown methods have been renamed
 for eventual engine use, a one-shot failure callback and explicit post-shutdown
 guard have been added, and the real loss test now checks callback count/cause.
 The isolated test and engine build passed, log
@@ -1716,16 +1716,15 @@ failure callback. Both ranks exited; logs use prefix
 the owned worker during generation. The callback was invoked exactly once
 with the original cause; the rank, worker and monitor all exited. Logs use
 prefix `/tmp/ds4-tp2-114-callback-`.
-An uncommitted experimental `tools/ds4/tp2_rank.py` prepares pack/partition/
+The experimental `tools/ds4/tp2_rank.py` prepares pack/partition/
 binary identity and rank-specific arguments, with 14 focused launcher/identity
 tests passing. Experimental rank startup, worker dispatch and serving hooks
-have built. An isolated paired serving-protocol test is running: local driver
-PID 265670/session 3997, local engine PID 265675, remote worker PID
-101043/session 57077. Logs use prefix `/tmp/ds4-tp2-111-serve-`. It will check
-two greedy requests, actual DSpark acceptance and coordinated shutdown. Do not
-use these for user serving until all remaining gates are complete.
+passed an isolated XS protocol test: two requests each matched the 64-token
+target-only pair and accepted 30/37 drafts, then both ranks shut down cleanly.
+Logs use prefix `/tmp/ds4-tp2-111-serve-`; all owned test processes exited.
+Do not use these for user serving until all remaining gates are complete.
 
-P6 idle liveness: uncommitted `Communicator::CheckPeer` polls without consuming
+P6 idle liveness: `Communicator::CheckPeer` polls without consuming
 control data and poisons on peer close. Host socket-state and controller tests,
 real two-host idle peer loss, and an RDMA/control coexistence test with a queued
 frame all passed. The experimental server now has a one-shot idle watcher;
