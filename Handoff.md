@@ -1457,3 +1457,16 @@ remote source/build for the uncommitted `ds4_model.cu` two-way partition integra
 `/tmp/ds4-tp2-review-115-build.log`. Its input `ds4_model.cu` SHA256 is
 `8d05ce349b8a444242d8e428d2c87b0d6bd2470ba1f004a89d7815965bcca034`. Do not claim this change
 compiled or passed GPU tests until the build and validation complete.
+Update: that isolated candidate compiled, and 64-token single-host XS DSpark output matched the
+reference (`f76114c`); the two-member path itself was not exercised. The owned Maya-S 262K reference
+completed and was stopped (`6abd8c8`). The owned 512K Maya-S one-token load check and single-host XS
+candidate `--sampler-test 50` also completed successfully. The former reported 9832/15744 experts in
+GPU slots and 5912 on the CPU lane; the latter is a small statistical smoke test. These were isolated
+single-host checks, not DeepSeek TP2 model validation. Evidence is in the P1 benchmark directory and
+`docs/validation/deepseek-tp2-control-2026-11-03/`.
+
+Owned full SHA-256 comparisons of the seven XS indexed source files are running on both hosts using
+`/tmp/ds4-hash-sources-112.py`. Local exec session 46539/PID 183041, output/log
+`/tmp/ds4-hash-local-112.{txt,log}`; remote exec session 48209/PID 69929, output/log
+`/tmp/ds4-hash-remote-112.{txt,log}`. Compare results only after both commands exit successfully.
+They read the model disks heavily; defer storage performance measurements until finished.

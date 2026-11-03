@@ -62,3 +62,8 @@ HTML 3.0/5.3/7.2. Per-request process read counters ranged from ~128 to ~479 MB/
 rates rose as the cache warmed. These counters cover all process storage reads, not only experts.
 The prompt outputs were not fully bit-stable across repeats. Raw data: `s-single-reference.json`.
 The owned S server and engine were stopped after the run.
+
+A separate one-host Maya-S load with 524288 context, DSpark on, vision off and three input IDs
+reported 9,832 of 15,744 experts in GPU slots, 5,912 on the CPU lane (~65.1 GB in model files),
+9.22 GB weights and 0.49 GB caches; the one-token output is a load smoke test, not a throughput
+measurement. See `maya-s-512k-load.txt`. This does not establish two-rank peak memory or fit.
