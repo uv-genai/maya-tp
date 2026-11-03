@@ -13,6 +13,7 @@ namespace strata::ds4::tp2 {
 struct RankExpertEntry {
     int layer=0, expert=0, ff_begin=0, ff_count=0;
     std::array<std::size_t,3> offsets{};
+    std::array<int,3> gg_types{}; // gate, up, down ggml type IDs
     std::size_t bytes=0;
     const std::uint8_t* device=nullptr; // valid only for the loader's lifetime
 };

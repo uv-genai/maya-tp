@@ -58,6 +58,7 @@ static bool check_entry(const std::filesystem::path& pack, const RankExpertEntry
     CHECK(tensors[0].size%width==0 && tensors[1].size%width==0 && tensors[2].size%hidden==0);
     std::array<Range,2> ranges; CHECK(expert_ranges(width,256,entry.layer,ranges,error));
     CHECK(entry.ff_begin==ranges[rank].begin && entry.ff_count==ranges[rank].count);
+    CHECK(entry.gg_types[0]>0 && entry.gg_types[0]==entry.gg_types[1] && entry.gg_types[2]>0);
     ExpertSpans sp; CHECK(expert_spans(width,hidden,256,ranges[rank],tensors[0].size/width,
                                        tensors[1].size/width,tensors[2].size/hidden,sp,error));
     DeviceExpertLayout layout; CHECK(device_expert_layout(sp,layout,error));

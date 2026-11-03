@@ -613,12 +613,14 @@ bool RankExpertLoader::load(const std::string& path, int device, int rank, std::
         const auto part=geometry[static_cast<std::size_t>(rank)].experts;
         std::array<ConstBytes,3> source;
         std::array<std::size_t,3> row{};
+        std::array<int,3> types{};
         std::string gate_type;
         for (int r=0;r<3;++r) {
             const std::string name="layers."+std::to_string(layer)+".ffn.experts."+
                                    std::to_string(expert)+"."+roles[r]+".weight";
             const Tensor* t=p.pack.get(name);
             const int ty=t==nullptr ? -1 : type_of(t->dtype);
+            types[r]=ty;
             const int rows=r<2?g.ff:g.dim, cols=r<2?g.dim:g.ff;
             if (t==nullptr || ty<0 || !gg::expert_type_ok(ty) || gg::type_block(ty)<=0 ||
                 256%gg::type_block(ty)!=0 || cols%gg::type_block(ty)!=0 ||
@@ -644,7 +646,7 @@ bool RankExpertLoader::load(const std::string& path, int device, int rank, std::
         DeviceExpertLayout layout;
         if (!device_expert_layout(span,layout,error)) return false;
         spans.push_back(span); sources.push_back(source);
-        p.entries.push_back({layer,expert,part.begin,part.count,layout.offsets,layout.bytes,nullptr});
+        p.entries.push_back({layer,expert,part.begin,part.count,layout.offsets,types,layout.bytes,nullptr});
     }
     if (!p.pool.allocate(device,spans,budget,error)) return false;
     for (std::size_t i=0;i<count;++i) {
