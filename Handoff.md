@@ -1492,6 +1492,14 @@ device layout; real XS/S expert-byte checks and synthetic quantized arithmetic p
 (`docs/validation/deepseek-tp2-control-2026-11-03/expert-upload.md`). It is not connected to the
 model loader and does not establish full rank allocation or distributed inference.
 
+The Maya-S directory was absent on strix-halo-1. An owned rsync is copying it into that new
+directory for future paired tests, using `--ignore-existing --partial-dir=.rsync-partial` so it
+does not overwrite existing files. Local parent PID 201366, rsync PID 201384 (start 2026-11-03
+11:40:08 AWST), exec session 19376, log `/tmp/ds4-tp2-115-s-copy.log`. At ~111 MB/s the ~317 GiB
+transfer was estimated to take ~50 minutes. Recheck PID/start/command before acting; don't use
+the remote S pack until the transfer and content verification complete. Shared DSpark and vision
+files already exist remotely. User-owned processes remain untouched.
+
 P4 has a fail-closed model-operation adapter for feed, step, verify, verdict, reset and shutdown.
 It requires window-only prefill, validates the model's position and drains device work at operation
 boundaries. Fake-model sequencing/failure tests and an isolated real-XS model dispatch passed;
