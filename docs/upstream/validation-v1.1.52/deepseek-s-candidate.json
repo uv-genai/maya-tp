@@ -1,0 +1,316 @@
+{
+  "tag": "v1.1.52",
+  "model": "s",
+  "variant": "candidate",
+  "engine_sha256": "8779012ea4a09e0007bffa856f5ddc0f0c03b5b065da787e5498c275af0260bf",
+  "settings": {
+    "pack": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4",
+    "manifest": "/home/ugo/software/project-maya-upstream-validation/manifests/maya-s.json",
+    "engine": "/home/ugo/software/project-maya-upstream-validation/engines/v1.1.52/maya-ds4",
+    "model_label": "DeepSeek V4.1 Maya-S",
+    "host": "192.168.1.92",
+    "peer": "strix-halo-1.local",
+    "peer_root": "/home/ugo/software/project-maya-upstream-validation",
+    "port": 18950,
+    "rdma_device": "usb4_rdma5",
+    "context": 262144,
+    "expert_budget_mib": 92160,
+    "reserve_mib": 1024,
+    "cpu_threads": 14,
+    "prefill_chunk": 256,
+    "dspark": "on",
+    "suffix_draft": 0,
+    "env": {
+      "MAYA_DS4_WARM_CAP_GB": "0",
+      "MAYA_DS4_ROUTER_CHECK": "1"
+    }
+  },
+  "runs": [
+    {
+      "repeat": 1,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 256,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-0dbacebf6768451ab6864c41",
+        "object": "chat.completion",
+        "created": 1793794205,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. Originally designed for packet filtering, eBPF has evolved into a general-purpose mechanism for safely extending kernel functionality.\n\n**Key benefits:**\n- **Safety**: Programs are verified before execution to prevent crashes\n- **Performance**: JIT-compiled to native machine code\n- **Observability**: Deep visibility into kernel and application behavior\n- **Programmability**: Attach to hooks throughout the kernel\n\n## How eBPF Works\n\nThe eBPF workflow involves several components:\n\n1. **eBPF Program**: Written in a restricted C-like language, compiled to eBPF bytecode\n2. **Verifier**: Kernel component that statically analyzes the program for safety\n3. **JIT Compiler**: Translates bytecode to native instructions\n4. **Maps**: Key-value data structures for sharing data between kernel and userspace\n5. **Hooks**: Attachment points (kprobes, tracepoints, XDP, etc.)\n\n```\n[Userspace] \u2192 [eBP"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 256,
+          "total_tokens": 275,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 805.5,
+          "prompt_per_token_ms": 42.395,
+          "prompt_per_second": 23.6,
+          "predicted_n": 256,
+          "predicted_ms": 9098.6,
+          "predicted_per_token_ms": 35.541,
+          "predicted_per_second": 28.1,
+          "draft_n": 171,
+          "draft_n_accepted": 131
+        }
+      }
+    },
+    {
+      "repeat": 2,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 256,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-cbd998d9651541d99f9e6d12",
+        "object": "chat.completion",
+        "created": 1793794215,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. Originally designed for packet filtering, eBPF has evolved into a general-purpose mechanism for safely extending kernel functionality.\n\n**Key benefits:**\n- **Safety**: Programs are verified before execution to prevent crashes\n- **Performance**: JIT-compiled to native machine code\n- **Observability**: Deep visibility into kernel and application behavior\n- **Programmability**: Attach to hooks throughout the kernel\n\n## How eBPF Works\n\nThe eBPF workflow involves several components:\n\n1. **eBPF Program**: Written in a restricted C-like language, compiled to eBPF bytecode\n2. **Verifier**: Kernel component that statically analyzes the program for safety\n3. **JIT Compiler**: Translates bytecode to native instructions\n4. **Maps**: Key-value data structures for sharing data between kernel and userspace\n5. **Hooks**: Attachment points (kprobes, tracepoints, XDP, etc.)\n\n```\n[Userspace] \u2192 [eBP"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 256,
+          "total_tokens": 275,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 453.1,
+          "prompt_per_token_ms": 23.847,
+          "prompt_per_second": 41.9,
+          "predicted_n": 256,
+          "predicted_ms": 8987.9,
+          "predicted_per_token_ms": 35.109,
+          "predicted_per_second": 28.5,
+          "draft_n": 171,
+          "draft_n_accepted": 131
+        }
+      }
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "deepseek-v4.1-flash",
+    "max_text_file": 1048576,
+    "model_label": "DeepSeek V4.1 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "reasoning_effort": "high"
+    },
+    "version": "1.1.43",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "prefill_chunk": 256,
+      "peer": "up"
+    }
+  },
+  "speculation_off": {
+    "id": "chatcmpl-783d889f76cf47078f79fda6",
+    "object": "chat.completion",
+    "created": 1793794224,
+    "model": "deepseek-v4.1-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "# eBPF Tutorial: A Practical Guide\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. Originally designed for packet filtering, eBPF has evolved into a general-purpose mechanism for safely extending kernel functionality.\n\n**Key benefits:**\n- **Safety**: Programs are verified before execution to prevent crashes\n- **Performance**: JIT-compiled to native machine code\n- **Observability**: Deep visibility into kernel and application behavior\n- **Programmability**: Attach to hooks throughout the kernel\n\n## How eBPF Works\n\nThe eBPF workflow involves several components:\n\n1. **eBPF Program**: Written in a restricted C-like language, compiled to eBPF bytecode\n2. **Verifier**: Kernel component that statically analyzes the program for safety\n3. **JIT Compiler**: Translates bytecode to native instructions\n4. **Maps**: Key-value data structures for sharing data between kernel and userspace\n5. **Hooks**: Attachment points (kprobes, tracepoints, XDP, etc.)\n\n```\n[Userspace] \u2192 [eBP"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 19,
+      "completion_tokens": 256,
+      "total_tokens": 275,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 19,
+      "prompt_ms": 453.4,
+      "prompt_per_token_ms": 23.863,
+      "prompt_per_second": 41.9,
+      "predicted_n": 256,
+      "predicted_ms": 12303.4,
+      "predicted_per_token_ms": 48.06,
+      "predicted_per_second": 20.8,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "multi_chunk_prefill": {
+    "request": {
+      "model": "deepseek-v4.1-flash",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Explain how the following eBPF tracing notes fit together.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\neBPF probes collect kernel events with bounded maps and verified programs.\nGive a short practical summary."
+        }
+      ],
+      "temperature": 0,
+      "max_tokens": 64,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      },
+      "strata_tune": {
+        "suffix_draft": 0,
+        "spec": 1
+      }
+    },
+    "response": {
+      "id": "chatcmpl-aaded5b3fb674c3ca6523f3c",
+      "object": "chat.completion",
+      "created": 1793794237,
+      "model": "deepseek-v4.1-flash",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "These notes are all the same statement repeated: **eBPF probes collect kernel events using bounded maps and verified programs.** There's no sequence or variation to connect\u2014it's one fact duplicated many times.\n\nPractically: eBPF lets you attach probes to kernel events; the kernel verifier ensures the probe program is"
+          },
+          "finish_reason": "length"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 1142,
+        "completion_tokens": 64,
+        "total_tokens": 1206,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 1142,
+        "prompt_ms": 5456.0,
+        "prompt_per_token_ms": 4.778,
+        "prompt_per_second": 209.3,
+        "predicted_n": 64,
+        "predicted_ms": 2470.6,
+        "predicted_per_token_ms": 38.603,
+        "predicted_per_second": 25.9,
+        "draft_n": 35,
+        "draft_n_accepted": 28
+      }
+    }
+  },
+  "paired_restart_guards": "passed",
+  "run_directory": "/tmp/maya-upstream-v1.1.52-deepseek-s-candidate-state/18250/run-l24flakq",
+  "router_check": "passed",
+  "tokenize_roundtrip": {
+    "tokens": {
+      "tokens": [
+        33310
+      ],
+      "count": 1,
+      "max_model_len": 262144
+    },
+    "decoded": {
+      "content": "hello",
+      "prompt": "hello"
+    }
+  },
+  "biased_speculative_response": {
+    "id": "chatcmpl-888b25d4957540c5a0430b6c",
+    "object": "chat.completion",
+    "created": 1793794245,
+    "model": "deepseek-v4.1-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "hellohellohellohello"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 7,
+      "completion_tokens": 4,
+      "total_tokens": 11,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 7,
+      "prompt_ms": 99.4,
+      "prompt_per_token_ms": 14.2,
+      "prompt_per_second": 70.4,
+      "predicted_n": 4,
+      "predicted_ms": 183.7,
+      "predicted_per_token_ms": 45.925,
+      "predicted_per_second": 21.8,
+      "draft_n": 1,
+      "draft_n_accepted": 0
+    }
+  }
+}

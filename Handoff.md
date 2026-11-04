@@ -2697,3 +2697,36 @@ XS 32.3/34.4 vs 32.9/34.2 and S 26.3/28.0 vs 27.2/28.2.
 The controls overlap at the warmed repeat. Raw responses and actual harnesses
 are committed with the v51 report. Driver session 93783 completed and every
 recorded owned pair exited. Model processes owned by this workstream are none.
+
+V51 completed through PR #129, merged as `7f8b78254e39cd43aa9500522e1733371ffabb14`.
+Exact-head push CI 41822571015, PR CI 41822610053 and merged-main CI 41823336490
+passed. Issues #127/#128 are closed. V52 began only after that main gate.
+
+Issue #130 tracks v52 on `merge/upstream-v1.1.52`, based on `7f8b782`.
+The FFN graph refactor keeps sliced dense geometry and TP all-reduce. Graph
+capture and local speculative dispatch are gated away from remote TP2. Existing
+MTP callbacks, mirrored reset/snapshot/cancel and sticky first-error handling are
+preserved. New CUDA peer transport and gfx906-specific work are excluded.
+All three gfx1151 engines and verifier built. Mapping, 695 server tests (11 skips),
+731 tools tests (3 skips), 58 focused HIP installer tests, five CPU CTest checks,
+new default-off indexer WMMA parity and GPU router comparison passed. Imported
+installer test mocks were adapted to the fork's existing compiler selection API.
+
+The completed paired driver session is 82752, using v51 controls and v52 candidates under
+`/home/ugo/software/project-maya-upstream-validation/engines/` on both hosts.
+Ownership and logs use `/tmp/maya-upstream-v1.1.52-*`. GLM candidate requests
+local graph/window options to test TP exclusion while keeping fixed two-draft
+MTP. Both DeepSeek models also read a multi-chunk prompt. Stop only recorded
+owned identities through these drivers. Finish paired validation, PR exact-head
+CI and merged-main CI before starting v53.
+
+V52 paired validation passed. GLM retained actual MTP and the TP exclusion gates,
+cancel/follow-up and original-cause active peer loss. XS/S passed actual DSpark,
+off/on exact text, tokenizer/logit-bias and paired guards. Both read 1,142 fresh
+tokens through five chunks and generated another 64-token response. Repeated and
+chunk-prompt response text matched before/after. Warmed GLM 32.7 vs 33.2 tok/s,
+XS 34.7 vs 33.7 and S 28.5 vs 27.8. First-response timings varied on both builds,
+including XS candidate 24.1 vs 32.8 and S control 17.9 before its warmed 27.8.
+The raw values, component checks and actual harnesses are in
+`docs/upstream/v1.1.52.md`. Every owned pair exited. Active owned model processes
+are none. The PR and merged-main CI outcomes are tracked in #130.

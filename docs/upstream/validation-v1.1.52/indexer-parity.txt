@@ -1,0 +1,14 @@
+device 0: AMD Radeon 8060S Graphics (gfx1151)
+n   1000,  1 rows: masks the same, worst difference 8.85e-08 of the row's largest, top-512 agreement 1.0000; 51.3 -> 6.2 us a call
+n  65536,  3 rows: masks the same, worst difference 2.02e-07 of the row's largest, top-512 agreement 1.0000; 432.4 -> 240.8 us a call
+n 131072,  6 rows: masks the same, worst difference 2.90e-07 of the row's largest, top-512 agreement 1.0000; 1801.1 -> 721.9 us a call
+n  20000, 64 rows: masks the same, worst difference 2.86e-07 of the row's largest, top-512 agreement 1.0000; 2799.0 -> 2036.0 us a call
+n  65536,  3 rows, candidates: masks the same, worst difference 1.53e-07 of the row's largest, top-512 agreement 1.0000; 118.0 -> 47.0 us a call
+n  40000, 16 rows, candidates: masks the same, worst difference 2.40e-07 of the row's largest, top-512 agreement 1.0000; 555.9 -> 292.0 us a call
+n 131072, 64 rows: masks the same, worst difference 3.48e-07 of the row's largest, top-512 agreement 1.0000; 19211.7 -> 11907.1 us a call
+n  20000,  6 rows, scales 0-2: masks the same, worst difference 3.02e-07 of the row's largest, top-512 agreement 1.0000; 275.7 -> 124.2 us a call
+n  20000,  1 rows, candidates, scales 0-2: masks the same, worst difference 1.60e-07 of the row's largest, top-512 agreement 1.0000; 84.3 -> 18.1 us a call
+n  32768,  6 rows: masks the same, worst difference 1.71e-07 of the row's largest, top-512 agreement 1.0000; 446.2 -> 202.1 us a call
+n  32768,  5 rows: masks the same, worst difference 2.40e-07 of the row's largest, top-512 agreement 1.0000; 373.8 -> 200.6 us a call
+n 131072,  5 rows: masks the same, worst difference 2.30e-07 of the row's largest, top-512 agreement 1.0000; 1518.0 -> 727.1 us a call
+PASS
