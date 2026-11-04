@@ -367,7 +367,9 @@ class Screen(unittest.IsolatedAsyncioTestCase):
                     self.assertLess(time.time() - t0, 20, "stuck at Loading the model")
                     await pilot.pause(0.05)
                 self.assertEqual(app.state[T.SERVE], "ready")
-                bridge.stop()
+                await pilot.press("ctrl+c")
+                await pilot.press("ctrl+c")
+            self.assertEqual(app.return_value, ("stopped", None))
         finally:
             httpd.shutdown()
         bridge.finish(10)

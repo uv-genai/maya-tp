@@ -2675,5 +2675,25 @@ Owned server/worker PID/start metadata and logs remain under their `/tmp` prefix
 Build directory is `/tmp/maya-upstream-integration-build`; build/suite logs use
 `/tmp/maya-upstream-v50-{config,build,serve,tools}.log`.
 
-The v50 PR, exact-head CI and merged-main CI outcome are recorded in #125.
-Complete those gates before checking out the separate v51 branch from merged main.
+V50 merged through PR #126 at `176ce06e9eb77cf2b909a358196daa20219312ac`.
+Exact-head CI 41818389690, PR CI 41818508286 and merged-main CI 41819239270
+passed. Issue #125 is closed.
+
+Issue #127 tracks v51 on `merge/upstream-v1.1.51`, based on that validated main.
+The semantic merge keeps DeepSeek TP2 attach/step/failure methods, excludes remote
+ranks from local-GPU room-based reload and keeps GLM checkpoint count zero under
+RDMA TP2. Mirrored resets, MTP and queued DSpark reductions are preserved.
+HIP builds passed for all three engines and the DeepSeek verifier. Ordered mapping,
+689 server tests (11 skips) and 726 tools tests (3 skips) passed. New CPU row-policy
+and native-experts-OFF stub tests passed. A pre-existing optional Textual readiness
+test teardown race reproduced on v50 too. Its normal-stop test correction is #128.
+The paired evidence and exact PR/CI checkpoints are recorded in
+`docs/upstream/v1.1.51.md` and #127. Finish the v51 PR and merged-main CI before
+starting v52. Isolated runtime binaries live in `engines/v1.1.51/` on both hosts.
+
+V51 paired GLM, XS and S checks completed successfully. Repeated-prompt text
+matched v50 for all three. GLM candidate 30.9/32.9 vs control 32.1/32.4 tok/s,
+XS 32.3/34.4 vs 32.9/34.2 and S 26.3/28.0 vs 27.2/28.2.
+The controls overlap at the warmed repeat. Raw responses and actual harnesses
+are committed with the v51 report. Driver session 93783 completed and every
+recorded owned pair exited. Model processes owned by this workstream are none.
