@@ -2639,94 +2639,71 @@ processes are active in this workstream.
 
 ## 47. Sequential upstream v1.1.50–v1.1.53 integration
 
-The user requires one branch and PR per tag, validation and merge to main before
-starting the next tag. Issue #125 tracks v1.1.50 on `merge/upstream-v1.1.50`.
-The isolated worktree is `/home/ugo/software/project-maya-upstream-integration`;
-its fixed path permits incremental builds while using a separate branch per tag.
-The user confirmed both hosts are available for this task's owned paired GPU
-validation. Stop only owned validation processes using recorded identities.
+The source incorporates applicable changes through upstream v1.1.53. The user
+required one branch/PR per tag, paired validation and exact-head CI before each
+merge, then merged-main CI before starting the next tag. All tag workstreams
+use separate issues on the fork.
 
-V50 passed HIP mapping, 684 server tests (11 skips), 723 tools tests (3 skips),
-the Release HIP build of both engines/DeepSeek verifier and the GPU route
-comparator. A subsequent GLM worker KV propagation correction passed all 13
-focused launcher tests. The final exact-head CI covers that correction too.
-The merge preserves fork docs, VERSION and both model families' RDMA/speculation
-paths. Metal/local ReBAR/DMA/planner additions are excluded. Full decisions and
-measurements are in `docs/upstream/v1.1.50.md`.
+| Tag | Issue | PR | Merged-main checkpoint |
+| --- | --- | --- | --- |
+| v1.1.50 | #125 | #126 | `176ce06`, CI 41819239270 passed |
+| v1.1.51 | #127 | #129 | `7f8b782`, CI 41823336490 passed |
+| v1.1.52 | #130 | #131 | `1bcec32`, CI 41828134565 passed |
+| v1.1.53 | #132 | Final PR recorded in #132 | Final SHA/CI recorded in #132 |
 
-Paired XS/S tests passed actual DSpark drafts, off/on exact text and paired
-Turbo/context guards. S also passed live tokenizer and speculative logit-bias
-sampling. GLM Maya-S passed actual MTP, prefill cancellation/follow-up and
-candidate active peer loss with original sticky cause retained. Two 256-token
-eBPF answers per build gave GLM candidate 32.2/32.9 vs baseline 32.9/33.4 tok/s,
-XS 31.6/33.8 vs 32.8/33.2, and S 28.0/28.7 vs 26.8/28.2. The second answer
-matched before/after exactly for all three. These short controls do not establish
-long-prompt prefill throughput or universal quality equivalence.
+Read each `docs/upstream/v1.1.5{0,1,2,3}.md` report for semantic decisions,
+complete measurements, limits and exact-head/PR CI tracking. Raw results and
+actual harnesses are in their `validation-v1.1.5N/` directories. Issues #125,
+#127, #130 and #132 record the authoritative GitHub completion checkpoints.
+Issue #128 fixed an existing optional terminal-UI test teardown race and merged
+with v51. #133 is left open for assessment of deferred v53 engine experiments.
 
-**Active owned model processes** are none. Drivers 96740 and 39008 completed.
-Temporary harnesses are `/tmp/maya-upstream-{deepseek,glm}-check.py`, with raw
-results under `/tmp/maya-upstream-v1.1.50-*`. Committed copies are under
-`docs/upstream/validation-v1.1.50/`. Runtime on both hosts is
-`/home/ugo/software/project-maya-upstream-validation`, with matched binaries in
-`engines/v1.1.50/`; protected accepted runtime paths retain their recorded builds.
-DeepSeek API/bootstrap are 18250/18950 and GLM are 18251/18951. Both use local
-strix-halo-2 as validation lead and strix-halo-1 as peer for controlled comparisons.
-Owned server/worker PID/start metadata and logs remain under their `/tmp` prefixes.
-Build directory is `/tmp/maya-upstream-integration-build`; build/suite logs use
-`/tmp/maya-upstream-v50-{config,build,serve,tools}.log`.
+Fork README/AGENTS, operational ownership, numeric VERSION 1.1.43 and pinned
+llama.cpp are preserved.
+Metal, POWER9, Docker and new CUDA/local peer transport paths are outside the
+checkpoint. New v53 EXL3 CPU, placement, lending and flow experiments are deferred
+consistently in source/settings/docs. The v52 gfx1151 indexer WMMA probe passed
+its component checks and keeps its default-off option.
 
-V50 merged through PR #126 at `176ce06e9eb77cf2b909a358196daa20219312ac`.
-Exact-head CI 41818389690, PR CI 41818508286 and merged-main CI 41819239270
-passed. Issue #125 is closed.
+V52's FFN refactor retains sliced dense geometry and ordered TP reductions.
+Layer graph capture and local speculative dispatch are gated away from remote
+TP2. DeepSeek preserves checked rank geometry, exact 256-row boundaries, queued
+reductions and DSpark controls. V53's GPU-fault END handler marks a pair down,
+retains the first cause and requires both ranks to restart. Mock tests cover
+GPU-fault recovery. Live worker-loss checks cover transport failure.
 
-Issue #127 tracks v51 on `merge/upstream-v1.1.51`, based on that validated main.
-The semantic merge keeps DeepSeek TP2 attach/step/failure methods, excludes remote
-ranks from local-GPU room-based reload and keeps GLM checkpoint count zero under
-RDMA TP2. Mirrored resets, MTP and queued DSpark reductions are preserved.
-HIP builds passed for all three engines and the DeepSeek verifier. Ordered mapping,
-689 server tests (11 skips) and 726 tools tests (3 skips) passed. New CPU row-policy
-and native-experts-OFF stub tests passed. A pre-existing optional Textual readiness
-test teardown race reproduced on v50 too. Its normal-stop test correction is #128.
-The paired evidence and exact PR/CI checkpoints are recorded in
-`docs/upstream/v1.1.51.md` and #127. Finish the v51 PR and merged-main CI before
-starting v52. Isolated runtime binaries live in `engines/v1.1.51/` on both hosts.
+All checkpoints passed paired GLM Maya-S MTP and DeepSeek XS/S DSpark controls.
+GLM also passed cancelled-prefill recovery and candidate active peer loss with
+sticky original cause. DeepSeek passed actual drafts, on/off exact text,
+paired mutation guards and candidate tokenizer/logit-bias checks. V52/v53 also
+read 1,142 fresh tokens across five chunks and completed a 64-token continuation.
+Repeated and chunk-prompt response text matched controls for every model.
+V53 warmed generation was GLM 32.7 vs v52 33.3 tok/s, XS 35.0 vs 33.6 and
+S 28.3 vs 28.1. Five-chunk prefill was XS 218.9 vs 228.3 and S 211.7 vs 195.0.
+These bounded checks leave broad quality, long-context capacity and sustained
+throughput as separate measurements. Earlier first-request timing variation is
+retained in the per-tag reports.
 
-V51 paired GLM, XS and S checks completed successfully. Repeated-prompt text
-matched v50 for all three. GLM candidate 30.9/32.9 vs control 32.1/32.4 tok/s,
-XS 32.3/34.4 vs 32.9/34.2 and S 26.3/28.0 vs 27.2/28.2.
-The controls overlap at the warmed repeat. Raw responses and actual harnesses
-are committed with the v51 report. Driver session 93783 completed and every
-recorded owned pair exited. Model processes owned by this workstream are none.
+V53 local mapping and ordered 738 server tests (11 skips, real GLM/DeepSeek
+tokenizers) plus 751 tools tests (3 skips) passed. The final memo alias regression
+passed within all 25 real-tokenizer memo cases afterward. Exact-head CI covers
+the updated complete suite. The 65 focused fault/TP2/dashboard tests passed.
+All three Release gfx1151 engines and the DeepSeek verifier built successfully.
+The optional prompt memo stays off by default. Settings accept STRATA aliases
+with MAYA precedence. The API benchmark has unit coverage, with full agent-load
+performance retained as a separate measurement.
 
-V51 completed through PR #129, merged as `7f8b78254e39cd43aa9500522e1733371ffabb14`.
-Exact-head push CI 41822571015, PR CI 41822610053 and merged-main CI 41823336490
-passed. Issues #127/#128 are closed. V52 began only after that main gate.
-
-Issue #130 tracks v52 on `merge/upstream-v1.1.52`, based on `7f8b782`.
-The FFN graph refactor keeps sliced dense geometry and TP all-reduce. Graph
-capture and local speculative dispatch are gated away from remote TP2. Existing
-MTP callbacks, mirrored reset/snapshot/cancel and sticky first-error handling are
-preserved. New CUDA peer transport and gfx906-specific work are excluded.
-All three gfx1151 engines and verifier built. Mapping, 695 server tests (11 skips),
-731 tools tests (3 skips), 58 focused HIP installer tests, five CPU CTest checks,
-new default-off indexer WMMA parity and GPU router comparison passed. Imported
-installer test mocks were adapted to the fork's existing compiler selection API.
-
-The completed paired driver session is 82752, using v51 controls and v52 candidates under
-`/home/ugo/software/project-maya-upstream-validation/engines/` on both hosts.
-Ownership and logs use `/tmp/maya-upstream-v1.1.52-*`. GLM candidate requests
-local graph/window options to test TP exclusion while keeping fixed two-draft
-MTP. Both DeepSeek models also read a multi-chunk prompt. Stop only recorded
-owned identities through these drivers. Finish paired validation, PR exact-head
-CI and merged-main CI before starting v53.
-
-V52 paired validation passed. GLM retained actual MTP and the TP exclusion gates,
-cancel/follow-up and original-cause active peer loss. XS/S passed actual DSpark,
-off/on exact text, tokenizer/logit-bias and paired guards. Both read 1,142 fresh
-tokens through five chunks and generated another 64-token response. Repeated and
-chunk-prompt response text matched before/after. Warmed GLM 32.7 vs 33.2 tok/s,
-XS 34.7 vs 33.7 and S 28.5 vs 27.8. First-response timings varied on both builds,
-including XS candidate 24.1 vs 32.8 and S control 17.9 before its warmed 27.8.
-The raw values, component checks and actual harnesses are in
-`docs/upstream/v1.1.52.md`. Every owned pair exited. Active owned model processes
-are none. The PR and merged-main CI outcomes are tracked in #130.
+**Active owned model processes are none.** Driver session 45449 completed.
+Temporary harnesses and ownership metadata use `/tmp/maya-upstream-*`; local
+suite/build logs use `/tmp/maya-upstream-v5N-*`. The isolated source worktree is
+`/home/ugo/software/project-maya-upstream-integration`, with incremental build
+`/tmp/maya-upstream-integration-build`. Both hosts have matching versioned
+validation binaries under
+`/home/ugo/software/project-maya-upstream-validation/engines/v1.1.53/`.
+GLM SHA-256 is `fd93fda269505636216c0560e43083a797673cee172a39db5eaf3e25fec8b2c8`.
+DeepSeek is `d047c94b8174b06f73947f19ebab28d08748472decc048c1f32c633160c99824`.
+Validation used strix-halo-2 as lead, strix-halo-1 as peer, GLM API/bootstrap
+18251/18951 and DeepSeek 18250/18950. Cleanup used recorded owned identities.
+Accepted user runtime selection remains documented in §§33 and 44. Preserve
+the remote canonical checkout's user edits and use isolated builds for future
+validation. Model contents and configs were selected explicitly for each rank.

@@ -16,7 +16,7 @@ POISON = 'verbs communicator is poisoned: verbs peer closed the bootstrap connec
 
 
 class PeerLoss(unittest.TestCase):
-    def engine(self, world=2, multi=0, error=POISON, down_cause=None):
+    def engine(self, world=2, multi=0, error=POISON, down_cause=None, end_cause=None):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         folder = Path(tmp.name)
@@ -36,6 +36,8 @@ for line in sys.stdin:
         rid = line.split('rid=', 1)[1].split()[0] + ' ' if 'rid=' in line else ''
         if {down_cause!r} is not None:
             print('TP2_DOWN ' + {down_cause!r}, flush=True)
+        if {end_cause!r} is not None:
+            print('END ' + {end_cause!r}, flush=True)
         print('ERR ' + rid + {error!r}, flush=True)
 ''')
         script.chmod(0o755)
@@ -85,6 +87,22 @@ for line in sys.stdin:
         with self.assertRaisesRegex(ValueError, 'TP2 pair down.*verbs peer closed the bootstrap connection'):
             self.generate(engine)
         self.assertEqual(len(seen.read_text().splitlines()), 1)
+
+    def test_gpu_fault_end_requires_both_ranks_and_retains_the_first_cause(self):
+        for multi in (0, 2):
+            for prior in (None, POISON):
+                with self.subTest(multi=multi, prior=prior):
+                    cause = "a GPU's state is unknown after this request"
+                    engine, seen = self.engine(multi=multi, error='HIP kernel failed',
+                                               down_cause=prior, end_cause=cause)
+                    with self.assertRaisesRegex(ValueError, 'TP2 pair down.*restart both ranks'):
+                        self.generate(engine)
+                    self.assertTrue(engine.ended)
+                    self.assertEqual(engine.info.get('tp_pair'), 'down')
+                    self.assertIn(prior or cause, engine.info['tp_error'])
+                    with self.assertRaisesRegex(ValueError, 'TP2 pair down.*restart both ranks'):
+                        self.generate(engine)
+                    self.assertEqual(len(seen.read_text().splitlines()), 1)
 
     def test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior(self):
         for world, error in ((1, POISON), (2, 'out of GPU memory')):

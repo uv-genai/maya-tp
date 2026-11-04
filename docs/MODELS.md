@@ -196,3 +196,12 @@ These also run on Maya:
 The DeepSeek installer also recognizes the pinned smaller unsloth UD quants, including `--ds4-quant gguf-iq3_s`. Q5_K Engram tables and GGUF type43 format checks are supported. Compatible Q6_K n-gram tables may be shared between Maya and UD-IQ3_S only after size and SHA256 verification, avoiding a second table download. These additions do not enable GLM TP2 vision or change the default TP2 model.
 
 Upstream v1.1.44 updates the Q8/Q4 download revision while retaining the exact pinned file sizes and SHA256 hashes; complete existing installs do not need another download. Installer quality/capacity descriptions are upstream estimates, not new gfx1151 measurements. DeepSeek packed-KV WMMA parity currently has known failures on gfx1151 ([#68](https://github.com/uv-genai/maya-tp/issues/68)); this installer/catalog update does not resolve them or add DS4 tensor parallelism.
+
+### Third-party DeepSeek EXL3 packing
+
+The packer accepts a BF16 `head.weight`. Each expert's tensors must remain
+contiguous within its shard. Type-grouped layouts are rejected with instructions
+to rewrite them in expert order. Custom INT4 Engram tables require the model's
+FP8 source tables from shards 47 and 48. These packing checks have synthetic
+coverage. The paired model paths and checked native manifests are documented in
+[the DeepSeek TP2 guide](DEEPSEEK-TP2-RUN.md).

@@ -245,3 +245,15 @@ records. These changes do not download or modify models merely by updating this 
 A start without a terminal on stdin, under systemd, or with `--yes` skips automatic speed/prefill calibration. Saved calibration remains effective; a missing calibration uses defaults and prints the command to measure later. Interactive starts keep their existing behavior. The skipped start does not write a replacement calibration to the config.
 
 TP2 still requires both ranks to be launched with matching model/pack/config and context through the pair launcher. A standalone service restart cannot coordinate the pair; the existing paired lifecycle guards remain in effect. See [TP2 operations](TP2-RUN.md).
+
+## Model management and paired recovery
+
+The updated Models page shows per-model overview, engine settings and storage
+ownership. File deletion respects shared model dependencies. Model management is
+opt-in in this fork. A running TP2 pair uses its pair launcher for changes that
+restart engines, including context changes and Turbo.
+
+A fatal DeepSeek GPU-state notice ends its engine after the request and leaves
+the pair down with the original failure cause. Restart both ranks through the
+appropriate GLM or DeepSeek launcher. Current source integration and validation
+are recorded in [the v1.1.53 report](upstream/v1.1.53.md).

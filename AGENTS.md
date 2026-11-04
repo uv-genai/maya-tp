@@ -79,6 +79,10 @@ python -m unittest discover -s serve -p "test_*.py" -t .
 python -m unittest discover -s tools -p "test_*.py"
 ```
 
+The workflow also runs CPU-only GLM memory-policy and DeepSeek row-preparation/
+native-experts-OFF stub checks after these three gates. Their exact compiler
+commands are in `.github/workflows/tests.yml`.
+
 Single test:
 
 ```sh
@@ -153,7 +157,15 @@ batch size: for sequential work, finish affected validation plus exact-head and 
 the next tag; for a cumulative merge, review the entire delta and validate it as one checkpoint. Historical design
 documents and measurement reports describe their dated checkpoints; [docs/README.md](docs/README.md)
 identifies the current guides. v1.1.37–v1.1.46 was integrated sequentially; #85 integrates v1.1.47–v1.1.49
-directly from the latest tag, as explicitly requested by the user.
+directly from the latest tag, as explicitly requested by the user. Upstream
+v1.1.50–v1.1.53 uses separate sequential branches/PRs, with paired GPU validation,
+exact-head CI and post-merge main CI for each checkpoint. See Handoff.md §47 and
+`docs/upstream/v1.1.53.md`. New v53 engine experiments are deferred in #133.
+Preserve the paired handling of the DeepSeek `END` notice. It marks the pair down
+and retains the first fatal cause, with both ranks required to restart. The
+optional prompt memo remains off by default and has real GLM/DeepSeek tokenizer
+identity checks.
+
 
 ## Key references
 
