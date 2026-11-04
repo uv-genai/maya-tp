@@ -1,9 +1,11 @@
-# DeepSeek TP2 review guide
+# DeepSeek TP2 and DSpark guide
 
-DeepSeek two-host execution is **experimental and under validation** on this
-branch. The established GLM production setup is separate; this guide does not
-replace it. The example starts processes explicitly and writes a dedicated
-server config. It does not change llama-swap or any existing config.
+DeepSeek Maya-XS and Maya-S have paired gfx1151 validation and successful user
+trials. The user reports hours of working DeepSeek and GLM inference, including
+DeepSWE benchmarks, and accepted integration into `main`. Numerical and
+peak-capacity follow-ups are tracked in #110/#112. DeepSeek uses `maya-ds4`
+and its own launcher configs. The manual examples below create a dedicated
+server config; the final section covers the SSH-managed llama-swap wrapper.
 
 The implementation runs `maya-ds4` on two gfx1151 HIP hosts, with one GPU per
 host and `usb4_rdma*` for tensor traffic. Each host needs the same DeepSeek GGUF

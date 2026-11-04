@@ -1,13 +1,16 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then the current state in Handoff.md §§42–44. The queued DeepSeek candidate, measured XS speedup and user-testing handoff are in §44. Rank/llama-swap launchers are described in §43. Earlier handoff entries are dated history and may describe superseded processes, issues, binaries or pending steps.
+Read [AGENTS.md](AGENTS.md), then Handoff.md §45 for the user's extended GLM/DeepSeek acceptance and main integration tracked in #121. The queued DeepSeek build and measured XS speedup are in §44. Rank/llama-swap launchers are described in §43. Earlier entries are dated checkpoints.
 
 ## Current GLM and DeepSeek state
 
-The user authorized implementation and validation of DeepSeek TP2 and DSpark on
-`feat/deepseek-tp2`. Experimental target inference, chunked prefill, DSpark and prompt lookup
-have been exercised on XS and S. Numerical/quality and resource review remain open.
-The user is testing the new launchers through llama-swap. Read §43 and #118 for
+The user accepted the DeepSeek TP2/DSpark work after hours of successful testing
+across most DeepSeek and GLM models, including DeepSWE benchmarks, and requested
+integration of `feat/deepseek-tp2` into `main` through a pull request. Use `main`
+as the development entry point after integration. The PR and CI outcome are
+tracked in #121. Target inference, chunked prefill, DSpark and prompt lookup
+have been exercised on XS and S. Numerical/capacity follow-ups remain in #110/#112.
+Read §43 and #118 for
 the staged runtime, config choices and ownership-safe stop actions. Issue #119
 installed `maya-deepseek-xs-mtp` and `maya-deepseek-s-mtp` in llama-swap on
 strix-halo-1.local. The user launches from that host. Issue #120 replaces
@@ -16,13 +19,14 @@ sequence and GPU router comparison. XS generation measured 23–24% above the
 same single-host build on two prompts. Both review configs select the measured
 versioned binary. Focused correctness checks passed. The user reports Maya-S
 eBPF generation slightly above 30 tok/s, prefill similar to XS and a larger
-relative speedup. Issue #120 is complete; #116 retains broader review. Do not restart the broad
+relative speedup. Issue #120 is complete, and extended user trials complete
+operational acceptance in #116. Do not restart the broad
 validation campaign; the user explicitly requested a few checks and then testing
 through the existing entries. No owned validation processes remain.
 Read the current-state summary at the start of Handoff.md §42, the implementation plan and phase issues #110–#116.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
-procedure is in [docs/DEEPSEEK-TP2-RUN.md](docs/DEEPSEEK-TP2-RUN.md); no production promotion
-has been authorized.
+procedure and accepted deployment paths are in
+[docs/DEEPSEEK-TP2-RUN.md](docs/DEEPSEEK-TP2-RUN.md) and Handoff.md §45.
 
 For the remote GLM startup repair and Maya-L cold-load investigation, read Handoff.md §§38–39
 and issues #104–#105. The user reports that everything is working; Maya-L has completed TP2

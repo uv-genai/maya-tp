@@ -6,6 +6,17 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **DeepSeek TP2 and DSpark** (#109–#116, #118–#121) add two-host gfx1151
+  execution, checked model identities, chunked prefill, coordinated speculative
+  verification, sticky peer-loss handling and rank/llama-swap launchers. Reuse
+  GLM's queued GPU/RDMA sequence and combine router comparisons on the GPU.
+  Controlled XS generation improved 23–24% over the same single-host build on
+  two prompts. The user reports Maya-S eBPF generation slightly above 30 tok/s,
+  similar prefill to XS and hours of successful DeepSeek/GLM use including
+  DeepSWE benchmarks. Numerical and peak-capacity investigations retain their
+  recorded scope in #110/#112.
+  [Measurements and user results](docs/benchmarks/deepseek-tp2-queued-2026-11-04/README.md).
+
 - **HIP setup:** select the versioned compiler subdirectory for `HIP_PATH` on split ROCm
   installations, so clang loads its device-math declarations when building DeepSeek and other
   engines. Existing standard ROCm paths keep their previous selection.

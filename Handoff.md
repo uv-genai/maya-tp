@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-04 · Current state: **§44**, queued DeepSeek TP2 passed the XS single-host performance gate; the user reports Maya-S eBPF generation slightly above 30 tok/s with prefill similar to XS; §43 records the launchers; §42 records implementation and earlier validation; §33 records the promoted GLM runtime.
+> Last updated: 2026-11-04 · Current state: **§45**, user-accepted GLM and DeepSeek operation after hours of successful use including DeepSWE benchmarks. Main integration is tracked in #121. §44 records the queued DeepSeek build and measured speedup. §43 records launchers. §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2574,3 +2574,27 @@ successfully; both recorded API servers and the recorded remote worker exited.
 PID/start-time and log files remain under
 `/tmp/ds4-tp2-queued-perf-xs-{single,tp}-*`. The canonical production binaries
 and the earlier review engine remain available at their recorded paths.
+
+## 45. Extended user acceptance and main integration (#121, 2026-11-04)
+
+The user reports hours of successful testing across most DeepSeek and GLM
+models, including DeepSWE benchmarks, and requests merging `feat/deepseek-tp2`
+into `main` through a pull request. This completes operational acceptance in
+#116. The exact model list, DeepSWE scores and per-run settings were not supplied.
+The implementation, queued optimization, launchers, tests and recorded evidence
+are included together. The PR and exact-head/post-merge CI results are tracked
+in #121. A merge commit preserves the phase history and issue references.
+Use `main` as the development entry point after integration.
+
+The accepted DeepSeek executable remains the versioned §44 build with SHA-256
+`a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102`,
+selected by both models' configs under
+`/home/ugo/software/project-maya-ds4-tp2-review` on both hosts. The existing
+llama-swap aliases on strix-halo-1 orchestrate the worker on strix-halo-2.
+The source merge uses this existing GPU evidence and the user's extended
+trials, with the required automated CPU CI checks. No owned model processes
+are active in this merge workstream.
+
+Issues #110/#112 retain their numerical/quality and peak-capacity investigations.
+Acceptance reflects successful workloads on the user's pair; the dated
+comparison limitations and unresolved measurements remain in the evidence.

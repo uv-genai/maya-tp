@@ -50,7 +50,7 @@ tutorial to explain how to use eBPF.” They encoded to 44 and 19 prompt tokens.
 These are end-to-end DSpark comparisons. Single-host and TP2 responses and
 draft acceptance differed, so the measured gain includes that effect.
 The short prompts measure generation and provide limited prefill evidence.
-The user's longer workloads remain part of ongoing review.
+The user's extended workload feedback is recorded below.
 
 ## User-reported Maya-S result
 
@@ -59,6 +59,13 @@ prefill similar to XS and a larger relative speedup. This records their
 llama-swap test of the staged candidate. Exact prefill rates, response length,
 repeat count and a matched single-host baseline were not supplied, so no
 Maya-S speedup percentage is calculated.
+
+The user subsequently reported hours of successful testing across most DeepSeek
+and GLM models, including DeepSWE benchmarks, and requested integration into
+`main` through a pull request. This completes the operational acceptance in
+#116. The merge is tracked in #121. Detailed DeepSWE scores and per-model run
+settings were not supplied. Numerical and capacity investigations remain
+tracked separately in #110/#112.
 
 ## Focused validation
 
@@ -90,5 +97,5 @@ Both hosts select the measured binary at
 The two existing aliases `maya-deepseek-xs-mtp` and `maya-deepseek-s-mtp` load
 their distinct packs through this binary. Launcher config backups have suffix
 `.before-queued-120-20261104`. The user launches through llama-swap on
-strix-halo-1. Issue #120 is complete with the user's Maya-S feedback; #116
-retains broader numerical/quality and resource review.
+strix-halo-1. Issue #120 is complete with the user's Maya-S feedback; the later
+extended trials complete operational acceptance in #116.
