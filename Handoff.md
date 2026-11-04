@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-04 · Current state: **§46**, post-merge documentation audit. PR #122 merged DeepSeek TP2/DSpark into `main` at `75e18e8`, with feature-head and merged-main CI passing. §45 records extended user acceptance including DeepSWE. §44 records the accepted DeepSeek binary. §33 records the promoted GLM runtime.
+> Last updated: 2026-11-04 · Current state: **§47**, sequential upstream v1.1.50–v1.1.53 integration, starting with #125. §46 records the completed documentation audit. §44 records the accepted DeepSeek binary. §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2636,3 +2636,44 @@ benchmark and inherited upstream reference material. Documentation validation
 passed 192 local linked-path and 57 section-link checks across 15 active/index
 documents, referenced-entry-point/argument checks and whitespace checks. No owned model
 processes are active in this workstream.
+
+## 47. Sequential upstream v1.1.50–v1.1.53 integration
+
+The user requires one branch and PR per tag, validation and merge to main before
+starting the next tag. Issue #125 tracks v1.1.50 on `merge/upstream-v1.1.50`.
+The isolated worktree is `/home/ugo/software/project-maya-upstream-integration`;
+its fixed path permits incremental builds while using a separate branch per tag.
+The user confirmed both hosts are available for this task's owned paired GPU
+validation. Stop only owned validation processes using recorded identities.
+
+V50 passed HIP mapping, 684 server tests (11 skips), 723 tools tests (3 skips),
+the Release HIP build of both engines/DeepSeek verifier and the GPU route
+comparator. A subsequent GLM worker KV propagation correction passed all 13
+focused launcher tests. The final exact-head CI covers that correction too.
+The merge preserves fork docs, VERSION and both model families' RDMA/speculation
+paths. Metal/local ReBAR/DMA/planner additions are excluded. Full decisions and
+measurements are in `docs/upstream/v1.1.50.md`.
+
+Paired XS/S tests passed actual DSpark drafts, off/on exact text and paired
+Turbo/context guards. S also passed live tokenizer and speculative logit-bias
+sampling. GLM Maya-S passed actual MTP, prefill cancellation/follow-up and
+candidate active peer loss with original sticky cause retained. Two 256-token
+eBPF answers per build gave GLM candidate 32.2/32.9 vs baseline 32.9/33.4 tok/s,
+XS 31.6/33.8 vs 32.8/33.2, and S 28.0/28.7 vs 26.8/28.2. The second answer
+matched before/after exactly for all three. These short controls do not establish
+long-prompt prefill throughput or universal quality equivalence.
+
+**Active owned model processes** are none. Drivers 96740 and 39008 completed.
+Temporary harnesses are `/tmp/maya-upstream-{deepseek,glm}-check.py`, with raw
+results under `/tmp/maya-upstream-v1.1.50-*`. Committed copies are under
+`docs/upstream/validation-v1.1.50/`. Runtime on both hosts is
+`/home/ugo/software/project-maya-upstream-validation`, with matched binaries in
+`engines/v1.1.50/`; protected accepted runtime paths retain their recorded builds.
+DeepSeek API/bootstrap are 18250/18950 and GLM are 18251/18951. Both use local
+strix-halo-2 as validation lead and strix-halo-1 as peer for controlled comparisons.
+Owned server/worker PID/start metadata and logs remain under their `/tmp` prefixes.
+Build directory is `/tmp/maya-upstream-integration-build`; build/suite logs use
+`/tmp/maya-upstream-v50-{config,build,serve,tools}.log`.
+
+The v50 PR, exact-head CI and merged-main CI outcome are recorded in #125.
+Complete those gates before checking out the separate v51 branch from merged main.

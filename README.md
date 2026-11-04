@@ -99,6 +99,12 @@ MTP/API suite passing. Report:
 
 ## Current scope
 
+The v1.1.50 integration adds the GLM Maya-XS installer option, tokenizer API,
+model-management APIs and UI controls. Model management stays opt-in. Settings
+that restart a TP2 engine require the pair launcher, including Turbo. GLM
+Maya-XS has installer coverage; the recorded paired model validation covers
+the models listed below. [Integration checkpoint](docs/upstream/v1.1.50.md).
+
 DeepSeek TP2 and DSpark were merged into `main` through PR #122 at `75e18e8`
 after extended user trials. HIP mapping, server and tools CI passed on the
 feature head and merged commit. [Merged pull request](https://github.com/uv-genai/maya-tp/pull/122).

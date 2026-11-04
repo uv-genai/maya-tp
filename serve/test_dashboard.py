@@ -123,6 +123,33 @@ class Dashboard(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "both ranks"):
             self.svc._delete_running(self.cfg, False, "another.json")
 
+    def test_tp2_turbo_preserves_both_model_families(self):
+        from unittest import mock
+        before = self.cfg.read_bytes()
+        for family in ("glm", "ds4"):
+            self.engine.info = {"tp_world": 2, "tp_rank": 0, "engine_kind": family}
+            with self.subTest(family=family), mock.patch("serve.server.models.turbo_enable") as enable, \
+                    mock.patch("serve.server.models.turbo_disable") as disable:
+                for on in (False, True):
+                    with self.assertRaisesRegex(ValueError, "both ranks"):
+                        self.svc.set_turbo(on)
+                enable.assert_not_called()
+                disable.assert_not_called()
+                self.assertEqual(self.cfg.read_bytes(), before)
+
+    def test_tp2_model_api_unload_preserves_pair(self):
+        from unittest import mock
+        self.engine.info = {"tp_world": 2, "tp_rank": 0}
+        self.svc.model_management = True
+        with mock.patch.object(self.engine, "close", create=True) as close:
+            for path in ("/api/chat", "/api/generate"):
+                with self.subTest(path=path):
+                    code, _, raw = self.req("POST", path, {"keep_alive": 0})
+                    self.assertEqual(code, 400, raw)
+                    self.assertIn("both ranks", raw.decode())
+            close.assert_not_called()
+            self.assertFalse(self.svc.unloaded)
+
     def test_context_range(self):
         s, _, b = self.req("GET", "/api/context")
         j = json.loads(b)
@@ -294,6 +321,31 @@ class Dashboard(unittest.TestCase):
         s, _, b = self.req("POST", "/api/tokens", {"messages": msgs + [{"role": "user", "content": [
             {"type": "text", "text": "and this"}, {"type": "image_url", "image_url": {"url": "data:,"}}]}]})
         self.assertTrue(json.loads(b)["approximate"])
+
+    def test_tokenize_and_detokenize(self):
+        """POST /tokenize and /detokenize in llama.cpp's and vLLM's forms: a text's ids (its special tokens' text as
+        those tokens unless parse_special is false), a chat request's prompt as prepare() makes it, and the text back."""
+        tok = ByteTokenizer()
+        s, _, b = self.req("POST", "/tokenize", {"content": "hi<|im_end|>"})
+        self.assertEqual((s, json.loads(b)["tokens"]), (200, tok.encode("hi<|im_end|>", parse_special=True)))
+        s, _, b = self.req("POST", "/tokenize", {"model": "m", "prompt": "hi<|im_end|>", "parse_special": False})
+        j = json.loads(b)
+        self.assertEqual((j["tokens"], j["count"]), (tok.encode("hi<|im_end|>"), len("hi<|im_end|>")))
+        self.assertEqual(j["max_model_len"], self.svc.engine.max_context)
+        msgs = [{"role": "system", "content": "Be brief."}, {"role": "user", "content": "count me"}]
+        s, _, b = self.req("POST", "/tokenize", {"messages": msgs, "reasoning_effort": "high"})
+        from serve.frontend import openai_to_messages
+        m, tools, kw = openai_to_messages({"messages": msgs, "reasoning_effort": "high"})
+        ids, _, _ = self.svc.prepare(m, tools, kw)
+        self.assertEqual((s, json.loads(b)["tokens"]), (200, ids))
+        s, _, b = self.req("POST", "/detokenize", {"tokens": ids})
+        j = json.loads(b)
+        self.assertEqual((s, j["content"]), (200, tok.decode(ids)))
+        self.assertEqual(j["prompt"], j["content"])
+        for path, body in (("/tokenize", {"content": 3}), ("/tokenize", {}), ("/detokenize", {"tokens": [1, -1]}),
+                           ("/detokenize", {"tokens": "1,2"})):
+            s, _, _ = self.req("POST", path, body)
+            self.assertEqual(s, 400, (path, body))
 
     def test_peak_decode_speed(self):
         # the Monitor's peak decode: the fastest answer since the server started, of PEAK_MIN_TOKENS tokens or more
