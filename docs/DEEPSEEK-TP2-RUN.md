@@ -49,6 +49,19 @@ separate manifests on the two hosts, because they also record local file
 metadata. If a source changes, regenerate the affected manifest and confirm
 that both hosts still have matching model contents.
 
+New manifests record the stable filesystem ID alongside local file metadata.
+On Btrfs it includes the subvolume identity, so a device-number change after
+remount or reboot can pass when the filesystem ID, inode, size and nanosecond
+modification/change times still match. Hashing still rejects files that change
+during the read, and startup rehashes the pack metadata.
+
+Older manifests without a filesystem ID retain their strict device-number
+check. If they report `identity input changed` after a remount, create a new
+manifest at a fresh path on each affected host using the command below. Compare
+its printed model digest with the previous manifest and the peer before updating
+the launcher's `manifest` path. This performs a full content hash once. The
+identity helper on both hosts must support the new local metadata fields.
+
 Build matching review executables with `STRATA_ENABLE_HIP=ON`,
 `STRATA_ENABLE_CUDA=OFF`, `STRATA_PREFILL_MMQ=ON`,
 `STRATA_ENABLE_TP2_RDMA=ON` and `CMAKE_HIP_ARCHITECTURES=gfx1151`; build the

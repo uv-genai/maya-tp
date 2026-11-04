@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from tools.ds4 import tp2_identity as identity
 
@@ -89,6 +90,54 @@ class DeepSeekTP2IdentityTest(unittest.TestCase):
         os.utime(source, ns=(old.st_atime_ns, old.st_mtime_ns))
         with self.assertRaisesRegex(identity.IdentityError, "changed"):
             identity.check_manifest(m, pack)
+
+    def test_cache_survives_device_renumbering_with_same_filesystem(self):
+        pack = self.make_pack("a")
+        manifest = identity.create_manifest(pack)
+        for entry in manifest["local"]:
+            self.assertTrue(entry["stat"]["filesystem_id"])
+            entry["stat"]["device"] += 1
+        self.assertEqual(identity.check_manifest(manifest, pack), manifest["identity"])
+
+    def test_stable_filesystem_cache_still_rejects_other_file_changes(self):
+        pack = self.make_pack("a")
+        manifest = identity.create_manifest(pack)
+        for role in ("config", "source/0"):
+            for field in ("filesystem_id", "inode", "size", "mtime_ns", "ctime_ns"):
+                with self.subTest(role=role, field=field):
+                    changed = copy.deepcopy(manifest)
+                    entry = next(x for x in changed["local"] if x["role"] == role)
+                    entry["stat"]["device"] += 1
+                    entry["stat"][field] += 1
+                    with self.assertRaisesRegex(identity.IdentityError, "changed"):
+                        identity.check_manifest(changed, pack)
+
+    def test_legacy_cache_keeps_strict_device_check(self):
+        pack = self.make_pack("a")
+        manifest = identity.create_manifest(pack)
+        for entry in manifest["local"]:
+            entry["stat"].pop("filesystem_id", None)
+        self.assertEqual(identity.check_manifest(manifest, pack), manifest["identity"])
+        for entry in manifest["local"]:
+            entry["stat"]["device"] += 1
+        with self.assertRaisesRegex(identity.IdentityError, "changed"):
+            identity.check_manifest(manifest, pack)
+
+    def test_zero_filesystem_id_keeps_device_identity(self):
+        pack = self.make_pack("a")
+        current = identity._signature((pack / "ds4.txt").stat(), 0)
+        self.assertNotIn("filesystem_id", current)
+        cached = dict(current, device=current["device"] + 1)
+        self.assertFalse(identity._cached_signature_matches(current, cached))
+
+    def test_device_change_during_hashing_is_rejected(self):
+        pack = self.make_pack("a")
+        path = pack / "ds4.txt"
+        changed = identity._path_signature(path)
+        changed["device"] += 1
+        with mock.patch.object(identity, "_path_signature", return_value=changed):
+            with self.assertRaisesRegex(identity.IdentityError, "changed while hashing"):
+                identity._stable_read(path)
 
     def test_metadata_is_rehashed_and_paths_cannot_be_redirected(self):
         a, b = self.make_pack("a"), self.make_pack("b")

@@ -2,6 +2,20 @@
 
 Read [AGENTS.md](AGENTS.md), then Handoff.md §47 for the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 
+The latest DeepSeek startup repair is in Handoff.md §49 and issue #138.
+Btrfs device renumbering invalidated the old identity caches. Both runtime
+helpers now use stable filesystem/subvolume identity, and both hosts' XS/S
+manifests were fully rehashed and refreshed. Paired preflight passes, and the
+user confirmed Maya-S running through llama-swap, closing #138. Handoff.md §50
+and #139 record the user's 1–4 client concurrency benchmark. All 20 requests
+succeeded, with aggregate throughput around 28 tok/s and queueing latency
+increasing with concurrency. Publication of the identity fix, benchmark and
+related handoff updates on `main` is tracked in #138/#139. Those issues record
+the publication commit and CI outcomes.
+DeepSeek TP2 continuous batching with DSpark is tracked in open #140, with
+the initial design and phased implementation plan pending. GLM multi-sequence
+tracking remains in #11.
+
 ## Current GLM and DeepSeek state
 
 The user accepted the DeepSeek TP2/DSpark work after hours of successful testing

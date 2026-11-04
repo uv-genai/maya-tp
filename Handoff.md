@@ -91,6 +91,9 @@ The user reports hours of successful use including DeepSWE benchmarks.
 | 118 / 119 | DeepSeek launchers and llama-swap entries | closed, accepted runtime uses both model-specific aliases |
 | 120 / 121 | Queued collective speedup and main integration | closed, user-accepted build and green merged-main CI |
 | 123 | Post-merge documentation audit | corrected active guides and checked links, entry points and runtime selections (§46) |
+| 138 | DeepSeek startup identity cache | closed after user confirms Maya-S running through llama-swap (§49) |
+| 139 | DeepSeek concurrent API benchmark | completed 1–4 client waves; script and results in §50 |
+| 140 | DeepSeek TP2 continuous batching with DSpark | open feature tracking; initial design and phased plan pending |
 
 ## 5. What works (Maya-S pack)
 
@@ -2731,7 +2734,70 @@ alias controls against source. Whitespace and documentation-only scope checks
 passed. The local canonical GLM binary matches its recorded runtime hashes.
 No model processes are owned by this audit.
 
-The user authorized publication through `docs/post-v53-audit`, followed by a
-pull request into `main`. Issue #135 records the publication commit, PR and CI
-outcomes. Use synchronized `main` as the entry point after the merge. This audit
-changes Markdown files only.
+PR #136 published the audit to `main` as `dc95103`. Merged-main CI 41842324378
+passed. Issue #135 records the publication outcome. The audit changed Markdown
+files only.
+
+## 49. DeepSeek startup identity repair (#138, 2026-11-04)
+
+The user reported `identity input changed` for Maya-S `ds4.txt` through
+llama-swap. Both Btrfs hosts' XS/S manifests differed only in `st_dev`, with
+host 1 changing 54→59 and host 2 changing 56→55. Device numbers can change after
+remount or reboot. Inodes, sizes and nanosecond mtime/ctime matched the caches.
+
+The identity helper now records the stable filesystem ID from statvfs/fstatvfs.
+Btrfs includes its filesystem UUID and subvolume ID in that value. Cache checks
+accept device renumbering when this ID and all other recorded file attributes
+match. Existing manifests without the new field retain their device checks.
+Hashing keeps the full before/after device and file-signature comparisons.
+
+The accepted runtime's `tools/ds4/tp2_identity.py` was updated on both hosts.
+Its SHA-256 is `5cbec57f0430eb7bbe87381233afdb8892292ec0cfc56649c74bd425c45a809a`.
+Full XS/S content hashing on each host reproduced the accepted canonical model
+identities. The refreshed `manifests/maya-{s,xs}.json` files were published
+atomically. Helper and manifest backups use the `.before-138` suffix.
+
+Actual launcher preflight passed for both models on both ranks, with matching
+model/partition/build digests, context 262144, chunk 256 and DSpark on. The
+accepted queued engine is the §44 executable. Validation passed 37 focused
+tests, HIP mapping, 739 server tests (20 skips), 756 tools tests (3 skips),
+GLM CPU memory policy and DeepSeek CPU row-preparation/stub checks. The baseline
+reproduces the device-renumbering rejection, and five new regressions cover
+the fix and retained identity guards.
+
+The user subsequently confirmed Maya-S running through llama-swap, completing
+the startup checkpoint and closing #138. The user requested publication of all
+pending source, regression and documentation changes on 2026-11-05. Issue #138
+records the publication commit and CI outcomes on `main`.
+Validation ran identity preflight and content hashes. No model processes were
+started in this workstream. Logs and repair scripts are under
+`/tmp/maya-identity-138-*`.
+
+## 50. DeepSeek Maya-S concurrent API benchmark (#139, 2026-11-04)
+
+At the user's request, `tools/bench_concurrency.py` measured the already running
+`maya-deepseek-s-mtp` alias at `http://strix-halo-1.local:8080/v1`. One warmup
+preceded two simultaneous-client waves at each level, using 89-token eBPF
+prompts, thinking off, temperature 0 and 256 output tokens per request.
+All 20 measured requests succeeded, with cache 0 and DSpark active throughout.
+
+| Concurrent clients | Aggregate tok/s | Median first token, s | Median completion, s |
+| --- | --- | --- | --- |
+| 1 | 27.93 | 0.74 | 9.17 |
+| 2 | 27.23 | 5.30 | 14.09 |
+| 3 | 27.37 | 10.22 | 18.60 |
+| 4 | 27.94 | 14.27 | 22.85 |
+
+The current TP2 setup serves one active sequence, with additional requests
+waiting in the queue. Server decode medians were 29.2–30.35 tok/s. These short
+burst waves produced partial tutorials at the token cap. Full requests,
+responses, timings, reproduction instructions and limits are in
+`docs/benchmarks/deepseek-maya-s-concurrency-2026-11-04/`.
+Four focused benchmark regressions pass. Issue #139 records publication of the
+source and results on `main`, with the commit and CI outcomes. The benchmark
+used the authorized API on the user's existing pair.
+
+The user requested dedicated feature tracking for DeepSeek TP2 multi-sequence
+execution and continuous batching with DSpark. Open issue #140 links this
+baseline and defines the initial design checkpoint and acceptance criteria.
+GLM multi-sequence work remains separately tracked in #11.

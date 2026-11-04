@@ -29,18 +29,33 @@ class IdentityError(ValueError):
     pass
 
 
-def _signature(st):
+def _signature(st, filesystem_id=None):
     if not stat.S_ISREG(st.st_mode):
         raise IdentityError("identity input is not a regular file")
-    return {"device": st.st_dev, "inode": st.st_ino, "size": st.st_size,
-            "mtime_ns": st.st_mtime_ns, "ctime_ns": st.st_ctime_ns}
+    signature = {"device": st.st_dev, "inode": st.st_ino, "size": st.st_size,
+                 "mtime_ns": st.st_mtime_ns, "ctime_ns": st.st_ctime_ns}
+    if filesystem_id:
+        signature["filesystem_id"] = filesystem_id
+    return signature
 
 
 def _path_signature(path):
     try:
-        return _signature(Path(path).stat())
+        return _signature(Path(path).stat(), os.statvfs(path).f_fsid)
     except OSError as exc:
         raise IdentityError(f"identity input unavailable: {path}: {exc.strerror}") from exc
+
+
+def _cached_signature_matches(current, cached):
+    """Btrfs device numbers can change after remount; its filesystem ID is stable."""
+    current, cached = dict(current), dict(cached)
+    if cached.get("filesystem_id"):
+        current.pop("device", None)
+        cached.pop("device", None)
+    else:
+        # Existing manifests keep their strict device check until regenerated.
+        current.pop("filesystem_id", None)
+    return current == cached
 
 
 def _stable_read(path: Path, keep=False, progress=None):
@@ -48,7 +63,7 @@ def _stable_read(path: Path, keep=False, progress=None):
     h = hashlib.sha256()
     chunks = [] if keep else None
     with path.open("rb") as f:
-        before = _signature(os.fstat(f.fileno()))
+        before = _signature(os.fstat(f.fileno()), os.fstatvfs(f.fileno()).f_fsid)
         if keep and before["size"] > MAX_META:
             raise IdentityError(f"metadata file too large: {path}")
         done = 0
@@ -67,7 +82,7 @@ def _stable_read(path: Path, keep=False, progress=None):
             if progress and now - last_report >= 5:
                 progress(done, before["size"])
                 last_report = now
-        after = _signature(os.fstat(f.fileno()))
+        after = _signature(os.fstat(f.fileno()), os.fstatvfs(f.fileno()).f_fsid)
     if before != after or after != _path_signature(path):
         raise IdentityError(f"identity input changed while hashing: {path}")
     if progress:
@@ -235,7 +250,7 @@ def check_manifest(manifest, pack):
             raise IdentityError("manifest local input path mismatch")
         if not isinstance(entry.get("sha256"), str) or not HEX256.fullmatch(entry["sha256"]):
             raise IdentityError("invalid local input digest")
-        if _path_signature(path) != entry["stat"]:
+        if not _cached_signature_matches(_path_signature(path), entry["stat"]):
             raise IdentityError(f"identity input changed: {path}")
         return entry
 
@@ -244,7 +259,7 @@ def check_manifest(manifest, pack):
     def meta(role, path, keep=False):
         entry = entry_for(role, path)
         digest, sig, data = _stable_read(Path(path), keep)
-        if digest != entry["sha256"] or sig != entry["stat"]:
+        if digest != entry["sha256"] or not _cached_signature_matches(sig, entry["stat"]):
             raise IdentityError(f"identity metadata changed: {path}")
         return digest, data
 
@@ -282,7 +297,7 @@ def check_manifest(manifest, pack):
             raise IdentityError("tensor span is outside its indexed file")
     # Catch a source changed while the other metadata was being checked.
     for entry in entries:
-        if _path_signature(entry["path"]) != entry["stat"]:
+        if not _cached_signature_matches(_path_signature(entry["path"]), entry["stat"]):
             raise IdentityError(f"identity input changed: {entry['path']}")
     return identity
 

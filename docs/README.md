@@ -13,6 +13,7 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | Pair setup, model/executable selection, MTP and recovery | [TP2 runbook](TP2-RUN.md) |
 | DeepSeek two-host operation | [DeepSeek TP2 and DSpark guide](DEEPSEEK-TP2-RUN.md) |
 | DeepSeek TP2 measurements | [Queued-collective comparison and user results](benchmarks/deepseek-tp2-queued-2026-11-04/README.md), [earlier review benchmark](benchmarks/deepseek-tp2-review-2026-11-03/README.md) |
+| DeepSeek concurrent requests | [Maya-S API throughput and queueing at 1–4 clients](benchmarks/deepseek-maya-s-concurrency-2026-11-04/README.md) |
 | Installer and clean-install updates | [Setup](SETUP.md) |
 | Model catalog and fork validation limits | [Models](MODELS.md) |
 | Runtime settings, thinking budgets and default-off options | [Settings](SETTINGS.md) |
