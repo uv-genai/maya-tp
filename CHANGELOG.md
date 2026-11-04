@@ -6,6 +6,13 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.52 integration** (#130) adds IQ1 CPU rows, F16 dense conversion,
+  Linux Engram reader sizing, early config validation and installer/server fixes.
+  Retain sliced GLM dense reductions and gate the new local graph/speculative
+  paths away from RDMA TP2. The optional gfx1151 indexer WMMA path passed its
+  component parity probe and keeps its default-off setting.
+  [Review and validation](docs/upstream/v1.1.52.md).
+
 - **Upstream v1.1.51 integration** (#127) adds opt-in DeepSeek CPU row preparation,
   configurable RAM margin, savings-ledger placement and server/UI/installer fixes.
   Preserve remote TP2 loading, mirrored GLM resets and checkpoint restrictions.
