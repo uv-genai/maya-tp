@@ -1931,3 +1931,20 @@ is off. It changes the floating-point summation order and can change close routi
 choices. The focused `ds4_index_score_tc` probe covers query windows, prompt slabs,
 candidate rows and scale edges. Paired acceptance runs use the default indexer.
 End-to-end quality and performance with this option remain separate measurements.
+
+## Incremental prompt preparation and diagnostics
+
+`MAYA_PROMPT_MEMO` defaults to `0`. `1` reuses literal marking, tokenization and
+serialized token-ID prefixes across turns. `verify` also compares each result
+with full prompt encoding and raises an error on a mismatch. GLM and DeepSeek
+pack-tokenizer tests cover edits, branches, tools, quoted literals and Unicode.
+Steady-state performance with this option remains a separate measurement.
+
+`MAYA_TURN_TRACE=1` records server-side preparation and first-token timestamps.
+Its default is `0`. Both settings accept their `STRATA_*` aliases, with `MAYA_*`
+winning. They can be placed in the server config's `env` object. The inherited
+engine-side `DS4_TURN_TRACE=1` adds DeepSeek request-stage timing.
+
+A fatal DeepSeek GPU-state notice ends that engine after the current request.
+A TP2 server marks the pair down immediately, retains the first cause and
+requires both ranks to restart through the pair launcher.

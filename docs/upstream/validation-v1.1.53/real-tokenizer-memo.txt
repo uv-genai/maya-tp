@@ -1,0 +1,30 @@
+test_the_same (serve.test_prompt_memo.GistByText.test_the_same) ... ok
+test_a_tuple_of_ids (serve.test_prompt_memo.JoinIdsMemo.test_a_tuple_of_ids) ... ok
+test_the_same_string_as_join (serve.test_prompt_memo.JoinIdsMemo.test_the_same_string_as_join) ... ok
+test_a_small_cap_keeps_the_answers (serve.test_prompt_memo.LiteralMemoSame.test_a_small_cap_keeps_the_answers) ... ok
+test_the_same_as_mark_literals (serve.test_prompt_memo.LiteralMemoSame.test_the_same_as_mark_literals) ... ok
+test_alias_and_maya_precedence (serve.test_prompt_memo.MemoSettings.test_alias_and_maya_precedence) ... ok
+test_default_least (serve.test_prompt_memo.RestorePointsFast.test_default_least) ... ok
+test_the_same_as_the_original (serve.test_prompt_memo.RestorePointsFast.test_the_same_as_the_original) ... ok
+test_a_suffix_takes_the_whole_way (serve.test_prompt_memo.SameIds.test_a_suffix_takes_the_whole_way) ... ok
+test_deepseek (serve.test_prompt_memo.SameIds.test_deepseek) ... ok
+test_glm (serve.test_prompt_memo.SameIds.test_glm) ... ok
+test_glm5 (serve.test_prompt_memo.SameIds.test_glm5) ... ok
+test_minimax (serve.test_prompt_memo.SameIds.test_minimax) ... ok
+test_off_by_default_the_memo_is_never_built (serve.test_prompt_memo.SameIds.test_off_by_default_the_memo_is_never_built) ... ok
+test_qwen (serve.test_prompt_memo.SameIds.test_qwen) ... ok
+test_verify_mode_passes_and_says_so (serve.test_prompt_memo.SameIds.test_verify_mode_passes_and_says_so) ... ok
+test_a_suffix_takes_the_whole_way (serve.test_prompt_memo.SameIdsRealTokenizers.test_a_suffix_takes_the_whole_way) ... ok
+test_deepseek (serve.test_prompt_memo.SameIdsRealTokenizers.test_deepseek) ... ok
+test_glm (serve.test_prompt_memo.SameIdsRealTokenizers.test_glm) ... ok
+test_glm5 (serve.test_prompt_memo.SameIdsRealTokenizers.test_glm5) ... ok
+test_minimax (serve.test_prompt_memo.SameIdsRealTokenizers.test_minimax) ... ok
+test_off_by_default_the_memo_is_never_built (serve.test_prompt_memo.SameIdsRealTokenizers.test_off_by_default_the_memo_is_never_built) ... ok
+test_qwen (serve.test_prompt_memo.SameIdsRealTokenizers.test_qwen) ... ok
+test_real (serve.test_prompt_memo.SameIdsRealTokenizers.test_real) ... ok
+test_verify_mode_passes_and_says_so (serve.test_prompt_memo.SameIdsRealTokenizers.test_verify_mode_passes_and_says_so) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 6.161s
+
+OK

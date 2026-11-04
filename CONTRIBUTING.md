@@ -44,3 +44,9 @@ An upstream merge does not itself publish a fork release. When a release is requ
 immutable **`tp-vMAJOR.MINOR.PATCH`** tag, keep `VERSION` numeric, and describe measured behavior and
 known limits. Existing published legacy `v*` tags stay unchanged. Upstream is read/merge only;
 fetch its tags as `upstream/v*` and never push there.
+
+The optional [agent-shaped API benchmark](docs/AGENT_BENCH.md) exercises repeated
+long-context turns. Its unit tests cover request construction and metrics.
+Use the pair runbooks for model selection and process ownership when measuring
+this fork. The recorded upstream tag checks use the bounded harnesses in each
+integration report.

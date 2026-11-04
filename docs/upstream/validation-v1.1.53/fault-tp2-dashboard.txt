@@ -1,0 +1,124 @@
+test_a_gpu_fault_the_engine_caught_is_not_read_as_ram (serve.test_server.EngineEndTests.test_a_gpu_fault_the_engine_caught_is_not_read_as_ram) ... ok
+test_end_ahead_of_done_marks_the_engine_ended_before_the_request_ends (serve.test_server.EngineEndTests.test_end_ahead_of_done_marks_the_engine_ended_before_the_request_ends) ... [maya] a GPU's state is unknown after this request - the engine ends (exit 3); the next request starts a fresh one
+ok
+test_the_watchdog_and_ram_notes_are_unchanged (serve.test_server.EngineEndTests.test_the_watchdog_and_ram_notes_are_unchanged) ... ok
+test_first_pair_down_cause_survives_a_later_engine_error (serve.test_tp2_peer_loss.PeerLoss.test_first_pair_down_cause_survives_a_later_engine_error) ... [maya] TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection - restart both ranks, worker first
+[maya] TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection - restart both ranks, worker first
+ok
+test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine (serve.test_tp2_peer_loss.PeerLoss.test_first_poisoned_error_is_sticky_and_later_request_never_reaches_engine) ... ok
+test_gpu_fault_end_requires_both_ranks_and_retains_the_first_cause (serve.test_tp2_peer_loss.PeerLoss.test_gpu_fault_end_requires_both_ranks_and_retains_the_first_cause) ... [maya] a GPU's state is unknown after this request
+[maya] TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection - restart both ranks, worker first
+[maya] a GPU's state is unknown after this request
+[maya] a GPU's state is unknown after this request
+[maya] TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection - restart both ranks, worker first
+[maya] a GPU's state is unknown after this request
+ok
+test_health_is_degraded_immediately_after_first_http_failure (serve.test_tp2_peer_loss.PeerLoss.test_health_is_degraded_immediately_after_first_http_failure) ... /home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] the engine reported an error: TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks
+[maya] done: 0 tokens in 1 s (0.0 tok/s) (error, cancel=False)
+ok
+test_raw_peer_close_is_sticky_even_before_the_pair_down_notice (serve.test_tp2_peer_loss.PeerLoss.test_raw_peer_close_is_sticky_even_before_the_pair_down_notice) ... ok
+test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior (serve.test_tp2_peer_loss.PeerLoss.test_unpaired_error_and_unrelated_tp_error_keep_their_existing_behavior) ... ok
+test_parsed_from_the_start_log (serve.test_dashboard.ContextCost.test_parsed_from_the_start_log) ... ok
+test_set_context_rewrites_the_command (serve.test_dashboard.ContextCost.test_set_context_rewrites_the_command) ... ok
+test_chat_gets_503_while_reloading (serve.test_dashboard.Dashboard.test_chat_gets_503_while_reloading) ... [maya] reloading the model with a 16384-token context (was 32768) ...
+[maya] the model runs with a 16384-token context now
+[maya] done: 16 tokens in 0 s (50211.1 tok/s) (stop, cancel=False)
+ok
+test_context_range (serve.test_dashboard.Dashboard.test_context_range) ... ok
+test_deepseek_context_range (serve.test_dashboard.Dashboard.test_deepseek_context_range)
+A DeepSeek pack: the context its ds4.txt says the model was trained for is the top (V4.1-Flash: 1M), and its ... [maya] reloading the model with a 1048576-token context (was 32768) ...
+[maya] the model runs with a 1048576-token context now
+ok
+test_deepseek_lookup_uses_engine_state_when_a_launcher_wraps_it (serve.test_dashboard.Dashboard.test_deepseek_lookup_uses_engine_state_when_a_launcher_wraps_it) ... ok
+test_explicit_model_label_and_installer_fallback (serve.test_dashboard.Dashboard.test_explicit_model_label_and_installer_fallback) ... ok
+test_health_has_the_version (serve.test_dashboard.Dashboard.test_health_has_the_version) ... ok
+test_metrics_list_the_drafters_that_run (serve.test_dashboard.Dashboard.test_metrics_list_the_drafters_that_run) ... ok
+test_metrics_say_whether_deepseek_drafts (serve.test_dashboard.Dashboard.test_metrics_say_whether_deepseek_drafts) ... ok
+test_out_of_range_and_foreign_pages_are_refused (serve.test_dashboard.Dashboard.test_out_of_range_and_foreign_pages_are_refused) ... ok
+test_peak_decode_follows_the_live_figure (serve.test_dashboard.Dashboard.test_peak_decode_follows_the_live_figure) ... ok
+test_peak_decode_speed (serve.test_dashboard.Dashboard.test_peak_decode_speed) ... [maya] done: 74 tokens in 0 s (3090.6 tok/s) (stop, cancel=False)
+[maya] done: 74 tokens in 0 s (3215.0 tok/s) (stop, cancel=False)
+[maya] done: 74 tokens in 0 s (3225.2 tok/s) (stop, cancel=False)
+[maya] done: 5 tokens in 0 s (12192.7 tok/s) (length, cancel=False)
+ok
+test_reload_changes_the_context_and_saves_it (serve.test_dashboard.Dashboard.test_reload_changes_the_context_and_saves_it) ... [maya] reloading the model with a 65536-token context (was 32768) ...
+[maya] the model runs with a 65536-token context now
+[maya] reloading the model with a 16384-token context (was 65536) ...
+[maya] the model runs with a 16384-token context now
+ok
+test_report_leaves_secrets_out (serve.test_dashboard.Dashboard.test_report_leaves_secrets_out) ... ok
+test_requests_carry_the_drafts_offered_and_kept (serve.test_dashboard.Dashboard.test_requests_carry_the_drafts_offered_and_kept) ... /home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[maya] done: 16 tokens in 0 s (90524.5 tok/s) (stop, cancel=False)
+ok
+test_requests_record_their_api (serve.test_dashboard.Dashboard.test_requests_record_their_api) ... [maya] done: 16 tokens in 0 s (96940.8 tok/s) (stop, cancel=False)
+ok
+test_stat_lines_carry_the_draft_counts_and_the_ssd_bytes (serve.test_dashboard.Dashboard.test_stat_lines_carry_the_draft_counts_and_the_ssd_bytes) ... ok
+test_token_count_matches_the_prompt (serve.test_dashboard.Dashboard.test_token_count_matches_the_prompt) ... ok
+test_tokenize_and_detokenize (serve.test_dashboard.Dashboard.test_tokenize_and_detokenize)
+POST /tokenize and /detokenize in llama.cpp's and vLLM's forms: a text's ids (its special tokens' text as ... ok
+test_tp2_context_reload_is_rejected_before_mutation (serve.test_dashboard.Dashboard.test_tp2_context_reload_is_rejected_before_mutation) ... ok
+test_tp2_load_unload_and_dead_restart_preserve_pair (serve.test_dashboard.Dashboard.test_tp2_load_unload_and_dead_restart_preserve_pair) ... ok
+test_tp2_model_api_unload_preserves_pair (serve.test_dashboard.Dashboard.test_tp2_model_api_unload_preserves_pair) ... ok
+test_tp2_running_model_settings_are_not_saved (serve.test_dashboard.Dashboard.test_tp2_running_model_settings_are_not_saved) ... /home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_tp2_turbo_preserves_both_model_families (serve.test_dashboard.Dashboard.test_tp2_turbo_preserves_both_model_families) ... ok
+test_a_vision_tower_in_the_engines_process (serve.test_dashboard.GpuMap.test_a_vision_tower_in_the_engines_process) ... ok
+test_an_engine_run_through_a_launcher (serve.test_dashboard.GpuMap.test_an_engine_run_through_a_launcher) ... ok
+test_found_by_pci_not_by_place (serve.test_dashboard.GpuMap.test_found_by_pci_not_by_place) ... ok
+test_helper_pool_and_primary_pool_on_one_card_do_not_overlap (serve.test_dashboard.GpuMap.test_helper_pool_and_primary_pool_on_one_card_do_not_overlap) ... ok
+test_helper_pool_is_accounted_separately_from_drafter_and_rest (serve.test_dashboard.GpuMap.test_helper_pool_is_accounted_separately_from_drafter_and_rest) ... ok
+test_later_lines_follow_a_picture (serve.test_dashboard.GpuMap.test_later_lines_follow_a_picture)
+maya-ds4 prints its VRAM lines again when a picture's room is lent to its vision tower and when it is given ... ok
+test_metrics_carry_it (serve.test_dashboard.GpuMap.test_metrics_carry_it) ... ok
+test_never_more_than_the_card (serve.test_dashboard.GpuMap.test_never_more_than_the_card) ... ok
+test_nvml_tells_the_engine_from_other_programs (serve.test_dashboard.GpuMap.test_nvml_tells_the_engine_from_other_programs) ... ok
+test_parse (serve.test_dashboard.GpuMap.test_parse) ... ok
+test_strata_ds4s_prompt_buffers_and_tensor_parallel (serve.test_dashboard.GpuMap.test_strata_ds4s_prompt_buffers_and_tensor_parallel) ... ok
+test_tensor_parallel_room_is_the_groups_least_free (serve.test_dashboard.GpuMap.test_tensor_parallel_room_is_the_groups_least_free) ... ok
+test_the_drivers_reserve_is_not_another_program (serve.test_dashboard.GpuMap.test_the_drivers_reserve_is_not_another_program) ... ok
+test_the_engine_not_listed_the_start_measurement (serve.test_dashboard.GpuMap.test_the_engine_not_listed_the_start_measurement) ... ok
+test_the_vision_encoder_has_the_tail (serve.test_dashboard.GpuMap.test_the_vision_encoder_has_the_tail) ... ok
+test_two_parts_on_one_card_add_up (serve.test_dashboard.GpuMap.test_two_parts_on_one_card_add_up) ... ok
+test_without_nvml_the_start_measurement (serve.test_dashboard.GpuMap.test_without_nvml_the_start_measurement) ... ok
+test_waits_until_no_gpu_lists_the_engine (serve.test_dashboard.GpuRelease.test_waits_until_no_gpu_lists_the_engine) ... ok
+test_without_nvml_a_short_wait (serve.test_dashboard.GpuRelease.test_without_nvml_a_short_wait) ... ok
+test_its_own_pid_when_listed_or_nothing_is (serve.test_dashboard.NvmlPids.test_its_own_pid_when_listed_or_nothing_is) ... ok
+test_the_processes_a_launcher_started (serve.test_dashboard.NvmlPids.test_the_processes_a_launcher_started) ... ok
+test_nothing_loaded_from_the_network (serve.test_dashboard.Offline.test_nothing_loaded_from_the_network) ... ok
+test_the_vendored_code_keeps_its_notices (serve.test_dashboard.Offline.test_the_vendored_code_keeps_its_notices) ... ok
+test_context_reload_capability (serve.test_dashboard.PageLogic.test_context_reload_capability) ... ok
+test_context_slider_reaches_each_models_own_top (serve.test_dashboard.PageLogic.test_context_slider_reaches_each_models_own_top) ... ok
+test_experts_on_the_ssd_have_their_bytes_like_the_other_tiers (serve.test_dashboard.PageLogic.test_experts_on_the_ssd_have_their_bytes_like_the_other_tiers) ... ok
+test_free_room_a_tensor_parallel_partner_cannot_use_promises_no_experts (serve.test_dashboard.PageLogic.test_free_room_a_tensor_parallel_partner_cannot_use_promises_no_experts) ... ok
+test_speculation_says_off_waiting_or_the_acceptance (serve.test_dashboard.PageLogic.test_speculation_says_off_waiting_or_the_acceptance) ... ok
+test_thinking_pill_covers_the_chosen_level_only (serve.test_dashboard.PageLogic.test_thinking_pill_covers_the_chosen_level_only) ... ok
+test_refused_with_nothing_saved (serve.test_dashboard.Port.test_refused_with_nothing_saved) ... /home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:670: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/ugo/software/project-maya-upstream-integration/serve/telemetry.py:653: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_saved_and_reported (serve.test_dashboard.Port.test_saved_and_reported) ... [maya] the port 57321 is saved - it applies from the next start
+ok
+
+----------------------------------------------------------------------
+Ran 65 tests in 20.670s
+
+OK

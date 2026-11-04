@@ -105,6 +105,12 @@ that restart a TP2 engine require the pair launcher, including Turbo. GLM
 Maya-XS has installer coverage; the recorded paired model validation covers
 the models listed below. [Integration checkpoint](docs/upstream/v1.1.50.md).
 
+Upstream v1.1.50–v1.1.53 is integrated through separate sequential PRs with
+isolated gfx1151 GLM TP2/MTP and DeepSeek TP2/DSpark validation. The later
+checkpoints add serving, model-storage/UI, packing and GPU-fault handling fixes.
+The new optional engine experiments are tracked for separate assessment in #133.
+[Latest review and validation](docs/upstream/v1.1.53.md).
+
 DeepSeek TP2 and DSpark were merged into `main` through PR #122 at `75e18e8`
 after extended user trials. HIP mapping, server and tools CI passed on the
 feature head and merged commit. [Merged pull request](https://github.com/uv-genai/maya-tp/pull/122).

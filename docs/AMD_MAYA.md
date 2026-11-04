@@ -1,4 +1,4 @@
-# Experimental Maya on RX 7900 XT / XTX, R9700 / RX 9070 and Strix Halo / Gorgon Halo
+# Maya on RX 7900 XT / XTX, R9700 / RX 9070 and Strix Halo / Gorgon Halo
 
 > **Inherited upstream HIP reference.** Maya-TP targets gfx1151 Linux and two-host RDMA; use
 > [TP2-RUN.md](TP2-RUN.md) for its build/launch procedure. Other architectures, Windows, same-host

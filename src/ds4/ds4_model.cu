@@ -2283,6 +2283,22 @@ struct Model::Impl {
     bool lend_broken = false;
     static constexpr const char* kLendBroken =
         "the prompt path's room could not be handed back - the expert tables are unknown; restart the engine";
+    bool broken() {
+        if (lend_broken) return true;
+        int cur = -1;
+        const bool had = cudaGetDevice(&cur) == cudaSuccess;
+        bool bad = false;
+        for (const Dev& d : devs) {
+            cudaError_t e = cudaSetDevice(d.id);
+            if (e == cudaSuccess) e = cudaStreamQuery(d.st);
+            if (e != cudaSuccess && e != cudaErrorNotReady) {
+                std::fprintf(stderr, "ds4: CUDA%d: %s - the device's state is unknown\n", d.id, cudaGetErrorString(e));
+                bad = true;
+            }
+        }
+        if (had) cudaSetDevice(cur);
+        return bad;
+    }
     std::vector<uint8_t*> rf_stage, rf_half;   // (rf_half: DS4_TP_BORROW's member parts, one a thread)
     std::thread rf_pre;   // (borrow_begin: the lent experts' file ranges asked for while the prompt runs; borrow_end joins it)
     bool rf_pre_cached = false;   // (the lent experts' ranges were asked for: borrow_end reads them through the page cache)
@@ -3346,6 +3362,7 @@ struct Model::Impl {
         l.esrc.assign((size_t) l.n_exp, {});
         l.esplit.assign((size_t) l.n_exp, 0);
         std::vector<Sig> sigs;
+        std::vector<uint8_t> xfile((size_t) l.n_exp, 0);   // expert -> 1: its pieces in two files (not just far apart)
         for (int e = 0; e < l.n_exp; ++e) {
             const std::string E = P + std::to_string(e) + ".";
             uint64_t lo = UINT64_MAX, hi = 0;
@@ -3372,6 +3389,7 @@ struct Model::Impl {
                     }
                     if (file < 0) file = t->file;
                     split = split || t->file != file;   // (a mixed quant's shards can cut an expert: read by pieces)
+                    if (t->file != file) xfile[(size_t) e] = 1;
                     lo = std::min(lo, t->off);
                     hi = std::max(hi, t->off + t->bytes);
                     sg.bytes[r][q] = t->bytes;
@@ -3409,8 +3427,12 @@ struct Model::Impl {
         if (l.n_cls == 1)   // (one layout: the CPU lane reads every expert's pieces where expert 0's lie, in one file)
             for (int e = 0; e < l.n_exp; ++e)
                 if (l.esrc[(size_t) e] != l.esrc[0] || l.esplit[(size_t) e]) {
-                    err = P + std::to_string(e) + (l.esplit[(size_t) e] ? ": split across files"
-                                                                        : ": the pieces lie differently from expert 0's");
+                    err = P + std::to_string(e) +
+                          (xfile[(size_t) e]    ? ": split across files"
+                           : l.esplit[(size_t) e] ? ": its pieces are not together in their file (the shards' tensors "
+                                                    "ordered by type, not expert by expert?) - rewrite those shards "
+                                                    "with each expert's tensors back to back"
+                                                  : ": the pieces lie differently from expert 0's");
                     return false;
                 }
         size_t bmax = 0;
@@ -21393,6 +21415,7 @@ void Model::set_progress(std::function<void(int64_t)> f) { p_->progress = std::m
 void Model::set_cancel(std::function<bool()> f) { p_->cancel = std::move(f); }
 void Model::set_yield(std::function<bool()> f) { p_->yield_to = std::move(f); }
 int Model::fed() const { return p_->fed_n; }
+bool Model::broken() { return p_->broken(); }
 bool Model::cancelled() const { return p_->halted; }
 void Model::begin_request() { p_->begin_request(); }
 int Model::sample(float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter) {

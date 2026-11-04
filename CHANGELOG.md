@@ -6,6 +6,12 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.53 integration** (#132) updates model storage/catalog and the
+  dashboard, fixes DeepSeek EXL3 packing and adds optional prompt memoization.
+  DeepSeek GPU-fault notices require a paired restart under TP2 and preserve the
+  first fatal cause. New engine experiments are deferred for gfx1151 assessment
+  in #133. [Review and validation](docs/upstream/v1.1.53.md).
+
 - **Upstream v1.1.52 integration** (#130) adds IQ1 CPU rows, F16 dense conversion,
   Linux Engram reader sizing, early config validation and installer/server fixes.
   Retain sliced GLM dense reductions and gate the new local graph/speculative
