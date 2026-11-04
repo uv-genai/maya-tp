@@ -1047,7 +1047,8 @@ struct Layer {
           *hcf_fn = nullptr, *hcf_scale = nullptr, *hcf_base = nullptr, *gate_bias = nullptr, *eg_w = nullptr,
           *gate_bias_vl = nullptr;   // (the image tokens' routing bias, with the vision tower)
     uint16_t* i_wproj = nullptr;
-    float* gate_w = nullptr;   // the router's weights, F32 (DeepSeek's inference computes the gate in F32)
+    GateW gate_w;   // the router's weights: F32, or the pack's BF16 as it is (DeepSeek's inference computes the gate in
+                    // F32: the kernels widen BF16 exactly, the same sums - gate())
     uint8_t* win = nullptr;                     // [win] rows of kKvFp8 (kv_row_bytes)
     float *c_kv = nullptr, *c_score = nullptr;  // the compressor's partial group (ratio > 1)
     // a run of chunks' mid-run checkpoint (feed_mark): the ring and the partial group as they were before a row
@@ -1477,6 +1478,16 @@ struct Model::Impl {
     // first request that has penalties; each pick waits for its stream, so the next one's rows never overwrite them
     int pen_n = 0;
     float pen_repeat = 1.0f, pen_freq = 0.0f, pen_present = 0.0f;
+    // the request's logit_bias (Model::set_logit_bias, GEN logit_bias=<id>:<bias>,...): a row of g.vocab biases on the
+    // head device that every pick of the request adds to its logits (sample, verify, the multi steps' picks; not the
+    // drafter's own proposals, which the verify then judges by the biased logits).  nullptr: none.  The last few rows
+    // stay, keyed by their entries, so the requests of a --parallel step do not upload theirs at each token
+    const float* cur_bias = nullptr;
+    struct BiasRow {
+        std::string key;
+        float* row = nullptr;
+    };
+    std::vector<BiasRow> bias_rows;
     static constexpr int kPenCap = 4096;
     int32_t* h_pen = nullptr;
     int32_t* d_pen = nullptr;
@@ -2923,6 +2934,41 @@ struct Model::Impl {
         if (!dalloc(d, p, n, err, acct)) return false;
         cudaSetDevice(d.id);
         CK(cudaMemcpy(p, v.data(), n * 4, cudaMemcpyHostToDevice));
+        return true;
+    }
+    // the router's weights (gate_w): DS4_ROUTER_BF16=1 (AMD's default) - a BF16 tensor's rows go to the device as they
+    // are, half an F32 copy's bytes, read every token twice a layer (the gate and the next layer's guesses), with the
+    // same bits (gemv_f32 widens each value exactly; DS4_ROUTER_CHECK=1 compares them at load) - another dtype as F32
+    // (f32()).  0 (NVIDIA's default): the F32 copy for every dtype, as before
+    bool gate(Dev& d, const std::string& name, GateW& g, std::string& err, size_t* acct, size_t want) {
+#if defined(STRATA_USE_HIP)
+        constexpr bool kBf16Default = true;
+#else
+        constexpr bool kBf16Default = false;
+#endif
+        static const bool keep_f32 = ds4_env("DS4_ROUTER_BF16") != nullptr ? std::atoi(ds4_env("DS4_ROUTER_BF16")) == 0
+                                                                            : !kBf16Default;
+        const Tensor* t = pk.get(name);
+        if (keep_f32 || t == nullptr || t->dtype != "BF16") {
+            float* p = nullptr;
+            if (!f32(d, name, p, err, acct, want)) return false;
+            g.f = p;
+            return true;
+        }
+        if (t->bytes != want * 2) {
+            err = name + ": " + std::to_string(t->bytes / 2) + " values, expected " + std::to_string(want);
+            return false;
+        }
+        std::vector<uint8_t> raw(t->bytes);
+        if (!pk.read(*t, raw.data())) {
+            err = name + ": read failed";
+            return false;
+        }
+        uint16_t* p = nullptr;
+        if (!dalloc(d, p, want, err, acct)) return false;
+        cudaSetDevice(d.id);
+        CK(cudaMemcpy(p, raw.data(), t->bytes, cudaMemcpyHostToDevice));
+        g.h = p;
         return true;
     }
     bool f16raw(Dev& d, const std::string& name, uint16_t*& p, std::string& err, size_t* acct) {
@@ -4787,6 +4833,8 @@ struct Model::Impl {
             if (hc_fuse_win && !(hc_fuse_check(err, 1, true) && hc_fuse_check(err, kWin, true)))   // (=2: a window too)
                 return false;
             if (route_fuse && !route_fuse_check(err)) return false;   // (no request yet)
+            if (ds4_env("DS4_ROUTER_CHECK") != nullptr && std::atoi(ds4_env("DS4_ROUTER_CHECK")) != 0 && !router_check(err))
+                return false;   // (MAYA_DS4_ROUTER_CHECK=1: at load, no request yet)
             if ((decode_trim & 3) && !trim_q8_check(err)) return false;   // (DS4_DECODE_TRIM: no request yet)
             if ((decode_trim & 12) && !trim_copy_check(err)) return false;
             if (route_fuse_win && !(route_fuse_check(err, 3) && route_fuse_check(err, kWin)))   // (=2: windows too)
@@ -6423,7 +6471,7 @@ struct Model::Impl {
                       f32(d, P + "hc_attn_base", l.hca_base, err, acct) && f32(d, P + "hc_ffn_fn", l.hcf_fn, err, acct) &&
                       f32(d, P + "hc_ffn_scale", l.hcf_scale, err, acct) &&
                       f32(d, P + "hc_ffn_base", l.hcf_base, err, acct) &&
-                      f32(d, P + "ffn.gate.weight", l.gate_w, err, acct, (size_t) l.n_exp * g.dim) &&
+                      gate(d, P + "ffn.gate.weight", l.gate_w, err, acct, (size_t) l.n_exp * g.dim) &&
                       f32(d, P + "ffn.gate.bias", l.gate_bias, err, acct, (size_t) l.n_exp) &&
                       (l.mtp || img_tok < 0 || pk.get(P + "ffn.gate.bias_vl") == nullptr ||
                        f32(d, P + "ffn.gate.bias_vl", l.gate_bias_vl, err, acct, (size_t) l.n_exp)) &&
@@ -12613,6 +12661,119 @@ struct Model::Impl {
         std::fflush(stdout);
         std::_Exit(kExitUnknown);
     }
+    // DS4_ROUTER_CHECK=1 (at load): each BF16 router (gate()) against the F32 copy it replaces and against the host's
+    // replay of the old one-token kernel's sums (a lane's fmaf chain over float4s c = lane + 32 j, then the warp's
+    // xor-16 .. 1 adds) - 1, 3 and kRows rows (the token, a window, a chunk's rows kernel), and the pair kernel against
+    // the single one; any bit off fails the load
+    bool router_check(std::string& err) {
+        constexpr int kRows = 40;
+        const int D = g.dim;
+        uint32_t st = 0x2545f491u;
+        auto rnd = [&]() {
+            st = st * 1664525u + 1013904223u;
+            return (float) (int) (st % 2001u - 1000u) / 250.0f;   // -4 .. 4
+        };
+        int layers = 0;
+        const Layer* prev = nullptr;
+        for (const Layer& l0 : L)
+            for (int mi = 0; mi < std::max(1, l0.nm); ++mi) {
+                const Layer& l = member(l0, mi);
+                if (l.gate_w.h == nullptr) continue;
+                auto fail_at = [&](const std::string& why) {
+                    err = "router check, layer " + std::to_string(l.il) + ": " + why;
+                    std::fprintf(stderr, "ds4: router check FAILED: %s\n", err.c_str());
+                    return false;
+                };
+                const int n = l.n_exp;
+                const size_t nw = (size_t) n * D;
+                CK(cudaSetDevice(devs[(size_t) l.dev].id));
+                std::vector<uint16_t> hw(nw);
+                std::vector<float> fw(nw), hx((size_t) kRows * D), y16((size_t) kRows * 1024), y32(y16.size());
+                CK(cudaMemcpy(hw.data(), l.gate_w.h, nw * 2, cudaMemcpyDeviceToHost));
+                for (size_t i = 0; i < nw; ++i) fw[i] = bf16_to_f32(hw[i]);
+                for (auto& v : hx) v = rnd();
+                float *dw = nullptr, *dx = nullptr, *dy = nullptr;
+                if (cudaMalloc((void**) &dw, nw * 4) != cudaSuccess || cudaMalloc((void**) &dx, hx.size() * 4) != cudaSuccess ||
+                    cudaMalloc((void**) &dy, 2 * y16.size() * 4) != cudaSuccess) {
+                    (void) cudaGetLastError();
+                    if (dw) cudaFree(dw);
+                    if (dx) cudaFree(dx);
+                    return fail_at("its buffers");
+                }
+                CK(cudaMemcpy(dw, fw.data(), nw * 4, cudaMemcpyHostToDevice));
+                CK(cudaMemcpy(dx, hx.data(), hx.size() * 4, cudaMemcpyHostToDevice));
+                bool ok = true;
+                std::string why;
+                for (const int T : {1, 3, kRows}) {
+                    CK(cudaMemset(dy, 0xff, 2 * y16.size() * 4));
+                    gemv_f32(l.gate_w, dx, n, D, T, dy, 1024, 0);
+                    gemv_f32((const float*) dw, dx, n, D, T, dy + y16.size(), 1024, 0);
+                    CK(cudaDeviceSynchronize());
+                    CK(cudaMemcpy(y16.data(), dy, y16.size() * 4, cudaMemcpyDeviceToHost));
+                    CK(cudaMemcpy(y32.data(), dy + y16.size(), y32.size() * 4, cudaMemcpyDeviceToHost));
+                    for (int t = 0; t < T && ok; ++t)
+                        for (int r = 0; r < n && ok; ++r) {
+                            const size_t o = (size_t) t * 1024 + r;
+                            if (std::memcmp(&y16[o], &y32[o], 4) != 0) {
+                                ok = false;
+                                why = std::to_string(T) + " rows: row " + std::to_string(r) + " of token " +
+                                      std::to_string(t) + " BF16 " + std::to_string(y16[o]) + ", F32 " + std::to_string(y32[o]);
+                            }
+                        }
+                    // the old kernel's sums on the host: the first token, every row
+                    for (int r = 0; r < n && ok; ++r) {
+                        float v[32];
+                        for (int lane = 0; lane < 32; ++lane) {
+                            float acc = 0.0f;
+                            for (int c = lane; c < D / 4; c += 32)
+                                for (int e = 0; e < 4; ++e)
+                                    acc = std::fmaf(fw[(size_t) r * D + 4 * c + e], hx[(size_t) 4 * c + e], acc);
+                            v[lane] = acc;
+                        }
+                        for (int o = 16; o > 0; o >>= 1) {
+                            float w[32];
+                            for (int lane = 0; lane < 32; ++lane) w[lane] = v[lane] + v[lane ^ o];
+                            std::memcpy(v, w, sizeof v);
+                        }
+                        if (std::memcmp(&v[0], &y16[r], 4) != 0) {
+                            ok = false;
+                            why = std::to_string(T) + " rows: row " + std::to_string(r) + " " + std::to_string(y16[r]) +
+                                  ", the old kernel's sums " + std::to_string(v[0]);
+                        }
+                    }
+                }
+                // the pair kernel (DS4_ROUTE_FUSE): this router and the one before it on this device, against singles
+                if (ok && prev != nullptr && prev->dev == l.dev && prev->gate_w.h != nullptr && prev->n_exp <= 1024)
+                    for (const int T : {1, 3}) {
+                        CK(cudaMemset(dy, 0xff, 2 * y16.size() * 4));
+                        if (!gemv_f32_pair(prev->gate_w, prev->n_exp, dy, l.gate_w, n, dy + T * 1024, dx, D, 0, T, 1024)) {
+                            ok = false;
+                            why = "the pair kernel's launch";
+                            break;
+                        }
+                        gemv_f32(prev->gate_w, dx, prev->n_exp, D, T, dy + y16.size(), 1024, 0);
+                        gemv_f32(l.gate_w, dx, n, D, T, dy + y16.size() + T * 1024, 1024, 0);
+                        CK(cudaDeviceSynchronize());
+                        CK(cudaMemcpy(y16.data(), dy, y16.size() * 4, cudaMemcpyDeviceToHost));
+                        CK(cudaMemcpy(y32.data(), dy + y16.size(), y32.size() * 4, cudaMemcpyDeviceToHost));
+                        for (int t = 0; t < 2 * T && ok; ++t)
+                            for (int r = 0; r < (t < T ? prev->n_exp : n) && ok; ++r)
+                                if (std::memcmp(&y16[(size_t) t * 1024 + r], &y32[(size_t) t * 1024 + r], 4) != 0) {
+                                    ok = false;
+                                    why = "the pair kernel (" + std::to_string(T) + " rows) against the single one";
+                                }
+                    }
+                cudaFree(dw);
+                cudaFree(dx);
+                cudaFree(dy);
+                if (!ok) return fail_at(why);
+                prev = &l;
+                ++layers;
+            }
+        std::fprintf(stderr, "ds4: router check: %d BF16 routers, the F32 copy's bits and the old kernel's (1, 3, %d rows; "
+                     "the pair kernel)\n", layers, kRows);
+        return true;
+    }
     bool route_fuse_check(std::string& err, int T = 1) {
         const int D = g.dim;
         constexpr size_t kGuard = 64;
@@ -16098,6 +16259,42 @@ struct Model::Impl {
         }
     }
 
+    void set_logit_bias(const std::vector<std::pair<int, float>>& e) {
+        cur_bias = nullptr;
+        if (e.empty()) return;
+        std::string key;
+        for (const auto& [id, b] : e) key += std::to_string(id) + ':' + std::to_string(b) + ',';
+        for (BiasRow& r : bias_rows)
+            if (r.key == key) {
+                cur_bias = r.row;
+                return;
+            }
+        Dev& d = devs[(size_t) head_dev];
+        cudaSetDevice(d.id);
+        BiasRow r;
+        if (bias_rows.size() >= 4) {   // (the oldest row again: its last pick is done before it is written)
+            r = bias_rows.front();
+            bias_rows.erase(bias_rows.begin());
+            cudaStreamSynchronize(d.st);
+        } else {
+            std::string err;
+            if (!dalloc(d, r.row, (size_t) g.vocab, err)) {
+                std::fprintf(stderr, "ds4: the logit_bias row: %s - this request's picks without it\n", err.c_str());
+                return;
+            }
+        }
+        std::vector<float> h((size_t) g.vocab, 0.0f);
+        for (const auto& [id, b] : e)
+            if (id >= 0 && id < g.vocab) h[(size_t) id] = b;
+        if (cudaMemcpy(r.row, h.data(), h.size() * sizeof(float), cudaMemcpyHostToDevice) != cudaSuccess) {
+            std::fprintf(stderr, "ds4: the logit_bias row: %s\n", cudaGetErrorString(cudaGetLastError()));
+            return;
+        }
+        r.key = std::move(key);
+        bias_rows.push_back(r);
+        cur_bias = r.row;
+    }
+
     // `hist_end`: the pick's penalty history ends there (toks[0 .. hist_end): the tokens up to its row's position)
     int sample_row(int row, float temperature, float top_p, int top_k, float min_p, uint64_t seed, uint64_t counter,
                    const float* bias, int64_t hist_end) {
@@ -16203,6 +16400,7 @@ struct Model::Impl {
             strata::kernels::SamplerParams sp;
             sp.greedy = true;
             sp.temperature = 0.0f;
+            sp.logit_bias = cur_bias;
             int h = 0;
             const int* hr = pen_rows(p0 + 1, T, sp, h);
             strata::kernels::sample_tokens(hd.logits, T, V, hr, h, sp, d_ints + 16, hd.st);   // (the T rows at once)
@@ -16236,6 +16434,7 @@ struct Model::Impl {
             sp.min_p = min_p;
             sp.seed = seed;
             sp.counter = counter;
+            sp.logit_bias = cur_bias;
             int h = 0;
             const int* hr = pen_rows(p0 + 1, n, sp, h);
             strata::kernels::sample_verify(hd.logits, n, V, sp, d_specq, d_ints + 32, d_ints + 16, hd.st, hr, h);
@@ -16243,7 +16442,7 @@ struct Model::Impl {
             CK(cudaStreamSynchronize(hd.st));
             while (m < n && h_idx[m] == drafts[(size_t) m]) ++m;
             next = m < n ? h_idx[m]
-                         : sample_row(n, temperature, top_p, top_k, min_p, seed, counter + (uint64_t) n, nullptr,
+                         : sample_row(n, temperature, top_p, top_k, min_p, seed, counter + (uint64_t) n, cur_bias,
                                       p0 + 1 + n);
         }
         if (lp_k >= 0) {   // (each kept token's row - the drafts', then next's - before the window is undone)
@@ -20182,6 +20381,7 @@ struct Model::Impl {
         sp.min_p = min_p;
         sp.seed = seed;
         sp.counter = counter;
+        sp.logit_bias = cur_bias;
         int h = 0;
         const int* hr = pen_rows((int64_t) toks.size(), 1, sp, h);   // (the last fed token's row: every token consumed)
         const float* row = d.logits + (size_t) std::max(0, n_logits - 1) * g.vocab;
@@ -20378,6 +20578,7 @@ struct Model::Impl {
             strata::kernels::SamplerParams sp;
             sp.greedy = true;
             sp.temperature = 0.0f;
+            sp.logit_bias = cur_bias;
             int h = 0;
             const int* hr = pen_rows(r.p0 + 1, r.n, sp, h, &q.toks);
             strata::kernels::sample_tokens(lg, r.n, V, hr, h, sp, d_ints + 16, hd.st);
@@ -20394,6 +20595,7 @@ struct Model::Impl {
             sp.min_p = min_p;
             sp.seed = seed;
             sp.counter = counter;
+            sp.logit_bias = cur_bias;
             if (n > 0) {
                 for (int k = 0; k < n; ++k) {
                     h_specq[(size_t) k].n = 1;
@@ -20511,6 +20713,7 @@ struct Model::Impl {
         sp.min_p = min_p;
         sp.seed = seed;
         sp.counter = counter;
+        sp.logit_bias = cur_bias;
         const std::vector<int32_t>& hist = seq_tokens(mrows[(size_t) row]);
         int h = 0;
         const int* hr = pen_rows((int64_t) hist.size(), 1, sp, h, &hist);
@@ -20879,6 +21082,7 @@ void Model::set_penalties(int last_n, float repeat, float freq, float present) {
     p_->pen_freq = freq;
     p_->pen_present = present;
 }
+void Model::set_logit_bias(const std::vector<std::pair<int, float>>& entries) { p_->set_logit_bias(entries); }
 void Model::set_logprobs(int k, int force) {
     p_->lp_k = k < 0 ? -1 : std::min(k, kTopLogprobs);
     p_->lp_force = k < 0 ? -1 : force;

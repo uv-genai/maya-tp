@@ -1,0 +1,259 @@
+{
+  "tag": "v1.1.50",
+  "model": "s",
+  "variant": "candidate",
+  "engine_sha256": "57c5feb31960699e3212be8519f6b2ea4fc12e3ff8b9ea6dcfed0d119f9f9f70",
+  "settings": {
+    "pack": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4",
+    "manifest": "/home/ugo/software/project-maya-upstream-validation/manifests/maya-s.json",
+    "engine": "/home/ugo/software/project-maya-upstream-validation/engines/v1.1.50/maya-ds4",
+    "model_label": "DeepSeek V4.1 Maya-S",
+    "host": "192.168.1.92",
+    "peer": "strix-halo-1.local",
+    "peer_root": "/home/ugo/software/project-maya-upstream-validation",
+    "port": 18950,
+    "rdma_device": "usb4_rdma5",
+    "context": 262144,
+    "expert_budget_mib": 92160,
+    "reserve_mib": 1024,
+    "cpu_threads": 14,
+    "prefill_chunk": 256,
+    "dspark": "on",
+    "suffix_draft": 0,
+    "env": {
+      "MAYA_DS4_WARM_CAP_GB": "0",
+      "MAYA_DS4_ROUTER_CHECK": "1"
+    }
+  },
+  "runs": [
+    {
+      "repeat": 1,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 256,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-e9ea4e92536640f49ba0efe1",
+        "object": "chat.completion",
+        "created": 1793789630,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. Originally designed for packet filtering, eBPF has evolved into a general-purpose mechanism for safely extending kernel functionality.\n\n**Key benefits:**\n- **Safety**: Programs are verified before execution to prevent crashes\n- **Performance**: JIT-compiled to native machine code\n- **Observability**: Deep visibility into kernel and application behavior\n- **Programmability**: Attach to hooks throughout the kernel\n\n## How eBPF Works\n\nThe eBPF workflow involves several components:\n\n1. **eBPF Program**: Written in a restricted C-like language, compiled to eBPF bytecode\n2. **Verifier**: Kernel component that statically analyzes the program for safety\n3. **JIT Compiler**: Translates bytecode to native instructions\n4. **Maps**: Key-value data structures for sharing data between kernel and userspace\n5. **Hooks**: Attachment points (kprobes, tracepoints, XDP, etc.)\n\n```\n[Userspace] \u2192 [eBP"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 256,
+          "total_tokens": 275,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 605.7,
+          "prompt_per_token_ms": 31.879,
+          "prompt_per_second": 31.4,
+          "predicted_n": 256,
+          "predicted_ms": 9128.6,
+          "predicted_per_token_ms": 35.659,
+          "predicted_per_second": 28.0,
+          "draft_n": 171,
+          "draft_n_accepted": 131
+        }
+      }
+    },
+    {
+      "repeat": 2,
+      "request": {
+        "model": "deepseek-v4.1-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 256,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        },
+        "strata_tune": {
+          "suffix_draft": 0,
+          "spec": 1
+        }
+      },
+      "response": {
+        "id": "chatcmpl-ae0f17134f584824a0135999",
+        "object": "chat.completion",
+        "created": 1793789640,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: A Practical Guide\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. Originally designed for packet filtering, eBPF has evolved into a general-purpose mechanism for safely extending kernel functionality.\n\n**Key benefits:**\n- **Safety**: Programs are verified before execution to prevent crashes\n- **Performance**: JIT-compiled to native machine code\n- **Observability**: Deep visibility into kernel and application behavior\n- **Programmability**: Attach to hooks throughout the kernel\n\n## How eBPF Works\n\nThe eBPF workflow involves several components:\n\n1. **eBPF Program**: Written in a restricted C-like language, compiled to eBPF bytecode\n2. **Verifier**: Kernel component that statically analyzes the program for safety\n3. **JIT Compiler**: Translates bytecode to native instructions\n4. **Maps**: Key-value data structures for sharing data between kernel and userspace\n5. **Hooks**: Attachment points (kprobes, tracepoints, XDP, etc.)\n\n```\n[Userspace] \u2192 [eBP"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 19,
+          "completion_tokens": 256,
+          "total_tokens": 275,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 19,
+          "prompt_ms": 453.6,
+          "prompt_per_token_ms": 23.874,
+          "prompt_per_second": 41.9,
+          "predicted_n": 256,
+          "predicted_ms": 8905.5,
+          "predicted_per_token_ms": 34.787,
+          "predicted_per_second": 28.7,
+          "draft_n": 171,
+          "draft_n_accepted": 131
+        }
+      }
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "deepseek-v4.1-flash",
+    "max_text_file": 1048576,
+    "model_label": "DeepSeek V4.1 Maya-S",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "reasoning_effort": "high"
+    },
+    "version": "1.1.43",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "prefill_chunk": 256,
+      "peer": "up"
+    }
+  },
+  "speculation_off": {
+    "id": "chatcmpl-e98f31e1be634aaf82a50af9",
+    "object": "chat.completion",
+    "created": 1793789649,
+    "model": "deepseek-v4.1-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "# eBPF Tutorial: A Practical Guide\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to run sandboxed programs in the Linux kernel without changing kernel source code or loading kernel modules. Originally designed for packet filtering, eBPF has evolved into a general-purpose mechanism for safely extending kernel functionality.\n\n**Key benefits:**\n- **Safety**: Programs are verified before execution to prevent crashes\n- **Performance**: JIT-compiled to native machine code\n- **Observability**: Deep visibility into kernel and application behavior\n- **Programmability**: Attach to hooks throughout the kernel\n\n## How eBPF Works\n\nThe eBPF workflow involves several components:\n\n1. **eBPF Program**: Written in a restricted C-like language, compiled to eBPF bytecode\n2. **Verifier**: Kernel component that statically analyzes the program for safety\n3. **JIT Compiler**: Translates bytecode to native instructions\n4. **Maps**: Key-value data structures for sharing data between kernel and userspace\n5. **Hooks**: Attachment points (kprobes, tracepoints, XDP, etc.)\n\n```\n[Userspace] \u2192 [eBP"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 19,
+      "completion_tokens": 256,
+      "total_tokens": 275,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 19,
+      "prompt_ms": 453.4,
+      "prompt_per_token_ms": 23.863,
+      "prompt_per_second": 41.9,
+      "predicted_n": 256,
+      "predicted_ms": 12367.5,
+      "predicted_per_token_ms": 48.311,
+      "predicted_per_second": 20.7,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "paired_restart_guards": "passed",
+  "run_directory": "/tmp/maya-upstream-v1.1.50-deepseek-s-candidate-state/18250/run-w9wbrkuv",
+  "router_check": "passed",
+  "tokenize_roundtrip": {
+    "tokens": {
+      "tokens": [
+        33310
+      ],
+      "count": 1,
+      "max_model_len": 262144
+    },
+    "decoded": {
+      "content": "hello",
+      "prompt": "hello"
+    }
+  },
+  "biased_speculative_response": {
+    "id": "chatcmpl-9a03265d3df24e059b14bc58",
+    "object": "chat.completion",
+    "created": 1793789662,
+    "model": "deepseek-v4.1-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "hellohellohellohello"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 7,
+      "completion_tokens": 4,
+      "total_tokens": 11,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 7,
+      "prompt_ms": 100.8,
+      "prompt_per_token_ms": 14.4,
+      "prompt_per_second": 69.4,
+      "predicted_n": 4,
+      "predicted_ms": 174.4,
+      "predicted_per_token_ms": 43.6,
+      "predicted_per_second": 22.9,
+      "draft_n": 1,
+      "draft_n_accepted": 0
+    }
+  }
+}

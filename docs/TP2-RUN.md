@@ -1,6 +1,10 @@
 # TP2 Run Book — two-host tensor parallel for GLM-5.3-Flash
 
 Operations guide for Maya TP2 on twin Strix Halo hosts over Thunderbolt RDMA.
+
+Both ranks use the selected config's KV format and streaming/resident settings.
+The worker forwards `--kv`, `--kv-streaming` and `--kv-resident` in config order,
+including the GLM Maya-XS installer's INT8 KV selection.
 Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rdma*`).
 For DeepSeek TP2 and DSpark, use its family-specific launchers in the
 [DeepSeek TP2 operations guide](DEEPSEEK-TP2-RUN.md).

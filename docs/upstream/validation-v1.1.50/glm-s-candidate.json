@@ -1,0 +1,234 @@
+{
+  "tag": "v1.1.50",
+  "variant": "candidate",
+  "model": "GLM Maya-S",
+  "context": 32768,
+  "engine_sha256": "e6368b3c5cb679f388a84071e1ff332ddc52486ee3cda52d640c88947a9ecdb6",
+  "runs": [
+    {
+      "repeat": 1,
+      "request": {
+        "model": "glm-5.3-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 256,
+        "stream": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "id": "chatcmpl-d8a5597df3974f36a788c420",
+        "object": "chat.completion",
+        "created": 1793789841,
+        "model": "glm-5.3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: From Zero to Your First Program\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Instead of writing kernel modules (risky and hard to maintain), you can write small, verified programs that attach to hooks like syscalls, network events, or tracepoints.\n\nCommon use cases:\n- **Observability**: tracing syscalls, profiling, monitoring\n- **Networking**: packet filtering, load balancing (used by Cilium, Kubernetes)\n- **Security**: detecting suspicious behavior\n- **Performance analysis**: like `bpftrace` or `perf`\n\n---\n\n## How eBPF Works (The Big Picture)\n\n1. You write an eBPF program (usually in a restricted subset of C).\n2. A **loader** (like `libbpf`, `bpftool`, or `bpftrace`) compiles it to eBPF bytecode.\n3. The kernel's **verifier** checks the program for safety (no infinite loops, no invalid memory access).\n4. A **JIT compiler** turns the bytecode into native machine code.\n5. The program attaches to a **hook point** (e.g.,"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 28,
+          "completion_tokens": 256,
+          "total_tokens": 284,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 28,
+          "prompt_ms": 10971.8,
+          "prompt_per_token_ms": 391.85,
+          "prompt_per_second": 2.6,
+          "predicted_n": 256,
+          "predicted_ms": 7956.3,
+          "predicted_per_token_ms": 31.079,
+          "predicted_per_second": 32.2,
+          "draft_n": 205,
+          "draft_n_accepted": 152
+        }
+      }
+    },
+    {
+      "repeat": 2,
+      "request": {
+        "model": "glm-5.3-flash",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Write an eBPF tutorial to explain how to use eBPF."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 256,
+        "stream": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "id": "chatcmpl-d6d9b40cf1e54a45bc2d96cd",
+        "object": "chat.completion",
+        "created": 1793789860,
+        "model": "glm-5.3-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "# eBPF Tutorial: From Zero to Your First Program\n\n## What is eBPF?\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Instead of writing kernel modules (risky and hard to maintain), you can write small, verified programs that attach to hooks like syscalls, network events, or tracepoints.\n\nCommon use cases:\n- **Observability**: tracing syscalls, profiling, monitoring\n- **Networking**: packet filtering, load balancing (used by Cilium, Kubernetes)\n- **Security**: detecting suspicious behavior\n- **Performance analysis**: like `bpftrace` or `perf`\n\n---\n\n## How eBPF Works (The Big Picture)\n\n1. You write an eBPF program (usually in a restricted subset of C).\n2. A **loader** (like `libbpf`, `bpftool`, or `bpftrace`) compiles it to eBPF bytecode.\n3. The kernel's **verifier** checks the program for safety (no infinite loops, no invalid memory access).\n4. A **JIT compiler** turns the bytecode into native machine code.\n5. The program attaches to a **hook point** (e.g.,"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 28,
+          "completion_tokens": 256,
+          "total_tokens": 284,
+          "prompt_tokens_details": {
+            "cached_tokens": 27
+          }
+        },
+        "timings": {
+          "cache_n": 27,
+          "prompt_n": 1,
+          "prompt_ms": 38.0,
+          "prompt_per_token_ms": 38.0,
+          "prompt_per_second": 26.3,
+          "predicted_n": 256,
+          "predicted_ms": 7776.6,
+          "predicted_per_token_ms": 30.377,
+          "predicted_per_second": 32.9,
+          "draft_n": 205,
+          "draft_n_accepted": 152
+        }
+      }
+    }
+  ],
+  "worker": {
+    "pid": 336824,
+    "start": "15102284",
+    "exe": "/home/ugo/software/project-maya-upstream-validation/engines/v1.1.50/maya"
+  },
+  "health": {
+    "status": "ok",
+    "max_context": 32768,
+    "model": "glm-5.3-flash",
+    "max_text_file": 524288,
+    "model_label": null,
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "reasoning_effort": "max"
+    },
+    "version": "1.1.43",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "peer": "up"
+    }
+  },
+  "mtp_acceptance": "positive",
+  "cancelled_prefill": [
+    3008,
+    6618
+  ],
+  "cancel_followup": {
+    "id": "chatcmpl-227e49bb82ba4cc3b57abdd8",
+    "object": "chat.completion",
+    "created": 1793789876,
+    "model": "glm-5.3-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "eBPF (extended Berkeley Packet Filter) is a Linux technology that allows sandboxed programs to run safely and efficiently in the kernel, enabling powerful networking, observability, and security features without modifying kernel source code."
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 21,
+      "completion_tokens": 44,
+      "total_tokens": 65,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 21,
+      "prompt_ms": 425.4,
+      "prompt_per_token_ms": 20.257,
+      "prompt_per_second": 49.4,
+      "predicted_n": 44,
+      "predicted_ms": 1616.3,
+      "predicted_per_token_ms": 36.734,
+      "predicted_per_second": 27.2,
+      "draft_n": 40,
+      "draft_n_accepted": 23
+    }
+  },
+  "peer_loss_prefill": [
+    3008,
+    6622
+  ],
+  "peer_loss": {
+    "responses": [
+      [
+        400,
+        {
+          "error": {
+            "type": "invalid_request_error",
+            "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+          }
+        }
+      ]
+    ],
+    "health": {
+      "status": "degraded",
+      "max_context": 32768,
+      "model": "glm-5.3-flash",
+      "max_text_file": 524288,
+      "model_label": null,
+      "images": false,
+      "api_key": false,
+      "defaults": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "reasoning_effort": "max"
+      },
+      "version": "1.1.43",
+      "mcp_tools": false,
+      "unloaded": false,
+      "tp": {
+        "world_size": 2,
+        "rank": 0,
+        "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks",
+        "peer": "down"
+      }
+    },
+    "later": {
+      "error": {
+        "type": "invalid_request_error",
+        "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+      }
+    }
+  }
+}

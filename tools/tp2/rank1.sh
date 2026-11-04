@@ -61,6 +61,16 @@ else
 fi
 CONTEXT="${CONTEXT:-$(jq -r '(.args // []) as $a | [$a | to_entries[] | select(.value == "--max-context") | $a[.key+1]][-1] // 4096' "$MAYA_CONFIG")}"
 
+KV_ARGS=()
+while IFS= read -r -d '' argument; do
+  KV_ARGS+=("$argument")
+done < <(jq -j '
+  (.args // []) as $args |
+  range(0; ($args | length) - 1) as $i |
+  select(["--kv", "--kv-streaming", "--kv-resident"] | index($args[$i])) |
+  $args[$i], "\u0000", ($args[$i + 1] | tostring), "\u0000"
+' "$MAYA_CONFIG")
+
 echo "rank1: pack=$PACK rdma=$RDEV bootstrap=$BOOTSTRAP_HOST seqs=${SEQS:-1} context=$CONTEXT"
 
 # Do NOT probe the bootstrap port with /dev/tcp: that completes a TCP
@@ -74,4 +84,4 @@ exec "$ENGINE" --glm-pack "$PACK" \
   --tp-bootstrap-port 18515 \
   --tp-rdma-device "$RDEV" \
   --parallel "${SEQS:-1}" \
-  --max-context "$CONTEXT"
+  --max-context "$CONTEXT" "${KV_ARGS[@]}"

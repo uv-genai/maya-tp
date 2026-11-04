@@ -140,6 +140,21 @@ with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump({k:os.environ.get(k)
         self.assertEqual(env, dict(MAYA_GLM_PREFILL_SUB='1024', MAYA_HIPBLASLT_TUNING=tuning,
                                    STRATA_LITERAL=literal))
 
+    def test_rank1_preserves_configured_kv_format_and_streaming(self):
+        cfg = json.loads(self.config.read_text())
+        cfg['args'] += ['--kv', 'fp16', '--kv', 'int8', '--kv-streaming', 'on', '--kv-resident', '8192']
+        self.config.write_text(json.dumps(cfg))
+        engine = self.executable('engine', '''import os,sys,json
+with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump(sys.argv[1:],f)
+''')
+        result = self.run_script('tools/tp2/rank1.sh', ENGINE=str(engine))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        args = json.loads((self.root / 'result.json').read_text())
+        formats = [args[i + 1] for i, value in enumerate(args[:-1]) if value == '--kv']
+        self.assertEqual(formats, ['fp16', 'int8'])
+        self.assertEqual(args[args.index('--kv-streaming') + 1], 'on')
+        self.assertEqual(args[args.index('--kv-resident') + 1], '8192')
+
     def test_rank1_model_flag_overrides_pack(self):
         engine = self.executable('engine', '''import os,sys,json
 with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump(sys.argv[1:],f)
