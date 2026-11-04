@@ -4,17 +4,32 @@ The setup in detail: what its first run does, starting again and updating, its o
 fails. Back to the
 [README](../README.md).
 
-**Maya-TP:** use HIP/ROCm on gfx1151 Linux and [TP2-RUN.md](TP2-RUN.md) for the two-host RDMA
-build and launch. Other platforms and same-host multi-GPU examples below describe inherited
-upstream behavior. The fork's validated TP2/MTP models are GLM Maya-S/M/L; DeepSeek has known
-[gfx1151 parity failures](https://github.com/uv-genai/maya-tp/issues/68).
+Maya-TP targets HIP/ROCm on gfx1151 Linux. GLM Maya-S/M/L have TP2/MTP
+validation, and DeepSeek Maya-XS/S have TP2/DSpark validation and extended
+user acceptance including DeepSWE benchmarks. Use the family-specific guides
+for the two-host RDMA build, model selection and launch.
+[GLM TP2](TP2-RUN.md), [DeepSeek TP2/DSpark](DEEPSEEK-TP2-RUN.md).
+
+Installer output uses `build-hip/maya` for GLM and `build-hip/maya-ds4` for
+DeepSeek. `./maya.sh` selects a local server config. Two-host orchestration is
+provided by the family-specific rank/llama-swap scripts. The accepted pair's
+versioned executable paths and model configs are recorded in
+[Handoff.md](../Handoff.md#46-post-merge-documentation-audit-123-2026-11-04).
+
+The model catalog and other-platform/same-host multi-GPU examples below are
+inherited installer reference material. Open kernel-parity investigations are
+tracked in [#68](https://github.com/uv-genai/maya-tp/issues/68), separately from
+the accepted XS/S inference workloads.
 
 ## What the first run does
 
 It first asks which model to set up:
 
 - **GLM-5.3-Flash** - Project Maya's GGUF quants (or turboderp's EXL3 quants), from one GPU up; the steps below;
-- **DeepSeek-V4.1-Flash-1017** (experimental) - [LibertAIDAI's EXL3 quant at 2.9 bits](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw)
+- **DeepSeek-V4.1-Flash-1017**, with GGUF and EXL3 installer options. This fork's
+  accepted TP2/DSpark packs are Maya-XS and Maya-S. The following EXL3 and local
+  multi-GPU details describe inherited installer options.
+  [LibertAIDAI's EXL3 quant at 2.9 bits](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw)
   (211 GB) or [at 3.5 bits](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-3.5bpw) (258 GB, about
   280 GB of VRAM and RAM; `--ds4-quant exl3-3.5`, its own folder; a second quant hard-links the Engram tables from the
   first instead of downloading them) and its two Engram tables from [DeepSeek's repo](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)
@@ -35,7 +50,7 @@ It first asks which model to set up:
   result goes into `maya-ds4.json` and a setup again keeps it).
 
   Or from [unsloth's GGUFs](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF) (`--ds4-quant`; the setup asks):
-  **UD-Q8_K_XL** (508 GB, the default: dense weights BF16, routed experts MXFP4, the Engram tables FP8 - DeepSeek's own
+  **UD-Q8_K_XL** (508 GB, dense weights BF16, routed experts MXFP4, the Engram tables FP8 - DeepSeek's own
   formats); its **UD-Q4_K_XL** (501 GB: dense weights Q8_0, less VRAM) is no longer in the setup's list - `--ds4-quant
   gguf-q4` and an install of it work as before. The same engine reads them in place (the pack is
   `tools/ds4/pack_gguf.py`'s), from NVIDIA Volta (V100) on: the most-used experts in VRAM, the others read from the

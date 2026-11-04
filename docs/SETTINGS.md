@@ -3,10 +3,13 @@
 Everything on this page is optional: the engine sizes itself for the PC it runs on. Back to the
 [README](../README.md).
 
-**Scope:** this reference includes inherited upstream controls. Maya-TP targets gfx1151 HIP on Linux;
-its [TP2 controls](#glm-two-host-tensor-parallel-tp2) and [runbook](TP2-RUN.md) describe the validated
-two-host RDMA path. NVIDIA, Windows, other-model and same-host multi-GPU examples are not fork
-validation claims. In particular, TP2 uses one active sequence and opt-in greedy MTP.
+This reference includes inherited upstream controls. Maya-TP targets gfx1151 HIP
+on Linux with separate two-host RDMA engines for GLM and DeepSeek. GLM uses one
+active sequence and opt-in greedy MTP. DeepSeek uses one active text request
+with rank-0 DSpark/sampling and matched settings across ranks.
+[GLM TP2 controls](#glm-two-host-tensor-parallel-tp2), [GLM runbook](TP2-RUN.md),
+[DeepSeek TP2/DSpark guide](DEEPSEEK-TP2-RUN.md).
+Other-platform and same-host multi-GPU examples retain their upstream scope.
 
 The settings below are environment variables named `MAYA_*`: set them before a start, or keep them in the config
 with `./maya.sh --setup --env MAYA_NAME=value`. Their earlier `STRATA_*` spellings still work; where both are set, the
@@ -17,9 +20,9 @@ server settings under `MAYA_GLM_RESPONSES_*`, with defaults and units in
 [Responses settings](RESPONSES.md#settings-and-metrics). They can be set in the same
 config `env` block; response storage and background work remain request opt-ins.
 
-### Experimental DeepSeek TP2 launch settings
+### DeepSeek TP2 launch settings
 
-Use the explicit options in the [DeepSeek TP2 review guide](DEEPSEEK-TP2-RUN.md).
+Use the explicit options in the [DeepSeek TP2 operations guide](DEEPSEEK-TP2-RUN.md).
 `tp2_rank.py` sets the internal `MAYA_DS4_TP2_PACK`, `MAYA_DS4_TP2_DSPARK`,
 `MAYA_DS4_TP2_CHUNK`, `MAYA_DS4_TP2_LOOKUP`, and
 `MAYA_DS4_TP2_{MODEL,PARTITION,BUILD}_DIGEST` values from its checked local

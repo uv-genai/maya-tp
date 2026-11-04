@@ -3,8 +3,7 @@
 This fork targets **HIP/ROCm on gfx1151 Linux**, with two Strix Halo APUs connected over
 Thunderbolt/USB4 RDMA. GLM Maya-S, Maya-M and Maya-L have TP2/MTP validation.
 DeepSeek Maya-XS and Maya-S have TP2/DSpark validation and user acceptance.
-Broader platform and
-model descriptions retained from Project Maya are upstream references, not fork support claims.
+Broader platform and model descriptions retained from Project Maya are upstream references.
 
 ## Current guides
 
@@ -24,6 +23,10 @@ model descriptions retained from Project Maya are upstream references, not fork 
 | Published versus unreleased changes | [Changelog](../CHANGELOG.md) |
 | Upstream integration decisions and evidence | [v1.1.49 merge and fresh live validation](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
 
+The current `main` includes the user-accepted DeepSeek TP2/DSpark implementation
+merged in PR #122 at `75e18e8`. Both feature-head and merged-main CI passed.
+[Merge and validation](https://github.com/uv-genai/maya-tp/pull/122).
+
 At the 2026-11-02 checkpoint, `main` includes the completed semantic integration through upstream
 v1.1.49 (v1.1.47–v1.1.49 in one cumulative merge). The latest published fork release remains legacy v1.1.42; future fork tags use
 `tp-vMAJOR.MINOR.PATCH`. The user-accepted prefill candidate was promoted to the canonical binary
@@ -41,7 +44,9 @@ tracked in [#83](https://github.com/uv-genai/maya-tp/issues/83).
 instructions, MTP restrictions and proposed settings do not describe the completed implementation.
 Use the current guides above and GitHub issue states for ongoing work.
 The [DeepSeek analysis and design](DEEPSEEK-TP2-ANALYSIS-DESIGN.md) similarly records its initial
-pre-implementation assumptions; the DeepSeek review guide describes the experimental implementation.
+pre-implementation assumptions. The [implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md)
+retains its original phase gates. Use the [DeepSeek operations guide](DEEPSEEK-TP2-RUN.md)
+for the accepted implementation and current runtime paths.
 
 `benchmarks/`, `validation/`, `upstream/v1.1.*` and `../bench/results/` contain dated measurements,
 controls, failures and per-tag evidence. They are historical records. A report's old build hash,
@@ -57,5 +62,7 @@ fork's current TP2 validation scope. Full DeepSeek WMMA failures
 [#75](https://github.com/uv-genai/maya-tp/issues/75), and default-off chunk-cap measurement
 [#79](https://github.com/uv-genai/maya-tp/issues/79) remain open.
 
-Documentation consistency was audited under [#82](https://github.com/uv-genai/maya-tp/issues/82).
-Historical raw evidence is retained unchanged; the active guides carry current fork instructions.
+The post-merge documentation audit is tracked in
+[#123](https://github.com/uv-genai/maya-tp/issues/123). The earlier upstream-integration
+audit is recorded in [#82](https://github.com/uv-genai/maya-tp/issues/82).
+The active guides carry current fork instructions. Dated evidence retains its recorded conditions.

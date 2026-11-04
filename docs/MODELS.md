@@ -90,13 +90,19 @@ results. See [the prompt format notes](deepseek-prompt-format.md) for API detail
 | Files | Size | Runs on |
 | --- | ---: | --- |
 | **[DeepSeek V4.1 · Maya-S](https://huggingface.co/peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF)** (`deepseek-maya-s`), Project Maya's own quant (default): the experts in 2-3 bits, 92.6% the same next token as the original | 340 GB, with the Engram tables (Q6_K) | NVIDIA from Volta (V100) on, and AMD; Linux and Windows |
-| **[DeepSeek V4.1 · Maya-XS v2](https://huggingface.co/peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF)** (`deepseek-maya-xs`): compact dense weights and higher-quality formats on selected layers; upstream targets a 128 GB memory pool with Engram tables on SSD | 117 GB model + 161 GB shared Q6_K tables | Installer/packing support; the same fork DS4 limitation applies |
+| **[DeepSeek V4.1 · Maya-XS v2](https://huggingface.co/peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF)** (`deepseek-maya-xs`): compact dense weights and higher-quality formats on selected layers; upstream targets a 128 GB memory pool with Engram tables on SSD | 117 GB model + 161 GB shared Q6_K tables | HIP gfx1151 single-host and two-host TP2/DSpark have recorded inference and user validation |
 | unsloth's [UD-IQ1_M GGUF](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF) (`--ds4-quant gguf-iq1_m`): upstream estimates about 140 GB resident weights; new setups use the shared Q6_K tables | 301 GB, including shared tables | Installer/packing support; DS4 GPU limitation [#68](https://github.com/uv-genai/maya-tp/issues/68) remains open |
 | unsloth's [UD-IQ3_S GGUF](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF) (`--ds4-quant gguf-iq3_s`): upstream estimates about 262 GB resident weights plus 161 GB Q6_K tables shared with Maya's quants | 424 GB | The same DS4 limitation |
 | unsloth's [UD-Q8_K_XL GGUF](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF) (DeepSeek's own formats; new setups share Maya's Q6_K tables) | 467 GB, including shared tables | the same |
 | LibertAIDAI's [EXL3 2.9 bpw](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw) + DeepSeek's Engram tables | 414 GB | NVIDIA from Volta (V100) on; pictures from RTX 30 / A100 on; AMD experimental |
 | LibertAIDAI's [EXL3 3.5 bpw](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-3.5bpw) + the same Engram tables (`--ds4-quant exl3-3.5`: closer to the original, ~280 GB of VRAM + RAM) | 461 GB | the same |
 | orcarouter's [Abliterated GGUFs](https://huggingface.co/orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF), the model with its refusals removed: Mix-128G (`--ds4-quant abliterated-128g`, ~114 GB of VRAM + RAM) or Mix-256G (`abliterated-256g`, ~236 GB); `abliterated` picks the one your PC holds. Their n-gram table is left out and Maya's Q6_K tables are read instead (once for both). A gated repo: accept its terms, then `HF_TOKEN` or `hf auth login` | 275 / 397 GB, with the 161 GB of n-gram tables shared with Maya's DeepSeek quants (downloaded once) | NVIDIA from Volta (V100) on (AMD not tried yet) |
+
+For the fork's two-host Maya-XS/S setup, `maya-ds4` runs on each host and the
+DeepSeek launcher matches their model identities, context and speculation
+settings. The installer model IDs above differ from the launcher names
+`Maya-XS` and `Maya-S`, which select per-model launcher JSON.
+[DeepSeek launchers and accepted runtime](DEEPSEEK-TP2-RUN.md).
 
 - **Any amount of memory:** the most-used experts go to the GPUs, the others are read in place from the model's files -
   from RAM where they fit, from the SSD otherwise. More VRAM and RAM is faster; keep the files on an NVMe SSD. The

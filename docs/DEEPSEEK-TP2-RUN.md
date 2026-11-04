@@ -7,6 +7,30 @@ peak-capacity follow-ups are tracked in #110/#112. DeepSeek uses `maya-ds4`
 and its own launcher configs. The manual examples below create a dedicated
 server config; the final section covers the SSH-managed llama-swap wrapper.
 
+PR #122 merged the implementation into `main` at `75e18e8`. Feature-head and
+post-merge CI passed. [Merged pull request](https://github.com/uv-genai/maya-tp/pull/122).
+
+## Accepted runtime on the user's pair
+
+Start the existing `maya-deepseek-xs-mtp` or `maya-deepseek-s-mtp` llama-swap
+entry on strix-halo-1.local. The wrapper starts rank 1 on strix-halo-2.local.
+Both hosts use the runtime at
+`/home/ugo/software/project-maya-ds4-tp2-review` and the versioned executable
+`build-hip/queued-a950e7e9350b/maya-ds4` within it. Its SHA-256 is
+`a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102`.
+The directory name reflects its original staging role. This is the build
+accepted in the user's extended trials.
+
+The per-model launcher files are `maya-ds4-tp2-maya-xs.json` and
+`maya-ds4-tp2-maya-s.json`. They select distinct packs and local manifests,
+context 262144, DSpark on, prefill chunk 256, lookup off, bootstrap port
+18525 and RDMA device usb4_rdma5. The per-rank expert budget is 92160 MiB
+with reserve 1024 MiB and 14 CPU threads. Run one model pair at a time.
+Use `main` for source development and this section for the accepted runtime
+selection. The following manual steps also support setting up a new pair.
+
+## Prepare a new pair
+
 The implementation runs `maya-ds4` on two gfx1151 HIP hosts, with one GPU per
 host and `usb4_rdma*` for tensor traffic. Each host needs the same DeepSeek GGUF
 model and pack, a matching TP2-enabled executable, sufficient memory, and a
@@ -50,7 +74,7 @@ the local RDMA device as `TP2_RDMA_DEVICE`, the same `TP2_CONTEXT` and per-rank 
 in MiB as `TP2_BUDGET_MIB`. Both ranks must select the same model contents, executable,
 context, DSpark, prefill and lookup options. The two local pack, manifest,
 executable and RDMA device names may differ. The example explicitly enables
-256-row experimental chunked prefill and DSpark; prompt lookup defaults off.
+256-row bounded chunked prefill and DSpark. Prompt lookup defaults off.
 For example, set these on each host using the values for your pair:
 
 ```sh
@@ -105,15 +129,15 @@ worker does not run the drafter or lookup itself. Vision, parallel requests,
 and performance at a filled 512K context are not validated for this path.
 The resident expert split does not imply that Engram and all model I/O have
 been eliminated. See the [validation evidence](validation/deepseek-tp2-control-2026-11-03/)
-and [implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md) for current
-gates and limitations.
+for the measured scope. The [implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md)
+records the original phase gates.
 
 ## Promotion and rollback
 
-The candidate remains experimental while the numerical review in #110 and the
-remaining validation in #116 are open. The user should review and test it
-before deciding whether to promote it. The steps below are a procedure for that
-decision; they do not change the active setup by themselves.
+The queued build above has user acceptance, and operational validation #116 is
+closed. Numerical/capacity follow-ups are tracked in #110/#112. Use the
+procedure below when selecting a future versioned build or restoring a previous
+pair configuration. The accepted executable and config paths are recorded above.
 
 Before a change, record the exact commands and environment used to start both
 previous ranks, including their binary paths and hashes, local pack and manifest
@@ -242,10 +266,10 @@ models:
 ```
 
 Use the two entries with llama-swap's normal one-model-at-a-time behavior.
-The review configs use bootstrap port 18525, leaving the established GLM
+The accepted configs use bootstrap port 18525, leaving the established GLM
 bootstrap selection separate. The user controls loading and inference testing.
 
-The 2026-11-04 review configs select the queued-collective candidate on both
+The accepted 2026-11-04 configs select the queued-collective build on both
 hosts. XS measured 23–24% higher generation throughput than the same single-host
 build on two prompts at 262144 context. The user reports Maya-S eBPF generation
 slightly above 30 tok/s with prefill similar to XS and a larger relative speedup.

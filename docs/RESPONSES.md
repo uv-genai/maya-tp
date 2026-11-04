@@ -5,9 +5,12 @@ authentication, CORS policy, context limit, and generation engine as Chat Comple
 This includes GLM models served by `maya` and DeepSeek-V4.1 models served by
 `maya-ds4`, with their configured chat templates, tool syntax and vision paths.
 
-For Maya-TP, the validated path is GLM text inference on gfx1151 Linux over RDMA. Vision and
-other-model descriptions here refer to inherited upstream API capabilities; TP2 rejects unsupported
-media before encoding. Set `max_output_tokens` for the total generated-token limit and the base
+For Maya-TP, GLM TP2/MTP and DeepSeek TP2/DSpark text inference have validation
+and user acceptance on gfx1151 Linux over RDMA. API descriptions also cover
+inherited single-host capabilities. TP2 rejects unsupported media before encoding.
+Use each model family's launch/config guide.
+[GLM TP2](TP2-RUN.md), [DeepSeek TP2/DSpark](DEEPSEEK-TP2-RUN.md).
+Set `max_output_tokens` for the total generated-token limit and the base
 config's `thinking_budget` for the GLM reasoning cap; see
 [thinking-budget details](SETTINGS.md#limiting-glm-thinking-for-a-coding-agent).
 

@@ -2,7 +2,7 @@
 
 Status: historical design proposal, written before the experimental implementation on 2026-11-03.
 Tracking: [#108](https://github.com/uv-genai/maya-tp/issues/108). The code descriptions and
-unverified assumptions below describe that earlier checkpoint; see the [review guide](DEEPSEEK-TP2-RUN.md),
+unverified assumptions below describe that earlier checkpoint; see the [operations guide](DEEPSEEK-TP2-RUN.md),
 [implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md) and [handoff](../Handoff.md) for current status.
 Scope: DeepSeek V4.1 Flash on two gfx1151 Strix Halo hosts connected by USB4 RDMA, with the
 existing DSpark drafter. This is not an implementation, a measured performance claim, or a phased

@@ -2,8 +2,8 @@
 
 Operations guide for Maya TP2 on twin Strix Halo hosts over Thunderbolt RDMA.
 Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rdma*`).
-For the separate experimental DeepSeek engine path, see the
-[DeepSeek TP2 review guide](DEEPSEEK-TP2-RUN.md).
+For DeepSeek TP2 and DSpark, use its family-specific launchers in the
+[DeepSeek TP2 operations guide](DEEPSEEK-TP2-RUN.md).
 
 ## Prerequisites
 

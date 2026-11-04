@@ -22,7 +22,7 @@ more memory and two GPUs, but using them efficiently requires coordinated execut
 
 Maya-TP adds that coordination to Maya:
 
-- **More speed:** divide attention, expert and feed-forward computation between two APUs. The current
+- **More speed:** divide attention, expert and feed-forward computation between two APUs. The 2026-10-30
   technical-prompt control measures about **25.8 tokens/s on the pair versus 18.6 on one host**, roughly
   **39% higher throughput** with ordinary decoding.
 - **More model capacity:** partition working weights across both systems, allowing model configurations
@@ -99,13 +99,17 @@ MTP/API suite passing. Report:
 
 ## Current scope
 
+DeepSeek TP2 and DSpark were merged into `main` through PR #122 at `75e18e8`
+after extended user trials. HIP mapping, server and tools CI passed on the
+feature head and merged commit. [Merged pull request](https://github.com/uv-genai/maya-tp/pull/122).
+
 The `main` branch includes the sequential semantic integration of upstream **v1.1.37–v1.1.46** and
 the cumulative **v1.1.47–v1.1.49** merge, with TP2/MTP preservation checks and CI. This is unreleased source work: the latest published
 fork release remains **v1.1.42**, and future fork releases use **`tp-vMAJOR.MINOR.PATCH`**.
 Fresh S/M/L ordinary/MTP API, CLI, strict historical-reference and peer-recovery checks passed after
 the cumulative upstream merge on its then-current binary. The later prefill build was accepted in user
 trials; its stricter fidelity limitations are documented in the [prefill report](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
-The [latest merge report](docs/upstream/v1.1.49.md) and
+The [upstream v1.1.49 merge report](docs/upstream/v1.1.49.md) and
 [earlier integration report](docs/upstream/COMPLETION-2026-11-02.md) distinguish accepted changes from
 deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya-tp/issues/68),
 [tail draining](https://github.com/uv-genai/maya-tp/issues/75) and
@@ -128,7 +132,7 @@ DeepSeek launchers are available as `tools/ds4/rank0.sh`,
 Per-model configs and the PID-scoped llama-swap stop command are documented in
 the DeepSeek guide. [DeepSeek launcher setup](docs/DEEPSEEK-TP2-RUN.md#rank-scripts-and-llama-swap).
 
-## Set up the pair
+## Set up the GLM pair
 
 Both hosts need a gfx1151-capable ROCm/HIP toolchain, C++20 compiler, CMake, Python 3.10+ with venv,
 `jq`, libibverbs development files and a working `usb4_rdma*` device. Keep matching engine builds and

@@ -1,15 +1,17 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-04 · Current state: **§45**, user-accepted GLM and DeepSeek operation after hours of successful use including DeepSWE benchmarks. Main integration is tracked in #121. §44 records the queued DeepSeek build and measured speedup. §43 records launchers. §33 records the promoted GLM runtime.
+> Last updated: 2026-11-04 · Current state: **§46**, post-merge documentation audit. PR #122 merged DeepSeek TP2/DSpark into `main` at `75e18e8`, with feature-head and merged-main CI passing. §45 records extended user acceptance including DeepSWE. §44 records the accepted DeepSeek binary. §33 records the promoted GLM runtime.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
 
 ## 1. What we are building
 
-Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** (**Maya-S, Maya-M and Maya-L** passed the full
-TP2+MTP suite on earlier builds and user trials on the promoted build; geometry is pack-derived via #12) across two twin hosts:
+Two-way **tensor parallel (TP2)** for **GLM-5.3-Flash** with MTP and
+**DeepSeek-V4.1-Flash** with DSpark across two twin hosts. GLM Maya-S/M/L
+and DeepSeek Maya-XS/S have paired validation and extended user acceptance.
+The user reports hours of successful use including DeepSWE benchmarks.
 
 | Host | Role | IP |
 | --- | --- | --- |
@@ -39,6 +41,8 @@ TP2+MTP suite on earlier builds and user trials on the promoted build; geometry 
 | `origin` | `https://github.com/uv-genai/maya-tp.git` |
 | `upstream` | `https://github.com/mw00/project-maya.git` (read/merge only) |
 | `main` | tracks `origin/main` |
+| Main integration | PR #122 merged at `75e18e8`, feature-head and merged-main CI passed |
+| Source version/checkpoint | Numeric VERSION `1.1.43`, tag `tp-v1.1.43` predates the DeepSeek TP2 merge |
 | Release version | **v1.1.42** published from `6471995` ([#35](https://github.com/uv-genai/maya-tp/issues/35)); previous v1.1.41 = `a6d15a7`, v1.1.40 = `d9248e8`, v1.1.39 = `20ff03a`, v1.1.38 = `c322b3e` |
 
 ## 4. Issue map
@@ -80,6 +84,13 @@ TP2+MTP suite on earlier builds and user trials on the promoted build; geometry 
 | 85 | Direct cumulative upstream v1.1.49 integration | closed; v47–49 reviewed together (§31) |
 | 90 / 91 | Prefill pool sizing and DSA tuning | closed after user acceptance; promoted in PR #94 (§33) |
 | 93 | Cold Maya-L baseline output variation | closed as not planned at user request; cause unresolved (§33) |
+| 108 / 109 | DeepSeek analysis/design and implementation plan | closed, dated plans retained as references |
+| 110 / 112 | DeepSeek numerical/quality and peak-capacity investigations | open follow-ups, accepted workloads and limits recorded separately |
+| 111 / 113 / 114 / 115 | DeepSeek control/identity, DSpark, failure handling and partition/load | closed, implementation and evidence merged in PR #122 |
+| 116 | DeepSeek operational acceptance | closed by PR #122 after extended user trials |
+| 118 / 119 | DeepSeek launchers and llama-swap entries | closed, accepted runtime uses both model-specific aliases |
+| 120 / 121 | Queued collective speedup and main integration | closed, user-accepted build and green merged-main CI |
+| 123 | Post-merge documentation audit | corrected active guides and checked links, entry points and runtime selections (§46) |
 
 ## 5. What works (Maya-S pack)
 
@@ -2565,9 +2576,9 @@ llama-swap entries on strix-halo-1; the worker starts automatically.
 The user tested Maya-S and reports a larger relative speedup than XS, with eBPF
 generation slightly above 30 tok/s and prefill similar to XS. Exact prefill
 rates and a matched single-host baseline were not supplied, so this user report
-has no computed speedup percentage. Issue #120 is complete with that feedback;
-#116 retains the broader review, including numerical/quality and resource
-questions in #110/#112.
+has no computed speedup percentage. Issue #120 is complete with that feedback.
+The later extended trials completed #116 in §45. Numerical/quality and resource
+questions are tracked separately in #110/#112.
 
 **Active owned model processes** are none. Benchmark driver session 91457 exited
 successfully; both recorded API servers and the recorded remote worker exited.
@@ -2578,13 +2589,15 @@ and the earlier review engine remain available at their recorded paths.
 ## 45. Extended user acceptance and main integration (#121, 2026-11-04)
 
 The user reports hours of successful testing across most DeepSeek and GLM
-models, including DeepSWE benchmarks, and requests merging `feat/deepseek-tp2`
-into `main` through a pull request. This completes operational acceptance in
+models, including DeepSWE benchmarks, and requested merging `feat/deepseek-tp2`
+into `main` through a pull request. This completed operational acceptance in
 #116. The exact model list, DeepSWE scores and per-run settings were not supplied.
 The implementation, queued optimization, launchers, tests and recorded evidence
-are included together. The PR and exact-head/post-merge CI results are tracked
-in #121. A merge commit preserves the phase history and issue references.
-Use `main` as the development entry point after integration.
+were merged through PR #122 at `75e18e8c186da260b128888d9170b217b0ad2f8c`.
+Feature-head runs 41764103063/41764139490 and merged-main run 41764710423 passed
+HIP mapping, 618 server tests (12 skips) and 721 tools tests (35 skips).
+The merge commit preserves phase history and issue references. Issues #116/#121
+are closed. Use `main` as the source development entry point.
 
 The accepted DeepSeek executable remains the versioned §44 build with SHA-256
 `a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102`,
@@ -2598,3 +2611,28 @@ are active in this merge workstream.
 Issues #110/#112 retain their numerical/quality and peak-capacity investigations.
 Acceptance reflects successful workloads on the user's pair; the dated
 comparison limitations and unresolved measurements remain in the evidence.
+
+## 46. Post-merge documentation audit (#123, 2026-11-04)
+
+The user asked whether all user-facing and coding-agent-facing documents were
+current. The audit corrected stale pre-merge wording, open-#116 rollout status,
+GLM-only scope summaries and outdated cross-links in active guides. The restart
+prompt now states the completed merge and points to current runtime selection.
+Design/plan headers identify their historical role, preserving their original
+phase gates and measurements.
+
+The source development entry point is `main`, merged through PR #122 at
+`75e18e8`. The accepted DeepSeek runtime remains under
+`/home/ugo/software/project-maya-ds4-tp2-review` on both hosts, using §44's
+matching versioned binary and distinct XS/S configs. Their selected paths and
+context/DSpark/prefill options were checked read-only on both hosts during this
+audit. GLM uses the promoted canonical `build-hip/maya` recorded in §33.
+Launch from strix-halo-1 with the existing model-family llama-swap aliases.
+
+The numeric source version is 1.1.43 and checkpoint tag `tp-v1.1.43` predates
+DeepSeek TP2. The latest published GitHub release is legacy `v1.1.42`.
+The active documentation index separates operating guides from dated design,
+benchmark and inherited upstream reference material. Documentation validation
+passed 192 local linked-path and 57 section-link checks across 15 active/index
+documents, referenced-entry-point/argument checks and whitespace checks. No owned model
+processes are active in this workstream.
