@@ -1,5 +1,14 @@
 # Experimental opt-in KDA layer graphs
 
+This report records the v1.0.21 experiment below. The v1.1.52 integration added
+eligible DSA feed-forward graph capture under `MAYA_GLM_KDA_GRAPH`, controlled by
+`MAYA_GLM_DSA_FFN_GRAPH`. The fork keeps graph capture off by default and uses
+direct execution for RDMA TP2. Current controls and validation scope are in
+[SETTINGS](SETTINGS.md#glm-local-speculative-and-graph-options) and the
+[v1.1.52 report](upstream/v1.1.52.md).
+
+## Original v1.0.21 capture scope
+
 `MAYA_GLM_KDA_GRAPH=1` captures recurrent layers of single-device GLM decode.
 Default is the ordinary direct path. DSA layers remain direct. Split/MTP,
 profiling, dumps, prefetch and lookahead bypass capture. Expert selection, weights,

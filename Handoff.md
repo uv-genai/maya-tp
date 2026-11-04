@@ -2642,16 +2642,17 @@ processes are active in this workstream.
 The source incorporates applicable changes through upstream v1.1.53. The user
 required one branch/PR per tag, paired validation and exact-head CI before each
 merge, then merged-main CI before starting the next tag. All tag workstreams
-use separate issues on the fork.
+use separate issues on the fork. The completed source checkpoint is
+`de184d954e79a3bfbea40541e4d1e2fa8dea6b5f`, merged through PR #134.
 
 | Tag | Issue | PR | Merged-main checkpoint |
 | --- | --- | --- | --- |
 | v1.1.50 | #125 | #126 | `176ce06`, CI 41819239270 passed |
 | v1.1.51 | #127 | #129 | `7f8b782`, CI 41823336490 passed |
 | v1.1.52 | #130 | #131 | `1bcec32`, CI 41828134565 passed |
-| v1.1.53 | #132 | Final PR recorded in #132 | Final SHA/CI recorded in #132 |
+| v1.1.53 | #132 | #134 | `de184d9`, CI 41834772034 passed |
 
-Read each `docs/upstream/v1.1.5{0,1,2,3}.md` report for semantic decisions,
+Read each `docs/upstream/v1.1.50.md` through `docs/upstream/v1.1.53.md` report for semantic decisions,
 complete measurements, limits and exact-head/PR CI tracking. Raw results and
 actual harnesses are in their `validation-v1.1.5N/` directories. Issues #125,
 #127, #130 and #132 record the authoritative GitHub completion checkpoints.
@@ -2686,8 +2687,10 @@ retained in the per-tag reports.
 
 V53 local mapping and ordered 738 server tests (11 skips, real GLM/DeepSeek
 tokenizers) plus 751 tools tests (3 skips) passed. The final memo alias regression
-passed within all 25 real-tokenizer memo cases afterward. Exact-head CI covers
-the updated complete suite. The 65 focused fault/TP2/dashboard tests passed.
+passed within all 25 real-tokenizer memo cases afterward. Exact-head push CI
+41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. The final
+CI ran 739 server tests (21 skips) and 751 tools tests (36 skips), followed by
+the CPU memory-policy and row-preparation/stub checks. The 65 focused fault/TP2/dashboard tests passed.
 All three Release gfx1151 engines and the DeepSeek verifier built successfully.
 The optional prompt memo stays off by default. Settings accept STRATA aliases
 with MAYA precedence. The API benchmark has unit coverage, with full agent-load
@@ -2707,3 +2710,28 @@ Validation used strix-halo-2 as lead, strix-halo-1 as peer, GLM API/bootstrap
 Accepted user runtime selection remains documented in §§33 and 44. Preserve
 the remote canonical checkout's user edits and use isolated builds for future
 validation. Model contents and configs were selected explicitly for each rank.
+
+## 48. Post-v53 documentation audit (#135, 2026-11-04)
+
+The audit verified merged PR #134, source `de184d9` and successful main CI
+41834772034. Final source CI ran 739 server tests (21 skips) and 751 tools tests
+(36 skips), plus HIP mapping and CPU policy/stub checks. The published release
+checkpoint is v1.1.42, with numeric source VERSION 1.1.43.
+
+Active user and agent guides now carry the final PR/commit/CI values, current
+handoff pointers, separate source-validation and accepted-runtime selection,
+paired health/GPU-state recovery and the updated installer labels. Removed the
+active settings entry for the excluded flow-DMA path. The original KDA graph
+experiment is identified by its v1.0.21 checkpoint, with a pointer to current
+v52 graph controls. Dated measurements retain their original conditions.
+
+Validation checked 18 active/reference guides, 230 local file links and 60
+heading links, along with 12 documented entry points and the paired/default/
+alias controls against source. Whitespace and documentation-only scope checks
+passed. The local canonical GLM binary matches its recorded runtime hashes.
+No model processes are owned by this audit.
+
+The user authorized publication through `docs/post-v53-audit`, followed by a
+pull request into `main`. Issue #135 records the publication commit, PR and CI
+outcomes. Use synchronized `main` as the entry point after the merge. This audit
+changes Markdown files only.

@@ -1191,7 +1191,6 @@ split change does.
 | `MAYA_DS4_TP_CHECK` | off | `1`: each member's parts checked against the whole expert at load |
 | `DS4_TP_SHARES` | from the members' rooms (GGUF packs) | the parts by hand instead, in whole blocks: `w0,w1,..` a member's share of each layer's FFN, `:` between patterns that go round the layers, `/` between groups (`4,5`: the lead 4 of 9 blocks); `off`: the split as before (even, or `MAYA_DS4_TP_GGUF_UNEVEN`'s) |
 | `MAYA_DS4_FLOW_DOWN_SHARE` | off | `1` (with `DS4_FLOW_TP=1`): a group's members read each streamed expert's down from the files once, through the page cache (dropped once every member read it), where each member read it from the disk itself - the same bytes |
-| `MAYA_DS4_FLOW_AR_DMA` | off | `1` (on the flow, `DS4_FLOW_TP=1`, and a group of three members or more, with the wire's sums in FP16 - `DS4_AR_F16`, on by default): a prompt chunk's all-reduce goes through `chunk_allreduce`, the helper the batches off the flow already use - the DMA reduce-scatter (`ar_rs16_kernel`), or the host's sums when `MAYA_DS4_AR_HOST` covers the group - instead of the group's F32 kernel all-reduce: the same rows, in FP16 on the wire. Two members and `DS4_AR_F16=0` are unchanged. On four mixed-capacity GPUs (two RTX 3090s, two CMP 170HX), weighted `--tp 4`, 50K-token prompt, `--prefill-chunk 4096`, `DS4_FAT_ROWS=64`, three repeats: 1,623.7 tok/s with the setting off, 1,684.5 with the DMA path, 1,734.0 with `MAYA_DS4_AR_HOST=4` and its four threads; decode 62.7 / 62.0 / 65.7, inside that box's noise (two copies of the same binary differed by 7% in decode across arms) |
 | `MAYA_DS4_FLOW_DOWN_PART` | off | `1` (with `DS4_FLOW_TP=1` and `MAYA_DS4_TP_GGUF_UNEVEN`): each member copies only its own columns of a streamed expert's down to the GPU, compacted where it was read, not the whole down and a gather there - the same bytes in its slot (`MAYA_DS4_TP_CHECK` checks them at load) |
 | `MAYA_DS4_TP_BORROW` | off | `1` (with `DS4_FLOW_TP=1`): a group's members lend the prompt path the room of their last expert slots for its buffers, as one GPU does, so larger chunks (16K / 32K tokens) leave the decode as many VRAM experts; the experts under the buffers stream during the prompt and are read back after it (its time logged, as the decode waits for it) |
 
@@ -1201,9 +1200,9 @@ time. `MAYA_DS4_AR2=1` does a prompt chunk's all-reduces in one launch that writ
 other member's rows read 16 bytes a lane: the same sums, bit for bit. `2` also sends both partials as FP16 (half the
 bytes; both members round theirs alike, so they stay equal, but the sums are FP16's, not exact).
 `MAYA_DS4_AR2_DECODE=1` takes the decode windows' all-reduces to the same kernel, exact. A group of three or more is
-unchanged, except on the flow (`DS4_FLOW_TP=1`) with `MAYA_DS4_FLOW_AR_DMA=1`, which takes its prompt chunks' sums
-to the helper the batches off the flow already use (`MAYA_DS4_FLOW_AR_DMA` above). `ds4_gguf_test --ar <GPU> <GPU>` checks both
-against the host's sums on two GPUs and times them.
+unchanged. `ds4_gguf_test --ar <GPU> <GPU>` checks both against the host's sums on two GPUs and times them.
+For the fork's remote TP2 execution, use the queued RDMA path described in the
+[DeepSeek operations guide](DEEPSEEK-TP2-RUN.md).
 
 | Setting | Default | |
 | --- | --- | --- |
@@ -1900,6 +1899,10 @@ forwarded to both ranks. The launcher schema and stop actions are described
 in the DeepSeek operations guide. [DeepSeek TP2 guide](DEEPSEEK-TP2-RUN.md).
 
 ## Token savings ledger
+
+Set this option in the server process environment before launching, for example
+`export MAYA_SAVINGS_PATH=/path/to/token-savings.json`. This server setting uses
+the `MAYA_` spelling.
 
 `MAYA_SAVINGS_PATH` names the ledger file. Its parent must be writable. The default is
 `token-savings.json` beside the server config. `off`, `none` or `0` keeps counts in memory
