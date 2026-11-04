@@ -52,6 +52,7 @@ struct Dev {
 std::mutex g_mu;                   // store path and file appends only; never held while waiting on a GPU
 Dev g_dev[64];
 std::string g_store;                 // set_store's file ("": the picks this process makes only)
+bool g_store_read_only = false;
 
 struct Desc {   // y (n x t, FP32, ldy) = W^T (W: k x n column-major = [n][k] row-major) . x (k x t, ldx)
     hipblasLtMatmulDesc_t op = nullptr;
@@ -101,9 +102,10 @@ void load_saved(Dev& d, const std::string& store) {
 
 }  // namespace
 
-void set_store(const char* path) {
+void set_store(const char* path, bool read_only) {
     std::lock_guard<std::mutex> lk(g_mu);
     g_store = path != nullptr ? path : "";
+    g_store_read_only = read_only;
 }
 bool available() { return !off(); }
 
@@ -116,9 +118,11 @@ bool gemm(void* stream, const uint16_t* W, int n, int k, const uint16_t* x, int 
     // A process-wide lock across hipEventSynchronize would prevent this device from submitting that work.
     std::lock_guard<std::mutex> lk(d.mu);
     std::string store;
+    bool store_read_only = false;
     {
         std::lock_guard<std::mutex> store_lk(g_mu);
         store = g_store;
+        store_read_only = g_store_read_only;
     }
     if (!d.tried) {
         d.tried = true;
@@ -205,7 +209,7 @@ bool gemm(void* stream, const uint16_t* W, int n, int k, const uint16_t* x, int 
             if (verbose)
                 std::fprintf(stderr, "ds4 gemm: hipBLASLt n %d k %d ldx %d ldy %d rows <= %d: %d candidates, %s %.3f ms\n",
                              n, k, ldx, ldy, key.tb, got, pick.ok ? "the fastest" : "none ran", pick.ok ? best / 2 : 0.0f);
-            if (pick.ok && !store.empty() && !d.tag.empty()) {   // (kept for the next start on this GPU kind)
+            if (pick.ok && !store_read_only && !store.empty() && !d.tag.empty()) {   // (kept for the next start on this GPU kind)
                 std::lock_guard<std::mutex> store_lk(g_mu);
                 std::ofstream f(store, std::ios::app);
                 f << d.tag << ' ' << n << ' ' << k << ' ' << ldx << ' ' << ldy << ' ' << key.tb << ' '
@@ -223,7 +227,7 @@ bool gemm(void* stream, const uint16_t* W, int n, int k, const uint16_t* x, int 
     return false;
 }
 #else
-void set_store(const char*) {}
+void set_store(const char*, bool) {}
 bool available() { return false; }
 bool gemm(void*, const uint16_t*, int, int, const uint16_t*, int, int, float*, int) { return false; }
 #endif

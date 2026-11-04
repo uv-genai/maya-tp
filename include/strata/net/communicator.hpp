@@ -98,6 +98,9 @@ public:
   /// After the stream has drained: false with the first failure of a queued
   /// exchange.
   [[nodiscard]] virtual bool CheckQueued(std::string* error) = 0;
+  /// Nonblocking peer-liveness check for an idle two-host pair. Implementations
+  /// without a control socket have no peer to check.
+  [[nodiscard]] virtual bool CheckPeer(std::string* error) { (void)error; return true; }
 };
 
 }  // namespace strata::net

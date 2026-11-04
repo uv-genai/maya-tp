@@ -1,0 +1,66 @@
+pack-info /home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4
+  GGUF, model_dir /home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS
+  40 layers x 384 routed experts, 6 a token; dim 5120, ff 2304, vocab 129280; the DSpark drafter: 3 blocks
+routed experts (gate, up / down; an expert's bytes, a token's picks):
+   layer  gate, up               down                      an expert      a token
+       0  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+       1  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+       2  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+       3  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+       4  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+       5  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+       6  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+       7  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+       8  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+       9  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      10  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      11  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      12  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      13  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      14  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      15  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      16  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      17  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      18  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      19  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      20  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      21  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      22  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      23  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      24  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      25  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      26  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      27  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      28  IQ1_S                  IQ2_XXS                     7.65 MB     45.90 MB
+      29  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      30  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      31  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      32  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      33  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      34  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      35  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      36  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      37  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      38  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+      39  IQ1_S                  IQ1_S                       6.91 MB     41.47 MB
+   mtp.0  IQ2_XXS                IQ2_XXS                     9.12 MB     27.37 MB
+   mtp.1  IQ2_XXS                IQ2_XXS                     9.12 MB     27.37 MB
+   mtp.2  IQ2_XXS                IQ2_XXS                     9.12 MB     27.37 MB
+  expert matrices by type: IQ1_S 41472, IQ2_XXS 5760
+  the trunk's 15360 experts 109.57 GB, 1.61 bits a weight; a token reads 1.712 GB of them (6 a layer)
+  the drafter's experts 3.50 GB
+where it goes (GB):
+  the GPUs: dense 6.18 (attention, shared experts, routers, norms), head 0.54, the drafter's blocks 0.75 + their experts 3.50
+  the routed experts 109.57: VRAM, RAM and the files, the most-routed first (the expert profile, below)
+  pinned RAM: the token embedding 1.32 (BF16 rows; 0.54 in the files)
+  read from the files as tokens need them: the Engram tables 161.28
+  borrowed while a picture is read: the vision tower 0.97
+  dense types: BF16 F32 Q6_K Q8_0
+expert profile /home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/expert-profile.bin: 16512 counts (the drafter's too), 74123437 routes, about 308848 tokens' worth
+  the most-routed experts holding 50% of its routes: 1248 (9.0 GB); 80%: 4165 (30.0 GB); 90%: 6331 (45.5 GB); 95%: 8280 (59.4 GB); 99%: 11646 (83.4 GB)
+  never routed: 58 experts (0.4 GB)
+drafter: 3 blocks in the tensors, 3 loaded; block size 5, noise token 128799, markov rank 256, 128 experts (3 a token), reading trunk layers 37,38,39
+Engram: layers 1,14, tables in Q6_K
+no GPU kernel: none (every tensor is of a type the engine reads)
+files: 7 in model_dir, all there and long enough (283.3 GB)
+pack-info: the pack can load

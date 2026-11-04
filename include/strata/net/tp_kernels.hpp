@@ -30,4 +30,10 @@ void WaitAdd(const std::uint64_t* flag, std::uint64_t value, std::uint64_t ticks
 void AddRowsBroadcast(const float* addend, float* residual, std::uint32_t rows, std::uint32_t hidden,
                       std::uint32_t streams, hipStream_t stream);
 
+/// Compare the active words of strided rows bit-for-bit. Retain the first
+/// nonzero tag in host-mapped failure memory, read after the stream drains.
+void CompareRows(const std::uint32_t* local, const std::uint32_t* peer,
+                 std::uint32_t rows, std::uint32_t stride, std::uint32_t active,
+                 std::uint32_t tag, std::uint32_t* failure, hipStream_t stream);
+
 }  // namespace strata::net

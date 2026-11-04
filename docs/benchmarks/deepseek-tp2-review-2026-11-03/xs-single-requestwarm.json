@@ -1,0 +1,1730 @@
+{
+  "model": "xs",
+  "mode": "single",
+  "engine_sha256": "a0dcc1cb91e9e52fa365291d68eef8203af714d8222e77e49d72741a4331ddc2",
+  "context": 32768,
+  "runs": [
+    {
+      "iteration": 1,
+      "metrics_before": {
+        "engine": {
+          "model": "deepseek-v4.1-flash",
+          "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+          "max_context": 32768,
+          "images": false,
+          "version": "ds4-0.1",
+          "context": 32768,
+          "kv": "fp4",
+          "kv_resident": 32768,
+          "expert_slots": 14784,
+          "engine_kind": "ds4",
+          "cpu_experts": 576,
+          "ram_experts": 0,
+          "cpu_threads": 14,
+          "engine": "ds4-0.1",
+          "engram_layers": 2,
+          "engram_lookups": 48,
+          "lookup": 0,
+          "logprobs": 20,
+          "maya_version": "1.1.43",
+          "trained_context": 1048576,
+          "dspark": true,
+          "speculation": [
+            "DSpark"
+          ]
+        },
+        "live": {
+          "state": "idle",
+          "queued": 0,
+          "active": 0,
+          "writing": 0,
+          "spec_off": false,
+          "phase": null,
+          "prompt_tokens": null,
+          "prompt_read": null,
+          "prompt_total": null,
+          "generated": null,
+          "max_tokens": null,
+          "elapsed_s": null,
+          "tok_s": null,
+          "tok_s_mean": null,
+          "prefill_tok_s_mean": null,
+          "tok_s_window_s": null,
+          "prompt_reused": null
+        },
+        "tiers": {
+          "now": {
+            "tok_s": 30.37,
+            "ms_tok": 32.93,
+            "vram_hit": 0.9933,
+            "cpu": 1.688,
+            "ram": 0.0,
+            "promo": 0.0,
+            "engram_ms": 1.803,
+            "vram_used": 14784.0,
+            "ram_used": 0.0,
+            "cpu_n": 576.0,
+            "vram_gb": 105.43,
+            "ram_gb": 0.0,
+            "disk_gb": 4.14,
+            "eg_cache_rows": 1104.0,
+            "eg_cache_cap": 1016800.0,
+            "eg_cache_row_bytes": 264.0,
+            "eg_lookup_rows": 1104.0,
+            "eg_lookup_hits": 0.0,
+            "eg_lookup_reads": 1104.0,
+            "disk_mb": 9.236,
+            "disk": 1.286,
+            "ram_fetch": 0.401,
+            "draft_rounds": 4.0,
+            "draft_ms": 39.876,
+            "verify_ms": 353.106,
+            "drafts": 0.667,
+            "draft_acc": 8.0,
+            "draft_off": 12.0,
+            "time": 1793715250.7201982
+          }
+        },
+        "gpu_map": [
+          {
+            "dev": 0,
+            "index": 0,
+            "name": "AMD Radeon",
+            "total": 2147483648,
+            "free": 0,
+            "parts": {
+              "weights": 6850365696,
+              "kv": 33055744,
+              "act": 47445248,
+              "prompt": 1419906304,
+              "tp": 0,
+              "drafter": 4129658880,
+              "pool": 105430302720,
+              "helper": 0,
+              "vision": 0,
+              "rest": 0,
+              "other": 0
+            },
+            "window": 0,
+            "drafter": 4129658880,
+            "tail": 0,
+            "borrow": 0,
+            "lendable": 0,
+            "vision_lent": false,
+            "vision_own": 0,
+            "slots": 14784,
+            "layers": [
+              0,
+              39
+            ],
+            "ctx": 32768,
+            "tp_n": 1,
+            "kv_ram": 0,
+            "measured": "start"
+          }
+        ],
+        "requests": [
+          {
+            "projection": null,
+            "time": 1793715249.9078434,
+            "duration_s": 0.8,
+            "finish": "stop",
+            "api": "openai",
+            "prefill_tok_s": 16.8,
+            "prompt_tokens": 7,
+            "reused": 0,
+            "output_tokens": 12,
+            "engine_generated": 12,
+            "prompt_ms": 416.5,
+            "decode_ms": 395.2,
+            "decode_tok_s": 30.4,
+            "hit_rate": 0.993,
+            "drafts_offered": 12,
+            "drafts_accepted": 8,
+            "spec_off": false,
+            "loop_guard": null
+          }
+        ],
+        "requests_kept": 1,
+        "totals": {
+          "since": 1793715249.3849545,
+          "requests": 1,
+          "prompt_tokens": 7,
+          "reused": 0,
+          "output_tokens": 12,
+          "prompt_ms": 416.5,
+          "decode_ms": 395.2,
+          "peak_decode": null
+        },
+        "loop_guard": {
+          "detected": 0,
+          "penalised": 0,
+          "thinking_closed": 0,
+          "stopped": 0,
+          "tool_repeats": 0,
+          "tool_blocked": 0,
+          "collapsed": 0,
+          "kept_going": 0,
+          "on": true
+        },
+        "hardware": {
+          "gpu_util": 37,
+          "gpu_mem_used": 274087936,
+          "gpu_mem_total": 2147483648,
+          "gpu_temp": 53.0,
+          "gpu_power": 57.412,
+          "gpu_power_limit": null,
+          "gpu_pcie_gen": 4,
+          "gpu_pcie_gen_max": 4,
+          "gpu_pcie_own_gen": 4,
+          "gpu_pcie_width": 16,
+          "gpu_pcie_path": "2/2",
+          "cpu": 26.4,
+          "ram_used": 125968609280,
+          "ram_total": 132634263552,
+          "disk_read_mb": 303.1158386987108,
+          "disk_write_mb": 103.07043954005009,
+          "tok_s": 12.0,
+          "tok_s_mean": 25.487527573026743,
+          "prefill_tok_s_mean": 0.0
+        },
+        "hardware_static": {
+          "gpu_name": "AMD Radeon",
+          "gpu_count": 1,
+          "cpu_name": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+          "cores": 16,
+          "threads": 16,
+          "psutil": true
+        },
+        "time": 1793715251.0236208,
+        "reload": null,
+        "storage": {
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS",
+          "free": 1475597303808,
+          "total": 3996489928704
+        },
+        "savings": {
+          "usd": 0.211063,
+          "start_usd": 8e-06,
+          "priced": true
+        }
+      },
+      "metrics_after": {
+        "engine": {
+          "model": "deepseek-v4.1-flash",
+          "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+          "max_context": 32768,
+          "images": false,
+          "version": "ds4-0.1",
+          "context": 32768,
+          "kv": "fp4",
+          "kv_resident": 32768,
+          "expert_slots": 14784,
+          "engine_kind": "ds4",
+          "cpu_experts": 576,
+          "ram_experts": 0,
+          "cpu_threads": 14,
+          "engine": "ds4-0.1",
+          "engram_layers": 2,
+          "engram_lookups": 48,
+          "lookup": 0,
+          "logprobs": 20,
+          "maya_version": "1.1.43",
+          "trained_context": 1048576,
+          "dspark": true,
+          "speculation": [
+            "DSpark"
+          ]
+        },
+        "live": {
+          "state": "idle",
+          "queued": 0,
+          "active": 0,
+          "writing": 0,
+          "spec_off": false,
+          "phase": null,
+          "prompt_tokens": null,
+          "prompt_read": null,
+          "prompt_total": null,
+          "generated": null,
+          "max_tokens": null,
+          "elapsed_s": null,
+          "tok_s": null,
+          "tok_s_mean": null,
+          "prefill_tok_s_mean": null,
+          "tok_s_window_s": null,
+          "prompt_reused": null
+        },
+        "tiers": {
+          "now": {
+            "tok_s": 36.08,
+            "ms_tok": 27.72,
+            "vram_hit": 0.999,
+            "cpu": 0.247,
+            "ram": 0.0,
+            "promo": 0.0,
+            "engram_ms": 1.18,
+            "vram_used": 14784.0,
+            "ram_used": 0.0,
+            "cpu_n": 576.0,
+            "vram_gb": 105.43,
+            "ram_gb": 0.0,
+            "disk_gb": 4.14,
+            "eg_cache_rows": 14192.0,
+            "eg_cache_cap": 1016800.0,
+            "eg_cache_row_bytes": 264.0,
+            "eg_lookup_rows": 16272.0,
+            "eg_lookup_hits": 2080.0,
+            "eg_lookup_reads": 14192.0,
+            "disk_mb": 1.46,
+            "disk": 0.203,
+            "ram_fetch": 0.043,
+            "draft_rounds": 75.0,
+            "draft_ms": 757.004,
+            "verify_ms": 5844.191,
+            "drafts": 0.841,
+            "draft_acc": 175.0,
+            "draft_off": 208.0,
+            "time": 1793715258.5125334
+          }
+        },
+        "gpu_map": [
+          {
+            "dev": 0,
+            "index": 0,
+            "name": "AMD Radeon",
+            "total": 2147483648,
+            "free": 0,
+            "parts": {
+              "weights": 6850365696,
+              "kv": 33055744,
+              "act": 47445248,
+              "prompt": 1419906304,
+              "tp": 0,
+              "drafter": 4129658880,
+              "pool": 105430302720,
+              "helper": 0,
+              "vision": 0,
+              "rest": 0,
+              "other": 0
+            },
+            "window": 0,
+            "drafter": 4129658880,
+            "tail": 0,
+            "borrow": 0,
+            "lendable": 0,
+            "vision_lent": false,
+            "vision_own": 0,
+            "slots": 14784,
+            "layers": [
+              0,
+              39
+            ],
+            "ctx": 32768,
+            "tp_n": 1,
+            "kv_ram": 0,
+            "measured": "start"
+          }
+        ],
+        "requests": [
+          {
+            "projection": null,
+            "time": 1793715251.0283828,
+            "duration_s": 7.5,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 72.3,
+            "prompt_tokens": 28,
+            "reused": 0,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 387.3,
+            "decode_ms": 7096.3,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715249.9078434,
+            "duration_s": 0.8,
+            "finish": "stop",
+            "api": "openai",
+            "prefill_tok_s": 16.8,
+            "prompt_tokens": 7,
+            "reused": 0,
+            "output_tokens": 12,
+            "engine_generated": 12,
+            "prompt_ms": 416.5,
+            "decode_ms": 395.2,
+            "decode_tok_s": 30.4,
+            "hit_rate": 0.993,
+            "drafts_offered": 12,
+            "drafts_accepted": 8,
+            "spec_off": false,
+            "loop_guard": null
+          }
+        ],
+        "requests_kept": 2,
+        "totals": {
+          "since": 1793715249.3849545,
+          "requests": 2,
+          "prompt_tokens": 35,
+          "reused": 0,
+          "output_tokens": 268,
+          "prompt_ms": 803.8,
+          "decode_ms": 7491.5,
+          "peak_decode": {
+            "tok_s": 38.2,
+            "tokens": 77,
+            "time": 1793715253.45054
+          }
+        },
+        "loop_guard": {
+          "detected": 0,
+          "penalised": 0,
+          "thinking_closed": 0,
+          "stopped": 0,
+          "tool_repeats": 0,
+          "tool_blocked": 0,
+          "collapsed": 0,
+          "kept_going": 0,
+          "on": true
+        },
+        "hardware": {
+          "gpu_util": 98,
+          "gpu_mem_used": 274087936,
+          "gpu_mem_total": 2147483648,
+          "gpu_temp": 60.0,
+          "gpu_power": 86.702,
+          "gpu_power_limit": null,
+          "gpu_pcie_gen": 4,
+          "gpu_pcie_gen_max": 4,
+          "gpu_pcie_own_gen": 4,
+          "gpu_pcie_width": 16,
+          "gpu_pcie_path": "2/2",
+          "cpu": 25.4,
+          "ram_used": 126017253376,
+          "ram_total": 132634263552,
+          "disk_read_mb": 86.75798683424011,
+          "disk_write_mb": 0.0,
+          "tok_s": 34.81171791044848,
+          "tok_s_mean": 35.362013137400965,
+          "prefill_tok_s_mean": 0.0
+        },
+        "hardware_static": {
+          "gpu_name": "AMD Radeon",
+          "gpu_count": 1,
+          "cpu_name": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+          "cores": 16,
+          "threads": 16,
+          "psutil": true
+        },
+        "time": 1793715258.8159773,
+        "reload": null,
+        "storage": {
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS",
+          "free": 1475597303808,
+          "total": 3996489928704
+        },
+        "savings": {
+          "usd": 0.21122,
+          "start_usd": 0.000166,
+          "priced": true
+        }
+      },
+      "io_before": {
+        "local": 119216541696
+      },
+      "io_after": {
+        "local": 119714336768
+      },
+      "request_start_monotonic": 76829.679451504,
+      "request_end_monotonic": 76837.168921714,
+      "gpu_samples": [
+        {
+          "t": 76829.679403436,
+          "local_busy_pct": 38,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76830.480272451,
+          "local_busy_pct": 70,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76831.28166771,
+          "local_busy_pct": 85,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76832.083446398,
+          "local_busy_pct": 92,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76832.884417271,
+          "local_busy_pct": 96,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76833.685272628,
+          "local_busy_pct": 97,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76834.486661638,
+          "local_busy_pct": 98,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76835.288682899,
+          "local_busy_pct": 98,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76836.090447269,
+          "local_busy_pct": 98,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76836.89152348,
+          "local_busy_pct": 98,
+          "remote_busy_pct": null
+        }
+      ],
+      "response": {
+        "id": "chatcmpl-ec4c888409434905a9d18edc",
+        "object": "chat.completion",
+        "created": 1793715251,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "```python\nimport csv\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Union\n\n\ndef parse_csv(file_path: Union[str, Path]) -> List[Dict[str, str]]:\n    \"\"\"\n    Parse a CSV file into a list of dictionaries.\n\n    Each row of the CSV file is converted into a dictionary whose keys are\n    the column headers (from the first row) and whose values are the\n    corresponding cell values as strings.\n\n    Args:\n        file_path: Path to the CSV file to parse. Can be a string or a\n            ``pathlib.Path`` object.\n\n    Returns:\n        A list of dictionaries, one per data row in the CSV file. Each\n        dictionary maps column header names to the row's values.\n\n    Raises:\n        FileNotFoundError: If the given file path does not exist.\n        csv.Error: If the file cannot be parsed as valid CSV.\n\n    Example:\n        >>> parse_csv(\"data.csv\")\n        [{'name': 'Alice', 'age': '30'}, {'name': 'Bob', 'age': '25'}]\n    \"\"\"\n    rows: List[Dict[str, str]] = []\n\n    with open(file_path, mode=\"r\", newline=\"\","
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 28,
+          "completion_tokens": 256,
+          "total_tokens": 284,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 28,
+          "prompt_ms": 387.3,
+          "prompt_per_token_ms": 13.832,
+          "prompt_per_second": 72.3,
+          "predicted_n": 256,
+          "predicted_ms": 7096.3,
+          "predicted_per_token_ms": 27.72,
+          "predicted_per_second": 36.1,
+          "draft_n": 208,
+          "draft_n_accepted": 175
+        }
+      }
+    },
+    {
+      "iteration": 2,
+      "metrics_before": {
+        "engine": {
+          "model": "deepseek-v4.1-flash",
+          "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+          "max_context": 32768,
+          "images": false,
+          "version": "ds4-0.1",
+          "context": 32768,
+          "kv": "fp4",
+          "kv_resident": 32768,
+          "expert_slots": 14784,
+          "engine_kind": "ds4",
+          "cpu_experts": 576,
+          "ram_experts": 0,
+          "cpu_threads": 14,
+          "engine": "ds4-0.1",
+          "engram_layers": 2,
+          "engram_lookups": 48,
+          "lookup": 0,
+          "logprobs": 20,
+          "maya_version": "1.1.43",
+          "trained_context": 1048576,
+          "dspark": true,
+          "speculation": [
+            "DSpark"
+          ]
+        },
+        "live": {
+          "state": "idle",
+          "queued": 0,
+          "active": 0,
+          "writing": 0,
+          "spec_off": false,
+          "phase": null,
+          "prompt_tokens": null,
+          "prompt_read": null,
+          "prompt_total": null,
+          "generated": null,
+          "max_tokens": null,
+          "elapsed_s": null,
+          "tok_s": null,
+          "tok_s_mean": null,
+          "prefill_tok_s_mean": null,
+          "tok_s_window_s": null,
+          "prompt_reused": null
+        },
+        "tiers": {
+          "now": {
+            "tok_s": 36.08,
+            "ms_tok": 27.72,
+            "vram_hit": 0.999,
+            "cpu": 0.247,
+            "ram": 0.0,
+            "promo": 0.0,
+            "engram_ms": 1.18,
+            "vram_used": 14784.0,
+            "ram_used": 0.0,
+            "cpu_n": 576.0,
+            "vram_gb": 105.43,
+            "ram_gb": 0.0,
+            "disk_gb": 4.14,
+            "eg_cache_rows": 14192.0,
+            "eg_cache_cap": 1016800.0,
+            "eg_cache_row_bytes": 264.0,
+            "eg_lookup_rows": 16272.0,
+            "eg_lookup_hits": 2080.0,
+            "eg_lookup_reads": 14192.0,
+            "disk_mb": 1.46,
+            "disk": 0.203,
+            "ram_fetch": 0.043,
+            "draft_rounds": 75.0,
+            "draft_ms": 757.004,
+            "verify_ms": 5844.191,
+            "drafts": 0.841,
+            "draft_acc": 175.0,
+            "draft_off": 208.0,
+            "time": 1793715258.5125334
+          }
+        },
+        "gpu_map": [
+          {
+            "dev": 0,
+            "index": 0,
+            "name": "AMD Radeon",
+            "total": 2147483648,
+            "free": 0,
+            "parts": {
+              "weights": 6850365696,
+              "kv": 33055744,
+              "act": 47445248,
+              "prompt": 1419906304,
+              "tp": 0,
+              "drafter": 4129658880,
+              "pool": 105430302720,
+              "helper": 0,
+              "vision": 0,
+              "rest": 0,
+              "other": 0
+            },
+            "window": 0,
+            "drafter": 4129658880,
+            "tail": 0,
+            "borrow": 0,
+            "lendable": 0,
+            "vision_lent": false,
+            "vision_own": 0,
+            "slots": 14784,
+            "layers": [
+              0,
+              39
+            ],
+            "ctx": 32768,
+            "tp_n": 1,
+            "kv_ram": 0,
+            "measured": "start"
+          }
+        ],
+        "requests": [
+          {
+            "projection": null,
+            "time": 1793715251.0283828,
+            "duration_s": 7.5,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 72.3,
+            "prompt_tokens": 28,
+            "reused": 0,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 387.3,
+            "decode_ms": 7096.3,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715249.9078434,
+            "duration_s": 0.8,
+            "finish": "stop",
+            "api": "openai",
+            "prefill_tok_s": 16.8,
+            "prompt_tokens": 7,
+            "reused": 0,
+            "output_tokens": 12,
+            "engine_generated": 12,
+            "prompt_ms": 416.5,
+            "decode_ms": 395.2,
+            "decode_tok_s": 30.4,
+            "hit_rate": 0.993,
+            "drafts_offered": 12,
+            "drafts_accepted": 8,
+            "spec_off": false,
+            "loop_guard": null
+          }
+        ],
+        "requests_kept": 2,
+        "totals": {
+          "since": 1793715249.3849545,
+          "requests": 2,
+          "prompt_tokens": 35,
+          "reused": 0,
+          "output_tokens": 268,
+          "prompt_ms": 803.8,
+          "decode_ms": 7491.5,
+          "peak_decode": {
+            "tok_s": 38.2,
+            "tokens": 77,
+            "time": 1793715253.45054
+          }
+        },
+        "loop_guard": {
+          "detected": 0,
+          "penalised": 0,
+          "thinking_closed": 0,
+          "stopped": 0,
+          "tool_repeats": 0,
+          "tool_blocked": 0,
+          "collapsed": 0,
+          "kept_going": 0,
+          "on": true
+        },
+        "hardware": {
+          "gpu_util": 98,
+          "gpu_mem_used": 274087936,
+          "gpu_mem_total": 2147483648,
+          "gpu_temp": 60.0,
+          "gpu_power": 86.702,
+          "gpu_power_limit": null,
+          "gpu_pcie_gen": 4,
+          "gpu_pcie_gen_max": 4,
+          "gpu_pcie_own_gen": 4,
+          "gpu_pcie_width": 16,
+          "gpu_pcie_path": "2/2",
+          "cpu": 25.4,
+          "ram_used": 126017253376,
+          "ram_total": 132634263552,
+          "disk_read_mb": 86.75798683424011,
+          "disk_write_mb": 0.0,
+          "tok_s": 34.81171791044848,
+          "tok_s_mean": 35.362013137400965,
+          "prefill_tok_s_mean": 0.0
+        },
+        "hardware_static": {
+          "gpu_name": "AMD Radeon",
+          "gpu_count": 1,
+          "cpu_name": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+          "cores": 16,
+          "threads": 16,
+          "psutil": true
+        },
+        "time": 1793715259.1173966,
+        "reload": null,
+        "storage": {
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS",
+          "free": 1475597287424,
+          "total": 3996489928704
+        },
+        "savings": {
+          "usd": 0.21122,
+          "start_usd": 0.000166,
+          "priced": true
+        }
+      },
+      "metrics_after": {
+        "engine": {
+          "model": "deepseek-v4.1-flash",
+          "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+          "max_context": 32768,
+          "images": false,
+          "version": "ds4-0.1",
+          "context": 32768,
+          "kv": "fp4",
+          "kv_resident": 32768,
+          "expert_slots": 14784,
+          "engine_kind": "ds4",
+          "cpu_experts": 576,
+          "ram_experts": 0,
+          "cpu_threads": 14,
+          "engine": "ds4-0.1",
+          "engram_layers": 2,
+          "engram_lookups": 48,
+          "lookup": 0,
+          "logprobs": 20,
+          "maya_version": "1.1.43",
+          "trained_context": 1048576,
+          "dspark": true,
+          "speculation": [
+            "DSpark"
+          ]
+        },
+        "live": {
+          "state": "idle",
+          "queued": 0,
+          "active": 0,
+          "writing": 0,
+          "spec_off": false,
+          "phase": null,
+          "prompt_tokens": null,
+          "prompt_read": null,
+          "prompt_total": null,
+          "generated": null,
+          "max_tokens": null,
+          "elapsed_s": null,
+          "tok_s": null,
+          "tok_s_mean": null,
+          "prefill_tok_s_mean": null,
+          "tok_s_window_s": null,
+          "prompt_reused": null
+        },
+        "tiers": {
+          "now": {
+            "tok_s": 36.08,
+            "ms_tok": 27.72,
+            "vram_hit": 0.999,
+            "cpu": 0.247,
+            "ram": 0.0,
+            "promo": 0.0,
+            "engram_ms": 0.007,
+            "vram_used": 14784.0,
+            "ram_used": 0.0,
+            "cpu_n": 576.0,
+            "vram_gb": 105.43,
+            "ram_gb": 0.0,
+            "disk_gb": 4.14,
+            "eg_cache_rows": 14192.0,
+            "eg_cache_cap": 1016800.0,
+            "eg_cache_row_bytes": 264.0,
+            "eg_lookup_rows": 30144.0,
+            "eg_lookup_hits": 15952.0,
+            "eg_lookup_reads": 14192.0,
+            "disk_mb": 0.134,
+            "disk": 0.019,
+            "ram_fetch": 0.228,
+            "draft_rounds": 75.0,
+            "draft_ms": 914.318,
+            "verify_ms": 5689.321,
+            "drafts": 0.841,
+            "draft_acc": 175.0,
+            "draft_off": 208.0,
+            "time": 1793715266.2761493
+          }
+        },
+        "gpu_map": [
+          {
+            "dev": 0,
+            "index": 0,
+            "name": "AMD Radeon",
+            "total": 2147483648,
+            "free": 0,
+            "parts": {
+              "weights": 6850365696,
+              "kv": 33055744,
+              "act": 47445248,
+              "prompt": 1419906304,
+              "tp": 0,
+              "drafter": 4129658880,
+              "pool": 105430302720,
+              "helper": 0,
+              "vision": 0,
+              "rest": 0,
+              "other": 0
+            },
+            "window": 0,
+            "drafter": 4129658880,
+            "tail": 0,
+            "borrow": 0,
+            "lendable": 0,
+            "vision_lent": false,
+            "vision_own": 0,
+            "slots": 14784,
+            "layers": [
+              0,
+              39
+            ],
+            "ctx": 32768,
+            "tp_n": 1,
+            "kv_ram": 0,
+            "measured": "start"
+          }
+        ],
+        "requests": [
+          {
+            "projection": null,
+            "time": 1793715259.1196456,
+            "duration_s": 7.2,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 16.7,
+            "prompt_tokens": 28,
+            "reused": 27,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 59.8,
+            "decode_ms": 7096.0,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715251.0283828,
+            "duration_s": 7.5,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 72.3,
+            "prompt_tokens": 28,
+            "reused": 0,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 387.3,
+            "decode_ms": 7096.3,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715249.9078434,
+            "duration_s": 0.8,
+            "finish": "stop",
+            "api": "openai",
+            "prefill_tok_s": 16.8,
+            "prompt_tokens": 7,
+            "reused": 0,
+            "output_tokens": 12,
+            "engine_generated": 12,
+            "prompt_ms": 416.5,
+            "decode_ms": 395.2,
+            "decode_tok_s": 30.4,
+            "hit_rate": 0.993,
+            "drafts_offered": 12,
+            "drafts_accepted": 8,
+            "spec_off": false,
+            "loop_guard": null
+          }
+        ],
+        "requests_kept": 3,
+        "totals": {
+          "since": 1793715249.3849545,
+          "requests": 3,
+          "prompt_tokens": 63,
+          "reused": 27,
+          "output_tokens": 524,
+          "prompt_ms": 863.5999999999999,
+          "decode_ms": 14587.5,
+          "peak_decode": {
+            "tok_s": 40.0,
+            "tokens": 92,
+            "time": 1793715261.4630437
+          }
+        },
+        "loop_guard": {
+          "detected": 0,
+          "penalised": 0,
+          "thinking_closed": 0,
+          "stopped": 0,
+          "tool_repeats": 0,
+          "tool_blocked": 0,
+          "collapsed": 0,
+          "kept_going": 0,
+          "on": true
+        },
+        "hardware": {
+          "gpu_util": 73,
+          "gpu_mem_used": 274108416,
+          "gpu_mem_total": 2147483648,
+          "gpu_temp": 45.0,
+          "gpu_power": 71.266,
+          "gpu_power_limit": null,
+          "gpu_pcie_gen": 4,
+          "gpu_pcie_gen_max": 4,
+          "gpu_pcie_own_gen": 4,
+          "gpu_pcie_width": 16,
+          "gpu_pcie_path": "2/2",
+          "cpu": 14.5,
+          "ram_used": 126030057472,
+          "ram_total": 132634263552,
+          "disk_read_mb": 33.93684114278748,
+          "disk_write_mb": 17.976889755829944,
+          "tok_s": 0.0,
+          "tok_s_mean": 0.0,
+          "prefill_tok_s_mean": 0.0
+        },
+        "hardware_static": {
+          "gpu_name": "AMD Radeon",
+          "gpu_count": 1,
+          "cpu_name": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+          "cores": 16,
+          "threads": 16,
+          "psutil": true
+        },
+        "time": 1793715266.5798614,
+        "reload": null,
+        "storage": {
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS",
+          "free": 1475597287424,
+          "total": 3996489928704
+        },
+        "savings": {
+          "usd": 0.211374,
+          "start_usd": 0.00032,
+          "priced": true
+        }
+      },
+      "io_before": {
+        "local": 119714336768
+      },
+      "io_after": {
+        "local": 119752880128
+      },
+      "request_start_monotonic": 76837.772543419,
+      "request_end_monotonic": 76844.932534051,
+      "gpu_samples": [
+        {
+          "t": 76837.772453491,
+          "local_busy_pct": 54,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76838.573122927,
+          "local_busy_pct": 78,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76839.375649454,
+          "local_busy_pct": 90,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76840.176379307,
+          "local_busy_pct": 96,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76840.977526489,
+          "local_busy_pct": 98,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76841.77866343,
+          "local_busy_pct": 99,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76842.579480063,
+          "local_busy_pct": 99,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76843.380376003,
+          "local_busy_pct": 100,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76844.181568654,
+          "local_busy_pct": 100,
+          "remote_busy_pct": null
+        }
+      ],
+      "response": {
+        "id": "chatcmpl-e73d9913c5d64291bbe9ceca",
+        "object": "chat.completion",
+        "created": 1793715259,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "```python\nimport csv\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Union\n\n\ndef parse_csv(file_path: Union[str, Path]) -> List[Dict[str, str]]:\n    \"\"\"\n    Parse a CSV file into a list of dictionaries.\n\n    Each row of the CSV file is converted into a dictionary whose keys are\n    the column headers (from the first row) and whose values are the\n    corresponding cell values as strings.\n\n    Args:\n        file_path: Path to the CSV file to parse. Can be a string or a\n            ``pathlib.Path`` object.\n\n    Returns:\n        A list of dictionaries, one per data row in the CSV file. Each\n        dictionary maps column header names to the row's values.\n\n    Raises:\n        FileNotFoundError: If the given file path does not exist.\n        csv.Error: If the file cannot be parsed as valid CSV.\n\n    Example:\n        >>> parse_csv(\"data.csv\")\n        [{'name': 'Alice', 'age': '30'}, {'name': 'Bob', 'age': '25'}]\n    \"\"\"\n    rows: List[Dict[str, str]] = []\n\n    with open(file_path, mode=\"r\", newline=\"\","
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 28,
+          "completion_tokens": 256,
+          "total_tokens": 284,
+          "prompt_tokens_details": {
+            "cached_tokens": 27
+          }
+        },
+        "timings": {
+          "cache_n": 27,
+          "prompt_n": 1,
+          "prompt_ms": 59.8,
+          "prompt_per_token_ms": 59.8,
+          "prompt_per_second": 16.7,
+          "predicted_n": 256,
+          "predicted_ms": 7096.0,
+          "predicted_per_token_ms": 27.719,
+          "predicted_per_second": 36.1,
+          "draft_n": 208,
+          "draft_n_accepted": 175
+        }
+      }
+    },
+    {
+      "iteration": 3,
+      "metrics_before": {
+        "engine": {
+          "model": "deepseek-v4.1-flash",
+          "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+          "max_context": 32768,
+          "images": false,
+          "version": "ds4-0.1",
+          "context": 32768,
+          "kv": "fp4",
+          "kv_resident": 32768,
+          "expert_slots": 14784,
+          "engine_kind": "ds4",
+          "cpu_experts": 576,
+          "ram_experts": 0,
+          "cpu_threads": 14,
+          "engine": "ds4-0.1",
+          "engram_layers": 2,
+          "engram_lookups": 48,
+          "lookup": 0,
+          "logprobs": 20,
+          "maya_version": "1.1.43",
+          "trained_context": 1048576,
+          "dspark": true,
+          "speculation": [
+            "DSpark"
+          ]
+        },
+        "live": {
+          "state": "idle",
+          "queued": 0,
+          "active": 0,
+          "writing": 0,
+          "spec_off": false,
+          "phase": null,
+          "prompt_tokens": null,
+          "prompt_read": null,
+          "prompt_total": null,
+          "generated": null,
+          "max_tokens": null,
+          "elapsed_s": null,
+          "tok_s": null,
+          "tok_s_mean": null,
+          "prefill_tok_s_mean": null,
+          "tok_s_window_s": null,
+          "prompt_reused": null
+        },
+        "tiers": {
+          "now": {
+            "tok_s": 36.08,
+            "ms_tok": 27.72,
+            "vram_hit": 0.999,
+            "cpu": 0.247,
+            "ram": 0.0,
+            "promo": 0.0,
+            "engram_ms": 0.007,
+            "vram_used": 14784.0,
+            "ram_used": 0.0,
+            "cpu_n": 576.0,
+            "vram_gb": 105.43,
+            "ram_gb": 0.0,
+            "disk_gb": 4.14,
+            "eg_cache_rows": 14192.0,
+            "eg_cache_cap": 1016800.0,
+            "eg_cache_row_bytes": 264.0,
+            "eg_lookup_rows": 30144.0,
+            "eg_lookup_hits": 15952.0,
+            "eg_lookup_reads": 14192.0,
+            "disk_mb": 0.134,
+            "disk": 0.019,
+            "ram_fetch": 0.228,
+            "draft_rounds": 75.0,
+            "draft_ms": 914.318,
+            "verify_ms": 5689.321,
+            "drafts": 0.841,
+            "draft_acc": 175.0,
+            "draft_off": 208.0,
+            "time": 1793715266.2761493
+          }
+        },
+        "gpu_map": [
+          {
+            "dev": 0,
+            "index": 0,
+            "name": "AMD Radeon",
+            "total": 2147483648,
+            "free": 0,
+            "parts": {
+              "weights": 6850365696,
+              "kv": 33055744,
+              "act": 47445248,
+              "prompt": 1419906304,
+              "tp": 0,
+              "drafter": 4129658880,
+              "pool": 105430302720,
+              "helper": 0,
+              "vision": 0,
+              "rest": 0,
+              "other": 0
+            },
+            "window": 0,
+            "drafter": 4129658880,
+            "tail": 0,
+            "borrow": 0,
+            "lendable": 0,
+            "vision_lent": false,
+            "vision_own": 0,
+            "slots": 14784,
+            "layers": [
+              0,
+              39
+            ],
+            "ctx": 32768,
+            "tp_n": 1,
+            "kv_ram": 0,
+            "measured": "start"
+          }
+        ],
+        "requests": [
+          {
+            "projection": null,
+            "time": 1793715259.1196456,
+            "duration_s": 7.2,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 16.7,
+            "prompt_tokens": 28,
+            "reused": 27,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 59.8,
+            "decode_ms": 7096.0,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715251.0283828,
+            "duration_s": 7.5,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 72.3,
+            "prompt_tokens": 28,
+            "reused": 0,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 387.3,
+            "decode_ms": 7096.3,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715249.9078434,
+            "duration_s": 0.8,
+            "finish": "stop",
+            "api": "openai",
+            "prefill_tok_s": 16.8,
+            "prompt_tokens": 7,
+            "reused": 0,
+            "output_tokens": 12,
+            "engine_generated": 12,
+            "prompt_ms": 416.5,
+            "decode_ms": 395.2,
+            "decode_tok_s": 30.4,
+            "hit_rate": 0.993,
+            "drafts_offered": 12,
+            "drafts_accepted": 8,
+            "spec_off": false,
+            "loop_guard": null
+          }
+        ],
+        "requests_kept": 3,
+        "totals": {
+          "since": 1793715249.3849545,
+          "requests": 3,
+          "prompt_tokens": 63,
+          "reused": 27,
+          "output_tokens": 524,
+          "prompt_ms": 863.5999999999999,
+          "decode_ms": 14587.5,
+          "peak_decode": {
+            "tok_s": 40.0,
+            "tokens": 92,
+            "time": 1793715261.4630437
+          }
+        },
+        "loop_guard": {
+          "detected": 0,
+          "penalised": 0,
+          "thinking_closed": 0,
+          "stopped": 0,
+          "tool_repeats": 0,
+          "tool_blocked": 0,
+          "collapsed": 0,
+          "kept_going": 0,
+          "on": true
+        },
+        "hardware": {
+          "gpu_util": 73,
+          "gpu_mem_used": 274108416,
+          "gpu_mem_total": 2147483648,
+          "gpu_temp": 45.0,
+          "gpu_power": 71.266,
+          "gpu_power_limit": null,
+          "gpu_pcie_gen": 4,
+          "gpu_pcie_gen_max": 4,
+          "gpu_pcie_own_gen": 4,
+          "gpu_pcie_width": 16,
+          "gpu_pcie_path": "2/2",
+          "cpu": 14.5,
+          "ram_used": 126030057472,
+          "ram_total": 132634263552,
+          "disk_read_mb": 33.93684114278748,
+          "disk_write_mb": 17.976889755829944,
+          "tok_s": 0.0,
+          "tok_s_mean": 0.0,
+          "prefill_tok_s_mean": 0.0
+        },
+        "hardware_static": {
+          "gpu_name": "AMD Radeon",
+          "gpu_count": 1,
+          "cpu_name": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+          "cores": 16,
+          "threads": 16,
+          "psutil": true
+        },
+        "time": 1793715266.8832927,
+        "reload": null,
+        "storage": {
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS",
+          "free": 1475597287424,
+          "total": 3996489928704
+        },
+        "savings": {
+          "usd": 0.211374,
+          "start_usd": 0.00032,
+          "priced": true
+        }
+      },
+      "metrics_after": {
+        "engine": {
+          "model": "deepseek-v4.1-flash",
+          "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+          "max_context": 32768,
+          "images": false,
+          "version": "ds4-0.1",
+          "context": 32768,
+          "kv": "fp4",
+          "kv_resident": 32768,
+          "expert_slots": 14784,
+          "engine_kind": "ds4",
+          "cpu_experts": 576,
+          "ram_experts": 0,
+          "cpu_threads": 14,
+          "engine": "ds4-0.1",
+          "engram_layers": 2,
+          "engram_lookups": 48,
+          "lookup": 0,
+          "logprobs": 20,
+          "maya_version": "1.1.43",
+          "trained_context": 1048576,
+          "dspark": true,
+          "speculation": [
+            "DSpark"
+          ]
+        },
+        "live": {
+          "state": "idle",
+          "queued": 0,
+          "active": 0,
+          "writing": 0,
+          "spec_off": false,
+          "phase": null,
+          "prompt_tokens": null,
+          "prompt_read": null,
+          "prompt_total": null,
+          "generated": null,
+          "max_tokens": null,
+          "elapsed_s": null,
+          "tok_s": null,
+          "tok_s_mean": null,
+          "prefill_tok_s_mean": null,
+          "tok_s_window_s": null,
+          "prompt_reused": null
+        },
+        "tiers": {
+          "now": {
+            "tok_s": 36.71,
+            "ms_tok": 27.24,
+            "vram_hit": 0.999,
+            "cpu": 0.247,
+            "ram": 0.0,
+            "promo": 0.0,
+            "engram_ms": 0.007,
+            "vram_used": 14784.0,
+            "ram_used": 0.0,
+            "cpu_n": 576.0,
+            "vram_gb": 105.43,
+            "ram_gb": 0.0,
+            "disk_gb": 4.14,
+            "eg_cache_rows": 14192.0,
+            "eg_cache_cap": 1016800.0,
+            "eg_cache_row_bytes": 264.0,
+            "eg_lookup_rows": 44016.0,
+            "eg_lookup_hits": 29824.0,
+            "eg_lookup_reads": 14192.0,
+            "disk_mb": 0.759,
+            "disk": 0.106,
+            "ram_fetch": 0.141,
+            "draft_rounds": 75.0,
+            "draft_ms": 754.426,
+            "verify_ms": 5716.228,
+            "drafts": 0.841,
+            "draft_acc": 175.0,
+            "draft_off": 208.0,
+            "time": 1793715273.9164796
+          }
+        },
+        "gpu_map": [
+          {
+            "dev": 0,
+            "index": 0,
+            "name": "AMD Radeon",
+            "total": 2147483648,
+            "free": 0,
+            "parts": {
+              "weights": 6850365696,
+              "kv": 33055744,
+              "act": 47445248,
+              "prompt": 1419906304,
+              "tp": 0,
+              "drafter": 4129658880,
+              "pool": 105430302720,
+              "helper": 0,
+              "vision": 0,
+              "rest": 0,
+              "other": 0
+            },
+            "window": 0,
+            "drafter": 4129658880,
+            "tail": 0,
+            "borrow": 0,
+            "lendable": 0,
+            "vision_lent": false,
+            "vision_own": 0,
+            "slots": 14784,
+            "layers": [
+              0,
+              39
+            ],
+            "ctx": 32768,
+            "tp_n": 1,
+            "kv_ram": 0,
+            "measured": "start"
+          }
+        ],
+        "requests": [
+          {
+            "projection": null,
+            "time": 1793715266.8862917,
+            "duration_s": 7.0,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 18.0,
+            "prompt_tokens": 28,
+            "reused": 27,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 55.7,
+            "decode_ms": 6973.7,
+            "decode_tok_s": 36.7,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715259.1196456,
+            "duration_s": 7.2,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 16.7,
+            "prompt_tokens": 28,
+            "reused": 27,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 59.8,
+            "decode_ms": 7096.0,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715251.0283828,
+            "duration_s": 7.5,
+            "finish": "length",
+            "api": "openai",
+            "prefill_tok_s": 72.3,
+            "prompt_tokens": 28,
+            "reused": 0,
+            "output_tokens": 256,
+            "engine_generated": 256,
+            "prompt_ms": 387.3,
+            "decode_ms": 7096.3,
+            "decode_tok_s": 36.1,
+            "hit_rate": 0.999,
+            "drafts_offered": 208,
+            "drafts_accepted": 175,
+            "spec_off": false,
+            "loop_guard": null
+          },
+          {
+            "projection": null,
+            "time": 1793715249.9078434,
+            "duration_s": 0.8,
+            "finish": "stop",
+            "api": "openai",
+            "prefill_tok_s": 16.8,
+            "prompt_tokens": 7,
+            "reused": 0,
+            "output_tokens": 12,
+            "engine_generated": 12,
+            "prompt_ms": 416.5,
+            "decode_ms": 395.2,
+            "decode_tok_s": 30.4,
+            "hit_rate": 0.993,
+            "drafts_offered": 12,
+            "drafts_accepted": 8,
+            "spec_off": false,
+            "loop_guard": null
+          }
+        ],
+        "requests_kept": 4,
+        "totals": {
+          "since": 1793715249.3849545,
+          "requests": 4,
+          "prompt_tokens": 91,
+          "reused": 54,
+          "output_tokens": 780,
+          "prompt_ms": 919.3,
+          "decode_ms": 21561.2,
+          "peak_decode": {
+            "tok_s": 41.2,
+            "tokens": 64,
+            "time": 1793715268.477827
+          }
+        },
+        "loop_guard": {
+          "detected": 0,
+          "penalised": 0,
+          "thinking_closed": 0,
+          "stopped": 0,
+          "tool_repeats": 0,
+          "tool_blocked": 0,
+          "collapsed": 0,
+          "kept_going": 0,
+          "on": true
+        },
+        "hardware": {
+          "gpu_util": 100,
+          "gpu_mem_used": 274108416,
+          "gpu_mem_total": 2147483648,
+          "gpu_temp": 61.0,
+          "gpu_power": 85.132,
+          "gpu_power_limit": null,
+          "gpu_pcie_gen": 4,
+          "gpu_pcie_gen_max": 4,
+          "gpu_pcie_own_gen": 4,
+          "gpu_pcie_width": 16,
+          "gpu_pcie_path": "2/2",
+          "cpu": 27.4,
+          "ram_used": 126065106944,
+          "ram_total": 132634263552,
+          "disk_read_mb": 55.53447788617716,
+          "disk_write_mb": 0.0,
+          "tok_s": 34.050971732170176,
+          "tok_s_mean": 35.585792437118855,
+          "prefill_tok_s_mean": 0.0
+        },
+        "hardware_static": {
+          "gpu_name": "AMD Radeon",
+          "gpu_count": 1,
+          "cpu_name": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S",
+          "cores": 16,
+          "threads": 16,
+          "psutil": true
+        },
+        "time": 1793715274.2193015,
+        "reload": null,
+        "storage": {
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS",
+          "free": 1475597287424,
+          "total": 3996489928704
+        },
+        "savings": {
+          "usd": 0.211528,
+          "start_usd": 0.000474,
+          "priced": true
+        }
+      },
+      "io_before": {
+        "local": 119752880128
+      },
+      "io_after": {
+        "local": 119971463168
+      },
+      "request_start_monotonic": 76845.53926572,
+      "request_end_monotonic": 76852.572746405,
+      "gpu_samples": [
+        {
+          "t": 76845.539233611,
+          "local_busy_pct": 49,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76846.340125193,
+          "local_busy_pct": 77,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76847.141705883,
+          "local_busy_pct": 89,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76847.942586895,
+          "local_busy_pct": 95,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76848.743301204,
+          "local_busy_pct": 98,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76849.544631183,
+          "local_busy_pct": 99,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76850.345446318,
+          "local_busy_pct": 99,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76851.146754219,
+          "local_busy_pct": 100,
+          "remote_busy_pct": null
+        },
+        {
+          "t": 76851.947821747,
+          "local_busy_pct": 100,
+          "remote_busy_pct": null
+        }
+      ],
+      "response": {
+        "id": "chatcmpl-6f14256c8c794ebda402321b",
+        "object": "chat.completion",
+        "created": 1793715266,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "```python\nimport csv\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Union\n\n\ndef parse_csv(file_path: Union[str, Path]) -> List[Dict[str, str]]:\n    \"\"\"\n    Parse a CSV file into a list of dictionaries.\n\n    Each row of the CSV file is converted into a dictionary whose keys are\n    the column headers (from the first row) and whose values are the\n    corresponding cell values as strings.\n\n    Args:\n        file_path: Path to the CSV file to parse. Can be a string or a\n            ``pathlib.Path`` object.\n\n    Returns:\n        A list of dictionaries, one per data row in the CSV file. Each\n        dictionary maps column header names to the row's values.\n\n    Raises:\n        FileNotFoundError: If the given file path does not exist.\n        csv.Error: If the file cannot be parsed as valid CSV.\n\n    Example:\n        >>> parse_csv(\"data.csv\")\n        [{'name': 'Alice', 'age': '30'}, {'name': 'Bob', 'age': '25'}]\n    \"\"\"\n    rows: List[Dict[str, str]] = []\n\n    with open(file_path, mode=\"r\", newline=\"\","
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 28,
+          "completion_tokens": 256,
+          "total_tokens": 284,
+          "prompt_tokens_details": {
+            "cached_tokens": 27
+          }
+        },
+        "timings": {
+          "cache_n": 27,
+          "prompt_n": 1,
+          "prompt_ms": 55.7,
+          "prompt_per_token_ms": 55.7,
+          "prompt_per_second": 18.0,
+          "predicted_n": 256,
+          "predicted_ms": 6973.7,
+          "predicted_per_token_ms": 27.241,
+          "predicted_per_second": 36.7,
+          "draft_n": 208,
+          "draft_n_accepted": 175
+        }
+      }
+    }
+  ],
+  "request": {
+    "model": "deepseek-v4.1-flash",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Write a Python function that parses a CSV file into a list of dictionaries, with type hints and a docstring."
+      }
+    ],
+    "temperature": 0,
+    "max_tokens": 256,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  }
+}

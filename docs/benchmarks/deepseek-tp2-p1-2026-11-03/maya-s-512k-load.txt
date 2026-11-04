@@ -1,0 +1,14 @@
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+ds4: the experts VRAM leaves over (~64.5 GB) are read in place from the model's files (copied into RAM after the GPUs' share when the RAM holds them all; --mmap-experts on keeps them in place) (113.4 GB of RAM free to keep them: the most-routed 64.5 GB read ahead; prompts in chunks of 32768)
+ds4: PCIe lane: CUDA0 IQ2_S/IQ2_S/IQ3_S 12625920 B: the times file's (0.49 / 1.73 ms for 3 experts on the CPU / streamed) do not hold now (0.59 / 2.43) - timed again
+ds4: PCIe lane: CUDA0 IQ2_S/IQ2_S/IQ3_S 12625920 B: an expert 0.144 ms on the CPU lane (+0.033 a call), 0.640 streamed (+0.444 a request), 0.059 on the GPU, 3.17 from the disk -> of 0..6 picks in RAM it streams 0 0 0 0 0 0 0 (decode's check of streaming - picks all in RAM: being measured, some from the disk: being measured)
+ds4: PCIe lane: CUDA0 IQ2_XXS/IQ2_XXS/IQ3_XXS 10598400 B: an expert 0.176 ms on the CPU lane (+0.012 a call), 0.494 streamed (+0.352 a request), 0.050 on the GPU, 2.66 from the disk -> of 0..6 picks in RAM it streams 0 0 0 0 0 0 1 (decode's check of streaming - picks all in RAM: being measured, some from the disk: being measured)
+ds4: PCIe lane: 40 layers on 1 GPU(s) stream some of a token's CPU-lane experts (2 reading threads; timed, 625 ms)
+ds4: CUDA0 layers [0, 42] + head: weights 9.22 GB, experts 111.62 GB (9832 of 15744 in VRAM), caches 0.49 GB, 361 MiB free
+ds4: 5912 routed experts on the CPU lane (65.1 GB, in place in the model's files), 14 threads
+prompt: 3 tokens in 1626 ms (1.85 tok/s, windows of 16)
+prompt's Engram rows: 144, 0.0% without a read (repeats and the row cache), 144 read
+prompt's host time: layers 1552 ms, head wait 0, Engram waits 7, CPU lane 0
+decode: 1 tokens in 2 ms (0.00 tok/s); CPU lane: 0 of 0 experts, streamed to the GPU: 0; the cache moved 0 (0 in all)
+decode per token: layers 0.00 ms (of it: routing waits 0.00, CPU lane 0.00, the rest host launches), head wait 0.00, Engram reads 0.00
+decode reads from the disk: 0.1 MB a token

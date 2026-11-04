@@ -177,6 +177,21 @@ class Dashboard(unittest.TestCase):
             s, _, b = self.req("GET", "/metrics")
             self.assertIs(json.loads(b)["engine"]["dspark"], on)
 
+    def test_deepseek_lookup_uses_engine_state_when_a_launcher_wraps_it(self):
+        from serve.server import deepseek_lookup_enabled
+        self.assertFalse(deepseek_lookup_enabled({"lookup": 0}, []))
+        self.assertTrue(deepseek_lookup_enabled({"lookup": 1}, ["--suffix-draft", "0"]))
+        self.assertFalse(deepseek_lookup_enabled({}, ["--suffix-draft", "0"]))
+        self.assertTrue(deepseek_lookup_enabled({}, []))
+
+    def test_explicit_model_label_and_installer_fallback(self):
+        from serve.server import config_display_label
+        cfg = {"model_label": " Review XS ", "installer": {"family": "deepseek", "ds4_quant": "maya-s"}}
+        self.assertEqual(config_display_label(cfg), "Review XS")
+        cfg["model_label"] = "  "
+        self.assertEqual(config_display_label(cfg), "DeepSeek V4.1 · Maya-S")
+        self.assertIsNone(config_display_label({}))
+
     def test_metrics_list_the_drafters_that_run(self):
         # the Monitor's Speculation: the drafters this engine runs with, per model engine; empty = drafting is off
         from serve.server import request_spec_off, speculation_modes
@@ -198,6 +213,13 @@ class Dashboard(unittest.TestCase):
                 self.assertEqual(speculation_modes(info, **kw), want)
         self.assertTrue(request_spec_off({"strata_tune": {"spec": 1}}))
         self.assertFalse(request_spec_off({"strata_tune": {"spec": 4}}))
+        self.assertTrue(request_spec_off({"strata_tune": {"spec": 0}}, "ds4"))
+        self.assertFalse(request_spec_off({"strata_tune": {"spec": 1}}, "ds4"))
+        self.assertFalse(request_spec_off({"strata_tune": {"spec": False}}, "ds4"))
+        self.assertFalse(request_spec_off({"strata_tune": {"spec": 0.0}}, "ds4"))
+        self.assertFalse(request_spec_off({"strata_tune": {"spec": 0}}, "ds4", lookup_enabled=True))
+        self.assertTrue(request_spec_off({"strata_tune": {"spec": 0, "suffix_draft": 0}}, "ds4", lookup_enabled=True))
+        self.assertFalse(request_spec_off({"strata_tune": {"spec": 0, "suffix_draft": False}}, "ds4", lookup_enabled=True))
         self.assertFalse(request_spec_off({}))
         self.assertFalse(request_spec_off(None))
         s, _, b = self.req("GET", "/metrics")

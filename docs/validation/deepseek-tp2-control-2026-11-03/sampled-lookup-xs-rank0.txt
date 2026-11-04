@@ -1,0 +1,31 @@
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+ds4: the experts VRAM leaves over (~0.0 GB) are read in place from the model's files (--mmap-experts on) (118.8 GB of RAM free to keep them: the most-routed 0.0 GB read ahead; prompts in chunks of 256)
+ds4 tp2: rank 0 loaded 54814310400 routed expert bytes (4249600 pinned staging bytes); awaiting peer attachment
+rank 0: sampled DSpark test loaded
+sample mode=0 candidate=5 unique=5 top=919/1000
+sample mode=0 candidate=35 unique=37 top=292/1000
+sample mode=0 trials=10/50
+sample mode=0 trials=20/50
+sample mode=0 trials=30/50
+sample mode=0 trials=40/50
+sample mode=0 trials=50/50
+mode=drawn plain=1000 speculative=50 groups=4 chi2=1.8139 p=0.611909 offered=250 accepted=35
+sample mode=1 candidate=5 unique=11 top=788/1000
+sample mode=1 candidate=5 point-draft target support=6/1000
+sample mode=1 candidate=35 unique=37 top=303/1000
+sample mode=1 candidate=35 point-draft target support=206/1000
+sample mode=1 trials=10/50
+sample mode=1 trials=20/50
+sample mode=1 trials=30/50
+sample mode=1 trials=40/50
+sample mode=1 trials=50/50
+mode=point+penalties plain=1000 speculative=50 groups=4 chi2=2.2241 p=0.527226 offered=250 accepted=8
+sample mode=2 candidate=5 unique=5 top=919/1000
+sample mode=2 candidate=35 unique=37 top=292/1000
+sample mode=2 trials=10/50
+sample mode=2 trials=20/50
+sample mode=2 trials=30/50
+sample mode=2 trials=40/50
+sample mode=2 trials=50/50
+mode=lookup-stale-q plain=1000 speculative=50 groups=4 chi2=2.1372 p=0.544423 offered=50 accepted=15
+lookup stale-q control: 23 of 32 verdicts differed

@@ -914,9 +914,10 @@ class StrataEngine:
                 continue
             # Engine-wide lines (STAT, NOTE, TP2 pair-down) are handled even without multi
             if line.startswith("TP2_DOWN"):
-                self.info["tp_pair"] = "down"
-                print("[maya] TP2 pair down: " + (line[8:].strip() or "mirror send failed") +
-                      " - restart both ranks (rank1.sh then rank0.sh)", flush=True)
+                cause = line[8:].strip() or "mirror send failed"
+                self._tp_pair_down(cause)
+                print("[maya] TP2 pair down: " + cause +
+                      " - restart both ranks, worker first", flush=True)
                 continue
             if line.startswith("ERR "):
                 fields = line.split(None, 2)
@@ -967,9 +968,10 @@ class StrataEngine:
             return True
         if line.startswith("TP2_DOWN"):
             # Rank 0 lost rank 1's control socket (issue #6). Sticky until both ranks restart.
-            self.info["tp_pair"] = "down"
-            print("[maya] TP2 pair down: " + (line[8:].strip() or "mirror send failed") +
-                  " - restart both ranks (tools/tp2/rank1.sh then rank0.sh)", flush=True)
+            cause = line[8:].strip() or "mirror send failed"
+            self._tp_pair_down(cause)
+            print("[maya] TP2 pair down: " + cause +
+                  " - restart both ranks, worker first", flush=True)
             return True
         return False
 
@@ -1131,7 +1133,7 @@ class StrataEngine:
         hist.append(st)
 
     @staticmethod
-    def sampling_keys(sampling: dict) -> str:
+    def sampling_keys(sampling: dict, engine_kind: str | None = None) -> str:
         keys = ""
         t = sampling.get("temperature")
         tb, te = sampling.get("_think_budget"), sampling.get("_think_end")   # the run config's (StrataService.run)
@@ -1162,8 +1164,8 @@ class StrataEngine:
             mf = tune.get("miss_skip_from")   # ... and its first layer (STRATA_GLM_MISS_SKIP_FROM)
             if isinstance(mf, int) and not isinstance(mf, bool) and 0 <= mf <= 1000:
                 tune_keys += f" miss_skip_from={mf}"
-            sw = tune.get("spec")   # the GLM engine's DFlash decode: its verify window (the anchor and drafts), 2..16;
-            if isinstance(sw, int) and not isinstance(sw, bool) and 1 <= sw <= 16:   # 1: no drafting (the token loop)
+            sw = tune.get("spec")   # GLM: 1 disables drafting; DeepSeek: 0 disables, positive enables it.
+            if isinstance(sw, int) and not isinstance(sw, bool) and (0 if engine_kind == "ds4" else 1) <= sw <= 16:
                 tune_keys += f" spec={sw}"
             sn = tune.get("spec_n_min")   # ... drafts it keeps whatever their confidence
             if isinstance(sn, int) and not isinstance(sn, bool) and 0 <= sn <= 15:
@@ -1260,14 +1262,26 @@ class StrataEngine:
         on = sampling.get("experimental_speed_projection")
         return f" cvec={int(on)}" if isinstance(on, bool) else ""
 
+    def _tp_pair_down(self, cause: str) -> str:
+        cause = cause.strip()
+        message = cause if cause.startswith("TP2 pair down") else "TP2 pair down: " + cause
+        if "restart both ranks" not in message:
+            message += "; restart both ranks"
+        # The pump and request thread can both report the same failure. The
+        # first one retains the cause and blocks all later writes to the pair.
+        first = self.info.setdefault("tp_error", message)
+        self.info["tp_pair"] = "down"
+        return first
+
     def _request_error(self, message: str) -> ValueError:
         # A queued collective can notice peer loss before the next mirror send. Its communicator is
         # already unusable; make health/restart guards sticky immediately, preserving the cause.
-        if int(self.info.get("tp_world", 1) or 1) > 1 and \
-                message.startswith(("verbs communicator is poisoned", "TP2 pair down")):
-            self.info["tp_pair"] = "down"
-            if not message.startswith("TP2 pair down"):
-                message = "TP2 pair down: " + message + "; restart both ranks"
+        if int(self.info.get("tp_world", 1) or 1) > 1:
+            if self.info.get("tp_pair") == "down":
+                message = self.info.get("tp_error", message)
+            elif message.startswith(("verbs communicator is poisoned", "verbs peer closed the bootstrap connection",
+                                     "TP2 pair down")):
+                message = self._tp_pair_down(message)
         return ValueError(message)
 
     def generate(self, ids, max_new, sampling, cancel, embeddings=None):
@@ -1275,15 +1289,15 @@ class StrataEngine:
         the HTTP layer turns it into an SSE comment, which keeps clients' watchdogs calm and notices a client that
         has gone.  A consumer that stops early (or `cancel`) makes the engine STOP, so it does not run to max_new."""
         if getattr(self, "info", {}).get("tp_pair") == "down":
-            raise ValueError("TP2 pair down: restart both ranks")
+            raise ValueError(self.info.get("tp_error", "TP2 pair down: restart both ranks"))
         if self.multi:
             yield from self._generate_multi(ids, max_new, sampling, cancel, embeddings)
             return
         self.progress = None
         self.prefill_tok_s_mean = None
         # an image request takes the same sampling keys as text (#75: it used to decode greedily whatever was asked)
-        head = f"GENI {int(max_new)}{self.sampling_keys(sampling or {})} {embeddings}" if embeddings else \
-            f"GEN {int(max_new)}{self.sampling_keys(sampling or {})}"
+        keys = self.sampling_keys(sampling or {}, (getattr(self, "info", {}) or {}).get("engine_kind"))
+        head = f"GENI {int(max_new)}{keys} {embeddings}" if embeddings else f"GEN {int(max_new)}{keys}"
         try:
             self.proc.stdin.write(f"{head} {','.join(str(int(t)) for t in ids)}\n")
             self.proc.stdin.flush()
@@ -1473,7 +1487,7 @@ class StrataEngine:
         self._tls.rid = rid
         self.progress = None
         self.prefill_tok_s_mean = None
-        keys = self.sampling_keys(sampling or {}) + f" rid={rid}"
+        keys = self.sampling_keys(sampling or {}, (getattr(self, "info", {}) or {}).get("engine_kind")) + f" rid={rid}"
         head = f"GENI {int(max_new)}{keys} {embeddings}" if embeddings else f"GEN {int(max_new)}{keys}"
         done = False
         try:
@@ -2020,6 +2034,22 @@ class Detokenizer:
         return delta
 
 
+def config_display_label(cfg: dict):
+    label = cfg.get("model_label")
+    return label.strip() if isinstance(label, str) and label.strip() else maya_quants.config_label(cfg)
+
+
+def deepseek_lookup_enabled(info: dict, args: list) -> bool:
+    """Prefer the engine's actual lookup state to a wrapper's command line."""
+    reported = info.get("lookup")
+    if isinstance(reported, int):
+        return reported > 0
+    try:
+        return int(models.flag(args, "--suffix-draft", "3")) > 0
+    except ValueError:
+        return True
+
+
 def speculation_modes(info: dict, dspark=None, lookup=None) -> list:
     """The drafters an engine runs with, for the Monitor's Speculation: DSpark (DeepSeek's server says, MiniMax's engine
     itself), DFlash2 or MTP (GLM's INFO dflash= / mtp=: its DFlash decode takes the request first, else MTP; CYBER-FROST's
@@ -2043,10 +2073,18 @@ def speculation_modes(info: dict, dspark=None, lookup=None) -> list:
     return modes
 
 
-def request_spec_off(sampling) -> bool:
-    """A request that switches drafting off for itself (the GLM engine's spec=1: the plain token loop)."""
+def request_spec_off(sampling, engine_kind=None, lookup_enabled=False) -> bool:
+    """Whether a request disables its configured speculative sources."""
     tune = (sampling or {}).get("strata_tune")
-    return isinstance(tune, dict) and tune.get("spec") == 1 and not isinstance(tune.get("spec"), bool)
+    if not isinstance(tune, dict) or not isinstance(tune.get("spec"), int) or isinstance(tune["spec"], bool):
+        return False
+    if engine_kind == "ds4":
+        # spec=0 disables DSpark only. Lookup can still draft unless the
+        # engine did not start it or this request also turns it off.
+        suffix = tune.get("suffix_draft")
+        lookup = lookup_enabled and not (isinstance(suffix, int) and not isinstance(suffix, bool) and suffix == 0)
+        return tune.get("spec") == 0 and not lookup
+    return tune.get("spec") == 1
 
 
 class RequestStat:
@@ -2055,7 +2093,7 @@ class RequestStat:
 
     def __init__(self):
         self.first_token = None
-        self.spec_off = False                           # it asked for no drafting (spec=1)
+        self.spec_off = False                           # it asked for no configured drafting sources
         self.base = None                                # (time, generated) at the window's start: the rate counts from it
         self.samples = collections.deque(maxlen=4096)   # the samples inside the window, oldest first
 
@@ -3690,7 +3728,8 @@ class Service:
         engine_last0 = getattr(self.engine, "last", None)
         counted, my_started, my_first, queued = False, time.time(), None, False
         stat = RequestStat()                            # this request's live figures
-        stat.spec_off = request_spec_off(sampling)
+        info = getattr(self.engine, "info", {}) or {}
+        stat.spec_off = request_spec_off(sampling, info.get("engine_kind"), bool(info.get("lookup")))
         with self.status_lock:
             self.status["queued"] += 1
             queued = True                               # counted as waiting until its turn comes (below, or in finally)
@@ -5017,9 +5056,10 @@ def make_handler(svc: Service):
                         svc.default_effort) or svc.default_effort
                     if getattr(svc.template, "forced_thinking", False):
                         rec["reasoning_effort"] = QWEN_EFFORT.get(rec["reasoning_effort"], rec["reasoning_effort"])
-                tp_world = int(getattr(svc.engine, "info", {}).get("tp_world", 1) or 1)
-                tp_rank = int(getattr(svc.engine, "info", {}).get("tp_rank", 0) or 0)
-                tp_peer = "down" if getattr(svc.engine, "info", {}).get("tp_pair") == "down" else (
+                tp_info = getattr(svc.engine, "info", {}) or {}
+                tp_world = int(tp_info.get("tp_world", 1) or 1)
+                tp_rank = int(tp_info.get("tp_rank", 0) or 0)
+                tp_peer = "down" if tp_info.get("tp_pair") == "down" else (
                     "up" if tp_world > 1 and tp_rank == 0 else None)
                 # TP2 with a dead rank 1 is degraded, not ok: /health must not lie (issue #6)
                 if tp_peer == "down":
@@ -5037,6 +5077,10 @@ def make_handler(svc: Service):
                                  "images": svc.vision is not None, "api_key": bool(svc.api_key), "defaults": rec,
                                  "version": MAYA_VERSION, "mcp_tools": bool(svc.mcp), "unloaded": svc.unloaded,
                                  "tp": {"world_size": tp_world, "rank": tp_rank,
+                                        **({"prefill_chunk": tp_info["tp_prefill_chunk"]}
+                                           if isinstance(tp_info.get("tp_prefill_chunk"), int) else {}),
+                                        **({"error": tp_info["tp_error"]}
+                                           if tp_peer == "down" and tp_info.get("tp_error") else {}),
                                         **({"peer": tp_peer} if tp_peer else {})}})
             elif path == "/api/context":
                 # the dashboard's Context size: the range, the measured cost of the current size, a reload's state
@@ -6135,7 +6179,7 @@ def main() -> int:
     svc.gpu_index = (gpu_list(cfg) or [0])[0]           # the Monitor reads the card the engine runs on (issue #51)
     svc.gpu_indices = gpu_list(cfg)                     # ... or every card of a layer split (issue #112)
     svc.backend = cfg.get("backend")                    # the Monitor's GPU reader: sysfs on AMD/HIP, NVML otherwise
-    svc.model_label = maya_quants.config_label(cfg)     # (configs of every release: by their installer record)
+    svc.model_label = config_display_label(cfg)
     if a.config:
         svc.config_path = str(Path(a.config).resolve())  # a context change from the dashboard is saved there
         p = Path(svc.config_path)                        # the tokens it serves, and what its API would have charged
@@ -6153,10 +6197,7 @@ def main() -> int:
         #  has them; MiniMax's says so itself, INFO dspark=)
         if models.family(cfg) == "deepseek":
             svc.dspark = models.flag(args, "--dspark", "on") not in ("off", "none") and models.ds4_has_drafter(cfg)
-            try:
-                svc.lookup = int(models.flag(args, "--suffix-draft", "3")) > 0
-            except ValueError:
-                svc.lookup = True
+            svc.lookup = deepseek_lookup_enabled((getattr(svc.engine, "info", {}) or {}), args)
     if a.config:                                        # the Chat settings shared with other apps, from last time
         svc.shared_path = str(Path(a.config).with_suffix("")) + ".shared-settings.json"
         try:

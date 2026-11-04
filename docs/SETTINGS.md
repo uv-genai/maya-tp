@@ -17,6 +17,27 @@ server settings under `MAYA_GLM_RESPONSES_*`, with defaults and units in
 [Responses settings](RESPONSES.md#settings-and-metrics). They can be set in the same
 config `env` block; response storage and background work remain request opt-ins.
 
+### Experimental DeepSeek TP2 launch settings
+
+Use the explicit options in the [DeepSeek TP2 review guide](DEEPSEEK-TP2-RUN.md).
+`tp2_rank.py` sets the internal `MAYA_DS4_TP2_PACK`, `MAYA_DS4_TP2_DSPARK`,
+`MAYA_DS4_TP2_CHUNK`, `MAYA_DS4_TP2_LOOKUP`, and
+`MAYA_DS4_TP2_{MODEL,PARTITION,BUILD}_DIGEST` values from its checked local
+manifest and launch options. They are launch bindings, not user tuning knobs;
+do not set them by hand. Chunk prefill additionally requires `DS4_STREAM=0`,
+`DS4_FLOW=0`, `DS4_YOCO=0` and no `DS4_CHUNK`; the launcher enforces these
+constraints. The `DS4_DSPARK_SAMPLE` environment variable is an inherited
+test-only sampled-draft experiment, not a recommended production setting.
+DeepSeek TP2 ranks read the selected Lt store but do not append new picks;
+single-host behavior is unchanged.
+
+For a DeepSeek API request, `"strata_tune": {"spec": 0}` disables DSpark for
+that request, and `"spec": 1` enables it when the engine has loaded a drafter.
+Prompt lookup is separate: when the engine has been started with lookup,
+`"suffix_draft": 0` disables it for the request and `1` enables it. These
+request values do not load a missing drafter or lookup at runtime. GLM's
+`spec` value instead specifies its verification window, where `1` means off.
+
 The engine sizes itself: it splits the layers across the GPUs it is given (up to 16; with more than two, each GPU
 takes layers in proportion to its free VRAM), fills each GPU's free VRAM with experts, sizes its RAM tier from the
 free RAM, and measures the CPU against the PCIe link at start to decide how many RAM experts the CPU computes itself.
@@ -1141,7 +1162,7 @@ lead's requests take them and each pick's sum joins the lead's CPU part once, be
 | --- | --- | --- |
 | `MAYA_DS4_HELPER` | off | the helper's visible GPU index (not one of `--gpus`); with `MAYA_DS4_HELPER_GB`. Linux only (tested); Windows + AMD untested |
 | `MAYA_DS4_HELPER_GB` | - | its experts' pool, GB |
-| `MAYA_DS4_WARM_CAP_GB` | - | required with the helper: the load's experts in host RAM, GB, beside the pool (an integrated GPU's pool is host RAM too); ignored under `DS4_REQUIRE_ALL_RAM=1` (every expert in RAM) |
+| `MAYA_DS4_WARM_CAP_GB` | - | Caps experts read ahead or copied into host RAM at load, in GB; `0` disables that warm-up. Required with the helper to budget RAM beside its pool (an integrated GPU's pool is host RAM too). A lower cap can reduce memory pressure but increase later storage reads. Ignored under `DS4_REQUIRE_ALL_RAM=1` (every expert in RAM). See [#117](https://github.com/uv-genai/maya-tp/issues/117). |
 | `MAYA_DS4_HELPER_CHECK` | off | `1`: at load, two tokens per expert format through the helper against the CPU lane, and its grouped window path against its per-token one, bit for bit |
 
 A prompt's experts that VRAM does not hold are read from the model's files as the prompt picks them (the flow), those
@@ -1765,3 +1786,14 @@ experts on multiple local GPUs is outside this fork's gfx1151 target and was not
 `MAYA_DS4_CHUNK_GFX11` defaults to **0** (preserve the existing plan). Set `4096` to cap DeepSeek's automatic GGUF borrowed-memory chunk choice on gfx1151. Values of at least 16 round down to a multiple of 16 when they reduce a larger plan; invalid, overflow, negative and 1–15 values leave the plan unchanged. `MAYA_` takes precedence over `STRATA_DS4_CHUNK_GFX11`, then legacy `DS4_CHUNK_GFX11`; JSON config uses the same aliases. An explicit `DS4_CHUNK` remains explicit.
 
 Upstream reports a 16K-prompt improvement with 4096, but this fork has no local DeepSeek measurement yet ([#79](https://github.com/uv-genai/maya-tp/issues/79)); no speedup is claimed. The optional cap and its boundaries are tested; full DS4 WMMA parity remains tracked in [#68](https://github.com/uv-genai/maya-tp/issues/68), and the separate tail-drain port in [#75](https://github.com/uv-genai/maya-tp/issues/75). GLM TP2 uses its own planner and tuning.
+
+### DeepSeek TP2 launcher selection
+
+`MAYA_DS4_TP2_CONFIG` selects the launcher JSON used by
+`tools/ds4/rank0.sh`, `tools/ds4/rank1.sh` and
+`tools/llama-swap/tp2-ds4.sh`. Explicit `--config PATH` and `--model NAME`
+take precedence. The fallback is `maya-ds4-tp2.json` beside the runtime
+checkout. A model selection such as `Maya-XS` resolves to
+`maya-ds4-tp2-maya-xs.json`. Common context and speculation choices are
+forwarded to both ranks. The launcher schema and stop actions are described
+in the DeepSeek operations guide. [DeepSeek TP2 guide](DEEPSEEK-TP2-RUN.md).

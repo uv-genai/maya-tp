@@ -1,0 +1,4 @@
+rank 0: layer=0 expert=0 FFN=1280+peer, pair max_abs=0, full expert max_abs=1.1175871e-08
+rank 0: layer=1 expert=0 FFN=1024+peer, pair max_abs=0, full expert max_abs=7.4505806e-09
+rank 1: layer=0 expert=0 FFN=1024+peer, pair max_abs=0 (reference on rank 0)
+rank 1: layer=1 expert=0 FFN=1280+peer, pair max_abs=0 (reference on rank 0)

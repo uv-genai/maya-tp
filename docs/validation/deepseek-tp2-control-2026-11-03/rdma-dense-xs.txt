@@ -1,0 +1,4 @@
+rank 0: output layers.0.attn.wq_b.weight gathered output full matrix max_abs=0
+rank 0: input layers.0.attn.wo_b.weight pair max_abs=0 full matrix max_abs=1.1920929e-07
+rank 1: output layers.0.attn.wq_b.weight output sent (reference on rank 0)
+rank 1: input layers.0.attn.wo_b.weight reduced sums matched (reference on rank 0)

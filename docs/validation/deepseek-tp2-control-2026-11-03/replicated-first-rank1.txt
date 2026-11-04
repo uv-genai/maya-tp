@@ -1,0 +1,12 @@
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+ds4: prompts run in windows of 16 tokens (--prefill-chunk 0): long prompts prefill far slower than in
+     chunks (a 7-GPU RTX 3090 rig, Maya-S read in place: 8K / 32K tokens 115 / 99 tokens/s,
+     461 / 1010 in chunks of 8192) - leave --prefill-chunk out for chunks
+ds4: the experts VRAM leaves over (~109.6 GB) are read in place from the model's files (copied into RAM after the GPUs' share when the RAM holds them all; --mmap-experts on keeps them in place) (120.5 GB of RAM free to keep them: the most-routed 109.6 GB read ahead; prompts in chunks of 0)
+ds4: PCIe lane: CUDA0 IQ1_S/IQ1_S/IQ1_S 6912000 B: an expert 0.123 ms on the CPU lane (+0.028 a call), 0.120 streamed (+0.101 a request, read in place), 0.040 on the GPU, 3.46 from the disk -> of 0..6 picks in RAM it streams 0 0 1 1 2 2 3 (decode's check of streaming - picks all in RAM: being measured, some from the disk: being measured)
+ds4: PCIe lane: CUDA0 IQ1_S/IQ1_S/IQ2_XXS 7649280 B: an expert 0.136 ms on the CPU lane (+0.023 a call), 0.140 streamed (+0.117 a request, read in place), 0.120 on the GPU, 3.82 from the disk -> of 0..6 picks in RAM it streams 0 0 0 1 1 2 2 (decode's check of streaming - picks all in RAM: being measured, some from the disk: being measured)
+ds4: PCIe lane: 40 layers on 1 GPU(s) stream some of a token's CPU-lane experts (2 reading threads; timed, 249 ms)
+rank 1: replicated XS model loaded, establishing test pair
+ds4: PCIe lane: CUDA0 IQ1_S/IQ1_S/IQ1_S 6912000 B: the CPU lane timed again in decode: an expert 0.235 ms (planned with 0.123; streamed 0.120) -> of 0..8 picks in RAM it streams 0 1 1 2 2 3 4 4 5
+line 91: max_abs<=1e-3f ()
+rank 1: replicated DeepSeek control smoke, 129280 logits, max_abs=5.6556959

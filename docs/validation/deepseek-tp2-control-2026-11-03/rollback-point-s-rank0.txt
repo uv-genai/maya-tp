@@ -1,0 +1,21 @@
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+ds4: the experts VRAM leaves over (~58.3 GB) are read in place from the model's files (--mmap-experts on) (118.0 GB of RAM free to keep them: the most-routed 0.0 GB read ahead; prompts in chunks of 256)
+ds4 tp2: rank 0 loaded 84509982720 routed expert bytes (7014400 pinned staging bytes); awaiting peer attachment
+rank 0: rollback test model loaded
+accepted=0 next_logits_max=0 drafts=5
+accepted=1 next_logits_max=0 drafts=5
+accepted=2 next_logits_max=0 drafts=5
+accepted=3 next_logits_max=0 drafts=5
+accepted=4 next_logits_max=0 drafts=5
+accepted=5 next_logits_max=0 drafts=5
+accepted=6 next_logits_max=0 drafts=5
+accepted=7 next_logits_max=0 drafts=5
+accepted=8 next_logits_max=0 drafts=5
+accepted=9 next_logits_max=0 drafts=5
+accepted=10 next_logits_max=0 drafts=5
+accepted=11 next_logits_max=0 drafts=5
+accepted=12 next_logits_max=0 drafts=5
+accepted=13 next_logits_max=0 drafts=5
+accepted=14 next_logits_max=0 drafts=5
+accepted=15 next_logits_max=0 drafts=5
+rank 0: zero, partial and full rollback parity passed

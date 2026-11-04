@@ -42,10 +42,19 @@ The user tested the prefill candidate on Maya-S, Maya-M and Maya-L through llama
 working prefill and generation across all three. Their eBPF tutorial prompt averaged 30, 32 and
 28 generation tokens/s respectively. [Results and validation limits](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
 
+**DeepSeek-V4.1-Flash Maya-XS and Maya-S also support TP2 with DSpark.** Queued
+collectives measured 23–24% higher XS generation throughput than the same
+single-host build on two prompts. The user reports Maya-S eBPF generation
+slightly above 30 tok/s with prefill similar to XS, and hours of successful
+DeepSeek and GLM use including DeepSWE benchmarks.
+[DeepSeek measurements and user results](docs/benchmarks/deepseek-tp2-queued-2026-11-04/README.md).
+
 ## What this project adds
 
 - **Two-host GLM tensor parallelism:** attention heads, routed experts, shared experts and dense FFNs are
   partitioned using dimensions read from the model pack.
+- **Two-host DeepSeek tensor parallelism and DSpark** partition target computation,
+  coordinate speculative verification and use GPU-queued RDMA collectives.
 - **RDMA collectives and matching execution:** both ranks agree on collective shapes, prefill chunk sizes
   and verification retries. Large prompts stay within the transport's receive window.
 - **MTP under TP2:** rank 0 coordinates draft inputs, verification, accepted tokens and stopping. Draft
@@ -110,8 +119,14 @@ deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya
 | MTP | Opt-in, greedy TP2 verification, configurable fixed width of 1–8 drafts |
 | Conversations | One active sequence; cached follow-ups and cancellation tested |
 | Model selection | Launchers take `--model` / `--pack` / `--config` (or `MAYA_*` env) — [choosing a model](docs/TP2-RUN.md#choosing-a-model) |
-| Other model families | DeepSeek and MiniMax engines are inherited; this project's published TP2 validation covers GLM |
+| DeepSeek TP2 + DSpark | Maya-XS and Maya-S have paired validation and successful user trials including coding workloads. [Operations and validation scope](docs/DEEPSEEK-TP2-RUN.md). |
+| MiniMax TP2 | Outside the current validation scope |
 | Deferred work | [Multi-sequence TP2](https://github.com/uv-genai/maya-tp/issues/11), [vision](https://github.com/uv-genai/maya-tp/issues/16) and [gather-based reduction](https://github.com/uv-genai/maya-tp/issues/10); DFlash under TP2 remains gated |
+
+DeepSeek launchers are available as `tools/ds4/rank0.sh`,
+`tools/ds4/rank1.sh` and `tools/llama-swap/tp2-ds4.sh run PORT --model NAME`.
+Per-model configs and the PID-scoped llama-swap stop command are documented in
+the DeepSeek guide. [DeepSeek launcher setup](docs/DEEPSEEK-TP2-RUN.md#rank-scripts-and-llama-swap).
 
 ## Set up the pair
 

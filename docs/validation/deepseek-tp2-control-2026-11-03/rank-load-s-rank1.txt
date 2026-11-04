@@ -1,0 +1,66 @@
+rank load 256/15360
+rank load 512/15360
+rank load 768/15360
+rank load 1024/15360
+rank load 1280/15360
+rank load 1536/15360
+rank load 1792/15360
+rank load 2048/15360
+rank load 2304/15360
+rank load 2560/15360
+rank load 2816/15360
+rank load 3072/15360
+rank load 3328/15360
+rank load 3584/15360
+rank load 3840/15360
+rank load 4096/15360
+rank load 4352/15360
+rank load 4608/15360
+rank load 4864/15360
+rank load 5120/15360
+rank load 5376/15360
+rank load 5632/15360
+rank load 5888/15360
+rank load 6144/15360
+rank load 6400/15360
+rank load 6656/15360
+rank load 6912/15360
+rank load 7168/15360
+rank load 7424/15360
+rank load 7680/15360
+rank load 7936/15360
+rank load 8192/15360
+rank load 8448/15360
+rank load 8704/15360
+rank load 8960/15360
+rank load 9216/15360
+rank load 9472/15360
+rank load 9728/15360
+rank load 9984/15360
+rank load 10240/15360
+rank load 10496/15360
+rank load 10752/15360
+rank load 11008/15360
+rank load 11264/15360
+rank load 11520/15360
+rank load 11776/15360
+rank load 12032/15360
+rank load 12288/15360
+rank load 12544/15360
+rank load 12800/15360
+rank load 13056/15360
+rank load 13312/15360
+rank load 13568/15360
+rank load 13824/15360
+rank load 14080/15360
+rank load 14336/15360
+rank load 14592/15360
+rank load 14848/15360
+rank load 15104/15360
+rank load 15360/15360
+rank=1 layer=0 expert=0: GPU bytes match source slices
+rank=1 layer=39 expert=383: GPU bytes match source slices
+rank=1 loaded=15360 GPU_bytes=84509982720 pinned_staging=7014400
+real 53.87
+user 10.02
+sys 19.18

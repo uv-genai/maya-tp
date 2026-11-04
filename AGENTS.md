@@ -124,6 +124,16 @@ gfx1201 reference, not this fork's target build recipe.
 8. **TP2 launchers take the model as input.** Do not hardcode Maya-S paths in `tools/tp2/*` or `tools/llama-swap/tp2.sh`. Use `tools/tp2/model_env.sh`: `--model NAME`/`MAYA_MODEL`, `--pack PATH`/`MAYA_PACK`, `--config PATH`/`MAYA_CONFIG` (and `MAYA_MODELS_DIR`). Pass the **same** selection to both ranks. Document new flags in `docs/TP2-RUN.md` “Choosing a model”. Example pack root: `/home/ugo/software/Maya-data/models/<Name>/pack`.
 9. **A fatal TP transport error is sticky on its first occurrence.** A queued collective may fail before the mirror-send guard. Preserve `StrataEngine._request_error` and the pre-write `generate` guard: health must report the pair down immediately, with the original cause retained, and later GEN must not reach the engine. Never clear communicator poison or retry/restart one rank. Regression: `python -m unittest serve.test_tp2_peer_loss` (#88).
 
+DeepSeek TP2 and DSpark have paired XS/S validation and user acceptance, including
+hours of GLM/DeepSeek use and DeepSWE benchmarks. `tools/ds4/tp2_rank.py` requires an explicit
+pack, local checked manifest and engine; `tools/ds4/tp2_config.py` prints a dedicated rank-0
+server config. `tools/ds4/rank0.sh` and `rank1.sh` read per-model launcher JSON;
+`tools/llama-swap/tp2-ds4.sh run PORT --model NAME` manages a pair over SSH. Its
+`stop PORT` and `stop-pid PID` actions use owned control sockets and recorded
+identities. Keep model contents, executable, context and feature choices matched on both
+ranks. DeepSeek uses its own launchers and engine. See `docs/DEEPSEEK-TP2-RUN.md`
+and `Handoff.md` for the accepted runtime paths and numerical/capacity follow-ups.
+
 ## PRs (from CONTRIBUTING.md)
 
 - Base on `main`; one topic per PR.
@@ -149,6 +159,7 @@ directly from the latest tag, as explicitly requested by the user.
 - `.github/workflows/tests.yml` — exact CI commands and gguf-py pin  
 - `docs/SETTINGS.md` — full `MAYA_*` / `STRATA_*` knob list  
 - `docs/TP2-RUN.md` — TP2 ops: model selection (`--model`/`--pack`), serve/bench examples  
+- `docs/DEEPSEEK-TP2-RUN.md` — DeepSeek TP2/DSpark launch, user acceptance and validation limits
 - `docs/SETUP.md` — install options, build failure fixes  
 - `docs/MODELS.md` — per-model files and engine options  
 - `docs/AMD_MAYA.md`, `docs/AMD_RDNA4.md` — HIP install and validation  

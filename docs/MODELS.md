@@ -4,7 +4,10 @@ Maya runs three models, each on an engine built for it. This page has each one's
 special about it. Back to the [README](../README.md).
 
 **Maya-TP scope:** HIP/ROCm on gfx1151 Linux; two-host RDMA TP2/MTP is validated for GLM Maya-S,
-Maya-M and Maya-L. Broader NVIDIA, Windows, same-host multi-GPU and other-model descriptions below
+Maya-M and Maya-L. DeepSeek Maya-XS and Maya-S have TP2/DSpark validation and
+successful user trials including DeepSWE benchmarks.
+[DeepSeek operations and validation scope](DEEPSEEK-TP2-RUN.md).
+Broader NVIDIA, Windows, same-host multi-GPU and other-model descriptions below
 are inherited upstream catalog information, not additional fork validation. DeepSeek's known
 [gfx1151 WMMA failures](https://github.com/uv-genai/maya-tp/issues/68) remain unresolved.
 

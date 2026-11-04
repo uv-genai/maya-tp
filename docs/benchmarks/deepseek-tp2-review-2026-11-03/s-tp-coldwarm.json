@@ -1,0 +1,819 @@
+{
+  "model": "s",
+  "context": 32768,
+  "engine_sha256": "bf1adc9fcf81f5478f5774b1fb961e3c950d0816fd28fa055128c70c548236f4",
+  "cold_cache": {
+    "local": {
+      "action": "evict",
+      "manifest": "/tmp/ds4-tp2-111-s-local.manifest",
+      "files": [
+        {
+          "role": "source/0",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+          "size": 47887697312,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/1",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+          "size": 47669578400,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/2",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+          "size": 47103347360,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/3",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+          "size": 35532532032,
+          "before": {
+            "resident": 5,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/4",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+          "size": 80641295472,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/5",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+          "size": 80643503412,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/6",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark.bin",
+          "size": 7967616768,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/7",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+          "size": 970536960,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        }
+      ]
+    },
+    "remote": {
+      "action": "evict",
+      "manifest": "/tmp/ds4-tp2-111-s-remote.manifest",
+      "files": [
+        {
+          "role": "source/0",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+          "size": 47887697312,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/1",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+          "size": 47669578400,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/2",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+          "size": 47103347360,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/3",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+          "size": 35532532032,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/4",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+          "size": 80641295472,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/5",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+          "size": 80643503412,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/6",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark.bin",
+          "size": 7967616768,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        },
+        {
+          "role": "source/7",
+          "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+          "size": 970536960,
+          "before": {
+            "resident": 0,
+            "sampled": 64
+          },
+          "after": {
+            "resident": 0,
+            "sampled": 64
+          }
+        }
+      ]
+    }
+  },
+  "runs": [
+    {
+      "case": "cold",
+      "startup_s": 91.30107897700509,
+      "request_wall_s": 13.680176801004563,
+      "health": {
+        "status": "ok",
+        "max_context": 32768,
+        "model": "deepseek-v4.1-flash",
+        "max_text_file": 524288,
+        "model_label": null,
+        "images": false,
+        "api_key": false,
+        "defaults": {
+          "temperature": 1.0,
+          "top_p": 1.0,
+          "reasoning_effort": "high"
+        },
+        "version": "1.1.43",
+        "mcp_tools": false,
+        "unloaded": false,
+        "tp": {
+          "world_size": 2,
+          "rank": 0,
+          "prefill_chunk": 256,
+          "peer": "up"
+        }
+      },
+      "io_ready": {
+        "local": 187157233664,
+        "remote": 178275733504
+      },
+      "io_done": {
+        "local": 187357876224,
+        "remote": 178469216256
+      },
+      "response": {
+        "id": "chatcmpl-5630b422674c4f7f9f741993",
+        "object": "chat.completion",
+        "created": 1793706773,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "```python\nimport csv\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Union\n\n\ndef parse_csv(\n    file_path: Union[str, Path],\n    *,\n    encoding: str = \"utf-8\",\n    delimiter: str = \",\",\n) -> List[Dict[str, Any]]:\n    \"\"\"Parse a CSV file into a list of dictionaries.\n\n    Each row in the CSV file is converted into a dictionary where the keys\n    are the column headers (from the first row) and the values are the\n    corresponding cell contents as strings.\n\n    Args:\n        file_path: Path to the CSV file to parse.\n        encoding: Text encoding used to read the file. Defaults to ``\"utf-8\"``.\n        delimiter: Field delimiter used in the CSV file. Defaults to ``\",\"``.\n\n    Returns:\n        A list of dictionaries, one per data row in the CSV file. Keys are\n        the header names and values are the raw string cell contents.\n\n    Raises:\n        FileNotFoundError: If ``file_path`` does not exist.\n        csv.Error: If the CSV file is malformed.\n\n    Example:\n        Given a file ``people.csv`` containing::\n\n            name,age\n"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 28,
+          "completion_tokens": 256,
+          "total_tokens": 284,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 28,
+          "prompt_ms": 1206.4,
+          "prompt_per_token_ms": 43.086,
+          "prompt_per_second": 23.2,
+          "predicted_n": 256,
+          "predicted_ms": 12324.0,
+          "predicted_per_token_ms": 48.141,
+          "predicted_per_second": 20.8,
+          "draft_n": 211,
+          "draft_n_accepted": 185
+        }
+      },
+      "cache_after": {
+        "local": {
+          "action": "inspect",
+          "manifest": "/tmp/ds4-tp2-111-s-local.manifest",
+          "files": [
+            {
+              "role": "source/0",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+              "size": 47887697312,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/1",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+              "size": 47669578400,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/2",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+              "size": 47103347360,
+              "before": {
+                "resident": 7,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 7,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/3",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+              "size": 35532532032,
+              "before": {
+                "resident": 15,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 15,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/4",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+              "size": 80641295472,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/5",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+              "size": 80643503412,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/6",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark.bin",
+              "size": 7967616768,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/7",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+              "size": 970536960,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            }
+          ]
+        },
+        "remote": {
+          "action": "inspect",
+          "manifest": "/tmp/ds4-tp2-111-s-remote.manifest",
+          "files": [
+            {
+              "role": "source/0",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+              "size": 47887697312,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/1",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+              "size": 47669578400,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/2",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+              "size": 47103347360,
+              "before": {
+                "resident": 3,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 3,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/3",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+              "size": 35532532032,
+              "before": {
+                "resident": 12,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 12,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/4",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+              "size": 80641295472,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/5",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+              "size": 80643503412,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/6",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark.bin",
+              "size": 7967616768,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/7",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+              "size": 970536960,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "warm",
+      "startup_s": 67.20027508799103,
+      "request_wall_s": 12.656101145999855,
+      "health": {
+        "status": "ok",
+        "max_context": 32768,
+        "model": "deepseek-v4.1-flash",
+        "max_text_file": 524288,
+        "model_label": null,
+        "images": false,
+        "api_key": false,
+        "defaults": {
+          "temperature": 1.0,
+          "top_p": 1.0,
+          "reasoning_effort": "high"
+        },
+        "version": "1.1.43",
+        "mcp_tools": false,
+        "unloaded": false,
+        "tp": {
+          "world_size": 2,
+          "rank": 0,
+          "prefill_chunk": 256,
+          "peer": "up"
+        }
+      },
+      "io_ready": {
+        "local": 186260934656,
+        "remote": 178180083712
+      },
+      "io_done": {
+        "local": 186458705920,
+        "remote": 178375168000
+      },
+      "response": {
+        "id": "chatcmpl-f9c761affa7949fe8db22a1a",
+        "object": "chat.completion",
+        "created": 1793706857,
+        "model": "deepseek-v4.1-flash",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "```python\nimport csv\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Union\n\n\ndef parse_csv(\n    file_path: Union[str, Path],\n    *,\n    encoding: str = \"utf-8\",\n    delimiter: str = \",\",\n) -> List[Dict[str, Any]]:\n    \"\"\"Parse a CSV file into a list of dictionaries.\n\n    Each row in the CSV file is converted into a dictionary where the keys\n    are the column headers (from the first row) and the values are the\n    corresponding cell contents as strings.\n\n    Args:\n        file_path: Path to the CSV file to parse.\n        encoding: Text encoding used to read the file. Defaults to ``\"utf-8\"``.\n        delimiter: Field delimiter used in the CSV file. Defaults to ``\",\"``.\n\n    Returns:\n        A list of dictionaries, one per data row in the CSV file. Keys are\n        the header names and values are the raw string cell contents.\n\n    Raises:\n        FileNotFoundError: If ``file_path`` does not exist.\n        csv.Error: If the CSV file is malformed.\n\n    Example:\n        Given a file ``people.csv`` containing::\n\n            name,age\n"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 28,
+          "completion_tokens": 256,
+          "total_tokens": 284,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 28,
+          "prompt_ms": 857.1,
+          "prompt_per_token_ms": 30.611,
+          "prompt_per_second": 32.7,
+          "predicted_n": 256,
+          "predicted_ms": 11669.1,
+          "predicted_per_token_ms": 45.582,
+          "predicted_per_second": 21.9,
+          "draft_n": 211,
+          "draft_n_accepted": 185
+        }
+      },
+      "cache_after": {
+        "local": {
+          "action": "inspect",
+          "manifest": "/tmp/ds4-tp2-111-s-local.manifest",
+          "files": [
+            {
+              "role": "source/0",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+              "size": 47887697312,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/1",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+              "size": 47669578400,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/2",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+              "size": 47103347360,
+              "before": {
+                "resident": 5,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 5,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/3",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+              "size": 35532532032,
+              "before": {
+                "resident": 17,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 17,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/4",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+              "size": 80641295472,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/5",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+              "size": 80643503412,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/6",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark.bin",
+              "size": 7967616768,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/7",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+              "size": 970536960,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            }
+          ]
+        },
+        "remote": {
+          "action": "inspect",
+          "manifest": "/tmp/ds4-tp2-111-s-remote.manifest",
+          "files": [
+            {
+              "role": "source/0",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+              "size": 47887697312,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/1",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+              "size": 47669578400,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/2",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+              "size": 47103347360,
+              "before": {
+                "resident": 1,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 1,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/3",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+              "size": 35532532032,
+              "before": {
+                "resident": 21,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 21,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/4",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+              "size": 80641295472,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/5",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+              "size": 80643503412,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/6",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark.bin",
+              "size": 7967616768,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            },
+            {
+              "role": "source/7",
+              "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+              "size": 970536960,
+              "before": {
+                "resident": 0,
+                "sampled": 64
+              },
+              "after": {
+                "resident": 0,
+                "sampled": 64
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

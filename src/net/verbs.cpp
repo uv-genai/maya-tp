@@ -6,6 +6,7 @@
 // into a send window and adds the peer's partial straight from a receive window - the two moves that keep a
 // decode exchange at ~6 µs instead of paying an extra copy and wake-up each way.
 #include "strata/net/verbs.hpp"
+#include "control_socket_state.hpp"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -726,7 +727,11 @@ public:
         continue;
       }
       if (n < 0 && errno == EINTR) continue;
-      if (n <= 0) {
+      if (n == 0) {
+        SetError(error, "verbs peer closed the bootstrap connection");
+        return false;
+      }
+      if (n < 0) {
         SetError(error, SystemError("control recv"));
         return false;
       }
@@ -889,6 +894,22 @@ public:
     if (poisoned_) {
       PoisonedError(error);
       return false;
+    }
+    return true;
+  }
+
+  [[nodiscard]] bool CheckPeer(std::string* error) override {
+    std::lock_guard lock(mutex_);
+    if (poisoned_) { PoisonedError(error); return false; }
+    if (!control_ || !control_->valid()) {
+      Poison(error, "verbs control channel is unavailable"); return false;
+    }
+    // Ask only for hangup/error, never read or consume queued control data.
+    pollfd fd{.fd=control_->fd(), .events=control_poll_events(true), .revents=0};
+    const int result=::poll(&fd,1,0);
+    if (result<0 && errno!=EINTR) { Poison(error,SystemError("verbs peer poll")); return false; }
+    if (result>0 && control_socket_state(fd.fd,fd.revents)==ControlSocketState::closed) {
+      Poison(error,"verbs peer closed the bootstrap connection"); return false;
     }
     return true;
   }
@@ -1370,6 +1391,7 @@ private:
                                      std::string* error) {
     bool written = false;
     bool received = std::exchange(early_receive_, false);
+    bool control_data_pending = false;
     const auto start = std::chrono::steady_clock::now();
     const auto spin_deadline = start + kExchangeSpinWindow;
     const auto deadline = start + kExchangeTimeout;
@@ -1452,7 +1474,7 @@ private:
       }
       std::array<pollfd, 2> fds{
           pollfd{.fd = completion_channel_->fd, .events = POLLIN, .revents = 0},
-          pollfd{.fd = control_->fd(), .events = POLLIN, .revents = 0}};
+          pollfd{.fd = control_->fd(), .events = control_poll_events(control_data_pending), .revents = 0}};
       const int result = ::poll(
           fds.data(), fds.size(),
           static_cast<int>(std::max<std::int64_t>(
@@ -1463,12 +1485,14 @@ private:
         SetError(error, "verbs completion poll failed");
         return false;
       }
-      if (fds[1].revents != 0) {
-        // The bootstrap socket carries nothing after setup; readable means
-        // the peer closed or reset it.
+      const auto control_state = control_socket_state(control_->fd(), fds[1].revents);
+      if (control_state == ControlSocketState::closed) {
         SetError(error, "verbs peer closed the bootstrap connection");
         return false;
       }
+      // A mirrored command can arrive while a queued collective is still
+      // completing. Leave it for RecvControl and avoid spinning on POLLIN.
+      if (control_state == ControlSocketState::pending_data) control_data_pending = true;
       if (fds[0].revents != 0) {
         ibv_cq* event_cq = nullptr;
         void* event_context = nullptr;

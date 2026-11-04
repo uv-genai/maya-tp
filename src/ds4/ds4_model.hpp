@@ -21,6 +21,9 @@
 #include <string>
 #include <vector>
 
+#if defined(STRATA_DS4_TP2_RDMA)
+namespace strata::net { class Communicator; }
+#endif
 namespace strata::ds4 {
 
 struct Options {
@@ -46,6 +49,14 @@ struct Options {
     double ssd_cache_gb = 0.0;
     int ssd_policy = 0;
     bool dspark = true;              // load the DSpark drafter (the checkpoint's mtp.* blocks) for speculative decoding
+    // Internal worker option: reserve target verification rollback state even
+    // when the drafter and prompt lookup are owned by the other rank.
+    bool tp_worker_verify = false;
+    // Two-host rank loading and its bounded prefill mode.
+    int tp2_rank = -1;
+    std::size_t tp2_expert_budget = 0;
+    // Set only after validating matching two-host configuration.
+    bool tp2_chunk_enabled = false;
     float dspark_conf = 0.5f;         // a draft is verified while its confidence (sigmoid) is at least this
     // prompt lookup (ds4_main's --suffix-draft): its verify windows run without the drafter too - their buffers (the
     // rows and states a rejected draft undoes) are allocated with the drafter, or with this
@@ -156,11 +167,26 @@ struct Stats {
     int64_t eg_ahead = 0;   // a prompt read in parts: Engram lookups of its next part's first chunk read ahead
 };
 
+struct Tp2Geometry {
+    int hidden = 0, layers = 0, experts = 0, expert_width = 0;
+};
+
 class Model {
 public:
     Model();
     ~Model();
     bool load(const Options& o, std::string& err);
+#if defined(STRATA_DS4_TP2_RDMA)
+    // Non-owning; the communicator must outlive all model calls. The caller
+    // must validate both identities before attaching either rank.
+    bool tp2_attach(strata::net::Communicator& comm, std::size_t limit, std::string& err,
+                         bool control_rank0 = false);
+    bool tp2_shutdown(std::string& err);
+    void tp2_set_failure_handler(std::function<void(const std::string&)> handler);
+#endif
+    bool tp2_driving() const;
+    std::string tp2_failure() const;
+    Tp2Geometry tp2_geometry() const;
 
     /// Feeds `token` at position pos(); with logits, the next token's logits are left on the head's device.
     bool step(int token, bool logits, std::string& err);
@@ -199,8 +225,21 @@ public:
     int draft_block() const;
     bool draft(int y, std::vector<int>& drafts, std::vector<float>& conf, std::string& err, float temperature = 0.0f,
                float top_p = 1.0f, int top_k = 0, float min_p = 0.0f, uint64_t seed = 0, uint64_t counter = 0);
+    /// Set point_proposal for externally supplied drafts (such as prompt lookup):
+    /// their q is a point mass even if a previous sampled drafter left q cached.
     bool verify(int y, const std::vector<int>& drafts, float temperature, float top_p, int top_k, float min_p,
-                uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err);
+                uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err,
+                bool point_proposal = false);
+    /// Worker-only split verification. The caller must exclusively own this
+    /// model: after begin, issue only commit (or discard/reset the model on
+    /// failure). No worker-side sampling or next-token choice occurs here.
+    /// A transport/model failure requires the paired engines to be restarted.
+    bool tp_verify_begin(const int* tokens, int count, std::string& err);
+    bool tp_verify_commit(int accepted, std::string& err);
+    /// Internal worker boundaries: check reset and all device work before a
+    /// control operation is acknowledged to the paired rank.
+    bool tp_worker_reset(std::string& err);
+    bool tp_worker_synchronize(std::string& err);
     /// A verify window's tokens at most (y and the drafts after it); verify() takes drafts from any source - those not
     /// the drafter's own draws as a point each (q 1)
     int verify_max() const;

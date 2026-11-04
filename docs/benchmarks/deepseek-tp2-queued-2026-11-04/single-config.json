@@ -1,0 +1,58 @@
+{
+  "exe": "/tmp/ds4-tp2-queued-build/maya-ds4",
+  "args": [
+    "--pack",
+    "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4",
+    "--max-context",
+    "262144",
+    "--tp",
+    "1",
+    "--threads",
+    "on",
+    "--reserve-mib",
+    "1024",
+    "--dspark",
+    "on",
+    "--vision",
+    "off",
+    "--suffix-draft",
+    "0",
+    "--profile-readonly",
+    "--cpu-threads",
+    "14",
+    "--prefill-chunk",
+    "256",
+    "--mmap-experts",
+    "on",
+    "--no-expert-cache"
+  ],
+  "cwd": "/home/ugo/software/project-maya",
+  "tokenizer": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/tokenizer",
+  "backend": "hip",
+  "model_name": "deepseek-v4.1-flash",
+  "gpu": [
+    0
+  ],
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 1.0
+  },
+  "reasoning_effort": "high",
+  "lib_dirs": [
+    "/opt/rocm/lib"
+  ],
+  "port": 8080,
+  "log": "/tmp/ds4-tp2-queued-perf-xs-single-engine.log",
+  "installer": {
+    "family": "deepseek",
+    "models_dir": "/home/ugo/software/Maya-data/models",
+    "quant": "DeepSeek-V4.1-Flash-1017",
+    "ds4_quant": "maya-xs",
+    "model_dir": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS",
+    "written": "2026-11-02 22:41"
+  },
+  "env": {
+    "MAYA_DS4_WARM_CAP_GB": "0",
+    "MAYA_DS4_LT_STORE": "/tmp/ds4-tp2-queued-perf-xs-single-lt-picks.txt"
+  }
+}

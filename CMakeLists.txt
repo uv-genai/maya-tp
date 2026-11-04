@@ -179,6 +179,24 @@ target_link_libraries(strata-dequant PRIVATE strata_artifact)
 # this file is now nothing but the CLI entry point, and its inherited guard spells that as a "selftest"
 target_compile_definitions(strata-dequant PRIVATE STRATA_DEQUANT_SELFTEST)
 if(STRATA_BUILD_TESTS)
+  # Requires a supplied real pack; do not register as an unattended ctest.
+  add_executable(ds4_tp_pack_file_test tests/ds4_tp_pack_file_test.cpp)
+  add_executable(ds4_tp_pack_test tests/ds4_tp_pack_test.cpp)
+  add_test(NAME ds4_tp_pack_test COMMAND ds4_tp_pack_test)
+  add_executable(ds4_tp_worker_state_test tests/ds4_tp_worker_state_test.cpp)
+  add_test(NAME ds4_tp_worker_state_test COMMAND ds4_tp_worker_state_test)
+  add_executable(ds4_tp_model_worker_test tests/ds4_tp_model_worker_test.cpp)
+  add_test(NAME ds4_tp_model_worker_test COMMAND ds4_tp_model_worker_test)
+  add_executable(ds4_tp_identity_test tests/ds4_tp_identity_test.cpp)
+  add_test(NAME ds4_tp_identity_test COMMAND ds4_tp_identity_test)
+  add_executable(ds4_tp_preflight_test tests/ds4_tp_preflight_test.cpp)
+  add_test(NAME ds4_tp_preflight_test COMMAND ds4_tp_preflight_test)
+  add_executable(ds4_tp_control_test tests/ds4_tp_control_test.cpp)
+  add_test(NAME ds4_tp_control_test COMMAND ds4_tp_control_test)
+  add_executable(ds4_tp_chunk_test tests/ds4_tp_chunk_test.cpp)
+  add_test(NAME ds4_tp_chunk_test COMMAND ds4_tp_chunk_test)
+  add_executable(ds4_tp_partition_test tests/ds4_tp_partition_test.cpp)
+  add_test(NAME ds4_tp_partition_test COMMAND ds4_tp_partition_test)
   add_executable(ds4_path_policy_test tests/ds4_path_policy_test.cpp)
   add_test(NAME ds4_path_policy_test COMMAND ds4_path_policy_test)
   add_executable(ds4_chunk_policy_test tests/ds4_chunk_policy_test.cpp)
@@ -214,6 +232,12 @@ if(STRATA_BUILD_TESTS)
   # Host-only execution, but TpContext's stream types require the HIP SDK.
   # hip::host supplies headers/platform definitions without compiling a GPU TU.
   if(STRATA_ENABLE_HIP)
+    add_executable(tp_control_socket_state_test tests/tp_control_socket_state_test.cpp)
+    add_test(NAME tp_control_socket_state_test COMMAND tp_control_socket_state_test)
+    add_executable(ds4_tp_channel_test tests/ds4_tp_channel_test.cpp)
+    target_include_directories(ds4_tp_channel_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_link_libraries(ds4_tp_channel_test PRIVATE hip::host)
+    add_test(NAME ds4_tp_channel_test COMMAND ds4_tp_channel_test)
     add_executable(tp_context_test tests/tp_context_test.cpp)
     target_link_libraries(tp_context_test PRIVATE strata_artifact hip::host)
     add_test(NAME tp_context_test COMMAND tp_context_test)
@@ -302,6 +326,9 @@ if(STRATA_ENABLE_TP2_RDMA)
   target_compile_options(strata_net PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include;format>)
   target_link_libraries(strata_net PUBLIC strata_warnings ${STRATA_IBVERBS_LIB} hip::host)
   if(STRATA_BUILD_TESTS)
+    add_executable(ds4_tp_channel_rdma_test tests/ds4_tp_channel_rdma_test.cpp)
+    target_link_libraries(ds4_tp_channel_rdma_test PRIVATE strata_net)
+    target_compile_options(ds4_tp_channel_rdma_test PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-include;format>)
     add_executable(tp_comm_rdma_test tests/tp_comm_rdma_test.cpp)
     target_link_libraries(tp_comm_rdma_test PRIVATE strata_net)
     # same GCC 16 + <format> workaround as strata_net
@@ -626,6 +653,47 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
     endif()
     if(STRATA_ENABLE_HIP)
       target_link_libraries(maya-ds4 PRIVATE strata_mmq)
+    endif()
+    if(STRATA_ENABLE_TP2_RDMA)
+      # Compile the DeepSeek transport into the isolated review binary. Rank
+      # entry points remain guarded until configuration and startup are wired.
+      target_compile_definitions(maya-ds4 PRIVATE STRATA_DS4_TP2_RDMA)
+      target_link_libraries(maya-ds4 PRIVATE strata_net)
+      # Keep this pair grouped: the HIP compatibility shim also uses
+      # -include and CMake otherwise de-duplicates the second switch.
+      target_compile_options(maya-ds4 PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include format>")
+    endif()
+    if(STRATA_BUILD_TESTS AND STRATA_ENABLE_HIP)
+      if(STRATA_HIPBLASLT_AVAILABLE)
+        # Explicit GPU integration test; never registered as unattended ctest.
+        add_executable(ds4_lt_store_test tests/ds4_lt_store_test.cpp src/ds4/ds4_lt.cu)
+        target_include_directories(ds4_lt_store_test PRIVATE ${_strata_gpu_include_directories})
+        target_link_libraries(ds4_lt_store_test PRIVATE ${_strata_gpu_runtime_target} roc::hipblaslt)
+      endif()
+      # Requires an explicit real DeepSeek pack; never registered as unattended ctest.
+      add_executable(ds4_tp_upload_real_test tests/ds4_tp_upload_real_test.cpp)
+      target_link_libraries(ds4_tp_upload_real_test PRIVATE hip::host)
+      # Model-backed TP worker verification test; requires a user-supplied pack.
+      add_executable(ds4_tp_verify_test tests/ds4_tp_verify_test.cpp src/ds4/ds4_model.cu src/ds4/ds4_kernels.cu
+                     src/ds4/ds4_vision.cu src/ds4/ds4_gguf.cu src/ds4/ds4_gguf_cpu.cpp src/ds4/ds4_iq.cu
+                     src/ds4/ds4_iq_cpu.cpp src/ds4/ds4_lt.cu src/ds4/ds4_host_ar.cpp src/ds4/ds4_packinfo.cpp
+                     tests/ds4_tp_rank_load_test.cpp tests/ds4_tp_dense_load_test.cpp tests/ds4_tp_model_load_test.cpp
+                     tests/ds4_single_prefill_compare_test.cpp)
+      target_include_directories(ds4_tp_verify_test PRIVATE ${_strata_gpu_include_directories} third_party/ggml)
+      target_link_libraries(ds4_tp_verify_test PRIVATE strata_kernels strata_kernels_cpu strata_spec strata_mmq
+                            ${_strata_gpu_runtime_target} ${_strata_gpu_blas_target})
+      if(STRATA_HIPBLASLT_AVAILABLE)
+        target_link_libraries(ds4_tp_verify_test PRIVATE roc::hipblaslt)
+      endif()
+      if(STRATA_ENABLE_TP2_RDMA)
+        target_sources(ds4_tp_verify_test PRIVATE tests/ds4_tp_pair_smoke.cpp tests/ds4_tp_expert_rdma_test.cu
+                       tests/ds4_tp_dense_rdma_test.cu tests/ds4_tp_model_rdma_test.cpp
+                       tests/ds4_tp_text_rdma_test.cpp tests/ds4_tp_sharded_control_test.cpp
+                       tests/ds4_tp_sharded_rollback_test.cpp tests/ds4_tp_sharded_dspark_test.cpp
+                       tests/ds4_tp_sharded_sample_test.cpp)
+        target_compile_definitions(ds4_tp_verify_test PRIVATE STRATA_DS4_TP2_RDMA STRATA_DS4_TP2_TESTING)
+        target_link_libraries(ds4_tp_verify_test PRIVATE strata_net)
+      endif()
     endif()
     if(NOT WIN32)   # mmap / mbind (NUMA)
       add_executable(ds4_cpu_bench tests/ds4_cpu_bench.cpp)
