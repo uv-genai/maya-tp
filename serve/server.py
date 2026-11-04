@@ -57,7 +57,8 @@ from serve import ds4_vision, gpu_map, loop_guard, mm3_vision, model_api, model_
 
 ENGINE_VISION = (ds4_vision.Vision, mm3_vision.Vision)   # the engines that run their vision tower themselves
 from serve.frontend import (CALL_END, CALL_START, MINIMAX_NS, ChatTemplate, Event, OutputParser,  # noqa: E402
-                            EFFORT_WORDS, QWEN_EFFORT, anthropic_to_messages, deepseek_effort_kwargs, deepseek_images,
+                            EFFORT_WORDS, QWEN_EFFORT, anthropic_to_messages, config_budget, deepseek_effort_kwargs,
+                            deepseek_images,
                             effort_kwargs,
                             effort_level, effort_name, literal_tags, mark_literals, media_of, openai_to_messages,
                             unmark_literals)
@@ -6627,6 +6628,8 @@ def main() -> int:
         print(f"[maya] {engine.multi} conversations at once (--parallel)", flush=True)
     if "reasoning_effort" not in cfg and a.engine == "maya":   # (a config without one: the model's own level)
         cfg = dict(cfg, reasoning_effort=maya_quants.model_defaults(cfg)[1])
+    if svc.template.deepseek and isinstance(cfg.get("reasoning_effort"), str):   # ("42" in the config = 42, #768)
+        cfg = dict(cfg, reasoning_effort=config_budget(cfg["reasoning_effort"]))
     if cfg.get("reasoning_effort") or (svc.template.deepseek and cfg.get("reasoning_effort") is not None):
         try:
             (deepseek_effort_kwargs if svc.template.deepseek else effort_kwargs)(cfg["reasoning_effort"])
@@ -6667,7 +6670,7 @@ def main() -> int:
     if a.config:
         svc.config_path = str(Path(a.config).resolve())  # a context change from the dashboard is saved there
         p = Path(svc.config_path)                        # the tokens it serves, and what its API would have charged
-        svc.savings = savings.Ledger(p.parent / savings.FILE, p.name, svc.model, models.quant_label(cfg, p))
+        svc.savings = savings.Ledger(savings.ledger_path(p), p.name, svc.model, models.quant_label(cfg, p))
         threading.Thread(target=svc.finish_delete, daemon=True).start()   # (the model before, if the page deleted it)
     args = [str(x) for x in cfg.get("args") or []]
     if "--glm-pack" in args[:-1]:                       # the model's folder: the pack's parent holds its GGUF files

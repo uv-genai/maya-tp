@@ -6,6 +6,12 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Upstream v1.1.51 integration** (#127) adds opt-in DeepSeek CPU row preparation,
+  configurable RAM margin, savings-ledger placement and server/UI/installer fixes.
+  Preserve remote TP2 loading, mirrored GLM resets and checkpoint restrictions.
+  The readiness UI test now exits through its normal stop action (#128).
+  [Review and validation](docs/upstream/v1.1.51.md).
+
 - **Upstream v1.1.50 integration** (#125) adds GLM Maya-XS installer/catalog
   support, tokenization and response-format APIs, live thinking-budget controls,
   opt-in model management and the Turbo UI. Preserve paired restart guards,

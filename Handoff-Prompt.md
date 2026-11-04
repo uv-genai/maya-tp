@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then Handoff.md §47 for the active sequential upstream v1.1.50–v1.1.53 integration. Issue #125 tracks v50, which must pass PR and merged-main CI before v51 starts. The source worktree is `/home/ugo/software/project-maya-upstream-integration`. Earlier accepted-state details are in §§45–46. PR #122 merged DeepSeek TP2/DSpark into `main` at `75e18e8`, with feature-head and merged-main CI passing. §46 records the documentation audit, §44 the accepted DeepSeek build, §43 the launchers and §33 the promoted GLM runtime. Earlier entries are dated checkpoints.
+Read [AGENTS.md](AGENTS.md), then Handoff.md §47 for the active sequential upstream v1.1.50–v1.1.53 integration. V50 merged through PR #126 at `176ce06`, with exact-head, PR and merged-main CI passing. Issue #127 tracks v51, which must finish its PR and merged-main CI before v52 starts. The source worktree is `/home/ugo/software/project-maya-upstream-integration`. Earlier accepted-state details are in §§45–46. PR #122 merged DeepSeek TP2/DSpark into `main` at `75e18e8`, with feature-head and merged-main CI passing. §46 records the documentation audit, §44 the accepted DeepSeek build, §43 the launchers and §33 the promoted GLM runtime. Earlier entries are dated checkpoints.
 
 ## Current GLM and DeepSeek state
 

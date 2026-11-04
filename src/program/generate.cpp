@@ -1329,7 +1329,6 @@ static int glm_pack_generate(const Options& o) {
                     }
                     if (rid == admitting_rid.load()) {
                         admit_stop.store(true);
-                        if (interleave.tokens == 0 && read_gaps.percent == 0) stop_req.store(true);
                     }
                     continue;
                 }
@@ -1723,18 +1722,44 @@ static int glm_pack_generate(const Options& o) {
     // tokens - only where at least 512 fresh tokens lie before.  A prompt that leaves the conversation before the
     // snapshot's position - an edited or replaced last message, another chat with the same system prompt and tools, a
     // client that rewrote an older turn - restores the longest checkpoint it starts with and reads only the rest,
-    // where it read everything from token 0.  One conversation at a time (not the several-conversation scheduler) and
-    // text prompts only; STRATA_GLM_NO_REUSE turns it off with the rest of the reuse.
+    // where it read everything from token 0.  Text prompts only; STRATA_GLM_NO_REUSE turns it off with the rest of the
+    // reuse.  SEVERAL CONVERSATIONS AT ONCE (STRATA_GLM_SEQS > 1) keep them only with STRATA_GLM_MULTI_CKPTS=1 (#711):
+    // each context then has checkpoints of its own conversation.  The model's checkpoint slots are host buffers that
+    // take whichever sequence is bound when one is written, and a checkpoint is good only for the sequence whose DSA
+    // rows it stood on, so context c owns the slots [c * ckpt_max, (c + 1) * ckpt_max): its list goes in and out with
+    // its snapshot (bind_ctx) and ckpt_base is its first slot.  Every context's checkpoints together are at most
+    // kMultiCkptSlots (~150 MB of host RAM each), and the periodic ones stay off there unless STRATA_GLM_CKPT_EVERY is
+    // set: each one ends a prompt-path call, a pipeline fill on a split, while other conversations wait to decode.
     struct Ckpt {
         std::vector<int32_t> tokens;   // the conversation's first tokens the checkpoint holds the state after (empty: free)
         uint64_t used = 0;
     };
-    std::vector<Ckpt> ckpts;
+    std::vector<Ckpt> ckpts;   // the bound context's (several conversations: each context's in turn, see bind_ctx)
     uint64_t ckpt_clock = 0;
-    const int ckpt_max = model.fast() && model.seq_count() <= 1 && getenv("STRATA_GLM_NO_REUSE") == nullptr
-                             ? std::max(0, std::min(16, (int) env_num("STRATA_GLM_CKPTS", 4)))
-                             : 0;
-    const int64_t ckpt_every = std::max<int64_t>(0, (int64_t) env_num("STRATA_GLM_CKPT_EVERY", 16384));
+    int ckpt_base = 0;         // the bound context's first checkpoint slot in the model (0 with one conversation)
+    const bool multi_ckpts = model.seq_count() > 1 && env_num("STRATA_GLM_MULTI_CKPTS", 0) != 0;
+    const int ckpt_max = [&] {
+        // Checkpoint operations have no TP mirror commands.
+        if (tp_comm != nullptr && tp_comm->world_size() > 1) return 0;
+        if (!model.fast() || getenv("STRATA_GLM_NO_REUSE") != nullptr) return 0;
+        const int want = std::max(0, std::min(16, (int) env_num("STRATA_GLM_CKPTS", 4)));
+        if (model.seq_count() <= 1) return want;
+        if (!multi_ckpts) return 0;
+        constexpr int kMultiCkptSlots = 32;   // every context's together (~4.8 GB with GLM-5.3-Flash at most)
+        return std::min(want, kMultiCkptSlots / model.seq_count());
+    }();
+    const int64_t ckpt_every =
+        model.seq_count() > 1 && getenv("STRATA_GLM_CKPT_EVERY") == nullptr
+            ? 0
+            : std::max<int64_t>(0, (int64_t) env_num("STRATA_GLM_CKPT_EVERY", 16384));
+    if (multi_ckpts && ckpt_max > 0) {
+        const std::string every = ckpt_every > 0 ? " and every " + std::to_string(ckpt_every) + " fresh tokens" : "";
+        std::fprintf(stderr, "glm checkpoints: up to %d for each of the %d conversations at once "
+                             "(MAYA_GLM_MULTI_CKPTS), at the system prompt's end and the last turn's start%s\n",
+                     ckpt_max, model.seq_count(), every.c_str());
+    } else if (multi_ckpts)
+        std::fprintf(stderr, "glm checkpoints: MAYA_GLM_MULTI_CKPTS is set but none is kept "
+                             "(MAYA_GLM_CKPTS=0 or MAYA_GLM_NO_REUSE)\n");
     // a prompt writes the state from position `from` on: the checkpoints past it no longer hold this conversation
     const auto ckpt_drop_past = [&](size_t from) {
         for (auto& c : ckpts)
@@ -1800,7 +1825,8 @@ static int glm_pack_generate(const Options& o) {
         }
         std::string e;
         ckpts[c].tokens.clear();
-        if (!(from_snapshot ? model.ckpt_save_snapshot((int) c, e) : model.ckpt_save((int) c, e))) {
+        const int slot = ckpt_base + (int) c;   // (several conversations: this context's own slots)
+        if (!(from_snapshot ? model.ckpt_save_snapshot(slot, e) : model.ckpt_save(slot, e))) {
             std::fprintf(stderr, "glm checkpoints: not kept at %zu (%s)\n", p, e.c_str());
             return;
         }
@@ -2086,7 +2112,7 @@ static int glm_pack_generate(const Options& o) {
                         slot_len = sl.tokens.size();
             std::string ce;
             if (slot_len > ck_len) {
-            } else if (model.ckpt_restore(ck, ce)) {
+            } else if (model.ckpt_restore(ckpt_base + ck, ce)) {
                 reuse = ck_len;
                 from_ckpt = true;
                 ckpts[(size_t) ck].used = ++ckpt_clock;
@@ -2181,9 +2207,12 @@ static int glm_pack_generate(const Options& o) {
             std::vector<size_t> marks = ckpt_marks(prompt, reuse, snap_at);
             // the first user turn's marker: the end of the system prompt (ckpt_marks' `first`)
             const size_t sys_end = strata::core::system_prompt_end(prompt.data(), prompt.size(), 154827);   // <|user|>
-            // without checkpoints (STRATA_GLM_CKPTS=0, the several-conversation scheduler) the read still ends a call
-            // there with the slots on, for slot_prefix: another conversation with this system prompt (a new conversation
-            // of the same client, another request of the same kind) restores it instead of reading it again.
+            // without checkpoints (STRATA_GLM_CKPTS=0, several conversations without STRATA_GLM_MULTI_CKPTS) the read
+            // still ends a call there with the slots on, for slot_prefix: another conversation with this system prompt
+            // (a new conversation of the same client, another request of the same kind) restores it instead of reading
+            // it again.  (With checkpoints the mark is ckpt_marks' `first` where that one is kept, and slot_prefix
+            // runs there the same way: with several conversations the slot serves the other contexts too, which a
+            // context's own checkpoints cannot.)
             // STRATA_GLM_PREFIX_CUT=0: off
             static const bool prefix_cut_on = env_num("STRATA_GLM_PREFIX_CUT", 1) != 0;
             if (ckpt_max <= 0 && slot_max > 0 && prefix_cut_on && cur_img_pos.empty())
@@ -2304,7 +2333,7 @@ static int glm_pack_generate(const Options& o) {
                             best = c;
                     }
                     std::string ce;
-                    if (best >= 0 && model.ckpt_restore(best, ce) && model.snapshot_save()) {
+                    if (best >= 0 && model.ckpt_restore(ckpt_base + best, ce) && model.snapshot_save()) {
                         kept = ckpts[(size_t) best].tokens.size();
                         snap_tokens.assign(prompt.begin(), prompt.begin() + (long) kept);
                         snap_img_hash = img_hash(kept);
@@ -2817,6 +2846,7 @@ static int glm_pack_generate(const Options& o) {
         std::vector<int32_t> snap_tokens;
         uint64_t snap_img_hash = kNoImages;
         bool snap_in_slot = false;
+        std::vector<Ckpt> ckpts;   // its checkpoints (STRATA_GLM_MULTI_CKPTS): the model's slots from c * ckpt_max on
         uint64_t used = 0;
         bool busy = false;
     };
@@ -2829,13 +2859,17 @@ static int glm_pack_generate(const Options& o) {
             was.snap_tokens = std::move(snap_tokens);
             was.snap_img_hash = snap_img_hash;
             was.snap_in_slot = snap_in_slot;
+            was.ckpts = std::move(ckpts);
             Ctx& now = ctxs[(size_t) c];
             snap_tokens = std::move(now.snap_tokens);
             now.snap_tokens.clear();
             snap_img_hash = now.snap_img_hash;
             snap_in_slot = now.snap_in_slot;
+            ckpts = std::move(now.ckpts);
+            now.ckpts.clear();
             cur_ctx = c;
         }
+        ckpt_base = c * ckpt_max;   // (one conversation, or none kept: 0)
         model.seq_bind_all(c);   // (the pipelined decode binds the model's sequences itself)
         if (tp_mirror) {
             const int32_t ci = (int32_t) c;
@@ -3021,7 +3055,7 @@ static int glm_pack_generate(const Options& o) {
                 return false;
             }
         }
-        if (stop_req.load()) {
+        if (quit_req.load() || (stop_req.load() && gens.size() <= 1)) {
             g.finish = "cancel";
             return false;
         }
@@ -3256,6 +3290,7 @@ static int glm_pack_generate(const Options& o) {
             bind_ctx(c);
             snap_tokens.clear();
             if (tp_mirror) tp_send(kTpMirrorReset, nullptr, 0);
+            ckpts.clear();   // (the caches they stood on are reset too)
             model.reset();
         }
         gen_sweep();
@@ -3269,6 +3304,7 @@ static int glm_pack_generate(const Options& o) {
         for (int c = 0; c < (int) ctxs.size(); ++c) {
             bind_ctx(c);
             snap_tokens.clear();
+            ckpts.clear();   // (the caches they stood on are reset too)
             model.reset();
         }
     };
@@ -3315,8 +3351,10 @@ static int glm_pack_generate(const Options& o) {
             g->pen = g->prompt;
             g->sp.host_history = &g->pen;
         }
-        // the context: an idle one that holds the prompt and the room after it, and whose snapshot this prompt
-        // extends (the longest), else the least recently used of those
+        // the context: an idle one that holds the prompt and the room after it, and whose snapshot - or one of its
+        // conversation checkpoints (STRATA_GLM_MULTI_CKPTS: an edited last message, a cancelled answer sent again
+        // without it, an older turn rewritten) - this prompt extends (the longest), else the least recently used of
+        // those.  prep_prompt then restores the one it found, as with one conversation.
         const int64_t want = (int64_t) g->prompt.size() + std::min<int64_t>(max_new, multi_room) + 8;
         const auto fits = [&](int c) { return model.seq_max_ctx(c) >= want; };
         int best = -1;
@@ -3325,10 +3363,20 @@ static int glm_pack_generate(const Options& o) {
             if (ctxs[(size_t) c].busy || !fits(c)) continue;
             const auto& st = c == cur_ctx ? snap_tokens : ctxs[(size_t) c].snap_tokens;
             const uint64_t hh = c == cur_ctx ? snap_img_hash : ctxs[(size_t) c].snap_img_hash;
-            if (!st.empty() && st.size() < g->prompt.size() && st.size() > blen &&
-                std::equal(st.begin(), st.end(), g->prompt.begin()) && img_hash(st.size()) == hh) {
+            size_t len = 0;
+            if (!st.empty() && st.size() < g->prompt.size() && std::equal(st.begin(), st.end(), g->prompt.begin()) &&
+                img_hash(st.size()) == hh)
+                len = st.size();
+            if (ckpt_max > 0 && cur_img_pos.empty()) {   // (checkpoints are kept of text prompts only)
+                const std::vector<Ckpt>& cl = c == cur_ctx ? ckpts : ctxs[(size_t) c].ckpts;
+                for (const Ckpt& k : cl)
+                    if (k.tokens.size() > len && k.tokens.size() < g->prompt.size() &&
+                        std::equal(k.tokens.begin(), k.tokens.end(), g->prompt.begin()))
+                        len = k.tokens.size();
+            }
+            if (len > blen) {
                 best = c;
-                blen = st.size();
+                blen = len;
             }
         }
         if (best < 0)
@@ -3360,6 +3408,10 @@ static int glm_pack_generate(const Options& o) {
             }
         }
         if (gens.empty()) stop_req.store(false);
+        {
+            std::lock_guard<std::mutex> lk(ctl_mu);
+            ctl.erase(rid);
+        }
         gap_failed = false;
         bind_ctx(best);
         model.set_image_rows(cur_img_pos, cur_img_rows);
@@ -4684,10 +4736,17 @@ static int glm_pack_generate(const Options& o) {
         if (o.expert_profile_save_min > 0 &&
             Clock::now() - profile_saved_at >= std::chrono::duration<double>(o.expert_profile_save_min * 60.0))
             save_profile("periodic");
-        // the watchdog watches a command from here until this iteration ends, whichever way it ends
+        // the watchdog watches a command from here until this iteration ends, whichever way it ends.  A command that
+        // ended is progress: back-to-back short commands (the zero-shot suite's LOGP lines, ~0.4 s each on the token
+        // path, which has no beat of its own) leave the watchdog's 1 s look almost never on an idle moment, so
+        // without this beat it stopped a healthy engine after STRATA_WATCHDOG_S of answers
         struct BusyScope {
             BusyScope() { strata::core::progress().busy.store(true); strata::core::progress_at("the request"); }
-            ~BusyScope() { strata::core::progress().busy.store(false); strata::core::progress_at("idle"); }
+            ~BusyScope() {
+                strata::core::progress_beat();
+                strata::core::progress().busy.store(false);
+                strata::core::progress_at("idle");
+            }
         } busy_scope;
         // LOGP <n_ctx> <id,id,...>: the summed log-probability of the tokens from n_ctx on given those before
         // ("LP <sum> <n> <1 if every one was the most likely>") - the multiple-choice scoring of the zero-shot suite
@@ -4736,7 +4795,9 @@ static int glm_pack_generate(const Options& o) {
                     for (size_t i = 0; ok && i < head.size(); i += 8) {
                         const std::vector<int32_t> part(head.begin() + (long) i,
                                                         head.begin() + (long) std::min(head.size(), i + 8));
+                        strata::core::progress_at("LOGP: the context on the token path, at token", (int64_t) i);
                         ok = model.forward(part, lg0, err);
+                        strata::core::progress_beat();
                     }
                 }
                 lp_ctx.clear();
@@ -4746,8 +4807,10 @@ static int glm_pack_generate(const Options& o) {
             double lp = 0.0;
             bool greedy = true;
             for (int64_t j = n_ctx; ok && j < (int64_t) t.size(); ++j) {
+                strata::core::progress_at("LOGP: the continuation, at token", j);
                 ok = model.forward({t[(size_t) j - 1]}, lgv, err);
                 if (!ok) break;
+                strata::core::progress_beat();
                 float mx = lgv[0];
                 size_t am = 0;
                 for (size_t v = 1; v < lgv.size(); ++v)
@@ -7849,12 +7912,18 @@ int main(int argc, char** argv) {
         constexpr int64_t kMinPromptChunk = 256;   // the layout's floor: a chunk smaller than this is not read
         while (next_line(line)) {
             if (line == "QUIT") break;
-            // the watchdog watches a request from here until this iteration ends, whichever way it ends
+            // the watchdog watches a request from here until this iteration ends, whichever way it ends; a request
+            // that ended is progress (back-to-back short requests leave the watchdog's 1 s look no idle moment)
             struct BusyScope {
                 BusyScope() { strata::core::progress().busy.store(true); strata::core::progress_at("request"); }
-                ~BusyScope() { strata::core::progress().busy.store(false); strata::core::progress_at("idle"); }
+                ~BusyScope() {
+                    strata::core::progress_beat();
+                    strata::core::progress().busy.store(false);
+                    strata::core::progress_at("idle");
+                }
             } busy_scope;
             stop_req.store(false);   // a STOP that arrived between requests is stale
+            err.clear();             // ... and so is the "cancelled" an abandoned read left behind (#703: every request after it failed)
             const bool geni = line.rfind("GENI ", 0) == 0;
             if (!geni && line.rfind("GEN ", 0) != 0) {
                 std::printf("ERR expected: GEN <max_new> <id,id,...> or GENI <max_new> <file> <id,id,...>\n");
