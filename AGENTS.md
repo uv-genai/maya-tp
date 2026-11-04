@@ -158,14 +158,14 @@ the next tag; for a cumulative merge, review the entire delta and validate it as
 documents and measurement reports describe their dated checkpoints; [docs/README.md](docs/README.md)
 identifies the current guides. v1.1.37–v1.1.46 was integrated sequentially; #85 integrates v1.1.47–v1.1.49
 directly from the latest tag, as explicitly requested by the user. Upstream
-v1.1.50–v1.1.53 uses separate sequential branches/PRs, with paired GPU validation,
-exact-head CI and post-merge main CI for each checkpoint. See Handoff.md §47 and
+v1.1.50–v1.1.53 was integrated through PRs #126/#129/#131/#134, ending at
+`de184d9`. Each checkpoint passed paired GPU validation, exact-head CI and
+post-merge main CI. Final merged-main CI is 41834772034. See Handoff.md §47 and
 `docs/upstream/v1.1.53.md`. New v53 engine experiments are deferred in #133.
 Preserve the paired handling of the DeepSeek `END` notice. It marks the pair down
 and retains the first fatal cause, with both ranks required to restart. The
 optional prompt memo remains off by default and has real GLM/DeepSeek tokenizer
 identity checks.
-
 
 ## Key references
 

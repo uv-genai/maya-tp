@@ -10,6 +10,11 @@ server config; the final section covers the SSH-managed llama-swap wrapper.
 PR #122 merged the implementation into `main` at `75e18e8`. Feature-head and
 post-merge CI passed. [Merged pull request](https://github.com/uv-genai/maya-tp/pull/122).
 
+The source checkpoint through upstream v1.1.53 is `de184d9`, with final main CI
+41834772034 passing. Per-tag validation used isolated GLM Maya-S and DeepSeek
+XS/S builds. Accepted runtime paths are recorded below, and the full source
+checkpoint is in [Handoff §47](../Handoff.md#47-sequential-upstream-v1150v1153-integration).
+
 ## Accepted runtime on the user's pair
 
 Start the existing `maya-deepseek-xs-mtp` or `maya-deepseek-s-mtp` llama-swap
@@ -28,6 +33,10 @@ context 262144, DSpark on, prefill chunk 256, lookup off, bootstrap port
 with reserve 1024 MiB and 14 CPU threads. Run one model pair at a time.
 Use `main` for source development and this section for the accepted runtime
 selection. The following manual steps also support setting up a new pair.
+
+A fatal GPU-state `END` notice marks the pair down and retains the first failure
+cause. Recovery uses the pair launcher to restart both ranks together. The
+updated Models/Settings context controls retain the paired restart guard.
 
 ## Prepare a new pair
 

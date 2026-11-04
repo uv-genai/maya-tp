@@ -11,7 +11,7 @@ inherited single-host capabilities. TP2 rejects unsupported media before encodin
 Use each model family's launch/config guide.
 [GLM TP2](TP2-RUN.md), [DeepSeek TP2/DSpark](DEEPSEEK-TP2-RUN.md).
 Set `max_output_tokens` for the total generated-token limit and the base
-config's `thinking_budget` for the GLM reasoning cap; see
+config's `thinking_budget` for the GLM or DeepSeek reasoning cap; see
 [thinking-budget details](SETTINGS.md#limiting-glm-thinking-for-a-coding-agent).
 
 ```sh

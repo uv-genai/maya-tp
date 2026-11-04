@@ -1,7 +1,7 @@
 # The models
 
-Maya runs three models, each on an engine built for it. This page has each one's files, what they need and what is
-special about it. Back to the [README](../README.md).
+Maya uses model-family engines. This page lists their files, memory requirements
+and settings. Back to the [README](../README.md).
 
 **Maya-TP scope:** HIP/ROCm on gfx1151 Linux; two-host RDMA TP2/MTP is validated for GLM Maya-S,
 Maya-M and Maya-L. DeepSeek Maya-XS and Maya-S have TP2/DSpark validation and
@@ -16,6 +16,10 @@ are inherited upstream catalog information, not additional fork validation. Deep
 - [DeepSeek-V4.1-Flash-1017](#deepseek-v41-flash-1017)
 - [MiniMax-M3.1-Flash](#minimax-m31-flash)
 - [Community quants of GLM-5.3-Flash](#community-quants-of-glm-53-flash)
+
+The v1.1.53 installer removed experimental badges for its supported AMD and EXL3
+options. The fork's measured two-host model coverage is the scope listed above.
+The completed source integration is [v1.1.53](upstream/v1.1.53.md).
 
 ## How the quants are named
 
@@ -95,7 +99,7 @@ results. See [the prompt format notes](deepseek-prompt-format.md) for API detail
 | unsloth's [UD-IQ1_M GGUF](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF) (`--ds4-quant gguf-iq1_m`): upstream estimates about 140 GB resident weights; new setups use the shared Q6_K tables | 301 GB, including shared tables | Installer/packing support; DS4 GPU limitation [#68](https://github.com/uv-genai/maya-tp/issues/68) remains open |
 | unsloth's [UD-IQ3_S GGUF](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF) (`--ds4-quant gguf-iq3_s`): upstream estimates about 262 GB resident weights plus 161 GB Q6_K tables shared with Maya's quants | 424 GB | The same DS4 limitation |
 | unsloth's [UD-Q8_K_XL GGUF](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF) (DeepSeek's own formats; new setups share Maya's Q6_K tables) | 467 GB, including shared tables | the same |
-| LibertAIDAI's [EXL3 2.9 bpw](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw) + DeepSeek's Engram tables | 414 GB | NVIDIA from Volta (V100) on; pictures from RTX 30 / A100 on; AMD experimental |
+| LibertAIDAI's [EXL3 2.9 bpw](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw) + DeepSeek's Engram tables | 414 GB | NVIDIA from Volta (V100) on; pictures from RTX 30 / A100 on; AMD installer support |
 | LibertAIDAI's [EXL3 3.5 bpw](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-3.5bpw) + the same Engram tables (`--ds4-quant exl3-3.5`: closer to the original, ~280 GB of VRAM + RAM) | 461 GB | the same |
 | orcarouter's [Abliterated GGUFs](https://huggingface.co/orcarouter/DeepSeek-V4.1-Flash-1017-abliterated-GGUF), the model with its refusals removed: Mix-128G (`--ds4-quant abliterated-128g`, ~114 GB of VRAM + RAM) or Mix-256G (`abliterated-256g`, ~236 GB); `abliterated` picks the one your PC holds. Their n-gram table is left out and Maya's Q6_K tables are read instead (once for both). A gated repo: accept its terms, then `HF_TOKEN` or `hf auth login` | 275 / 397 GB, with the 161 GB of n-gram tables shared with Maya's DeepSeek quants (downloaded once) | NVIDIA from Volta (V100) on (AMD not tried yet) |
 
@@ -190,12 +194,12 @@ These also run on Maya:
 
 | Model | Size | How | Notes |
 | --- | ---: | --- | --- |
-| [EXL3 3.05 bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/3.05bpw) by turboderp | 125.3 GB | in the setup: `--model EXL3-3.05bpw` | experimental; NVIDIA, and AMD |
-| [EXL3 4.05 bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/4.05bpw) by turboderp | 165.2 GB | in the setup: `--model EXL3-4.05bpw` | experimental; NVIDIA, and AMD |
+| [EXL3 3.05 bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/3.05bpw) by turboderp | 125.3 GB | in the setup: `--model EXL3-3.05bpw` | Single-host installer support on NVIDIA and AMD |
+| [EXL3 4.05 bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/4.05bpw) by turboderp | 165.2 GB | in the setup: `--model EXL3-4.05bpw` | Single-host installer support on NVIDIA and AMD |
 
 The DeepSeek installer also recognizes the pinned smaller unsloth UD quants, including `--ds4-quant gguf-iq3_s`. Q5_K Engram tables and GGUF type43 format checks are supported. Compatible Q6_K n-gram tables may be shared between Maya and UD-IQ3_S only after size and SHA256 verification, avoiding a second table download. These additions do not enable GLM TP2 vision or change the default TP2 model.
 
-Upstream v1.1.44 updates the Q8/Q4 download revision while retaining the exact pinned file sizes and SHA256 hashes; complete existing installs do not need another download. Installer quality/capacity descriptions are upstream estimates, not new gfx1151 measurements. DeepSeek packed-KV WMMA parity currently has known failures on gfx1151 ([#68](https://github.com/uv-genai/maya-tp/issues/68)); this installer/catalog update does not resolve them or add DS4 tensor parallelism.
+Upstream v1.1.44 updates the Q8/Q4 download revision while retaining the exact pinned file sizes and SHA256 hashes; complete existing installs do not need another download. Installer quality/capacity descriptions are upstream estimates, not new gfx1151 measurements. DeepSeek packed-KV WMMA parity is tracked in [#68](https://github.com/uv-genai/maya-tp/issues/68). The later user-accepted DeepSeek TP2/DSpark implementation is documented in the [operations guide](DEEPSEEK-TP2-RUN.md).
 
 ### Third-party DeepSeek EXL3 packing
 

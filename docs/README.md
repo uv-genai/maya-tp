@@ -17,6 +17,7 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | Model catalog and fork validation limits | [Models](MODELS.md) |
 | Runtime settings, thinking budgets and default-off options | [Settings](SETTINGS.md) |
 | Responses API | [Responses](RESPONSES.md) |
+| Agent-shaped API benchmark and coverage | [Agent benchmark](AGENT_BENCH.md) |
 | Contributor workflow and validation | [Contributing](../CONTRIBUTING.md) |
 | Coding-agent rules | [AGENTS.md](../AGENTS.md) |
 | Coding-agent current state and restart prompt | [Handoff](../Handoff.md), [Handoff-Prompt](../Handoff-Prompt.md) |
@@ -24,7 +25,8 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | Upstream integration decisions and evidence | [v1.1.53](upstream/v1.1.53.md), [v1.1.52](upstream/v1.1.52.md), [v1.1.51](upstream/v1.1.51.md), [v1.1.50](upstream/v1.1.50.md), [v1.1.49 merge and fresh live validation](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
 
 The current source incorporates applicable upstream v1.1.50–v1.1.53 changes as
-individual validated checkpoints. The reports above record per-tag decisions,
+individual validated checkpoints, completed through PR #134 at `de184d9` with
+merged-main CI 41834772034 passing. The reports above record per-tag decisions,
 paired results and CI tracking. New v53 engine experiments are deferred in #133.
 
 The current `main` includes the user-accepted DeepSeek TP2/DSpark implementation
@@ -66,7 +68,8 @@ fork's current TP2 validation scope. Full DeepSeek WMMA failures
 [#75](https://github.com/uv-genai/maya-tp/issues/75), and default-off chunk-cap measurement
 [#79](https://github.com/uv-genai/maya-tp/issues/79) remain open.
 
-The post-merge documentation audit is tracked in
+The post-v53 documentation audit is tracked in
+[#135](https://github.com/uv-genai/maya-tp/issues/135). The preceding audit is
 [#123](https://github.com/uv-genai/maya-tp/issues/123). The earlier upstream-integration
 audit is recorded in [#82](https://github.com/uv-genai/maya-tp/issues/82).
 The active guides carry current fork instructions. Dated evidence retains its recorded conditions.

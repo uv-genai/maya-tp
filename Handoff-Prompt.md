@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then Handoff.md §47 for the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131 complete the first three checkpoints. Issue #132 records the final PR, exact-head CI, merged-main CI and completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation.
+Read [AGENTS.md](AGENTS.md), then Handoff.md §47 for the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 
 ## Current GLM and DeepSeek state
 
@@ -24,7 +24,7 @@ relative speedup. Issue #120 is complete, and extended user trials complete
 operational acceptance in #116. Do not restart the broad
 validation campaign; the user explicitly requested a few checks and then testing
 through the existing entries. No owned validation processes remain.
-Use Handoff.md §§45–46 for current state. §42, the implementation plan and
+Use Handoff.md §47 for the source checkpoint and §§33/44 for accepted runtime selection. §42, the implementation plan and
 phase issues #110–#116 record the implementation history and separate follow-ups.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
 procedure and accepted deployment paths are in

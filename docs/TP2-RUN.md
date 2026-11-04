@@ -9,6 +9,11 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 For DeepSeek TP2 and DSpark, use its family-specific launchers in the
 [DeepSeek TP2 operations guide](DEEPSEEK-TP2-RUN.md).
 
+The source checkpoint through upstream v1.1.53 is `de184d9`, with final main CI
+41834772034 passing. Per-tag validation used isolated GLM Maya-S and DeepSeek
+XS/S builds. Accepted runtime paths are recorded below, and the full source
+checkpoint is in [Handoff §47](../Handoff.md#47-sequential-upstream-v1150v1153-integration).
+
 ## Prerequisites
 
 - Both hosts: gfx1151, ROCm, `thunderbolt_ibverbs` loaded (`usb4_rdma5` up; `ibv_devices` shows it)
@@ -29,7 +34,7 @@ For DeepSeek TP2 and DSpark, use its family-specific launchers in the
 
 The user accepted the prefill candidate after Maya-S, Maya-M and Maya-L llama-swap tests. Canonical
 `build-hip/maya` on both hosts is MD5 `cbd9e99a6a49e9107b0db3190a40766a`, with matching calibrated
-tuning. The original llama-swap configuration is restored; restart llama-swap to load it. The
+tuning. The user validated this selection through llama-swap. The
 previous binaries, configs, rank1 launchers and tuning are backed up on both hosts in
 `/home/ugo/software/project-maya-before-prefill-90-promotion`; the rank0 backup also contains its
 previous server files. The rank0 llama-swap backup is `~/.config/llama-swap/config.yaml.before-prefill-90`. The remote canonical checkout
@@ -264,9 +269,10 @@ Partition widths (`n_ff_exp`, `n_ff_dense`) are **read from the pack’s GGUF** 
 curl http://192.168.1.22:18080/health
 ```
 
-`tp.world_size` / `tp.rank` come from the engine INFO line. **`tp.peer`** is `up` while the pair is healthy and
-`down` after the first failed mirror send (rank 1 died). `status` becomes **`degraded`** then — `/health` does not
-claim ok when TP2 cannot serve. Restart **both** ranks to clear it (`rank1.sh` then `rank0.sh`).
+`tp.world_size` / `tp.rank` come from the engine INFO line. **`tp.peer`** is `up` while the pair is healthy.
+The first fatal transport error or pair-down notice sets it to `down` and sets
+`status` to **`degraded`**. The first cause stays in `tp.error`. Restart **both**
+ranks to recover (`rank1.sh` then `rank0.sh`).
 
 Acceptance: `tools/tp2/acceptance.sh` (pair up, chat, kill rank1 → degraded, restart → recover).
 Select the model with env vars (the script does not take `--model`):

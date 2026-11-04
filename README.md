@@ -106,7 +106,8 @@ Maya-XS has installer coverage; the recorded paired model validation covers
 the models listed below. [Integration checkpoint](docs/upstream/v1.1.50.md).
 
 Upstream v1.1.50–v1.1.53 is integrated through separate sequential PRs with
-isolated gfx1151 GLM TP2/MTP and DeepSeek TP2/DSpark validation. The later
+isolated gfx1151 GLM TP2/MTP and DeepSeek TP2/DSpark validation, ending at
+`de184d9` through PR #134 with merged-main CI passing. The later
 checkpoints add serving, model-storage/UI, packing and GPU-fault handling fixes.
 The new optional engine experiments are tracked for separate assessment in #133.
 [Latest review and validation](docs/upstream/v1.1.53.md).
@@ -234,7 +235,10 @@ Development and measurements are tracked in [Maya-TP issues](https://github.com/
 Reports should include the model/quant, both hosts' configuration, commit and binary hashes, context,
 draft width, cache/disk counters and reproduction steps. `./maya.sh --report` collects local diagnostics.
 
-GitHub CI runs CPU-only checks: the HIP compatibility-name gate, server tests and installer/tools tests.
+GitHub CI runs the HIP compatibility-name gate, server and installer/tools tests,
+plus CPU memory-policy and row-preparation/stub checks. The latest source
+checkpoint passed paired GLM Maya-S and DeepSeek XS/S controls. Its bounded
+measurements and model coverage are in the [v1.1.53 report](docs/upstream/v1.1.53.md).
 GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery were exercised on the
 Strix Halo pair for **Maya-S, Maya-M and Maya-L** (simple and MTP) on earlier builds. Evidence:
 
