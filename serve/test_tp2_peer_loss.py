@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import tempfile
 import threading
+import time
 import unittest
 import urllib.error
 import urllib.request
@@ -16,7 +17,8 @@ POISON = 'verbs communicator is poisoned: verbs peer closed the bootstrap connec
 
 
 class PeerLoss(unittest.TestCase):
-    def engine(self, world=2, multi=0, error=POISON, down_cause=None, end_cause=None):
+    def engine(self, world=2, multi=0, error=POISON, down_cause=None, end_cause=None,
+               fail_after=1, notice_only=False, eof=False):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         folder = Path(tmp.name)
@@ -27,25 +29,35 @@ import sys
 from pathlib import Path
 print('INFO engine_kind=glm-fast tp_world={world} tp_rank=0 tp_prefill_chunk=256', flush=True)
 print('READY 4096 stop' + (' multi={multi}' if {multi} else ''), flush=True)
+requests = 0
 for line in sys.stdin:
     if line.startswith('QUIT'):
         break
     if line.startswith('GEN '):
         with Path({str(seen)!r}).open('a') as out:
             out.write(line)
+        requests += 1
+        if requests < {fail_after}:
+            continue
+        if {eof!r}:
+            break
         rid = line.split('rid=', 1)[1].split()[0] + ' ' if 'rid=' in line else ''
         if {down_cause!r} is not None:
             print('TP2_DOWN ' + {down_cause!r}, flush=True)
         if {end_cause!r} is not None:
             print('END ' + {end_cause!r}, flush=True)
-        print('ERR ' + rid + {error!r}, flush=True)
+        if not {notice_only!r}:
+            print('ERR ' + rid + {error!r}, flush=True)
 ''')
         script.chmod(0o755)
         engine = StrataEngine(str(script), [])
         def close_engine():
             engine.close()
             engine.proc.wait(timeout=5)
-            engine.proc.stdin.close()
+            try:
+                engine.proc.stdin.close()
+            except BrokenPipeError:
+                pass
             engine.proc.stdout.close()
         self.addCleanup(close_engine)
         return engine, seen
@@ -88,6 +100,59 @@ for line in sys.stdin:
             self.generate(engine)
         self.assertEqual(len(seen.read_text().splitlines()), 1)
 
+    def test_every_active_route_wakes_on_fatal_notices_or_unexpected_eof(self):
+        cases = ({'down_cause': POISON, 'notice_only': True},
+                 {'end_cause': 'GPU state unknown', 'notice_only': True},
+                 {'error': POISON}, {'eof': True})
+        for options in cases:
+            with self.subTest(options=options):
+                engine, seen = self.engine(multi=3, fail_after=3, **options)
+                errors = []
+
+                def request():
+                    try:
+                        self.generate(engine)
+                    except Exception as error:
+                        errors.append(error)
+
+                threads = [threading.Thread(target=request, daemon=True) for _ in range(3)]
+                for thread in threads:
+                    thread.start()
+                for thread in threads:
+                    thread.join(3)
+                self.assertEqual(len(errors), 3)
+                self.assertTrue(all(isinstance(error, ValueError) for error in errors), errors)
+                self.assertTrue(all(str(error) == engine.info['tp_error'] for error in errors))
+                self.assertEqual(engine._routes, {})
+                self.assertEqual(len(seen.read_text().splitlines()), 3)
+                with self.assertRaisesRegex(ValueError, 'restart both ranks'):
+                    self.generate(engine)
+                self.assertEqual(len(seen.read_text().splitlines()), 3)
+
+    def test_failure_while_waiting_for_writer_blocks_gen_and_releases_its_route(self):
+        engine, seen = self.engine(multi=2)
+        errors = []
+
+        def request():
+            try:
+                self.generate(engine)
+            except Exception as error:
+                errors.append(error)
+
+        with engine._write_lock:
+            thread = threading.Thread(target=request, daemon=True)
+            thread.start()
+            deadline = time.monotonic() + 2
+            while not engine._routes and time.monotonic() < deadline:
+                time.sleep(0.001)
+            self.assertEqual(len(engine._routes), 1)
+            engine._tp_pair_down(POISON)
+        thread.join(3)
+        self.assertEqual(len(errors), 1)
+        self.assertIn(POISON, str(errors[0]))
+        self.assertEqual(engine._routes, {})
+        self.assertFalse(seen.exists())
+
     def test_gpu_fault_end_requires_both_ranks_and_retains_the_first_cause(self):
         for multi in (0, 2):
             for prior in (None, POISON):
@@ -97,6 +162,9 @@ for line in sys.stdin:
                                                down_cause=prior, end_cause=cause)
                     with self.assertRaisesRegex(ValueError, 'TP2 pair down.*restart both ranks'):
                         self.generate(engine)
+                    deadline = time.monotonic() + 2
+                    while not engine.ended and time.monotonic() < deadline:
+                        time.sleep(0.001)
                     self.assertTrue(engine.ended)
                     self.assertEqual(engine.info.get('tp_pair'), 'down')
                     self.assertIn(prior or cause, engine.info['tp_error'])

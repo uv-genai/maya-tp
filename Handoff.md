@@ -2851,3 +2851,31 @@ Markdown paths and whitespace. Future GPU work uses isolated builds, explicit
 configs and owned process records. Use §§33/44 for accepted runtime selection.
 The user requested publication of the plan documents and handoff/index updates
 on `main`. Planning issues #141/#142 record the publication commit and CI outcome.
+
+## 52. Continuous-batching implementation (2026-11-05)
+
+The user authorized implementation of #11/#140 on a separate branch, tests
+after each phase and a final pull request merged after validation. Work starts
+from `72d9260` on `codex/tp2-continuous-batching`. Both hosts are available with
+no models running. Shared phase C1 (#143) passed its local gates. GLM G1–G5 and DeepSeek
+D1–D5 follow their dependency gates. Use the plans in §51 and record phase
+decisions, tests and commits in the individual issues. Current authorization
+uses phase commits on this feature branch and a final integration PR.
+
+Live validation uses isolated outputs and explicit model/config selections.
+Record every owned process and stop only those processes. Accepted runtime
+selection remains in §§33/44. The current session has started no GPU processes.
+
+C1 serializes complete engine commands and rechecks paired health under the
+writer lock. The first fatal TP2 notice wakes all active routes with its retained
+cause. Unexpected paired EOF is fatal, while owned shutdown is marked explicitly.
+Restart joins the old pump before reinitializing its queues. New regressions
+cover fragmented concurrent large prompts, all-route failure on ERR/DOWN/END/EOF,
+and failure while a GEN waits for the writer lock. The large-prompt regression
+fails against the unchanged parent source and passes with the fix.
+
+Validation passed 43 focused tests, HIP mapping, 742 server tests (20 skips),
+760 tools tests (3 skips), GLM CPU memory policy and DeepSeek CPU row/stub
+checks. Logs are `/tmp/maya-batching-c1-{focused,serve,tools,before}.log`.
+The phase commit and CI are recorded in #143. Next phase is G1 (#144).
+The isolated HIP build is `/home/ugo/software/project-maya-batching-build`.
