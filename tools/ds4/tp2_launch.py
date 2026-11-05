@@ -178,15 +178,15 @@ def stop_event():
     return event
 
 
-def run_worker(settings, managed=False):
-    options, command, environment, identity = prepare(settings, 1)
+def run_worker(settings, managed=False, prepare_rank=None):
+    options, command, environment, identity = (prepare_rank or prepare)(settings, 1)
     if managed:
         print(json.dumps({'preflight': identity}), flush=True)
         if sys.stdin.readline().strip() != 'start':
             raise ValueError('peer start handshake was interrupted')
     event = stop_event()
     process = subprocess.Popen(command, env=environment, stdin=subprocess.DEVNULL, start_new_session=True)
-    print('DeepSeek owned worker ' + json.dumps({'pid': process.pid, 'identity': process_identity(process.pid)}),
+    print(settings.get('family','DeepSeek') + ' owned worker ' + json.dumps({'pid': process.pid, 'identity': process_identity(process.pid)}),
           file=sys.stderr, flush=True)
     if managed:
         def control_closed():
@@ -223,12 +223,12 @@ def runtime_root(options):
     return Path(options.state_dir).expanduser().resolve()
 
 
-def run_api(settings, port, state):
+def run_api(settings, port, state, start_server=None):
     state.mkdir(parents=True, exist_ok=True, mode=0o700)
     directory = Path(tempfile.mkdtemp(prefix='rank0-', dir=state))
-    print('DeepSeek rank 0 logs ' + str(directory), flush=True)
+    print(settings.get('family','DeepSeek') + ' rank 0 logs ' + str(directory), flush=True)
     event = stop_event()
-    process = start_api(rank_settings(settings, 0), port, directory)
+    process = (start_server or start_api)(rank_settings(settings, 0), port, directory)
     try:
         while process.poll() is None and not event.wait(.2):
             remember_children(process)
@@ -260,7 +260,11 @@ def peer_preflight(process, expected, log):
         raise ValueError('peer model, partition or engine identity differs')
 
 
-def run_pair(settings, port, state):
+def run_pair(settings, port, state, prepare_rank=None, start_server=None, worker_script=None):
+    # Process ownership is shared by the family launchers; model preparation
+    # and server configurations remain in their respective engine modules.
+    prepare_rank = prepare_rank or prepare
+    start_server = start_server or start_api
     state.mkdir(parents=True, exist_ok=True, mode=0o700)
     bootstrap = int(settings.get('port', RANK_DEFAULTS['port']))
     with (state / 'pair.lock').open('a') as lock, \
@@ -269,7 +273,7 @@ def run_pair(settings, port, state):
             for handle in (lock, resource):
                 fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
-            raise ValueError('a DeepSeek pair already owns this API or bootstrap port') from exc
+            raise ValueError('a pair already owns this API or bootstrap port') from exc
         directory = Path(tempfile.mkdtemp(prefix='run-', dir=state))
         control_path = state / 'control.sock'
         control_path.unlink(missing_ok=True)
@@ -284,14 +288,15 @@ def run_pair(settings, port, state):
             try:
                 local = rank_settings(settings, 0)
                 peer = rank_settings(settings, 1)
-                _, _, _, expected = prepare(local, 0)
+                _, _, _, expected = prepare_rank(local, 0)
                 peer_host = settings.get('peer', 'strix-halo-2.local')
                 if not isinstance(peer_host, str) or not peer_host or peer_host.startswith('-'):
                     raise ValueError('invalid peer SSH host')
                 peer_root = settings.get('peer_root', str(ROOT))
                 peer_python = settings.get('peer_python', peer_root + '/.venv/bin/python')
-                remote_command = shlex.join([peer_python, peer_root + '/tools/ds4/tp2_launch.py', 'worker', '--managed'])
-                print('DeepSeek pair logs ' + str(directory), flush=True)
+                remote_command = shlex.join([peer_python, peer_root + '/' + (worker_script or 'tools/ds4/tp2_launch.py'),
+                                             'worker', '--managed'])
+                print(settings.get('family','DeepSeek') + ' pair logs ' + str(directory), flush=True)
                 worker_log = (directory / 'worker.log').open('w', buffering=1)
                 server_log = (directory / 'server.log').open('w', buffering=1)
                 worker = subprocess.Popen(
@@ -312,7 +317,7 @@ def run_pair(settings, port, state):
                         worker_log.write(line)
                 drainer = threading.Thread(target=drain_worker, daemon=True)
                 drainer.start()
-                server = start_api(local, port, directory, server_log)
+                server = start_server(local, port, directory, server_log)
                 (directory / 'owned.json').write_text(json.dumps({
                     'supervisor_pid': os.getpid(), 'server_pid': server.pid,
                     'supervisor_identity': process_identity(os.getpid()),
@@ -324,7 +329,7 @@ def run_pair(settings, port, state):
                     if server.poll() is not None:
                         return server.returncode
                     if worker.poll() is not None:
-                        raise ValueError('DeepSeek worker exited, see ' + str(directory / 'worker.log'))
+                        raise ValueError(settings.get('family','DeepSeek') + ' worker exited, see ' + str(directory / 'worker.log'))
                     try:
                         client, _ = control.accept()
                     except socket.timeout:

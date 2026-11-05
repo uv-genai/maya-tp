@@ -690,6 +690,15 @@ bool Glm5Model::rows_moe(int il, RowSeq* rw, int n, std::string& err) {
                           rows(S->sh_g, FFs, i), rows(S->sh_u, FFs, i), rows(S->ffn, E, i)};
         if (!fast_moe_experts(il, io, false, 0, no_bias, pf_pending, err, true)) return false;
     }
+    // Collective shape is a property of the canonical batch, never of local
+    // residency or kernel dispatch. Include local CPU contributions first.
+#if defined(STRATA_USE_HIP)
+    if (tp_.active() && il != mtp_il_) {
+        if (getenv("STRATA_GLM_TP_AR_TRACE"))
+            std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
+        if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+    }
+#endif
     return true;
 }
 
@@ -816,11 +825,10 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
             err = "glm rows: the grouped EXL3 experts";
             return false;
         }
-        if (tp_.active() && il != mtp_il_) {
-            if (getenv("STRATA_GLM_TP_AR_TRACE"))
-                std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
-            if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
-        }
+#if !defined(STRATA_USE_HIP)
+        if (tp_.active() && il != mtp_il_ &&
+            !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+#endif
         return true;
     } else {
         mw.xq = S->xq;
@@ -831,16 +839,32 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
         mw.out = S->ffn;
         mw.out_stride = (size_t) E;
         mw.down_off = Ly.down_off;
-        if (!gf::moe_win_experts(Ly.gu_type, Ly.d_type, mw, s, rows_small_on())) {
+        bool executed = false;
+#if defined(STRATA_USE_HIP)
+        // Resident TP rows can use the same fused per-token expert launch as
+        // the accepted HIP window path, without serial group-member loops.
+        // Shared partials were already computed with the checked row stride.
+        const char* multi = getenv("STRATA_GLM_TP_ROWS_EXPERT_MULTI");
+        if (tp_.active() && empty && (multi == nullptr || std::atoi(multi) != 0)) {
+            gf::MoeDev mm = row_dev(0);
+            mm.mt_T = n;
+            mm.mt_xq_s = (unsigned int) (E / 32);
+            mm.mt_hq_s = (unsigned int) (8 * (mw.n_ff / 32));
+            mm.mt_out_s = mm.mt_cpu_s = (unsigned int) E;
+            executed = gf::moe_experts_multi(Ly.gu_type, Ly.d_type, mm, K, E, mw.n_ff, g.swiglu_exp,
+                Ly.down_off, S->xq, W.whq, nullptr, Ly.sh_down.type, nullptr, FFs,
+                const_cast<float*>(sh_out), S->ffn, s);
+        }
+#endif
+        if (!executed && !gf::moe_win_experts(Ly.gu_type, Ly.d_type, mw, s, rows_small_on())) {
             err = "glm rows: the grouped experts (types " + std::to_string(Ly.gu_type) + " / " +
                   std::to_string(Ly.d_type) + ")";
             return false;
         }
-        if (tp_.active() && il != mtp_il_) {
-            if (getenv("STRATA_GLM_TP_AR_TRACE"))
-                std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
-            if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
-        }
+#if !defined(STRATA_USE_HIP)
+        if (tp_.active() && il != mtp_il_ &&
+            !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+#endif
     }
     // the CPU lane's answers last: the device's experts ran while the host computed the group's merged request
     if (lane && !empty && md.cpu_seq != nullptr) {

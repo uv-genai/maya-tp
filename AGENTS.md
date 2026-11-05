@@ -177,3 +177,19 @@ identity checks.
 - `docs/SETUP.md` — install options, build failure fixes  
 - `docs/MODELS.md` — per-model files and engine options  
 - `docs/AMD_MAYA.md`, `docs/AMD_RDNA4.md` — HIP install and validation  
+
+## Continuous-batching implementation checkpoint
+
+GLM opt-in TP2 batching negotiates application control version 2, slot/row
+limits and kernel/MTP choices before READY. Every target plan and complete
+MTP verdict checks operation, slot generation, expected position and canonical
+retained inputs. Preserve acceptance/completion acknowledgements and sticky
+pair-fatal recovery; never reset uncertain device state after a failed batch.
+Default one-sequence control operations retain their accepted meanings.
+
+Use `tools/tp2/launch.py` through the GLM llama-swap wrapper for an owned pair;
+`--parallel 2..4` is explicit and defaults to 1. Stop by port or supervisor PID,
+never by process name. `tools/tp2/validate_batch.py` records isolated GPU-test
+ownership. G1–G4 evidence is in `docs/validation/tp2-batching-g*-2026-11-05.*`;
+G5 and DeepSeek phase status are in Handoff.md §52 and #148–#153. The process
+supervisor reused from DeepSeek shares ownership only, not model execution.

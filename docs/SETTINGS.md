@@ -1969,3 +1969,12 @@ In TP2 multi-sequence mode, an unset `MAYA_GLM_PREFILL_INTERLEAVE` uses
 An explicit setting retains its meaning. In-call `MAYA_GLM_PREFILL_GAPS` is
 disabled in this mode because the worker still owns that complete prefill call.
 The default single-sequence behavior is unchanged.
+
+For opted-in GLM TP2 batches, unset `MAYA_GLM_GROUP_EXPERTS`,
+`MAYA_GLM_ROWS_BATCH`, `MAYA_GLM_ROWS_ATTN` and `MAYA_GLM_ROWS_SMALL` default
+to 1 on gfx1151. Explicit values win and both ranks negotiate these choices.
+`MAYA_GLM_TP_ROWS_EXPERT_MULTI` defaults to 1: resident regular-quant row
+experts use the accepted HIP fused multi-token launch. Set 0 on both ranks to
+compare the grouped-member kernels. Tiered and EXL3 paths retain their existing
+dispatch. This affects batched row execution, including replicated NextN;
+the default single-sequence execution branch retains its existing behavior.

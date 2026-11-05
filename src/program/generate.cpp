@@ -1107,6 +1107,12 @@ static int glm_pack_generate(const Options& o) {
                                     std::atoi(sequence_setting) > 1 &&
                                     (o.serve || (o.tp_rank > 0 && o.tokens.empty()));
     if (tp_batch_requested) {
+        // The measured gfx1151 resident-row configuration. Explicit settings
+        // still win, and the accepted one-sequence branch keeps its defaults.
+        for (const char* setting : {"STRATA_GLM_GROUP_EXPERTS", "STRATA_GLM_ROWS_BATCH",
+                                   "STRATA_GLM_ROWS_ATTN", "STRATA_GLM_ROWS_SMALL",
+                                   "STRATA_GLM_TP_ROWS_EXPERT_MULTI"})
+            if (getenv(setting) == nullptr) set_env(setting, "1");
         const char* enabled = getenv("STRATA_TP_MTP");
         if (enabled != nullptr && std::atoi(enabled) != 0) {
             const char* width = getenv("STRATA_GLM_MULTI_MTP");
@@ -2047,7 +2053,8 @@ static int glm_pack_generate(const Options& o) {
                                  batch_limits.rows, tp_mtp_enabled ? 1 : 0,
                                  strata::core::Glm5Model::multi_mtp_setting(), model.mtpw_ok() ? 1 : 0};
         for (const char* setting : {"STRATA_GLM_GROUP_EXPERTS", "STRATA_GLM_ROWS_BATCH",
-                                   "STRATA_GLM_ROWS_ATTN", "STRATA_GLM_ROWS_SMALL"}) {
+                                   "STRATA_GLM_ROWS_ATTN", "STRATA_GLM_ROWS_SMALL",
+                                   "STRATA_GLM_TP_ROWS_EXPERT_MULTI"}) {
             const char* value = getenv(setting);
             words.push_back(value != nullptr && std::atoi(value) != 0 ? 1 : 0);
         }

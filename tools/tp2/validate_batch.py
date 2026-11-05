@@ -39,6 +39,7 @@ p.add_argument('--tokens', type=int, default=32)
 a = p.parse_args()
 if not 1 <= a.seqs <= 4 or not 1 <= a.clients <= 16 or a.mtp not in (0,1):
     p.error('require 1..4 slots, 1..16 clients and mtp 0 or 1')
+if a.scenario != 'normal' and a.seqs < 2: p.error('lifecycle/peer-loss scenarios require multiple slots')
 if not 1 <= a.port <= 65535 or a.tokens <= 0 or a.context <= 0:
     p.error('require a valid port and positive token/context limits')
 if Path(a.name).name != a.name or a.name in ('.','..'): p.error('name must be a directory name')
@@ -100,6 +101,7 @@ try:
     if load_errors:
         raise load_errors[0]
 
+    if a.seqs > 1: assert engine.multi==a.seqs,engine.info
     result['rank0_pid']=engine.proc.pid
     (folder/'ownership.json').write_text(json.dumps(result,indent=2))
     tok=Tokenizer.from_dir(Path(pack)/'tokenizer')

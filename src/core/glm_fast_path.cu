@@ -5990,7 +5990,12 @@ bool Glm5Model::fast_moe_experts(int il, const MoeIo& io, bool pred, int n_ah, c
     }
     // Trunk expert/shared outputs are rank-local partials. The replicated NextN
     // output is already complete and must not be summed across ranks.
-    if (tp_.active() && il != mtp_il_) {
+    // Row callers reduce their entire canonical batch after local CPU waits.
+    bool reduce_here = tp_.active() && il != mtp_il_;
+#if defined(STRATA_USE_HIP)
+    reduce_here = reduce_here && !rows;
+#endif
+    if (reduce_here) {
         std::string ar_err;
         if (!tp_.all_reduce(io.ffn, (std::size_t) g.n_embd, g.n_embd, s, ar_err)) {
             err = ar_err;

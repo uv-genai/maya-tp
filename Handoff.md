@@ -2957,3 +2957,42 @@ The MTP-on/off peer-loss cases retained one cause across every active request
 and later GEN (fanout 1.37/1.64 s). The corrected two-slot case proves queued
 `spec=1` stays disabled; prefix reuse, retirement and cancellation pass. G4
 commit/CI publication precedes G5 launcher/performance work.
+
+G4 commit `d4d143d` passed CI 41993343099 and #147 is closed. G5 (#148)
+and ownership cleanup #83 are active. The wrapper now shares only the existing
+DeepSeek process supervisor, with GLM preparation kept in `tools/tp2/launch.py`.
+It supports owned stop-by-port/PID, model/executable preflight and opt-in
+parallelism. Forty focused launcher/harness/ownership tests pass, including
+unchanged DeepSeek behavior. Production files and unrelated services are untouched.
+
+The initial grouped configuration failed the performance gate. A fused resident
+HIP expert-row candidate passes full-logit/forced-commit checks and matched
+three-wave HTTP measurement. Median aggregate tok/s at 1/2/4 clients is
+25.77/29.95/34.04, versus serialized 24.04/24.38/23.86. All 21 response texts
+match the serial control exactly, and real MTP runs for every eligible stream.
+The final source selects these measured defaults only in opt-in TP2 batching.
+`MAYA_GLM_TP_ROWS_EXPERT_MULTI=0` retains the grouped-member comparison path.
+Default one-sequence behavior remains unchanged. Ordinary-target measurements,
+final default-preset smokes and M/L family coverage are in progress.
+
+All G5 owned model processes have exited. Final GLM candidate binaries are
+frozen on both hosts under `/home/ugo/software/project-maya-batching-validation/g5-release/`,
+SHA256 `c50b12b630766a26dda39f525d48e25e6d9e74d36ac184d75b2b1b0cdec0bbbc`.
+It passes the strict 64-pick default control and all 128 mixed-request picks.
+The final collective policy reduces one complete FFN batch after local CPU
+contributions, independent of local grouped/fallback dispatch. An asymmetric
+paired fixture passes full logits/partial commits and matches 630 row-collective
+trace entries per rank. The HIP change preserves inherited CUDA dispatch.
+
+Maya-M/L pass two-client MTP checks at explicit 32K context. Host-1 wrapper
+serving passes staggered/replenished traffic and a deliberate owned-worker loss:
+both active HTTP streams retain the same original cause within 0.95 s, health
+is degraded with peer down and the whole owned pair shuts down. The first
+no-proposal benchmark also passes: median 29.71/36.45 aggregate tok/s at two/four
+clients versus serialized 21.78/21.68, with all 21 matched response texts identical.
+See `docs/benchmarks/glm-tp2-batching-2026-11-05/README.md` and the G5 validation
+report for hashes, limits and raw data. Local gates pass HIP mapping, 743 server
+tests (20 skips), 765 tools tests (3 skips), 41 focused tests and CPU policy,
+batch-framing and DeepSeek row/stub checks. G5 commit/CI publication is next.
+The isolated peer source remains `project-maya-batching-runtime`; production
+configs/binaries and unrelated services remain untouched. DeepSeek D1–D5 are next.

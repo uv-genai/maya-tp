@@ -15,6 +15,8 @@ source "$HERE/model_env.sh"
 
 while (( $# )); do
   case "$1" in
+    --parallel) SEQS="${2:?--parallel needs N}"; shift 2 ;;
+    --context) CONTEXT="${2:?--context needs N}"; shift 2 ;;
     --config) MAYA_CONFIG="${2:?--config needs PATH}"; shift 2 ;;
     --model) MAYA_MODEL="${2:?--model needs NAME}"; MAYA_PACK=""; shift 2 ;;
     --pack) MAYA_PACK="${2:?--pack needs PATH}"; shift 2 ;;
@@ -44,6 +46,8 @@ done < <(jq -j '(.env // {}) | to_entries | sort_by(.key | startswith("MAYA_")) 
     else .["MAYA_" + $suffix] = ($e.value | tostring) | .["STRATA_" + $suffix] = ($e.value | tostring) end) |
   to_entries[] | .key, "=", .value, "\u0000"' "$MAYA_CONFIG")
 
+SEQS="${SEQS:-1}"
+[[ "$SEQS" =~ ^[1-4]$ ]] || { echo "parallel must be 1..4" >&2; exit 2; }
 ENGINE="${ENGINE:-$ROOT/build-hip/maya}"
 BOOTSTRAP_HOST="${BOOTSTRAP_HOST:-192.168.1.22}"
 
@@ -77,7 +81,7 @@ echo "rank1: pack=$PACK rdma=$RDEV bootstrap=$BOOTSTRAP_HOST seqs=${SEQS:-1} con
 # connection and rank 0's single accept() takes it as the peer handshake,
 # then fails (EAGAIN / EISDIR) when the probe closes.  The engine's own
 # connect retries until rank 0 is listening (MAYA_TP_BOOTSTRAP_TIMEOUT).
-# Use one sequence while multi-sequence TP2 remains gated (#11).
+# Both ranks must request the same explicit slot count.
 exec "$ENGINE" --glm-pack "$PACK" \
   --tp-world-size 2 --tp-rank 1 \
   --tp-bootstrap-host "$BOOTSTRAP_HOST" \

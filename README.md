@@ -227,7 +227,11 @@ SSH access from rank 0 to rank 1 is required.
 `--model` / `--pack` / `--config` select the pack and are forwarded to both ranks.
 These flags belong to the wrapper. Direct engine/rank launches enable MTP with
 `MAYA_TP_MTP=1 MAYA_GLM_MTP_FIXED=N MAYA_GLM_MTP_DRAFT=N` on both hosts, with `MAYA_GLM_NO_MTP` unset.
-See [TP2 settings](docs/SETTINGS.md#glm-two-host-tensor-parallel-tp2) for runtime controls.
+GLM continuous batching is opt-in with `--parallel 2`–`4` on the paired wrapper,
+with matching per-slot context and real MTP (`--mtp --drafts 2`). The default
+remains one conversation. The wrapper owns its pair and stops by port or
+recorded supervisor PID. See [the batch runbook](docs/TP2-RUN.md#opt-in-glm-tp2-continuous-batching)
+and [TP2 settings](docs/SETTINGS.md#glm-two-host-tensor-parallel-tp2).
 
 ## Validation and development
 
