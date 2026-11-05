@@ -26,7 +26,7 @@ RANK_DEFAULTS = {
     'engine': str(ROOT / 'build-hip/maya-ds4'), 'port': 18525,
     'context': 32768, 'expert_budget_mib': 92160, 'reserve_mib': 1024,
     'gpu': 0, 'cpu_threads': 14, 'dspark': 'on', 'prefill_chunk': 256,
-    'suffix_draft': 0,
+    'suffix_draft': 0, 'parallel': 1,
 }
 PATH_KEYS = ('pack', 'manifest', 'engine')
 
@@ -43,10 +43,14 @@ def load_settings(options):
     settings = json.loads(path.read_text())
     if not isinstance(settings, dict):
         raise ValueError('launcher config must be a JSON object')
-    for key in ('context', 'dspark', 'prefill_chunk', 'suffix_draft', 'peer'):
+    for key in ('context', 'dspark', 'prefill_chunk', 'suffix_draft', 'parallel', 'peer', 'peer_root', 'engine'):
         value = getattr(options, key, None)
         if value is not None:
             settings[key] = value
+    if getattr(options,'engine',None) is not None:
+        for rank in ('rank0','rank1'):
+            if isinstance(settings.get(rank),dict) and 'engine' in settings[rank]:
+                settings[rank]['engine']=options.engine
     # Resolve paths here, before forwarding the peer settings over SSH.
     for values in (settings, settings.get('rank0', {}), settings.get('rank1', {})):
         if not isinstance(values, dict):
@@ -75,7 +79,7 @@ def prepare(settings, rank):
         arguments.append('--serve')
     for key in ('pack', 'manifest', 'engine', 'host', 'port', 'rdma_device', 'context',
                 'expert_budget_mib', 'reserve_mib', 'gpu', 'cpu_threads', 'dspark',
-                'prefill_chunk', 'suffix_draft'):
+                'prefill_chunk', 'suffix_draft', 'parallel'):
         if key not in settings:
             raise ValueError('launcher config requires ' + key)
         arguments.extend(['--' + key.replace('_', '-'), str(settings[key])])
@@ -87,7 +91,7 @@ def prepare(settings, rank):
     environment.update(extra)
     command, environment = tp2_rank.prepare_launch(options, environment)
     identity = {key: environment['MAYA_DS4_TP2_' + key.upper() + '_DIGEST']
-                for key in ('model', 'partition', 'build')}
+                for key in ('model', 'partition', 'build', 'execution')}
     return options, command, environment, identity
 
 
@@ -257,7 +261,7 @@ def peer_preflight(process, expected, log):
     log.flush()
     received = json.loads(line)
     if received.get('preflight') != expected:
-        raise ValueError('peer model, partition or engine identity differs')
+        raise ValueError('peer model, partition, engine or execution identity differs')
 
 
 def run_pair(settings, port, state, prepare_rank=None, start_server=None, worker_script=None):
@@ -417,6 +421,9 @@ def main(argv=None):
     parser.add_argument('--dspark', choices=('on', 'off'))
     parser.add_argument('--prefill-chunk', type=int, choices=(0, 256))
     parser.add_argument('--suffix-draft', type=int, choices=(0, 3))
+    parser.add_argument('--parallel', type=tp2_rank.bounded(1, 4))
+    parser.add_argument('--engine', help='same explicit executable path on both hosts')
+    parser.add_argument('--peer-root', help='peer source tree containing the matching launcher')
     parser.add_argument('--peer')
     parser.add_argument('--state-dir', default=str(Path.home() / '.cache/maya/deepseek-tp2'))
     parser.add_argument('--managed', action='store_true', help=argparse.SUPPRESS)

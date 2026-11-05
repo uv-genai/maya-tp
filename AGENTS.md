@@ -196,4 +196,13 @@ supervisor reused from DeepSeek shares ownership only, not model execution.
 
 DeepSeek batch protocol is separately negotiated; preserve its complete verdict,
 acceptance/completion ACK and per-slot generation checks. The wire contract is
-`docs/DEEPSEEK-TP2-BATCH-PROTOCOL.md`. D2 does not enable model batching.
+`docs/DEEPSEEK-TP2-BATCH-PROTOCOL.md`. D3/D4 passed XS/S full-logit and
+rollback/drafter gates. D5 enables explicit `--parallel 2..4` in the DeepSeek
+wrapper; keep the default 1 branch intact. DeepSeek request `spec=0` disables
+DSpark (GLM uses 1). Batched DSpark uses point proposals with fitting groups;
+reject sampled-q proposal mode and lookup in this mode. Never reuse a slot
+before the complete EOS/output/cancel verdict finishes on both peers.
+The owned DeepSeek GPU harness is `tools/ds4/validate_batch.py`. Operational
+user acceptance of the new batch mode is separate from the accepted deployed
+single-slot runtime. Source integration does not authorize changing production
+binaries or the protected peer checkout.

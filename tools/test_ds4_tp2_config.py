@@ -34,6 +34,15 @@ class ConfigTest(unittest.TestCase):
         self.assertTrue(parsed.serve)
         self.assertEqual((parsed.rank, parsed.prefill_chunk, parsed.suffix_draft), (0, 256, 3))
 
+    def test_batch_config_preserves_explicit_capacity(self):
+        opts=tp2_rank.parser().parse_args(['--serve','--rank','0','--pack','models/XS',
+            '--manifest','tmp/id.json','--engine','build-hip/maya-ds4','--host','rank0',
+            '--port','17777','--rdma-device','usb4_rdma5','--context','262144',
+            '--expert-budget-mib','92160','--parallel','3'])
+        cfg=tp2_config.make_config(opts,'tmp/log','test-ds4')
+        parsed=tp2_rank.parser().parse_args(cfg['args'])
+        self.assertEqual((parsed.parallel,parsed.context),(3,262144))
+
     def test_cannot_override_rank_or_serve(self):
         for override in (['--rank', '1'], ['--rank=1'], ['--serve']):
             with self.subTest(override=override), contextlib.redirect_stderr(io.StringIO()):

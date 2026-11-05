@@ -6,6 +6,16 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- **Opt-in TP2 continuous batching for GLM/MTP and DeepSeek/DSpark** (#11/#140):
+  checked slot generations and complete speculative commits, bounded prompt
+  interleave, per-request cancellation/reuse and paired failure fanout. Both
+  wrappers accept explicit 2–4-slot mode and retain the default single-sequence
+  flow. DeepSeek drafting fits groups independently of target rows. Owned
+  launchers validate model/executable/execution identities and stop only their
+  recorded pair. See the [GLM](docs/TP2-RUN.md#opt-in-glm-tp2-continuous-batching)
+  and [DeepSeek](docs/DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching) guides for
+  runtime selection, validated scope and measurements.
+
 - **Upstream v1.1.53 integration** (#132) updates model storage/catalog and the
   dashboard, fixes DeepSeek EXL3 packing and adds optional prompt memoization.
   DeepSeek GPU-fault notices require a paired restart under TP2 and preserve the

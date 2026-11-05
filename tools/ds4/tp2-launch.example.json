@@ -8,6 +8,7 @@
   "peer_root": "/absolute/path/to/project-maya",
   "port": 18525,
   "rdma_device": "usb4_rdma5",
+  "parallel": 1,
   "context": 262144,
   "expert_budget_mib": 92160,
   "reserve_mib": 1024,

@@ -3049,3 +3049,32 @@ S D4 also passes all 24 exact full-logit comparisons and subsequent draft
 comparisons, with 120 actual fitting-group proposals. Both final pairs exit
 0/0; all owned processes are stopped. D4 report/data are committed alongside
 the checked model/control changes; D5 scheduler/launcher integration is next.
+
+D4 commit `3c8d661` passed CI 42013032184 and #152 is closed. D5 (#153)
+source enables explicit 2–4-slot scheduling and paired execution identity.
+The first XS four-client mixed-request check passes; DSpark is active for
+eligible clients, disabled for spec=0, and thinking closure passes. Staggered
+3-slot DSpark-on and 2-slot DSpark-off lifecycle checks pass cancellation,
+queued admission/refill, 1210-token prefill interleave and 215-token in-place
+continuation reuse, exiting 0/0. Final error-guard candidate is frozen as
+`d5-guard/maya-ds4`, SHA256
+`ecac4769d8bd3d1d7cf1045e35191b343a012b5b24ec4c359e8604db10faf9f0`.
+Current owned benchmark is launched on host 1 by `/tmp/maya-d5-host1-bench.py`,
+with ownership/logs under `/tmp/maya-batching-validation/d5-xs-parent-http`.
+It uses only isolated source/binaries, API 19161/bootstrap 19160, and the
+owned supervisor control socket. Check that ownership before cleanup.
+Production files, configs and unrelated services remain untouched.
+
+XS parent and batch HTTP runs are complete and their owned pairs/samplers
+stopped. All 44 measured response texts match. Median aggregate at 2/4
+clients is ordinary 20.89/20.70 → 32.11/40.15 and DSpark 25.26/25.13 →
+33.97/40.05 tok/s. Single-client points improve. Deliberate owned-worker
+loss reaches four HTTP routes with one cause in 0.924 s; health is degraded
+with peer down, then the pair stops. Source configs remain opt-in.
+S parent measurement is now running from host 1 under
+`/tmp/maya-batching-validation/d5-s-parent-http`; its ownership JSON is the
+authority for cleanup. The local session log is
+`/tmp/maya-batching-d5-s-parent-http.log`. After it finishes, run the matching
+S batch candidate with `/tmp/maya-d5-host1-bench.py --model s --kind batch`.
+Final default-mode DeepSeek raw-pick and GLM launcher regression smokes,
+D5/PR exact-head CI, final evidence/docs and PR merge/main CI remain.

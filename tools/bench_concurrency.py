@@ -166,7 +166,7 @@ def main(argv=None):
     parser.add_argument("--timeout", type=float, default=600)
     parser.add_argument("--prompt-file", type=Path)
     parser.add_argument("--api-key", default=os.environ.get("MAYA_API_KEY"))
-    parser.add_argument("--spec", type=int, help="per-request speculative width (1 disables proposals)")
+    parser.add_argument("--spec", type=int, help="per-request speculation (GLM: 1 disables proposals; DeepSeek: 0 disables DSpark)")
     parser.add_argument("--stagger", type=float, default=0, help="seconds between client starts")
     parser.add_argument("--requests-per-client", type=int, default=1, help="replenish each client after completion")
     parser.add_argument("--requests-json", type=Path, help="JSON array of replayable chat request bodies")

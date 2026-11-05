@@ -21808,9 +21808,10 @@ bool Model::draft_tp2_groups(const int* seqs,const int* ys,int n,std::vector<std
 bool Model::tp2_commit_multi(const std::vector<std::vector<int>>& emitted,const std::vector<bool>& more,std::string& err) {
 #if defined(STRATA_DS4_TP2_RDMA)
     Impl& p=*p_;
+    const auto fail=[&] { if (p.tp_pending_target) p.tp_record_failure(err);return false; };
     if (!p.tp_test_controller || p.o.seqs<2 || p.tp_unready(err) || !p.tp_pending_target ||
         emitted.size()!=p.tp_pending_plan.members.size() || more.size()!=emitted.size()) {
-        if (err.empty()) err="ds4 batch: incomplete model verdict";return false;
+        if (err.empty()) err="ds4 batch: incomplete model verdict";return fail();
     }
     tp2::BatchCommit commit{p.tp_pending_target,{}};
     for (std::size_t i=0;i<emitted.size();++i) {
@@ -21820,7 +21821,7 @@ bool Model::tp2_commit_multi(const std::vector<std::vector<int>>& emitted,const 
     }
     std::vector<std::uint32_t> words;
     if (!tp2::encode_commit(commit,p.tp_pending_plan,p.tp_pending_target,
-        {static_cast<std::uint32_t>(p.o.seqs),static_cast<std::uint32_t>(p.g.vocab),static_cast<std::uint64_t>(p.o.max_context)},words,err)) return false;
+        {static_cast<std::uint32_t>(p.o.seqs),static_cast<std::uint32_t>(p.g.vocab),static_cast<std::uint64_t>(p.o.max_context)},words,err)) return fail();
     const bool ok=p.tp_test_controller->run(tp2::Command::BatchCommit,0,std::move(words),
         [&](const tp2::Control& c,std::string& e) { return tp_batch_execute(c,e) && p.tp_worker_synchronize(e); },err);
     if (!ok) p.tp_record_failure(err);

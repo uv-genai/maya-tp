@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -39,6 +40,7 @@ def parser():
     p.add_argument("--reserve-mib", type=bounded(0, 1048576), default=1024)
     p.add_argument("--gpu", type=bounded(0, 255), default=0)
     p.add_argument("--cpu-threads", type=bounded(1, 1024), default=14)
+    p.add_argument("--parallel", type=bounded(1, 4), default=1, help="matched TP2 sequence slots (default: 1)")
     p.add_argument("--dspark", choices=("on", "off"), default="on")
     p.add_argument("--suffix-draft", type=int, choices=(0, 3), default=0,
                    help="experimental synchronized prompt lookup (0: off; 3: minimum match length)")
@@ -65,6 +67,12 @@ def prepare_launch(opts, environ):
     if env.get("DS4_STREAM", "0") != "0":
         raise IdentityError("DeepSeek TP2 requires DS4_STREAM=0")
     env["DS4_STREAM"] = "0"
+    if opts.parallel>1:
+        if opts.suffix_draft:
+            raise IdentityError("batched DeepSeek TP2 requires --suffix-draft 0")
+        if env.get("DS4_DSPARK_SAMPLE", "0") != "0":
+            raise IdentityError("batched DeepSeek TP2 uses point proposals; DS4_DSPARK_SAMPLE must be 0")
+
     if opts.prefill_chunk:
         for name in ("DS4_FLOW", "DS4_YOCO"):
             if env.get(name, "0") != "0":
@@ -77,11 +85,17 @@ def prepare_launch(opts, environ):
     env["MAYA_DS4_TP2_DSPARK"] = "1" if opts.dspark == "on" else "0"
     env["MAYA_DS4_TP2_CHUNK"] = str(opts.prefill_chunk)
     env["MAYA_DS4_TP2_LOOKUP"] = str(opts.suffix_draft)
+    execution = {"context": opts.context, "parallel": opts.parallel, "rows": 16,
+                 "dspark": opts.dspark, "prefill_chunk": opts.prefill_chunk,
+                 "suffix_draft": opts.suffix_draft, "proposals": "point" if opts.parallel>1 else "legacy"}
+    env["MAYA_DS4_TP2_EXECUTION_DIGEST"] = hashlib.sha256(
+        json.dumps(execution,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+    env["MAYA_DS4_TP2_PARALLEL"] = str(opts.parallel)
     for kind in ("model", "partition", "build"):
         env["MAYA_DS4_TP2_" + kind.upper() + "_DIGEST"] = identity[kind + "_digest"]
     draft = opts.rank == 0 and opts.dspark == "on"
     args = [engine, "--pack", pack, "--gpus", str(opts.gpu), "--max-context", str(opts.context),
-            "--reserve-mib", str(opts.reserve_mib), "--cpu-threads", str(opts.cpu_threads),
+            "--parallel", str(opts.parallel), "--reserve-mib", str(opts.reserve_mib), "--cpu-threads", str(opts.cpu_threads),
             "--tp", "1", "--threads", "off", "--prefill-chunk", str(opts.prefill_chunk), "--vision", "off",
             "--mmap-experts", "on", "--no-expert-cache", "--profile-readonly", "--vram-experts",
             "1" if draft else "0", "--suffix-draft", str(opts.suffix_draft if opts.rank == 0 else 0),

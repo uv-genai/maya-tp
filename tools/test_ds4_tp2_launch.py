@@ -135,6 +135,19 @@ with patch.object(tp2_launch,'prepare',return_value=(None,command,dict(os.enviro
         self.assertEqual((local['dspark'], remote['dspark']), ('on', 'on'))
         self.assertEqual((local['prefill_chunk'], remote['prefill_chunk']), (256, 256))
 
+    def test_parallel_and_explicit_engine_override_both_ranks(self):
+        self.settings['rank1']['engine']='/old/peer-engine'
+        self.config.write_text(json.dumps(self.settings))
+        options=SimpleNamespace(config=str(self.config),parallel=4,engine=str(self.directory/'candidate'),peer_root='/isolated/source')
+        settings=tp2_launch.load_settings(options)
+        for rank in (0,1):
+            value=tp2_launch.rank_settings(settings,rank)
+            self.assertEqual(value['parallel'],4)
+            self.assertEqual(value['engine'],options.engine)
+        self.assertEqual(settings['peer_root'],'/isolated/source')
+        self.settings['rank1']['parallel']=3;self.config.write_text(json.dumps(self.settings))
+        with self.assertRaisesRegex(ValueError,'overrides'): tp2_launch.load_settings(options)
+
     def test_rank_cannot_override_shared_feature(self):
         self.settings['rank1']['context'] = 123
         self.config.write_text(json.dumps(self.settings))
