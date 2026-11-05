@@ -2,6 +2,7 @@
 #pragma once
 
 #include "ds4_tp_control.hpp"
+#include "ds4_tp_batch_state.hpp"
 #include <cstdint>
 #include <limits>
 #include <string>
@@ -14,14 +15,18 @@ namespace strata::ds4::tp2 {
 // claim to restore the model's KV, compressor, Engram, or drafter state.
 class WorkerState {
 public:
-    WorkerState(std::uint64_t context, std::uint32_t vocab, std::uint32_t max_words)
-        : context_(context), vocab_(vocab), max_words_(max_words) {}
+    WorkerState(std::uint64_t context, std::uint32_t vocab, std::uint32_t max_words, std::uint32_t slots=1)
+        : context_(context), vocab_(vocab), max_words_(batch_control_words(max_words,slots)) {
+        if (slots!=1) batch_.emplace(context,vocab,max_words,slots);
+    }
 
     bool begin(const Control& c, std::string& error) {
+        if (batch_) return batch_->begin(c,error);
         if (!failure_.empty()) { error = failure_; return false; }
         if (stopped_ || pending_) { error = "ds4 tp2 worker: stopped or operation already in progress"; return false; }
         const auto fatal = [&](const char* cause) { failure_ = cause; error = failure_; return false; };
         if (context_ == 0 || vocab_ == 0) return fatal("ds4 tp2 worker: invalid model limits");
+        if (batch_command(c.command)) return fatal("ds4 tp2 worker: batch mode was not negotiated");
         if (!valid_control(c, max_words_, error)) { failure_ = error; return false; }
         if (c.sequence != next_sequence_ || c.sequence == std::numeric_limits<std::uint64_t>::max()) {
             return fatal("ds4 tp2 worker: control sequence mismatch or exhausted");
@@ -54,6 +59,7 @@ public:
     }
 
     bool complete(bool success, const std::string& cause, std::string& error) {
+        if (batch_) return batch_->complete(success,cause,error);
         if (!failure_.empty()) { error = failure_; return false; }
         if (!pending_) { error = "ds4 tp2 worker: no operation in progress"; return false; }
         pending_ = false;
@@ -64,20 +70,26 @@ public:
             case Command::Verdict: position_ = active_.position; awaiting_verdict_ = false; offered_ = 0; break;
             case Command::Reset: position_ = 0; break;
             case Command::Shutdown: stopped_ = true; break;
+            default: return fail("ds4 tp2 worker: unsupported legacy operation",error);
         }
         ++next_sequence_;
         error.clear(); return true;
     }
 
-    std::uint64_t position() const { return position_; }
-    bool awaiting_verdict() const { return awaiting_verdict_; }
-    bool failed() const { return !failure_.empty(); }
-    bool stopped() const { return stopped_; }
-    const std::string& failure() const { return failure_; }
+    bool batch_mode() const { return batch_.has_value(); }
+    std::uint64_t position() const { return batch_?batch_->position():position_; }
+    std::uint64_t position(std::uint32_t slot) const { return batch_?batch_->position(slot):(slot==0?position_:0); }
+    std::uint64_t generation(std::uint32_t slot) const { return batch_?batch_->generation(slot):0; }
+    std::uint32_t selected() const { return batch_?batch_->selected():0; }
+    bool awaiting_verdict() const { return batch_?batch_->awaiting_verdict():awaiting_verdict_; }
+    bool failed() const { return batch_?batch_->failed():!failure_.empty(); }
+    bool stopped() const { return batch_?batch_->stopped():stopped_; }
+    const std::string& failure() const { return batch_?batch_->failure():failure_; }
 
     // A failed receive or operation is fatal to the pair. Never replace the
     // first cause or allow another operation on this state.
     bool fail(const std::string& cause, std::string& error) {
+        if (batch_) return batch_->fail(cause,error);
         if (failure_.empty()) failure_ = cause.empty() ? "ds4 tp2 worker: operation failed" : cause;
         pending_ = false;
         error = failure_; return false;
@@ -90,6 +102,7 @@ private:
     bool pending_ = false, awaiting_verdict_ = false, stopped_ = false;
     Control active_;
     std::string failure_;
+    std::optional<BatchState> batch_;
 };
 
 }  // namespace strata::ds4::tp2

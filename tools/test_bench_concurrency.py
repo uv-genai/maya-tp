@@ -64,6 +64,28 @@ class ConcurrencyBenchmarkTest(unittest.TestCase):
         self.assertEqual(summary['aggregate_tok_s'], 1024 / 40)
         self.assertEqual(summary['median_server_decode_tok_s'], 40)
 
+    def test_replay_overrides_prompt_but_keeps_stream_contract(self):
+        chunks=[b'data: {"choices":[{"delta":{"content":"x"},"finish_reason":"length"}],"usage":{"completion_tokens":1}}\n',b'data: [DONE]\n']
+        payload={'messages':[{'role':'user','content':'fixed'}],'strata_tune':{'spec':1},'stream':False}
+        with mock.patch.object(bench.urllib.request,'urlopen',return_value=self.stream(chunks)) as opened:
+            result=bench.request('http://local/v1','model','ignored','id',1,10,payload=payload)
+        self.assertIsNone(result['error'])
+        sent=json.loads(opened.call_args.args[0].data)
+        self.assertEqual(sent['messages'],payload['messages'])
+        self.assertEqual(sent['strata_tune'],{'spec':1})
+        self.assertTrue(sent['stream'])
+
+    def test_replenished_clients_keep_replay_order_and_stagger(self):
+        options=SimpleNamespace(url='url',model='model',max_tokens=8,timeout=30,api_key=None,
+                                stagger=.01,requests_per_client=2,requests=[{'messages':[{'content':str(i)}]} for i in range(4)])
+        def complete(*args):return {'request_id':args[3],'payload':args[7],'error':None}
+        with mock.patch.object(bench,'request',side_effect=complete), mock.patch.object(bench.time,'sleep') as sleep:
+            wave=bench.wave(options,'ignored','fixed',2,1)
+        self.assertEqual(len(wave['requests']),4)
+        self.assertEqual([r['payload'] for r in wave['requests']],options.requests)
+        self.assertEqual(len({r['request_id'] for r in wave['requests']}),4)
+        sleep.assert_any_call(.01)
+
 
 if __name__ == '__main__':
     unittest.main()

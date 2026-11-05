@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-04 · Current state: **§47**, sequential upstream v1.1.50–v1.1.53 integration, starting with #125. §46 records the completed documentation audit. §44 records the accepted DeepSeek binary. §33 records the promoted GLM runtime.
+> Last updated: 2026-11-05 · Current state: **§52**, validated opt-in GLM/MTP and DeepSeek/DSpark continuous batching, integration PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2851,3 +2851,281 @@ Markdown paths and whitespace. Future GPU work uses isolated builds, explicit
 configs and owned process records. Use §§33/44 for accepted runtime selection.
 The user requested publication of the plan documents and handoff/index updates
 on `main`. Planning issues #141/#142 record the publication commit and CI outcome.
+
+## 52. Continuous-batching implementation (2026-11-05)
+
+The user authorized implementation of #11/#140 on a separate branch, phase
+tests and a final PR merged after validation. Implementation started at
+`72d9260` on `codex/tp2-continuous-batching` and is integrated through
+[PR #155](https://github.com/uv-genai/maya-tp/pull/155). Shared C1, GLM G1–G5
+and DeepSeek D1–D5 have engineering validation. Final exact-head/PR and
+post-merge main CI publication is recorded in #153. The feature issues #11/#140
+remain open for the new mode's operational user trial.
+
+**Current checkpoint:** all owned GPU validation processes are stopped; D5
+records an identity audit on both hosts. Accepted production binaries/configs,
+the protected peer checkout and unrelated services are unchanged. Both wrappers
+default to one sequence; select matching current source/engines explicitly for
+`--parallel 2..4`. DeepSeek batch proposals are point masses; lookup and sampled-q
+proposal mode are rejected. Context is per slot. Tensor traffic remains APU RDMA.
+
+- GLM: [G5 report](docs/validation/tp2-batching-g5-2026-11-05.md) and
+  [matched throughput](docs/benchmarks/glm-tp2-batching-2026-11-05/README.md).
+  Frozen final `g5-release/maya` SHA256
+  `c50b12b630766a26dda39f525d48e25e6d9e74d36ac184d75b2b1b0cdec0bbbc`.
+- DeepSeek: [D5 report/data](docs/validation/tp2-batching-d5-2026-11-05.md) and
+  [matched XS/S HTTP results](docs/benchmarks/deepseek-tp2-batching-2026-11-05/README.md).
+  Frozen final `d5-guard/maya-ds4` SHA256
+  `ecac4769d8bd3d1d7cf1045e35191b343a012b5b24ec4c359e8604db10faf9f0`.
+  Four 262K slots fit; all 88 measured response comparisons and 64 default
+  raw picks match their parent controls. XS/S aggregate DSpark at four clients
+  is 40.05/36.08 tok/s versus serialized 25.13/22.44 on this workload.
+- Local gates: HIP map, 743 server tests (20 skips), 770 tools tests (3 skips),
+  37 focused launcher/harness tests and all CPU memory/row/stub/control gates.
+  Implementation `109aefc` passed push CI 42016420751 and PR CI 42016445488.
+- Source/build isolation: `/home/ugo/software/project-maya-batching-build`,
+  `project-maya-batching-runtime` and `project-maya-batching-validation` on the
+  hosts. Never overwrite protected production paths as a test setup step.
+- Separate open follow-ups include #110/#112 (numerical/capacity) and #154
+  (dormant WaitAdd helper, unused by engines). Do not claim their broad scopes
+  are resolved by these focused batching gates.
+
+The dated phase history below retains intermediate failures, frozen binaries,
+measurements and ownership snapshots. The current checkpoint above supersedes
+its earlier active-process/task-status statements.
+
+C1 serializes complete engine commands and rechecks paired health under the
+writer lock. The first fatal TP2 notice wakes all active routes with its retained
+cause. Unexpected paired EOF is fatal, while owned shutdown is marked explicitly.
+Restart joins the old pump before reinitializing its queues. New regressions
+cover fragmented concurrent large prompts, all-route failure on ERR/DOWN/END/EOF,
+and failure while a GEN waits for the writer lock. The large-prompt regression
+fails against the unchanged parent source and passes with the fix.
+
+Validation passed 43 focused tests, HIP mapping, 742 server tests (20 skips),
+760 tools tests (3 skips), GLM CPU memory policy and DeepSeek CPU row/stub
+checks. Logs are `/tmp/maya-batching-c1-{focused,serve,tools,before}.log`.
+The phase commit is `2ba0803`, and CI 41980368163 passed. Issue #143 is closed.
+The isolated HIP build is `/home/ugo/software/project-maya-batching-build`.
+
+G1 (#144) completed its bounded GPU gates. The historical prompt fault did not
+reproduce with the current source at 32K context. Two allocated arenas produced
+the exact raw picks of the one-sequence MTP control. The new paired four-slot
+fixture passed per-slot bind, prefill, snapshot, reverse restore, full-logit
+replay and peer pick agreement. All experts remained resident, with about
+60.4 GiB device memory free per rank. The arena guard now checks every offset
+vector. See `docs/validation/tp2-batching-g1-2026-11-05.{md,json}` for capacities,
+controls, hashes, commands and scoped limits. G2 retains the scheduler gate
+until the actual batch framing and row executor pass their checks.
+
+Control engines are frozen on both hosts under
+`/home/ugo/software/project-maya-batching-validation/baseline-72d9260/`.
+The paired fixture is in the sibling `g1/` directory. Logs and owned identities
+are under `/tmp/maya-batching-validation/g1-*/`. All G1 processes are stopped.
+
+G1 commit `5f54297` passed CI 41981947354 and #144 is closed. G2 (#145) is
+active. Its extended paired fixture reproduced the historical `mv_rdna_kernel`
+GPU memory fault in the original packed-row path. DSA used full head counts
+against compact TP weights, KDA consumed compact projections with full-width
+row strides, and shared-expert row projections used the full FF width.
+The geometry candidate passed 1–4 packed rows at unequal positions against
+independent ordinary forwards on both ranks, with exit 0/0.
+
+The original fault binary is in the validation directory's `g2-before/`, and
+the corrected fixture is in `g2-geometry/`. Raw evidence and owned identities
+are in `/tmp/maya-batching-validation/g2-{before,geometry}-rows/`. Those pairs
+have exited. Current uncommitted G2 work adds a bounded host batch codec/test,
+capability negotiation, member operation/generation/position checks, peer
+acceptance/completion acknowledgements, graceful paired shutdown and fatal
+batch handling that avoids resetting uncertain device state. Serving validation
+is next, followed by the G2 commit and CI. The GPU runner and GLM API helper
+are `/tmp/maya-batching-pair.py` and `/tmp/maya-batching-glm-check.py`.
+
+G2 local gates now pass. The final grouped case also fixes its shared-expert
+quantized-input column stride and matches 318 row-collective trace entries per
+rank. Four concurrent 32-token requests complete through the real tagged
+engine API, with overlapping streams and clean paired shutdown. The default
+one-sequence MTP control matches all 64 parent picks and accepts 37/47 drafts.
+A 4-vs-3-slot startup is rejected before READY. The shared API admission fix
+passes within 743 server tests (20 skips), followed by 760 tools tests (3 skips).
+Host framing tests pass in Release and with ASan/UBSan, and the existing CPU
+policy/row/stub gates pass. Results, hashes and scoped limits are in
+`docs/validation/tp2-batching-g2-2026-11-05.{md,json}`. All owned pairs are stopped.
+G2 commit `c176647` passed CI 41986562009 and #145 is closed.
+G3 (#146) is active with uncommitted changes. The application codec is now
+version 2 with complete checked MTP verdicts. It validates retained tokens
+against the canonical target inputs, continuation, draft counts and every
+member identity. KDA replay uses rank-local heads/beta strides. Replicated
+NextN grouped execution skips trunk reductions. Batched MTP loads the NextN
+block explicitly and respects per-request `spec=1`. The frozen G3 candidate passes four-client serving with actual MTP in every
+conversation (65/108 drafts accepted) and all 128 raw picks matching the G2
+ordinary control. Mixed speculation, sampling/penalties, thinking closure and
+bias match an ordinary control exactly. Forced retained prefixes 1–3, ragged
+windows, cache reseeding and full-logit state replay pass on both ranks with
+grouped experts; replicated NextN issues no trunk reduction. The strict default
+control matches all 64 parent picks. All owned G3 processes have exited. G3 commit `bd925af` passed CI
+41991971622 and #146 is closed. See
+`docs/validation/tp2-batching-g3-2026-11-05.{md,json}`. G4 (#147) is active.
+
+G4 first lifecycle checks pass with MTP off/on: staggered admission, bounded
+prompt/decode interleave, request-local cancellation and snapshot reuse. Both
+peer-loss modes fan out the same retained cause to every active route and
+reject later GEN. A two-slot candidate exposed an MLA scratch-capacity fault
+when replicated NextN followed compact trunk heads. The HIP scratch now grows
+to the requested byte capacity; the original failing binary/logs remain frozen
+under `g4-final` / `g4-final-queued-mtp`. The corrected `g4-scratch` candidate passes the two-slot queued lifecycle
+and four-slot mixed-request gates. Its SHA256 is
+`d97fd8d5ca73e6bb90776db97d04349f01221b2bf77028f68984af2f34fcecbe`.
+All owned G4 model processes have exited. Queued requests now retain their speculation setting, and
+TP2 prefill gaps run only between completed mirrored calls. The reproducible
+owned harness is `tools/tp2/validate_batch.py`.
+
+G4 evidence is in `docs/validation/tp2-batching-g4-2026-11-05.{md,json}`.
+The MTP-on/off peer-loss cases retained one cause across every active request
+and later GEN (fanout 1.37/1.64 s). The corrected two-slot case proves queued
+`spec=1` stays disabled; prefix reuse, retirement and cancellation pass. G4
+commit/CI publication precedes G5 launcher/performance work.
+
+G4 commit `d4d143d` passed CI 41993343099 and #147 is closed. G5 (#148)
+and ownership cleanup #83 are active. The wrapper now shares only the existing
+DeepSeek process supervisor, with GLM preparation kept in `tools/tp2/launch.py`.
+It supports owned stop-by-port/PID, model/executable preflight and opt-in
+parallelism. Forty focused launcher/harness/ownership tests pass, including
+unchanged DeepSeek behavior. Production files and unrelated services are untouched.
+
+The initial grouped configuration failed the performance gate. A fused resident
+HIP expert-row candidate passes full-logit/forced-commit checks and matched
+three-wave HTTP measurement. Median aggregate tok/s at 1/2/4 clients is
+25.77/29.95/34.04, versus serialized 24.04/24.38/23.86. All 21 response texts
+match the serial control exactly, and real MTP runs for every eligible stream.
+The final source selects these measured defaults only in opt-in TP2 batching.
+`MAYA_GLM_TP_ROWS_EXPERT_MULTI=0` retains the grouped-member comparison path.
+Default one-sequence behavior remains unchanged. Ordinary-target measurements,
+final default-preset smokes and M/L family coverage are in progress.
+
+All G5 owned model processes have exited. Final GLM candidate binaries are
+frozen on both hosts under `/home/ugo/software/project-maya-batching-validation/g5-release/`,
+SHA256 `c50b12b630766a26dda39f525d48e25e6d9e74d36ac184d75b2b1b0cdec0bbbc`.
+It passes the strict 64-pick default control and all 128 mixed-request picks.
+The final collective policy reduces one complete FFN batch after local CPU
+contributions, independent of local grouped/fallback dispatch. An asymmetric
+paired fixture passes full logits/partial commits and matches 630 row-collective
+trace entries per rank. The HIP change preserves inherited CUDA dispatch.
+
+Maya-M/L pass two-client MTP checks at explicit 32K context. Host-1 wrapper
+serving passes staggered/replenished traffic and a deliberate owned-worker loss:
+both active HTTP streams retain the same original cause within 0.95 s, health
+is degraded with peer down and the whole owned pair shuts down. The first
+no-proposal benchmark also passes: median 29.71/36.45 aggregate tok/s at two/four
+clients versus serialized 21.78/21.68, with all 21 matched response texts identical.
+See `docs/benchmarks/glm-tp2-batching-2026-11-05/README.md` and the G5 validation
+report for hashes, limits and raw data. Local gates pass HIP mapping, 743 server
+tests (20 skips), 765 tools tests (3 skips), 41 focused tests and CPU policy,
+batch-framing and DeepSeek row/stub checks. G5 commit `fc26e2b` passed CI 41999222087; #148/#83 are closed.
+The isolated peer source remains `project-maya-batching-runtime`; production
+configs/binaries and unrelated services remain untouched. DeepSeek D1–D5 are next.
+
+D1 (#149) is active. The model loader now permits bounded 1–4 TP2 state arenas
+for the manual fixture; the production CLI still rejects multi-sequence TP2
+until its protocol/scheduler port is validated. New diagnostics check every
+per-slot ring/compressor/source pointer and record actual allocation categories.
+The paired fixture feeds 509 tokens, crosses the 512 boundary in a three-row
+verify, retains one input and checks full logits and rank-0 drafts against an
+independent continuation across reverse slot binds. XS/S content/partition and
+fixture executable preflight agree on both hosts. The current owned XS run is
+`/tmp/maya-batching-validation/d1-xs-four`, launched by
+`/tmp/maya-batching-pair.py`; inspect its ownership JSON before cleanup. Frozen
+D1 binaries are in the validation root's `d1-first/`. Both XS/S aligned-reference tests pass, exit 0/0. All owned processes are stopped.
+Four 262K slots fit with complete target residency on both models. Extra caches
+are about 0.743 GB; post-load free is XS 60.38/64.77 GB and S 25.91/33.96 GB
+on lead/peer. All seven logit comparisons per rank are exact, and rank-0 drafts
+match after reverse slot switches and partial rollback. The initial comparison
+folded the final token into a prefill chunk only for slot 0; matching that
+reference boundary fixed the fixture. No arithmetic repair was needed.
+Evidence is `docs/validation/tp2-batching-d1-2026-11-05.{md,json}`. Final
+HIP builds and CPU gates pass. D1 commit `1658e7a` passed CI 42002747492
+and #149 is closed. D2 (#150) is active with uncommitted bounded batch/control
+headers and host tests; no owned model processes are running.
+
+D2 host, HIP and paired RDMA protocol gates pass, including legacy worker and
+control-EOF behavior. All pairs exited 0/0 and owned processes are stopped.
+The new mode checks acceptance before work and completion before reuse;
+production multi-slot DeepSeek stays gated until D3–D5. See the D2 report
+and `docs/DEEPSEEK-TP2-BATCH-PROTOCOL.md`. The dormant WaitAdd row defect
+found by the initial synthetic fixture is separately open in #154; production
+WaitValue/AddRowsBroadcast reductions pass unchanged.
+
+D2 commit `b00a472` passed CI 42009256835 and #150 is closed. D3 (#151)
+checked ordinary rows pass XS/S at four 262K slots: all ten full-logit
+comparisons for 1–4 unequal-position members are exact, with matching greedy
+picks and positions; both pairs exit 0/0. Fallback attention/router traces
+are the final D3 checkpoint. Production multi-slot serving stays gated.
+
+D3 fallback attention also passes all ten exact full-logit comparisons. All
+320 valid router records match between peers. All owned D3 processes
+are stopped. The D3 report records the frozen hash and scope.
+
+D3 commit `fdcaec2` passed CI 42010589452 and #151 is closed. D4 (#152)
+separates selection from complete deterministic commits. XS passes all 24
+full-logit/DSpark continuation checks after retained counts 1–6 and ragged
+6/4/3/3-input windows, with 120 real proposals from fitting groups. The first
+fixture assumed four proposals; the code returns five for block_size five.
+Both the failed initial and corrected frozen binaries/logs remain recorded.
+S is running the same D4 gate; production multi-slot serving is still gated.
+
+S D4 also passes all 24 exact full-logit comparisons and subsequent draft
+comparisons, with 120 actual fitting-group proposals. Both final pairs exit
+0/0; all owned processes are stopped. D4 report/data are committed alongside
+the checked model/control changes; D5 scheduler/launcher integration is next.
+
+D4 commit `3c8d661` passed CI 42013032184 and #152 is closed. D5 (#153)
+source enables explicit 2–4-slot scheduling and paired execution identity.
+The first XS four-client mixed-request check passes; DSpark is active for
+eligible clients, disabled for spec=0, and thinking closure passes. Staggered
+3-slot DSpark-on and 2-slot DSpark-off lifecycle checks pass cancellation,
+queued admission/refill, 1210-token prefill interleave and 215-token in-place
+continuation reuse, exiting 0/0. Final error-guard candidate is frozen as
+`d5-guard/maya-ds4`, SHA256
+`ecac4769d8bd3d1d7cf1045e35191b343a012b5b24ec4c359e8604db10faf9f0`.
+Current owned benchmark is launched on host 1 by `/tmp/maya-d5-host1-bench.py`,
+with ownership/logs under `/tmp/maya-batching-validation/d5-xs-parent-http`.
+It uses only isolated source/binaries, API 19161/bootstrap 19160, and the
+owned supervisor control socket. Check that ownership before cleanup.
+Production files, configs and unrelated services remain untouched.
+
+XS parent and batch HTTP runs are complete and their owned pairs/samplers
+stopped. All 44 measured response texts match. Median aggregate at 2/4
+clients is ordinary 20.89/20.70 → 32.11/40.15 and DSpark 25.26/25.13 →
+33.97/40.05 tok/s. Single-client points improve. Deliberate owned-worker
+loss reaches four HTTP routes with one cause in 0.924 s; health is degraded
+with peer down, then the pair stops. Source configs remain opt-in.
+S parent measurement is now running from host 1 under
+`/tmp/maya-batching-validation/d5-s-parent-http`; its ownership JSON is the
+authority for cleanup. The local session log is
+`/tmp/maya-batching-d5-s-parent-http.log`. After it finishes, run the matching
+S batch candidate with `/tmp/maya-d5-host1-bench.py --model s --kind batch`.
+Final default-mode DeepSeek raw-pick and GLM launcher regression smokes,
+D5/PR exact-head CI, final evidence/docs and PR merge/main CI remain.
+
+D5 source commit `109aefc` is pushed; draft PR #155 is open. Push CI
+42016420751 and PR CI 42016445488 are running. S parent HTTP benchmark
+completed cleanly; its 2/4-client medians are ordinary 17.60/17.73 and
+DSpark 22.27/22.44 tok/s. The current owned run is now S batch, under
+`/tmp/maya-batching-validation/d5-s-batch-http` on host 1, launched by
+`/tmp/maya-d5-host1-bench.py`. The local log is
+`/tmp/maya-batching-d5-s-batch-http.log`. XS raw data has been copied locally
+to `/tmp/maya-batching-bench-collected/`; final committed report is pending S.
+
+Final D5 GPU/host gates are complete: S also matches all 44 measured response
+texts, passes staggered refill and two natural EOS completions, and improves
+2/4-client aggregate throughput beyond spread. Default DeepSeek matches all
+64 raw picks and draft counters. Final GLM wrapper MTP passes two clients.
+All owned GPU processes/samplers/supervisors are stopped, with 29 recorded
+identity checks in the D5 data. Local ordered Python and CPU gates pass.
+Final report/data publication and PR/main CI outcomes are recorded in #153;
+operational user trials remain in #11/#140.
+
+Final launcher review retains the legacy three-field preflight identity for
+parallel=1. The execution digest is required only for opt-in batching; a
+focused regression checks both formats. Engine binaries/measurements are
+unchanged by this compatibility correction. Final publication CI is on #153.

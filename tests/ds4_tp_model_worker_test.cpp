@@ -87,5 +87,10 @@ int main() {
         FakeModel m; m.at=33; ModelWorker<FakeModel> w(m);
         CHECK(!w.execute({Command::Step,1,33,{1}},error) && m.calls==0);
     }
+    {
+        FakeModel m; ModelWorker<FakeModel> w(m,false,4);
+        CHECK(!w.execute({Command::BeginSlot,1,0,{0,1,0}},error) && m.calls==0);
+        CHECK(error.find("no checked batch entry")!=std::string::npos);
+    }
     std::puts("DeepSeek TP2 model worker dispatch and sticky failure passed");
 }

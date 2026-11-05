@@ -1,106 +1,18 @@
-#!/bin/bash
-# tools/tp2/acceptance.sh — TP2 serve acceptance: pair up, chat, peer health, kill/recover.
-#
-# Usage: tools/tp2/acceptance.sh [--serve-host HOST] [--port PORT]
-# Set MAYA_TP_MTP=1 to exercise opt-in MTP on the remote server as well.
-# Model selection: MAYA_MODEL / MAYA_PACK / MAYA_CONFIG (tools/tp2/model_env.sh).
-#
-# Run from rank 1 (strix-halo-2). Rank 0 is started via SSH.
-# Tests:
-#   1. Start rank1 worker + rank0 server; wait for /health peer=up
-#   2. curl chat/completions
-#   3. Kill rank1; next chat fails; /health degraded peer=down
-#   4. Restart both; health peer=up; chat works again
+#!/usr/bin/env bash
+# Owned GLM engine/API route acceptance. Deliberately loses its recorded peer,
+# verifies all-route failure and later-GEN rejection; never clears existing jobs.
 set -euo pipefail
-cd "$(dirname "$0")/../.."
-
-HOST="${HOST:-strix-halo-1.local}"
-PORT="${PORT:-18080}"
-PASS=0
-FAIL=0
-TP_MTP=0
-if [ "${MAYA_TP_MTP:-0}" = 1 ]; then TP_MTP=1; fi
-TP_FIXED="${MAYA_GLM_MTP_FIXED:-2}"
-TP_CAP="${MAYA_GLM_MTP_DRAFT:-$TP_FIXED}"
-TP_CONTEXT="${CONTEXT:-32768}"
-[[ "$TP_FIXED" =~ ^[1-8]$ && "$TP_CAP" =~ ^[1-8]$ && "$TP_FIXED" -le "$TP_CAP" &&
-   "$TP_CONTEXT" =~ ^[1-9][0-9]*$ ]] || { echo "invalid draft count/capacity or context" >&2; exit 2; }
-MODEL_ENV=()
-[ -n "${MAYA_CONFIG:-}" ] && MODEL_ENV+=("MAYA_CONFIG=$MAYA_CONFIG")
-[ -n "${MAYA_PACK:-}" ] && MODEL_ENV+=("MAYA_PACK=$MAYA_PACK")
-[ -n "${MAYA_MODEL:-}" ] && MODEL_ENV+=("MAYA_MODEL=$MAYA_MODEL")
-
-check() {
-  local desc="$1" expected="$2" actual="$3"
-  if echo "$actual" | grep -qF "$expected"; then
-    echo "  PASS: $desc"
-    PASS=$((PASS + 1))
-  else
-    echo "  FAIL: $desc (expected '$expected', got: ${actual:0:200})"
-    FAIL=$((FAIL + 1))
-  fi
-}
-
-health() { curl -s -m 5 "http://$HOST:$PORT/health" 2>/dev/null || echo '{}'; }
-chat() {
-  curl -s -m 120 "http://$HOST:$PORT/v1/chat/completions" \
-    -H 'Content-Type: application/json' \
-    -d '{"model":"maya","messages":[{"role":"user","content":"Say hello."}],"max_tokens":16}' \
-    2>/dev/null || echo '{}'
-}
-
-start_pair() {
-  ssh -o BatchMode=yes "$HOST" 'pkill -9 -f "[s]erver.py --engine" 2>/dev/null; pkill -9 -x maya 2>/dev/null; fuser -k '"$PORT"'/tcp 2>/dev/null; true'
-  pkill -9 -x maya 2>/dev/null || true
-  sleep 1
-  setsid nohup env MAYA_TP_MTP="$TP_MTP" MAYA_GLM_MTP_FIXED="$TP_FIXED" MAYA_GLM_MTP_DRAFT="$TP_CAP" \
-    CONTEXT="$TP_CONTEXT" "${MODEL_ENV[@]+"${MODEL_ENV[@]}"}" \
-    bash tools/tp2/rank1.sh >/tmp/tp2-acc-r1.log 2>&1 </dev/null &
-  disown
-  sleep 1
-  # Background only the server command: `cd ... && server &` leaves a subshell holding
-  # SSH's stdout/stderr open for the server's lifetime, so the readiness loop never starts.
-  REMOTE_ENV="MAYA_TP_MTP=$TP_MTP MAYA_GLM_MTP_FIXED=$TP_FIXED MAYA_GLM_MTP_DRAFT=$TP_CAP CONTEXT=$TP_CONTEXT"
-  for kv in ${MODEL_ENV[@]+"${MODEL_ENV[@]}"}; do
-    REMOTE_ENV="$REMOTE_ENV $(printf '%q' "$kv")"
-  done
-  ssh -o BatchMode=yes "$HOST" "cd '$PWD' || exit; setsid nohup env $REMOTE_ENV bash tools/tp2/rank0.sh $PORT >/tmp/tp2-acc-r0.log 2>&1 </dev/null &"
-  # Cold disk-backed expert loading can exceed three minutes on rank 0.
-  for i in $(seq 1 120); do
-    if health | grep -q '"peer": "up"'; then return 0; fi
-    sleep 5
-  done
-  echo "pair did not become ready" >&2
-  return 1
-}
-
-echo "=== TP2 acceptance ($HOST:$PORT, mtp=$TP_MTP drafts=$TP_FIXED cap=$TP_CAP context=$TP_CONTEXT) ==="
-echo "--- 1. start pair ---"
-start_pair
-H=$(health)
-check "health peer up" '"peer": "up"' "$H"
-check "status ok" '"status": "ok"' "$H"
-
-echo "--- 2. chat ---"
-R=$(chat)
-check "chat content" '"content"' "$R"
-
-echo "--- 3. kill rank1 ---"
-pkill -9 -x maya 2>/dev/null || true
-sleep 1
-R=$(chat)
-check "chat fails cleanly" 'TP2 pair down' "$R"
-H=$(health)
-check "health degraded" '"status": "degraded"' "$H"
-check "peer down" '"peer": "down"' "$H"
-
-echo "--- 4. restart both ---"
-start_pair
-H=$(health)
-check "recover peer up" '"peer": "up"' "$H"
-R=$(chat)
-check "chat after recover" '"content"' "$R"
-
-echo ""
-echo "=== results: $PASS passed, $FAIL failed ==="
-[ "$FAIL" = 0 ]
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+source "$ROOT/tools/tp2/model_env.sh"
+BASE=$(maya_resolve_config "$ROOT")
+WORK=$(mktemp -d /tmp/maya-tp2-acceptance-XXXXXX)
+trap 'rm -rf "$WORK"' EXIT
+PACK=""
+if [[ -n "${MAYA_MODEL:-}${MAYA_PACK:-}" ]]; then PACK=$(maya_resolve_pack); fi
+maya_config_with_pack "$BASE" "$PACK" > "$WORK/base.json"
+"$ROOT/.venv/bin/python" "$ROOT/tools/tp2/validate_batch.py" \
+  --name "acceptance-$(date +%s)-$$" --config "$WORK/base.json" \
+  --engine "${ENGINE:-$ROOT/build-hip/maya}" --peer "${RANK1_HOST:-strix-halo-2.local}" \
+  --lead-address "${BOOTSTRAP_HOST:-192.168.1.22}" --port "${TP_PORT:-19151}" \
+  --context "${CONTEXT:-32768}" --seqs "${SEQS:-4}" --clients 4 \
+  --mtp "${MAYA_TP_MTP:-0}" --scenario peer-loss "$@"

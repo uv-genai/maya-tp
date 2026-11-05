@@ -3,6 +3,7 @@
 
 #include "ds4_tp_channel.hpp"
 #include "ds4_tp_worker_state.hpp"
+#include "ds4_tp_ack.hpp"
 #include <exception>
 #include <functional>
 
@@ -18,7 +19,8 @@ class Worker {
 public:
     using Handler = std::function<bool(const Control&, std::string&)>;
     Worker(strata::net::Communicator& comm, std::uint64_t context, std::uint32_t vocab,
-           std::uint32_t max_words) : comm_(comm), state_(context, vocab, max_words), max_words_(max_words) {}
+           std::uint32_t max_words, std::uint32_t slots=1)
+        : comm_(comm), state_(context, vocab, max_words,slots), max_words_(batch_control_words(max_words,slots)) {}
 
     bool run_one(const Handler& handle, std::string& error) {
         if (state_.failed()) { error = state_.failure(); return false; }
@@ -27,18 +29,35 @@ public:
             return state_.fail("ds4 tp2 worker: expected rank 1 of 2", error);
         Control c;
         if (!receive_message(comm_, max_words_, c, error)) return state_.fail(error, error);
-        if (!state_.begin(c, error)) return false;
-        if (!comm_.BeginOperation(c.sequence, &error)) return state_.complete(false, error, error);
-        try {
-            if (!handle(c, error)) return state_.complete(false, error, error);
-        } catch (const std::exception& ex) {
-            return state_.complete(false, ex.what(), error);
-        } catch (...) {
-            return state_.complete(false, "ds4 tp2 worker: operation threw", error);
+        if (!state_.begin(c, error)) {
+            if (state_.batch_mode()) {
+                std::string ignored;
+                (void)send_batch_ack(comm_,c.sequence,AckStage::Accepted,error,ignored);
+            }
+            return false;
         }
-        if (!comm_.CheckQueued(&error)) return state_.complete(false, error, error);
-        if (!comm_.EndOperation(c.sequence, &error)) return state_.complete(false, error, error);
-        return state_.complete(true, "", error);
+        if (state_.batch_mode() && !send_batch_ack(comm_,c.sequence,AckStage::Accepted,"",error))
+            return state_.complete(false,error,error);
+        const auto failed=[&](const std::string& cause) {
+            const std::string first=cause;
+            std::string ignored;
+            if (state_.batch_mode()) (void)send_batch_ack(comm_,c.sequence,AckStage::Completed,first,ignored);
+            return state_.complete(false,first,error);
+        };
+        if (!comm_.BeginOperation(c.sequence, &error)) return failed(error);
+        try {
+            if (!handle(c, error)) return failed(error);
+        } catch (const std::exception& ex) {
+            return failed(ex.what());
+        } catch (...) {
+            return failed("ds4 tp2 worker: operation threw");
+        }
+        if (!comm_.CheckQueued(&error)) return failed(error);
+        if (!comm_.EndOperation(c.sequence, &error)) return failed(error);
+        if (!state_.complete(true,"",error)) return false;
+        if (state_.batch_mode() && !send_batch_ack(comm_,c.sequence,AckStage::Completed,"",error))
+            return state_.fail(error,error);
+        return true;
     }
     const WorkerState& state() const { return state_; }
 private:

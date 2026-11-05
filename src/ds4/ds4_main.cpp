@@ -1980,6 +1980,8 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             std::vector<strata::ds4::LogprobRow> got_lp;
         };
         const int nseq = m.seq_count();
+        const bool tp_batch=m.tp2_driving();
+        std::size_t batch_turn=0;
         std::vector<long long> seq_rid((size_t) nseq, -1);   // the request in each conversation (-1: idle)
         std::vector<uint64_t> seq_used((size_t) nseq, 0);    // (the least recently used goes first)
         std::vector<std::vector<Pic>> held_of((size_t) nseq);   // the pictures each one holds (`held`: the bound one's)
@@ -2006,7 +2008,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             const int x = v != nullptr ? std::atoi(v) : 0;
             return x > 0 ? x : dflt;
         };
-        const size_t read_piece = m.prompt_chunk() > 0 ? (size_t) m.prompt_chunk() * (size_t) m.pipeline_stages() *
+        const size_t read_piece = tp_batch ? static_cast<std::size_t>(m.prompt_chunk()>0?m.prompt_chunk():m.feed_unit()) : m.prompt_chunk() > 0 ? (size_t) m.prompt_chunk() * (size_t) m.pipeline_stages() *
                                                              (size_t) env_count("MAYA_DS4_READ_PIECE", kReadPieceChunks)
                                                        : (size_t) m.feed_unit();
         const int read_rounds = env_count("MAYA_DS4_READ_ROUNDS", kReadRounds);
@@ -2156,6 +2158,9 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 return;
             }
             bind(best);
+            if (tp_batch && !m.tp2_begin_sequence(best,err)) {
+                std::printf("ERR %lld %s\n",r.rid,err.c_str());std::fflush(stdout);end_if_broken();return;
+            }
             seq_used[(size_t) best] = ++use_clock;
             if (acts.empty()) m.begin_request();   // (DISK_SKIP_AUTO: between requests only - none runs now)
             const long long rid = r.rid;
@@ -2169,7 +2174,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             // (arrival reads a prompt whole, unless an answer is running: it then writes tokens between the pieces)
             const bool answering_now = std::any_of(acts.begin(), acts.end(),
                                                    [](const std::unique_ptr<Act>& x) { return !x->reading; });
-            if ((!read_pieces && !answering_now) || !a->P.pics.empty()) {
+            if (!tp_batch && ((!read_pieces && !answering_now) || !a->P.pics.empty())) {
                 read_turn(*a, r.ids.size(), false);
                 if (a->ended) {
                     in.forget(rid);
@@ -2249,13 +2254,13 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                         a.done = true;
                         break;
                     }
-                    if (a.produced >= a.limit || m.seq_pos(a.seq) >= m.max_context()) {
+                    if (a.produced >= a.limit || (m.seq_pos(a.seq) >= m.max_context() && (!tp_batch || a.got.empty()))) {
                         a.done = true;
                         break;
                     }
                     if (!a.got.empty()) {
                         next_tok(a);
-                        if (several) continue;
+                        if (several || tp_batch) continue;
                         break;
                     }
                     need.push_back(&a);
@@ -2268,7 +2273,10 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 std::printf("%s\n", st.c_str());
             }
             std::fflush(stdout);
-            if (need.size() == 1) {   // alone (or the last of several still running): its rounds, as with one conversation
+            if (tp_batch && !need.empty()) {
+                std::rotate(need.begin(),need.begin()+static_cast<std::ptrdiff_t>(batch_turn++%need.size()),need.end());
+            }
+            if (need.size() == 1 && !tp_batch) {   // alone (or the last of several still running): its rounds, as with one conversation
                 Act& a = *need[0];
                 bind(a.seq);
                 if (round_log().f != nullptr) round_log().tag = "rid" + std::to_string(a.r.rid);   // (DS4_ROUND_LOG)
@@ -2302,7 +2310,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                     if (a.r.logprobs >= 0) a.got_lp = lp_take(m, a.got.size());
                     next_tok(a);
                 }
-            } else if (need.size() > 1) {   // several: a round of each through the model together
+            } else if (need.size() > 1 || (tp_batch && !need.empty())) {   // several: a round of each through the model together
                 // each one's drafts (DSpark, a conversation at a time: its own drafter rings) while their confidence
                 // holds, its share of a window at most; then every one's token and drafts through the model at once
                 // (step_multi_spec) and each its verdict (verify_multi).  No drafts this round: a token of each.
@@ -2341,7 +2349,13 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 // (the drafter's argmax either way: verify_multi takes each draft as a point)
                 const int nd = (int) dsv.size();
                 const bool one_pass = nd > 1 && m.can_draft_multi(dsv.data(), nd);
-                if (nd > 1 && !one_pass) {   // (more drafters than one pass holds - four with DSpark's block: a drafter
+                if (tp_batch && nd>0) {
+                    std::vector<std::vector<int>> dd;std::vector<std::vector<float>> cc;
+                    failed=!m.draft_tp2_groups(dsv.data(),dys.data(),nd,dd,cc,err);
+                    for (int j=0;j<nd && !failed;++j) {
+                        drafts[dix[j]]=std::move(dd[j]);confs[dix[j]]=std::move(cc[j]);
+                    }
+                } else if (nd > 1 && !one_pass) {   // (more drafters than one pass holds - four with DSpark's block: a drafter
                                              //  pass each cost more than their drafts won, so a token of each)
                     for (int j : dix) tried[(size_t) j] = 0;
                 } else if (one_pass) {
@@ -2451,8 +2465,13 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                         lens[(size_t) i] = (int) rows[(size_t) i].size();
                         sv[(size_t) i] = need[(size_t) i]->seq;
                     }
+                    std::vector<std::int64_t> starts;
+                    for (Act* a:need) starts.push_back(m.seq_pos(a->seq));
+                    std::vector<std::vector<int>> emitted(nn);
+                    std::vector<bool> more(nn,true);
+                    bool selected=true;
                     if (!m.step_multi_spec(sv.data(), tp.data(), lens.data(), nn, err)) cancel_all();
-                    else
+                    else {
                         for (int i = 0; i < nn; ++i) {
                             Act& a = *need[(size_t) i];
                             const std::vector<int>& d = drafts[(size_t) i];
@@ -2461,22 +2480,37 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                             int acc = 0, next = -1;
                             if (!m.verify_multi(i, d, a.r.temperature, a.r.top_p, a.r.top_k, a.r.min_p, a.r.seed,
                                                 a.counter, acc, next, err)) {
-                                cancel_all();
+                                selected=false;cancel_all();
                                 break;
                             }
                             stepped = i == nn - 1;   // (every verdict taken)
                             if (dc != nullptr && !d.empty()) dc->alone.observe_drafts(confs[(size_t) i].data(), (int) d.size(), acc);
-                            a.counter += (unsigned long long) acc + 1;
-                            a.d_off += (long long) d.size();
-                            a.d_acc += acc;
                             a.cool = tried[(size_t) i] && d.empty();
-                            a.got.assign(d.begin(), d.begin() + acc);
-                            a.got.push_back(next);
-                            if (closing[(size_t) i]) a.got.back() = a.r.think_end;
+                            a.got.assign(d.begin(),d.begin()+acc);a.got.push_back(next);
+                            if (closing[(size_t) i]) a.got.back()=a.r.think_end;
+                            if (tp_batch) {
+                                // Decide output/EOS/cancel before committing any member. Every
+                                // verdict retains at least its anchor and a final unconsumed token.
+                                std::size_t keep=std::min<std::size_t>(a.got.size(),static_cast<std::size_t>(a.limit-a.produced));
+                                keep=std::min<std::size_t>(keep,static_cast<std::size_t>(m.max_context()-starts[i]));
+                                if (in.stopped(a.r.rid)) keep=1;
+                                bool terminal=in.stopped(a.r.rid);
+                                for (std::size_t j=0;j<keep;++j) {
+                                    if (std::find(eos.begin(),eos.end(),a.got[j])!=eos.end()) { keep=j+1;terminal=true;break; }
+                                }
+                                a.got.resize(keep);emitted[i]=a.got;
+                                more[i]=!terminal && a.produced+static_cast<long long>(keep)<a.limit &&
+                                    starts[i]+static_cast<std::int64_t>(keep)<m.max_context();
+                                acc=static_cast<int>(keep)-1;
+                            }
+                            a.counter+=static_cast<unsigned long long>(acc)+1;
+                            a.d_off+=static_cast<long long>(d.size());a.d_acc+=acc;
                             std::reverse(a.got.begin(), a.got.end());
                             if (a.r.logprobs >= 0) a.got_lp = lp_take(m, a.got.size());
                             next_tok(a);
                         }
+                        if (tp_batch && selected && !m.tp2_commit_multi(emitted,more,err)) { stepped=false;cancel_all(); }
+                    }
                 }
                 if (sp != nullptr && stepped) {   // (DS4_DRAFT_COST: the step's time by its rows in all)
                     int rows_all = 0;
@@ -2492,7 +2526,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             Act* a = read_line.front();
             read_line.pop_front();
             const bool alone = read_line.empty() && !answering;
-            if (!a->done) read_turn(*a, alone ? a->r.ids.size() : read_piece, alone);
+            if (!a->done) read_turn(*a,tp_batch?read_piece:(alone?a->r.ids.size():read_piece),alone && !tp_batch);
             if (a->reading && !a->done) {   // (arrival: the prompt in front keeps its turn, the later ones wait for it)
                 if (read_pieces) read_line.push_back(a);
                 else read_line.push_front(a);
@@ -3604,8 +3638,15 @@ int main(int argc, char** argv) {
             (tp2_rank==0 ? (!serve_mode || tp2_worker) : (!tp2_worker || serve_mode)) ||
             !ids_s.empty() || !ppl.empty() || !prof_run.empty() || !spec_eval_path.empty() ||
             !enc_rgb.empty() || !images.empty() || describe || multi_check || parts_check || sampler_n>0 ||
-            o.seqs!=1) {
+            o.seqs<1 || o.seqs>4) {
             std::fprintf(stderr,"maya-ds4: unsupported or incomplete DeepSeek TP2 rank configuration\n"); return 2;
+        }
+        const char* requested_parallel=std::getenv("MAYA_DS4_TP2_PARALLEL");
+        if ((o.seqs>1 && !requested_parallel) ||
+            (requested_parallel && std::string(requested_parallel)!=std::to_string(o.seqs)) ||
+            (o.seqs>1 && (suffix_draft!=0 || (std::getenv("DS4_DSPARK_SAMPLE") &&
+              std::atoi(std::getenv("DS4_DSPARK_SAMPLE"))!=0)))) {
+            std::fprintf(stderr,"maya-ds4: batching requires matching parallel 2..4, suffix-draft 0 and point DSpark proposals\n");return 2;
         }
         tp2_dspark=std::strcmp(requested,"1")==0;
         if (!strata::ds4::tp2::preflight_chunk(requested_chunk,o.prefill_chunk,o.tp2_chunk_enabled,tp2_error)) {
@@ -3651,6 +3692,9 @@ int main(int argc, char** argv) {
         tp2_identity.feature_flags=(tp2_dspark ? 1ull : 0ull) |
             (static_cast<std::uint64_t>(o.prefill_chunk)<<16) | (static_cast<std::uint64_t>(tp2_lookup)<<32);
         tp2_identity.max_partial_bytes=tp2_comm->MaxPartialBytes();
+        if (!strata::ds4::tp2::configure_batch_identity(tp2_identity,m.seq_count(),err)) {
+            std::fprintf(stderr,"maya-ds4: %s\n",err.c_str()); return 1;
+        }
         strata::ds4::tp2::Identity peer; std::uint64_t limit=0;
         if (!strata::ds4::tp2::exchange_identity(*tp2_comm,tp2_identity,peer,limit,err) ||
             !m.tp2_attach(*tp2_comm,static_cast<std::size_t>(limit),err,tp2_rank==0)) {
@@ -3658,15 +3702,15 @@ int main(int argc, char** argv) {
         }
         if (tp2_rank==1) {
             const std::uint32_t max_words=o.tp2_chunk_enabled ? static_cast<std::uint32_t>(m.prompt_chunk()) : 16;
-            strata::ds4::tp2::Worker worker(*tp2_comm,static_cast<std::uint64_t>(m.max_context()),m.vocab(),max_words);
-            strata::ds4::tp2::ModelWorker<strata::ds4::Model> adapter(m,o.tp2_chunk_enabled); std::uint64_t processed=0;
+            strata::ds4::tp2::Worker worker(*tp2_comm,static_cast<std::uint64_t>(m.max_context()),m.vocab(),max_words,static_cast<std::uint32_t>(m.seq_count()));
+            strata::ds4::tp2::ModelWorker<strata::ds4::Model> adapter(m,o.tp2_chunk_enabled,static_cast<std::uint32_t>(m.seq_count())); std::uint64_t processed=0;
             while (!worker.state().stopped()) {
                 if (!worker.run_one([&](const strata::ds4::tp2::Control& c,std::string& e) { return adapter.execute(c,e); },err)) {
                     std::fprintf(stderr,"maya-ds4 worker: %s\n",err.c_str()); return 1;
                 }
                 ++processed;
             }
-            if (!strata::ds4::tp2::send_message(*tp2_comm,{strata::ds4::tp2::Command::Shutdown,processed+1,
+            if (m.seq_count()==1 && !strata::ds4::tp2::send_message(*tp2_comm,{strata::ds4::tp2::Command::Shutdown,processed+1,
                     static_cast<std::uint64_t>(m.pos()),{}},max_words,err)) {
                 std::fprintf(stderr,"maya-ds4 worker: %s\n",err.c_str()); return 1;
             }

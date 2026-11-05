@@ -5,6 +5,12 @@ Feature tracking is #140 and the completed source-review workstream is #142.
 This document defines proposed implementation work. Use the
 [DeepSeek runbook](DEEPSEEK-TP2-RUN.md) for the accepted runtime.
 
+Implementation checkpoint: shared C1, GLM G1–G5 and DeepSeek D1–D5 are
+implemented in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), with
+phase evidence linked from [Handoff §52](../Handoff.md). This document retains
+its dated design/review findings. Use the current runbooks and validation
+reports for implemented controls, measured limits and pending user trials.
+
 ## Goal and preservation contract
 
 Run 2–4 active XS/S text conversations with continuous admission/retirement,

@@ -1,10 +1,13 @@
 import json
+import os
+import contextlib
+import io
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from tools.ds4 import tp2_identity, tp2_rank
+from tools.ds4 import tp2_identity, tp2_rank, tp2_launch
 
 
 class DeepSeekTP2RankTest(unittest.TestCase):
@@ -70,6 +73,38 @@ class DeepSeekTP2RankTest(unittest.TestCase):
                 self.build(flags)
         with self.assertRaisesRegex(tp2_identity.IdentityError, "DS4_STREAM"):
             self.build(["--serve", "--rank", "0"], {"DS4_STREAM": "1"})
+
+    def test_parallel_is_shared_and_execution_identity_is_separate(self):
+        root,a=self.build(['--serve','--rank','0','--parallel','4','--prefill-chunk','256'])
+        peer,b=self.build(['--rank','1','--parallel','4','--prefill-chunk','256'])
+        for command in (root,peer): self.assertEqual(command[command.index('--parallel')+1],'4')
+        self.assertEqual(a['MAYA_DS4_TP2_EXECUTION_DIGEST'],b['MAYA_DS4_TP2_EXECUTION_DIGEST'])
+        _,single=self.build(['--serve','--rank','0','--parallel','1','--prefill-chunk','256'])
+        _,small=self.build(['--serve','--rank','0','--parallel','2','--prefill-chunk','256'])
+        self.assertEqual(len({a['MAYA_DS4_TP2_EXECUTION_DIGEST'],single['MAYA_DS4_TP2_EXECUTION_DIGEST'],small['MAYA_DS4_TP2_EXECUTION_DIGEST']}),3)
+        for env in (a,b,single,small): self.assertEqual(env['MAYA_DS4_TP2_MODEL_DIGEST'],'a'*64)
+
+    def test_default_preflight_retains_legacy_identity_format(self):
+        settings=dict(tp2_launch.RANK_DEFAULTS,pack=str(self.pack),manifest=str(self.manifest),
+                      engine=str(self.engine),host='rank0.local',rdma_device='usb4_rdma5')
+        with patch.dict(os.environ,{},clear=True),patch.object(tp2_rank,'prepare_identity',return_value=self.identity):
+            _,_,_,legacy=tp2_launch.prepare(settings,0)
+            settings['parallel']=4
+            _,_,_,batch=tp2_launch.prepare(settings,0)
+        self.assertEqual(legacy,{'model':'a'*64,'partition':'b'*64,'build':'c'*64})
+        self.assertEqual({k:batch[k] for k in legacy},legacy)
+        self.assertEqual(set(batch)-set(legacy),{'execution'})
+
+    def test_batch_proposal_modes_fail_before_launch(self):
+        for extra,env in [(['--suffix-draft','3'],{}),([],{ 'DS4_DSPARK_SAMPLE':'1'})]:
+            with self.subTest(extra=extra,env=env),self.assertRaises(tp2_identity.IdentityError):
+                self.build(['--serve','--rank','0','--parallel','4',*extra],env)
+        # Legacy one-sequence sampling remains available.
+        _,env=self.build(['--serve','--rank','0'],{'DS4_DSPARK_SAMPLE':'1'})
+        self.assertEqual(env['DS4_DSPARK_SAMPLE'],'1')
+        for count in ('0','5'):
+            with contextlib.redirect_stderr(io.StringIO()),self.assertRaises(SystemExit):
+                tp2_rank.parser().parse_args(['--serve','--rank','0','--parallel',count,*self.base])
 
     def test_drafter_can_be_disabled_for_both_ranks(self):
         root, a = self.build(["--serve", "--rank", "0", "--dspark", "off"])

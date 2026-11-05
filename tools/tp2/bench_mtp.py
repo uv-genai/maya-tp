@@ -2,7 +2,7 @@
 """Compare MTP and simple TP2 decode on a resident gfx1151 pair over RDMA.
 
 Run on strix-halo-2: .venv/bin/python tools/tp2/bench_mtp.py --output /tmp/mtp-bench
-Both hosts must have matching binaries. Stops existing Maya engines/remote server.
+Both hosts must have matching binaries. Stops only children it starts.
 Generates a simple-loop reference, then replays it with --spec-follow. MTP stays
 loaded in both modes; GEN spec=1/0 selects simple/MTP. Model load and warmups are
 excluded. EOS stopping is disabled via an unreachable EOS ID for fixed-length runs.
@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import uuid
 import queue
 import re
 import shlex
@@ -48,12 +49,6 @@ def remote(argv, **kwargs):
     return subprocess.run(["ssh", "-o", "BatchMode=yes", HOST, shlex.join(argv)], check=True, **kwargs)
 
 
-def cleanup():
-    subprocess.run(["pkill", "-9", "-x", "maya"], check=False, capture_output=True)
-    subprocess.run(["ssh", "-o", "BatchMode=yes", HOST,
-                    'pkill -9 -f "[s]erver.py --engine"; pkill -9 -x maya; true'],
-                   check=False, capture_output=True)
-
 
 class Pair:
     def __init__(self, output, label, context, follow=None, single_host=False):
@@ -85,7 +80,7 @@ class Pair:
                        "--eos-ids", "2147483647"]
             if follow:
                 cmd += ["--spec-follow", follow]
-            command = cmd if single_host else ["ssh", "-o", "BatchMode=yes", HOST, "exec " + shlex.join(cmd)]
+            command = cmd if single_host else ["ssh", "-o", "BatchMode=yes", HOST, "exec " + shlex.join([str(ROOT/".venv/bin/python"), str(ROOT/"tools/tp2/owned_exec.py"), "--identity", f"/tmp/maya-tp2-bench-{uuid.uuid4().hex}.json", "--", *cmd])]
             self.r0 = subprocess.Popen(command,
                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                        text=True, bufsize=1, env=env if single_host else None)
@@ -177,7 +172,6 @@ class Pair:
         self.log0.close()
         self.log0err.close()
         self.log1.close()
-        cleanup()
 
 
 def main():
@@ -234,7 +228,6 @@ def main():
                     max_pick_differences=args.max_pick_differences,
                     warmup_order=["simple", "mtp", "mtp", "simple"], results=[], warmups=[])
     (out / "results.json").write_text(json.dumps(metadata, indent=2) + "\n")
-    cleanup()
     pair = None
     try:
         if args.reference:
@@ -290,7 +283,6 @@ def main():
     finally:
         if pair is not None:
             pair.close()
-        cleanup()
 
 
 if __name__ == "__main__":

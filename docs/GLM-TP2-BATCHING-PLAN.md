@@ -5,6 +5,18 @@ Feature tracking is #11 and the completed source-review workstream is #141.
 This document defines proposed implementation work. The accepted operating
 instructions are in the [TP2 runbook](TP2-RUN.md).
 
+Implementation checkpoint: C1 and G1–G4 passed their phase gates. G5's local
+operational and performance gates pass on `codex/tp2-continuous-batching`;
+publication/CI is tracked in #148. See the [G5 report](validation/tp2-batching-g5-2026-11-05.md).
+The original plan below remains a dated design contract. Combined integration
+and user trial status are recorded in Handoff.md §52 and #11.
+
+Implementation checkpoint: shared C1, GLM G1–G5 and DeepSeek D1–D5 are
+implemented in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), with
+phase evidence linked from [Handoff §52](../Handoff.md). This document retains
+its dated design/review findings. Use the current runbooks and validation
+reports for implemented controls, measured limits and pending user trials.
+
 ## Goal and preservation contract
 
 Support 2–4 active text conversations, continuous admission and retirement,

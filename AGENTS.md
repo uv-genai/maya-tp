@@ -79,8 +79,8 @@ python -m unittest discover -s serve -p "test_*.py" -t .
 python -m unittest discover -s tools -p "test_*.py"
 ```
 
-The workflow also runs CPU-only GLM memory-policy and DeepSeek row-preparation/
-native-experts-OFF stub checks after these three gates. Their exact compiler
+The workflow also runs CPU-only GLM memory-policy/batch-framing and DeepSeek row-preparation/
+native-experts-OFF stub checks and checked DeepSeek TP2 batch-control suites after these three gates. Their exact compiler
 commands are in `.github/workflows/tests.yml`.
 
 Single test:
@@ -177,3 +177,32 @@ identity checks.
 - `docs/SETUP.md` — install options, build failure fixes  
 - `docs/MODELS.md` — per-model files and engine options  
 - `docs/AMD_MAYA.md`, `docs/AMD_RDNA4.md` — HIP install and validation  
+
+## Continuous-batching implementation checkpoint
+
+GLM opt-in TP2 batching negotiates application control version 2, slot/row
+limits and kernel/MTP choices before READY. Every target plan and complete
+MTP verdict checks operation, slot generation, expected position and canonical
+retained inputs. Preserve acceptance/completion acknowledgements and sticky
+pair-fatal recovery; never reset uncertain device state after a failed batch.
+Default one-sequence control operations retain their accepted meanings.
+
+Use `tools/tp2/launch.py` through the GLM llama-swap wrapper for an owned pair;
+`--parallel 2..4` is explicit and defaults to 1. Stop by port or supervisor PID,
+never by process name. `tools/tp2/validate_batch.py` records isolated GPU-test
+ownership. G1–G4 evidence is in `docs/validation/tp2-batching-g*-2026-11-05.*`;
+G5 and DeepSeek phase status are in Handoff.md §52 and #148–#153. The process
+supervisor reused from DeepSeek shares ownership only, not model execution.
+
+DeepSeek batch protocol is separately negotiated; preserve its complete verdict,
+acceptance/completion ACK and per-slot generation checks. The wire contract is
+`docs/DEEPSEEK-TP2-BATCH-PROTOCOL.md`. D3/D4 passed XS/S full-logit and
+rollback/drafter gates. D5 enables explicit `--parallel 2..4` in the DeepSeek
+wrapper; keep the default 1 branch intact. DeepSeek request `spec=0` disables
+DSpark (GLM uses 1). Batched DSpark uses point proposals with fitting groups;
+reject sampled-q proposal mode and lookup in this mode. Never reuse a slot
+before the complete EOS/output/cancel verdict finishes on both peers.
+The owned DeepSeek GPU harness is `tools/ds4/validate_batch.py`. Operational
+user acceptance of the new batch mode is separate from the accepted deployed
+single-slot runtime. Source integration does not authorize changing production
+binaries or the protected peer checkout.

@@ -23,6 +23,7 @@
 
 #if defined(STRATA_DS4_TP2_RDMA)
 namespace strata::net { class Communicator; }
+namespace strata::ds4::tp2 { struct Control; }
 #endif
 namespace strata::ds4 {
 
@@ -171,17 +172,31 @@ struct Tp2Geometry {
     int hidden = 0, layers = 0, experts = 0, expert_width = 0;
 };
 
+struct Tp2Capacity {
+    int sequences = 0;
+    std::int64_t context = 0;
+    std::uint64_t weights = 0, caches = 0, scratch = 0, experts = 0;
+    std::uint64_t extra_sequence_caches = 0, pinned_staging = 0;
+    std::uint64_t free = 0, total = 0, system_available = 0;
+};
+
 class Model {
 public:
     Model();
     ~Model();
     bool load(const Options& o, std::string& err);
+    // Allocation/state diagnostics for bounded TP2 validation, no model work.
+    bool tp2_capacity(Tp2Capacity& capacity, std::string& err) const;
+    bool tp2_sequence_layout(std::string& err) const;
 #if defined(STRATA_DS4_TP2_RDMA)
     // Non-owning; the communicator must outlive all model calls. The caller
     // must validate both identities before attaching either rank.
     bool tp2_attach(strata::net::Communicator& comm, std::size_t limit, std::string& err,
                          bool control_rank0 = false);
     bool tp2_shutdown(std::string& err);
+    bool tp_batch_execute(const tp2::Control& control, std::string& err);
+    bool tp_batch_rows(const int* seqs, const int* const* tokens, const int* lengths,
+                       int n, bool verify, std::string& err);
     void tp2_set_failure_handler(std::function<void(const std::string&)> handler);
 #endif
     bool tp2_driving() const;
@@ -304,6 +319,8 @@ public:
     /// conversation s from here - feed, step, draft / verify, sample, checkpoints, slots, reset, tokens (0 at load).
     int seq_count() const;
     void seq_bind(int s);
+    /// Admit a new TP2 request generation before binding/resetting/reusing a slot.
+    bool tp2_begin_sequence(int s, std::string& err);
     int seq_bound() const;
     int64_t seq_pos(int s) const;
     const std::vector<int32_t>& seq_tokens(int s) const;
@@ -327,6 +344,13 @@ public:
     /// together.  can_draft_multi: whether these conversations fit one pass (their blocks in a window, each its
     /// block's room in its context); else each drafts alone with draft().
     bool can_draft_multi(const int* seqs, int n) const;
+    /// Root-only fitting groups with point proposals; no target operation is open.
+    bool draft_tp2_groups(const int* seqs, const int* ys, int n,
+                          std::vector<std::vector<int>>& drafts,
+                          std::vector<std::vector<float>>& conf, std::string& err);
+    /// Commit the complete ordered pending batch after EOS/output cuts. Final token is unconsumed.
+    bool tp2_commit_multi(const std::vector<std::vector<int>>& emitted,
+                         const std::vector<bool>& more, std::string& err);
     bool draft_multi(const int* seqs, const int* ys, int n, std::vector<std::vector<int>>& drafts,
                      std::vector<std::vector<float>>& conf, std::string& err);
     bool verify_multi(int i, const std::vector<int>& drafts, float temperature, float top_p, int top_k, float min_p,

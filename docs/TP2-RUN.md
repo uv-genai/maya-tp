@@ -368,7 +368,10 @@ reloads on edit. Manual examples **on strix-halo-1**:
 `--drafts N` accepts 1–8, defaults to 2, and forwards both `MAYA_GLM_MTP_FIXED=N` and
 `MAYA_GLM_MTP_DRAFT=N` to both hosts. `--context N` also sets the same context on both ranks;
 otherwise the context comes from the base Maya JSON config. `--model NAME` / `--pack PATH` / `--config PATH`
-select the model pack (forwarded to both ranks). One sequence is used while #11 remains gated.
+select the model pack (forwarded to both ranks). One sequence remains the default;
+`--parallel 2`, `3` or `4` opts into the checked TP2 batch scheduler. With
+`--mtp`, batch mode accepts 1–7 drafts per request. Context applies to each
+slot, so use an explicit proven context when increasing parallelism.
 
 For direct engine/manual rank launches, put these environment assignments on **both** ranks before the command:
 
@@ -470,3 +473,46 @@ On a matching4096-context pair with MTP enabled, `tools/tp2/continuation_boundar
 TP2 MTP currently enforces greedy verification and rejects nonempty `logit_bias` (#69). For ordinary decoding with bias, use `strata_tune: {"spec": 1}`. No MTP sampling algorithm was changed.
 
 For long-loop cache validation on a fresh matching32768-context pair, run `tools/tp2/long_loop_reuse.py` with `--expect-preserved` at the default collapse limit32000, or `--expect-collapsed` with config limit0. Synthetic tool history is input data; no tool executes. Keep separate output paths for both arms.
+
+## Opt-in GLM TP2 continuous batching
+
+Launch from the lead host, with the same models and executable on its peer:
+
+```sh
+tools/llama-swap/tp2.sh run 18080 --model Maya-S-v2-IQ2_XXS \
+  --parallel 4 --context 32768 --mtp --drafts 2
+tools/llama-swap/tp2.sh stop 18080
+```
+
+The wrapper validates executable/model-index identity and matching capacities
+before starting inference. Its control socket and recorded process identities
+own only this pair. It stops the API server before the engine and closes the
+owned worker control pipe. It never clears process names or occupied ports.
+`stop-pid PID` is suitable for llama-swap `cmdStop` with `${PID}`; explicit
+`stop PORT` also works. For compatibility, bare `stop` stops the sole owned
+pair and refuses ambiguity when more than one pair is recorded.
+
+`--peer HOST`, `--peer-root PATH`, `--bootstrap-host ADDRESS`,
+`--bootstrap-port PORT`, `--engine PATH` and `--state-dir PATH` support isolated
+review trees. `--parallel 1` preserves the accepted single-conversation branch.
+Direct `rank0.sh` and `rank1.sh` also accept `--parallel N --context N`; pass
+matching model, context and speculation settings to both.
+
+The batch scheduler admits/retires requests between completed operations and
+interleaves bounded prefill pieces with decode. Requests retain their own
+sampling, bias, penalties, thinking/output limits and cancellation. MTP target
+windows and complete per-slot commits carry generation and position checks;
+a fatal error ends the pair with its first cause retained. Restart both ranks.
+Default batch kernel settings and overrides are in [SETTINGS](SETTINGS.md#hip-tp2-multi-sequence-mtp).
+
+Use `tools/bench_concurrency.py` for existing API endpoints: `--rounds 3`,
+`--concurrency 1 2 3 4`, `--run-id FIXED` for matched identifiers, `--spec 1` to
+disable proposals per request, `--stagger SECONDS` and `--requests-per-client N`
+for staggered/replenished traffic. `--requests-json FILE` replays a JSON array
+of chat request bodies. Results retain exact inputs, usage, timings, draft
+counts, per-wave rates and client latencies.
+
+The standalone owned correctness/lifecycle driver is
+`tools/tp2/validate_batch.py`; see the [G4 checkpoint](validation/tp2-batching-g4-2026-11-05.md).
+The `acceptance.sh` helper deliberately loses only its recorded worker to test
+all-route fatal handling. The MTP benchmark likewise cleans up its own children.

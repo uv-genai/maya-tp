@@ -107,7 +107,10 @@ For the fork's two-host Maya-XS/S setup, `maya-ds4` runs on each host and the
 DeepSeek launcher matches their model identities, context and speculation
 settings. The installer model IDs above differ from the launcher names
 `Maya-XS` and `Maya-S`, which select per-model launcher JSON.
-[DeepSeek launchers and accepted runtime](DEEPSEEK-TP2-RUN.md).
+[DeepSeek launchers and accepted runtime](DEEPSEEK-TP2-RUN.md). Current source also provides
+opt-in 2–4-slot TP2 continuous batching with DSpark on XS/S; the default remains
+one sequence. Use matching new binaries/launchers and the runbook's explicit
+runtime selection. This is separate from the accepted deployed single-slot build.
 
 - **Any amount of memory:** the most-used experts go to the GPUs, the others are read in place from the model's files -
   from RAM where they fit, from the SSD otherwise. More VRAM and RAM is faster; keep the files on an NVMe SSD. The

@@ -1,0 +1,1723 @@
+{
+  "started_utc": "2026-11-05T08:26:56.943479+00:00",
+  "url": "http://127.0.0.1:19161/v1",
+  "model": "glm-5.3-flash",
+  "prompt": "Write a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words.",
+  "max_tokens": 96,
+  "rounds": 3,
+  "stagger": 0,
+  "requests_per_client": 1,
+  "replay": null,
+  "concurrency": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "timeout_s": 600,
+  "warmup": {
+    "concurrency": 1,
+    "round": 0,
+    "elapsed_s": 4.277241958996456,
+    "requests": [
+      {
+        "request_id": "bf9062fcac02-c01-r00-i00-n00",
+        "request": {
+          "model": "glm-5.3-flash",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Request identifier bf9062fcac02-c01-r00-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+            }
+          ],
+          "max_tokens": 96,
+          "temperature": 0,
+          "top_p": 1,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "chat_template_kwargs": {
+            "enable_thinking": false
+          }
+        },
+        "error": null,
+        "ttft_s": 1.1153521119995276,
+        "usage": {
+          "prompt_tokens": 98,
+          "completion_tokens": 96,
+          "total_tokens": 194,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 98,
+          "prompt_ms": 1102.2,
+          "prompt_per_token_ms": 11.247,
+          "prompt_per_second": 88.9,
+          "predicted_n": 96,
+          "predicted_ms": 3161.6,
+          "predicted_per_token_ms": 32.933,
+          "predicted_per_second": 30.4,
+          "draft_n": 78,
+          "draft_n_accepted": 55
+        },
+        "finish_reason": "length",
+        "response_model": "glm-5.3-flash",
+        "elapsed_s": 4.27672999400238,
+        "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies and, if safe, attaches to",
+        "reasoning_content": ""
+      }
+    ]
+  },
+  "waves": [
+    {
+      "concurrency": 1,
+      "round": 1,
+      "elapsed_s": 4.123689836000267,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c01-r01-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c01-r01-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9161447769947699,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 910.9,
+            "prompt_per_token_ms": 9.295,
+            "prompt_per_second": 107.6,
+            "predicted_n": 96,
+            "predicted_ms": 3206.9,
+            "predicted_per_token_ms": 33.405,
+            "predicted_per_second": 29.9,
+            "draft_n": 80,
+            "draft_n_accepted": 54
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 4.123397634997673,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to safely run sandboxed programs directly in the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security.\n\nThis tutorial walks you through writing, compiling, loading, and troubleshooting your",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 1,
+      "round": 2,
+      "elapsed_s": 3.993493996000325,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c01-r02-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c01-r02-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.8987910540017765,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 893.5,
+            "prompt_per_token_ms": 9.117,
+            "prompt_per_second": 109.7,
+            "predicted_n": 96,
+            "predicted_ms": 3094.4,
+            "predicted_per_token_ms": 32.233,
+            "predicted_per_second": 31.0,
+            "draft_n": 77,
+            "draft_n_accepted": 56
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 3.993223154997395,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies for safety before executing them.\n\nThis",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 1,
+      "round": 3,
+      "elapsed_s": 3.94917037000414,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c01-r03-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c01-r03-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.8941220449996763,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 888.2,
+            "prompt_per_token_ms": 9.063,
+            "prompt_per_second": 110.3,
+            "predicted_n": 96,
+            "predicted_ms": 3054.9,
+            "predicted_per_token_ms": 31.822,
+            "predicted_per_second": 31.4,
+            "draft_n": 79,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 3.94893572699948,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to safely run sandboxed programs directly in the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security.\n\neBPF programs are verified by the kernel's in-kernel verifier",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 2,
+      "round": 1,
+      "elapsed_s": 7.843747703002009,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c02-r01-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c02-r01-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.954603804995713,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 895.9,
+            "prompt_per_token_ms": 9.142,
+            "prompt_per_second": 109.4,
+            "predicted_n": 96,
+            "predicted_ms": 2889.1,
+            "predicted_per_token_ms": 30.095,
+            "predicted_per_second": 33.2,
+            "draft_n": 75,
+            "draft_n_accepted": 57
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 7.84348632000183,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework for tracing, networking, security, and observability. eBPF programs are verified by the kernel for safety, JIT-compiled for speed, and can attach to hooks like tracepoints, kpro",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c02-r01-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c02-r01-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.8987524539988954,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 892.6,
+            "prompt_per_token_ms": 9.108,
+            "prompt_per_second": 109.8,
+            "predicted_n": 96,
+            "predicted_ms": 3156.1,
+            "predicted_per_token_ms": 32.876,
+            "predicted_per_second": 30.4,
+            "draft_n": 80,
+            "draft_n_accepted": 54
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 4.055390145003912,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or loading custom kernel code. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by the kernel for safety, then JIT-compiled to native machine code,",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 2,
+      "round": 2,
+      "elapsed_s": 7.953026390998275,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c02-r02-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c02-r02-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.881739833006577,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 896.0,
+            "prompt_per_token_ms": 9.143,
+            "prompt_per_second": 109.4,
+            "predicted_n": 96,
+            "predicted_ms": 3070.8,
+            "predicted_per_token_ms": 31.988,
+            "predicted_per_second": 31.3,
+            "draft_n": 78,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 7.952564655002789,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies and, if safe, attaches to",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c02-r02-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c02-r02-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.8993454649971682,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 893.4,
+            "prompt_per_token_ms": 9.116,
+            "prompt_per_second": 109.7,
+            "predicted_n": 96,
+            "predicted_ms": 3083.0,
+            "predicted_per_token_ms": 32.115,
+            "predicted_per_second": 31.1,
+            "draft_n": 80,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 3.9830339179970906,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by the kernel for safety, then JIT-compiled to native machine code",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 2,
+      "round": 3,
+      "elapsed_s": 7.876123569003539,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c02-r03-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c02-r03-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9060421519970987,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 899.5,
+            "prompt_per_token_ms": 9.179,
+            "prompt_per_second": 108.9,
+            "predicted_n": 96,
+            "predicted_ms": 3136.1,
+            "predicted_per_token_ms": 32.668,
+            "predicted_per_second": 30.6,
+            "draft_n": 80,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 4.043022344994824,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to safely run sandboxed programs directly in the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security.\n\neBPF programs are verified by an in-kernel verifier, executed",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c02-r03-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c02-r03-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.941979520997847,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 896.2,
+            "prompt_per_token_ms": 9.145,
+            "prompt_per_second": 109.4,
+            "predicted_n": 96,
+            "predicted_ms": 2934.0,
+            "predicted_per_token_ms": 30.562,
+            "predicted_per_second": 32.7,
+            "draft_n": 76,
+            "draft_n_accepted": 57
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 7.875743340999179,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Programs written in a restricted subset of C (and increasingly Rust and other languages) are compiled to a special bytecode, verified by the kernel for safety",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 3,
+      "round": 1,
+      "elapsed_s": 12.039625966004678,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c03-r01-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r01-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 8.828210617000877,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 905.7,
+            "prompt_per_token_ms": 9.242,
+            "prompt_per_second": 108.2,
+            "predicted_n": 96,
+            "predicted_ms": 3210.7,
+            "predicted_per_token_ms": 33.445,
+            "predicted_per_second": 29.9,
+            "draft_n": 81,
+            "draft_n_accepted": 53
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 12.039016744995024,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or loading custom kernel code. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by the kernel for safety, making it possible to safely extend kernel behavior on",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c03-r01-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r01-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9055267069998081,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 899.6,
+            "prompt_per_token_ms": 9.18,
+            "prompt_per_second": 108.9,
+            "predicted_n": 96,
+            "predicted_ms": 3071.0,
+            "predicted_per_token_ms": 31.99,
+            "predicted_per_second": 31.3,
+            "draft_n": 80,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 3.9778523200002383,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified for safety by an in-kernel verifier, then JIT-compiled to",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c03-r01-i02-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r01-i02-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.873672510999313,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 892.8,
+            "prompt_per_token_ms": 9.11,
+            "prompt_per_second": 109.8,
+            "predicted_n": 96,
+            "predicted_ms": 3045.6,
+            "predicted_per_token_ms": 31.725,
+            "predicted_per_second": 31.5,
+            "draft_n": 78,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 7.9199105849984335,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies and, if safe, attaches to",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 3,
+      "round": 2,
+      "elapsed_s": 12.010281255003065,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c03-r02-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r02-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.885161646998313,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 896.9,
+            "prompt_per_token_ms": 9.152,
+            "prompt_per_second": 109.3,
+            "predicted_n": 96,
+            "predicted_ms": 3200.4,
+            "predicted_per_token_ms": 33.337,
+            "predicted_per_second": 30.0,
+            "draft_n": 81,
+            "draft_n_accepted": 53
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 8.086119281993888,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security.\n\neBPF programs are verified by an in-kernel verifier, executed efficiently via JIT",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c03-r02-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r02-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9056504820036935,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 899.6,
+            "prompt_per_token_ms": 9.18,
+            "prompt_per_second": 108.9,
+            "predicted_n": 96,
+            "predicted_ms": 3078.1,
+            "predicted_per_token_ms": 32.064,
+            "predicted_per_second": 31.2,
+            "draft_n": 79,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 3.984741877000488,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or loading custom kernel code. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs written in a restricted C subset (or other languages) are compiled to a special bytecode",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c03-r02-i02-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r02-i02-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 8.991900439003075,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 902.7,
+            "prompt_per_token_ms": 9.211,
+            "prompt_per_second": 108.6,
+            "predicted_n": 96,
+            "predicted_ms": 3018.0,
+            "predicted_per_token_ms": 31.438,
+            "predicted_per_second": 31.8,
+            "draft_n": 77,
+            "draft_n_accepted": 56
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 12.009852447001322,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies for safety before executing them.\n\nThis",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 3,
+      "round": 3,
+      "elapsed_s": 12.127872053002648,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c03-r03-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r03-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.953940835002868,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 898.1,
+            "prompt_per_token_ms": 9.164,
+            "prompt_per_second": 109.1,
+            "predicted_n": 96,
+            "predicted_ms": 3179.4,
+            "predicted_per_token_ms": 33.119,
+            "predicted_per_second": 30.2,
+            "draft_n": 81,
+            "draft_n_accepted": 54
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 8.13415683600033,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies and executes with guaranteed safety.\n\nThis",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c03-r03-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r03-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9035254359987448,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 896.5,
+            "prompt_per_token_ms": 9.148,
+            "prompt_per_second": 109.3,
+            "predicted_n": 96,
+            "predicted_ms": 3148.2,
+            "predicted_per_token_ms": 32.794,
+            "predicted_per_second": 30.5,
+            "draft_n": 78,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 4.052708379997057,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Programs written in a restricted subset of C (and increasingly Rust and other languages) are compiled to a special bytecode, verified by the kernel for safety",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c03-r03-i02-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c03-r03-i02-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 9.042861112997343,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 906.0,
+            "prompt_per_token_ms": 9.245,
+            "prompt_per_second": 108.2,
+            "predicted_n": 96,
+            "predicted_ms": 3084.3,
+            "predicted_per_token_ms": 32.128,
+            "predicted_per_second": 31.1,
+            "draft_n": 77,
+            "draft_n_accepted": 56
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 12.12720185299986,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies for safety before executing them.\n\nThis",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 4,
+      "round": 1,
+      "elapsed_s": 16.746035138996376,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c04-r01-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r01-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 5.097716744996433,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 898.1,
+            "prompt_per_token_ms": 9.164,
+            "prompt_per_second": 109.1,
+            "predicted_n": 96,
+            "predicted_ms": 3617.4,
+            "predicted_per_token_ms": 37.681,
+            "predicted_per_second": 26.5,
+            "draft_n": 82,
+            "draft_n_accepted": 53
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 8.715917128000001,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or loading custom kernel code. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by the kernel for safety, then JIT-compiled to native machine code,",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r01-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r01-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 9.61773377499776,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 898.5,
+            "prompt_per_token_ms": 9.168,
+            "prompt_per_second": 109.1,
+            "predicted_n": 96,
+            "predicted_ms": 3193.6,
+            "predicted_per_token_ms": 33.267,
+            "predicted_per_second": 30.1,
+            "draft_n": 80,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 12.811889839002106,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified for safety by an in-kernel verifier, then JIT-compiled to",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r01-i02-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r01-i02-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9106894979995559,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 903.3,
+            "prompt_per_token_ms": 9.217,
+            "prompt_per_second": 108.5,
+            "predicted_n": 96,
+            "predicted_ms": 3285.2,
+            "predicted_per_token_ms": 34.221,
+            "predicted_per_second": 29.2,
+            "draft_n": 82,
+            "draft_n_accepted": 53
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 4.197877359001723,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or loading custom kernel code. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by the kernel for safety, then JIT-compiled to native machine code,",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r01-i03-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r01-i03-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 13.712331775997882,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 897.0,
+            "prompt_per_token_ms": 9.153,
+            "prompt_per_second": 109.3,
+            "predicted_n": 96,
+            "predicted_ms": 3033.4,
+            "predicted_per_token_ms": 31.598,
+            "predicted_per_second": 31.6,
+            "draft_n": 77,
+            "draft_n_accepted": 56
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 16.745856743997138,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies for safety before executing them.\n\nThis",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 4,
+      "round": 2,
+      "elapsed_s": 16.092661460003,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c04-r02-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r02-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9061716430005617,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 898.7,
+            "prompt_per_token_ms": 9.17,
+            "prompt_per_second": 109.0,
+            "predicted_n": 96,
+            "predicted_ms": 3088.0,
+            "predicted_per_token_ms": 32.167,
+            "predicted_per_second": 31.1,
+            "draft_n": 78,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 3.9948742760025198,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies and, if safe, attaches to",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r02-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r02-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.903085357000236,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 905.5,
+            "prompt_per_token_ms": 9.24,
+            "prompt_per_second": 108.2,
+            "predicted_n": 96,
+            "predicted_ms": 3166.1,
+            "predicted_per_token_ms": 32.98,
+            "predicted_per_second": 30.3,
+            "draft_n": 80,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 8.06997540500015,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified for safety by an in-kernel verifier, then JIT-compiled to",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r02-i02-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r02-i02-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 8.980331471000682,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 907.2,
+            "prompt_per_token_ms": 9.257,
+            "prompt_per_second": 108.0,
+            "predicted_n": 96,
+            "predicted_ms": 3186.9,
+            "predicted_per_token_ms": 33.197,
+            "predicted_per_second": 30.1,
+            "draft_n": 80,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 12.16819650099933,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by the kernel for safety, then JIT-compiled to native machine code",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r02-i03-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r02-i03-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 13.06509673599794,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 894.3,
+            "prompt_per_token_ms": 9.126,
+            "prompt_per_second": 109.6,
+            "predicted_n": 96,
+            "predicted_ms": 3026.7,
+            "predicted_per_token_ms": 31.528,
+            "predicted_per_second": 31.7,
+            "draft_n": 77,
+            "draft_n_accepted": 56
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 16.09183099600341,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies for safety before executing them.\n\nThis",
+          "reasoning_content": ""
+        }
+      ]
+    },
+    {
+      "concurrency": 4,
+      "round": 3,
+      "elapsed_s": 15.82544743300241,
+      "requests": [
+        {
+          "request_id": "bf9062fcac02-c04-r03-i00-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r03-i00-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 4.7660721899956116,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 888.8,
+            "prompt_per_token_ms": 9.069,
+            "prompt_per_second": 110.3,
+            "predicted_n": 96,
+            "predicted_ms": 3061.5,
+            "predicted_per_token_ms": 31.891,
+            "predicted_per_second": 31.4,
+            "draft_n": 78,
+            "draft_n_accepted": 55
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 7.828515695000533,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or loading custom kernel code. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by the kernel for safety, then JIT-compiled to native machine code for",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r03-i01-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r03-i01-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 12.62980856300419,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 900.0,
+            "prompt_per_token_ms": 9.184,
+            "prompt_per_second": 108.9,
+            "predicted_n": 96,
+            "predicted_ms": 3194.7,
+            "predicted_per_token_ms": 33.278,
+            "predicted_per_second": 30.0,
+            "draft_n": 81,
+            "draft_n_accepted": 54
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 15.824601498999982,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that allows you to run sandboxed programs inside the Linux kernel without writing kernel modules or recompiling the kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose programmable framework used for networking, observability, tracing, and security. Programs are verified by an in-kernel verifier to guarantee they cannot crash the kernel or",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r03-i02-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r03-i02-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 8.729496184998425,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 897.5,
+            "prompt_per_token_ms": 9.158,
+            "prompt_per_second": 109.2,
+            "predicted_n": 96,
+            "predicted_ms": 2997.1,
+            "predicted_per_token_ms": 31.22,
+            "predicted_per_second": 32.0,
+            "draft_n": 77,
+            "draft_n_accepted": 56
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 11.727297800993256,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a technology that lets you safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (which risk crashing the system), you write eBPF programs that the kernel verifies for safety before executing them.\n\nThis",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "bf9062fcac02-c04-r03-i03-n00",
+          "request": {
+            "model": "glm-5.3-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Request identifier bf9062fcac02-c04-r03-i03-n00. Omit this identifier from your answer.\n\nWrite a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words."
+              }
+            ],
+            "max_tokens": 96,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.9006915579957422,
+          "usage": {
+            "prompt_tokens": 98,
+            "completion_tokens": 96,
+            "total_tokens": 194,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 98,
+            "prompt_ms": 893.2,
+            "prompt_per_token_ms": 9.114,
+            "prompt_per_second": 109.7,
+            "predicted_n": 96,
+            "predicted_ms": 2973.4,
+            "predicted_per_token_ms": 30.973,
+            "predicted_per_second": 32.3,
+            "draft_n": 75,
+            "draft_n_accepted": 56
+          },
+          "finish_reason": "length",
+          "response_model": "glm-5.3-flash",
+          "elapsed_s": 3.8749717899991083,
+          "content": "# eBPF on Linux: A Complete Tutorial\n\n## Introduction\n\neBPF (extended Berkeley Packet Filter) is a revolutionary technology that allows you to safely run sandboxed programs inside the Linux kernel. Originally designed for packet filtering, eBPF has evolved into a general-purpose framework used for networking, observability, tracing, and security. Instead of writing kernel modules (risky and hard to maintain), you write eBPF programs that the kernel verifies and, if safe",
+          "reasoning_content": ""
+        }
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "concurrency": 1,
+      "requests": 3,
+      "errors": 0,
+      "output_tokens": 288,
+      "aggregate_tok_s": 23.86802137402456,
+      "median_wave_tok_s": 24.039099619568375,
+      "min_wave_tok_s": 23.280121400477167,
+      "max_wave_tok_s": 24.308903138027787,
+      "drafts_offered": 236,
+      "drafts_accepted": 165,
+      "median_ttft_s": 0.8987910540017765,
+      "median_latency_s": 3.993223154997395,
+      "median_server_decode_tok_s": 31.0
+    },
+    {
+      "concurrency": 2,
+      "requests": 6,
+      "errors": 0,
+      "output_tokens": 576,
+      "aggregate_tok_s": 24.33162210218891,
+      "median_wave_tok_s": 24.377474314346138,
+      "min_wave_tok_s": 24.14175315918949,
+      "max_wave_tok_s": 24.47809481767453,
+      "drafts_offered": 469,
+      "drafts_accepted": 333,
+      "median_ttft_s": 2.893890992501838,
+      "median_latency_s": 5.949438232502871,
+      "median_server_decode_tok_s": 31.200000000000003
+    },
+    {
+      "concurrency": 3,
+      "requests": 9,
+      "errors": 0,
+      "output_tokens": 864,
+      "aggregate_tok_s": 23.882062894354753,
+      "median_wave_tok_s": 23.921008909512835,
+      "min_wave_tok_s": 23.74695237065073,
+      "max_wave_tok_s": 23.979455092280144,
+      "drafts_offered": 712,
+      "drafts_accepted": 492,
+      "median_ttft_s": 4.885161646998313,
+      "median_latency_s": 8.086119281993888,
+      "median_server_decode_tok_s": 31.1
+    },
+    {
+      "concurrency": 4,
+      "requests": 12,
+      "errors": 0,
+      "output_tokens": 1152,
+      "aggregate_tok_s": 23.67245993769949,
+      "median_wave_tok_s": 23.861808126294132,
+      "min_wave_tok_s": 22.930801041124166,
+      "max_wave_tok_s": 24.26471678767236,
+      "drafts_offered": 947,
+      "drafts_accepted": 659,
+      "median_ttft_s": 6.913606464997429,
+      "median_latency_s": 10.221607464496628,
+      "median_server_decode_tok_s": 30.700000000000003
+    }
+  ]
+}

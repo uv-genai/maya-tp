@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-05",
+  "issue": 152,
+  "fixture_sha256": "026b73ab6ce6b45a573c5c26b2dff3814d65aeb08f19191a53e5ba06f7ceead0",
+  "cases": {
+    "d4-xs-spec_counted": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d4-xs-spec_counted",
+        "env": {
+          "DS4_TP_TEST_CONTEXT": "262144",
+          "DS4_TP_TEST_SEQS": "4",
+          "MAYA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "STRATA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "DS4_TP_TEST_MODEL_DIGEST": "0c4933e6b70f53f7eff163a4053f8970fce470cacc4065983ebe28bd507c57af",
+          "DS4_TP_TEST_PARTITION_DIGEST": "b71b12627fd73832ac3ebace373bcd574b63f46f021104d711de5f9900304e94",
+          "DS4_TP_TEST_BUILD_DIGEST": "026b73ab6ce6b45a573c5c26b2dff3814d65aeb08f19191a53e5ba06f7ceead0"
+        },
+        "timeout": 900,
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d4-counted/ds4_tp_verify_test",
+          "--batch-spec",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d4-counted/ds4_tp_verify_test",
+          "--batch-spec",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4"
+        ],
+        "peer_outputs": [
+          "rank1.log",
+          "rank1-identity.json"
+        ]
+      },
+      "start": 1793874827.877353,
+      "rank0_pid": 398333,
+      "rank0_start": "7083753",
+      "ssh_pid": 398332,
+      "passed": true,
+      "rank0_exit": 0,
+      "rank1_exit": 0,
+      "ended": 1793874961.966549
+    },
+    "d4-s-spec_counted": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d4-s-spec_counted",
+        "env": {
+          "DS4_TP_TEST_CONTEXT": "262144",
+          "DS4_TP_TEST_SEQS": "4",
+          "MAYA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "STRATA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "DS4_TP_TEST_MODEL_DIGEST": "e8d41763b86d0ed5430202521f42c1089205d3bf14afc2e0308ca82e1d481c71",
+          "DS4_TP_TEST_PARTITION_DIGEST": "b71b12627fd73832ac3ebace373bcd574b63f46f021104d711de5f9900304e94",
+          "DS4_TP_TEST_BUILD_DIGEST": "026b73ab6ce6b45a573c5c26b2dff3814d65aeb08f19191a53e5ba06f7ceead0"
+        },
+        "timeout": 900,
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d4-counted/ds4_tp_verify_test",
+          "--batch-spec",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d4-counted/ds4_tp_verify_test",
+          "--batch-spec",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4"
+        ],
+        "peer_outputs": [
+          "rank1.log",
+          "rank1-identity.json"
+        ]
+      },
+      "start": 1793874998.9027078,
+      "rank0_pid": 399525,
+      "rank0_start": "7100855",
+      "ssh_pid": 399524,
+      "passed": true,
+      "rank0_exit": 0,
+      "rank1_exit": 0,
+      "ended": 1793875304.356772
+    }
+  },
+  "full_logit_comparisons_per_model": 24,
+  "max_abs": 0,
+  "actual_draft_proposals_per_model": 120,
+  "retained_input_counts": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "target_run_lengths": [
+    6,
+    4,
+    3,
+    3
+  ]
+}

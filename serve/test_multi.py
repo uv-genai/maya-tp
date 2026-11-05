@@ -44,6 +44,44 @@ class Engine(unittest.TestCase):
             self.assertEqual(toks, [i + 1000 for i in ids], k)
         self.assertEqual(len(out), 3)
 
+    def test_large_concurrent_prompts_keep_complete_command_lines(self):
+        original = self.engine.proc.stdin
+
+        class FragmentedInput:
+            def write(self, text):
+                for start in range(0, len(text), 512):
+                    original.write(text[start:start + 512])
+                    original.flush()
+                    time.sleep(0.0001)
+
+            def flush(self):
+                original.flush()
+
+        self.engine.proc.stdin = FragmentedInput()
+        out, errors = {}, []
+        barrier = threading.Barrier(3)
+
+        def request(index):
+            try:
+                barrier.wait(timeout=3)
+                ids = [index + 1] * 20000
+                out[index] = [token for token in self.engine.generate(ids, 2, {}, threading.Event())
+                              if token is not None]
+            except Exception as error:
+                errors.append(error)
+
+        threads = [threading.Thread(target=request, args=(index,), daemon=True) for index in range(3)]
+        try:
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join(5)
+            self.assertFalse(errors, errors)
+            self.assertEqual(out, {index: [1001 + index] * 2 for index in range(3)})
+            self.assertEqual(self.engine._routes, {})
+        finally:
+            self.engine.proc.stdin = original
+
     def test_each_request_reads_its_own_done_figures(self):   # (#310: one shared `last` mixed them up)
         out = {}
 
@@ -107,6 +145,14 @@ class Engine(unittest.TestCase):
         self.assertIn("busy", str(cm.exception))
         for g in gens:
             g.close()
+
+    def test_invalid_budget_leaves_no_unadmitted_route(self):
+        with self.assertRaises((TypeError, ValueError)):
+            list(self.engine.generate([1, 2], "invalid", {}, threading.Event()))
+        self.assertEqual(self.engine._routes, {})
+        self.assertIsNone(getattr(self.engine._tls, "rid", None))
+        result = [token for token in self.engine.generate([1, 2], 2, {}, threading.Event()) if token is not None]
+        self.assertEqual(result, [1001, 1002])
 
 
 class Interleaved(unittest.TestCase):

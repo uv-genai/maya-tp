@@ -1,0 +1,54 @@
+[
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Reply with exactly one word: OK."
+      }
+    ],
+    "max_tokens": 32,
+    "temperature": 0,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  },
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Count from 1 to 20."
+      }
+    ],
+    "max_tokens": 5,
+    "temperature": 0,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  },
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Say hello."
+      }
+    ],
+    "max_tokens": 2,
+    "temperature": 0,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  },
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Briefly explain an eBPF map."
+      }
+    ],
+    "max_tokens": 16,
+    "temperature": 0,
+    "chat_template_kwargs": {
+      "enable_thinking": false
+    }
+  }
+]

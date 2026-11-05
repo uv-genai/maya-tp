@@ -3,6 +3,7 @@
 
 #include "ds4_tp_channel.hpp"
 #include "ds4_tp_worker_state.hpp"
+#include "ds4_tp_ack.hpp"
 #include <exception>
 #include <functional>
 #include <utility>
@@ -16,8 +17,8 @@ class Controller {
 public:
     using Handler = std::function<bool(const Control&, std::string&)>;
     Controller(strata::net::Communicator& comm, std::uint64_t context, std::uint32_t vocab,
-               std::uint32_t max_words)
-        : comm_(comm), state_(context, vocab, max_words), max_words_(max_words) {}
+               std::uint32_t max_words, std::uint32_t slots=1)
+        : comm_(comm), state_(context, vocab, max_words,slots), max_words_(batch_control_words(max_words,slots)) {}
 
     bool run(Command command, std::uint64_t position, std::vector<std::uint32_t> words,
              const Handler& handle, std::string& error) {
@@ -30,7 +31,10 @@ public:
         if (!comm_.CheckPeer(&error)) return state_.fail(error,error);
         Control c{command, sequence_, position, std::move(words)};
         if (!state_.begin(c, error)) return false;
-        if (!send_message(comm_, c, max_words_, error) || !comm_.BeginOperation(sequence_, &error))
+        if (!send_message(comm_, c, max_words_, error)) return state_.complete(false,error,error);
+        if (state_.batch_mode() && !receive_batch_ack(comm_,sequence_,AckStage::Accepted,error))
+            return state_.complete(false,error,error);
+        if (!comm_.BeginOperation(sequence_, &error))
             return state_.complete(false, error, error);
         try {
             if (!handle(c, error)) return state_.complete(false, error, error);
@@ -41,9 +45,11 @@ public:
         }
         if (!comm_.CheckQueued(&error) || !comm_.EndOperation(sequence_, &error))
             return state_.complete(false, error, error);
+        if (state_.batch_mode() && !receive_batch_ack(comm_,sequence_,AckStage::Completed,error))
+            return state_.complete(false,error,error);
         if (!state_.complete(true, "", error)) return false;
         ++sequence_;
-        if (command == Command::Shutdown) {
+        if (command == Command::Shutdown && !state_.batch_mode()) {
             Control done;
             if (!receive_message(comm_, max_words_, done, error)) return state_.fail(error, error);
             if (done.command != Command::Shutdown || done.sequence != sequence_ ||

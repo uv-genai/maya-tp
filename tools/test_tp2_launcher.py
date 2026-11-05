@@ -63,44 +63,14 @@ keys=('MAYA_TP_MTP','MAYA_GLM_MTP_FIXED','MAYA_GLM_MTP_DRAFT','CONTEXT','SEQS','
 with open(os.environ['TP_TEST_RESULT'],'w') as f: json.dump({'env':{k:os.environ.get(k) for k in keys},'args':sys.argv[1:]},f)
 ''', self.root / 'tools/tp2/rank0.sh')
 
-    def test_mtp_four_drafts_reaches_both_ranks_and_stops_server_first(self):
-        self.stub_rank0()
-        r = self.run_script('tools/llama-swap/tp2.sh', 'run', '18080', '--mtp', '--drafts', '4', '--context', '8192')
-        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
-        local = json.loads((self.root / 'result.json').read_text())
-        self.assertEqual(local['args'], ['18080'])
-        self.assertEqual(local['env']['MAYA_TP_MTP'], '1')
-        self.assertEqual(local['env']['MAYA_GLM_MTP_FIXED'], '4')
-        self.assertEqual(local['env']['MAYA_GLM_MTP_DRAFT'], '4')
-        self.assertEqual(local['env']['CONTEXT'], '8192')
-        self.assertEqual(local['env']['SEQS'], '1')
-        events = [json.loads(line) for line in (self.root / 'events.jsonl').read_text().splitlines()]
-        self.assertEqual(events[0][0], 'pkill')
-        self.assertIn('[s]erver.py --engine strata --config /tmp/maya-tp2', events[0][1])
-        command = next(e[1][-1] for e in events if e[0] == 'ssh' and 'nohup' in e[1][-1])
-        for setting in ('MAYA_TP_MTP=1','MAYA_GLM_MTP_FIXED=4','MAYA_GLM_MTP_DRAFT=4','CONTEXT=8192','SEQS=1'):
-            self.assertIn(setting, shlex.split(command))
-        self.assertNotIn('&&', command)
-        self.assertIn('-u MAYA_GLM_NO_MTP', command)
-
-    def test_default_uses_simple_loop_and_configured_context(self):
-        self.stub_rank0()
-        r = self.run_script('tools/llama-swap/tp2.sh', 'run', '18080')
-        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
-        env = json.loads((self.root / 'result.json').read_text())['env']
-        self.assertEqual(env['MAYA_TP_MTP'], '0')
-        self.assertEqual(env['CONTEXT'], '32768')
-
-    def test_invalid_draft_count_does_not_stop_or_start_processes(self):
-        r = self.run_script('tools/llama-swap/tp2.sh', 'run', '18080', '--mtp', '--drafts', '9')
-        self.assertEqual(r.returncode, 2)
-        self.assertFalse((self.root / 'events.jsonl').exists())
-
-    def test_worker_launch_failure_is_reported(self):
-        self.stub_rank0()
-        r = self.run_script('tools/llama-swap/tp2.sh', 'run', '18080', TP_TEST_SSH_FAIL='1')
-        self.assertEqual(r.returncode, 77)
-        self.assertFalse((self.root / 'result.json').exists())
+    def test_wrapper_forwards_to_owned_launcher_without_cleanup(self):
+        self.executable('python', 'import os,sys,json;open(os.environ["TP_TEST_RESULT"],"w").write(json.dumps(sys.argv[1:]))', self.root/'.venv/bin/python')
+        r=self.run_script('tools/llama-swap/tp2.sh','run','18080','--parallel','4','--mtp','--drafts','3')
+        self.assertEqual(r.returncode,0,r.stderr)
+        args=json.loads((self.root/'result.json').read_text())
+        self.assertEqual(args[1:],['run','18080','--parallel','4','--mtp','--drafts','3'])
+        self.assertTrue(args[0].endswith('/tools/tp2/launch.py'))
+        self.assertFalse((self.root/'events.jsonl').exists())
 
     def test_rank0_context_override_reaches_engine_config(self):
         self.executable('server', '''import os,sys,json
@@ -201,22 +171,6 @@ os.unlink(p)
         # log / installer must follow the selected pack, not the Maya-S base config
         self.assertEqual(cfg['log'], str(self.root / 'maya-maya-m-hip.log'))
         self.assertEqual(cfg['installer']['quant'], 'Maya-M')
-
-    def test_tp2_swap_forwards_model_to_both_ranks(self):
-        self.stub_rank0()
-        models = self.root / 'models'
-        (models / 'Maya-M' / 'pack').mkdir(parents=True)
-        r = self.run_script('tools/llama-swap/tp2.sh', 'run', '18080', '--model', 'Maya-M',
-                            MAYA_MODELS_DIR=str(models))
-        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
-        local = json.loads((self.root / 'result.json').read_text())
-        self.assertEqual(local['env']['MAYA_MODEL'], 'Maya-M')
-        self.assertEqual(local['env']['MAYA_MODELS_DIR'], str(models))
-        events = [json.loads(line) for line in (self.root / 'events.jsonl').read_text().splitlines()]
-        command = next(e[1][-1] for e in events if e[0] == 'ssh' and 'nohup' in e[1][-1])
-        tokens = shlex.split(command)
-        self.assertIn('MAYA_MODEL=Maya-M', tokens)
-        self.assertIn(f'MAYA_MODELS_DIR={models}', tokens)
 
     def test_rank1_aliases_match_server_for_config_and_shell_conflicts(self):
         from serve.server import child_env

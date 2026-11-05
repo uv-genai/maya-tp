@@ -126,8 +126,9 @@ bool Glm5Model::seq_alloc_arenas(std::string& err) {
     seq_.assign((size_t) n, SeqCtx{});
     // the first sequence's layout recomputed must be the one load_pack made, or the others' would be wrong
     SeqCtx check;
-    if (seq_layout(max_ctx_, check) != state_bytes_ || check.dsa_pool != dsa_pool_ || check.kda_conv != kda_conv_ ||
-        check.dsa_lat != dsa_lat_ || check.ik_ring != ik_ring_) {
+    if (seq_layout(max_ctx_, check) != state_bytes_ || check.kda_S != kda_S_ || check.kda_conv != kda_conv_ ||
+        check.dsa_lat != dsa_lat_ || check.dsa_ik != dsa_ik_ || check.dsa_ig != dsa_ig_ ||
+        check.dsa_pool != dsa_pool_ || check.ik_ring != ik_ring_) {
         err = "glm multi: the state layout does not match load_pack's (this build cannot run MAYA_GLM_SEQS)";
         return false;
     }

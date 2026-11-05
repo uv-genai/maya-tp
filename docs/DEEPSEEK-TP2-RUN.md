@@ -147,8 +147,9 @@ retains its first cause in `tp.error`; stop the server and worker, then start
 chunk path. `--dspark off` disables the drafter on both ranks. Experimental
 prompt lookup is opt-in with `--suffix-draft 3` on both ranks; the launcher
 keeps lookup ownership on rank 0. Rank choices must match even though the
-worker does not run the drafter or lookup itself. Vision, parallel requests,
-and performance at a filled 512K context are not validated for this path.
+worker does not run the drafter or lookup itself. Vision and performance at a filled 512K context are not validated for this
+path. The accepted deployed build serves one sequence; new opt-in batching
+requires the current matching source/engine described below.
 The resident expert split does not imply that Engram and all model I/O have
 been eliminated. See the [validation evidence](validation/deepseek-tp2-control-2026-11-03/)
 for the measured scope. The [implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md)
@@ -259,7 +260,7 @@ A new launch starts both ranks afresh.
 ```
 
 Overrides `--context N`, `--dspark on|off`, `--prefill-chunk 0|256` and
-`--suffix-draft 0|3` apply to both ranks. `--peer HOST` overrides the SSH
+`--suffix-draft 0|3` and `--parallel 1..4` apply to both ranks. `--peer HOST` overrides the SSH
 host. The foreground supervisor handles SIGTERM, SIGINT and SIGHUP. Shutdown
 ends the API supervisor, cleans up its recorded child engines, then closes
 the remote worker's control pipe. The remote supervisor also stops its worker
@@ -296,3 +297,56 @@ hosts. XS measured 23–24% higher generation throughput than the same single-ho
 build on two prompts at 262144 context. The user reports Maya-S eBPF generation
 slightly above 30 tok/s with prefill similar to XS and a larger relative speedup.
 [Measurements and validation scope](benchmarks/deepseek-tp2-queued-2026-11-04/README.md).
+
+
+## Opt-in continuous batching
+
+Current source adds checked 2–4-slot TP2 serving for XS/S, including real DSpark
+proposals and per-request commits. Keep `parallel` at its default 1 for the
+accepted single-sequence flow. The versioned accepted executable documented
+above predates this option; select a matching newly built `maya-ds4` on both
+hosts and matching launcher source before opting in. Model manifests remain
+valid: slot/context/speculation choices have a separate execution identity.
+
+Launch from the API host only, using a dedicated port/config while comparing:
+
+```sh
+./tools/llama-swap/tp2-ds4.sh run 18080 --model Maya-XS --parallel 4 \
+  --engine /absolute/path/to/new/maya-ds4 \
+  --peer-root /absolute/path/to/matching/peer/source
+./tools/llama-swap/tp2-ds4.sh stop 18080
+```
+
+`--engine` requires that explicit path on both hosts. For different local
+executable paths, put them in the launcher's `rank0`/`rank1` objects and omit
+that override. `rank0.sh`, `rank1.sh` and `tp2_config.py` also accept
+`--parallel`; use the same count on both. A shared JSON `"parallel": 4`
+provides the persistent equivalent. Preserve the existing pack/context,
+manifest, bootstrap and RDMA selections. An old peer launcher fails preflight
+rather than silently changing batch semantics.
+
+Batch mode requires lookup off (`--suffix-draft 0`). DSpark drafting uses
+argmax point proposals on rank zero in fitting groups, so all four eligible
+clients can draft even when their combined drafter block exceeds scratch.
+Target windows remain bounded to 16 rows. Temperature/top-p/top-k/min-p,
+per-request seed, bias and penalties apply to target selection. The optional
+`DS4_DSPARK_SAMPLE=1` proposal-distribution mode is rejected for batching;
+the default single-sequence implementation retains it. A request can disable
+DSpark with `strata_tune: {"spec": 0}`. `--dspark off` disables it globally.
+
+Admission, cancellation, EOS/output cuts and slot reuse occur between complete
+mirrored transactions. Each speculative verdict covers every member before
+reuse, and leaves the final emitted token pending. Prompt pieces stay bounded
+to one negotiated chunk even when only one request is active. Exact in-place
+continuations reuse committed tokens; file slots and checkpoint restoration
+remain outside TP2 support. Four full 262144-token XS/S slots passed the D1
+capacity gate with complete target-expert residency. Longer filled contexts
+and operational user trials remain separate checks.
+
+Use `tools/ds4/validate_batch.py` for owned isolated model/lifecycle validation;
+it records PIDs/start identities and stops only its own pair. Shared HTTP
+measurements use `tools/bench_concurrency.py`; DeepSeek `--spec 0` disables
+DSpark, whereas GLM uses 1 to disable proposals. Raw throughput, numerical
+checks and rollout limits are in the [D5 validation report](validation/tp2-batching-d5-2026-11-05.md)
+and [matched XS/S measurements](benchmarks/deepseek-tp2-batching-2026-11-05/README.md). Production configs and executables are not changed by
+source integration.

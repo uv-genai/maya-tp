@@ -1,5 +1,23 @@
 # Handoff-Prompt — Maya-TP restart
 
+GLM/MTP and DeepSeek/DSpark opt-in continuous batching is implemented and
+validated in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), starting
+from `72d9260` on `codex/tp2-continuous-batching`. Read Handoff.md §52 first.
+C1, GLM G1–G5 and DeepSeek D1–D5 engineering gates passed; exact final
+publication/PR/main CI is tracked in #153. Use `main` once the PR is merged.
+Both wrappers default to one sequence; new 2–4-slot mode requires explicit
+matching current binaries and launchers. Accepted production runtime files
+and the protected peer checkout are unchanged. All owned GPU validation
+processes are stopped; the D5 report has their identity audit.
+
+XS/S batch HTTP tests match all 88 measured parent responses, and DeepSeek's
+default mode matches all 64 raw parent picks. Final GLM MTP wrapper regression
+passes. Actual proposals, bounded prefill, cancellation, refill, in-place reuse,
+EOS and first-cause HTTP failure fanout pass. Read the linked reports for
+memory/performance scope. Feature issues #11/#140 remain open for operational
+user trials of the new opt-in mode. Do not repeat the broad completed campaign
+or change the production selections without a new task.
+
 Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 
 The latest DeepSeek startup repair is in Handoff.md §49 and issue #138.

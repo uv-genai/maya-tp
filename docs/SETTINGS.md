@@ -1924,7 +1924,7 @@ uses the fork's mirrored fixed-draft MTP path.
 | `MAYA_GLM_DSA_FFN_GRAPH` | 1 within enabled graphs | DSA feed-forward graph capture under `MAYA_GLM_KDA_GRAPH`. RDMA TP2 disables layer graph capture. `0` keeps the direct DSA feed-forward path. |
 | `MAYA_GLM_SPEC_WIN` | 0 | Local layer-split MTP verification. `1` pipelines token windows and `2` uses batched windows. RDMA TP2 keeps its paired MTP protocol. |
 | `MAYA_GLM_WIN_COMMIT_WAIT` | 0 | With local speculative windows, `1` waits for commits for comparison. |
-| `MAYA_GLM_MTPW_CREWS` | 0 | Local multi-conversation MTP rows use one host worker per split part when set to `1`. RDMA TP2 keeps its single-conversation restriction. |
+| `MAYA_GLM_MTPW_CREWS` | 0 | Local multi-conversation MTP rows use one host worker per split part when set to `1`. RDMA TP2 disables these host crews for its replicated rank-0 drafter. |
 | `MAYA_GLM_MTPW_TRACE` | 0 | `1` prints local MTP row-round picks, commit and draft timings. |
 
 ## DeepSeek optional indexer WMMA
@@ -1951,3 +1951,56 @@ engine-side `DS4_TURN_TRACE=1` adds DeepSeek request-stage timing.
 A fatal DeepSeek GPU-state notice ends that engine after the current request.
 A TP2 server marks the pair down immediately, retains the first cause and
 requires both ranks to restart through the pair launcher.
+
+### HIP TP2 multi-sequence MTP
+
+With `MAYA_GLM_SEQS=2`–`4`, the paired GLM engine negotiates bounded target
+windows and complete per-slot commits. `MAYA_TP_MTP=1` derives the draft count
+from `MAYA_GLM_MULTI_MTP`, then `MAYA_GLM_MTP_FIXED`, defaulting to 2. The
+validated range is 0–7; 0 disables window drafting. Both ranks must request
+matching capacities and features. Per-request `spec=1` disables proposals for
+that conversation. Host expert crews are disabled for replicated NextN while
+TP2 is active; trunk reductions retain their rank-local geometry. The default
+one-sequence mode keeps its existing control protocol. Operational launcher
+controls and rollout performance are tracked in #148.
+
+In TP2 multi-sequence mode, an unset `MAYA_GLM_PREFILL_INTERLEAVE` uses
+`256,1,cut`: completed mirrored prompt pieces alternate with decode rounds.
+An explicit setting retains its meaning. In-call `MAYA_GLM_PREFILL_GAPS` is
+disabled in this mode because the worker still owns that complete prefill call.
+The default single-sequence behavior is unchanged.
+
+For opted-in GLM TP2 batches, unset `MAYA_GLM_GROUP_EXPERTS`,
+`MAYA_GLM_ROWS_BATCH`, `MAYA_GLM_ROWS_ATTN` and `MAYA_GLM_ROWS_SMALL` default
+to 1 on gfx1151. Explicit values win and both ranks negotiate these choices.
+`MAYA_GLM_TP_ROWS_EXPERT_MULTI` defaults to 1: resident regular-quant row
+experts use the accepted HIP fused multi-token launch. Set 0 on both ranks to
+compare the grouped-member kernels. Tiered and EXL3 paths retain their existing
+dispatch. This affects batched row execution, including replicated NextN;
+the default single-sequence execution branch retains its existing behavior.
+
+
+### DeepSeek TP2 continuous batching
+
+The DeepSeek pair wrapper and rank/config helpers accept `--parallel 1..4`.
+The default is 1. A shared launcher JSON `parallel` field selects the same
+capacity; per-rank overrides are rejected. Opt-in 2–4-slot mode negotiates a
+separate checked protocol, 16 target rows and complete speculative verdicts.
+It preserves the default single-sequence control path. Both hosts need matching
+current launchers and engines; `--engine PATH` overrides the executable on both,
+and `--peer-root PATH` selects the matching peer source tree.
+
+Batch mode requires `--suffix-draft 0`. DSpark argmax proposals run on rank zero
+in fitting groups (2+2 with four clients); sampled targets use point-proposal
+verification. `DS4_DSPARK_SAMPLE=1` is rejected before loading in this mode.
+The default one-sequence sampled-proposal path is unchanged. Per-request
+`strata_tune.spec=0` disables DeepSeek DSpark; a positive value enables it.
+This differs from GLM's `spec=1` meaning. Global `--dspark off` disables loading
+the drafter on both ranks.
+
+Prompt/decode scheduling runs only between completed mirrored operations.
+In batch mode, a prompt piece is one negotiated chunk (256, or 16 in window
+mode), including with one active client. `MAYA_DS4_READ_PIECE` does not enlarge
+that bound. In-place continuation reuses each slot's committed prefix; file
+slots/checkpoint restore and vision remain unsupported for TP2. See the
+[DeepSeek runbook](DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching).

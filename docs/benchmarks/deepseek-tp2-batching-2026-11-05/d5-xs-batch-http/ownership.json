@@ -1,0 +1,121 @@
+{
+  "args": {
+    "model": "xs",
+    "kind": "batch",
+    "name": "d5-xs-batch-http",
+    "tokens": 96
+  },
+  "engine": "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4",
+  "engine_sha256": "ecac4769d8bd3d1d7cf1045e35191b343a012b5b24ec4c359e8604db10faf9f0",
+  "command": [
+    "/home/ugo/software/project-maya-batching-runtime/.venv/bin/python",
+    "/home/ugo/software/project-maya-batching-runtime/tools/ds4/tp2_launch.py",
+    "run",
+    "19161",
+    "--config",
+    "/tmp/maya-batching-validation/d5-xs-batch-http/launcher.json",
+    "--state-dir",
+    "/tmp/maya-batching-validation/d5-xs-batch-http/state"
+  ],
+  "start": 1793876326.656817,
+  "coordinator_pid": 135439,
+  "coordinator_identity": [
+    "7224115",
+    "/usr/bin/python3.14"
+  ],
+  "supervisor_pid": 135441,
+  "supervisor_identity": [
+    "7224122",
+    "/usr/bin/python3.14"
+  ],
+  "run_directory": "/tmp/maya-batching-validation/d5-xs-batch-http/state/19161/run-n_cd2sjc",
+  "engine_pid": 135447,
+  "engine_identity": [
+    "7224205",
+    "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+  ],
+  "peer_engine": {
+    "pid": 408501,
+    "identity": [
+      "7233675",
+      "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+    ]
+  },
+  "peer_sampler_ssh_pid": 135609,
+  "http_peer_loss": {
+    "owned": {
+      "pid": 408501,
+      "identity": [
+        "7233675",
+        "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+      ]
+    },
+    "streams": [
+      {
+        "index": 0,
+        "chunks": 1,
+        "error": {
+          "type": "server_error",
+          "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        }
+      },
+      {
+        "index": 1,
+        "chunks": 6,
+        "error": {
+          "type": "server_error",
+          "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        }
+      },
+      {
+        "index": 2,
+        "chunks": 2,
+        "error": {
+          "type": "server_error",
+          "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        }
+      },
+      {
+        "index": 3,
+        "chunks": 6,
+        "error": {
+          "type": "server_error",
+          "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        }
+      }
+    ],
+    "fanout_s": 0.9236178349965485
+  },
+  "post_failure_health": {
+    "status": "degraded",
+    "max_context": 262144,
+    "model": "deepseek-v4.1-flash",
+    "max_text_file": 1048576,
+    "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+    "images": false,
+    "api_key": false,
+    "defaults": {
+      "temperature": 1.0,
+      "top_p": 1.0,
+      "reasoning_effort": "high"
+    },
+    "version": "1.1.43",
+    "mcp_tools": false,
+    "unloaded": false,
+    "tp": {
+      "world_size": 2,
+      "rank": 0,
+      "prefill_chunk": 256,
+      "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks",
+      "peer": "down"
+    }
+  },
+  "success": true,
+  "peer_sampler_exit": 0,
+  "supervisor_exit": 0,
+  "end": 1793876509.4234602,
+  "observed_root_peak_gtt": 66955259904,
+  "observed_peer_peak_gtt": 62567936000,
+  "root_bench_read_bytes": 293552128,
+  "peer_bench_read_bytes": 224174080
+}

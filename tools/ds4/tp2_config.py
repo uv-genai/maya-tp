@@ -18,7 +18,7 @@ def make_config(opts, engine_log, model_name, model_label=None):
     manifest = str(Path(opts.manifest).resolve())
     engine = str(Path(opts.engine).resolve())
     args = ["--serve", "--rank", "0", "--pack", pack, "--manifest", manifest,
-            "--engine", engine, "--host", opts.host, "--port", str(opts.port),
+            "--engine", engine, "--parallel", str(opts.parallel), "--host", opts.host, "--port", str(opts.port),
             "--rdma-device", opts.rdma_device, "--context", str(opts.context),
             "--expert-budget-mib", str(opts.expert_budget_mib), "--reserve-mib", str(opts.reserve_mib),
             "--gpu", str(opts.gpu), "--cpu-threads", str(opts.cpu_threads), "--dspark", opts.dspark,

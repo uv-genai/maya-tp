@@ -1,0 +1,20 @@
+{
+  "pack": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4",
+  "manifest": "/home/ugo/software/project-maya-ds4-tp2-review/manifests/maya-xs.json",
+  "engine": "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4",
+  "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+  "host": "strix-halo-1.local",
+  "peer": "strix-halo-2.local",
+  "peer_root": "/home/ugo/software/project-maya-batching-runtime",
+  "port": 19160,
+  "rdma_device": "usb4_rdma5",
+  "context": 262144,
+  "expert_budget_mib": 92160,
+  "reserve_mib": 1024,
+  "cpu_threads": 14,
+  "prefill_chunk": 256,
+  "dspark": "on",
+  "suffix_draft": 0,
+  "parallel": 1,
+  "model_name": "deepseek-v4.1-flash"
+}

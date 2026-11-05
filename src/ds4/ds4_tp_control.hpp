@@ -15,7 +15,13 @@ inline constexpr std::uint32_t kControlVersion = 1;
 inline constexpr std::uint32_t kControlMaxWords = 1u << 20;
 inline constexpr std::size_t kControlHeaderBytes = 32;
 
-enum class Command : std::uint32_t { Feed = 1, Step = 2, Verify = 3, Verdict = 4, Reset = 5, Shutdown = 6 };
+enum class Command : std::uint32_t {
+    Feed = 1, Step = 2, Verify = 3, Verdict = 4, Reset = 5, Shutdown = 6,
+    Bind = 16, BeginSlot = 17, Rows = 18, BatchVerify = 19, BatchCommit = 20
+};
+inline bool batch_command(Command command) {
+    return command>=Command::Bind && command<=Command::BatchCommit;
+}
 
 struct Control {
     Command command = Command::Reset;
@@ -37,6 +43,9 @@ inline bool valid_control(const Control& c, std::uint32_t max_words, std::string
         case Command::Verify: if (n >= 2 && n <= 16) return true; break;
         case Command::Verdict: if (n == 2 && c.words[0] <= 15) return true; break;
         case Command::Reset: case Command::Shutdown: if (n == 0) return true; break;
+        case Command::Bind: case Command::BeginSlot: if (n == 3) return true; break;
+        case Command::Rows: case Command::BatchVerify: if (n >= 10 && n <= 43) return true; break;
+        case Command::BatchCommit: if (n >= 12 && n <= 48) return true; break;
         default: break;
     }
     error = "ds4 tp2 control: invalid command or payload"; return false;

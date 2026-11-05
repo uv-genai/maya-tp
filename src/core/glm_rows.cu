@@ -287,7 +287,7 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
     FastState* F = fast_;
     RowsState* S = rows_;
     const Glm5Geometry& g = g_;
-    const int E = g.n_embd, DI = g.d_inner();
+    const int E = g.n_embd;
     cudaSetDevice(dev_);
     cudaStream_t s = F->cs;
     auto& rows = row_at;
@@ -348,13 +348,13 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
         if (batch) gf::hc_rows(hb, n, s);
 
         if (Ly.recr) {
-            // TP2: q/k/v/beta weights are head-sliced — NH/DIw as the token path (#11)
+            // TP2: q/k/v/beta weights are head-sliced — NH/DI as the token path (#11)
             const int NH = head_compute_for(il);
-            const int DIw = NH * g.kda_head_dim;
+            const int DI = NH * g.kda_head_dim;
             gf::MvJob j[6];
-            j[0] = {Ly.q.q, S->xq, S->x, S->proj[0], nullptr, 1.0f, Ly.q.type, E, DIw};
-            j[1] = {Ly.k.q, S->xq, S->x, S->proj[1], nullptr, 1.0f, Ly.k.type, E, DIw};
-            j[2] = {Ly.v.q, S->xq, S->x, S->proj[2], nullptr, 1.0f, Ly.v.type, E, DIw};
+            j[0] = {Ly.q.q, S->xq, S->x, S->proj[0], nullptr, 1.0f, Ly.q.type, E, DI};
+            j[1] = {Ly.k.q, S->xq, S->x, S->proj[1], nullptr, 1.0f, Ly.k.type, E, DI};
+            j[2] = {Ly.v.q, S->xq, S->x, S->proj[2], nullptr, 1.0f, Ly.v.type, E, DI};
             j[3] = {Ly.f_a, nullptr, S->x, S->fa, nullptr, 1.0f, gf::kTypeBF16, E, g.kda_head_dim};
             j[4] = {Ly.g_a, nullptr, S->x, S->ga, nullptr, 1.0f, gf::kTypeBF16, E, g.kda_head_dim};
             j[5] = {Ly.beta, nullptr, S->x, S->beta, nullptr, 1.0f, gf::kTypeBF16, E, NH};
@@ -407,7 +407,7 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
                     kr[i].k = k.out[1];
                     kr[i].v = k.out[2];
                     kr[i].g1 = k.g1;
-                    kr[i].beta_raw = rows(S->beta, g.n_head, i);
+                    kr[i].beta_raw = rows(S->beta, NH, i);
                     kr[i].state = rw[i].state + (*rw[i].kda_S)[(size_t) il];
                     kr[i].g2 = k.g2;
                     kr[i].norm_w = Ly.ssm_norm;
@@ -415,13 +415,13 @@ bool Glm5Model::rows_layers(RowSeq* rw, int n, std::string& err) {
                     continue;
                 }
                 gf::kda_prep(k, s);
-                gf::kda_rec(F->conv[0], F->conv[1], F->conv[2], F->g1, rows(S->beta, g.n_head, i),
+                gf::kda_rec(F->conv[0], F->conv[1], F->conv[2], F->g1, rows(S->beta, NH, i),
                             rw[i].state + (*rw[i].kda_S)[(size_t) il], F->g2, Ly.ssm_norm, g.norm_eps, NH,
                             g.kda_head_dim, rows_q(S->gated_q, DI, i), s);
             }
             for (int i0 = 0; kda_batch && i0 < n; i0 += gf::kKdaLayers)
                 gf::kda_layers(kp + i0, kr + i0, std::min(gf::kKdaLayers, n - i0), g.norm_eps, s);
-            gf::MvJob o = {Ly.out.q, S->gated_q, nullptr, S->mixer, nullptr, 1.0f, Ly.out.type, DIw, E};
+            gf::MvJob o = {Ly.out.q, S->gated_q, nullptr, S->mixer, nullptr, 1.0f, Ly.out.type, DI, E};
             if (!mv(&o, 1, "kda output")) return false;
         } else {
             if (!rows_dsa(il, rw, n, err)) return false;
@@ -541,7 +541,7 @@ bool Glm5Model::rows_dsa(int il, RowSeq* rw, int n, std::string& err) {
     // verify window's rows of one conversation (consecutive rows) on a streamed layer share its slot pool: one resolve
     // over all their selections then (a resolve never evicts a block it names), not one a row - a row's resolve could
     // evict a block the row before it still has to read.  Rows of one conversation that are not consecutive: one by one
-    const int64_t qd = (int64_t) g.n_head * g.qk_nope, ad = (int64_t) g.n_head * g.kv_lora, nsm = g.n_sel_max();
+    const int64_t qd = (int64_t) NHq * g.qk_nope, ad = (int64_t) NHq * g.kv_lora, nsm = g.n_sel_max();
     bool attn = rows_attn_on() && n > 1 && S->apart != nullptr && g.v_head % 32 == 0 && gf::mla_rows_ok(g.kv_lora);
     int run0[gf::kMaxMvNt];   // the first row of each row's run of consecutive rows of its conversation
     for (int i = 0; i < n; ++i) {
@@ -559,7 +559,7 @@ bool Glm5Model::rows_dsa(int il, RowSeq* rw, int n, std::string& err) {
     const uint16_t* a_lat[gf::kMaxMvNt];
     const int* a_cells[gf::kMaxMvNt];
     int a_nsel[gf::kMaxMvNt];
-    if (attn) gf::mla_q_abs(S->q, qd, Ly.k_b, g.n_head, g.qk_nope, g.kv_lora, n, S->aq, ad, s);
+    if (attn) gf::mla_q_abs(S->q, qd, Ly.k_b, NHq, g.qk_nope, g.kv_lora, n, S->aq, ad, s);
     gf::DsaSelectRows sr;   // (with the rows' attention: the rows' selections in one launch, then each one resolved)
     int n_sr = 0;
     const bool small = attn && rows_small_on();   // (STRATA_GLM_ROWS_SMALL: the rows' scores in one launch too)
@@ -604,8 +604,8 @@ bool Glm5Model::rows_dsa(int il, RowSeq* rw, int n, std::string& err) {
         if (all) gf::dsa_select_all(pool_done, g.idx_kpool, n_sel, (int) p, sel, s);
         else gf::dsa_select(F->score, pool_done, g.idx_kpool, top_pools, n_sel, (int) p, sel, s);
         const int* cells = kv_attend_cells(rw[i].kv, il, lat, F->cells, n_sel, F->slot_cells, s);
-        gf::mla(rows(S->q, qd, i), Ly.k_b, Ly.v_b, lat, cells, n_sel, g.n_head,
-                g.qk_nope, g.kv_lora, g.v_head, rows_q(S->attn_q, (int64_t) g.n_head * g.v_head, i), s,
+        gf::mla(rows(S->q, qd, i), Ly.k_b, Ly.v_b, lat, cells, n_sel, NHq,
+                g.qk_nope, g.kv_lora, g.v_head, rows_q(S->attn_q, (int64_t) NHq * g.v_head, i), s,
                 lat_q8_, nullptr, true);   // (a decode row: the token path's kernels)
     }
     if (attn) {
@@ -640,15 +640,15 @@ bool Glm5Model::rows_dsa(int il, RowSeq* rw, int n, std::string& err) {
             i += len;
         }
         if (n_kr > 0) gf::glm_kv_resolve_rows(kr, n_kr, kr_row, kr_page, s);
-        if (!gf::mla_attend_rows(S->aq, ad, a_lat, a_cells, a_nsel, n, g.n_head, g.qk_nope, g.kv_lora, S->actx, ad,
+        if (!gf::mla_attend_rows(S->aq, ad, a_lat, a_cells, a_nsel, n, NHq, g.qk_nope, g.kv_lora, S->actx, ad,
                                  S->apart, S->apart_tokens, s, lat_q8_)) {
             err = "glm rows: the rows' attention is not available here";   // (mla_rows_ok said it was)
             return false;
         }
-        gf::mla_out(S->actx, ad, Ly.v_b, g.n_head, g.kv_lora, g.v_head, n, S->attn_q,
-                    (int64_t) ((int64_t) g.n_head * g.v_head / 32) * kQ8, s);
+        gf::mla_out(S->actx, ad, Ly.v_b, NHq, g.kv_lora, g.v_head, n, S->attn_q,
+                    (int64_t) ((int64_t) NHq * g.v_head / 32) * kQ8, s);
     }
-    gf::MvJob o = {Ly.out.q, S->attn_q, nullptr, S->mixer, nullptr, 1.0f, Ly.out.type, g.n_head * g.v_head,
+    gf::MvJob o = {Ly.out.q, S->attn_q, nullptr, S->mixer, nullptr, 1.0f, Ly.out.type, NHq * g.v_head,
                    E};
     if (!mv(&o, 1, "dsa output")) return false;
     return true;
@@ -659,7 +659,7 @@ bool Glm5Model::rows_moe(int il, RowSeq* rw, int n, std::string& err) {
     FastState* F = fast_;
     RowsState* S = rows_;
     const Glm5Geometry& g = g_;
-    const int E = g.n_embd, FFs = g.n_ff_exp * g.n_shared;
+    const int E = g.n_embd, FFs = ff_compute_for(il) * g.n_shared;
     (void) FFs;
     cudaStream_t s = F->cs;
     auto& rows = row_at;
@@ -690,6 +690,15 @@ bool Glm5Model::rows_moe(int il, RowSeq* rw, int n, std::string& err) {
                           rows(S->sh_g, FFs, i), rows(S->sh_u, FFs, i), rows(S->ffn, E, i)};
         if (!fast_moe_experts(il, io, false, 0, no_bias, pf_pending, err, true)) return false;
     }
+    // Collective shape is a property of the canonical batch, never of local
+    // residency or kernel dispatch. Include local CPU contributions first.
+#if defined(STRATA_USE_HIP)
+    if (tp_.active() && il != mtp_il_) {
+        if (getenv("STRATA_GLM_TP_AR_TRACE"))
+            std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
+        if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+    }
+#endif
     return true;
 }
 
@@ -711,7 +720,7 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
     auto& W = F->win;
     const Glm5Geometry& g = g_;
     const auto& Ly = F->L[(size_t) il];
-    const int E = g.n_embd, FFs = g.n_ff_exp * g.n_shared, K = g.n_exp_used;
+    const int E = g.n_embd, FFs = ff_compute_for(il) * g.n_shared, K = g.n_exp_used;
     if (n < 2) return false;
     const bool wide = n > F->rows_group && n <= F->rows_scr_rows && F->all_in_vram;   // (STRATA_GLM_MULTI_MTP)
     if ((n > F->rows_group && !wide) || F->rows_scr == nullptr || W.mplan_ptr == nullptr || W.tmax < n ||
@@ -765,7 +774,10 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
     const float* sh_out = nullptr;
     if (Ly.sh_down.q != nullptr) {
         gf::MvJob sd = {Ly.sh_down.q, W.sh_hq, nullptr, W.sh_out, nullptr, 1.0f, Ly.sh_down.type, FFs, E};
-        if (!gf::mv_nt(&sd, 1, n, s)) {
+        sd.ncol = n;
+        sd.xq_cstride = (int64_t) W.sh_hq_s;
+        sd.y_cstride = E;
+        if (!gf::mv(&sd, 1, s)) {
             err = "glm rows: the grouped shared expert's down";
             return false;
         }
@@ -813,11 +825,10 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
             err = "glm rows: the grouped EXL3 experts";
             return false;
         }
-        if (tp_.active()) {
-            if (getenv("STRATA_GLM_TP_AR_TRACE"))
-                std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
-            if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
-        }
+#if !defined(STRATA_USE_HIP)
+        if (tp_.active() && il != mtp_il_ &&
+            !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+#endif
         return true;
     } else {
         mw.xq = S->xq;
@@ -828,16 +839,32 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
         mw.out = S->ffn;
         mw.out_stride = (size_t) E;
         mw.down_off = Ly.down_off;
-        if (!gf::moe_win_experts(Ly.gu_type, Ly.d_type, mw, s, rows_small_on())) {
+        bool executed = false;
+#if defined(STRATA_USE_HIP)
+        // Resident TP rows can use the same fused per-token expert launch as
+        // the accepted HIP window path, without serial group-member loops.
+        // Shared partials were already computed with the checked row stride.
+        const char* multi = getenv("STRATA_GLM_TP_ROWS_EXPERT_MULTI");
+        if (tp_.active() && empty && (multi == nullptr || std::atoi(multi) != 0)) {
+            gf::MoeDev mm = row_dev(0);
+            mm.mt_T = n;
+            mm.mt_xq_s = (unsigned int) (E / 32);
+            mm.mt_hq_s = (unsigned int) (8 * (mw.n_ff / 32));
+            mm.mt_out_s = mm.mt_cpu_s = (unsigned int) E;
+            executed = gf::moe_experts_multi(Ly.gu_type, Ly.d_type, mm, K, E, mw.n_ff, g.swiglu_exp,
+                Ly.down_off, S->xq, W.whq, nullptr, Ly.sh_down.type, nullptr, FFs,
+                const_cast<float*>(sh_out), S->ffn, s);
+        }
+#endif
+        if (!executed && !gf::moe_win_experts(Ly.gu_type, Ly.d_type, mw, s, rows_small_on())) {
             err = "glm rows: the grouped experts (types " + std::to_string(Ly.gu_type) + " / " +
                   std::to_string(Ly.d_type) + ")";
             return false;
         }
-        if (tp_.active()) {
-            if (getenv("STRATA_GLM_TP_AR_TRACE"))
-                std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
-            if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
-        }
+#if !defined(STRATA_USE_HIP)
+        if (tp_.active() && il != mtp_il_ &&
+            !tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
+#endif
     }
     // the CPU lane's answers last: the device's experts ran while the host computed the group's merged request
     if (lane && !empty && md.cpu_seq != nullptr) {

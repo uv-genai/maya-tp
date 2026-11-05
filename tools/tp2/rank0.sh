@@ -21,6 +21,8 @@ PORT=8000
 PORT_SET=0
 while (( $# )); do
   case "$1" in
+    --parallel) SEQS="${2:?--parallel needs N}"; shift 2 ;;
+    --context) CONTEXT="${2:?--context needs N}"; shift 2 ;;
     --config) MAYA_CONFIG="${2:?--config needs PATH}"; shift 2 ;;
     --model) MAYA_MODEL="${2:?--model needs NAME}"; MAYA_PACK=""; shift 2 ;;
     --pack) MAYA_PACK="${2:?--pack needs PATH}"; shift 2 ;;
@@ -54,8 +56,9 @@ RDEV=$(ibv_devices | awk '/usb4_rdma/{print $2, $1}' | sort | head -n1 | awk '{p
 [ -n "$RDEV" ] || { echo "no usb4_rdma device found" >&2; exit 1; }
 
 # Generate a TP2 config from the base config: add tp block and --tp-* flags.
-# Multi-sequence TP2 remains gated (#11); llama-swap uses one sequence.
+# The opt-in batch mode negotiates matching capacities/features on both ranks.
 SEQS="${SEQS:-1}"
+[[ "$SEQS" =~ ^[1-4]$ ]] || { echo "parallel must be 1..4" >&2; exit 2; }
 CONTEXT="${CONTEXT:-$(jq -r '(.args // []) as $a | [$a | to_entries[] | select(.value == "--max-context") | $a[.key+1]][-1] // 4096' "$BASE_CONFIG")}"
 TP_CONFIG="$WORK/rank0.json"
 

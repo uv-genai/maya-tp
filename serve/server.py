@@ -835,6 +835,9 @@ class StrataEngine:
         self.multi = 0                   # READY ... multi=<n>: n conversations at once (requests tagged rid=<id>)
         self._routes: dict[int, queue.Queue] = {}       # rid -> its lines (multi)
         self._routes_lock = threading.Lock()
+        self._write_lock = getattr(self, "_write_lock", threading.Lock())
+        self._closing = False
+        self.ended = False
         self._rids = itertools.count(1)
         self._tls = threading.local()                   # the request this thread is generating (pause())
         self.last = {}
@@ -878,7 +881,8 @@ class StrataEngine:
             self._context_cost(log_start)
         # the engine's stdout on a thread, so a request can wait with a timeout (heartbeats, cancel checks)
         self.lines: queue.Queue = queue.Queue()
-        threading.Thread(target=self._pump, daemon=True).start()
+        self._pump_thread = threading.Thread(target=self._pump, daemon=True)
+        self._pump_thread.start()
 
     def _context_cost(self, offset: int):
         """What this start's context costs in VRAM, from the GLM engine's own start lines ("CUDA0 VRAM before the
@@ -911,8 +915,8 @@ class StrataEngine:
         """Ask the engine to end (QUIT: it frees its GPU memory itself), and end it if it does not in time - then wait
         until the GPUs have that memory back."""
         try:
-            self.proc.stdin.write("QUIT\n")
-            self.proc.stdin.flush()
+            self._closing = True
+            self._write_command("QUIT", allow_down=True)
             self.proc.wait(timeout=timeout)
         except (OSError, ValueError, subprocess.TimeoutExpired):
             try:
@@ -955,11 +959,14 @@ class StrataEngine:
             if self.multi and self._route(line):
                 continue
             self.lines.put(line)
+        if int(self.info.get("tp_world", 1) or 1) > 1 and not getattr(self, "_closing", False):
+            self._tp_pair_down("engine output closed unexpectedly")
         self.ended = True                               # its output closed: it is gone, even before the OS says so
         self.lines.put(None)
         with self._routes_lock:
-            for q in self._routes.values():
-                q.put(None)
+            routes = list(self._routes.values())
+        for q in routes:
+            q.put(None)
 
     def _vram_line(self, line: str) -> None:
         """A VRAM line after the start (maya-ds4: its vision tower's room taken for a request's pictures, then given
@@ -1078,11 +1085,15 @@ class StrataEngine:
 
     def restart(self):
         """Start the engine again (the same command) after it died; the new process has its own line queue."""
+        self._closing = True
         try:
             self.proc.kill()
             self.proc.wait(timeout=20)
         except (OSError, subprocess.TimeoutExpired):
             pass
+        pump = getattr(self, "_pump_thread", None)
+        if pump is not None:
+            pump.join(timeout=5)
         wait_gpu_release(self.proc.pid)
         with self._routes_lock:                         # requests still waiting on the dead one: it is gone
             for q in self._routes.values():
@@ -1292,6 +1303,19 @@ class StrataEngine:
         on = sampling.get("experimental_speed_projection")
         return f" cvec={int(on)}" if isinstance(on, bool) else ""
 
+    def _write_command(self, line: str, *, allow_down: bool = False):
+        """Serialize each complete command and flush, including prompts larger than PIPE_BUF.
+
+        Writers may take the route lock only before/after this call. The pump never
+        takes the writer lock, so failure fanout also works while a pipe write waits.
+        """
+        with self.__dict__.setdefault("_write_lock", threading.Lock()):
+            info = getattr(self, "info", {})
+            if not allow_down and info.get("tp_pair") == "down":
+                raise ValueError(info.get("tp_error", "TP2 pair down: restart both ranks"))
+            self.proc.stdin.write(line + "\n")
+            self.proc.stdin.flush()
+
     def _tp_pair_down(self, cause: str) -> str:
         cause = cause.strip()
         message = cause if cause.startswith("TP2 pair down") else "TP2 pair down: " + cause
@@ -1299,8 +1323,18 @@ class StrataEngine:
             message += "; restart both ranks"
         # The pump and request thread can both report the same failure. The
         # first one retains the cause and blocks all later writes to the pair.
-        first = self.info.setdefault("tp_error", message)
-        self.info["tp_pair"] = "down"
+        with self.__dict__.setdefault("_routes_lock", threading.Lock()):
+            first = self.info.setdefault("tp_error", message)
+            if self.info.get("tp_pair") == "down":
+                return first
+            self.info["tp_pair"] = "down"
+            routes = list(getattr(self, "_routes", {}).items())
+        # Queue outside the route lock. Waiting consumers release their FIFO
+        # places immediately even if the failed engine keeps stdout open.
+        for rid, q in routes:
+            q.put(f"ERR {rid} {first}\n")
+        if hasattr(self, "lines"):
+            self.lines.put(f"ERR {first}\n")
         return first
 
     def _request_error(self, message: str) -> ValueError:
@@ -1331,11 +1365,10 @@ class StrataEngine:
         try:
             turn_mark("gen_start")
             if prompt_memo_on():
-                self.proc.stdin.write(f"{head} {join_ids_memo(self.__dict__.setdefault('_join_memo', {}), ids)}\n")
+                self._write_command(f"{head} {join_ids_memo(self.__dict__.setdefault('_join_memo', {}), ids)}")
             else:
-                self.proc.stdin.write(f"{head} {','.join(str(int(t)) for t in ids)}\n")
+                self._write_command(f"{head} {','.join(str(int(t)) for t in ids)}")
             turn_mark("gen_written")
-            self.proc.stdin.flush()
             turn_mark("gen_flushed")
         except OSError:                                  # the pipe is gone: the engine died (not the client)
             raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})") from None
@@ -1415,9 +1448,8 @@ class StrataEngine:
             if not done:                                  # the consumer stopped early: stop the engine, drain to DONE
                 if self.can_stop:
                     try:
-                        self.proc.stdin.write("STOP\n")
-                        self.proc.stdin.flush()
-                    except OSError:
+                        self._write_command("STOP")
+                    except (OSError, ValueError):
                         pass
                 # Not bounded like the multi one: one conversation shares one line queue, so going on before this
                 # request's DONE handed its lines (T ... DONE) to the next request, and every request after it read
@@ -1491,8 +1523,7 @@ class StrataEngine:
         """One control line between requests (the GLM engine's VLEND / VRECLAIM) -> its answer line; ValueError on
         the engine's ERR or no answer.  The caller holds the service's FIFO, so no request is reading the lines."""
         try:
-            self.proc.stdin.write(line + "\n")
-            self.proc.stdin.flush()
+            self._write_command(line)
         except OSError:
             raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})") from None
         end = time.time() + timeout
@@ -1511,9 +1542,8 @@ class StrataEngine:
     def wrap(self):
         """The server is stopping: a request still thinking closes its reasoning at the next token and answers."""
         try:
-            self.proc.stdin.write("WRAP\n")
-            self.proc.stdin.flush()
-        except OSError:
+            self._write_command("WRAP")
+        except (OSError, ValueError):
             pass
 
     def _generate_multi(self, ids, max_new, sampling, cancel, embeddings=None):
@@ -1521,18 +1551,20 @@ class StrataEngine:
         back through its own queue (_route), and STOP <id> ends it alone."""
         rid = next(self._rids)
         q: queue.Queue = queue.Queue()
-        with self._routes_lock:
-            self._routes[rid] = q
-        self._tls.rid = rid
         self.progress = None
         self.prefill_tok_s_mean = None
         keys = self.sampling_keys(sampling or {}, (getattr(self, "info", {}) or {}).get("engine_kind")) + f" rid={rid}"
         head = f"GENI {int(max_new)}{keys} {embeddings}" if embeddings else f"GEN {int(max_new)}{keys}"
         done = False
+        with self._routes_lock:
+            self._routes[rid] = q
+        self._tls.rid = rid
         try:
             try:
-                self.proc.stdin.write(f"{head} {','.join(str(int(t)) for t in ids)}\n")
-                self.proc.stdin.flush()
+                self._write_command(f"{head} {','.join(str(int(t)) for t in ids)}")
+            except ValueError:
+                done = True
+                raise
             except OSError:
                 raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})") from None
             heard, stall = time.monotonic(), {}
@@ -1563,9 +1595,8 @@ class StrataEngine:
                               f"and giving its place in the queue back (STRATA_REQUEST_QUIET_S={REQUEST_QUIET_S:.0f})",
                               flush=True)
                         try:
-                            self.proc.stdin.write(f"STOP {rid}\n")
-                            self.proc.stdin.flush()
-                        except OSError:
+                            self._write_command(f"STOP {rid}")
+                        except (OSError, ValueError):
                             pass
                         done = True                        # nothing of its own to drain: later lines are dropped
                         raise ValueError(f"the engine never answered this request ({quiet:.0f} s without a line of "
@@ -1609,11 +1640,10 @@ class StrataEngine:
                     done = True
                     raise self._request_error(line.split(None, 2)[2].strip() if len(f) > 2 else "engine error")
         finally:
-            if not done:                                  # the consumer stopped early: stop this request, drain it
+            if not done and self.info.get("tp_pair") != "down":
                 try:
-                    self.proc.stdin.write(f"STOP {rid}\n")
-                    self.proc.stdin.flush()
-                except OSError:
+                    self._write_command(f"STOP {rid}")
+                except (OSError, ValueError):
                     pass
                 # The drain is bounded: an engine that does not honour the STOP (or whose DONE for this rid was
                 # already dropped) left this loop waiting for a line that never came, holding the request's place in
@@ -1645,31 +1675,27 @@ class StrataEngine:
         rid = getattr(getattr(self, "_tls", None), "rid", None) if self.multi else None
         try:
             if rid is not None:
-                self.proc.stdin.write(f"PAUSE {rid}{' keep' if keep else ''}\n")
+                self._write_command(f"PAUSE {rid}{' keep' if keep else ''}")
             else:
-                self.proc.stdin.write("PAUSE keep\n" if keep else "PAUSE\n")
-            self.proc.stdin.flush()
-        except OSError:
+                self._write_command("PAUSE keep" if keep else "PAUSE")
+        except (OSError, ValueError):
             pass
 
     def stop(self):
         """End the request in flight at its next step (its answer is cut there)."""
         if self.can_stop:
             try:
-                self.proc.stdin.write("STOP\n")
-                self.proc.stdin.flush()
-            except OSError:
+                self._write_command("STOP")
+            except (OSError, ValueError):
                 pass
 
     def close(self):
         """QUIT, then wait for the engine to end: with kept conversations (STRATA_GLM_SLOT_KEEP) it first writes the
         one it holds, so it gets STRATA_ENGINE_QUIT_S seconds (50; llama-swap's unloadTimeout should exceed it)."""
         wait = float(os.environ.get("STRATA_ENGINE_QUIT_S", "50") or 50)
+        self._closing = True
         try:
-            if self.can_stop:                           # a request in flight ends at its next step first: QUIT
-                self.proc.stdin.write("STOP\n")         # alone lets it run to max_tokens before the engine ends
-            self.proc.stdin.write("QUIT\n")
-            self.proc.stdin.flush()
+            self._write_command("STOP\nQUIT" if self.can_stop else "QUIT", allow_down=True)
             end = time.monotonic() + wait
             src = getattr(self, "lines", None)          # after start-up the pump thread owns stdout: read its queue
             while self.proc.poll() is None and time.monotonic() < end:

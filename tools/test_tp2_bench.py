@@ -64,7 +64,6 @@ for line in sys.stdin:
                 def spawn(_command, **kwargs):
                     return real_popen([sys.executable, "-u", "-c", program, order], **kwargs)
                 with mock.patch.object(bench.subprocess, "Popen", side_effect=spawn), \
-                        mock.patch.object(bench, "cleanup"), \
                         mock.patch.object(bench.Pair, "until", bounded_until):
                     pair = bench.Pair(Path(tmp), "fixture", 4096, follow="fixture", single_host=True)
                     try:
