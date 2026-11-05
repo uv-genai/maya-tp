@@ -25,7 +25,7 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | Contributor workflow and validation | [Contributing](../CONTRIBUTING.md) |
 | Coding-agent rules | [AGENTS.md](../AGENTS.md) |
 | Coding-agent current state and restart prompt | [Handoff](../Handoff.md), [Handoff-Prompt](../Handoff-Prompt.md) |
-| Published versus unreleased changes | [Changelog](../CHANGELOG.md) |
+| Current release and changes | [tp-v1.1.44 notes](releases/tp-v1.1.44.md), [changelog](../CHANGELOG.md) |
 | Upstream integration decisions and evidence | [v1.1.53](upstream/v1.1.53.md), [v1.1.52](upstream/v1.1.52.md), [v1.1.51](upstream/v1.1.51.md), [v1.1.50](upstream/v1.1.50.md), [v1.1.49 merge and fresh live validation](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
 
 The current source incorporates applicable upstream v1.1.50–v1.1.53 changes as
@@ -38,8 +38,9 @@ merged in PR #122 at `75e18e8`. Both feature-head and merged-main CI passed.
 [Merge and validation](https://github.com/uv-genai/maya-tp/pull/122).
 
 At the 2026-11-02 checkpoint, `main` includes the completed semantic integration through upstream
-v1.1.49 (v1.1.47–v1.1.49 in one cumulative merge). The latest published fork release remains legacy v1.1.42; future fork tags use
-`tp-vMAJOR.MINOR.PATCH`. The user-accepted prefill candidate was promoted to the canonical binary
+v1.1.49 (v1.1.47–v1.1.49 in one cumulative merge). The latest release at that checkpoint was legacy v1.1.42. The current
+release is [tp-v1.1.44](releases/tp-v1.1.44.md), after the unpublished
+`tp-v1.1.43` checkpoint. The user-accepted prefill candidate was promoted to the canonical binary
 on both hosts after the v1.1.49 integration; earlier runtime files are backed up. See [executable selection](TP2-RUN.md#development-pair-production-and-review-builds)
 before launching from an existing development checkout.
 

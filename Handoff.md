@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-05 · Current state: **§52**, validated opt-in GLM/MTP and DeepSeek/DSpark continuous batching, integration PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
+> Last updated: 2026-11-05 · Current state: **§53**, user-accepted batching and release tp-v1.1.44 (#156). §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2859,8 +2859,7 @@ tests and a final PR merged after validation. Implementation started at
 `72d9260` on `codex/tp2-continuous-batching` and is integrated through
 [PR #155](https://github.com/uv-genai/maya-tp/pull/155). Shared C1, GLM G1–G5
 and DeepSeek D1–D5 have engineering validation. Final exact-head/PR and
-post-merge main CI publication is recorded in #153. The feature issues #11/#140
-remain open for the new mode's operational user trial.
+post-merge main CI publication is recorded in #153. The user has now accepted the new mode and #11/#140 are closed; see §53.
 
 **Current checkpoint:** all owned GPU validation processes are stopped; D5
 records an identity audit on both hosts. Accepted production binaries/configs,
@@ -3129,3 +3128,25 @@ Final launcher review retains the legacy three-field preflight identity for
 parallel=1. The execution digest is required only for opt-in batching; a
 focused regression checks both formats. Engine binaries/measurements are
 unchanged by this compatibility correction. Final publication CI is on #153.
+
+## 53. User acceptance and tp-v1.1.44 release (2026-11-05)
+
+The user reports testing the integrated work and says it is working really
+well, then explicitly requests a new tag and GitHub release with release notes.
+This completes operational acceptance of #11/#140; both features are closed.
+Do not infer additional model/context-specific measurements from that report.
+
+Implementation PR #155 is merged at `3f265263fcfd55f33e7c92c2108fa86704f5ab28`;
+its exact-head/PR CI and merged-main CI 42019696534 passed. The release is
+`tp-v1.1.44`, with numeric VERSION `1.1.44`. Publication, final tag target,
+metadata PR and CI outcomes are tracked in #156. The prior `tp-v1.1.43` tag is
+an immutable unpublished checkpoint; legacy published `v*` tags stay unchanged.
+[Release notes](docs/releases/tp-v1.1.44.md) describe batching, measured aggregate
+throughput, DeepSeek TP2/DSpark, identity-cache repairs and upstream v50–v53.
+
+This is a source release. No new engine arithmetic, GPU validation campaign,
+production deployment, model/config edits or process operations are requested.
+The earlier frozen binaries and runtime selections remain recorded in §52 and
+§§33/44. Historical reports retain their dated measurement limits. User-facing
+and coding-agent guides record the acceptance; source release metadata alone
+does not authorize overwriting the protected peer checkout or production files.
