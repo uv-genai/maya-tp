@@ -1,0 +1,375 @@
+[maya] sampling defaults from the model: temperature=1.0, top_p=1.0
+loading the model (the first start takes a minute or two) ...
+[maya] starting the engine: reading the model's weights ...
+ds4: WARNING - CUDA0: 1.2 of its 129.9 GB already in use as the engine starts (other programs: nvidia-smi lists them) - what they hold is not planned for experts
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not NVIDIA + one GPU)
+[maya] WARNING: CUDA0: 1.2 of its 129.9 GB already in use as the engine starts (other programs: nvidia-smi lists them) - what they hold is not planned for experts
+ds4: the experts VRAM leaves over (~0.0 GB) are read in place from the model's files (--mmap-experts on) (120.6 GB of RAM free to keep them: the most-routed 0.0 GB read ahead; prompts in chunks of 256)
+ds4: WARNING - CUDA0: 2.2 GB went to other programs while the engine loaded (nvidia-smi lists them) - the experts' plan works around it
+[maya] WARNING: CUDA0: 2.2 GB went to other programs while the engine loaded (nvidia-smi lists them) - the experts' plan works around it
+[maya] still starting (20 s) - please wait ...
+[maya] still starting (40 s) - please wait ...
+ds4 tp2: rank 0 loaded 54814310400 routed expert bytes (4249600 pinned staging bytes); awaiting peer attachment
+ds4: CUDA0 layers [0, 42] + head: weights 4.97 GB, experts 58.32 GB (15744 of 15744 in VRAM), caches 0.24 GB, 58052 MiB free
+ds4: 0 routed experts on the CPU lane (0.0 GB, in place in the model's files), 14 threads
+maya ds4 serve: GEN <max_new> [keys] <ids>; GENI <max_new> [keys] <pictures> <ids>; STOP, QUIT
+[maya] thinking level when a request names none: high
+[maya] thinking budget: 32768 tokens (then the answer)
+[maya] idle unload disabled: TP2 changes require restarting both ranks together. Use the pair launcher's matching --context or --model options.
+ready: http://127.0.0.1:19161/v1  (OpenAI: /v1/chat/completions, /v1/responses, Anthropic: /v1/messages, context 262144 tokens)
+       open http://127.0.0.1:19161/ in a browser to chat; close this window to stop the model
+       from other devices: http://192.168.1.22:19161/   (API: http://192.168.1.22:19161/v1)
+       WARNING: no API key - anyone on your network can use this model. Add "api_key": "..." to the config (clients send it as their API key; the web page asks for it)
+maya ds4 serve: prompt read: 86 tokens in 0.9 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.5 after
+[maya] answering: 3 of max 96 tokens, 32.8 tok/s, 1 s
+[maya] answering: 27 of max 96 tokens, 24.3 tok/s, 2 s
+[maya] answering: 51 of max 96 tokens, 24.1 tok/s, 3 s
+[maya] answering: 74 of max 96 tokens, 23.7 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 910 ms (94.6 tok/s), 96 generated in 4012 ms (23.93 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 10 of max 96 tokens, 26.5 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.8 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 23.1 tok/s, 3 s
+[maya] answering: 85 of max 96 tokens, 23.9 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 656 ms (131.0 tok/s), 96 generated in 3989 ms (24.06 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.1 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 25.9 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.3 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 23.7 tok/s, 3 s
+[maya] answering: 83 of max 96 tokens, 24.0 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 616 ms (139.5 tok/s), 96 generated in 4002 ms (23.99 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.0 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 9 of max 96 tokens, 25.9 tok/s, 1 s
+[maya] answering: 33 of max 96 tokens, 24.1 tok/s, 2 s
+[maya] answering: 57 of max 96 tokens, 23.9 tok/s, 3 s
+[maya] answering: 81 of max 96 tokens, 23.6 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 659 ms (130.6 tok/s), 96 generated in 4029 ms (23.83 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.8 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 9 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 25.9 tok/s, 1 s
+[maya] answering: 36 of max 96 tokens, 24.7 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 23.6 tok/s, 3 s
+[maya] answering: 84 of max 96 tokens, 24.2 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 613 ms (140.3 tok/s), 96 generated in 4049 ms (23.71 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.7 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.7 tok/s, 1 s
+[maya] answering: 36 of max 96 tokens, 24.8 tok/s, 2 s
+[maya] answering: 61 of max 96 tokens, 24.6 tok/s, 3 s
+[maya] answering: 85 of max 96 tokens, 24.1 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 615 ms (139.8 tok/s), 96 generated in 3932 ms (24.42 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.4 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 10 of max 96 tokens, 27.2 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.9 tok/s, 2 s
+[maya] answering: 59 of max 96 tokens, 24.2 tok/s, 3 s
+[maya] answering: 84 of max 96 tokens, 23.7 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 656 ms (131.0 tok/s), 96 generated in 3964 ms (24.22 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.2 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.2 tok/s, 1 s
+[maya] answering: 36 of max 96 tokens, 24.8 tok/s, 2 s
+[maya] answering: 57 of max 96 tokens, 23.1 tok/s, 3 s
+[maya] answering: 84 of max 96 tokens, 24.0 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 3951 ms (24.30 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.3 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 10 of max 96 tokens, 26.6 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.9 tok/s, 2 s
+[maya] answering: 59 of max 96 tokens, 24.1 tok/s, 3 s
+[maya] answering: 84 of max 96 tokens, 23.7 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 657 ms (131.0 tok/s), 96 generated in 3958 ms (24.25 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.3 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 9 of max 96 tokens, 27.3 tok/s, 1 s
+[maya] answering: 33 of max 96 tokens, 23.9 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 24.2 tok/s, 3 s
+[maya] answering: 82 of max 96 tokens, 24.0 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 707 ms (121.7 tok/s), 96 generated in 4030 ms (23.82 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.8 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.5 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.6 tok/s, 2 s
+[maya] answering: 57 of max 96 tokens, 23.3 tok/s, 3 s
+[maya] answering: 83 of max 96 tokens, 23.8 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 4012 ms (23.93 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.5 tok/s, 1 s
+[maya] answering: 36 of max 96 tokens, 24.9 tok/s, 2 s
+[maya] answering: 57 of max 96 tokens, 23.2 tok/s, 3 s
+[maya] answering: 84 of max 96 tokens, 24.1 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.8 tok/s), 96 generated in 3964 ms (24.22 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.2 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 9 of max 96 tokens, 27.5 tok/s, 1 s
+[maya] answering: 33 of max 96 tokens, 24.6 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 24.3 tok/s, 3 s
+[maya] answering: 79 of max 96 tokens, 23.2 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 708 ms (121.5 tok/s), 96 generated in 3999 ms (24.01 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.0 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.7 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.7 tok/s, 2 s
+[maya] answering: 56 of max 96 tokens, 23.0 tok/s, 3 s
+[maya] answering: 83 of max 96 tokens, 23.8 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 612 ms (140.6 tok/s), 96 generated in 3980 ms (24.12 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.1 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 9 s for the engine (1 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 9 of max 96 tokens, 26.2 tok/s, 1 s
+[maya] answering: 34 of max 96 tokens, 24.9 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 23.9 tok/s, 3 s
+[maya] answering: 83 of max 96 tokens, 23.8 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 656 ms (131.1 tok/s), 96 generated in 4007 ms (23.96 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.0 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 14 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.5 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.6 tok/s, 2 s
+[maya] answering: 57 of max 96 tokens, 23.2 tok/s, 3 s
+[maya] answering: 81 of max 96 tokens, 23.3 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 613 ms (140.4 tok/s), 96 generated in 4067 ms (23.60 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.6 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 10 of max 96 tokens, 26.6 tok/s, 1 s
+[maya] answering: 34 of max 96 tokens, 24.5 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 23.0 tok/s, 3 s
+[maya] answering: 85 of max 96 tokens, 23.9 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 657 ms (131.0 tok/s), 96 generated in 3974 ms (24.16 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.2 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.5 tok/s, 1 s
+[maya] answering: 36 of max 96 tokens, 24.9 tok/s, 2 s
+[maya] answering: 59 of max 96 tokens, 23.8 tok/s, 3 s
+[maya] answering: 82 of max 96 tokens, 23.5 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 609 ms (141.3 tok/s), 96 generated in 4045 ms (23.74 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.7 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 9 s for the engine (1 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.4 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.7 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 23.8 tok/s, 3 s
+[maya] answering: 83 of max 96 tokens, 23.9 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 610 ms (140.9 tok/s), 96 generated in 4024 ms (23.86 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 14 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.1 tok/s, 1 s
+[maya] answering: 36 of max 96 tokens, 24.6 tok/s, 2 s
+[maya] answering: 61 of max 96 tokens, 24.5 tok/s, 3 s
+[maya] answering: 85 of max 96 tokens, 23.8 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 608 ms (141.4 tok/s), 96 generated in 4019 ms (23.88 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 9 of max 96 tokens, 25.9 tok/s, 1 s
+[maya] answering: 34 of max 96 tokens, 24.6 tok/s, 2 s
+[maya] answering: 57 of max 96 tokens, 23.7 tok/s, 3 s
+[maya] answering: 82 of max 96 tokens, 23.6 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 657 ms (131.0 tok/s), 96 generated in 4036 ms (23.79 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.8 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 10 of max 96 tokens, 27.2 tok/s, 1 s
+[maya] answering: 34 of max 96 tokens, 24.8 tok/s, 2 s
+[maya] answering: 58 of max 96 tokens, 24.1 tok/s, 3 s
+[maya] answering: 83 of max 96 tokens, 24.2 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 656 ms (131.0 tok/s), 96 generated in 3971 ms (24.18 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.2 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 9 s for the engine (1 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.7 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 10 of max 96 tokens, 26.3 tok/s, 1 s
+[maya] answering: 35 of max 96 tokens, 24.8 tok/s, 2 s
+[maya] answering: 57 of max 96 tokens, 23.3 tok/s, 3 s
+[maya] answering: 84 of max 96 tokens, 24.1 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 656 ms (131.0 tok/s), 96 generated in 3945 ms (24.33 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (24.3 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 14 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 11 of max 96 tokens, 26.6 tok/s, 1 s
+[maya] answering: 36 of max 96 tokens, 24.9 tok/s, 2 s
+[maya] answering: 61 of max 96 tokens, 24.6 tok/s, 3 s
+[maya] answering: 86 of max 96 tokens, 24.2 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 610 ms (141.1 tok/s), 96 generated in 4009 ms (23.95 tok/s); CPU lane 0.0% of the experts
+[maya] done: 96 tokens in 5 s (23.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 14 of max 96 tokens, 34.6 tok/s, 1 s
+[maya] answering: 47 of max 96 tokens, 33.1 tok/s, 2 s
+[maya] answering: 77 of max 96 tokens, 31.3 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 615 ms (139.9 tok/s), 96 generated in 2994 ms (32.06 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 45 of 49 kept; per position (kept / reached): 1: 27/30 90% 2: 12/12 100% 3: 4/5 80% 4: 1/1 100% 5: 1/1 100%
+[maya] done: 96 tokens in 4 s (32.1 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 16 of max 96 tokens, 36.3 tok/s, 1 s
+[maya] answering: 45 of max 96 tokens, 30.0 tok/s, 2 s
+[maya] answering: 77 of max 96 tokens, 30.1 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 607 ms (141.6 tok/s), 96 generated in 3209 ms (29.91 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 42 of 50 kept; per position (kept / reached): 1: 26/31 84% 2: 10/12 83% 3: 4/5 80% 4: 1/1 100% 5: 1/1 100%
+[maya] done: 96 tokens in 4 s (29.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 28.5 tok/s, 1 s
+[maya] answering: 40 of max 96 tokens, 26.9 tok/s, 2 s
+[maya] answering: 68 of max 96 tokens, 26.9 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 3383 ms (28.38 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 39 of 58 kept; per position (kept / reached): 1: 25/33 76% 2: 11/15 73% 3: 3/3 100%
+[maya] done: 96 tokens in 4 s (28.4 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 29.7 tok/s, 1 s
+[maya] answering: 39 of max 96 tokens, 27.5 tok/s, 2 s
+[maya] answering: 73 of max 96 tokens, 29.8 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 605 ms (142.0 tok/s), 96 generated in 3209 ms (29.92 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 40 of 52 kept; per position (kept / reached): 1: 26/32 81% 2: 10/12 83% 3: 4/4 100%
+[maya] done: 96 tokens in 4 s (29.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 8 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 28.9 tok/s, 1 s
+[maya] answering: 45 of max 96 tokens, 31.1 tok/s, 2 s
+[maya] answering: 77 of max 96 tokens, 30.8 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 3091 ms (31.06 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 44 of 48 kept; per position (kept / reached): 1: 25/27 93% 2: 14/15 93% 3: 4/5 80% 4: 1/1 100%
+[maya] done: 96 tokens in 4 s (31.1 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 16 of max 96 tokens, 36.5 tok/s, 1 s
+[maya] answering: 48 of max 96 tokens, 32.1 tok/s, 2 s
+[maya] answering: 81 of max 96 tokens, 31.4 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 611 ms (140.7 tok/s), 96 generated in 2952 ms (32.52 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 45 of 49 kept; per position (kept / reached): 1: 27/30 90% 2: 12/12 100% 3: 4/5 80% 4: 1/1 100% 5: 1/1 100%
+[maya] done: 96 tokens in 4 s (32.5 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 16 of max 96 tokens, 37.0 tok/s, 1 s
+[maya] answering: 43 of max 96 tokens, 29.7 tok/s, 2 s
+[maya] answering: 72 of max 96 tokens, 29.3 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 3114 ms (30.83 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 44 of 50 kept; per position (kept / reached): 1: 24/29 83% 2: 13/14 93% 3: 5/5 100% 4: 2/2 100%
+[maya] done: 96 tokens in 4 s (30.8 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 16 of max 96 tokens, 38.2 tok/s, 1 s
+[maya] answering: 48 of max 96 tokens, 32.2 tok/s, 2 s
+[maya] answering: 80 of max 96 tokens, 31.9 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 607 ms (141.6 tok/s), 96 generated in 3002 ms (31.98 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 46 of 54 kept; per position (kept / reached): 1: 27/33 82% 2: 13/14 93% 3: 4/5 80% 4: 1/1 100% 5: 1/1 100%
+[maya] done: 96 tokens in 4 s (32.0 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 29.3 tok/s, 1 s
+[maya] answering: 43 of max 96 tokens, 28.5 tok/s, 2 s
+[maya] answering: 73 of max 96 tokens, 28.9 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (142.0 tok/s), 96 generated in 3240 ms (29.63 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 42 of 52 kept; per position (kept / reached): 1: 24/30 80% 2: 13/15 87% 3: 4/4 100% 4: 1/1 100%
+[maya] done: 96 tokens in 4 s (29.6 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 16 of max 96 tokens, 35.3 tok/s, 1 s
+[maya] answering: 45 of max 96 tokens, 29.8 tok/s, 2 s
+[maya] answering: 75 of max 96 tokens, 29.3 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 3145 ms (30.52 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 43 of 51 kept; per position (kept / reached): 1: 22/28 79% 2: 14/15 93% 3: 6/6 100% 4: 1/1 100%
+[maya] done: 96 tokens in 4 s (30.5 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 13 of max 96 tokens, 30.3 tok/s, 1 s
+[maya] answering: 40 of max 96 tokens, 27.7 tok/s, 2 s
+[maya] answering: 65 of max 96 tokens, 26.3 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.8 tok/s), 96 generated in 3448 ms (27.84 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 36 of 48 kept; per position (kept / reached): 1: 22/30 73% 2: 9/10 90% 3: 3/3 100% 4: 2/2 100%
+[maya] done: 96 tokens in 4 s (27.8 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 14 of max 96 tokens, 31.3 tok/s, 1 s
+[maya] answering: 47 of max 96 tokens, 31.9 tok/s, 2 s
+[maya] answering: 76 of max 96 tokens, 30.5 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 612 ms (140.5 tok/s), 96 generated in 3067 ms (31.30 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 46 of 51 kept; per position (kept / reached): 1: 26/30 87% 2: 13/13 100% 3: 4/5 80% 4: 2/2 100% 5: 1/1 100%
+[maya] done: 96 tokens in 4 s (31.3 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 15 of max 96 tokens, 36.8 tok/s, 1 s
+[maya] answering: 39 of max 96 tokens, 27.1 tok/s, 2 s
+[maya] answering: 65 of max 96 tokens, 26.5 tok/s, 3 s
+[maya] answering: 94 of max 96 tokens, 27.1 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 607 ms (141.8 tok/s), 96 generated in 3508 ms (27.37 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 35 of 48 kept; per position (kept / reached): 1: 23/29 79% 2: 9/11 82% 3: 3/3 100%
+[maya] done: 96 tokens in 4 s (27.4 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 29.6 tok/s, 1 s
+[maya] answering: 39 of max 96 tokens, 27.0 tok/s, 2 s
+[maya] answering: 64 of max 96 tokens, 26.0 tok/s, 3 s
+[maya] answering: 90 of max 96 tokens, 25.7 tok/s, 4 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (142.0 tok/s), 96 generated in 3631 ms (26.44 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 32 of 47 kept; per position (kept / reached): 1: 21/29 72% 2: 9/10 90% 3: 2/2 100%
+[maya] done: 96 tokens in 4 s (26.4 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 8 s for the engine (1 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 13 of max 96 tokens, 32.7 tok/s, 1 s
+[maya] answering: 38 of max 96 tokens, 26.7 tok/s, 2 s
+[maya] answering: 68 of max 96 tokens, 27.7 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 613 ms (140.4 tok/s), 96 generated in 3249 ms (29.55 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 43 of 61 kept; per position (kept / reached): 1: 26/38 68% 2: 12/13 92% 3: 4/5 80% 4: 1/1 100%
+[maya] done: 96 tokens in 4 s (29.6 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 12 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 17 of max 96 tokens, 37.6 tok/s, 1 s
+[maya] answering: 47 of max 96 tokens, 31.2 tok/s, 2 s
+[maya] answering: 80 of max 96 tokens, 31.9 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 605 ms (142.1 tok/s), 96 generated in 2950 ms (32.55 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 47 of 56 kept; per position (kept / reached): 1: 30/34 88% 2: 13/15 87% 3: 4/6 67%
+[maya] done: 96 tokens in 4 s (32.5 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 16 of max 96 tokens, 37.8 tok/s, 1 s
+[maya] answering: 45 of max 96 tokens, 30.9 tok/s, 2 s
+[maya] answering: 77 of max 96 tokens, 30.7 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 607 ms (141.7 tok/s), 96 generated in 3100 ms (30.96 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 46 of 57 kept; per position (kept / reached): 1: 28/33 85% 2: 14/16 88% 3: 4/7 57%
+[maya] done: 96 tokens in 4 s (31.0 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 26.8 tok/s, 1 s
+[maya] answering: 39 of max 96 tokens, 26.4 tok/s, 2 s
+[maya] answering: 68 of max 96 tokens, 27.4 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 605 ms (142.1 tok/s), 96 generated in 3442 ms (27.89 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 38 of 55 kept; per position (kept / reached): 1: 22/31 71% 2: 11/13 85% 3: 5/5 100%
+[maya] done: 96 tokens in 4 s (27.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 8 s for the engine (1 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 29.0 tok/s, 1 s
+[maya] answering: 40 of max 96 tokens, 27.5 tok/s, 2 s
+[maya] answering: 69 of max 96 tokens, 28.0 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 3360 ms (28.57 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 40 of 58 kept; per position (kept / reached): 1: 25/34 74% 2: 10/12 83% 3: 4/4 100% 4: 1/1 100%
+[maya] done: 96 tokens in 4 s (28.6 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 12 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 18 of max 96 tokens, 42.4 tok/s, 1 s
+[maya] answering: 47 of max 96 tokens, 32.1 tok/s, 2 s
+[maya] answering: 83 of max 96 tokens, 32.5 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 605 ms (142.1 tok/s), 96 generated in 2938 ms (32.68 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 47 of 55 kept; per position (kept / reached): 1: 31/36 86% 2: 13/14 93% 3: 3/5 60%
+[maya] done: 96 tokens in 4 s (32.7 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 29.4 tok/s, 1 s
+[maya] answering: 39 of max 96 tokens, 27.5 tok/s, 2 s
+[maya] answering: 73 of max 96 tokens, 29.7 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (141.9 tok/s), 96 generated in 3275 ms (29.31 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 41 of 57 kept; per position (kept / reached): 1: 25/32 78% 2: 11/15 73% 3: 5/5 100%
+[maya] done: 96 tokens in 4 s (29.3 tok/s) (length, cancel=False), expert cache 100.0% hit
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 28.0 tok/s, 1 s
+[maya] answering: 43 of max 96 tokens, 29.6 tok/s, 2 s
+[maya] answering: 74 of max 96 tokens, 29.9 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 606 ms (142.0 tok/s), 96 generated in 3245 ms (29.58 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 38 of 46 kept; per position (kept / reached): 1: 24/27 89% 2: 11/13 85% 3: 3/3 100%
+[maya] done: 96 tokens in 4 s (29.6 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 8 s for the engine (1 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 30.4 tok/s, 1 s
+[maya] answering: 44 of max 96 tokens, 31.1 tok/s, 2 s
+[maya] answering: 78 of max 96 tokens, 31.8 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 611 ms (140.7 tok/s), 96 generated in 2992 ms (32.09 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 47 of 55 kept; per position (kept / reached): 1: 28/32 88% 2: 11/14 79% 3: 6/6 100% 4: 1/1 100% 5: 1/1 100%
+[maya] done: 96 tokens in 4 s (32.1 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] this request waited 11 s for the engine (0 request(s) behind it)
+maya ds4 serve: prompt read: 86 tokens in 0.6 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.5 after
+[maya] answering: 12 of max 96 tokens, 29.2 tok/s, 1 s
+[maya] answering: 42 of max 96 tokens, 29.1 tok/s, 2 s
+[maya] answering: 71 of max 96 tokens, 28.5 tok/s, 3 s
+maya ds4 serve: prompt 86 tokens = 0 reused + 86 read in 611 ms (140.8 tok/s), 96 generated in 3326 ms (28.86 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 42 of 54 kept; per position (kept / reached): 1: 28/37 76% 2: 11/11 100% 3: 3/4 75%
+[maya] done: 96 tokens in 4 s (28.9 tok/s) (length, cancel=False), expert cache 100.0% hit
+[maya] stopping (SIGTERM): the engine ends

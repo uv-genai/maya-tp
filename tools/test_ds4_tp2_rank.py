@@ -1,4 +1,5 @@
 import json
+import os
 import contextlib
 import io
 from pathlib import Path
@@ -6,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from tools.ds4 import tp2_identity, tp2_rank
+from tools.ds4 import tp2_identity, tp2_rank, tp2_launch
 
 
 class DeepSeekTP2RankTest(unittest.TestCase):
@@ -82,6 +83,17 @@ class DeepSeekTP2RankTest(unittest.TestCase):
         _,small=self.build(['--serve','--rank','0','--parallel','2','--prefill-chunk','256'])
         self.assertEqual(len({a['MAYA_DS4_TP2_EXECUTION_DIGEST'],single['MAYA_DS4_TP2_EXECUTION_DIGEST'],small['MAYA_DS4_TP2_EXECUTION_DIGEST']}),3)
         for env in (a,b,single,small): self.assertEqual(env['MAYA_DS4_TP2_MODEL_DIGEST'],'a'*64)
+
+    def test_default_preflight_retains_legacy_identity_format(self):
+        settings=dict(tp2_launch.RANK_DEFAULTS,pack=str(self.pack),manifest=str(self.manifest),
+                      engine=str(self.engine),host='rank0.local',rdma_device='usb4_rdma5')
+        with patch.dict(os.environ,{},clear=True),patch.object(tp2_rank,'prepare_identity',return_value=self.identity):
+            _,_,_,legacy=tp2_launch.prepare(settings,0)
+            settings['parallel']=4
+            _,_,_,batch=tp2_launch.prepare(settings,0)
+        self.assertEqual(legacy,{'model':'a'*64,'partition':'b'*64,'build':'c'*64})
+        self.assertEqual({k:batch[k] for k in legacy},legacy)
+        self.assertEqual(set(batch)-set(legacy),{'execution'})
 
     def test_batch_proposal_modes_fail_before_launch(self):
         for extra,env in [(['--suffix-draft','3'],{}),([],{ 'DS4_DSPARK_SAMPLE':'1'})]:

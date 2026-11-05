@@ -1,0 +1,53 @@
+{
+  "args": {
+    "model": "xs",
+    "kind": "parent",
+    "name": "d5-xs-parent-http",
+    "tokens": 96
+  },
+  "engine": "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4",
+  "engine_sha256": "70891055ff14a722bfcd3f6fcccc2ff06e4f610e3c50a4eea7d277c12f525359",
+  "command": [
+    "/home/ugo/software/project-maya-batching-runtime/.venv/bin/python",
+    "/home/ugo/software/project-maya-batching-runtime/tools/ds4/tp2_launch.py",
+    "run",
+    "19161",
+    "--config",
+    "/tmp/maya-batching-validation/d5-xs-parent-http/launcher.json",
+    "--state-dir",
+    "/tmp/maya-batching-validation/d5-xs-parent-http/state"
+  ],
+  "start": 1793876062.2134194,
+  "coordinator_pid": 134624,
+  "coordinator_identity": [
+    "7197664",
+    "/usr/bin/python3.14"
+  ],
+  "supervisor_pid": 134626,
+  "supervisor_identity": [
+    "7197677",
+    "/usr/bin/python3.14"
+  ],
+  "run_directory": "/tmp/maya-batching-validation/d5-xs-parent-http/state/19161/run-yunf9vtd",
+  "engine_pid": 134633,
+  "engine_identity": [
+    "7197775",
+    "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4"
+  ],
+  "peer_engine": {
+    "pid": 406803,
+    "identity": [
+      "7207238",
+      "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4"
+    ]
+  },
+  "peer_sampler_ssh_pid": 134818,
+  "success": true,
+  "peer_sampler_exit": 0,
+  "supervisor_exit": 0,
+  "end": 1793876316.8020184,
+  "observed_root_peak_gtt": 66162536448,
+  "observed_peer_peak_gtt": 61775212544,
+  "root_bench_read_bytes": 303513600,
+  "peer_bench_read_bytes": 215674880
+}

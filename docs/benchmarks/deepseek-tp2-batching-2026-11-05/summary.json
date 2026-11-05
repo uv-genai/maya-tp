@@ -1,0 +1,1016 @@
+{
+  "date": "2026-11-05",
+  "source_commit": "109aefcc81c1ccee9748490457bdbb6552204c3e",
+  "issue": 153,
+  "pr": 155,
+  "runs": {
+    "d5-xs-parent-http": {
+      "ownership": {
+        "args": {
+          "model": "xs",
+          "kind": "parent",
+          "name": "d5-xs-parent-http",
+          "tokens": 96
+        },
+        "engine": "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4",
+        "engine_sha256": "70891055ff14a722bfcd3f6fcccc2ff06e4f610e3c50a4eea7d277c12f525359",
+        "command": [
+          "/home/ugo/software/project-maya-batching-runtime/.venv/bin/python",
+          "/home/ugo/software/project-maya-batching-runtime/tools/ds4/tp2_launch.py",
+          "run",
+          "19161",
+          "--config",
+          "/tmp/maya-batching-validation/d5-xs-parent-http/launcher.json",
+          "--state-dir",
+          "/tmp/maya-batching-validation/d5-xs-parent-http/state"
+        ],
+        "start": 1793876062.2134194,
+        "coordinator_pid": 134624,
+        "coordinator_identity": [
+          "7197664",
+          "/usr/bin/python3.14"
+        ],
+        "supervisor_pid": 134626,
+        "supervisor_identity": [
+          "7197677",
+          "/usr/bin/python3.14"
+        ],
+        "run_directory": "/tmp/maya-batching-validation/d5-xs-parent-http/state/19161/run-yunf9vtd",
+        "engine_pid": 134633,
+        "engine_identity": [
+          "7197775",
+          "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4"
+        ],
+        "peer_engine": {
+          "pid": 406803,
+          "identity": [
+            "7207238",
+            "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4"
+          ]
+        },
+        "peer_sampler_ssh_pid": 134818,
+        "success": true,
+        "peer_sampler_exit": 0,
+        "supervisor_exit": 0,
+        "end": 1793876316.8020184,
+        "observed_root_peak_gtt": 66162536448,
+        "observed_peer_peak_gtt": 61775212544,
+        "root_bench_read_bytes": 303513600,
+        "peer_bench_read_bytes": 215674880
+      },
+      "modes": {
+        "ordinary": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 20.650490431392306,
+              "median_wave_tok_s": 20.650490431392306,
+              "min_wave_tok_s": 20.650490431392306,
+              "max_wave_tok_s": 20.650490431392306,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 0.6595560169953387,
+              "median_latency_s": 4.648551110003609,
+              "median_server_decode_tok_s": 24.1
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 20.771701836026306,
+              "median_wave_tok_s": 20.886377304960583,
+              "min_wave_tok_s": 20.522688946446355,
+              "max_wave_tok_s": 20.91061308497168,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 2.9443688285027747,
+              "median_latency_s": 6.902620245993603,
+              "median_server_decode_tok_s": 24.2
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 20.61103423573363,
+              "median_wave_tok_s": 20.61103423573363,
+              "min_wave_tok_s": 20.61103423573363,
+              "max_wave_tok_s": 20.61103423573363,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 5.281051329991897,
+              "median_latency_s": 9.310298301003058,
+              "median_server_decode_tok_s": 23.8
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 20.663599162122154,
+              "median_wave_tok_s": 20.696956998631435,
+              "min_wave_tok_s": 20.590690539198693,
+              "max_wave_tok_s": 20.703538919885716,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 7.627329023001948,
+              "median_latency_s": 11.62558174500009,
+              "median_server_decode_tok_s": 23.95
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            20.650490431392306,
+            19.39686807025075,
+            21.071986272279716
+          ]
+        },
+        "dspark": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 25.131459694380943,
+              "median_wave_tok_s": 25.131459694380943,
+              "min_wave_tok_s": 25.131459694380943,
+              "max_wave_tok_s": 25.131459694380943,
+              "drafts_offered": 50,
+              "drafts_accepted": 42,
+              "median_ttft_s": 0.6107680090062786,
+              "median_latency_s": 3.8196219420060515,
+              "median_server_decode_tok_s": 29.9
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 25.40487668167018,
+              "median_wave_tok_s": 25.260627766985564,
+              "min_wave_tok_s": 24.811043989822537,
+              "max_wave_tok_s": 26.181002903000092,
+              "drafts_offered": 306,
+              "drafts_accepted": 257,
+              "median_ttft_s": 2.4701263994938927,
+              "median_latency_s": 5.695695387497835,
+              "median_server_decode_tok_s": 30.65
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 25.030705240003595,
+              "median_wave_tok_s": 25.030705240003595,
+              "min_wave_tok_s": 25.030705240003595,
+              "max_wave_tok_s": 25.030705240003595,
+              "drafts_offered": 158,
+              "drafts_accepted": 123,
+              "median_ttft_s": 4.599000166999758,
+              "median_latency_s": 7.808470589006902,
+              "median_server_decode_tok_s": 29.9
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 24.866515352457984,
+              "median_wave_tok_s": 25.130436959479983,
+              "min_wave_tok_s": 24.34208990059169,
+              "max_wave_tok_s": 25.144154800216086,
+              "drafts_offered": 649,
+              "drafts_accepted": 496,
+              "median_ttft_s": 6.537616198496835,
+              "median_latency_s": 9.849929707495903,
+              "median_server_decode_tok_s": 29.450000000000003
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            25.131459694380943,
+            26.535593146128818,
+            26.867606954063543
+          ]
+        }
+      },
+      "minimum_per_request_drafts": {
+        "offered": 46,
+        "accepted": 32
+      }
+    },
+    "d5-xs-batch-http": {
+      "ownership": {
+        "args": {
+          "model": "xs",
+          "kind": "batch",
+          "name": "d5-xs-batch-http",
+          "tokens": 96
+        },
+        "engine": "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4",
+        "engine_sha256": "ecac4769d8bd3d1d7cf1045e35191b343a012b5b24ec4c359e8604db10faf9f0",
+        "command": [
+          "/home/ugo/software/project-maya-batching-runtime/.venv/bin/python",
+          "/home/ugo/software/project-maya-batching-runtime/tools/ds4/tp2_launch.py",
+          "run",
+          "19161",
+          "--config",
+          "/tmp/maya-batching-validation/d5-xs-batch-http/launcher.json",
+          "--state-dir",
+          "/tmp/maya-batching-validation/d5-xs-batch-http/state"
+        ],
+        "start": 1793876326.656817,
+        "coordinator_pid": 135439,
+        "coordinator_identity": [
+          "7224115",
+          "/usr/bin/python3.14"
+        ],
+        "supervisor_pid": 135441,
+        "supervisor_identity": [
+          "7224122",
+          "/usr/bin/python3.14"
+        ],
+        "run_directory": "/tmp/maya-batching-validation/d5-xs-batch-http/state/19161/run-n_cd2sjc",
+        "engine_pid": 135447,
+        "engine_identity": [
+          "7224205",
+          "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+        ],
+        "peer_engine": {
+          "pid": 408501,
+          "identity": [
+            "7233675",
+            "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+          ]
+        },
+        "peer_sampler_ssh_pid": 135609,
+        "http_peer_loss": {
+          "owned": {
+            "pid": 408501,
+            "identity": [
+              "7233675",
+              "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+            ]
+          },
+          "streams": [
+            {
+              "index": 0,
+              "chunks": 1,
+              "error": {
+                "type": "server_error",
+                "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+              }
+            },
+            {
+              "index": 1,
+              "chunks": 6,
+              "error": {
+                "type": "server_error",
+                "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+              }
+            },
+            {
+              "index": 2,
+              "chunks": 2,
+              "error": {
+                "type": "server_error",
+                "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+              }
+            },
+            {
+              "index": 3,
+              "chunks": 6,
+              "error": {
+                "type": "server_error",
+                "message": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+              }
+            }
+          ],
+          "fanout_s": 0.9236178349965485
+        },
+        "post_failure_health": {
+          "status": "degraded",
+          "max_context": 262144,
+          "model": "deepseek-v4.1-flash",
+          "max_text_file": 1048576,
+          "model_label": "DeepSeek V4.1 \u00b7 Maya-XS",
+          "images": false,
+          "api_key": false,
+          "defaults": {
+            "temperature": 1.0,
+            "top_p": 1.0,
+            "reasoning_effort": "high"
+          },
+          "version": "1.1.43",
+          "mcp_tools": false,
+          "unloaded": false,
+          "tp": {
+            "world_size": 2,
+            "rank": 0,
+            "prefill_chunk": 256,
+            "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks",
+            "peer": "down"
+          }
+        },
+        "success": true,
+        "peer_sampler_exit": 0,
+        "supervisor_exit": 0,
+        "end": 1793876509.4234602,
+        "observed_root_peak_gtt": 66955259904,
+        "observed_peer_peak_gtt": 62567936000,
+        "root_bench_read_bytes": 293552128,
+        "peer_bench_read_bytes": 224174080
+      },
+      "modes": {
+        "ordinary": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 21.30630862928078,
+              "median_wave_tok_s": 21.30630862928078,
+              "min_wave_tok_s": 21.30630862928078,
+              "max_wave_tok_s": 21.30630862928078,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 0.710467842000071,
+              "median_latency_s": 4.505414340004791,
+              "median_server_decode_tok_s": 25.3
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 31.948612222731008,
+              "median_wave_tok_s": 32.105016890761846,
+              "min_wave_tok_s": 31.406368757436258,
+              "max_wave_tok_s": 32.34954406451932,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 0.9892484560041339,
+              "median_latency_s": 5.9799450670034275,
+              "median_server_decode_tok_s": 19.15
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 38.01996861561382,
+              "median_wave_tok_s": 38.01996861561382,
+              "min_wave_tok_s": 38.01996861561382,
+              "max_wave_tok_s": 38.01996861561382,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 1.2783491959999083,
+              "median_latency_s": 7.574207868005033,
+              "median_server_decode_tok_s": 15.2
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 40.24684118432059,
+              "median_wave_tok_s": 40.14581926735165,
+              "min_wave_tok_s": 40.1349666937823,
+              "max_wave_tok_s": 40.46144185189753,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 1.620452186500188,
+              "median_latency_s": 9.506815002503572,
+              "median_server_decode_tok_s": 12.2
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            21.30630862928078,
+            19.787571193161593,
+            21.836437039839463
+          ]
+        },
+        "dspark": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 26.092048512617364,
+              "median_wave_tok_s": 26.092048512617364,
+              "min_wave_tok_s": 26.092048512617364,
+              "max_wave_tok_s": 26.092048512617364,
+              "drafts_offered": 50,
+              "drafts_accepted": 42,
+              "median_ttft_s": 0.6102019760000985,
+              "median_latency_s": 3.678998527000658,
+              "median_server_decode_tok_s": 31.3
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 34.02990133275097,
+              "median_wave_tok_s": 33.967250375140836,
+              "min_wave_tok_s": 32.85260039333955,
+              "max_wave_tok_s": 35.36236604495088,
+              "drafts_offered": 306,
+              "drafts_accepted": 257,
+              "median_ttft_s": 0.9520657379980548,
+              "median_latency_s": 5.521023563997005,
+              "median_server_decode_tok_s": 20.700000000000003
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 37.41807868073059,
+              "median_wave_tok_s": 37.41807868073059,
+              "min_wave_tok_s": 37.41807868073059,
+              "max_wave_tok_s": 37.41807868073059,
+              "drafts_offered": 158,
+              "drafts_accepted": 123,
+              "median_ttft_s": 1.2891404480033088,
+              "median_latency_s": 7.6551366450003115,
+              "median_server_decode_tok_s": 15.1
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 39.746498420194264,
+              "median_wave_tok_s": 40.045066312997506,
+              "min_wave_tok_s": 39.01933689880506,
+              "max_wave_tok_s": 40.195893737673764,
+              "drafts_offered": 645,
+              "drafts_accepted": 494,
+              "median_ttft_s": 1.6520041705080075,
+              "median_latency_s": 9.308421337496839,
+              "median_server_decode_tok_s": 12.45
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            26.092048512617364,
+            26.70853167429638,
+            27.318812565121405
+          ]
+        }
+      },
+      "minimum_per_request_drafts": {
+        "offered": 46,
+        "accepted": 32
+      }
+    },
+    "d5-s-parent-http": {
+      "ownership": {
+        "args": {
+          "model": "s",
+          "kind": "parent",
+          "name": "d5-s-parent-http",
+          "tokens": 96
+        },
+        "engine": "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4",
+        "engine_sha256": "70891055ff14a722bfcd3f6fcccc2ff06e4f610e3c50a4eea7d277c12f525359",
+        "command": [
+          "/home/ugo/software/project-maya-batching-runtime/.venv/bin/python",
+          "/home/ugo/software/project-maya-batching-runtime/tools/ds4/tp2_launch.py",
+          "run",
+          "19161",
+          "--config",
+          "/tmp/maya-batching-validation/d5-s-parent-http/launcher.json",
+          "--state-dir",
+          "/tmp/maya-batching-validation/d5-s-parent-http/state"
+        ],
+        "start": 1793876550.6013498,
+        "coordinator_pid": 136165,
+        "coordinator_identity": [
+          "7246509",
+          "/usr/bin/python3.14"
+        ],
+        "supervisor_pid": 136167,
+        "supervisor_identity": [
+          "7246516",
+          "/usr/bin/python3.14"
+        ],
+        "run_directory": "/tmp/maya-batching-validation/d5-s-parent-http/state/19161/run-7fkhzoxe",
+        "engine_pid": 136176,
+        "engine_identity": [
+          "7246628",
+          "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4"
+        ],
+        "peer_engine": {
+          "pid": 409937,
+          "identity": [
+            "7256100",
+            "/home/ugo/software/project-maya-batching-validation/baseline-72d9260/maya-ds4"
+          ]
+        },
+        "peer_sampler_ssh_pid": 136404,
+        "success": true,
+        "peer_sampler_exit": 0,
+        "supervisor_exit": 0,
+        "end": 1793876867.048758,
+        "observed_root_peak_gtt": 100625035264,
+        "observed_peer_peak_gtt": 92582375424,
+        "root_bench_read_bytes": 270442496,
+        "peer_bench_read_bytes": 252055552
+      },
+      "modes": {
+        "ordinary": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 17.847721667020814,
+              "median_wave_tok_s": 17.847721667020814,
+              "min_wave_tok_s": 17.847721667020814,
+              "max_wave_tok_s": 17.847721667020814,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 0.7177582239964977,
+              "median_latency_s": 5.378536889998941,
+              "median_server_decode_tok_s": 20.6
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 17.7001531209295,
+              "median_wave_tok_s": 17.600977779659008,
+              "min_wave_tok_s": 17.580444275758808,
+              "max_wave_tok_s": 17.92318664437476,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 3.452692000006209,
+              "median_latency_s": 8.108629345006193,
+              "median_server_decode_tok_s": 20.5
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 17.74492465449441,
+              "median_wave_tok_s": 17.74492465449441,
+              "min_wave_tok_s": 17.74492465449441,
+              "max_wave_tok_s": 17.74492465449441,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 6.07805443899997,
+              "median_latency_s": 10.810786829999415,
+              "median_server_decode_tok_s": 20.4
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 17.73172620133003,
+              "median_wave_tok_s": 17.73154433319115,
+              "min_wave_tok_s": 17.681416077967985,
+              "max_wave_tok_s": 17.78250635450457,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 8.916716607505805,
+              "median_latency_s": 13.581961299511022,
+              "median_server_decode_tok_s": 20.7
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            17.847721667020814,
+            16.667623191467644,
+            18.073052681859792
+          ]
+        },
+        "dspark": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 21.18433551271574,
+              "median_wave_tok_s": 21.18433551271574,
+              "min_wave_tok_s": 21.18433551271574,
+              "max_wave_tok_s": 21.18433551271574,
+              "drafts_offered": 55,
+              "drafts_accepted": 41,
+              "median_ttft_s": 0.7105709040042711,
+              "median_latency_s": 4.531382148998091,
+              "median_server_decode_tok_s": 25.1
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 22.128451973869264,
+              "median_wave_tok_s": 22.274610133032787,
+              "min_wave_tok_s": 21.276854789913386,
+              "max_wave_tok_s": 22.894571461309763,
+              "drafts_offered": 340,
+              "drafts_accepted": 269,
+              "median_ttft_s": 2.7825053924971144,
+              "median_latency_s": 6.44720412499737,
+              "median_server_decode_tok_s": 26.5
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 21.728279163574072,
+              "median_wave_tok_s": 21.728279163574072,
+              "min_wave_tok_s": 21.728279163574072,
+              "max_wave_tok_s": 21.728279163574072,
+              "drafts_offered": 165,
+              "drafts_accepted": 130,
+              "median_ttft_s": 4.9153993539948715,
+              "median_latency_s": 8.589073152994388,
+              "median_server_decode_tok_s": 26.1
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 22.363624583160274,
+              "median_wave_tok_s": 22.443201488225714,
+              "min_wave_tok_s": 21.927450118236028,
+              "max_wave_tok_s": 22.73525523201596,
+              "drafts_offered": 672,
+              "drafts_accepted": 536,
+              "median_ttft_s": 7.099596345498867,
+              "median_latency_s": 10.641889538499527,
+              "median_server_decode_tok_s": 26.700000000000003
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            21.18433551271574,
+            21.70651484784593,
+            22.209426040345285
+          ]
+        }
+      },
+      "minimum_per_request_drafts": {
+        "offered": 51,
+        "accepted": 40
+      }
+    },
+    "d5-s-batch-http": {
+      "ownership": {
+        "args": {
+          "model": "s",
+          "kind": "batch",
+          "name": "d5-s-batch-http",
+          "tokens": 96
+        },
+        "engine": "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4",
+        "engine_sha256": "ecac4769d8bd3d1d7cf1045e35191b343a012b5b24ec4c359e8604db10faf9f0",
+        "command": [
+          "/home/ugo/software/project-maya-batching-runtime/.venv/bin/python",
+          "/home/ugo/software/project-maya-batching-runtime/tools/ds4/tp2_launch.py",
+          "run",
+          "19161",
+          "--config",
+          "/tmp/maya-batching-validation/d5-s-batch-http/launcher.json",
+          "--state-dir",
+          "/tmp/maya-batching-validation/d5-s-batch-http/state"
+        ],
+        "start": 1793876947.1722412,
+        "coordinator_pid": 137288,
+        "coordinator_identity": [
+          "7286166",
+          "/usr/bin/python3.14"
+        ],
+        "supervisor_pid": 137290,
+        "supervisor_identity": [
+          "7286173",
+          "/usr/bin/python3.14"
+        ],
+        "run_directory": "/tmp/maya-batching-validation/d5-s-batch-http/state/19161/run-2ffk971z",
+        "engine_pid": 137299,
+        "engine_identity": [
+          "7286282",
+          "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+        ],
+        "peer_engine": {
+          "pid": 412581,
+          "identity": [
+            "7295755",
+            "/home/ugo/software/project-maya-batching-validation/d5-guard/maya-ds4"
+          ]
+        },
+        "peer_sampler_ssh_pid": 137525,
+        "refill_summary": [
+          {
+            "concurrency": 3,
+            "requests": 6,
+            "errors": 0,
+            "output_tokens": 32,
+            "aggregate_tok_s": 19.1992631937204,
+            "median_wave_tok_s": 19.1992631937204,
+            "min_wave_tok_s": 19.1992631937204,
+            "max_wave_tok_s": 19.1992631937204,
+            "drafts_offered": 19,
+            "drafts_accepted": 11,
+            "median_ttft_s": 0.3266424869943876,
+            "median_latency_s": 0.6127104539991706,
+            "median_server_decode_tok_s": 8.45
+          }
+        ],
+        "natural_eos_requests": 2,
+        "success": true,
+        "peer_sampler_exit": 0,
+        "supervisor_exit": 0,
+        "end": 1793877177.283765,
+        "observed_root_peak_gtt": 101417758720,
+        "observed_peer_peak_gtt": 93375098880,
+        "root_bench_read_bytes": 280817664,
+        "peer_bench_read_bytes": 217718784
+      },
+      "modes": {
+        "ordinary": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 18.632674304161018,
+              "median_wave_tok_s": 18.632674304161018,
+              "min_wave_tok_s": 18.632674304161018,
+              "max_wave_tok_s": 18.632674304161018,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 0.7096900019969326,
+              "median_latency_s": 5.151981086994056,
+              "median_server_decode_tok_s": 21.6
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 27.70952229030457,
+              "median_wave_tok_s": 27.759681987255963,
+              "min_wave_tok_s": 27.51100115183697,
+              "max_wave_tok_s": 27.8602220636885,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 1.1395832774942392,
+              "median_latency_s": 6.91614806499274,
+              "median_server_decode_tok_s": 16.6
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 33.68893201640078,
+              "median_wave_tok_s": 33.68893201640078,
+              "min_wave_tok_s": 33.68893201640078,
+              "max_wave_tok_s": 33.68893201640078,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 1.4750324759952491,
+              "median_latency_s": 8.548130716997548,
+              "median_server_decode_tok_s": 13.6
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 35.775198695287635,
+              "median_wave_tok_s": 35.73673080422249,
+              "min_wave_tok_s": 35.71955895374118,
+              "max_wave_tok_s": 35.86968328729145,
+              "drafts_offered": 0,
+              "drafts_accepted": 0,
+              "median_ttft_s": 1.8853568284976063,
+              "median_latency_s": 10.703569573001005,
+              "median_server_decode_tok_s": 10.9
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            18.632674304161018,
+            15.729820935797719,
+            18.74043925015735
+          ]
+        },
+        "dspark": {
+          "summary": [
+            {
+              "concurrency": 1,
+              "requests": 1,
+              "errors": 0,
+              "output_tokens": 96,
+              "aggregate_tok_s": 21.805362435656907,
+              "median_wave_tok_s": 21.805362435656907,
+              "min_wave_tok_s": 21.805362435656907,
+              "max_wave_tok_s": 21.805362435656907,
+              "drafts_offered": 55,
+              "drafts_accepted": 41,
+              "median_ttft_s": 0.7119398570066551,
+              "median_latency_s": 4.402387337002438,
+              "median_server_decode_tok_s": 26.0
+            },
+            {
+              "concurrency": 2,
+              "requests": 6,
+              "errors": 0,
+              "output_tokens": 576,
+              "aggregate_tok_s": 29.913397368070118,
+              "median_wave_tok_s": 29.663342141573604,
+              "min_wave_tok_s": 29.206040799461967,
+              "max_wave_tok_s": 30.923012132617064,
+              "drafts_offered": 340,
+              "drafts_accepted": 269,
+              "median_ttft_s": 1.1050463614883483,
+              "median_latency_s": 6.340507824999804,
+              "median_server_decode_tok_s": 18.2
+            },
+            {
+              "concurrency": 3,
+              "requests": 3,
+              "errors": 0,
+              "output_tokens": 288,
+              "aggregate_tok_s": 33.147666314029614,
+              "median_wave_tok_s": 33.147666314029614,
+              "min_wave_tok_s": 33.147666314029614,
+              "max_wave_tok_s": 33.147666314029614,
+              "drafts_offered": 165,
+              "drafts_accepted": 130,
+              "median_ttft_s": 1.5034137530019507,
+              "median_latency_s": 8.617066015998716,
+              "median_server_decode_tok_s": 13.5
+            },
+            {
+              "concurrency": 4,
+              "requests": 12,
+              "errors": 0,
+              "output_tokens": 1152,
+              "aggregate_tok_s": 36.117784805105444,
+              "median_wave_tok_s": 36.07659404656379,
+              "min_wave_tok_s": 35.92883989436526,
+              "max_wave_tok_s": 36.35045034449553,
+              "drafts_offered": 671,
+              "drafts_accepted": 531,
+              "median_ttft_s": 1.905236064500059,
+              "median_latency_s": 10.496897047996754,
+              "median_server_decode_tok_s": 11.25
+            }
+          ],
+          "one_client_rates_including_warmups": [
+            21.805362435656907,
+            22.549270319470697,
+            22.708816872829626
+          ]
+        }
+      },
+      "minimum_per_request_drafts": {
+        "offered": 51,
+        "accepted": 40
+      }
+    }
+  },
+  "response_comparisons": {
+    "xs-ordinary": {
+      "checked": 22,
+      "different": []
+    },
+    "xs-dspark": {
+      "checked": 22,
+      "different": []
+    },
+    "s-ordinary": {
+      "checked": 22,
+      "different": []
+    },
+    "s-dspark": {
+      "checked": 22,
+      "different": []
+    }
+  },
+  "throughput_table": [
+    [
+      "xs",
+      "ordinary",
+      "parent",
+      20.65,
+      20.89,
+      20.61,
+      20.7
+    ],
+    [
+      "xs",
+      "dspark",
+      "parent",
+      25.13,
+      25.26,
+      25.03,
+      25.13
+    ],
+    [
+      "xs",
+      "ordinary",
+      "batch",
+      21.31,
+      32.11,
+      38.02,
+      40.15
+    ],
+    [
+      "xs",
+      "dspark",
+      "batch",
+      26.09,
+      33.97,
+      37.42,
+      40.05
+    ],
+    [
+      "s",
+      "ordinary",
+      "parent",
+      17.85,
+      17.6,
+      17.74,
+      17.73
+    ],
+    [
+      "s",
+      "dspark",
+      "parent",
+      21.18,
+      22.27,
+      21.73,
+      22.44
+    ],
+    [
+      "s",
+      "ordinary",
+      "batch",
+      18.63,
+      27.76,
+      33.69,
+      35.74
+    ],
+    [
+      "s",
+      "dspark",
+      "batch",
+      21.81,
+      29.66,
+      33.15,
+      36.08
+    ]
+  ],
+  "memory_table": [
+    [
+      "xs",
+      "parent",
+      66162536448,
+      61775212544,
+      303513600,
+      215674880
+    ],
+    [
+      "xs",
+      "batch",
+      66955259904,
+      62567936000,
+      293552128,
+      224174080
+    ],
+    [
+      "s",
+      "parent",
+      100625035264,
+      92582375424,
+      270442496,
+      252055552
+    ],
+    [
+      "s",
+      "batch",
+      101417758720,
+      93375098880,
+      280817664,
+      217718784
+    ]
+  ]
+}

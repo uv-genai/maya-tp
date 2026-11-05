@@ -347,6 +347,6 @@ Use `tools/ds4/validate_batch.py` for owned isolated model/lifecycle validation;
 it records PIDs/start identities and stops only its own pair. Shared HTTP
 measurements use `tools/bench_concurrency.py`; DeepSeek `--spec 0` disables
 DSpark, whereas GLM uses 1 to disable proposals. Raw throughput, numerical
-checks and rollout limits are recorded in the D5 validation report when that
-checkpoint completes. Production configs and executables are not changed by
+checks and rollout limits are in the [D5 validation report](validation/tp2-batching-d5-2026-11-05.md)
+and [matched XS/S measurements](benchmarks/deepseek-tp2-batching-2026-11-05/README.md). Production configs and executables are not changed by
 source integration.

@@ -91,7 +91,9 @@ def prepare(settings, rank):
     environment.update(extra)
     command, environment = tp2_rank.prepare_launch(options, environment)
     identity = {key: environment['MAYA_DS4_TP2_' + key.upper() + '_DIGEST']
-                for key in ('model', 'partition', 'build', 'execution')}
+                for key in ('model', 'partition', 'build')}
+    if options.parallel>1:
+        identity['execution']=environment['MAYA_DS4_TP2_EXECUTION_DIGEST']
     return options, command, environment, identity
 
 

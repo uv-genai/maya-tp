@@ -1,7 +1,7 @@
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-04 · Current state: **§47**, sequential upstream v1.1.50–v1.1.53 integration, starting with #125. §46 records the completed documentation audit. §44 records the accepted DeepSeek binary. §33 records the promoted GLM runtime.
+> Last updated: 2026-11-05 · Current state: **§52**, validated opt-in GLM/MTP and DeepSeek/DSpark continuous batching, integration PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -2854,17 +2854,45 @@ on `main`. Planning issues #141/#142 record the publication commit and CI outcom
 
 ## 52. Continuous-batching implementation (2026-11-05)
 
-The user authorized implementation of #11/#140 on a separate branch, tests
-after each phase and a final pull request merged after validation. Work starts
-from `72d9260` on `codex/tp2-continuous-batching`. Both hosts are available with
-no models running. Shared phase C1 (#143) passed its local gates. GLM G1–G5 and DeepSeek
-D1–D5 follow their dependency gates. Use the plans in §51 and record phase
-decisions, tests and commits in the individual issues. Current authorization
-uses phase commits on this feature branch and a final integration PR.
+The user authorized implementation of #11/#140 on a separate branch, phase
+tests and a final PR merged after validation. Implementation started at
+`72d9260` on `codex/tp2-continuous-batching` and is integrated through
+[PR #155](https://github.com/uv-genai/maya-tp/pull/155). Shared C1, GLM G1–G5
+and DeepSeek D1–D5 have engineering validation. Final exact-head/PR and
+post-merge main CI publication is recorded in #153. The feature issues #11/#140
+remain open for the new mode's operational user trial.
 
-Live validation uses isolated outputs and explicit model/config selections.
-Record every owned process and stop only those processes. Accepted runtime
-selection remains in §§33/44. Current G1 validation processes have all exited.
+**Current checkpoint:** all owned GPU validation processes are stopped; D5
+records an identity audit on both hosts. Accepted production binaries/configs,
+the protected peer checkout and unrelated services are unchanged. Both wrappers
+default to one sequence; select matching current source/engines explicitly for
+`--parallel 2..4`. DeepSeek batch proposals are point masses; lookup and sampled-q
+proposal mode are rejected. Context is per slot. Tensor traffic remains APU RDMA.
+
+- GLM: [G5 report](docs/validation/tp2-batching-g5-2026-11-05.md) and
+  [matched throughput](docs/benchmarks/glm-tp2-batching-2026-11-05/README.md).
+  Frozen final `g5-release/maya` SHA256
+  `c50b12b630766a26dda39f525d48e25e6d9e74d36ac184d75b2b1b0cdec0bbbc`.
+- DeepSeek: [D5 report/data](docs/validation/tp2-batching-d5-2026-11-05.md) and
+  [matched XS/S HTTP results](docs/benchmarks/deepseek-tp2-batching-2026-11-05/README.md).
+  Frozen final `d5-guard/maya-ds4` SHA256
+  `ecac4769d8bd3d1d7cf1045e35191b343a012b5b24ec4c359e8604db10faf9f0`.
+  Four 262K slots fit; all 88 measured response comparisons and 64 default
+  raw picks match their parent controls. XS/S aggregate DSpark at four clients
+  is 40.05/36.08 tok/s versus serialized 25.13/22.44 on this workload.
+- Local gates: HIP map, 743 server tests (20 skips), 770 tools tests (3 skips),
+  37 focused launcher/harness tests and all CPU memory/row/stub/control gates.
+  Implementation `109aefc` passed push CI 42016420751 and PR CI 42016445488.
+- Source/build isolation: `/home/ugo/software/project-maya-batching-build`,
+  `project-maya-batching-runtime` and `project-maya-batching-validation` on the
+  hosts. Never overwrite protected production paths as a test setup step.
+- Separate open follow-ups include #110/#112 (numerical/capacity) and #154
+  (dormant WaitAdd helper, unused by engines). Do not claim their broad scopes
+  are resolved by these focused batching gates.
+
+The dated phase history below retains intermediate failures, frozen binaries,
+measurements and ownership snapshots. The current checkpoint above supersedes
+its earlier active-process/task-status statements.
 
 C1 serializes complete engine commands and rechecks paired health under the
 writer lock. The first fatal TP2 notice wakes all active routes with its retained
@@ -3078,3 +3106,26 @@ authority for cleanup. The local session log is
 S batch candidate with `/tmp/maya-d5-host1-bench.py --model s --kind batch`.
 Final default-mode DeepSeek raw-pick and GLM launcher regression smokes,
 D5/PR exact-head CI, final evidence/docs and PR merge/main CI remain.
+
+D5 source commit `109aefc` is pushed; draft PR #155 is open. Push CI
+42016420751 and PR CI 42016445488 are running. S parent HTTP benchmark
+completed cleanly; its 2/4-client medians are ordinary 17.60/17.73 and
+DSpark 22.27/22.44 tok/s. The current owned run is now S batch, under
+`/tmp/maya-batching-validation/d5-s-batch-http` on host 1, launched by
+`/tmp/maya-d5-host1-bench.py`. The local log is
+`/tmp/maya-batching-d5-s-batch-http.log`. XS raw data has been copied locally
+to `/tmp/maya-batching-bench-collected/`; final committed report is pending S.
+
+Final D5 GPU/host gates are complete: S also matches all 44 measured response
+texts, passes staggered refill and two natural EOS completions, and improves
+2/4-client aggregate throughput beyond spread. Default DeepSeek matches all
+64 raw picks and draft counters. Final GLM wrapper MTP passes two clients.
+All owned GPU processes/samplers/supervisors are stopped, with 29 recorded
+identity checks in the D5 data. Local ordered Python and CPU gates pass.
+Final report/data publication and PR/main CI outcomes are recorded in #153;
+operational user trials remain in #11/#140.
+
+Final launcher review retains the legacy three-field preflight identity for
+parallel=1. The execution digest is required only for opt-in batching; a
+focused regression checks both formats. Engine binaries/measurements are
+unchanged by this compatibility correction. Final publication CI is on #153.

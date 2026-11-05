@@ -1,0 +1,501 @@
+{
+  "started_utc": "2026-11-05T11:12:52.268321+00:00",
+  "url": "http://127.0.0.1:19161/v1",
+  "model": "deepseek-v4.1-flash",
+  "prompt": "Write a detailed eBPF tutorial explaining how to use eBPF on Linux. Include prerequisites, the compiler toolchain, an example program and its userspace loader, compilation commands, tracing, verification and troubleshooting. Explain each part with code examples. Aim for at least 1000 words.",
+  "max_tokens": 32,
+  "rounds": 1,
+  "stagger": 0.1,
+  "requests_per_client": 2,
+  "replay": [
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Reply with exactly one word: OK."
+        }
+      ],
+      "max_tokens": 32,
+      "temperature": 0,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Count from 1 to 20."
+        }
+      ],
+      "max_tokens": 5,
+      "temperature": 0,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Say hello."
+        }
+      ],
+      "max_tokens": 2,
+      "temperature": 0,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Briefly explain an eBPF map."
+        }
+      ],
+      "max_tokens": 16,
+      "temperature": 0,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  ],
+  "concurrency": [
+    3
+  ],
+  "timeout_s": 600,
+  "warmup": {
+    "concurrency": 1,
+    "round": 0,
+    "elapsed_s": 0.8359968080039835,
+    "requests": [
+      {
+        "request_id": "ds4-s-refill-c01-r00-i00-n00",
+        "request": {
+          "model": "deepseek-v4.1-flash",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Say hello."
+            }
+          ],
+          "max_tokens": 2,
+          "temperature": 0,
+          "top_p": 1,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "chat_template_kwargs": {
+            "enable_thinking": false
+          }
+        },
+        "error": null,
+        "ttft_s": 0.11360040800354909,
+        "usage": {
+          "prompt_tokens": 7,
+          "completion_tokens": 2,
+          "total_tokens": 9,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 7,
+          "prompt_ms": 101.3,
+          "prompt_per_token_ms": 14.471,
+          "prompt_per_second": 69.1,
+          "predicted_n": 2,
+          "predicted_ms": 54.3,
+          "predicted_per_token_ms": 27.15,
+          "predicted_per_second": 36.8,
+          "draft_n": 0,
+          "draft_n_accepted": 0
+        },
+        "finish_reason": "length",
+        "response_model": "deepseek-v4.1-flash",
+        "elapsed_s": 0.16867283299507108,
+        "content": "Hello!",
+        "reasoning_content": ""
+      },
+      {
+        "request_id": "ds4-s-refill-c01-r00-i00-n01",
+        "request": {
+          "model": "deepseek-v4.1-flash",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Briefly explain an eBPF map."
+            }
+          ],
+          "max_tokens": 16,
+          "temperature": 0,
+          "top_p": 1,
+          "stream": true,
+          "stream_options": {
+            "include_usage": true
+          },
+          "chat_template_kwargs": {
+            "enable_thinking": false
+          }
+        },
+        "error": null,
+        "ttft_s": 0.14099171399720944,
+        "usage": {
+          "prompt_tokens": 13,
+          "completion_tokens": 16,
+          "total_tokens": 29,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 13,
+          "prompt_ms": 137.9,
+          "prompt_per_token_ms": 10.608,
+          "prompt_per_second": 94.3,
+          "predicted_n": 16,
+          "predicted_ms": 525.2,
+          "predicted_per_token_ms": 32.825,
+          "predicted_per_second": 30.5,
+          "draft_n": 7,
+          "draft_n_accepted": 7
+        },
+        "finish_reason": "length",
+        "response_model": "deepseek-v4.1-flash",
+        "elapsed_s": 0.666598890995374,
+        "content": "An eBPF map is a kernel-resident data structure that lets eBP",
+        "reasoning_content": ""
+      }
+    ]
+  },
+  "waves": [
+    {
+      "concurrency": 3,
+      "round": 1,
+      "elapsed_s": 1.666730627999641,
+      "requests": [
+        {
+          "request_id": "ds4-s-refill-c03-r01-i00-n00",
+          "request": {
+            "model": "deepseek-v4.1-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Reply with exactly one word: OK."
+              }
+            ],
+            "max_tokens": 32,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.13733045999833848,
+          "usage": {
+            "prompt_tokens": 12,
+            "completion_tokens": 2,
+            "total_tokens": 14,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 12,
+            "prompt_ms": 132.6,
+            "prompt_per_token_ms": 11.05,
+            "prompt_per_second": 90.5,
+            "predicted_n": 2,
+            "predicted_ms": 239.6,
+            "predicted_per_token_ms": 119.8,
+            "predicted_per_second": 8.3,
+            "draft_n": 4,
+            "draft_n_accepted": 0
+          },
+          "finish_reason": "stop",
+          "response_model": "deepseek-v4.1-flash",
+          "elapsed_s": 0.37610204399970826,
+          "content": "OK",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "ds4-s-refill-c03-r01-i00-n01",
+          "request": {
+            "model": "deepseek-v4.1-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Count from 1 to 20."
+              }
+            ],
+            "max_tokens": 5,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.3510636829887517,
+          "usage": {
+            "prompt_tokens": 12,
+            "completion_tokens": 5,
+            "total_tokens": 17,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 12,
+            "prompt_ms": 224.6,
+            "prompt_per_token_ms": 18.717,
+            "prompt_per_second": 53.4,
+            "predicted_n": 5,
+            "predicted_ms": 578.8,
+            "predicted_per_token_ms": 115.76,
+            "predicted_per_second": 8.6,
+            "draft_n": 2,
+            "draft_n_accepted": 2
+          },
+          "finish_reason": "length",
+          "response_model": "deepseek-v4.1-flash",
+          "elapsed_s": 0.9299049179971917,
+          "content": "1, 2,",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "ds4-s-refill-c03-r01-i01-n00",
+          "request": {
+            "model": "deepseek-v4.1-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Say hello."
+              }
+            ],
+            "max_tokens": 2,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.22953415199299343,
+          "usage": {
+            "prompt_tokens": 7,
+            "completion_tokens": 2,
+            "total_tokens": 9,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 7,
+            "prompt_ms": 192.6,
+            "prompt_per_token_ms": 27.514,
+            "prompt_per_second": 36.3,
+            "predicted_n": 2,
+            "predicted_ms": 264.4,
+            "predicted_per_token_ms": 132.2,
+            "predicted_per_second": 7.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          },
+          "finish_reason": "length",
+          "response_model": "deepseek-v4.1-flash",
+          "elapsed_s": 0.49414207799418364,
+          "content": "Hello!",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "ds4-s-refill-c03-r01-i01-n01",
+          "request": {
+            "model": "deepseek-v4.1-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Briefly explain an eBPF map."
+              }
+            ],
+            "max_tokens": 16,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.360474321001675,
+          "usage": {
+            "prompt_tokens": 13,
+            "completion_tokens": 16,
+            "total_tokens": 29,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 13,
+            "prompt_ms": 226.8,
+            "prompt_per_token_ms": 17.446,
+            "prompt_per_second": 57.3,
+            "predicted_n": 16,
+            "predicted_ms": 712.6,
+            "predicted_per_token_ms": 44.538,
+            "predicted_per_second": 22.5,
+            "draft_n": 7,
+            "draft_n_accepted": 7
+          },
+          "finish_reason": "length",
+          "response_model": "deepseek-v4.1-flash",
+          "elapsed_s": 1.0722687999950722,
+          "content": "An eBPF map is a kernel-resident data structure that lets eBP",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "ds4-s-refill-c03-r01-i02-n00",
+          "request": {
+            "model": "deepseek-v4.1-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Reply with exactly one word: OK."
+              }
+            ],
+            "max_tokens": 32,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.3022212910000235,
+          "usage": {
+            "prompt_tokens": 12,
+            "completion_tokens": 2,
+            "total_tokens": 14,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 12,
+            "prompt_ms": 264.9,
+            "prompt_per_token_ms": 22.075,
+            "prompt_per_second": 45.3,
+            "predicted_n": 2,
+            "predicted_ms": 310.6,
+            "predicted_per_token_ms": 155.3,
+            "predicted_per_second": 6.4,
+            "draft_n": 4,
+            "draft_n_accepted": 0
+          },
+          "finish_reason": "stop",
+          "response_model": "deepseek-v4.1-flash",
+          "elapsed_s": 0.6126569799962454,
+          "content": "OK",
+          "reasoning_content": ""
+        },
+        {
+          "request_id": "ds4-s-refill-c03-r01-i02-n01",
+          "request": {
+            "model": "deepseek-v4.1-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": "Count from 1 to 20."
+              }
+            ],
+            "max_tokens": 5,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": true,
+            "stream_options": {
+              "include_usage": true
+            },
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "error": null,
+          "ttft_s": 0.3835815280035604,
+          "usage": {
+            "prompt_tokens": 12,
+            "completion_tokens": 5,
+            "total_tokens": 17,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 12,
+            "prompt_ms": 241.7,
+            "prompt_per_token_ms": 20.142,
+            "prompt_per_second": 49.6,
+            "predicted_n": 5,
+            "predicted_ms": 228.9,
+            "predicted_per_token_ms": 45.78,
+            "predicted_per_second": 21.8,
+            "draft_n": 2,
+            "draft_n_accepted": 2
+          },
+          "finish_reason": "length",
+          "response_model": "deepseek-v4.1-flash",
+          "elapsed_s": 0.6127639280020958,
+          "content": "1, 2,",
+          "reasoning_content": ""
+        }
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "concurrency": 3,
+      "requests": 6,
+      "errors": 0,
+      "output_tokens": 32,
+      "aggregate_tok_s": 19.1992631937204,
+      "median_wave_tok_s": 19.1992631937204,
+      "min_wave_tok_s": 19.1992631937204,
+      "max_wave_tok_s": 19.1992631937204,
+      "drafts_offered": 19,
+      "drafts_accepted": 11,
+      "median_ttft_s": 0.3266424869943876,
+      "median_latency_s": 0.6127104539991706,
+      "median_server_decode_tok_s": 8.45
+    }
+  ]
+}
