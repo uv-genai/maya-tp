@@ -1,6 +1,6 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read [AGENTS.md](AGENTS.md), then Handoff.md §47 for the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
+Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 
 The latest DeepSeek startup repair is in Handoff.md §49 and issue #138.
 Btrfs device renumbering invalidated the old identity caches. Both runtime
@@ -12,9 +12,13 @@ succeeded, with aggregate throughput around 28 tok/s and queueing latency
 increasing with concurrency. Publication of the identity fix, benchmark and
 related handoff updates on `main` is tracked in #138/#139. Those issues record
 the publication commit and CI outcomes.
-DeepSeek TP2 continuous batching with DSpark is tracked in open #140, with
-the initial design and phased implementation plan pending. GLM multi-sequence
-tracking remains in #11.
+GLM batching is tracked in #11 and DeepSeek TP2/DSpark batching in #140.
+The completed source-review plans are [GLM](docs/GLM-TP2-BATCHING-PLAN.md) and
+[DeepSeek](docs/DEEPSEEK-TP2-BATCHING-PLAN.md), reviewed at `69bb0ee`.
+Shared API phase C1 is #143, GLM G1–G5 are #144–#148 and DeepSeek D1–D5
+are #149–#153. Each phase has its own acceptance gate and issue. Planning
+reviews #141/#142 are complete. Plan/handoff publication on `main` is tracked
+in those issues, including the publication commit and CI outcome.
 
 ## Current GLM and DeepSeek state
 

@@ -93,7 +93,11 @@ The user reports hours of successful use including DeepSWE benchmarks.
 | 123 | Post-merge documentation audit | corrected active guides and checked links, entry points and runtime selections (§46) |
 | 138 | DeepSeek startup identity cache | closed after user confirms Maya-S running through llama-swap (§49) |
 | 139 | DeepSeek concurrent API benchmark | completed 1–4 client waves; script and results in §50 |
-| 140 | DeepSeek TP2 continuous batching with DSpark | open feature tracking; initial design and phased plan pending |
+| 140 | DeepSeek TP2 continuous batching with DSpark | open feature, source-review plan and phase issues ready (§51) |
+| 141 / 142 | GLM/DeepSeek continuous-batching source review and plans | completed planning work, documents and phase graph in §51 |
+| 143 | Shared TP2 multi-request API safety | open C1 implementation phase |
+| 144–148 | GLM continuous-batching implementation | open G1–G5 phases under #11 |
+| 149–153 | DeepSeek continuous-batching implementation | open D1–D5 phases under #140 |
 
 ## 5. What works (Maya-S pack)
 
@@ -2801,3 +2805,49 @@ The user requested dedicated feature tracking for DeepSeek TP2 multi-sequence
 execution and continuous batching with DSpark. Open issue #140 links this
 baseline and defines the initial design checkpoint and acceptance criteria.
 GLM multi-sequence work remains separately tracked in #11.
+
+## 51. GLM and DeepSeek continuous-batching plans (2026-11-05)
+
+The user requested a code review and implementation plans for #11 and #140,
+preserving the accepted GLM TP2/MTP and DeepSeek TP2/DSpark paths. Source was
+reviewed at `69bb0eeb1ea3f893dd3103b46bc53d378dff2b49`, whose publication CI
+41864969535 passed. The local Gufo batch-control implementation at `78d8a4bf`
+was also reviewed for canonical member/draft-plan and execution-digest patterns.
+
+The plans are `docs/GLM-TP2-BATCHING-PLAN.md` and
+`docs/DEEPSEEK-TP2-BATCHING-PLAN.md`. They define opt-in 2–4-sequence execution,
+per-rank memory/identity contracts, batch transactions, speculative verification
+and rollback, dynamic admission, API safety and measured rollout gates. The
+proposed performance gate includes a provisional 5% median throughput regression
+budget for batching mode with one active client, plus aggregate gains above run spread.
+Hardware capacities and performance need the phase-specific measurements.
+
+The review found a concrete GLM disabled-path framing mismatch. MultiRows sends
+`2*N` payload words, while its worker interprets the header count as rows and
+requires twice that payload again. Batched MTP also needs its own mirrored
+window/verdict protocol, and KDA replay contains full-head geometry beside
+rank-local buffers. The historical `SEQS=2` prompt GPU fault requires a fresh
+controlled reproduction. NextN full-width geometry and reduction policy are
+explicit G3 gates.
+
+DeepSeek's existing multi-row executor and sampler are guarded away from TP2,
+whose controller tracks one position and pending verdict. Its drafter accepts
+at most 16 rows, while four block-size-5 conversations need 20. The current
+standalone scheduler suppresses those drafts when the group fails to fit.
+D4 specifies fitting rank-0 draft groups and a separately bounded ragged target
+plan, with actual DSpark activity for every eligible conversation at four clients.
+
+Shared phase C1 is #143. GLM phases G1–G5 are #144–#148, and DeepSeek phases
+D1–D5 are #149–#153. Each engine's five phases run in order. C1 gates their API
+integration. The existing GLM operational-wrapper route also needs #83's
+ownership-safe cleanup. Broader #68/#110/#112 investigations become additional
+dependencies only when the affected batching path establishes the overlap.
+Features #11/#140 and all implementation phase issues are open. Planning
+reviews #141/#142 are complete.
+
+The changes in this planning workstream are documentation and issue tracking.
+Validation covers source-entry references, phase links/dependencies, local
+Markdown paths and whitespace. Future GPU work uses isolated builds, explicit
+configs and owned process records. Use §§33/44 for accepted runtime selection.
+The user requested publication of the plan documents and handoff/index updates
+on `main`. Planning issues #141/#142 record the publication commit and CI outcome.
