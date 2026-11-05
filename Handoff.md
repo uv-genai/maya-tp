@@ -2894,3 +2894,33 @@ Control engines are frozen on both hosts under
 `/home/ugo/software/project-maya-batching-validation/baseline-72d9260/`.
 The paired fixture is in the sibling `g1/` directory. Logs and owned identities
 are under `/tmp/maya-batching-validation/g1-*/`. All G1 processes are stopped.
+
+G1 commit `5f54297` passed CI 41981947354 and #144 is closed. G2 (#145) is
+active. Its extended paired fixture reproduced the historical `mv_rdna_kernel`
+GPU memory fault in the original packed-row path. DSA used full head counts
+against compact TP weights, KDA consumed compact projections with full-width
+row strides, and shared-expert row projections used the full FF width.
+The geometry candidate passed 1–4 packed rows at unequal positions against
+independent ordinary forwards on both ranks, with exit 0/0.
+
+The original fault binary is in the validation directory's `g2-before/`, and
+the corrected fixture is in `g2-geometry/`. Raw evidence and owned identities
+are in `/tmp/maya-batching-validation/g2-{before,geometry}-rows/`. Those pairs
+have exited. Current uncommitted G2 work adds a bounded host batch codec/test,
+capability negotiation, member operation/generation/position checks, peer
+acceptance/completion acknowledgements, graceful paired shutdown and fatal
+batch handling that avoids resetting uncertain device state. Serving validation
+is next, followed by the G2 commit and CI. The GPU runner and GLM API helper
+are `/tmp/maya-batching-pair.py` and `/tmp/maya-batching-glm-check.py`.
+
+G2 local gates now pass. The final grouped case also fixes its shared-expert
+quantized-input column stride and matches 318 row-collective trace entries per
+rank. Four concurrent 32-token requests complete through the real tagged
+engine API, with overlapping streams and clean paired shutdown. The default
+one-sequence MTP control matches all 64 parent picks and accepts 37/47 drafts.
+A 4-vs-3-slot startup is rejected before READY. The shared API admission fix
+passes within 743 server tests (20 skips), followed by 760 tools tests (3 skips).
+Host framing tests pass in Release and with ASan/UBSan, and the existing CPU
+policy/row/stub gates pass. Results, hashes and scoped limits are in
+`docs/validation/tp2-batching-g2-2026-11-05.{md,json}`. All owned pairs are stopped.
+The phase commit and CI follow in #145. Batched MTP is the next phase, G3 (#146).

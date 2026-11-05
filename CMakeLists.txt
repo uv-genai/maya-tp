@@ -229,6 +229,9 @@ if(STRATA_BUILD_TESTS)
   add_executable(tp_collective_test tests/tp_collective_test.cpp)
   target_include_directories(tp_collective_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
   add_test(NAME tp_collective_test COMMAND tp_collective_test)
+  add_executable(glm_tp_batch_test tests/glm_tp_batch_test.cpp)
+  target_include_directories(glm_tp_batch_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  add_test(NAME glm_tp_batch_test COMMAND glm_tp_batch_test)
   # Host-only execution, but TpContext's stream types require the HIP SDK.
   # hip::host supplies headers/platform definitions without compiling a GPU TU.
   if(STRATA_ENABLE_HIP)

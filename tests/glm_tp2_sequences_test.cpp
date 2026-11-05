@@ -1,6 +1,7 @@
 // Paired sequence allocation, bind, prompt and snapshot regression for GLM TP2.
 // Run manually on both gfx1151 ranks with identical packs and prompt IDs.
 #include "strata/core/glm_model.hpp"
+#include "strata/kernels/sampler.hpp"
 #include "strata/net/verbs.hpp"
 
 #include <algorithm>
@@ -17,8 +18,8 @@
 } } while (false)
 
 int main(int argc, char** argv) {
-    if (argc != 10) {
-        std::fprintf(stderr, "usage: rank host port rdma pack context sequences prompt-ids output-json\n");
+    if (argc != 10 && (argc != 11 || std::string(argv[10]) != "--rows")) {
+        std::fprintf(stderr, "usage: rank host port rdma pack context sequences prompt-ids output-json [--rows]\n");
         return 2;
     }
     const int rank = std::stoi(argv[1]);
@@ -97,6 +98,43 @@ int main(int argc, char** argv) {
         for (int other = 0; other < sequences; ++other)
             CHECK(model.seq_pos(other) == (int64_t) prompt.size() + 1);
     }
+    if (argc == 11) {
+        // Give each slot a different retained position/history before testing
+        // packed rows against independent ordinary forwards of the same state.
+        for (int slot = 0; slot < sequences; ++slot) {
+            model.seq_bind_all(slot);
+            CHECK(model.snapshot_restore());
+            for (int step = 0; step < slot; ++step)
+                CHECK(model.forward({picks[(size_t) slot]}, logits, error));
+            CHECK(model.snapshot_save());
+        }
+        for (int count = 1; count <= sequences; ++count) {
+            std::vector<int> slots, expected, actual((size_t) count);
+            std::vector<int32_t> inputs;
+            std::vector<strata::kernels::SamplerParams> sampling((size_t) count);
+            for (int slot = 0; slot < sequences; ++slot) {
+                model.seq_bind_all(slot);
+                CHECK(model.snapshot_restore());
+                if (slot >= count) continue;
+                CHECK(model.forward({picks[(size_t) slot]}, logits, error));
+                expected.push_back((int) std::distance(logits.begin(), std::max_element(logits.begin(), logits.end())));
+                CHECK(model.snapshot_restore());
+                slots.push_back(slot);
+                inputs.push_back(picks[(size_t) slot]);
+                sampling[(size_t) slot].greedy = true;
+            }
+            CHECK(model.multi_rows(slots.data(), inputs.data(), sampling.data(), count, actual.data(), error));
+            for (int row = 0; row < count; ++row)
+                if (actual[(size_t) row] != expected[(size_t) row])
+                    std::fprintf(stderr, "rank %d batch %d row %d pick %d expected %d\n", rank, count, row,
+                                 actual[(size_t) row], expected[(size_t) row]);
+            CHECK(actual == expected);
+            for (int slot = 0; slot < sequences; ++slot)
+                CHECK(model.seq_pos(slot) == (int64_t) prompt.size() + slot + (slot < count ? 1 : 0));
+            CHECK(model.multi_boundary(error));
+            std::fprintf(stderr, "rank %d passed %d packed rows against independent forwards\n", rank, count);
+        }
+    }
     CHECK(cudaDeviceSynchronize() == cudaSuccess);
     CHECK(communicator->CheckQueued(&error));
     CHECK(communicator->EndOperation(0, &error));
@@ -111,7 +149,7 @@ int main(int argc, char** argv) {
     output << "{\"rank\":" << rank << ",\"sequences\":" << sequences
            << ",\"context\":" << context << ",\"free_bytes\":" << free_bytes
            << ",\"total_bytes\":" << total_bytes << ",\"prompt_tokens\":" << prompt.size()
-           << ",\"passed\":true}\n";
+           << ",\"rows\":" << (argc == 11 ? "true" : "false") << ",\"passed\":true}\n";
     CHECK(output.good());
     std::printf("PASS rank %d, %d isolated sequences, snapshots and replay\n", rank, sequences);
     return 0;

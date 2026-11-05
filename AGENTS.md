@@ -79,7 +79,7 @@ python -m unittest discover -s serve -p "test_*.py" -t .
 python -m unittest discover -s tools -p "test_*.py"
 ```
 
-The workflow also runs CPU-only GLM memory-policy and DeepSeek row-preparation/
+The workflow also runs CPU-only GLM memory-policy/batch-framing and DeepSeek row-preparation/
 native-experts-OFF stub checks after these three gates. Their exact compiler
 commands are in `.github/workflows/tests.yml`.
 

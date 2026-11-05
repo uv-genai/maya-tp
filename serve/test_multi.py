@@ -146,6 +146,14 @@ class Engine(unittest.TestCase):
         for g in gens:
             g.close()
 
+    def test_invalid_budget_leaves_no_unadmitted_route(self):
+        with self.assertRaises((TypeError, ValueError)):
+            list(self.engine.generate([1, 2], "invalid", {}, threading.Event()))
+        self.assertEqual(self.engine._routes, {})
+        self.assertIsNone(getattr(self.engine._tls, "rid", None))
+        result = [token for token in self.engine.generate([1, 2], 2, {}, threading.Event()) if token is not None]
+        self.assertEqual(result, [1001, 1002])
+
 
 class Interleaved(unittest.TestCase):
     """STRATA_GLM_PREFILL_INTERLEAVE's lines: a new prompt's PP lines come between the running requests' T lines."""

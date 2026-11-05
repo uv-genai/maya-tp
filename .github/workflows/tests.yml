@@ -41,6 +41,8 @@ jobs:
         run: |
           c++ -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Werror tests/glm_memory_test.cpp -o "$RUNNER_TEMP/glm_memory_test"
           "$RUNNER_TEMP/glm_memory_test"
+          c++ -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Werror -Iinclude tests/glm_tp_batch_test.cpp -o "$RUNNER_TEMP/glm_tp_batch_test"
+          "$RUNNER_TEMP/glm_tp_batch_test"
       - name: DeepSeek CPU row preparation (CPU only)
         run: |
           c++ -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Werror tests/ds4_cpu_prepare_rows_test.cpp -o "$RUNNER_TEMP/ds4_cpu_prepare_rows_test"

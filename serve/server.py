@@ -1551,14 +1551,14 @@ class StrataEngine:
         back through its own queue (_route), and STOP <id> ends it alone."""
         rid = next(self._rids)
         q: queue.Queue = queue.Queue()
-        with self._routes_lock:
-            self._routes[rid] = q
-        self._tls.rid = rid
         self.progress = None
         self.prefill_tok_s_mean = None
         keys = self.sampling_keys(sampling or {}, (getattr(self, "info", {}) or {}).get("engine_kind")) + f" rid={rid}"
         head = f"GENI {int(max_new)}{keys} {embeddings}" if embeddings else f"GEN {int(max_new)}{keys}"
         done = False
+        with self._routes_lock:
+            self._routes[rid] = q
+        self._tls.rid = rid
         try:
             try:
                 self._write_command(f"{head} {','.join(str(int(t)) for t in ids)}")
