@@ -1290,13 +1290,16 @@ static int glm_pack_generate(const Options& o) {
     // STRATA_GLM_PREFILL_INTERLEAVE (strata/core/prefill_pieces.hpp): the other requests decode between the pieces of
     // a prompt being read, so a STOP / PAUSE for the request being admitted stops its read alone (admit_stop) - not
     // stop_req, which every decoding request reads as its own.  Off: stop_req as before (nothing decodes meanwhile)
-    static const strata::core::PrefillInterleave interleave =
-        strata::core::prefill_interleave_parse(std::getenv("STRATA_GLM_PREFILL_INTERLEAVE"));
+    const strata::core::PrefillInterleave interleave = strata::core::prefill_interleave_parse(
+        tp_batch_requested && !std::getenv("STRATA_GLM_PREFILL_INTERLEAVE")
+            ? "256,1,cut" : std::getenv("STRATA_GLM_PREFILL_INTERLEAVE"));
     // STRATA_GLM_PREFILL_GAPS (strata/core/prefill_gaps.hpp): the other requests decode at the chunk boundaries of a
     // prompt being read (one call, its chunks pipelined as without) - like interleave, a STOP for the request being
     // read stops its read alone.  Over interleave when both are set.
-    static const strata::core::PrefillGaps read_gaps =
-        strata::core::prefill_gaps_parse(std::getenv("STRATA_GLM_PREFILL_GAPS"));
+    // A remote worker owns the complete mirrored prefill call. Never enter a
+    // decode collective from a rank-0-only callback inside that call.
+    const strata::core::PrefillGaps read_gaps = strata::core::prefill_gaps_parse(
+        tp_batch_requested ? nullptr : std::getenv("STRATA_GLM_PREFILL_GAPS"));
     std::atomic<bool> admit_stop{false};
     const auto read_stopped = [&] { return stop_req.load() || admit_stop.load(); };
     std::mutex in_mu;
@@ -2168,6 +2171,7 @@ static int glm_pack_generate(const Options& o) {
     };
     const auto prep_prompt = [&](const std::vector<int32_t>& prompt, size_t& reuse, const char*& finish,
                                  std::chrono::steady_clock::time_point& t0) -> int {
+        if (tp_pair_down) { err = "TP2 pair down before prompt"; return 1; }
         // CONVERSATION REUSE (the fast path): the previous prompt's state, saved just before its last token, is
         // restored when this prompt extends it - a chat's next turn reads only what is new
         strata::core::progress_at("the request: restoring a conversation");
@@ -2197,7 +2201,7 @@ static int glm_pack_generate(const Options& o) {
                 reuse = snap_tokens.size();
             } else if (tp_mirror) {
                 // Rank 1 may have restored; put it back to a clean state with us.
-                tp_send(kTpMirrorReset, nullptr, 0);
+                if (!tp_send(kTpMirrorReset, nullptr, 0)) return 1;
             }
         }
         if (reuse == 0 && ck >= 0) {
@@ -2237,7 +2241,7 @@ static int glm_pack_generate(const Options& o) {
             }
         }
         if (reuse == 0) {
-            tp_send(kTpMirrorReset, nullptr, 0);   // rank 1 clears its state too
+            if (!tp_send(kTpMirrorReset, nullptr, 0)) return 1;   // rank 1 clears its state too
             model.reset();
         }
         ckpt_drop_past(reuse);   // this prompt writes the state from `reuse` on (all of it after a reset)
@@ -2447,7 +2451,7 @@ static int glm_pack_generate(const Options& o) {
                 }
                 if (kept == 0) {
                     snap_tokens.clear();
-                    tp_send(kTpMirrorReset, nullptr, 0);
+                    if (!tp_send(kTpMirrorReset, nullptr, 0)) return 1;
                     model.reset();
                     ckpt_drop_past(0);
                 }
@@ -2472,7 +2476,7 @@ static int glm_pack_generate(const Options& o) {
                         return 1;
                     }
                     saved = model.snapshot_save();
-                    if (!saved) tp_send(kTpMirrorReset, nullptr, 0);
+                    if (!saved && !tp_send(kTpMirrorReset, nullptr, 0)) return 1;
                 } else {
                     saved = model.snapshot_save();
                 }
@@ -3019,6 +3023,7 @@ static int glm_pack_generate(const Options& o) {
         std::vector<int64_t> img_pos;
         std::vector<float> img_rows;
         std::vector<std::pair<int32_t, float>> bias;
+        int spec;
     };
     std::deque<Pending> pending;
     // the room a context must leave for the answer (at most what the request asked for): a long prompt goes to a
@@ -3551,7 +3556,7 @@ static int glm_pack_generate(const Options& o) {
                 return;
             }
             pending.push_back({rid, ids, max_new, rq, req_think_budget, req_think_end, cur_img_pos, cur_img_rows,
-                               req_bias});
+                               req_bias, req_spec});
             std::fprintf(stderr, "glm multi: request %d waits for a context that holds %lld tokens\n", rid,
                          (long long) want);
             return;
@@ -3641,6 +3646,10 @@ static int glm_pack_generate(const Options& o) {
                          (unsigned long long) gap_tok, 1000.0 * (double) gap_tok / std::max(1.0, gap_ms));
         tag.clear();
         if (rc != 0) {
+            if (tp_batch && (tp_pair_down || g->finish != std::string("cancel"))) {
+                multi_fail(err.empty() ? "TP2 prompt transaction failed" : err);
+                std::printf("ERR %d %s\n", rid, multi_fail_why.c_str());
+            }
             ctxs[(size_t) best].busy = false;
             admit_stop.store(false);
             std::lock_guard<std::mutex> lk(ctl_mu);   // (a STOP for it that came during its prompt: nothing to stop now)
@@ -3704,6 +3713,7 @@ static int glm_pack_generate(const Options& o) {
             pending.erase(pending.begin() + (long) i);
             req_think_budget = w2.think_budget;
             req_think_end = w2.think_end;
+            req_spec = w2.spec;
             req_bias = std::move(w2.bias);
             cur_img_pos = std::move(w2.img_pos);
             cur_img_rows = std::move(w2.img_rows);

@@ -2935,5 +2935,25 @@ ordinary control. Mixed speculation, sampling/penalties, thinking closure and
 bias match an ordinary control exactly. Forced retained prefixes 1–3, ragged
 windows, cache reseeding and full-logit state replay pass on both ranks with
 grouped experts; replicated NextN issues no trunk reduction. The strict default
-control matches all 64 parent picks. All owned G3 processes have exited. See
-`docs/validation/tp2-batching-g3-2026-11-05.{md,json}`. Phase commit/CI follow.
+control matches all 64 parent picks. All owned G3 processes have exited. G3 commit `bd925af` passed CI
+41991971622 and #146 is closed. See
+`docs/validation/tp2-batching-g3-2026-11-05.{md,json}`. G4 (#147) is active.
+
+G4 first lifecycle checks pass with MTP off/on: staggered admission, bounded
+prompt/decode interleave, request-local cancellation and snapshot reuse. Both
+peer-loss modes fan out the same retained cause to every active route and
+reject later GEN. A two-slot candidate exposed an MLA scratch-capacity fault
+when replicated NextN followed compact trunk heads. The HIP scratch now grows
+to the requested byte capacity; the original failing binary/logs remain frozen
+under `g4-final` / `g4-final-queued-mtp`. The corrected `g4-scratch` candidate passes the two-slot queued lifecycle
+and four-slot mixed-request gates. Its SHA256 is
+`d97fd8d5ca73e6bb90776db97d04349f01221b2bf77028f68984af2f34fcecbe`.
+All owned G4 model processes have exited. Queued requests now retain their speculation setting, and
+TP2 prefill gaps run only between completed mirrored calls. The reproducible
+owned harness is `tools/tp2/validate_batch.py`.
+
+G4 evidence is in `docs/validation/tp2-batching-g4-2026-11-05.{md,json}`.
+The MTP-on/off peer-loss cases retained one cause across every active request
+and later GEN (fanout 1.37/1.64 s). The corrected two-slot case proves queued
+`spec=1` stays disabled; prefix reuse, retirement and cancellation pass. G4
+commit/CI publication precedes G5 launcher/performance work.

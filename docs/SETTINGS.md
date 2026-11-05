@@ -1963,3 +1963,9 @@ that conversation. Host expert crews are disabled for replicated NextN while
 TP2 is active; trunk reductions retain their rank-local geometry. The default
 one-sequence mode keeps its existing control protocol. Operational launcher
 controls and rollout performance are tracked in #148.
+
+In TP2 multi-sequence mode, an unset `MAYA_GLM_PREFILL_INTERLEAVE` uses
+`256,1,cut`: completed mirrored prompt pieces alternate with decode rounds.
+An explicit setting retains its meaning. In-call `MAYA_GLM_PREFILL_GAPS` is
+disabled in this mode because the worker still owns that complete prefill call.
+The default single-sequence behavior is unchanged.

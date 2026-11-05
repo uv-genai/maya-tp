@@ -4,7 +4,8 @@ Implementation is active on `codex/tp2-continuous-batching` from `72d9260`.
 Read Handoff.md §52 first. The user authorized both hosts, phase tests and a
 final integration PR merged after validation. Shared C1 (#143) passed its local
 gates and exact-commit CI. GLM G1 (#144) passed its bounded four-slot state tests.
-G1/G2 CI passed and #144/#145 are closed. G3 (#146) is active with uncommitted changes.
+G1/G2 CI passed and #144/#145 are closed. G3 (#146) passed CI and is closed. G4 (#147) passed local lifecycle gates;
+its commit and CI are next.
 G3 paired MTP windows, forced partial commits and mixed-request controls pass.
 G2 reproduced the historical row-path GPU fault. Corrected fallback
 and grouped geometry, four-request serving, startup mismatch rejection and the

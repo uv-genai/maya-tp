@@ -6475,6 +6475,9 @@ void mla(const float* q, const uint16_t* wk_b, const uint16_t* wv_b, const uint1
     };
     // scratch for q_abs and ctx (n_head * kv_lora each), per device
     static float* scratch[16] = {};
+#if defined(STRATA_USE_HIP)
+    static size_t scratch_bytes[16] = {};
+#endif
     int dev = 0;
     cudaGetDevice(&dev);
     if (getenv("STRATA_GLM_MLA1") != nullptr || dev >= 16 || kv_lora % 32 || v_head % 32) {
@@ -6485,6 +6488,16 @@ void mla(const float* q, const uint16_t* wk_b, const uint16_t* wv_b, const uint1
         mark("mla");
         return;
     }
+#if defined(STRATA_USE_HIP)
+    // TP trunk heads are compact; replicated NextN can be wider. The first
+    // call's allocation is not a capacity guarantee for later layers.
+    const size_t required = (size_t) 2 * n_head * kv_lora * sizeof(float);
+    if (scratch[dev] != nullptr && scratch_bytes[dev] < required) {
+        cudaFree(scratch[dev]);
+        scratch[dev] = nullptr;
+        scratch_bytes[dev] = 0;
+    }
+#endif
     if (scratch[dev] == nullptr && cudaMalloc(&scratch[dev], (size_t) 2 * n_head * kv_lora * sizeof(float)) != cudaSuccess) {
         scratch[dev] = nullptr;
         cudaGetLastError();
@@ -6495,6 +6508,9 @@ void mla(const float* q, const uint16_t* wk_b, const uint16_t* wv_b, const uint1
         mark("mla");
         return;
     }
+#if defined(STRATA_USE_HIP)
+    scratch_bytes[dev] = std::max(scratch_bytes[dev], required);
+#endif
     float* q_abs = scratch[dev];
     float* ctx = q_abs + (size_t) n_head * kv_lora;
     headwise_gemv_kernel<<<n_head * kv_lora / 32, 256, 0, s>>>(wk_b, q, kv_lora, qk_nope, q_abs, nullptr);
