@@ -340,8 +340,8 @@ reuse, and leaves the final emitted token pending. Prompt pieces stay bounded
 to one negotiated chunk even when only one request is active. Exact in-place
 continuations reuse committed tokens; file slots and checkpoint restoration
 remain outside TP2 support. Four full 262144-token XS/S slots passed the D1
-capacity gate with complete target-expert residency. Longer filled contexts
-and operational user trials remain separate checks.
+capacity gate with complete target-expert residency. The user subsequently tested and accepted the integrated new mode; #11/#140
+are closed. Longer filled contexts remain outside the recorded performance scope.
 
 Use `tools/ds4/validate_batch.py` for owned isolated model/lifecycle validation;
 it records PIDs/start identities and stops only its own pair. Shared HTTP

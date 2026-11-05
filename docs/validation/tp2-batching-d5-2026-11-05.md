@@ -55,9 +55,10 @@ continuations independently of these serving tests.
 
 Validation is HIP gfx1151/APU RDMA only, with four allocated 262K slots but
 short inference contexts. It does not establish filled-context performance,
-vision, unsupported sampled-q proposals/lookup in batch mode, or completed
-operational user trials. Feature issues #11/#140 retain the latter. The old
-single-slot user runtime remains selected until an explicit new-build choice.
+vision or unsupported sampled-q proposals/lookup in batch mode. After this
+engineering checkpoint, the user reported successful testing and accepted the
+integrated mode; #11/#140 are closed. Release publication is tracked in #156.
+Recorded production selections still require an explicit new-build choice.
 
 The final launcher review retains the three-field legacy preflight identity
 for parallel=1; only batching requires the execution digest. Its focused

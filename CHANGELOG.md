@@ -6,6 +6,13 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+## tp-v1.1.44 — 2026-11-05
+
+First published Maya-TP release after legacy v1.1.42. This section collects
+changes since that release, including the unpublished tp-v1.1.43 checkpoint.
+The user accepted the new GLM/MTP and DeepSeek/DSpark batching mode after testing;
+#11/#140 are closed. [Release notes](docs/releases/tp-v1.1.44.md).
+
 - **Opt-in TP2 continuous batching for GLM/MTP and DeepSeek/DSpark** (#11/#140):
   checked slot generations and complete speculative commits, bounded prompt
   interleave, per-request cancellation/reuse and paired failure fanout. Both

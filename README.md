@@ -117,8 +117,9 @@ after extended user trials. HIP mapping, server and tools CI passed on the
 feature head and merged commit. [Merged pull request](https://github.com/uv-genai/maya-tp/pull/122).
 
 The `main` branch includes the sequential semantic integration of upstream **v1.1.37–v1.1.46** and
-the cumulative **v1.1.47–v1.1.49** merge, with TP2/MTP preservation checks and CI. This is unreleased source work: the latest published
-fork release remains **v1.1.42**, and future fork releases use **`tp-vMAJOR.MINOR.PATCH`**.
+the cumulative **v1.1.47–v1.1.49** merge, with TP2/MTP preservation checks and CI. These changes are included in
+**[tp-v1.1.44](https://github.com/uv-genai/maya-tp/releases/tag/tp-v1.1.44)**,
+the first published fork release using the `tp-vMAJOR.MINOR.PATCH` naming scheme.
 Fresh S/M/L ordinary/MTP API, CLI, strict historical-reference and peer-recovery checks passed after
 the cumulative upstream merge on its then-current binary. The later prefill build was accepted in user
 trials; its stricter fidelity limitations are documented in the [prefill report](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
@@ -239,6 +240,8 @@ DSpark remains active through fitting drafter groups and complete per-slot
 verdicts. The default is one conversation. See [DeepSeek batching and runtime
 selection](docs/DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching); existing pinned
 production binaries/configs require explicit selection of the new build.
+The user has tested and accepted this mode; #11/#140 are closed. See the
+[1.1.44 release notes](docs/releases/tp-v1.1.44.md) for measured scope and upgrade details.
 
 ## Validation and development
 

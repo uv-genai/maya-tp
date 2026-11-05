@@ -2,9 +2,9 @@
 
 GLM/MTP and DeepSeek/DSpark opt-in continuous batching is implemented and
 validated in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), starting
-from `72d9260` on `codex/tp2-continuous-batching`. Read Handoff.md §52 first.
+from `72d9260` on `codex/tp2-continuous-batching`. Read Handoff.md §53 first, then §52.
 C1, GLM G1–G5 and DeepSeek D1–D5 engineering gates passed; exact final
-publication/PR/main CI is tracked in #153. Use `main` once the PR is merged.
+publication/PR/main CI is tracked in #153. PR #155 is merged at `3f26526`; use `main`.
 Both wrappers default to one sequence; new 2–4-slot mode requires explicit
 matching current binaries and launchers. Accepted production runtime files
 and the protected peer checkout are unchanged. All owned GPU validation
@@ -14,9 +14,11 @@ XS/S batch HTTP tests match all 88 measured parent responses, and DeepSeek's
 default mode matches all 64 raw parent picks. Final GLM MTP wrapper regression
 passes. Actual proposals, bounded prefill, cancellation, refill, in-place reuse,
 EOS and first-cause HTTP failure fanout pass. Read the linked reports for
-memory/performance scope. Feature issues #11/#140 remain open for operational
-user trials of the new opt-in mode. Do not repeat the broad completed campaign
-or change the production selections without a new task.
+memory/performance scope. The user reports successful testing and accepts the new mode; #11/#140 are
+closed. The requested source release is `tp-v1.1.44` (numeric VERSION `1.1.44`),
+with notes in `docs/releases/tp-v1.1.44.md` and publication/CI tracked in #156.
+Do not repeat the broad completed campaign or change the production selections
+without a new task.
 
 Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 
@@ -86,7 +88,8 @@ Treat model processes as user-owned and preserve their recorded ownership bounda
 - The user tested Maya-S, Maya-M and Maya-L through llama-swap and reported working prefill and generation. Their eBPF tutorial prompt averaged 30, 32 and 28 generation tok/s respectively; [report and raw results](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
 - The promoted `build-hip/maya` on both hosts has MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
-- The checkpoint tag is `tp-v1.1.43`, with numeric VERSION `1.1.43`; no GitHub release was requested. No further GLM prefill investigation or deployment is requested. Push only to `origin`.
+- The earlier prefill checkpoint is immutable `tp-v1.1.43` (then VERSION `1.1.43`);
+  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). No further GLM prefill investigation or deployment is requested. Push only to `origin`.
 
 ## Operating rules
 

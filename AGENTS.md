@@ -202,7 +202,9 @@ wrapper; keep the default 1 branch intact. DeepSeek request `spec=0` disables
 DSpark (GLM uses 1). Batched DSpark uses point proposals with fitting groups;
 reject sampled-q proposal mode and lookup in this mode. Never reuse a slot
 before the complete EOS/output/cancel verdict finishes on both peers.
-The owned DeepSeek GPU harness is `tools/ds4/validate_batch.py`. Operational
-user acceptance of the new batch mode is separate from the accepted deployed
-single-slot runtime. Source integration does not authorize changing production
-binaries or the protected peer checkout.
+The owned DeepSeek GPU harness is `tools/ds4/validate_batch.py`.
+The user accepted the new batch mode on 2026-11-05; #11/#140 are closed.
+Release `tp-v1.1.44` uses numeric VERSION `1.1.44`; publication is tracked in #156.
+This acceptance does not change the recorded deployed single-slot selections.
+Source integration does not authorize changing production binaries or the
+protected peer checkout.
