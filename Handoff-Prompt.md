@@ -3,7 +3,8 @@
 Implementation is active on `codex/tp2-continuous-batching` from `72d9260`.
 Read Handoff.md §52 first. The user authorized both hosts, phase tests and a
 final integration PR merged after validation. Shared C1 (#143) passed its local
-gates. GLM G1 (#144) is next. Phase commits and CI are recorded in the issues.
+gates and exact-commit CI. GLM G1 (#144) passed its bounded four-slot state tests.
+G2 (#145) is next. Phase commits and CI are recorded in the issues.
 
 Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 

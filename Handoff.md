@@ -2864,7 +2864,7 @@ uses phase commits on this feature branch and a final integration PR.
 
 Live validation uses isolated outputs and explicit model/config selections.
 Record every owned process and stop only those processes. Accepted runtime
-selection remains in §§33/44. The current session has started no GPU processes.
+selection remains in §§33/44. Current G1 validation processes have all exited.
 
 C1 serializes complete engine commands and rechecks paired health under the
 writer lock. The first fatal TP2 notice wakes all active routes with its retained
@@ -2877,5 +2877,20 @@ fails against the unchanged parent source and passes with the fix.
 Validation passed 43 focused tests, HIP mapping, 742 server tests (20 skips),
 760 tools tests (3 skips), GLM CPU memory policy and DeepSeek CPU row/stub
 checks. Logs are `/tmp/maya-batching-c1-{focused,serve,tools,before}.log`.
-The phase commit and CI are recorded in #143. Next phase is G1 (#144).
+The phase commit is `2ba0803`, and CI 41980368163 passed. Issue #143 is closed.
 The isolated HIP build is `/home/ugo/software/project-maya-batching-build`.
+
+G1 (#144) completed its bounded GPU gates. The historical prompt fault did not
+reproduce with the current source at 32K context. Two allocated arenas produced
+the exact raw picks of the one-sequence MTP control. The new paired four-slot
+fixture passed per-slot bind, prefill, snapshot, reverse restore, full-logit
+replay and peer pick agreement. All experts remained resident, with about
+60.4 GiB device memory free per rank. The arena guard now checks every offset
+vector. See `docs/validation/tp2-batching-g1-2026-11-05.{md,json}` for capacities,
+controls, hashes, commands and scoped limits. G2 retains the scheduler gate
+until the actual batch framing and row executor pass their checks.
+
+Control engines are frozen on both hosts under
+`/home/ugo/software/project-maya-batching-validation/baseline-72d9260/`.
+The paired fixture is in the sibling `g1/` directory. Logs and owned identities
+are under `/tmp/maya-batching-validation/g1-*/`. All G1 processes are stopped.
