@@ -3026,3 +3026,13 @@ production multi-slot DeepSeek stays gated until D3–D5. See the D2 report
 and `docs/DEEPSEEK-TP2-BATCH-PROTOCOL.md`. The dormant WaitAdd row defect
 found by the initial synthetic fixture is separately open in #154; production
 WaitValue/AddRowsBroadcast reductions pass unchanged.
+
+D2 commit `b00a472` passed CI 42009256835 and #150 is closed. D3 (#151)
+checked ordinary rows pass XS/S at four 262K slots: all ten full-logit
+comparisons for 1–4 unequal-position members are exact, with matching greedy
+picks and positions; both pairs exit 0/0. Fallback attention/router traces
+are the final D3 checkpoint. Production multi-slot serving stays gated.
+
+D3 fallback attention also passes all ten exact full-logit comparisons. All
+320 valid router records match between peers. All owned D3 processes
+are stopped. The D3 report records the frozen hash and scope.

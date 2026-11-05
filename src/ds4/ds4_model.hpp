@@ -23,6 +23,7 @@
 
 #if defined(STRATA_DS4_TP2_RDMA)
 namespace strata::net { class Communicator; }
+namespace strata::ds4::tp2 { struct Control; }
 #endif
 namespace strata::ds4 {
 
@@ -193,6 +194,7 @@ public:
     bool tp2_attach(strata::net::Communicator& comm, std::size_t limit, std::string& err,
                          bool control_rank0 = false);
     bool tp2_shutdown(std::string& err);
+    bool tp_batch_execute(const tp2::Control& control, std::string& err);
     void tp2_set_failure_handler(std::function<void(const std::string&)> handler);
 #endif
     bool tp2_driving() const;
@@ -315,6 +317,8 @@ public:
     /// conversation s from here - feed, step, draft / verify, sample, checkpoints, slots, reset, tokens (0 at load).
     int seq_count() const;
     void seq_bind(int s);
+    /// Admit a new TP2 request generation before binding/resetting/reusing a slot.
+    bool tp2_begin_sequence(int s, std::string& err);
     int seq_bound() const;
     int64_t seq_pos(int s) const;
     const std::vector<int32_t>& seq_tokens(int s) const;
