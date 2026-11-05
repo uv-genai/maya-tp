@@ -18,20 +18,25 @@
 } } while (false)
 
 int main(int argc, char** argv) {
-    if (argc != 10 && (argc != 11 || std::string(argv[10]) != "--rows")) {
-        std::fprintf(stderr, "usage: rank host port rdma pack context sequences prompt-ids output-json [--rows]\n");
+    if (argc != 10 && (argc != 11 || (std::string(argv[10]) != "--rows" && std::string(argv[10]) != "--mtp"))) {
+        std::fprintf(stderr, "usage: rank host port rdma pack context sequences prompt-ids output-json [--rows|--mtp]\n");
         return 2;
     }
     const int rank = std::stoi(argv[1]);
     const int port = std::stoi(argv[3]);
     const int64_t context = std::stoll(argv[6]);
     const int sequences = std::stoi(argv[7]);
+    const bool check_mtp = argc == 11 && std::string(argv[10]) == "--mtp";
     std::string error;
     CHECK(rank >= 0 && rank < 2 && port > 0 && port <= 65535);
     CHECK(context >= 256 && sequences >= 2 && sequences <= 4);
     const std::string count = std::to_string(sequences);
     CHECK(setenv("STRATA_GLM_SEQS", count.c_str(), 1) == 0);
     CHECK(setenv("STRATA_GLM_SPLIT", "0", 1) == 0);
+    if (check_mtp) {
+        CHECK(setenv("STRATA_GLM_MTP", "1", 1) == 0);
+        CHECK(setenv("STRATA_GLM_MULTI_MTP", "2", 1) == 0);
+    }
     std::vector<int32_t> prompt;
     {
         std::ifstream input(argv[8]);
@@ -135,6 +140,78 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "rank %d passed %d packed rows against independent forwards\n", rank, count);
         }
     }
+    if (check_mtp) {
+        CHECK(model.mtpw_ok());
+        std::vector<int> slots, counts;
+        std::vector<strata::kernels::SamplerParams> sampling((size_t) sequences);
+        for (int slot = 0; slot < sequences; ++slot) {
+            model.seq_bind_all(slot);
+            CHECK(model.snapshot_save());
+            slots.push_back(slot);
+            counts.push_back(slot % 3 == 0 ? 3 : slot % 3 == 1 ? 2 : 1);
+            sampling[(size_t) slot].greedy = true;
+        }
+        for (int retained = 1; retained <= 3; ++retained) {
+            std::vector<int32_t> inputs, reference_picks, last, written;
+            std::vector<int> keep, drafts;
+            std::vector<int64_t> positions;
+            std::vector<std::vector<float>> expected((size_t) sequences);
+            for (int slot = 0; slot < sequences; ++slot) {
+                model.seq_bind_all(slot);
+                CHECK(model.snapshot_restore());
+                positions.push_back(model.seq_pos(slot));
+                const int count = counts[(size_t) slot];
+                const int kept = std::min(retained, count);
+                std::vector<int32_t> window;
+                int32_t token = picks[(size_t) slot];
+                int32_t pending = -1;
+                for (int row = 0; row < count; ++row) {
+                    window.push_back(token);
+                    CHECK(model.forward({token}, logits, error));
+                    token = (int32_t) std::distance(logits.begin(), std::max_element(logits.begin(), logits.end()));
+                    reference_picks.push_back(token);
+                    if (row + 1 == kept) pending = token;
+                }
+                CHECK(model.snapshot_restore());
+                for (int row = 0; row < kept; ++row)
+                    CHECK(model.forward({window[(size_t) row]}, logits, error));
+                CHECK(model.forward({pending}, expected[(size_t) slot], error));
+                CHECK(model.snapshot_restore());
+                inputs.insert(inputs.end(), window.begin(), window.end());
+                written.insert(written.end(), window.begin() + 1, window.begin() + kept);
+                keep.push_back(kept);
+                last.push_back(pending);
+                drafts.push_back(slot == 2 ? 0 : 2);
+            }
+            std::vector<int32_t> actual(inputs.size());
+            CHECK(model.mtpw_front(slots.data(), counts.data(), sequences, inputs.data(), error));
+            CHECK(model.mtpw_back(slots.data(), counts.data(), sequences, inputs.data(), sampling.data(), error));
+            CHECK(model.mtpw_picks(slots.data(), counts.data(), sequences, actual.data(), error));
+            CHECK(actual == reference_picks);
+            CHECK(model.mtpw_commit(slots.data(), counts.data(), keep.data(), sequences, error));
+            CHECK(model.mtpw_draft_queue(slots.data(), keep.data(), sequences, written.data(), last.data(), drafts.data(), error));
+            std::vector<int32_t> proposals((size_t) sequences * 2, -1);
+            CHECK(model.mtpw_draft_take(proposals.data(), error));
+            for (int slot = 0; slot < sequences; ++slot) {
+                for (int draft = 0; draft < 2; ++draft) {
+                    const int32_t token = proposals[(size_t) slot * 2 + (size_t) draft];
+                    if (drafts[(size_t) slot] == 0) CHECK(token == -1);
+                    else CHECK(token >= 0 && token < geometry.n_vocab);
+                }
+                CHECK(model.seq_pos(slot) == positions[(size_t) slot] + keep[(size_t) slot]);
+                model.seq_bind_all(slot);
+                CHECK(model.forward({last[(size_t) slot]}, logits, error));
+                if (!agrees(logits, expected[(size_t) slot])) {
+                    float largest = 0;
+                    for (size_t token = 0; token < logits.size(); ++token)
+                        largest = std::max(largest, std::abs(logits[token] - expected[(size_t) slot][token]));
+                    std::fprintf(stderr, "rank %d keep %d slot %d replay max difference %g\n", rank, retained, slot, largest);
+                }
+                CHECK(agrees(logits, expected[(size_t) slot]));
+            }
+            std::fprintf(stderr, "rank %d MTP retained %d, ragged windows, replay and per-slot drafts passed\n", rank, retained);
+        }
+    }
     CHECK(cudaDeviceSynchronize() == cudaSuccess);
     CHECK(communicator->CheckQueued(&error));
     CHECK(communicator->EndOperation(0, &error));
@@ -149,7 +226,8 @@ int main(int argc, char** argv) {
     output << "{\"rank\":" << rank << ",\"sequences\":" << sequences
            << ",\"context\":" << context << ",\"free_bytes\":" << free_bytes
            << ",\"total_bytes\":" << total_bytes << ",\"prompt_tokens\":" << prompt.size()
-           << ",\"rows\":" << (argc == 11 ? "true" : "false") << ",\"passed\":true}\n";
+           << ",\"rows\":" << (argc == 11 ? "true" : "false")
+           << ",\"mtp\":" << (check_mtp ? "true" : "false") << ",\"passed\":true}\n";
     CHECK(output.good());
     std::printf("PASS rank %d, %d isolated sequences, snapshots and replay\n", rank, sequences);
     return 0;

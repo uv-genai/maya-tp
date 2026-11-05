@@ -816,7 +816,7 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
             err = "glm rows: the grouped EXL3 experts";
             return false;
         }
-        if (tp_.active()) {
+        if (tp_.active() && il != mtp_il_) {
             if (getenv("STRATA_GLM_TP_AR_TRACE"))
                 std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
             if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;
@@ -836,7 +836,7 @@ bool Glm5Model::rows_moe_grouped(int il, int n, std::string& err) {
                   std::to_string(Ly.d_type) + ")";
             return false;
         }
-        if (tp_.active()) {
+        if (tp_.active() && il != mtp_il_) {
             if (getenv("STRATA_GLM_TP_AR_TRACE"))
                 std::fprintf(stderr, "rows AR r=%d ffn il=%d n=%d floats=%zu\n", tp_.rank, il, n, (size_t) n * E);
             if (!tp_.all_reduce(S->ffn, (std::size_t) n * E, E, s, err)) return false;

@@ -2923,4 +2923,17 @@ passes within 743 server tests (20 skips), followed by 760 tools tests (3 skips)
 Host framing tests pass in Release and with ASan/UBSan, and the existing CPU
 policy/row/stub gates pass. Results, hashes and scoped limits are in
 `docs/validation/tp2-batching-g2-2026-11-05.{md,json}`. All owned pairs are stopped.
-The phase commit and CI follow in #145. Batched MTP is the next phase, G3 (#146).
+G2 commit `c176647` passed CI 41986562009 and #145 is closed.
+G3 (#146) is active with uncommitted changes. The application codec is now
+version 2 with complete checked MTP verdicts. It validates retained tokens
+against the canonical target inputs, continuation, draft counts and every
+member identity. KDA replay uses rank-local heads/beta strides. Replicated
+NextN grouped execution skips trunk reductions. Batched MTP loads the NextN
+block explicitly and respects per-request `spec=1`. The frozen G3 candidate passes four-client serving with actual MTP in every
+conversation (65/108 drafts accepted) and all 128 raw picks matching the G2
+ordinary control. Mixed speculation, sampling/penalties, thinking closure and
+bias match an ordinary control exactly. Forced retained prefixes 1–3, ragged
+windows, cache reseeding and full-logit state replay pass on both ranks with
+grouped experts; replicated NextN issues no trunk reduction. The strict default
+control matches all 64 parent picks. All owned G3 processes have exited. See
+`docs/validation/tp2-batching-g3-2026-11-05.{md,json}`. Phase commit/CI follow.

@@ -1951,3 +1951,15 @@ engine-side `DS4_TURN_TRACE=1` adds DeepSeek request-stage timing.
 A fatal DeepSeek GPU-state notice ends that engine after the current request.
 A TP2 server marks the pair down immediately, retains the first cause and
 requires both ranks to restart through the pair launcher.
+
+### HIP TP2 multi-sequence MTP
+
+With `MAYA_GLM_SEQS=2`–`4`, the paired GLM engine negotiates bounded target
+windows and complete per-slot commits. `MAYA_TP_MTP=1` derives the draft count
+from `MAYA_GLM_MULTI_MTP`, then `MAYA_GLM_MTP_FIXED`, defaulting to 2. The
+validated range is 0–7; 0 disables window drafting. Both ranks must request
+matching capacities and features. Per-request `spec=1` disables proposals for
+that conversation. Host expert crews are disabled for replicated NextN while
+TP2 is active; trunk reductions retain their rank-local geometry. The default
+one-sequence mode keeps its existing control protocol. Operational launcher
+controls and rollout performance are tracked in #148.

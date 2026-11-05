@@ -486,7 +486,7 @@ bool Glm5Model::mtpw_front(const int* seqs, const int* counts, int n, const int3
         return false;
     }
     if (seq_[0].hop_h == nullptr && !seq_pipe_ready(err)) return false;
-    static const bool crews = getenv("STRATA_GLM_MTPW_CREWS") != nullptr &&
+    const bool crews = !tp_.active() && getenv("STRATA_GLM_MTPW_CREWS") != nullptr &&
                               std::atoi(getenv("STRATA_GLM_MTPW_CREWS")) != 0;
     if (crews) {
         auto* C = (RowsCrew*) rows_crew_;
@@ -642,7 +642,7 @@ void Glm5Model::rows_crew_start(std::string& err) {
 
 bool Glm5Model::mtpw_back(const int* seqs, const int* counts, int n, const int32_t* tokens,
                           const strata::kernels::SamplerParams* sps, std::string& err) {
-    static const bool crews = getenv("STRATA_GLM_MTPW_CREWS") != nullptr &&
+    const bool crews = !tp_.active() && getenv("STRATA_GLM_MTPW_CREWS") != nullptr &&
                               std::atoi(getenv("STRATA_GLM_MTPW_CREWS")) != 0;
     if (crews) {
         auto* C = (RowsCrew*) rows_crew_;
@@ -706,7 +706,8 @@ bool Glm5Model::mtpw_commit_part(const int* seqs, const int* counts, const int* 
     const Glm5Geometry& g = g_;
     cudaSetDevice(dev_);
     cudaStream_t s = F->cs;
-    const size_t DI = (size_t) head_compute() * g.kda_head_dim, sd = DI * (size_t) g.kda_head_dim;
+    const int NH = head_compute();
+    const size_t DI = (size_t) NH * g.kda_head_dim, sd = DI * (size_t) g.kda_head_dim;
     std::vector<int> layers;
     for (int il = l0_; il < l1_; ++il)
         if (M->kin_of[(size_t) il] >= 0) layers.push_back(il);
@@ -754,7 +755,7 @@ bool Glm5Model::mtpw_commit_part(const int* seqs, const int* counts, const int* 
                         k.lower_bound = g.kda_lb;
                         k.g1 = sc + 3 * DI;
                         k.g2 = sc + 4 * DI;
-                        k.n_head = g.n_head;
+                        k.n_head = NH;
                         k.head_dim = g.kda_head_dim;
                         k.d_conv = g.d_conv;
                         gf::KdaRecArgs& r = ra[i];
@@ -762,7 +763,7 @@ bool Glm5Model::mtpw_commit_part(const int* seqs, const int* counts, const int* 
                         r.k = k.out[1];
                         r.v = k.out[2];
                         r.g1 = k.g1;
-                        r.beta_raw = rest + 2 * T * (size_t) g.kda_head_dim + tt * (size_t) g.n_head;
+                        r.beta_raw = rest + 2 * T * (size_t) g.kda_head_dim + tt * (size_t) NH;
                         r.state = b;
                         r.g2 = k.g2;
                         r.norm_w = Ly.ssm_norm;

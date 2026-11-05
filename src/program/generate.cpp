@@ -56,6 +56,7 @@
 #include "strata/core/glm_model.hpp"
 #include "strata/core/mtp_rows.hpp"
 #include "strata/core/glm_tp_batch.hpp"
+#include <optional>
 #include "strata/core/split_groups.hpp"
 #include "strata/core/prefix_cut.hpp"
 #include "strata/core/prefill_pieces.hpp"
@@ -1101,6 +1102,24 @@ static int glm_pack_generate(const Options& o) {
     }
     // two-host tensor parallel (TP2): peek pack geometry first (fail fast, #12), then connect
     // (bootstrap must finish before the model load warms ~40 s of expert tiers).
+    const char* sequence_setting = getenv("STRATA_GLM_SEQS");
+    const bool tp_batch_requested = o.tp_world > 1 && sequence_setting != nullptr &&
+                                    std::atoi(sequence_setting) > 1 &&
+                                    (o.serve || (o.tp_rank > 0 && o.tokens.empty()));
+    if (tp_batch_requested) {
+        const char* enabled = getenv("STRATA_TP_MTP");
+        if (enabled != nullptr && std::atoi(enabled) != 0) {
+            const char* width = getenv("STRATA_GLM_MULTI_MTP");
+            if (width == nullptr) width = getenv("STRATA_GLM_MTP_FIXED");
+            const int drafts = width != nullptr ? std::atoi(width) : 2;
+            if (drafts < 0 || drafts > 7) {
+                std::fprintf(stderr, "GLM TP2 batched MTP supports 0-7 drafts per conversation\n");
+                return 1;
+            }
+            set_env("STRATA_GLM_MULTI_MTP", std::to_string(drafts).c_str());
+            if (drafts > 0) set_env("STRATA_GLM_MTP", "1");
+        }
+    }
     if (o.tp_world > 1) {
 #if defined(STRATA_ENABLE_TP2_RDMA)
         strata::core::Glm5Geometry pack_g;
@@ -1898,6 +1917,8 @@ static int glm_pack_generate(const Options& o) {
         kTpMirrorMtpAbort = 14,   // incomplete decode: fail the pair without parsing cleanup as round data
         kTpBatchHello = 16,
         kTpBatchRows = 17,
+        kTpBatchVerify = 18,
+        kTpBatchVerdict = 19,
         kTpBatchShutdown = 31,
     };
     // Sampler scalars for a mirrored decode_mtp (no host pointers).
@@ -1922,13 +1943,13 @@ static int glm_pack_generate(const Options& o) {
         return e != nullptr && std::atoi(e) != 0;
     }();
     const bool tp_mirror = tp_comm != nullptr && tp_comm->rank() == 0 && o.serve && tp2;
-    const bool tp_batch = tp2 && model.seq_count() > 1 &&
-                          (o.serve || (o.tp_rank > 0 && o.tokens.empty()));
+    const bool tp_batch = tp2 && tp_batch_requested && model.seq_count() > 1;
     const strata::core::glm_tp::Limits batch_limits{
         model.seq_count(), strata::core::Glm5Model::rows_max(), (int) n_vocab, (uint64_t) o.max_context};
     uint64_t batch_operation = 0;
     std::array<uint64_t, strata::core::glm_tp::kMaxSlots> batch_generations{};
     bool batch_ready = false;
+    std::optional<strata::core::glm_tp::Batch> batch_pending;
     const bool tp_reuse_ok = !tp2 || tp_mirror || !o.serve;
     // Sticky pair-down: the first failed mirror send ends the pair for good until both ranks restart.
     // serve/server.py watches stdout for "TP2_DOWN" and reports it on /health (issue #6).
@@ -2021,7 +2042,7 @@ static int glm_pack_generate(const Options& o) {
     const auto batch_capabilities = [&] {
         std::vector<int32_t> words{strata::core::glm_tp::kVersion, model.seq_count(),
                                  batch_limits.rows, tp_mtp_enabled ? 1 : 0,
-                                 strata::core::Glm5Model::multi_mtp_setting()};
+                                 strata::core::Glm5Model::multi_mtp_setting(), model.mtpw_ok() ? 1 : 0};
         for (const char* setting : {"STRATA_GLM_GROUP_EXPERTS", "STRATA_GLM_ROWS_BATCH",
                                    "STRATA_GLM_ROWS_ATTN", "STRATA_GLM_ROWS_SMALL"}) {
             const char* value = getenv(setting);
@@ -2074,6 +2095,10 @@ static int glm_pack_generate(const Options& o) {
         return 1;
     }
     if (tp_batch && tp_mirror) {
+        if (tp_mtp_enabled && strata::core::Glm5Model::multi_mtp_setting() > 0 && !model.mtpw_ok()) {
+            std::fprintf(stderr, "GLM TP2 batched MTP requires the NextN block and its window buffers\n");
+            return 1;
+        }
         if (!tp_send_vec(kTpBatchHello, batch_capabilities()) || !batch_receive_ack()) return 1;
         batch_ready = true;
         std::printf("INFO tp_batch_version=%d tp_batch_slots=%d tp_batch_rows=%d\n",
@@ -2083,7 +2108,7 @@ static int glm_pack_generate(const Options& o) {
     const auto tp_force = [&](int32_t t) -> bool {
         // Inside decode_mtp the accept wire carries forced tokens. An op-11 here would precede
         // the round frame and strand the peer (thinking-budget failure, #13).
-        if (!tp_mirror || tp_mtp_decoding) return true;
+        if (!tp_mirror || tp_mtp_decoding || tp_batch) return true;
         return tp_send(kTpMirrorForce, &t, 1);
     };
     const auto tp_send_mtp = [&](int64_t max_new, const strata::kernels::SamplerParams& sq,
@@ -2902,7 +2927,7 @@ static int glm_pack_generate(const Options& o) {
     }
     // STRATA_GLM_MULTI_MTP=<drafts>: the running requests' batched steps carry verify windows - each one's last token
     // and the NextN block's drafts after it (Glm5Model::mtpw_*, strata/core/mtp_rows.hpp)
-    const bool mtp_rows = multi && model.mtpw_ok();
+    const bool mtp_rows = multi && model.mtpw_ok() && (!tp2 || tp_mtp_enabled);
     if (multi && strata::core::Glm5Model::multi_mtp_setting() > 0 && !mtp_rows)
         std::fprintf(stderr, "glm multi mtp: MAYA_GLM_MULTI_MTP is set but not used here - it needs MAYA_GLM_SPLIT_ROWS "
                              "on a split (or one GPU), the NextN block loaded (no MAYA_GLM_NO_MTP) and no --dflash\n");
@@ -2952,6 +2977,7 @@ static int glm_pack_generate(const Options& o) {
     };
     struct Gen {
         int rid = -1, ctx = 0;
+        int draft_limit = 0;
         strata::kernels::SamplerParams sp;
         int64_t max_new = 0, produced = 0;
         std::vector<int32_t> prompt, emitted;
@@ -3216,6 +3242,7 @@ static int glm_pack_generate(const Options& o) {
         std::vector<int32_t> toks;
         std::vector<strata::kernels::SamplerParams> sps;
         bool back = false;
+        strata::core::glm_tp::Batch plan;
     };
     std::deque<WinGroup> wflight;
     const auto win_back = [&](WinGroup& w) -> bool {
@@ -3240,6 +3267,10 @@ static int glm_pack_generate(const Options& o) {
         for (const int c : w.counts) rows += c;
         std::vector<int32_t> picks((size_t) rows);
         if (!win_back(w) || !model.mtpw_picks(w.seqs.data(), w.counts.data(), n, picks.data(), err)) return false;
+        if (tp_batch && !batch_complete()) {
+            err = "TP2 pair down during batched MTP verification";
+            return false;
+        }
         const double t_picks = trace ? std::chrono::duration<double, std::milli>(
                                            std::chrono::steady_clock::now() - t_round0).count() : 0.0;
         std::vector<int> keep((size_t) n, 1), nd((size_t) n, 0);
@@ -3283,10 +3314,30 @@ static int glm_pack_generate(const Options& o) {
                 // room (draft j's NextN cache entry is at the window's start + j - 1; the position is still this
                 // window's start + its rows until the commit below)
                 nd[(size_t) i] = (int) std::max<int64_t>(
-                    0, std::min<int64_t>({(int64_t) D, g.max_new - g.produced - 1,
+                    0, std::min<int64_t>({(int64_t) g.draft_limit, g.max_new - g.produced - 1,
                                           model.seq_max_ctx(g.ctx) - 2 -
                                               (model.seq_pos(g.ctx) - w.counts[(size_t) i] + k)}));
             }
+        }
+        if (tp_batch) {
+            strata::core::glm_tp::Verdict verdict;
+            verdict.operation = ++batch_operation;
+            verdict.target_operation = w.plan.operation;
+            size_t at = 0;
+            for (int i = 0; i < n; ++i) {
+                const auto& member = w.plan.members[(size_t) i];
+                strata::core::glm_tp::VerdictMember result{
+                    member.slot, member.generation, member.position, nd[(size_t) i], !ended[(size_t) i], {}};
+                const size_t accepted = (size_t) keep[(size_t) i] - 1;
+                result.emitted.assign(written.begin() + (ptrdiff_t) at,
+                                      written.begin() + (ptrdiff_t) (at + accepted));
+                result.emitted.push_back(last[(size_t) i]);
+                at += accepted;
+                verdict.members.push_back(std::move(result));
+            }
+            std::vector<int32_t> wire;
+            if (!strata::core::glm_tp::encode_verdict(verdict, w.plan, batch_limits, D, wire, err) ||
+                !tp_send_vec(kTpBatchVerdict, wire) || !batch_receive_ack()) return false;
         }
         if (!model.mtpw_commit(w.seqs.data(), w.counts.data(), keep.data(), n, err)) return false;
         const double t_commit = trace ? std::chrono::duration<double, std::milli>(
@@ -3305,6 +3356,10 @@ static int glm_pack_generate(const Options& o) {
                 g.draft_at = model.seq_pos(g.ctx);
                 g.draft_tok = g.pending;
             }
+        }
+        if (tp_batch && !batch_complete()) {
+            err = "TP2 pair down during batched MTP commit";
+            return false;
         }
         for (int i = 0; i < n; ++i)
             if (ended[(size_t) i]) gen_finish(*w.g[(size_t) i]);
@@ -3433,6 +3488,8 @@ static int glm_pack_generate(const Options& o) {
         auto g = std::make_unique<Gen>();
         g->rid = rid;
         g->sp = rq;
+        g->draft_limit = strata::core::Glm5Model::multi_mtp_setting();
+        if (tp_batch && req_spec >= 1) g->draft_limit = std::min(g->draft_limit, req_spec - 1);
         g->max_new = max_new;
         g->in_think = req_think_budget > 0 && req_think_end >= 0;
         g->think_budget = req_think_budget;
@@ -3771,7 +3828,7 @@ static int glm_pack_generate(const Options& o) {
         static const int mtp_max = (int) env_num("STRATA_GLM_MULTI_MTP_MAX", 4);
         int n_run = 0;
         for (auto& gp : gens) n_run += !gp->done;
-        const bool use_win = !tp2 && mtp_rows && (mtp_max <= 0 || n_run <= mtp_max);
+        const bool use_win = mtp_rows && (mtp_max <= 0 || n_run <= mtp_max);
         if ((use_win && !flight.empty()) || (!use_win && !wflight.empty())) {
             if (!multi_drain()) {
                 multi_fail(err);
@@ -3787,8 +3844,8 @@ static int glm_pack_generate(const Options& o) {
                 ready += !gp->inflight && gp->pending >= 0;
                 active += gp->inflight || gp->pending >= 0;
             }
-            const int k = std::max(1, split_rows > 0 ? split_rows : model.seq_count());
-            const std::vector<int> sizes = strata::core::split_groups(ready, active, k, even_groups);
+            const int k = tp_batch ? model.seq_count() : std::max(1, split_rows > 0 ? split_rows : model.seq_count());
+            const std::vector<int> sizes = strata::core::split_groups(ready, active, k, tp_batch ? false : even_groups);
             std::vector<Gen*> rdy;
             for (auto& gp : gens)
                 if (!gp->done && !gp->inflight && gp->pending >= 0) rdy.push_back(gp.get());
@@ -3810,6 +3867,25 @@ static int glm_pack_generate(const Options& o) {
                     for (int t = 1; t < w.counts[j]; ++t) w.toks.push_back(w.g[j]->drafts[(size_t) t - 1]);
                 }
                 if (w.g.empty()) continue;
+                if (tp_batch) {
+                    w.plan.operation = ++batch_operation;
+                    size_t row = 0;
+                    for (size_t i = 0; i < w.g.size(); ++i) {
+                        const int slot = w.seqs[i];
+                        strata::core::glm_tp::Member member{slot, ctxs[(size_t) slot].generation,
+                                                           (uint64_t) model.seq_pos(slot), {}};
+                        member.tokens.assign(w.toks.begin() + (ptrdiff_t) row,
+                                             w.toks.begin() + (ptrdiff_t) (row + w.counts[i]));
+                        row += (size_t) w.counts[i];
+                        w.plan.members.push_back(std::move(member));
+                    }
+                    std::vector<int32_t> wire;
+                    if (!strata::core::glm_tp::encode(w.plan, batch_limits, wire, err) ||
+                        !tp_send_vec(kTpBatchVerify, wire) || !batch_receive_ack()) {
+                        multi_fail(err.empty() ? "TP2 pair down while sending MTP windows" : err);
+                        return;
+                    }
+                }
                 if (!model.mtpw_front(w.seqs.data(), w.counts.data(), (int) w.seqs.size(), w.toks.data(), err)) {
                     multi_fail(err);
                     return;
@@ -4473,13 +4549,17 @@ static int glm_pack_generate(const Options& o) {
                 return 1;
             }
             if (h.n < 0 || h.n > 1000000 ||
-                ((h.op == kTpBatchHello || h.op == kTpBatchRows) &&
+                ((h.op == kTpBatchHello || h.op == kTpBatchRows || h.op == kTpBatchVerify || h.op == kTpBatchVerdict) &&
                  (size_t) h.n > strata::core::glm_tp::kMaxWords)) {
                 std::fprintf(stderr, "TP2 worker: bad instruction n=%d op=%d\n", h.n, h.op);
                 return 1;
             }
             // Rank 1 has no stdin reader: mirrored requests must wake its CPU service too.
             strata::platform::idle_poke();
+            if (batch_pending && h.op != kTpBatchVerdict) {
+                batch_send_ack("GLM TP2 verify window requires its complete verdict before other work");
+                return 1;
+            }
             // MTP carries a POD sampler + optional history before any token vector.
             if (h.op == kTpMirrorMtp) {
                 TpMtpSp s{};
@@ -4547,36 +4627,97 @@ static int glm_pack_generate(const Options& o) {
                     if (!batch_send_ack(e) || !e.empty()) return 1;
                     batch_ready = true;
                     break;
-                case kTpBatchRows: {
+                case kTpBatchRows:
+                case kTpBatchVerify: {
+                    const bool verify = h.op == kTpBatchVerify;
                     strata::core::glm_tp::Batch batch;
                     if (!batch_ready || !strata::core::glm_tp::decode(toks, batch_limits,
                                                                    batch_operation + 1, batch, e)) {
                         if (e.empty()) e = "GLM TP2 batch capability was not negotiated";
                     } else {
                         for (const auto& member : batch.members) {
-                            if (member.tokens.size() != 1 || member.generation < batch_generations[(size_t) member.slot] ||
+                            if ((!verify && member.tokens.size() != 1) ||
+                                (verify && (!model.mtpw_ok() ||
+                                            member.tokens.size() > (size_t) strata::core::Glm5Model::multi_mtp_setting() + 1)) ||
+                                member.generation < batch_generations[(size_t) member.slot] ||
                                 member.position != (uint64_t) model.seq_pos(member.slot) ||
-                                member.position + 1 >= (uint64_t) model.seq_max_ctx(member.slot)) {
+                                member.position + member.tokens.size() >= (uint64_t) model.seq_max_ctx(member.slot)) {
                                 e = "GLM TP2 batch member has stale state or an invalid row count";
                                 break;
                             }
                         }
                     }
                     if (!batch_send_ack(e) || !e.empty()) return 1;
-                    std::vector<int> seqs, output(batch.members.size());
+                    std::vector<int> seqs, counts, output(batch.members.size());
                     std::vector<int32_t> tokens;
                     std::vector<strata::kernels::SamplerParams> sampling(batch.members.size(), tp_peer_sp());
                     for (const auto& member : batch.members) {
                         seqs.push_back(member.slot);
-                        tokens.push_back(member.tokens[0]);
+                        counts.push_back((int) member.tokens.size());
+                        tokens.insert(tokens.end(), member.tokens.begin(), member.tokens.end());
                         batch_generations[(size_t) member.slot] = member.generation;
                     }
-                    bool ok = model.multi_rows(seqs.data(), tokens.data(), sampling.data(),
-                                               (int) seqs.size(), output.data(), e);
+                    bool ok;
+                    if (verify) {
+                        std::vector<int32_t> picks(tokens.size());
+                        ok = model.mtpw_front(seqs.data(), counts.data(), (int) seqs.size(), tokens.data(), e) &&
+                             model.mtpw_back(seqs.data(), counts.data(), (int) seqs.size(), tokens.data(), sampling.data(), e) &&
+                             model.mtpw_picks(seqs.data(), counts.data(), (int) seqs.size(), picks.data(), e);
+                    } else {
+                        ok = model.multi_rows(seqs.data(), tokens.data(), sampling.data(),
+                                              (int) seqs.size(), output.data(), e);
+                    }
                     if (ok) ok = tp_comm->CheckQueued(&e);
                     if (!ok && e.empty()) e = "GLM TP2 batch row execution failed";
+                    if (ok && verify) batch_pending = batch;
                     if (!batch_send_ack(e) || !ok) return 1;
                     batch_operation = batch.operation;
+                    break;
+                }
+                case kTpBatchVerdict: {
+                    strata::core::glm_tp::Verdict verdict;
+                    const int drafts = strata::core::Glm5Model::multi_mtp_setting();
+                    if (!batch_ready || !batch_pending ||
+                        !strata::core::glm_tp::decode_verdict(toks, *batch_pending, batch_limits,
+                                                            batch_operation + 1, drafts, verdict, e)) {
+                        if (e.empty()) e = "GLM TP2 verdict has no pending verify window";
+                    } else {
+                        for (size_t i = 0; i < verdict.members.size(); ++i) {
+                            const auto& member = verdict.members[i];
+                            const auto& window = batch_pending->members[i];
+                            const uint64_t kept_position = member.position + member.emitted.size();
+                            if ((uint64_t) model.seq_pos(member.slot) != member.position + window.tokens.size() ||
+                                (member.drafts > 0 && kept_position + member.drafts + 1 >=
+                                                          (uint64_t) model.seq_max_ctx(member.slot))) {
+                                e = "GLM TP2 verdict has stale position or exceeds the slot context";
+                                break;
+                            }
+                        }
+                    }
+                    if (!batch_send_ack(e) || !e.empty()) return 1;
+                    std::vector<int> seqs, counts, keep, next_drafts;
+                    std::vector<int32_t> written, last;
+                    for (size_t i = 0; i < verdict.members.size(); ++i) {
+                        const auto& member = verdict.members[i];
+                        seqs.push_back(member.slot);
+                        counts.push_back((int) batch_pending->members[i].tokens.size());
+                        keep.push_back((int) member.emitted.size());
+                        next_drafts.push_back(member.drafts);
+                        written.insert(written.end(), member.emitted.begin(), member.emitted.end() - 1);
+                        last.push_back(member.emitted.back());
+                    }
+                    std::vector<int32_t> proposals(seqs.size() * (size_t) std::max(1, drafts), -1);
+                    bool ok = model.mtpw_commit(seqs.data(), counts.data(), keep.data(), (int) seqs.size(), e) &&
+                              model.mtpw_draft_queue(seqs.data(), keep.data(), (int) seqs.size(), written.data(),
+                                                     last.data(), next_drafts.data(), e) &&
+                              model.mtpw_draft_take(proposals.data(), e);
+                    if (ok) ok = tp_comm->CheckQueued(&e);
+                    if (!ok && e.empty()) e = "GLM TP2 batched MTP commit failed";
+                    if (ok) {
+                        batch_pending.reset();
+                        batch_operation = verdict.operation;
+                    }
+                    if (!batch_send_ack(e) || !ok) return 1;
                     break;
                 }
                 case kTpBatchShutdown:
