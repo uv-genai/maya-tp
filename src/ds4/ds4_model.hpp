@@ -171,11 +171,22 @@ struct Tp2Geometry {
     int hidden = 0, layers = 0, experts = 0, expert_width = 0;
 };
 
+struct Tp2Capacity {
+    int sequences = 0;
+    std::int64_t context = 0;
+    std::uint64_t weights = 0, caches = 0, scratch = 0, experts = 0;
+    std::uint64_t extra_sequence_caches = 0, pinned_staging = 0;
+    std::uint64_t free = 0, total = 0, system_available = 0;
+};
+
 class Model {
 public:
     Model();
     ~Model();
     bool load(const Options& o, std::string& err);
+    // Allocation/state diagnostics for bounded TP2 validation, no model work.
+    bool tp2_capacity(Tp2Capacity& capacity, std::string& err) const;
+    bool tp2_sequence_layout(std::string& err) const;
 #if defined(STRATA_DS4_TP2_RDMA)
     // Non-owning; the communicator must outlive all model calls. The caller
     // must validate both identities before attaching either rank.

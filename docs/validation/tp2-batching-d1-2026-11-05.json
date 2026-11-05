@@ -1,0 +1,195 @@
+{
+  "xs": {
+    "ownership": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d1-xs-four-aligned",
+        "env": {
+          "DS4_TP_TEST_CONTEXT": "262144",
+          "DS4_TP_TEST_SEQS": "4",
+          "MAYA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "STRATA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "DS4_TP_TEST_MODEL_DIGEST": "0c4933e6b70f53f7eff163a4053f8970fce470cacc4065983ebe28bd507c57af",
+          "DS4_TP_TEST_PARTITION_DIGEST": "b71b12627fd73832ac3ebace373bcd574b63f46f021104d711de5f9900304e94",
+          "DS4_TP_TEST_BUILD_DIGEST": "7d811ef051a745a87bdae57442993c547c3b61f42183e9c57f062f634329a9e8"
+        },
+        "timeout": 900,
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d1-aligned/ds4_tp_verify_test",
+          "--sharded-sequences",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d1-aligned/ds4_tp_verify_test",
+          "--sharded-sequences",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4"
+        ]
+      },
+      "start": 1793870392.2242622,
+      "rank0_pid": 368954,
+      "rank0_start": "6640187",
+      "ssh_pid": 368953,
+      "passed": true,
+      "rank0_exit": 0,
+      "rank1_exit": 0,
+      "ended": 1793870448.4631639
+    },
+    "ranks": [
+      {
+        "passed": true,
+        "rank": 0,
+        "slots": 4,
+        "context": 262144,
+        "weights": 4965171456,
+        "caches": 986902528,
+        "scratch": 64499200,
+        "experts": 58317864960,
+        "extra_sequence_caches": 742820864,
+        "pinned_staging": 4249600,
+        "free": 60377198592,
+        "total": 129922760704,
+        "system_available": 61076221952
+      },
+      {
+        "passed": true,
+        "rank": 1,
+        "slots": 4,
+        "context": 262144,
+        "weights": 4216895488,
+        "caches": 986091520,
+        "scratch": 61877504,
+        "experts": 54751395840,
+        "extra_sequence_caches": 742212608,
+        "pinned_staging": 4249600,
+        "free": 64766103552,
+        "total": 129922760704,
+        "system_available": 65515286528
+      }
+    ]
+  },
+  "s": {
+    "ownership": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d1-s-four-aligned",
+        "env": {
+          "DS4_TP_TEST_CONTEXT": "262144",
+          "DS4_TP_TEST_SEQS": "4",
+          "MAYA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "STRATA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "DS4_TP_TEST_MODEL_DIGEST": "e8d41763b86d0ed5430202521f42c1089205d3bf14afc2e0308ca82e1d481c71",
+          "DS4_TP_TEST_PARTITION_DIGEST": "b71b12627fd73832ac3ebace373bcd574b63f46f021104d711de5f9900304e94",
+          "DS4_TP_TEST_BUILD_DIGEST": "7d811ef051a745a87bdae57442993c547c3b61f42183e9c57f062f634329a9e8"
+        },
+        "timeout": 900,
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d1-aligned/ds4_tp_verify_test",
+          "--sharded-sequences",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d1-aligned/ds4_tp_verify_test",
+          "--sharded-sequences",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4"
+        ]
+      },
+      "start": 1793870449.1631558,
+      "rank0_pid": 369384,
+      "rank0_start": "6645881",
+      "ssh_pid": 369383,
+      "passed": true,
+      "rank0_exit": 0,
+      "rank1_exit": 0,
+      "ended": 1793870662.105745
+    },
+    "ranks": [
+      {
+        "passed": true,
+        "rank": 0,
+        "slots": 4,
+        "context": 262144,
+        "weights": 5964790016,
+        "caches": 986902528,
+        "scratch": 64499200,
+        "experts": 91729428480,
+        "extra_sequence_caches": 742820864,
+        "pinned_staging": 7014400,
+        "free": 25908215808,
+        "total": 129922760704,
+        "system_available": 26403934208
+      },
+      {
+        "passed": true,
+        "rank": 1,
+        "slots": 4,
+        "context": 262144,
+        "weights": 5216514048,
+        "caches": 986091520,
+        "scratch": 61877504,
+        "experts": 84509982720,
+        "extra_sequence_caches": 742212608,
+        "pinned_staging": 7014400,
+        "free": 33964228608,
+        "total": 129922760704,
+        "system_available": 34487926784
+      }
+    ]
+  },
+  "initial_reference_boundary_case": {
+    "ownership": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d1-xs-four",
+        "env": {
+          "DS4_TP_TEST_CONTEXT": "262144",
+          "DS4_TP_TEST_SEQS": "4",
+          "MAYA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "STRATA_TP_BOOTSTRAP_TIMEOUT": "900",
+          "DS4_TP_TEST_MODEL_DIGEST": "0c4933e6b70f53f7eff163a4053f8970fce470cacc4065983ebe28bd507c57af",
+          "DS4_TP_TEST_PARTITION_DIGEST": "b71b12627fd73832ac3ebace373bcd574b63f46f021104d711de5f9900304e94",
+          "DS4_TP_TEST_BUILD_DIGEST": "bac5627c87f1ac7bc1031768bc76a316c0e68818612f8606e8ec43242940efc7"
+        },
+        "timeout": 900,
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d1-first/ds4_tp_verify_test",
+          "--sharded-sequences",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d1-first/ds4_tp_verify_test",
+          "--sharded-sequences",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4"
+        ]
+      },
+      "start": 1793869879.3379385,
+      "rank0_pid": 365915,
+      "rank0_start": "6588899",
+      "ssh_pid": 365914,
+      "rank0_exit": -15,
+      "rank1_exit": 1,
+      "ended": 1793869942.0055869
+    },
+    "explanation": "Only slot 0 differed because its reset/refeed used 510 prefill tokens, while the independent control used 509 plus an ordinary step. Matching the chunk/token boundary gives exact logits on all slots. No engine arithmetic change was made."
+  }
+}

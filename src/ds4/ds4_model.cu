@@ -1761,6 +1761,7 @@ struct Model::Impl {
         std::vector<std::vector<uint8_t*>> ckv, ik;   // [source][device]
     };
     std::vector<SeqState> sqs;   // empty: one conversation (Options::seqs 1)
+    std::uint64_t seq_extra_cache_bytes = 0;
     int sq_bound = 0;
     std::vector<int> sq_base;
     std::vector<int> mrows;      // the last multi step's rows' conversations (sample_multi)
@@ -3553,7 +3554,13 @@ struct Model::Impl {
                           [this](std::size_t done,std::size_t count) {
                               if (o.verbose && (done==count || done%2048==0))
                                   std::fprintf(stderr,"ds4 tp2: rank %d experts %zu/%zu\n",o.tp2_rank,done,count);
-                          })) return false;
+                          })) {
+            if (o.seqs > 1)
+                err = "ds4 tp2 rank " + std::to_string(o.tp2_rank) + ": " + std::to_string(o.seqs) +
+                      " slots at context " + std::to_string(o.max_context) +
+                      ", expert budget " + std::to_string(budget) + " bytes after reserve: " + err;
+            return false;
+        }
         const auto expected=static_cast<std::size_t>(g.nl)*static_cast<std::size_t>(g.n_exp);
         if (loader->size()!=expected) { err="ds4 tp2: incomplete expert rank"; return false; }
         for (int il=0;il<g.nl;++il) {
@@ -3618,7 +3625,7 @@ struct Model::Impl {
                 !lane_env_off() || o.gpus.size()!=1 || o.tp!=1 ||
                 (o.tp2_chunk_enabled ? !test_chunk : o.prefill_chunk!=0) ||
                 o.vision || o.vision_only || (o.dspark && !test_drafter) || (o.lookup && o.tp2_rank!=0) ||
-                o.seqs!=1 || o.expert_cache ||
+                (o.seqs<1 || o.seqs>4) || o.expert_cache ||
                 o.mmap_experts!=1 || o.vram_experts!=(test_drafter?1.0:0.0) || o.ssd_cache_gb!=0.0 ||
                 !o.profile_readonly || !o.ablate.empty() || !host_free_on || sync_decode) {
                 err="ds4 tp2: invalid rank settings: use one GPU, validated prefill, drafter on rank 0 only, "
@@ -4722,7 +4729,12 @@ struct Model::Impl {
         prof_load = prof;
 
         // --parallel: the other conversations' rings, partial groups and KV (before the experts: they take what is left)
-        if (!alloc_seqs(err)) return false;
+        if (!alloc_seqs(err)) {
+            if (o.tp2_rank >= 0)
+                err = "ds4 tp2/state allocation: " + std::to_string(o.seqs) + " slots at context " +
+                      std::to_string(o.max_context) + ": " + err;
+            return false;
+        }
         // the chunked prompt path's buffers (before the experts: they take what is left)
         if (chunk > 0) alloc_chunks_fit();
         // the CPU lane's experts read in place (decided above): how much of them the load reads ahead, from what VRAM
@@ -9199,6 +9211,7 @@ struct Model::Impl {
                          ((double) ma_rows_max(g.win) * g.hd + (double) kWin * topk_stride() * g.hd) * 2 / 1e6);
         double more = 0;
         for (size_t di = 0; di < devs.size(); ++di) more += (double) (devs[di].caches - before[di]);
+        seq_extra_cache_bytes = (std::uint64_t) more;
         std::fprintf(stderr, "ds4: --parallel %d: %d conversations at once, each its own rings and KV (%.2f GB more "
                              "VRAM for the other %d, from the experts' room)\n", n, n, more / 1e9, n - 1);
         return true;
@@ -21503,6 +21516,53 @@ int Model::vocab() const { return p_->g.vocab; }
 bool Model::has_drafter() const { return p_->g.n_mtp > 0; }
 const std::vector<int32_t>& Model::tokens() const { return p_->toks; }
 int Model::seq_count() const { return p_->seq_count(); }
+bool Model::tp2_capacity(Tp2Capacity& capacity, std::string& err) const {
+    const Impl& p = *p_;
+    if (p.o.tp2_rank < 0 || p.devs.size() != 1) {
+        err = "ds4 tp2 capacity requires one loaded rank"; return false;
+    }
+    const Dev& d = p.devs[0];
+    CK(cudaSetDevice(d.id));
+    std::size_t free = 0, total = 0;
+    CK(mem_info(&free, &total));
+    capacity = {p.seq_count(), p.o.max_context, d.weights, d.caches, d.scratch, d.experts,
+                p.seq_extra_cache_bytes, 0, free, total, ram_avail()};
+#if defined(STRATA_USE_HIP)
+    if (p.tp_rank_experts) capacity.pinned_staging = p.tp_rank_experts->staging_bytes();
+#endif
+    err.clear(); return true;
+}
+bool Model::tp2_sequence_layout(std::string& err) const {
+    const Impl& p = *p_;
+    if (p.o.tp2_rank < 0) { err = "ds4 sequence check requires a TP2 rank"; return false; }
+    if (p.sqs.empty()) { err.clear(); return true; }
+    std::size_t members = 0;
+    for (const Layer& l : p.L) members += l.nm;
+    const auto fail = [&] { err = "ds4 tp2: invalid or aliased sequence cache layout"; return false; };
+    for (const auto& q : p.sqs) {
+        if (q.win.size() != members || q.c_kv.size() != members || q.c_score.size() != members ||
+            q.ckv.size() != p.srcs.size() || q.ik.size() != p.srcs.size()) return fail();
+        for (std::size_t source = 0; source < p.srcs.size(); ++source)
+            if (q.ckv[source].size() != p.devs.size() || q.ik[source].size() != p.devs.size()) return fail();
+    }
+    const auto unique = [&](const auto& get) {
+        for (std::size_t a = 0; a < p.sqs.size(); ++a)
+            for (std::size_t b = 0; b < a; ++b) {
+                const void* pa = get(p.sqs[a]); const void* pb = get(p.sqs[b]);
+                if ((pa == nullptr) != (pb == nullptr) || (pa != nullptr && pa == pb)) return false;
+            }
+        return true;
+    };
+    for (std::size_t i = 0; i < members; ++i)
+        if (!unique([&](const auto& q) { return q.win[i]; }) ||
+            !unique([&](const auto& q) { return q.c_kv[i]; }) ||
+            !unique([&](const auto& q) { return q.c_score[i]; })) return fail();
+    for (std::size_t source = 0; source < p.srcs.size(); ++source)
+        for (std::size_t device = 0; device < p.devs.size(); ++device)
+            if (!unique([&](const auto& q) { return q.ckv[source][device]; }) ||
+                !unique([&](const auto& q) { return q.ik[source][device]; })) return fail();
+    err.clear(); return true;
+}
 void Model::seq_bind(int s) { p_->seq_bind(s); }
 int Model::seq_bound() const { return p_->sq_bound; }
 int64_t Model::seq_pos(int s) const { return p_->seq_pos(s); }

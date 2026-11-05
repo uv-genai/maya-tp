@@ -23,6 +23,7 @@ int ds4_tp_sharded_control_test(int argc, char** argv);
 int ds4_tp_sharded_rollback_test(int argc, char** argv);
 int ds4_tp_sharded_dspark_test(int argc, char** argv);
 int ds4_tp_sharded_sample_test(int argc, char** argv);
+int ds4_tp_sequences_test(int argc, char** argv);
 #endif
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
 #if defined(STRATA_DS4_TP2_RDMA)
@@ -72,6 +73,7 @@ int main(int argc,char** argv) {
                      std::string(argv[1])=="--sharded-rollback-dspark"))
         return ds4_tp_sharded_rollback_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--sharded-dspark") return ds4_tp_sharded_dspark_test(argc,argv);
+    if (argc > 1 && std::string(argv[1])=="--sharded-sequences") return ds4_tp_sequences_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--sharded-sample") return ds4_tp_sharded_sample_test(argc,argv);
 #endif
     if(argc!=3 || (std::string(argv[2])!="on" && std::string(argv[2])!="none" && std::string(argv[2])!="off" && std::string(argv[2])!="dispatch")) {

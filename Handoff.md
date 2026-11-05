@@ -2993,6 +2993,26 @@ clients versus serialized 21.78/21.68, with all 21 matched response texts identi
 See `docs/benchmarks/glm-tp2-batching-2026-11-05/README.md` and the G5 validation
 report for hashes, limits and raw data. Local gates pass HIP mapping, 743 server
 tests (20 skips), 765 tools tests (3 skips), 41 focused tests and CPU policy,
-batch-framing and DeepSeek row/stub checks. G5 commit/CI publication is next.
+batch-framing and DeepSeek row/stub checks. G5 commit `fc26e2b` passed CI 41999222087; #148/#83 are closed.
 The isolated peer source remains `project-maya-batching-runtime`; production
 configs/binaries and unrelated services remain untouched. DeepSeek D1–D5 are next.
+
+D1 (#149) is active. The model loader now permits bounded 1–4 TP2 state arenas
+for the manual fixture; the production CLI still rejects multi-sequence TP2
+until its protocol/scheduler port is validated. New diagnostics check every
+per-slot ring/compressor/source pointer and record actual allocation categories.
+The paired fixture feeds 509 tokens, crosses the 512 boundary in a three-row
+verify, retains one input and checks full logits and rank-0 drafts against an
+independent continuation across reverse slot binds. XS/S content/partition and
+fixture executable preflight agree on both hosts. The current owned XS run is
+`/tmp/maya-batching-validation/d1-xs-four`, launched by
+`/tmp/maya-batching-pair.py`; inspect its ownership JSON before cleanup. Frozen
+D1 binaries are in the validation root's `d1-first/`. Both XS/S aligned-reference tests pass, exit 0/0. All owned processes are stopped.
+Four 262K slots fit with complete target residency on both models. Extra caches
+are about 0.743 GB; post-load free is XS 60.38/64.77 GB and S 25.91/33.96 GB
+on lead/peer. All seven logit comparisons per rank are exact, and rank-0 drafts
+match after reverse slot switches and partial rollback. The initial comparison
+folded the final token into a prefill chunk only for slot 0; matching that
+reference boundary fixed the fixture. No arithmetic repair was needed.
+Evidence is `docs/validation/tp2-batching-d1-2026-11-05.{md,json}`. Final
+HIP build and phase commit/CI are next.
