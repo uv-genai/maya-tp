@@ -83,8 +83,18 @@ int main() {
     CHECK(state.position(0)==1 && state.position(3)==2);
     auto pending=state;CHECK(!pending.begin({Command::Reset,sequence,0,{}},error));
     BatchCommit result{target_sequence,{{0,1,1,true,{3,9}},{3,1,2,true,{9}}}};
+    auto terminal_result=result;terminal_result.members[0].more=false;
+    CHECK(encode_commit(terminal_result,plan,target_sequence,limits,wire,error));
+    auto ended=state;CHECK(ended.begin({Command::BatchCommit,sequence,0,wire},error));CHECK(ended.complete(true,"",error));
+    auto retired=ended;CHECK(!retired.begin({Command::Step,sequence+1,3,{9}},error));
+    CHECK(ended.begin({Command::BeginSlot,sequence+1,3,{0,2,0}},error));CHECK(ended.complete(true,"",error));
+    CHECK(ended.begin({Command::Step,sequence+2,3,{8}},error));CHECK(ended.complete(true,"",error));
     CHECK(encode_commit(result,plan,target_sequence,limits,wire,error));CHECK(run(Command::BatchCommit,0,wire));
     CHECK(!state.awaiting_verdict() && state.position(0)==3 && state.position(3)==3);
+    auto wrong_pending=state;
+    CHECK(!wrong_pending.begin({Command::Step,sequence,3,{8}},error));
+    auto terminal=state;
+    CHECK(terminal.begin({Command::Step,sequence,3,{9}},error));CHECK(terminal.complete(true,"",error));
     CHECK(run(Command::BeginSlot,3,{3,2,0}));
     auto stale=state;CHECK(encode_batch(plan,limits,false,wire,error));
     CHECK(!stale.begin({Command::BatchVerify,sequence,0,wire},error));

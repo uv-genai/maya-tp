@@ -26,6 +26,7 @@ int ds4_tp_sharded_sample_test(int argc, char** argv);
 int ds4_tp_sequences_test(int argc, char** argv);
 int ds4_tp_batch_rdma_test(int argc, char** argv);
 int ds4_tp_batch_rows_test(int argc, char** argv);
+int ds4_tp_batch_spec_test(int argc, char** argv);
 #endif
 #define CHECK(x) do { if (!(x)) { std::fprintf(stderr,"line %d: %s (%s)\n",__LINE__,#x,error.c_str()); return 1; } } while (0)
 #if defined(STRATA_DS4_TP2_RDMA)
@@ -75,6 +76,7 @@ int main(int argc,char** argv) {
                      std::string(argv[1])=="--sharded-rollback-dspark"))
         return ds4_tp_sharded_rollback_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--sharded-dspark") return ds4_tp_sharded_dspark_test(argc,argv);
+    if (argc > 1 && std::string(argv[1])=="--batch-spec") return ds4_tp_batch_spec_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--batch-rows") return ds4_tp_batch_rows_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--batch-protocol") return ds4_tp_batch_rdma_test(argc,argv);
     if (argc > 1 && std::string(argv[1])=="--sharded-sequences") return ds4_tp_sequences_test(argc,argv);

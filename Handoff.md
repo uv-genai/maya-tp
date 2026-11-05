@@ -3036,3 +3036,16 @@ are the final D3 checkpoint. Production multi-slot serving stays gated.
 D3 fallback attention also passes all ten exact full-logit comparisons. All
 320 valid router records match between peers. All owned D3 processes
 are stopped. The D3 report records the frozen hash and scope.
+
+D3 commit `fdcaec2` passed CI 42010589452 and #151 is closed. D4 (#152)
+separates selection from complete deterministic commits. XS passes all 24
+full-logit/DSpark continuation checks after retained counts 1–6 and ragged
+6/4/3/3-input windows, with 120 real proposals from fitting groups. The first
+fixture assumed four proposals; the code returns five for block_size five.
+Both the failed initial and corrected frozen binaries/logs remain recorded.
+S is running the same D4 gate; production multi-slot serving is still gated.
+
+S D4 also passes all 24 exact full-logit comparisons and subsequent draft
+comparisons, with 120 actual fitting-group proposals. Both final pairs exit
+0/0; all owned processes are stopped. D4 report/data are committed alongside
+the checked model/control changes; D5 scheduler/launcher integration is next.

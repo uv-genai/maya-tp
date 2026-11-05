@@ -45,8 +45,9 @@ public:
                 BatchPlan p;
                 if (!decode_batch(c.words,limits_,c.command==Command::Rows,p,error)) return bad(error);
                 for (const auto& m:p.members)
-                    if (m.generation!=generations_[m.slot] || m.position!=positions_[m.slot])
-                        return bad("ds4 batch state: stale member generation or position");
+                    if (m.generation!=generations_[m.slot] || m.position!=positions_[m.slot] || retired_[m.slot] ||
+                        (next_token_[m.slot] && m.tokens.front()!=*next_token_[m.slot]))
+                        return bad("ds4 batch state: stale member identity or pending token");
                 next_plan=std::move(p);break;
             }
             case Command::BatchCommit: {
@@ -58,7 +59,8 @@ public:
             case Command::Feed: case Command::Step: case Command::Verify:
                 if (c.command==Command::Feed && c.words.size()>feed_words_)
                     return bad("ds4 batch state: feed exceeds negotiated prompt piece");
-                if (generations_[selected_]==0 || c.position!=positions_[selected_] ||
+                if (generations_[selected_]==0 || retired_[selected_] ||
+                    (next_token_[selected_] && c.words.front()!=*next_token_[selected_]) || c.position!=positions_[selected_] ||
                     positions_[selected_]>limits_.context || c.words.size()>limits_.context-positions_[selected_])
                     return bad("ds4 batch state: selected slot position or context mismatch");
                 for (auto token:c.words) if (token>=limits_.vocab) return bad("ds4 batch state: invalid input token");
@@ -84,17 +86,24 @@ public:
         if (!success) return fail(cause,error);
         switch (active_.command) {
             case Command::Bind: case Command::BeginSlot:
-                selected_=active_.words[0];generations_[selected_]=batch_get64(active_.words,1);break;
-            case Command::Feed: case Command::Step: positions_[selected_]+=active_.words.size();break;
+                selected_=active_.words[0];generations_[selected_]=batch_get64(active_.words,1);
+                if (active_.command==Command::BeginSlot) { next_token_[selected_].reset();retired_[selected_]=false; }
+                break;
+            case Command::Feed: case Command::Step:
+                positions_[selected_]+=active_.words.size();next_token_[selected_].reset();break;
             case Command::Verify: legacy_verify_=true;legacy_offered_=active_.words.size()-1;break;
-            case Command::Verdict: positions_[selected_]=active_.position;legacy_verify_=false;legacy_offered_=0;break;
-            case Command::Reset: positions_[selected_]=0;break;
+            case Command::Verdict:
+                positions_[selected_]=active_.position;next_token_[selected_]=active_.words[1];
+                legacy_verify_=false;legacy_offered_=0;break;
+            case Command::Reset: positions_[selected_]=0;next_token_[selected_].reset();break;
             case Command::Rows:
-                for (const auto& m:active_plan_->members) positions_[m.slot]+=m.tokens.size();
+                for (const auto& m:active_plan_->members) { positions_[m.slot]+=m.tokens.size();next_token_[m.slot].reset(); }
                 break;
             case Command::BatchVerify: plan_=std::move(active_plan_);target_=active_.sequence;break;
             case Command::BatchCommit:
-                for (const auto& m:active_commit_->members) positions_[m.slot]=m.position+m.emitted.size();
+                for (const auto& m:active_commit_->members) {
+                    positions_[m.slot]=m.position+m.emitted.size();next_token_[m.slot]=m.emitted.back();retired_[m.slot]=!m.more;
+                }
                 plan_.reset();target_=0;break;
             case Command::Shutdown: stopped_=true;break;
         }
@@ -115,6 +124,8 @@ public:
 private:
     BatchLimits limits_;std::uint32_t words_,feed_words_,selected_=0;
     std::array<std::uint64_t,kBatchSlots> positions_{},generations_{};
+    std::array<std::optional<std::uint32_t>,kBatchSlots> next_token_{};
+    std::array<bool,kBatchSlots> retired_{};
     std::uint64_t sequence_=1,target_=0;
     bool pending_=false,legacy_verify_=false,stopped_=false;
     std::size_t legacy_offered_=0;

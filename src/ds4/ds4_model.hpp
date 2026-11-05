@@ -195,6 +195,8 @@ public:
                          bool control_rank0 = false);
     bool tp2_shutdown(std::string& err);
     bool tp_batch_execute(const tp2::Control& control, std::string& err);
+    bool tp_batch_rows(const int* seqs, const int* const* tokens, const int* lengths,
+                       int n, bool verify, std::string& err);
     void tp2_set_failure_handler(std::function<void(const std::string&)> handler);
 #endif
     bool tp2_driving() const;
@@ -342,6 +344,13 @@ public:
     /// together.  can_draft_multi: whether these conversations fit one pass (their blocks in a window, each its
     /// block's room in its context); else each drafts alone with draft().
     bool can_draft_multi(const int* seqs, int n) const;
+    /// Root-only fitting groups with point proposals; no target operation is open.
+    bool draft_tp2_groups(const int* seqs, const int* ys, int n,
+                          std::vector<std::vector<int>>& drafts,
+                          std::vector<std::vector<float>>& conf, std::string& err);
+    /// Commit the complete ordered pending batch after EOS/output cuts. Final token is unconsumed.
+    bool tp2_commit_multi(const std::vector<std::vector<int>>& emitted,
+                         const std::vector<bool>& more, std::string& err);
     bool draft_multi(const int* seqs, const int* ys, int n, std::vector<std::vector<int>>& drafts,
                      std::vector<std::vector<float>>& conf, std::string& err);
     bool verify_multi(int i, const std::vector<int>& drafts, float temperature, float top_p, int top_k, float min_p,

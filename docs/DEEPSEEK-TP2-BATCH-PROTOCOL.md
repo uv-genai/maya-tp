@@ -43,3 +43,9 @@ The pack-free RDMA fixture tests ragged commit, reuse and integer-exact queued
 reductions through the production StagePartial/WaitValue/AddRowsBroadcast
 path. The dormant WaitAdd helper has a separate defect tracked in
 [#154](https://github.com/uv-genai/maya-tp/issues/154); engines do not call it.
+
+D4 additionally retains each committed final pending token for the next target
+input check. A terminal verdict retires that generation; new work requires
+BeginSlot. Admission clears the old pending-token expectation independently of
+whether the physical prompt prefix is reused. Selecting target tokens on rank
+zero does not publish or retire any member before the whole verdict completes.

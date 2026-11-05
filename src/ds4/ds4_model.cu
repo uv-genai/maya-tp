@@ -1296,6 +1296,8 @@ struct Model::Impl {
     std::unique_ptr<tp2::Controller> tp_test_controller;
     bool tp_test_inside=false;
     std::array<std::uint64_t,4> tp_generations{};
+    tp2::BatchPlan tp_pending_plan;
+    std::uint64_t tp_pending_target=0;
     bool tp_test_stopped=false;
     std::function<void(const std::string&)> tp_test_on_failure;
     void tp_record_failure(const std::string& cause) {
@@ -20763,6 +20765,7 @@ struct Model::Impl {
         int seq = 0, r0 = 0, n = 0;
         int64_t p0 = 0;
         bool open = false;   // (its verdict not taken yet: verify_multi)
+        bool chosen = false; // root selection, before whole-batch deterministic commit
     };
     std::vector<MRun> mruns;
 
@@ -20903,8 +20906,8 @@ struct Model::Impl {
     // rows from the backups at its rows, its compressors from its snapshot and its kept rows) and its drafter rings
     // seeded with the kept rows' taps.  drafts: run i's tokens after y (its rows - 1 of them)
     bool verify_multi(int i, const std::vector<int>& drafts, float temperature, float top_p, int top_k, float min_p,
-                      uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err) {
-        if (i < 0 || i >= (int) mruns.size() || !mruns[(size_t) i].open) {
+                      uint64_t seed, uint64_t counter, int& accepted, int& next, std::string& err, bool deferred=false) {
+        if (i < 0 || i >= (int) mruns.size() || !mruns[(size_t) i].open || mruns[(size_t) i].chosen) {
             err = "verify_multi: no verify window " + std::to_string(i);
             return false;
         }
@@ -20914,7 +20917,8 @@ struct Model::Impl {
             err = "verify_multi: " + std::to_string(drafts.size()) + " drafts for a window of " + std::to_string(r.n);
             return false;
         }
-        r.open = false;
+        if (!deferred) r.open = false;
+        r.chosen = true;
         seq_park();
         SeqState& q = sqs[(size_t) r.seq];
         Dev& hd = devs[(size_t) head_dev];
@@ -20976,6 +20980,9 @@ struct Model::Impl {
             for (int k = 0; k < m; ++k) tk[k] = drafts[(size_t) k];
             tk[m] = next;
             lp_pick(lg, m + 1, tk, r.p0 + 1, &q.toks);
+        }
+        if (deferred) {
+            seq_unpark(); accepted=m; err.clear(); return true;
         }
         rollback_run(i, m + 1);
         bool ok = true;
@@ -21276,10 +21283,44 @@ bool Model::tp_batch_execute(const tp2::Control& c,std::string& err) {
         p.seq_bind(static_cast<int>(slot));p.tp_generations[slot]=generation;
         err.clear();return true;
     }
-    if (c.command!=tp2::Command::Rows) { err="ds4 batch: model command not enabled";return false; }
+    const tp2::BatchLimits limits{static_cast<std::uint32_t>(p.o.seqs),static_cast<std::uint32_t>(p.g.vocab),
+        static_cast<std::uint64_t>(p.o.max_context)};
+    if (c.command==tp2::Command::BatchCommit) {
+        tp2::BatchCommit commit;
+        if (!tp2::decode_commit(c.words,p.tp_pending_plan,p.tp_pending_target,limits,commit,err)) return false;
+        if (p.mruns.size()!=commit.members.size()) { err="ds4 batch: physical verdict set mismatch"; return false; }
+        // Validate every member before changing any member's cache or position.
+        for (std::size_t i=0;i<commit.members.size();++i) {
+            const auto& m=commit.members[i];const auto& r=p.mruns[i];
+            if (!r.open || r.seq!=static_cast<int>(m.slot) || r.p0!=static_cast<std::int64_t>(m.position) ||
+                p.tp_generations[m.slot]!=m.generation || p.seq_pos(m.slot)!=r.p0+r.n) {
+                err="ds4 batch: physical verdict identity mismatch";return false;
+            }
+        }
+        p.seq_park();
+        for (std::size_t i=0;i<commit.members.size();++i) {
+            auto& r=p.mruns[i];const int keep=static_cast<int>(commit.members[i].emitted.size());
+            p.rollback_run(static_cast<int>(i),keep);r.open=false;
+            if (p.g.n_mtp>0) {
+                p.seq_point(r.seq,true);
+                if (!p.seed_drafter(r.p0,keep,r.r0,err)) { p.seq_point(p.sq_bound,true);p.seq_unpark();return false; }
+            }
+            const int offered=r.n-1,accepted=keep-1;
+            p.st.drafts_offered+=offered;p.st.drafts_accepted+=accepted;
+            for (int k=0;k<offered && k<=accepted && k<8;++k) {
+                ++p.st.draft_reached[k];if (k<accepted) ++p.st.draft_kept[k];
+            }
+        }
+        if (p.g.n_mtp>0) p.seq_point(p.sq_bound,true);
+        p.seq_unpark();p.tp_pending_plan.members.clear();p.tp_pending_target=0;
+        err.clear();return true;
+    }
+    const bool spec=c.command==tp2::Command::BatchVerify;
+    if (c.command!=tp2::Command::Rows && !spec) { err="ds4 batch: model command not enabled";return false; }
+    if (p.tp_pending_target!=0) { err="ds4 batch: model verdict still pending";return false; }
     tp2::BatchPlan plan;
     if (!tp2::decode_batch(c.words,{static_cast<std::uint32_t>(p.o.seqs),static_cast<std::uint32_t>(p.g.vocab),
-        static_cast<std::uint64_t>(p.o.max_context)},true,plan,err)) return false;
+        static_cast<std::uint64_t>(p.o.max_context)},!spec,plan,err)) return false;
     std::array<int,4> slots{},lens{};std::array<const int*,4> inputs{};
     std::array<std::vector<int>,4> tokens;
     for (std::size_t i=0;i<plan.members.size();++i) {
@@ -21291,7 +21332,33 @@ bool Model::tp_batch_execute(const tp2::Control& c,std::string& err) {
         slots[i]=static_cast<int>(m.slot);tokens[i].assign(m.tokens.begin(),m.tokens.end());
         lens[i]=static_cast<int>(tokens[i].size());inputs[i]=tokens[i].data();
     }
-    return p.step_runs(slots.data(),inputs.data(),lens.data(),static_cast<int>(plan.members.size()),false,err,true);
+    if (!p.step_runs(slots.data(),inputs.data(),lens.data(),static_cast<int>(plan.members.size()),spec,err,true)) return false;
+    if (spec) { p.tp_pending_plan=std::move(plan);p.tp_pending_target=c.sequence; }
+    return true;
+}
+bool Model::tp_batch_rows(const int* seqs,const int* const* tokens,const int* lens,int n,bool spec,std::string& err) {
+    Impl& p=*p_;
+    if (!p.tp_test_controller || p.o.seqs<2 || p.tp_unready(err)) {
+        if (err.empty()) err="ds4 batch: rows require the driving rank";return false;
+    }
+    if (!seqs || !tokens || !lens || n<1 || n>p.o.seqs) { err="ds4 batch: invalid row count";return false; }
+    tp2::BatchPlan plan;int total=0;
+    for (int i=0;i<n;++i) {
+        const int slot=seqs[i];
+        if (slot<0 || slot>=p.o.seqs || !tokens[i] || lens[i]<1 || lens[i]>kWin-total) {
+            err="ds4 batch: invalid row member";return false;
+        }
+        total+=lens[i];
+        plan.members.push_back({static_cast<std::uint32_t>(slot),p.tp_generations[slot],
+            static_cast<std::uint64_t>(p.seq_pos(slot)),std::vector<std::uint32_t>(tokens[i],tokens[i]+lens[i])});
+    }
+    std::vector<std::uint32_t> words;
+    if (!tp2::encode_batch(plan,{static_cast<std::uint32_t>(p.o.seqs),static_cast<std::uint32_t>(p.g.vocab),
+        static_cast<std::uint64_t>(p.o.max_context)},!spec,words,err)) return false;
+    const bool ok=p.tp_test_controller->run(spec?tp2::Command::BatchVerify:tp2::Command::Rows,0,std::move(words),
+        [&](const tp2::Control& c,std::string& e) { return tp_batch_execute(c,e) && p.tp_worker_synchronize(e); },err);
+    if (!ok) p.tp_record_failure(err);
+    return ok;
 }
 bool Model::tp2_shutdown(std::string& err) {
     if (!p_->tp_test_controller) { err="ds4 tp2: no test controller"; return false; }
@@ -21513,7 +21580,10 @@ void Model::set_images(std::vector<Image> images) {
 int Model::draft_block() const { return p_->g.n_mtp > 0 ? p_->g.d_block : 0; }
 bool Model::draft(int y, std::vector<int>& d, std::vector<float>& c, std::string& err, float t, float tp, int tk,
                   float mp, uint64_t seed, uint64_t counter) {
-    return p_->draft(y, d, c, err, t, tp, tk, mp, seed, counter);
+#if defined(STRATA_DS4_TP2_RDMA)
+    if (p_->tp_pending_target) { err="ds4 batch: drafting cannot overwrite a pending target";return false; }
+#endif
+    return p_->draft(y,d,c,err,t,tp,tk,mp,seed,counter);
 }
 bool Model::verify(int y, const std::vector<int>& d, float t, float tp, int tk, float mp, uint64_t seed, uint64_t counter,
                    int& accepted, int& next, std::string& err, bool point_proposal) {
@@ -21643,29 +21713,13 @@ void Model::seq_bind(int s) {
 int Model::seq_bound() const { return p_->sq_bound; }
 int64_t Model::seq_pos(int s) const { return p_->seq_pos(s); }
 const std::vector<int32_t>& Model::seq_tokens(int s) const { return p_->seq_tokens(s); }
-bool Model::step_multi(const int* seqs, const int* tokens, int n, std::string& err) {
+bool Model::step_multi(const int* seqs,const int* tokens,int n,std::string& err) {
 #if defined(STRATA_DS4_TP2_RDMA)
-    Impl& p=*p_;
-    if (p.o.tp2_rank>=0) {
-        if (!p.tp_test_controller || p.o.seqs<2 || p.tp_unready(err)) {
-            if (err.empty()) err="ds4 batch: rows require the driving rank";
-            return false;
-        }
-        tp2::BatchPlan plan;
-        if (!seqs || !tokens || n<1 || n>p.o.seqs) { err="ds4 batch: invalid row count"; return false; }
-        for (int i=0;i<n;++i) {
-            const int slot=seqs[i];
-            if (slot<0 || slot>=p.o.seqs) { err="ds4 batch: invalid row slot"; return false; }
-            plan.members.push_back({static_cast<std::uint32_t>(slot),p.tp_generations[slot],
-                static_cast<std::uint64_t>(p.seq_pos(slot)),{static_cast<std::uint32_t>(tokens[i])}});
-        }
-        std::vector<std::uint32_t> words;
-        if (!tp2::encode_batch(plan,{static_cast<std::uint32_t>(p.o.seqs),static_cast<std::uint32_t>(p.g.vocab),
-            static_cast<std::uint64_t>(p.o.max_context)},true,words,err)) return false;
-        const bool ok=p.tp_test_controller->run(tp2::Command::Rows,0,std::move(words),
-            [&](const tp2::Control& c,std::string& e) { return tp_batch_execute(c,e) && p.tp_worker_synchronize(e); },err);
-        if (!ok) p.tp_record_failure(err);
-        return ok;
+    if (p_->o.tp2_rank>=0) {
+        if (!tokens || n<1 || n>4) { err="ds4 batch: invalid ordinary rows";return false; }
+        std::array<const int*,4> inputs{};std::array<int,4> lens{};
+        for (int i=0;i<n;++i) { inputs[i]=tokens+i;lens[i]=1; }
+        return tp_batch_rows(seqs,inputs.data(),lens.data(),n,false,err);
     }
 #endif
     return p_->step_multi(seqs,tokens,n,err);
@@ -21682,18 +21736,98 @@ int Model::sample_multi(int row, float t, float tp, int tk, float mp, uint64_t s
     return p_->sample_multi(row, t, tp, tk, mp, seed, counter);
 }
 bool Model::step_multi_spec(const int* seqs, const int* const* toks, const int* lens, int n, std::string& err) {
-    return p_->step_runs(seqs, toks, lens, n, true, err);
+#if defined(STRATA_DS4_TP2_RDMA)
+    if (p_->o.tp2_rank>=0) return tp_batch_rows(seqs,toks,lens,n,true,err);
+#endif
+    return p_->step_runs(seqs,toks,lens,n,true,err);
 }
 bool Model::can_draft_multi(const int* seqs, int n) const { return p_->can_draft_multi(seqs, n); }
 bool Model::draft_multi(const int* seqs, const int* ys, int n, std::vector<std::vector<int>>& d,
                         std::vector<std::vector<float>>& c, std::string& err) {
+#if defined(STRATA_DS4_TP2_RDMA)
+    if (p_->o.tp2_rank>=0) {
+        if (!p_->tp_test_controller || p_->o.seqs<2 || p_->tp_unready(err) || p_->tp_pending_target) {
+            if (err.empty()) err="ds4 batch: grouped drafting is unavailable";return false;
+        }
+    }
+#else
     if (p_->tp_load_only(err)) return false;
-    return p_->draft_multi(seqs, ys, n, d, c, err);
+#endif
+    return p_->draft_multi(seqs,ys,n,d,c,err);
 }
 bool Model::verify_multi(int i, const std::vector<int>& d, float t, float tp, int tk, float mp, uint64_t seed,
                          uint64_t counter, int& accepted, int& next, std::string& err) {
+#if defined(STRATA_DS4_TP2_RDMA)
+    if (p_->o.tp2_rank>=0) {
+        if (!p_->tp_test_controller || p_->o.seqs<2 || p_->tp_unready(err) || !p_->tp_pending_target) {
+            if (err.empty()) err="ds4 batch: no target batch to select";return false;
+        }
+        const bool ok=p_->verify_multi(i,d,t,tp,tk,mp,seed,counter,accepted,next,err,true);
+        if (!ok) p_->tp_record_failure(err);
+        return ok;
+    }
+#else
     if (p_->tp_load_only(err)) return false;
-    return p_->verify_multi(i, d, t, tp, tk, mp, seed, counter, accepted, next, err);
+#endif
+    return p_->verify_multi(i,d,t,tp,tk,mp,seed,counter,accepted,next,err);
+}
+bool Model::draft_tp2_groups(const int* seqs,const int* ys,int n,std::vector<std::vector<int>>& drafts,
+                              std::vector<std::vector<float>>& conf,std::string& err) {
+#if defined(STRATA_DS4_TP2_RDMA)
+    Impl& p=*p_;
+    if (!p.tp_test_controller || p.o.seqs<2 || p.tp_unready(err) || p.tp_pending_target ||
+        !seqs || !ys || n<1 || n>p.o.seqs) {
+        if (err.empty()) err="ds4 batch: invalid grouped drafter request";return false;
+    }
+    for (int i=0;i<n;++i) {
+        if (seqs[i]<0 || seqs[i]>=p.o.seqs || ys[i]<0 || ys[i]>=p.g.vocab) { err="ds4 batch: invalid draft member";return false; }
+        for (int j=0;j<i;++j) if (seqs[i]==seqs[j]) { err="ds4 batch: duplicate draft member";return false; }
+    }
+    drafts.assign(n,{});conf.assign(n,{});
+    // Two fitting groups preserve real proposals at four block-size-five clients.
+    // Every group uses argmax point proposals, including singleton groups; no
+    // sampled-q scratch is shared across conversations.
+    for (int at=0;at<n;) {
+        const int group=(n-at>=2 && p.can_draft_multi(seqs+at,2))?2:1;
+        if (group==2) {
+            std::vector<std::vector<int>> dd;std::vector<std::vector<float>> cc;
+            if (!p.draft_multi(seqs+at,ys+at,2,dd,cc,err)) return false;
+            for (int j=0;j<2;++j) { drafts[at+j]=std::move(dd[j]);conf[at+j]=std::move(cc[j]); }
+        } else {
+            seq_bind(seqs[at]);
+            if (!p.tp_test_failure.empty()) { err=p.tp_test_failure;return false; }
+            if (!p.draft(ys[at],drafts[at],conf[at],err,0,1,0,0,0,0)) return false;
+        }
+        at+=group;
+    }
+    err.clear();return true;
+#else
+    (void)seqs;(void)ys;(void)n;(void)drafts;(void)conf;err="ds4 batch: RDMA unavailable";return false;
+#endif
+}
+bool Model::tp2_commit_multi(const std::vector<std::vector<int>>& emitted,const std::vector<bool>& more,std::string& err) {
+#if defined(STRATA_DS4_TP2_RDMA)
+    Impl& p=*p_;
+    if (!p.tp_test_controller || p.o.seqs<2 || p.tp_unready(err) || !p.tp_pending_target ||
+        emitted.size()!=p.tp_pending_plan.members.size() || more.size()!=emitted.size()) {
+        if (err.empty()) err="ds4 batch: incomplete model verdict";return false;
+    }
+    tp2::BatchCommit commit{p.tp_pending_target,{}};
+    for (std::size_t i=0;i<emitted.size();++i) {
+        const auto& m=p.tp_pending_plan.members[i];
+        commit.members.push_back({m.slot,m.generation,m.position,more[i],
+            std::vector<std::uint32_t>(emitted[i].begin(),emitted[i].end())});
+    }
+    std::vector<std::uint32_t> words;
+    if (!tp2::encode_commit(commit,p.tp_pending_plan,p.tp_pending_target,
+        {static_cast<std::uint32_t>(p.o.seqs),static_cast<std::uint32_t>(p.g.vocab),static_cast<std::uint64_t>(p.o.max_context)},words,err)) return false;
+    const bool ok=p.tp_test_controller->run(tp2::Command::BatchCommit,0,std::move(words),
+        [&](const tp2::Control& c,std::string& e) { return tp_batch_execute(c,e) && p.tp_worker_synchronize(e); },err);
+    if (!ok) p.tp_record_failure(err);
+    return ok;
+#else
+    (void)emitted;(void)more;err="ds4 batch: RDMA unavailable";return false;
+#endif
 }
 void Model::reset() {
 #if defined(STRATA_DS4_TP2_RDMA)
