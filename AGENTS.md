@@ -80,7 +80,7 @@ python -m unittest discover -s tools -p "test_*.py"
 ```
 
 The workflow also runs CPU-only GLM memory-policy/batch-framing and DeepSeek row-preparation/
-native-experts-OFF stub checks after these three gates. Their exact compiler
+native-experts-OFF stub checks and checked DeepSeek TP2 batch-control suites after these three gates. Their exact compiler
 commands are in `.github/workflows/tests.yml`.
 
 Single test:
@@ -193,3 +193,7 @@ never by process name. `tools/tp2/validate_batch.py` records isolated GPU-test
 ownership. G1–G4 evidence is in `docs/validation/tp2-batching-g*-2026-11-05.*`;
 G5 and DeepSeek phase status are in Handoff.md §52 and #148–#153. The process
 supervisor reused from DeepSeek shares ownership only, not model execution.
+
+DeepSeek batch protocol is separately negotiated; preserve its complete verdict,
+acceptance/completion ACK and per-slot generation checks. The wire contract is
+`docs/DEEPSEEK-TP2-BATCH-PROTOCOL.md`. D2 does not enable model batching.

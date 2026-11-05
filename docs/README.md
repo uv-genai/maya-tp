@@ -16,7 +16,7 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | DeepSeek concurrent requests | [Maya-S API throughput and queueing at 1–4 clients](benchmarks/deepseek-maya-s-concurrency-2026-11-04/README.md) |
 | Continuous-batching implementation plans | [GLM TP2 and MTP](GLM-TP2-BATCHING-PLAN.md), [DeepSeek TP2 and DSpark](DEEPSEEK-TP2-BATCHING-PLAN.md) — phase issues and dated design contracts |
 | GLM batching validation | [Lifecycle](validation/tp2-batching-g4-2026-11-05.md), [rollout checkpoint](validation/tp2-batching-g5-2026-11-05.md), [matched throughput](benchmarks/glm-tp2-batching-2026-11-05/README.md) |
-| DeepSeek batching state/capacity | [D1 XS/S four-slot checkpoint](validation/tp2-batching-d1-2026-11-05.md) — serving remains gated pending D2–D5 |
+| DeepSeek batching state/capacity | [D1 XS/S four-slot checkpoint](validation/tp2-batching-d1-2026-11-05.md) and [D2 checked protocol](validation/tp2-batching-d2-2026-11-05.md) — serving remains gated pending D3–D5 |
 | Installer and clean-install updates | [Setup](SETUP.md) |
 | Model catalog and fork validation limits | [Models](MODELS.md) |
 | Runtime settings, thinking budgets and default-off options | [Settings](SETTINGS.md) |

@@ -16,7 +16,8 @@ namespace strata::ds4::tp2 {
 // until both ranks negotiate chunking and collective order.
 template <class ModelT> class ModelWorker {
 public:
-    explicit ModelWorker(ModelT& model, bool allow_chunks=false) : model_(model), allow_chunks_(allow_chunks) {}
+    explicit ModelWorker(ModelT& model, bool allow_chunks=false, std::uint32_t slots=1)
+        : model_(model), allow_chunks_(allow_chunks), batch_(slots>1 && slots<=4) {}
 
     bool execute(const Control& c, std::string& error) {
         if (!failure_.empty()) { error = failure_; return false; }
@@ -30,6 +31,22 @@ public:
         if (!valid_control(c, kControlMaxWords, why)) return fail(why);
         if (pending_ != (c.command == Command::Verdict))
             return fail("ds4 tp2 model worker: expected verify verdict");
+        if (pending_batch_ && c.command!=Command::BatchCommit)
+            return fail("ds4 tp2 model worker: complete batch verdict required");
+        if (batch_command(c.command)) {
+            if (!batch_) return fail("ds4 tp2 model worker: batch mode was not negotiated");
+            if (c.command==Command::BatchCommit && !pending_batch_)
+                return fail("ds4 tp2 model worker: no pending batch");
+            if constexpr (requires { model_.tp_batch_execute(c,why); }) {
+                const bool ok=model_.tp_batch_execute(c,why);
+                std::string sync_error; const bool synced=model_.tp_worker_synchronize(sync_error);
+                if (!ok) return fail(why);
+                if (!synced) return fail(sync_error);
+                if (c.command==Command::BatchVerify) pending_batch_=true;
+                if (c.command==Command::BatchCommit) pending_batch_=false;
+                error.clear();return true;
+            } else return fail("ds4 tp2 model worker: model has no checked batch entry");
+        }
         if (model_.pos() < 0 || model_.max_context() <= 0 || model_.pos() > model_.max_context() || model_.vocab() <= 0)
             return fail("ds4 tp2 model worker: invalid model limits or position");
         if (c.command != Command::Verdict && c.command != Command::Reset &&
@@ -72,6 +89,7 @@ public:
                 break;
             case Command::Reset: ok = model_.tp_worker_reset(why); break;
             case Command::Shutdown: ok = true; break;
+            default: return fail("ds4 tp2 model worker: unsupported operation");
         }
         // Preserve the first model error even when draining reports another.
         std::string sync_error;
@@ -97,6 +115,7 @@ private:
     std::uint64_t verify_start_ = 0;
     std::uint32_t verify_count_ = 0;
     bool pending_ = false, stopped_ = false;
+    bool batch_ = false, pending_batch_ = false;
     std::string failure_;
 };
 

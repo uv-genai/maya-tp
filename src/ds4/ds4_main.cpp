@@ -3651,6 +3651,9 @@ int main(int argc, char** argv) {
         tp2_identity.feature_flags=(tp2_dspark ? 1ull : 0ull) |
             (static_cast<std::uint64_t>(o.prefill_chunk)<<16) | (static_cast<std::uint64_t>(tp2_lookup)<<32);
         tp2_identity.max_partial_bytes=tp2_comm->MaxPartialBytes();
+        if (!strata::ds4::tp2::configure_batch_identity(tp2_identity,m.seq_count(),err)) {
+            std::fprintf(stderr,"maya-ds4: %s\n",err.c_str()); return 1;
+        }
         strata::ds4::tp2::Identity peer; std::uint64_t limit=0;
         if (!strata::ds4::tp2::exchange_identity(*tp2_comm,tp2_identity,peer,limit,err) ||
             !m.tp2_attach(*tp2_comm,static_cast<std::size_t>(limit),err,tp2_rank==0)) {

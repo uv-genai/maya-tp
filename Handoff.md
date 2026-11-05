@@ -3015,4 +3015,14 @@ match after reverse slot switches and partial rollback. The initial comparison
 folded the final token into a prefill chunk only for slot 0; matching that
 reference boundary fixed the fixture. No arithmetic repair was needed.
 Evidence is `docs/validation/tp2-batching-d1-2026-11-05.{md,json}`. Final
-HIP build and phase commit/CI are next.
+HIP builds and CPU gates pass. D1 commit `1658e7a` passed CI 42002747492
+and #149 is closed. D2 (#150) is active with uncommitted bounded batch/control
+headers and host tests; no owned model processes are running.
+
+D2 host, HIP and paired RDMA protocol gates pass, including legacy worker and
+control-EOF behavior. All pairs exited 0/0 and owned processes are stopped.
+The new mode checks acceptance before work and completion before reuse;
+production multi-slot DeepSeek stays gated until D3–D5. See the D2 report
+and `docs/DEEPSEEK-TP2-BATCH-PROTOCOL.md`. The dormant WaitAdd row defect
+found by the initial synthetic fixture is separately open in #154; production
+WaitValue/AddRowsBroadcast reductions pass unchanged.

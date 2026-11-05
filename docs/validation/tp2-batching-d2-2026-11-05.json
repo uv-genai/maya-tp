@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-05",
+  "issue": 150,
+  "cases": {
+    "d2-production-path": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d2-production-path",
+        "timeout": 120,
+        "peer_outputs": [
+          "rank1.log",
+          "rank1-identity.json"
+        ],
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d2-production-path/ds4_tp_verify_test",
+          "--batch-protocol",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d2-production-path/ds4_tp_verify_test",
+          "--batch-protocol",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5"
+        ]
+      },
+      "start": 1793873020.7995765,
+      "rank0_pid": 385182,
+      "rank0_start": "6903045",
+      "ssh_pid": 385181,
+      "passed": true,
+      "rank0_exit": 0,
+      "rank1_exit": 0,
+      "ended": 1793873021.202438
+    },
+    "d2-legacy-worker": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d2-legacy-worker",
+        "timeout": 60,
+        "peer_outputs": [
+          "rank1.log",
+          "rank1-identity.json"
+        ],
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d2-production-path/ds4_tp_channel_rdma_test",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "worker"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d2-production-path/ds4_tp_channel_rdma_test",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "worker"
+        ]
+      },
+      "start": 1793873307.8163457,
+      "rank0_pid": 386861,
+      "rank0_start": "6931747",
+      "ssh_pid": 386860,
+      "passed": true,
+      "rank0_exit": 0,
+      "rank1_exit": 0,
+      "ended": 1793873308.2186348
+    },
+    "d2-legacy-control-eof": {
+      "config": {
+        "folder": "/tmp/maya-batching-validation/d2-legacy-control-eof",
+        "timeout": 60,
+        "peer_outputs": [
+          "rank1.log",
+          "rank1-identity.json"
+        ],
+        "rank0": [
+          "/home/ugo/software/project-maya-batching-validation/d2-production-path/ds4_tp_channel_rdma_test",
+          "0",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "control-eof"
+        ],
+        "rank1": [
+          "/home/ugo/software/project-maya-batching-validation/d2-production-path/ds4_tp_channel_rdma_test",
+          "1",
+          "192.168.1.92",
+          "19151",
+          "usb4_rdma5",
+          "control-eof"
+        ]
+      },
+      "start": 1793873308.6395502,
+      "rank0_pid": 386889,
+      "rank0_start": "6931829",
+      "ssh_pid": 386888,
+      "passed": true,
+      "rank0_exit": 0,
+      "rank1_exit": 0,
+      "ended": 1793873309.4439762
+    }
+  },
+  "fixture_sha256": "1443ea0da10c27843adce502bcff68c8f30de1b74bb81e29852a5154439ef48f",
+  "limits": "Protocol only; model batch execution remains gated. Dormant WaitAdd follow-up #154 remains open."
+}

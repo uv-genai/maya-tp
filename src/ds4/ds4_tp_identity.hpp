@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ds4_tp_control.hpp"
+#include "ds4_tp_batch.hpp"
 
 #include <algorithm>
 #include <array>
@@ -20,6 +21,15 @@ struct Identity {
     // canonical rank-independent partition description. Zero is never valid.
     std::array<std::uint8_t, 32> model_digest{}, partition_digest{}, build_digest{};
 };
+
+inline bool configure_batch_identity(Identity& id,std::uint32_t slots,std::string& error) {
+    if (slots<1 || slots>kBatchSlots) { error="ds4 tp2: batch slots must be 1..4";return false; }
+    id.protocol=slots==1?1:2;
+    id.feature_flags&=~((255ull<<8)|(255ull<<48)|(255ull<<56));
+    if (slots>1) id.feature_flags|=(static_cast<std::uint64_t>(kBatchVersion)<<8) |
+        (static_cast<std::uint64_t>(slots)<<48) | (static_cast<std::uint64_t>(kBatchRows)<<56);
+    error.clear();return true;
+}
 
 inline constexpr std::uint32_t kIdentityMagic = 0x44534944u; // DSID
 inline constexpr std::uint32_t kIdentityVersion = 1;
