@@ -14,7 +14,7 @@ The source includes sequentially validated upstream v1.1.54–v1.1.58 through
 [PR #168](https://github.com/uv-genai/maya-tp/pull/168), merged as `b7458c4`.
 [#169](https://github.com/uv-genai/maya-tp/issues/169) installs the validated
 engines at existing executable paths, without changing launchers/configs.
-Current installation and user-testing state are recorded below and in Handoff §55.
+The current user-accepted installation is recorded below and in Handoff §55.
 
 <a id="accepted-runtime-on-the-users-pair"></a>
 
@@ -28,7 +28,8 @@ Both hosts use the runtime at
 same file path now contains the validated v58 engine, SHA256
 `17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076`.
 The directory name is historical: it no longer names the contents' hash. No
-launcher/config path was changed. User testing of the new contents is pending.
+launcher/config path was changed. The user confirmed the installed builds are
+working fine on 2026-11-11; this installation is accepted (#169).
 An already-loaded process retains the previous executable until the user
 unloads/reloads it. Original files are backed up on each host under
 `/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/`.
@@ -158,8 +159,9 @@ chunk path. `--dspark off` disables the drafter on both ranks. Experimental
 prompt lookup is opt-in with `--suffix-draft 3` on both ranks; the launcher
 keeps lookup ownership on rank 0. Rank choices must match even though the
 worker does not run the drafter or lookup itself. Vision and performance at a filled 512K context are not validated for this
-path. The accepted deployed build serves one sequence; new opt-in batching
-requires the current matching source/engine described below.
+path. The preserved deployed configuration selects one sequence. The installed v58
+engine also supports opt-in batching, which requires matching current server/
+launcher source and an explicit parallel setting as described below.
 The resident expert split does not imply that Engram and all model I/O have
 been eliminated. See the [validation evidence](validation/deepseek-tp2-control-2026-11-03/)
 for the measured scope. The [implementation plan](DEEPSEEK-TP2-IMPLEMENTATION-PLAN.md)
@@ -168,7 +170,7 @@ records the original phase gates.
 ## Promotion and rollback
 
 The initial queued engine was accepted in extended user trials; the v58 engine
-now installed at the same path is pending user testing (#169). Numerical/
+now installed at the same path is also user-tested and accepted (#169). Numerical/
 capacity follow-ups remain in #110/#112. Preserve the existing commands,
 executable paths, model/config selections and launcher files during binary-only
 updates.

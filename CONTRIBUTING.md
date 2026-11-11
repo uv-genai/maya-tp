@@ -17,8 +17,10 @@ For comparable numbers, use the [controlled TP2 harness](tools/tp2/bench_mtp.py)
 [saved methodology](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md): the same prompt and
 continuation, excluded warmups, balanced run order, raw greedy-pick agreement, cache/disk counters
 and retained outliers. Select the same model/pack on both ranks; see
-[Choosing a model](docs/TP2-RUN.md#choosing-a-model). The launch/cleanup limitations of the older
-harnesses are documented in [the runbook](docs/TP2-RUN.md#process-ownership-and-validation).
+[Choosing a model](docs/TP2-RUN.md#choosing-a-model). Current-main harnesses
+record and clean up their own processes; historical/protected copies may differ.
+The [runbook](docs/TP2-RUN.md#process-ownership-and-validation) records those
+ownership rules and legacy limitations.
 
 ## Pull requests
 

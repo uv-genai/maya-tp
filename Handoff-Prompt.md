@@ -2,7 +2,8 @@
 
 Read Handoff.md §55 first. The user explicitly requested replacing the validated
 v58 GLM/DeepSeek binaries at the SAME existing paths, with NO launcher/config
-changes. This is complete on both hosts (#169); user testing is pending. GLM
+changes. This is complete on both hosts (#169); the user reports the installed
+builds are working fine and accepts them. GLM
 canonical build-hip/maya is SHA256 dd37dbd8…; existing DeepSeek TP2 review path
 build-hip/queued-a950e7e9350b/maya-ds4 now contains SHA256 17f42fa1… (directory
 name is historical). Host2's existing canonical build-hip/maya-ds4 is updated
@@ -24,8 +25,9 @@ Preserve rank-local KDA descriptors/copies and checked speculative slot/verdict/
 ACK contracts. Full GLM-5.3 TP2 and unmirrored tuning/ablation remain refused.
 AI_RUN stays experimental/off with changed long-prompt answers (#166).
 #165 intermittent stalls, #167 full-model RAM-slot trailer and remaining #133
-experiments stay open. Do not repeat the completed campaign; wait for the user's
-reports from their normal entries. Earlier acceptance below is historical.
+experiments stay open. #169 is complete. Do not repeat the completed campaign
+or change installed binaries/launchers without a new task. Earlier acceptance
+below is historical.
 
 GLM/MTP and DeepSeek/DSpark opt-in continuous batching is implemented and
 validated in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), starting
@@ -117,11 +119,11 @@ Treat model processes as user-owned and preserve their recorded ownership bounda
 - The then-promoted `build-hip/maya` on both hosts had MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
 - The earlier prefill checkpoint is immutable `tp-v1.1.43` (then VERSION `1.1.43`);
-  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). Current installation is the later v58 same-path delivery in §55; user testing is pending. Push only to `origin`.
+  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). Current installation is the later user-accepted v58 same-path delivery in §55. Push only to `origin`.
 
 ## Operating rules
 
-The user owns their processes. For new validation, record exact owned PIDs and start times; stop only processes you started and stop an owned server before its engine. Do not use name-wide or port-wide cleanup or inspect unrelated services. The legacy `acceptance.sh` and `bench_mtp.py` cleanup is tracked in #83. Prior permission to use the hosts is not standing permission to stop user processes.
+The user owns their processes. For new validation, record exact owned PIDs and start times; stop only processes you started and stop an owned server before its engine. Do not use name-wide or port-wide cleanup or inspect unrelated services. Current-main `acceptance.sh` and `bench_mtp.py` use owned process cleanup; unsafe historical/protected copies remain covered by #83. Prior permission to use the hosts is not standing permission to stop user processes.
 
 The usual workspace is on strix-halo-2 (rank 1). SSH directly to strix-halo-1.local (rank 0) from there, never nested SSH. GLM model selection uses `tools/tp2/model_env.sh`. DeepSeek uses its per-model `maya-ds4-tp2-*.json` launcher configs and `tools/llama-swap/tp2-ds4.sh`. Keep pack contents, executable digests, context and feature settings matched across both ranks. Never probe the bootstrap port with `/dev/tcp`. Restart both ranks after a poisoned communicator. Preserve #88's first-failure health guard, #59's completed mirrored prefill before cancellation, #57's total output budget, #64's dual-lane wake-up, #62's unmirrored-operation guards and #69's MTP bias guard.
 

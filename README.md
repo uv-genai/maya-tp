@@ -19,8 +19,8 @@ tracked in [#159](https://github.com/uv-genai/maya-tp/issues/159). GLM-5.3-Flash
 DeepSeek-V4.1-Flash TP2/DSpark pass default and batched regression checks, including
 four-slot public HTTP operation. The user subsequently requested installing the
 validated engines at their existing paths on both hosts (#169). Launchers and
-model/config selections are unchanged; user testing of the installed binaries
-is pending. See [current deployment](docs/deployments/v58-existing-paths-2026-11-11/README.md).
+model/config selections are unchanged. The user confirmed that the installed
+binaries are working fine on 2026-11-11. See [current deployment](docs/deployments/v58-existing-paths-2026-11-11/README.md).
 
 ## Why Maya-TP?
 

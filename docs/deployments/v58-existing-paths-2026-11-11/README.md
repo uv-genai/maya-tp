@@ -2,8 +2,9 @@
 
 [#169](https://github.com/uv-genai/maya-tp/issues/169) records the user's explicit
 request to replace binary contents while keeping executable paths, launcher
-scripts and configs unchanged. Installation is complete; user testing through
-the existing model entries is pending. No user process was stopped or model
+scripts and configs unchanged. Installation is complete, and on 2026-11-11
+the user confirmed that the installed builds are working fine. The installation
+is user-tested and accepted (#169). No user process was stopped or model
 started. An already-loaded model retains the previous executable until the
 user unloads/reloads it.
 

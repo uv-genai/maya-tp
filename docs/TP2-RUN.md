@@ -39,7 +39,8 @@ contains the GPU-validated v58 engine, SHA256
 The executable path, launcher scripts, model/config selections and tuning files
 were preserved. Existing llama-swap entries use the new file on their next model
 start; an already-loaded process continues with its previous executable until
-the user unloads/reloads it. User testing of this installation is pending.
+the user unloads/reloads it. The user confirmed the installed builds are working
+fine on 2026-11-11; this installation is accepted (#169).
 
 The preceding accepted prefill binary (MD5 `cbd9e99a6a49e9107b0db3190a40766a`)
 is backed up on each host under
@@ -56,11 +57,14 @@ The user starts their own processes. Coding agents may clean up only their recor
 PIDs/process groups, stopping their server before its engine. A prior permission to use the hosts
 does not authorize future cleanup of user processes or inspection/control of unrelated services.
 
-`acceptance.sh` and `bench_mtp.py` currently use name-wide process cleanup when starting a pair.
-They require explicitly reserved, free hosts; an agent must not run them against user processes.
-Owned-process cleanup is tracked in [#83](https://github.com/uv-genai/maya-tp/issues/83).
-The API probes below use an already-running pair; the benchmark/recovery harnesses start and stop
-engines and must be scheduled accordingly.
+Current-main `acceptance.sh` delegates to the owned `validate_batch.py` driver,
+and `bench_mtp.py` cleans up only its recorded children. Both start their own
+pairs and require reserved, available hosts. Historical/protected runtime copies
+may still contain name-wide cleanup; do not assume those copies were upgraded
+by binary-only installation or run them against user processes. Legacy cleanup
+follow-up is tracked in [#83](https://github.com/uv-genai/maya-tp/issues/83).
+The API probes below use an already-running pair; benchmark/recovery harnesses
+start and stop engines and must be scheduled accordingly.
 
 ## Choosing a model
 
@@ -479,13 +483,20 @@ To stress idle wake-up (#64), configure BOTH ranks with `MAYA_GLM_SERVICE_IDLE_M
 
 On a matching4096-context pair with MTP enabled, `tools/tp2/continuation_boundaries.py --eos-id ID --output PATH` verifies unsupported MTP-bias rejection, supported simple-loop EOS continuation at the context boundary, and normal MTP follow-up. Use the EOS id from the selected pack. Its `--forced-follow` mode requires the explicit EOS follow-token diagnostic on both ranks and tests MTP/simple continuation branches; forced-token results are not numerical-fidelity evidence.
 
-TP2 MTP currently enforces greedy verification and rejects nonempty `logit_bias` (#69). For ordinary decoding with bias, use `strata_tune: {"spec": 1}`. No MTP sampling algorithm was changed.
+Default single-sequence GLM TP2 MTP uses greedy verification and rejects nonempty `logit_bias` (#69). For ordinary decoding with bias, use `strata_tune: {"spec": 1}`. Opt-in continuous batching supports per-request target sampling and bias through its separately checked verdict protocol, described below.
 
 For long-loop cache validation on a fresh matching32768-context pair, run `tools/tp2/long_loop_reuse.py` with `--expect-preserved` at the default collapse limit32000, or `--expect-collapsed` with config limit0. Synthetic tool history is input data; no tool executes. Keep separate output paths for both arms.
 
 ## Opt-in GLM TP2 continuous batching
 
-Launch from the lead host, with the same models and executable on its peer:
+The installed v58 engines support this mode. The example below requires
+matching current server/launcher source on both hosts, with the same model and
+executable. The binary-only #169 installation preserved the protected runtime's
+older launcher/server files and existing single-slot entries; it did not enable
+batching or change their paths/configs. Do not update those files or settings
+without a separate user request.
+
+From the lead host with matching current source:
 
 ```sh
 tools/llama-swap/tp2.sh run 18080 --model Maya-S-v2-IQ2_XXS \

@@ -234,4 +234,4 @@ user instruction. Launcher/config files and protected peer source are unchanged.
 Use isolated matching builds for validation; keep stable executable paths when
 the user authorizes installation. Back up and atomically replace binary files
 on both hosts; do not rewire launchers to review paths. Handoff §55 records the
-current hashes/backups and pending user testing.
+current hashes/backups and the user's successful testing/acceptance (#169).

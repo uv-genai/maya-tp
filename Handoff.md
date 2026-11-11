@@ -1,9 +1,9 @@
-> **Current runtime (2026-11-11):** read §55 / #169. At the user's explicit request, validated v58 GLM/DeepSeek executables now replace the files at their existing paths on both hosts. Launcher/config paths and files are unchanged; user testing is pending. §54 records the completed upstream integration.
+> **Current runtime (2026-11-11):** read §55 / #169. At the user's explicit request, validated v58 GLM/DeepSeek executables now replace the files at their existing paths on both hosts. Launcher/config paths and files are unchanged; the user reports the installed builds are working fine and accepts them. §54 records the completed upstream integration.
 
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-11 · Current state: **§55**, v58 binary installation at unchanged paths (#169), user testing pending. §54 records validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. The explicit binary-only installation in §55 supersedes earlier binary hashes, preserving paths/configs.
+> Last updated: 2026-11-11 · Current state: **§55**, v58 binary installation at unchanged paths (#169), user-tested and accepted. §54 records validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. The explicit binary-only installation in §55 supersedes earlier binary hashes, preserving paths/configs.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and binary installation state in §55 override those snapshots.
@@ -3397,8 +3397,11 @@ and each launcher freshly hashes its selected engine on start.
 
 Use the usual GLM and DeepSeek llama-swap entries. On the next model start they
 load the new files; an already-loaded model remains on its old inode until the
-user unloads/reloads it. User acceptance of these installed builds is PENDING.
+user unloads/reloads it. On 2026-11-11 the user reported “it's working fine”;
+the installed builds are user-tested and accepted. No new per-model timing or
+benchmark detail was supplied with this report.
 §55 supersedes earlier current-binary hashes, while prior sections retain their
-historical acceptance/performance scope. #169 tracks installation/doc publication;
-#133/#165/#166/#167 remain open. Keep stable executable paths for future
-user-authorized installations and preserve backups; do not redirect launchers.
+historical acceptance/performance scope. #169 is complete following the user
+report and documentation audit. #133/#165/#166/#167 remain open. Keep stable
+executable paths for future user-authorized installations and preserve backups;
+do not redirect launchers.
