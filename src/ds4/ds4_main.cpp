@@ -139,7 +139,8 @@ void usage() {
                  "           [--suffix-draft N]\n"
                  "           [--vision on|off] [--mmap-experts on|off|auto] [--parallel N (--serve: N conversations at once)]\n"
                  "           [--ssd-cache GB|auto|off [--ssd-policy lru|lfu]]   (the in-place experts in a RAM store; opt-in)\n"
-                 "           [--ablate DIRECTION.gguf|ADAPTER.gguf [--ablate-layer N] [--ablate-scale F]]\n"
+                 "           [--ablate DIRECTION.gguf|ADAPTER.gguf [--ablate-layer N] [--ablate-scale F]\n"
+                 "            [--ablate-default on|off]]   (--serve: GEN ablate=0|1 per request)\n"
                  "           (--ids I,J,... [--images FILE] [--n N] [--dump-logits FILE] | --ppl FILE | --serve\n"
                  "           | --encode-image FILE.rgb --size WxH --dump-image OUT)\n"
                  "maya-ds4 --pack <model>/maya-ds4 --pack-info [--expert-profile FILE]   the pack described: no GPU, no "
@@ -538,6 +539,9 @@ struct Req {
     // logit_bias=<id>:<bias>,... (OpenAI's logit_bias; the server's ignore_eos bans the end tokens with -100): added to
     // the logits of every pick of the answer (Model::set_logit_bias); none: the picks exactly as without
     std::vector<std::pair<int, float>> bias;
+    // ablate=0|1 (the server's per-request switch, INFO ablate=1): this request's passes project the --ablate direction
+    // out or not; -1: as the engine started (--ablate-default).  Without a direction: ignored
+    int ablate = -1;
 };
 
 // A prompt's picture: where its span starts, its pixels (the server's resize: RGB rows, both sides multiples of the
@@ -662,6 +666,7 @@ bool parse_gen(const std::string& line, Req& r, bool geni) {
         else if (k == "think_weak") { for (int x : parse_ids(v)) r.soft_weak.insert(x); }
         else if (k == "think_dig") { for (int x : parse_ids(v)) r.soft_dig.insert(x); }
         else if (k == "rid") r.rid = std::atoll(v.c_str());
+        else if (k == "ablate") r.ablate = std::atoi(v.c_str()) != 0;
         else if (k == "marks") {
             for (int x : parse_ids(v))
                 if (x > 0) r.marks.push_back(x);
@@ -738,6 +743,9 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
     if (m.tp2_driving()) std::printf("INFO tp_world=2 tp_rank=0 tp_pair=up tp_prefill_chunk=%d\n",m.prompt_chunk());
     std::printf("INFO logprobs=%d\n", strata::ds4::kTopLogprobs);   // (GEN logprobs=<k>: LP lines, k at most this)
     std::printf("INFO logit_bias=1\n");   // (GEN logit_bias=<id>:<bias>,...: added to the logits of every pick)
+    if (!m.tp2_driving() && m.ablate_loaded())   // (--ablate: GEN ablate=0|1 turns its projection off / on for the request)
+        std::printf("INFO ablate=1 ablate_default=%d\n", m.ablating() ? 1 : 0);
+    const bool abl_default = m.ablating();   // (a GEN without ablate=: as the engine started)
     if (m.seq_count() > 1)   // (--parallel: n conversations at once, GEN rid=<id>)
         std::printf("READY %lld stop multi=%d\n", (long long) m.max_context(), m.seq_count());
     else
@@ -1013,7 +1021,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
     };
     // the conversation in the model into a slot (the state is lost otherwise: another one takes the model)
     const auto slot_put = [&](const char* why) {
-        if (slot_max <= 0) return;
+        if (slot_max <= 0 || m.ablating()) return;   // (an abliterated conversation is not kept: read again)
         const std::vector<int32_t>& t = m.tokens();
         if (t.size() < slot_min) return;   // (a fresh engine's 0-token state is no conversation: nothing to set aside)
         std::vector<strata::ds4::PicMark> marks;   // (the state's pictures: what the slot keeps of them - no pixels,
@@ -1183,7 +1191,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
     // the state as the read keeps it at a shared start: kept apart (a copy of it), unless it already is
     const auto prefix_keep = [&]() {
         const std::vector<int32_t>& t = m.tokens();
-        if (prefix_max <= 0 || t.size() < prefix_min) return;
+        if (prefix_max <= 0 || t.size() < prefix_min || m.ablating()) return;   // (nor an abliterated start)
         for (Prefix& p : prefixes)
             if (p.tokens == t) {
                 p.used = ++prefix_clock;
@@ -1476,6 +1484,12 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             if ((size_t) q.start < c && !pic_same(held, q)) c = (size_t) q.start;
         for (const Pic& q : held)
             if ((size_t) q.start < c && !pic_same(pics, q)) c = (size_t) q.start;
+        // abliteration: a state read with the projection on shares nothing with a request that has it off, and the
+        // other way round - the conversation starts over (an abliterated one is never kept as a slot or a shared start:
+        // slot_put / prefix_keep, so none is taken back either)
+        const bool abl = m.ablate_loaded() && (r.ablate >= 0 ? r.ablate != 0 : abl_default);
+        const bool abl_flip = m.ablate_loaded() && abl != m.ablating();
+        if (abl_flip) c = 0;
         size_t from = 0;
         bool continued = false;
         // the conversation continues, reused in place - a conversation has to be in the model first: a fresh engine
@@ -1496,9 +1510,9 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             bool whole = false;
             // (a kept shared start, when it covers more than the state itself can go back to; a kept conversation
             //  only when it covers more than either)
-            const int pi = prefix_find(r.ids, pics, rs > 0 ? (size_t) rs : 0);
+            const int pi = abl ? -1 : prefix_find(r.ids, pics, rs > 0 ? (size_t) rs : 0);
             const size_t plen = pi >= 0 ? prefixes[(size_t) pi].tokens.size() : 0;
-            const size_t back = slot_take(r.ids, pics, std::max(rs > 0 ? (size_t) rs : 0, plen), whole);
+            const size_t back = abl ? 0 : slot_take(r.ids, pics, std::max(rs > 0 ? (size_t) rs : 0, plen), whole);
             beat();
             if (back > 0) {
                 from = back;
@@ -1510,6 +1524,8 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 from = (size_t) m.pos();
             else m.reset();
         }
+        if (abl_flip && from == 0 && m.pos() != 0) m.reset();
+        m.set_ablate(abl);
         if (from == 0) held.clear();   // (a slot that came back set held itself: its pictures' marks, not only start
                                        //  and hash, so the spans already in the KV are not encoded again)
         if ((int64_t) r.ids.size() + std::max(0LL, r.max_new) > m.max_context()) {
@@ -1793,6 +1809,9 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             std::printf("ERR expected: GEN <max_new> [keys] <id,id,...> or GENI <max_new> [keys] <file> <id,id,...>\n");
             std::fflush(stdout);
             continue;
+        }
+        if (m.tp2_driving() && r.ablate >= 0) {
+            std::printf("ERR ablate is unsupported for DeepSeek TP2\n"); std::fflush(stdout); continue;
         }
         const double tr_parsed = now_ms();
         m.begin_request();   // (DISK_SKIP_AUTO: between requests only)
@@ -2136,6 +2155,10 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 std::printf("ERR expected: GEN <max_new> [keys] <id,id,...> or GENI <max_new> [keys] <file> <id,id,...>\n");
                 std::fflush(stdout);
                 return;
+            }
+            if (m.tp2_driving() && r.ablate >= 0) {
+                std::printf("ERR %lld ablate is unsupported for DeepSeek TP2\n",r.rid);
+                std::fflush(stdout); return;
             }
             if (r.rid < 0) {
                 std::printf("ERR this engine runs several conversations: GEN needs rid=<id>\n");
@@ -3431,6 +3454,7 @@ int main(int argc, char** argv) {
     std::string ids_s, dump, eos = "1", ppl;
     int n = 0, window = 16, suffix_draft = 3;
     bool spec = true;
+    bool ablate_option_asked = false;
     bool dspark_on_asked = false;   // (--dspark on given: a pack without drafter blocks is then told)
     float temp = 0.0f;   // the CLI's sampling (0: greedy)
     unsigned long long cli_seed = 1;
@@ -3447,6 +3471,7 @@ int main(int argc, char** argv) {
 #endif
     for (int i = 1; i < argc; ++i) {
         const std::string a = argv[i];
+        if (a == "--ablate" || a.rfind("--ablate-", 0) == 0) ablate_option_asked = true;
         auto val = [&](const char* what) -> std::string {
             if (i + 1 >= argc) {
                 std::fprintf(stderr, "%s needs a value\n", what);
@@ -3533,6 +3558,14 @@ int main(int argc, char** argv) {
         else if (a == "--ablate") o.ablate = val("--ablate");
         else if (a == "--ablate-layer") o.ablate_layer = (int) num("--ablate-layer", 1, 4096, true);
         else if (a == "--ablate-scale") o.ablate_scale = (float) num("--ablate-scale", 1e-6, 1e6, false);
+        else if (a == "--ablate-default") {   // on (as before: every pass) | off (loaded; GEN ablate=1 turns it on)
+            const std::string v = val("--ablate-default");
+            if (v != "on" && v != "off" && v != "1" && v != "0") {
+                std::fprintf(stderr, "--ablate-default: on or off\n");
+                return 2;
+            }
+            o.ablate_default = v == "on" || v == "1";
+        }
         else if (a == "--serve") serve_mode = true;
         else if (a == "--parallel") o.seqs = (int) num("--parallel", 1, 8, true);   // (--serve: conversations at once)
         else if (a == "--multi-check") multi_check = true;   // (tests: --parallel's rows against each alone)
@@ -3638,6 +3671,9 @@ int main(int argc, char** argv) {
         std::printf("TP2_DOWN %s\n",text.c_str()); std::fflush(stdout);
     };
     if (tp2_rank>=0) {
+        if (ablate_option_asked) {
+            std::fprintf(stderr,"maya-ds4: ablation is unsupported for DeepSeek TP2\n"); return 2;
+        }
         const char* requested=std::getenv("MAYA_DS4_TP2_DSPARK");
         const char* requested_chunk=std::getenv("MAYA_DS4_TP2_CHUNK");
         const char* requested_lookup=std::getenv("MAYA_DS4_TP2_LOOKUP");

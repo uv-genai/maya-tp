@@ -15,7 +15,7 @@ their model engines, quantization work, expert memory management and serving sta
 derived project is tracked in [uv-genai/maya-tp](https://github.com/uv-genai/maya-tp).
 
 The next upstream update batch (v1.1.54–v1.1.58) is being integrated in
-[#159](https://github.com/uv-genai/maya-tp/issues/159), with Flash-only paired
+[#159](https://github.com/uv-genai/maya-tp/issues/159), with paired GLM-5.3-Flash and DeepSeek-V4.1-Flash
 validation before the final PR. Production selections remain unchanged.
 
 ## Why Maya-TP?
@@ -117,10 +117,18 @@ The new optional engine experiments are tracked for separate assessment in #133.
 [Last merged-main upstream checkpoint](docs/upstream/v1.1.53.md).
 The active v54–v58 branch includes full GLM-5.3 source/catalog additions, while
 remote TP2 remains **Flash-only** and rejects the 744B architecture before
-bootstrap. No 744B model is downloaded or tested. The branch also adds
+bootstrap. Full-model support is unqualified here; no 744B model is downloaded
+or tested. Its new Q8 attention repacking and single-APU drafting calibration do
+not repack Flash models or change the accepted Flash launch defaults. New
+refusal-ablation controls are limited to unpaired engines: TP2 refuses their
+startup/config settings and every explicit `ablate` request, including `false`,
+and exposes no ablation UI capability. The branch also adds
 Responses compatibility and inline document inputs;
 text extraction works within paired text-only limits. Images/video remain outside
-the validated TP2 scope. [v54](docs/upstream/v1.1.54.md), [v55](docs/upstream/v1.1.55.md).
+the validated TP2 scope. [v54](docs/upstream/v1.1.54.md), [v55](docs/upstream/v1.1.55.md),
+[v56](docs/upstream/v1.1.56.md), [v57](docs/upstream/v1.1.57.md),
+[v58](docs/upstream/v1.1.58.md). The final branch is still under validation;
+source integration does not change production binaries or model selections.
 
 DeepSeek TP2 and DSpark were merged into `main` through PR #122 at `75e18e8`
 after extended user trials. HIP mapping, server and tools CI passed on the
@@ -304,6 +312,8 @@ Their work makes this project's focus on dual Strix Halo tensor parallelism poss
   The ggml authors, Anbeeld; `third_party/beellama.cpp/LICENSE`).
 - The models: [GLM-5.3-Flash](https://huggingface.co/zai-org/GLM-5.3-Flash) by zai-org (MIT); Maya's quants and the
   image encoder file are made from zai-org's released weights and keep its license.
+  [GLM-5.3](https://huggingface.co/zai-org/GLM-5.3) by zai-org (its own license); its GGUF is
+  [unsloth's](https://huggingface.co/unsloth/GLM-5.3-GGUF).
   [DeepSeek-V4.1-Flash-1017](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017) by DeepSeek (MIT); Maya's
   quant, its Engram tables and the drafter are made from DeepSeek's released weights and keep its license; the vision
   tower comes from DeepSeek's checkpoint, the GGUF option from

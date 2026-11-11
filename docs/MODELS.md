@@ -20,12 +20,14 @@ are inherited upstream catalog information, not additional fork validation. Deep
 
 The v1.1.53 installer removed experimental badges for its supported AMD and EXL3
 options. The fork's measured two-host model coverage is the scope listed above.
-The completed source integration is [v1.1.53](upstream/v1.1.53.md).
+The last merged-main upstream checkpoint is [v1.1.53](upstream/v1.1.53.md).
+The v54–v58 integration branch is under validation; [v57](upstream/v1.1.57.md)
+and [v58](upstream/v1.1.58.md) record the new full-model catalog and its limits.
 
 ## How the quants are named
 
 Every Maya quant is named after its model first, then its tier - XS, S, M or L, by how many bits its experts keep - so
-"GLM-5.3 · Maya-S" and "MiniMax M3.1 · Maya-S" never get mixed up. The setup asks which one to download; to pick one
+"GLM-5.3-Flash · Maya-S" and "MiniMax M3.1 · Maya-S" never get mixed up. The setup asks which one to download; to pick one
 yourself, give its setup id: `./setup.sh --model glm-maya-s24`. The names used before (`--model Maya-S24`,
 `--ds4-quant maya-xs`, ...) keep working.
 
@@ -39,12 +41,12 @@ the model's MTP block, which drafts tokens ahead.
 
 | Model | Setup id | Size | Made for | Against the FP8 model |
 | --- | --- | ---: | --- | --- |
-| **GLM-5.3 · Maya-S** (default) | `glm-maya-s` | 96.5 GB | PCs with a smaller memory pool (RAM and VRAM together) | 97.9% of its zero-shot accuracy; the same next token 83% of the time |
-| **GLM-5.3 · Maya-S24** | `glm-maya-s24` | 94.7 GB | cards of 24 GB or less: 4-bit attention leaves ~1.5 GB more of the card for experts, decode +14% | 97.7%; 83% |
-| **GLM-5.3 · Maya-XS** | `glm-maya-xs` | 73.4 GB | PCs with 64 GB of RAM and a 24 GB card, at 128K context (int8 KV cache, thinking budget 8192) | - |
-| **GLM-5.3 · Maya-M** | `glm-maya-m` | 116 GB | a bigger memory pool; more bits where they count, calibrated toward tool calls and front-end code | 97.9%; 86% |
-| **GLM-5.3 · Maya-M-Derisked** | `glm-maya-m-derisked` | 116 GB | Maya-M with a weight edit by [Blackfrost_AI](https://x.com/Blackfrost_AI) that reduces blanket refusals ([its repo](https://huggingface.co/peasantsmith/GLM-5.3-Flash-Maya-M-Derisked-IQ2_S-GGUF)); experimental | not measured yet |
-| **GLM-5.3 · Maya-L** | `glm-maya-l` | 156.3 GB | the biggest memory pools | **99.2%**; 90% |
+| **GLM-5.3-Flash · Maya-S** (default) | `glm-maya-s` | 96.5 GB | PCs with a smaller memory pool (RAM and VRAM together) | 97.9% of its zero-shot accuracy; the same next token 83% of the time |
+| **GLM-5.3-Flash · Maya-S24** | `glm-maya-s24` | 94.7 GB | cards of 24 GB or less: 4-bit attention leaves ~1.5 GB more of the card for experts, decode +14% | 97.7%; 83% |
+| **GLM-5.3-Flash · Maya-XS** | `glm-maya-xs` | 73.4 GB | PCs with 64 GB of RAM and a 24 GB card, at 128K context (int8 KV cache, thinking budget 8192) | - |
+| **GLM-5.3-Flash · Maya-M** | `glm-maya-m` | 116 GB | a bigger memory pool; more bits where they count, calibrated toward tool calls and front-end code | 97.9%; 86% |
+| **GLM-5.3-Flash · Maya-M-Derisked** | `glm-maya-m-derisked` | 116 GB | Maya-M with a weight edit by [Blackfrost_AI](https://x.com/Blackfrost_AI) that reduces blanket refusals ([its repo](https://huggingface.co/peasantsmith/GLM-5.3-Flash-Maya-M-Derisked-IQ2_S-GGUF)); experimental | not measured yet |
+| **GLM-5.3-Flash · Maya-L** | `glm-maya-l` | 156.3 GB | the biggest memory pools | **99.2%**; 90% |
 
 **Two-host TP2** (this fork, `uv-genai/maya-tp`): pick the pack on the launch scripts with `--model NAME`
 (or `MAYA_MODEL` / `MAYA_PACK` / `--config`); see [TP2-RUN.md](TP2-RUN.md#choosing-a-model) for flags and
@@ -54,9 +56,12 @@ Maya-L have each passed the full TP2 + MTP suite** (API matrices, acceptance, CL
 controlled bench): [S](benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md),
 [M](benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md),
 [L](benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md) (#29, #30).
-Under TP2, **MTP is supported and opt-in** with `MAYA_TP_MTP=1`; fixed draft widths are 1–8,
-with greedy verification. See [the launch instructions](TP2-RUN.md#opt-in-mtp).
-DFlash and multi-conversation remain gated ([#11](https://github.com/uv-genai/maya-tp/issues/11)).
+Under TP2, **MTP is supported and opt-in** with `MAYA_TP_MTP=1`; single-conversation fixed draft widths are 1–8,
+with greedy verification (batched launchers allow 1–7 drafts). See [the launch instructions](TP2-RUN.md#opt-in-mtp).
+The pair defaults to one conversation. Explicit `--parallel 2..4` enables the
+user-accepted checked batching mode, including per-request MTP controls;
+[the runbook](TP2-RUN.md) describes its launch and validation limits.
+DFlash is unsupported on the remote TP2 path.
 
 The setup recommends one for your PC. How they're made and measured: [MAYA-S](../bench/results/MAYA-S.md),
 [MAYA-S24](../bench/results/MAYA-S24.md), [MAYA-M](../bench/results/MAYA-M.md), [MAYA-L](../bench/results/MAYA-L.md). On
@@ -91,10 +96,17 @@ GLM-5.3-Flash, with its own sparse-attention indexer. Text only, up to 1M contex
 
 | Model | Setup id | Size | Made for |
 | --- | --- | ---: | --- |
-| **GLM-5.3 (744B) · UD-IQ2_M** ([unsloth's GGUF](https://huggingface.co/unsloth/GLM-5.3-GGUF)) | `GLM-5.3-UD-IQ2_M` | 238.6 GB | the biggest memory pools (~256 GB of VRAM and RAM together keeps every expert in memory) |
+| **GLM-5.3 (744B) · Maya-XS** ([Maya's own GGUF](https://huggingface.co/peasantsmith/GLM-5.3-Maya-GGUF)) | `glm-5.3-maya-xs` | 170.0 GB | smaller memory pools (~192 GB of VRAM and RAM together keeps every expert in memory); as close to the original as unsloth's UD-IQ1_S at 78% of its size |
+| **GLM-5.3 (744B) · UD-IQ2_M** ([unsloth's GGUF](https://huggingface.co/unsloth/GLM-5.3-GGUF)) | `GLM-5.3-UD-IQ2_M` | 238.6 GB | the biggest memory pools (~256 GB of VRAM and RAM together keeps every expert in memory); closer to the original |
 
-NVIDIA from the V100 on (CUDA, Linux and Windows) and AMD (HIP, the Strix and Gorgon Halo included); not on Mac.
-Everything about it - setup, context, defaults, APIs: [GLM53.md](GLM53.md).
+These are imported upstream catalog entries, memory estimates and quality comparisons;
+this fork has not qualified their single-host capacity, speed or output quality.
+No 744B weights were downloaded or run during integration. Remote TP2 rejects
+`glm-dsa` before bootstrap; its source/catalog do not add full-model TP2/MTP or
+batching support. The full-model Q8 attention repack and drafting calibration are
+architecture-specific and leave existing Flash packs/defaults unchanged.
+See [the standalone model scope](GLM53.md), [v57](upstream/v1.1.57.md) and
+[v58](upstream/v1.1.58.md).
 
 ## DeepSeek-V4.1-Flash-1017
 

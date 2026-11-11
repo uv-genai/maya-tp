@@ -27,10 +27,19 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | Coding-agent rules | [AGENTS.md](../AGENTS.md) |
 | Coding-agent current state and restart prompt | [Handoff](../Handoff.md), [Handoff-Prompt](../Handoff-Prompt.md) |
 | Current release and changes | [tp-v1.1.44 notes](releases/tp-v1.1.44.md), [changelog](../CHANGELOG.md) |
-| Current v54–v58 integration | [v54](upstream/v1.1.54.md), [v55](upstream/v1.1.55.md), [v56](upstream/v1.1.56.md); progress in [#159](https://github.com/uv-genai/maya-tp/issues/159) |
+| Current v54–v58 integration | [v54](upstream/v1.1.54.md), [v55](upstream/v1.1.55.md), [v56](upstream/v1.1.56.md), [v57](upstream/v1.1.57.md), [v58](upstream/v1.1.58.md); final validation pending, progress in [#159](https://github.com/uv-genai/maya-tp/issues/159) |
 | Earlier upstream integration decisions and evidence | [v1.1.53](upstream/v1.1.53.md), [v1.1.52](upstream/v1.1.52.md), [v1.1.51](upstream/v1.1.51.md), [v1.1.50](upstream/v1.1.50.md), [v1.1.49 merge and fresh live validation](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
 
-The current source incorporates applicable upstream v1.1.50–v1.1.53 changes as
+The v54–v58 review branch remains under validation before its final PR. It imports
+full GLM-5.3 source/catalog without qualifying that model: remote TP2 rejects its
+architecture before bootstrap and no 744B weights were downloaded/run. Full-model
+Q8 attention repacking and drafting calibration leave Flash packs/defaults
+unchanged. Ablation is limited to unpaired engines; TP2 refuses its config/startup
+and every explicit request field, with no paired UI capability. The experimental
+`MAYA_GLM_PREFILL_STABLE` stays off, and DeepSeek `MAYA_DS4_AI_RUN` retains its
+[answer-change warning](SETTINGS.md#upstream-v55-defaults-in-this-fork).
+
+The last merged-main upstream batch incorporates applicable v1.1.50–v1.1.53 changes as
 individual validated checkpoints, completed through PR #134 at `de184d9` with
 merged-main CI 41834772034 passing. The reports above record per-tag decisions,
 paired results and CI tracking. New v53 engine experiments are deferred in #133.

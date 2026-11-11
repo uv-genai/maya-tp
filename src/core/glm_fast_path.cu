@@ -1825,12 +1825,22 @@ bool Glm5Model::fast_setup(std::string& err) {
             }
         F->stage_bytes = sstride;
         // at a pinning cap's first refusal the room left under it is measured (pin_room), and from there on each class
-        // takes its planned share of what is left - less the room kept above the tier
-        int64_t pin_left = -1;
+        // takes its planned share of what is left - less the room kept above the tier (glmfast::pin_cap_room: 512 MB;
+        // a discrete AMD card under Windows a tenth of the cap, #924 - until the cap is reached, of what is pinned)
+#if defined(STRATA_USE_HIP) && defined(_WIN32)
+        const bool amd_room = !F->unified_memory;
+#else
+        const bool amd_room = false;
+#endif
+        static const int64_t room_mb = getenv("STRATA_GLM_PIN_ROOM_MB") ? std::atoll(getenv("STRATA_GLM_PIN_ROOM_MB")) : -1;
+        int64_t pin_left = -1, pin_cap = -1;
+        const auto pin_keep = [&]() {
+            return glmfast::pin_cap_room(amd_room, pin_cap >= 0 ? pin_cap : g_pin_held, room_mb);
+        };
         const auto share = [&](size_t c) {
             int64_t planned = 0;
             for (size_t k = c; k < cls_n.size(); ++k) planned += cls_n[k] * (int64_t) cls_stride[k];
-            const double f = (double) std::max<int64_t>(0, pin_left - (int64_t) kPinRoom) / (double) std::max<int64_t>(1, planned);
+            const double f = (double) std::max<int64_t>(0, pin_left - pin_keep()) / (double) std::max<int64_t>(1, planned);
             return (int64_t) (f * (double) cls_n[c]);
         };
         // a class pinned in pieces of at most STRATA_GLM_PIN_PIECE_MB (Windows: 1024 by default; 0: one block, as on
@@ -1897,9 +1907,11 @@ bool Glm5Model::fast_setup(std::string& err) {
                 if ((p = pin_tier(R, n)) != nullptr) {
                     // ... and leave room under the cap: a pageable copy needs pinned buffers of the driver's own, and
                     // with two tiers pinned right up to it the warmed tables' upload failed (#105).  512 MB more that
-                    // will not pin: a step less
-                    void* room = nullptr;
-                    if (pin_alloc(&room, kPinRoom, cudaHostAllocDefault) == cudaSuccess) {
+                    // will not pin: a step less.  (A larger room is probed in pieces, pin_room.)
+                    const int64_t keep = pin_keep();
+                    if (keep != (int64_t) kPinRoom) {
+                        if (pin_room(keep) >= keep) break;
+                    } else if (void* room = nullptr; pin_alloc(&room, kPinRoom, cudaHostAllocDefault) == cudaSuccess) {
                         pin_free(room, kPinRoom);
                         break;
                     }
@@ -1911,10 +1923,12 @@ bool Glm5Model::fast_setup(std::string& err) {
                 if (pin_left < 0) {
                     int64_t planned = 0;
                     for (size_t k = c; k < cls_n.size(); ++k) planned += cls_n[k] * (int64_t) cls_stride[k];
-                    pin_left = pin_room(planned + (int64_t) kPinRoom);
+                    pin_left = pin_room(planned + glmfast::pin_cap_room(amd_room, g_pin_held + planned, room_mb));
+                    pin_cap = g_pin_held + pin_left;
                     const int64_t fit = share(c);
-                    std::fprintf(stderr, "glm fast: CUDA%d a pinning cap: %.2f GB more pin, the RAM tier sized to it\n",
-                                 dev_, (double) pin_left / 1073741824.0);
+                    std::fprintf(stderr, "glm fast: CUDA%d a pinning cap: %.2f GB more pin, the RAM tier sized to it "
+                                         "(%.2f GB kept free above it)\n",
+                                 dev_, (double) pin_left / 1073741824.0, (double) pin_keep() / 1073741824.0);
                     if (fit < n) {
                         n = std::max(least, fit);
                         continue;
@@ -6282,7 +6296,9 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
     // 1 = the first part of a split only (!hop_in, as before); 2 = every part: each part has its own CPU lane, MoeDev and
     // defer_post, and a part's last layer is never deferred (il + 1 < l1_ below), so nothing deferred crosses a hop
     static const int defer_lvl = getenv("STRATA_GLM_DEFER_CPU") != nullptr ? std::atoi(getenv("STRATA_GLM_DEFER_CPU")) : 0;
-    const bool defer = defer_lvl != 0 && (defer_lvl >= 2 || !hop_in) && !graphs && F->cpu_plan != 0ull && !F->all_resident;
+    // (--ablate: a deferred CPU answer would join the streams unprojected - the projecting conversation waits instead)
+    const bool defer = defer_lvl != 0 && (defer_lvl >= 2 || !hop_in) && !graphs && F->cpu_plan != 0ull && !F->all_resident &&
+                       !ablating();
     if (defer && F->defer_post == nullptr && cudaMalloc(&F->defer_post, 8 * sizeof(float)) != cudaSuccess) {
         err = "glm fast: the deferred post weights did not allocate";
         return false;
@@ -6321,6 +6337,7 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
         h.xq = F->xq;
         h.part = F->part;
         h.counter = F->counter;
+        if (il != l0_) ablate(F->ffn, 1, s);   // (--ablate: the previous FFN's write loses the direction)
         gf::hc(h, s);
         if (F->prof_on) F->mark("hc_attn");
         if (il != l0_) std::swap(Rc, Ro);
@@ -6403,6 +6420,7 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
             hf.w_scale = Ly.hc_ffn_scale;
             hf.w_base = Ly.hc_ffn_base;
             hf.norm_w = Ly.ffn_norm;
+            ablate(F->mixer, 1, s);   // (--ablate: the mixer's write)
             gf::hc(hf, s);
             if (F->prof_on) F->mark("hc_ffn");
             std::swap(Rc, Ro);
@@ -6446,7 +6464,7 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
         };
         if (graphs && !Ly.recr && dsa_ffn_graphs) {
             bool replayed = false;
-            const glmfast::LayerGraphs::Key key{F->cpu_plan, Rc, Ro, F->all_resident, F->win.pipe_t};
+            const glmfast::LayerGraphs::Key key{F->cpu_plan, Rc, Ro, F->all_resident, F->win.pipe_t, ablating()};
             if (!F->kda_graphs.enqueue(il + 100, key, s, F->expected, Ly.moe ? 1 : 0, ffn_body, replayed, err))
                 return false;
             if (replayed) std::swap(Rc, Ro);
@@ -6456,7 +6474,7 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
         };
         if (graphs && Ly.recr) {
             bool replayed = false;
-            const glmfast::LayerGraphs::Key key{F->cpu_plan, Rc, Ro, F->all_resident, F->win.pipe_t};
+            const glmfast::LayerGraphs::Key key{F->cpu_plan, Rc, Ro, F->all_resident, F->win.pipe_t, ablating()};
             if (!F->kda_graphs.enqueue(il, key, s, F->expected, Ly.moe ? 1 : 0, body, replayed, err))
                 return false;
             // Capture executes the host pointer swaps; replay only executes device
@@ -6473,6 +6491,7 @@ bool Glm5Model::fast_layers(int64_t p, bool hop_in, std::string& err) {
         if (const int fe = glmfast::submit_every(); fe > 0 && (il - l0_) % fe == 0) glmfast::submit_queued(s);
     }
     // the last layer's write half: R (in the OTHER buffer) = post x ffn + comb . R
+    ablate(F->ffn, 1, s);   // (--ablate: the part's last FFN write)
     gf::hc_post(F->ffn, Rc, F->post, F->comb, g.n_embd, Ro, s);
     if (F->prof_on) F->mark("hc_post_end");
     // keep the convention "the residual lives at state_" for the hop and the head: copy back
@@ -6628,8 +6647,10 @@ bool Glm5Model::fast_mtp(int64_t p, int32_t next_tok, std::string& err, int step
     }();
     const bool sample_draft_on = mtp_sample_ != nullptr && F->spec_q != nullptr && step == 0;
     // (a two-GPU split: only where the caller asks for it, as up to v1.1.51 - its speculative decode drafts over the
-    // whole head, #860)
-    sub = (sub || (!full_head && !sample_draft_on && n_parts_ != 2)) && F->mtp_dv > 0;
+    // whole head, #860.)  3+ GPUs (decode_spec asks nothing): the draft vocabulary while the answer stays in it, the
+    // whole head while it does not - mtp_out_ (decode_spec keeps it) under decode_mtp's 2%.  One GPU: the caller's
+    // choice (decode_mtp's own rule on mtp_out_; mtp_draft asks for the vocabulary)
+    sub = (sub || (!full_head && !sample_draft_on && n_parts_ > 2 && mtp_out_ < 0.02)) && F->mtp_dv > 0;
     mtp_hx_pos_ = -1;   // head_x becomes the block's own hidden state
     if (next_tok < 0) {
         if (F->mtp_emb == nullptr || step < 1) {
@@ -7009,7 +7030,10 @@ int Glm5Model::mtp_draft(int32_t next_tok, std::string& err) {
     cudaSetDevice(t->dev_);
     // between tokens: the draft block's routes go through the same tiers, so the boundary runs first
     if (!t->fast_boundary(err)) { cudaSetDevice(dev_); return -1; }
-    if (!t->fast_mtp(t->pos_ - 1, next_tok, err)) {
+    // (the vocabulary everywhere but on a two-GPU split, whatever the answer's script: the prompt's cache fill and the
+    // tests read this draft, not a decode; STRATA_GLM_MTP_FULL_HEAD=1 still asks for the whole head)
+    static const bool full_head = strata::platform::env_switch("STRATA_GLM_MTP_FULL_HEAD");
+    if (!t->fast_mtp(t->pos_ - 1, next_tok, err, 0, t->n_parts_ != 2 && !full_head)) {
         cudaSetDevice(dev_);
         return -1;
     }
@@ -7042,6 +7066,28 @@ bool Glm5Model::spec_ready() const {
         last = m;
     }
     return last->mtp_il_ >= 0;
+}
+
+bool Glm5Model::spec_plain_turn() {
+    if (g_.arch != GlmArch::GlmDsa || !spec_ready()) return false;
+    int n = 0;
+    for (Glm5Model* m = this; m != nullptr; m = m->split_next_.get()) ++n;
+    if (!glmspec::tune_plain_turn(n, getenv("STRATA_GLM_SPEC_HEAD"))) return false;
+    spec_plain_live_ = true;
+    static bool said = false;
+    if (!said) {
+        said = true;
+        std::fprintf(stderr, "glm spec tune: this decode goes token by token (MAYA_GLM_SPEC_TUNE_PLAIN: no drafting is "
+                             "one of the measured candidates)\n");
+    }
+    return true;
+}
+
+// (only after spec_plain_turn said yes: any other plain loop leaves the tuner's clock alone)
+void Glm5Model::spec_plain_end(int64_t produced) {
+    if (!spec_plain_live_) return;
+    spec_plain_live_ = false;
+    glmspec::tune_end(produced);
 }
 
 Glm5Model* Glm5Model::spec_head_last() {
@@ -7627,6 +7673,14 @@ bool Glm5Model::decode_spec(strata::kernels::SamplerParams& sp, int64_t max_new,
         }
         return true;
     };
+    // the draft vocabulary's misses (3+ GPUs: fast_mtp drafts over it while the answer stays in it): every emitted
+    // token outside it moves the drafting part's mtp_out_, the share decode_mtp keeps on one GPU - above it the drafts
+    // take the whole head (an answer in another script drafts as on two GPUs)
+    const auto vocab_note = [&](int tok) {
+        const std::vector<uint8_t>& vin = TL->mtp_vin_;
+        const bool outside = !vin.empty() && tok >= 0 && tok < (int) vin.size() && !vin[(size_t) tok];
+        TL->mtp_out_ += ((outside ? 1.0 : 0.0) - TL->mtp_out_) / 64.0;
+    };
     // the prompt's last forward left position q = pos_ - 1 processed by both halves and its logits on the tail
     int64_t q = pos_ - 1;
     int y = -1;
@@ -7640,6 +7694,7 @@ bool Glm5Model::decode_spec(strata::kernels::SamplerParams& sp, int64_t max_new,
     }
     ++produced;
     ng.push(y);   // glm-dsa B14.13
+    vocab_note(y);
     if (!emit(y) || produced >= max_new || q + 2 >= max_ctx_) return true;
     int d = -1;
     if (!draft(q, y, d)) return false;
@@ -7697,9 +7752,14 @@ bool Glm5Model::decode_spec(strata::kernels::SamplerParams& sp, int64_t max_new,
         lapn(0, early ? 2 : 1);
         ++produced;
         ng.push(y2);   // glm-dsa B14.13
+        vocab_note(y2);
         const bool more = emit(y2) && produced < max_new && q + 3 < max_ctx_;
         if (!more) break;
         const bool wrong = d != y2;
+        // the draft for q+2 against the truth: B11.3's acceptance (the NextN block's own draft - an n-gram one is the
+        // n-gram chooser's - for MAYA_GLM_SPEC_LOG / _TRACE and the unload summary), then the n-gram chooser's verdict
+        glmspec::note(this, 1, q + 2, ng.mtp_draft(d), y2);
+        ng.verdict(d, y2);
         int d2 = -1;
         if (v51) {
             // two GPUs (#860): v1.1.51's round.  (STRATA_GLM_SPEC_CANCEL) a wrong draft: the head's speculative pass
@@ -7713,6 +7773,7 @@ bool Glm5Model::decode_spec(strata::kernels::SamplerParams& sp, int64_t max_new,
             }
             // (2) the draft for q+3 from (h_{q+1}, y2), made and waited for
             if (!draft(q + 1, y2, d2)) { ok = false; break; }
+            d2 = draft_ok(ng.pick(d2), y2);   // glm-dsa B14.13 (off: the NextN draft, untouched)
             lap(1);
             // (3) the head's speculative position q+2 stands iff its draft was y2; else restore and redo it
             ++spec_steps_;
@@ -7759,7 +7820,7 @@ bool Glm5Model::decode_spec(strata::kernels::SamplerParams& sp, int64_t max_new,
             if (cancel) fast_->spec_cancellable = true;   // q+3 with the new draft: speculative
             cudaSetDevice(TL->dev_);
             if (!glmfast::wait_event(TL->fast_->ev_mtp, "glm spec draft", err)) { ok = false; break; }
-            d2 = draft_ok(TL->fast_->mtp_tok_h[0], y2);
+            d2 = draft_ok(ng.pick(draft_ok(TL->fast_->mtp_tok_h[0], y2)), y2);   // glm-dsa B14.13 (as above)
             if (!TL->fast_->route_ok(err)) { ok = false; break; }
             lap(1);
             have_draft = true;

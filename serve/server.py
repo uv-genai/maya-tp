@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import collections
 import contextlib
+import dataclasses
 import base64
 import bisect
 import hashlib
@@ -74,7 +75,7 @@ from serve.update import RESTART_EXIT, Updater  # noqa: E402
 from serve import glm_dsa_product, glm_dsa_tune  # noqa: E402  (GLM-5.3, glm-dsa: the pack test, its release gate, its knobs)
 from serve.glm_dsa_template import reads_images  # noqa: E402
 import maya_names  # noqa: E402  (tools/) the settings' names users see (MAYA_*) and the older ones the code reads
-import maya_quants  # noqa: E402  (tools/) the quants' names users see (the model first: "GLM-5.3 · Maya-S")
+import maya_quants  # noqa: E402  (tools/) the quants' names users see (the model first: "GLM-5.3-Flash · Maya-S")
 
 try:                        # Project Maya's release (the dashboard's About; the engine's INFO carries none)
     MAYA_VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip() or None
@@ -1311,7 +1312,14 @@ class StrataEngine:
         """`cvec=0|1`: the experimental-speed-projection control vector for this request, when the engine was
         started with one (--control-vector-scaled; an engine without one ignores the key).  Absent = on."""
         on = sampling.get("experimental_speed_projection")
-        return f" cvec={int(on)}" if isinstance(on, bool) else ""
+        return (f" cvec={int(on)}" if isinstance(on, bool) else "") + StrataEngine.ablate_key(sampling)
+
+    @staticmethod
+    def ablate_key(sampling: dict) -> str:
+        """`ablate=1`: this request projects the model's refusal direction out (the request's `ablate`, else the
+        Models page's default for the model, else the Chat's; the engine loaded the direction with --ablate-default off,
+        so a line without the key is the line - and the answer - as before).  An engine without a direction ignores it."""
+        return " ablate=1" if sampling.get("ablate") is True else ""
 
     def _write_command(self, line: str, *, allow_down: bool = False):
         """Serialize each complete command and flush, including prompts larger than PIPE_BUF.
@@ -2359,6 +2367,8 @@ def check_tp_request_tuning(info, sampling) -> None:
     """Reject knobs whose state is not part of the paired request/handshake contract before any engine write."""
     if int((info or {}).get("tp_world", 1) or 1) <= 1:
         return
+    if "ablate" in (sampling or {}):
+        raise ValueError("TP2 does not support unmirrored refusal ablation")
     tune = (sampling or {}).get("strata_tune")
     unsupported = sorted(set(tune) & set(glm_dsa_tune.KEYS)) if isinstance(tune, dict) else []
     if unsupported:
@@ -2515,6 +2525,18 @@ class Service:
         # the special literals that stay text inside a message (frontend.mark_literals): every one the vocabulary has
         self.literals = literal_tags(getattr(tokenizer, "special_tokens", None))
 
+    def ablate_state(self) -> dict:
+        """Refusal ablation as /health and /props tell it: whether the engine loaded a direction (INFO ablate=1), the
+        default for requests that leave `ablate` out (the Models page's), and why it is not there."""
+        info = getattr(self.engine, "info", None) or {}
+        if int(info.get("tp_world", 1) or 1) > 1:
+            return {"available": False, "default": False,
+                    "why": "not available with TP2 (direction state is not negotiated between ranks)"}
+        loaded = info.get("ablate") == 1
+        return {"available": loaded, "default": loaded and self.sampling_defaults.get("ablate") is True,
+                "why": "" if loaded else
+                (getattr(self, "ablate_why", "") or "no refusal direction loaded for this model")}
+
     def check_request(self, req: dict) -> None:
         """A request's sampling fields and logit_bias, checked (a ValueError is the 400) and kept in the form the engine
         line takes, before anything is sent.  A logit_bias needs an engine that applies it (INFO logit_bias=1): an
@@ -2524,6 +2546,14 @@ class Service:
         bias = logit_bias_of(req.get("logit_bias"), len(getattr(self.tok, "tokens", None) or ()) or None)
         if bias and (getattr(self.engine, "info", None) or {}).get("logit_bias") != 1:
             raise ValueError("logit_bias: this engine does not apply token biases - update Maya (./maya.sh --setup)")
+        # ablate (Maya's refusal ablation, the same name on every API): true / false; true needs an engine that loaded a
+        # direction (INFO ablate=1) - else the answer would come back unchanged, which a client could not tell
+        ablate = req.get("ablate")
+        if ablate is not None and not isinstance(ablate, bool):
+            raise ValueError("ablate: true or false")
+        if ablate is True and (getattr(self.engine, "info", None) or {}).get("ablate") != 1:
+            raise ValueError("ablate: this model has no refusal direction loaded (the Models page: a direction file "
+                             "for it, and the switch on)")
         # ignore_eos (vLLM's and llama.cpp's): the tokens that end an answer are banned, so it runs to max_tokens - as
         # llama.cpp does it, through the logit bias, so the text past the model's natural end stays text it would write
         ignore = req.get("ignore_eos")
@@ -3001,6 +3031,10 @@ class Service:
         if running:
             self._restart_busy()
         out = models.save(p, settings)
+        if running and "ablate" in settings:   # (refusal ablation's default: live - no restart, the engine has it)
+            self.sampling_defaults = {k: v for k, v in self.sampling_defaults.items() if k != "ablate"}
+            if models.ablate_default(new):
+                self.sampling_defaults["ablate"] = True
         restarts = bool(running and out["changed"] and os.environ.get("MAYA_RESTART_ON_UPDATE"))
         if restarts:
             self._restart_into(p, "settings")
@@ -3587,7 +3621,7 @@ class Service:
                 prefill = CALL_START + (force if glm_calls else "\n" + (f"<function={force}>\n" if force else ""))
         given["_prefill"] = prefill
         given["_blocked"] = self._block_suffixes(blocked, tools, kwargs) if blocked and force is None else None
-        if looping and tools and force is None:
+        if looping and tools and force is None and not loop_guard.answers_user(asked):   # (an answer to the user ends)
             keep = self._keep_suffix(tools, kwargs)
             if keep is not None:                     # (+ what the model said before: stops_short's `seen`)
                 given["_blocked"] = {**(given["_blocked"] or {}), "_keep": keep + (loop_guard.said_before(asked),)}
@@ -4314,6 +4348,7 @@ class Service:
         think_resume = (sampling or {}).get("_think_resume")   # (ids, thinks): a quoted marker inside the thinking
         think_restarts = 0                          # times the thinking was resumed in this answer
         said = []                                   # this engine call's text for the user (stops_short)
+        join = None                                 # after a keep: the paragraph break before the continuation (#921)
         kept = 0                                    # times it was kept going in this answer
         called = False                              # it wrote a tool call (then its turn does not end here)
         pending, tries, sent_call = [], {}, False
@@ -4573,6 +4608,8 @@ class Service:
                                 # reasoning closed (the continuation opens none: #640's thinking, retracted)
                                 kept += 1
                                 self._kept_going(kept, "".join(said))
+                                tail = "".join(said)      # the join readable: the continuation starts a new
+                                join = "\n\n"[len(tail) - len(tail.rstrip("\n")):] if tail.strip() else ""
                                 ids_k, thinks, _ = keep
                                 if answered and thinks and self.think_end_id is not None:
                                     ids_k, thinks = [*ids_k, self.think_end_id], False
@@ -4639,6 +4676,17 @@ class Service:
                         self._note(n, evs, stat)
                         last_print = self._progress(last_print)
                         for ev in evs:
+                            if ev.kind == "content" and join is not None:
+                                # the continuation after a keep: in the client's text it starts a new paragraph (its
+                                # own leading line breaks go, the break stands - once, before its first words)
+                                t = ev.text.lstrip("\n")
+                                if not t:
+                                    continue
+                                if join:
+                                    yield "event", Event("content", join)
+                                join = None
+                                if t != ev.text:
+                                    ev = dataclasses.replace(ev, text=t)
                             if ev.kind == "content":
                                 said.append(ev.text)
                             elif ev.kind == "tool_call":
@@ -6048,7 +6096,7 @@ def make_handler(svc: Service):
                 self._json(200, {"status": status,
                                  "max_context": svc.engine.max_context, "model": svc.model,
                                  "max_text_file": text_file_limit(svc.engine.max_context),
-                                 "model_label": svc.model_label,   # (the model first: "GLM-5.3 · Maya-S24")
+                                 "model_label": svc.model_label,   # (the model first: "GLM-5.3-Flash · Maya-S24")
                                  "images": svc.vision is not None, "api_key": bool(svc.api_key), "defaults": rec,
                                  # videos: the llama.cpp encoder's (as /v1/models' input_modalities); DeepSeek's and
                                  # MiniMax's engine-run towers read pictures only
@@ -6063,6 +6111,9 @@ def make_handler(svc: Service):
                                  # the web chat sends past answers' thinking back (a Qwen3.x template keeps it): the
                                  # history then reads as the model wrote it, and the next turn goes on from there
                                  "history_thinking": bool(getattr(svc.template, "keeps_thinking", False)),
+                                 # refusal ablation: the Chat's switch shows only with a direction loaded; its
+                                 # starting position the model's default (the Models page's)
+                                 "ablate": svc.ablate_state(),
                                  # GLM-5.3 (glm-dsa) alone: no vision tower at all - the page's attachments say so
                                  # (not "images are off": no setting turns them on)
                                  **({"text_only": True} if svc.text_only() else {}),
@@ -6342,6 +6393,9 @@ def make_handler(svc: Service):
             version = getattr(svc.engine, "info", {}).get("version")
             if version:
                 props["build_info"] = "Strata " + str(version)
+            # Maya's refusal ablation: whether the engine has a direction loaded (the Chat's switch shows only then),
+            # and the model's default for requests that leave `ablate` out (the Models page's)
+            props["ablate"] = svc.ablate_state()
             self._json(200, props)
 
         def _own_page(self, what) -> bool:
@@ -6971,6 +7025,11 @@ def sampling_defaults_from_config(cfg: dict) -> dict:
                 raise SystemExit(f"[maya] config sampling.experimental_speed_projection={value!r}: expected true or "
                                  "false (the default for requests that leave it out, when the engine has the vector)")
             out[key] = value
+        elif key == "ablate":   # (the Models page's refusal-ablation default: requests without `ablate` take it)
+            if not isinstance(value, bool):
+                raise SystemExit(f"[maya] config sampling.ablate={value!r}: expected true or false (the refusal "
+                                 "ablation default for requests that leave it out, when the model has a direction)")
+            out[key] = value
         else:
             print(f"[maya] config sampling.{key}={value!r}: unknown key, ignored", flush=True)
     return out
@@ -7167,6 +7226,10 @@ def main() -> int:
         a.engine = "maya"
     maya_names.alias_env(os.environ)   # (MAYA_* settings under the names the code and the engine read)
     cfg = maya_names.env_in(json.loads(Path(a.config).read_text(encoding="utf-8-sig"))) if a.config else {}   # (a BOM: Notepad)
+    try:
+        models.check_tp2_ablation_config(cfg)
+    except ValueError as error:
+        ap.error(str(error))
     apply_server_env(cfg)
     if not isinstance(sys.stdout, StampedStdout):       # (#783: a time before each [maya] line, in the log too)
         sys.stdout = StampedStdout(sys.stdout)
@@ -7218,6 +7281,8 @@ def main() -> int:
         sampling_defaults = sampling_defaults_from_config(cfg)
         if "sampling" not in cfg:                       # (a config without them: the model's own, not none)
             sampling_defaults = maya_quants.model_defaults(cfg)[0]
+        if models.ablate_default(cfg):                  # (refusal ablation on by default: the Models page's switch)
+            sampling_defaults = {**(sampling_defaults or {}), "ablate": True}
         if sampling_defaults:
             pretty = ", ".join(f"{k}={v}" for k, v in sampling_defaults.items())
             print(f"[maya] sampling defaults from the {'config' if 'sampling' in cfg else 'model'}: {pretty}",
@@ -7293,6 +7358,8 @@ def main() -> int:
                   model_name=cfg.get("model_name", "qwen3.8-flash-next"), vision=vision,
                   sampling_defaults=sampling_defaults,
                   fit_max_tokens=a.fit_max_tokens or cfg.get("fit_max_tokens") is True)
+    if cfg:   # (refusal ablation's reason when the model cannot have it: Qwen, the Mac engine - "not available")
+        svc.ablate_why = models.ablate_choice(cfg).get("why") or ""
     if getattr(engine, "multi", 0) > 1:                 # n conversations at once: n places in the FIFO
         svc.fifo.set_capacity(engine.multi)
         print(f"[maya] {engine.multi} conversations at once (--parallel)", flush=True)

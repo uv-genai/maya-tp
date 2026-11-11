@@ -3170,7 +3170,7 @@ numeric VERSION and pinned llama.cpp are preserved.
 | v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates and evidence CI 42966915176 pass at `ad7f71f` |
 | v1.1.55 | #161 | Source `cc5ea59`, exact-head CI 42967989395 passed; default-off2304 tokens exact; bounded performance replay passes; #165/#166 remain follow-ups |
 | v1.1.56 | #162 | Source `14a127f`, CI42973291953 passed; host/EXL3 and all six Flash gates pass;2304 tokens exact |
-| v1.1.57 | #163 | Semantic source reviewed; rank-local state repair + Flash-only host/sanitizer gates pass; builds/ordered suites starting |
+| v1.1.57 | #163 | Source `4911c55`, CI42977956159 and host/GPU gates pass;2304 tokens exact |
 | v1.1.58 | #164 | Queued; additional Q5_K parity and Flash Unicode drafting checks identified |
 
 V54 passes mapping, 756 server tests (20 skips), 782 tools tests (3 skips),
@@ -3306,3 +3306,20 @@ new security/issue-form docs name this fork, both configured hosts, Linux/gfx115
 and ROCm. Metal/MSVC-only source-audit tests are outside scope, not restored.
 Pin/ROCm split paths/RDMA flags/version remain unchanged. Isolated builds and
 ordered full suites are starting; consult current ownership before GPU use.
+
+V57 accepted at `4911c55`, CI42977956159 passed. Full967server/905tools and
+workflow CPU gates plus all six Flash GPU cases match2,304 prior tokens.
+GLM descriptor lifecycle/fatal checks pass. All49 recorded identities exited.
+XS mixed27.60 vs31.44 is retained with changed-admission-order caveat, no
+speedup/regression attribution; long control31.31 vs30.99 remains stable.
+Read `docs/upstream/v1.1.57.md` and raw evidence. V58 now starts after these
+gates, with final kernel/Unicode/max-slot HTTP validation planned.
+
+V58 source integration is resolved; final HIP builds and ordered host gates
+are running. New ablation is unpaired only: explicit paired startup/config/
+request settings fail before mutation; installer skips paired direction fetch.
+Preserve v57 rank-local state corrections and remote speculative protocols.
+Q5_K multi-column and whole-vocabulary fallback fixes are imported. Full-model
+catalog/calibration/Q8 packing changes remain scoped; no Flash repack/default
+promotion. Final six cases plus kernel/Chinese and same-pair4-slot HTTP gates
+are planned. No new model/full744B inference or production deployment.
