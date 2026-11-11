@@ -20,9 +20,10 @@ are inherited upstream catalog information, not additional fork validation. Deep
 
 The v1.1.53 installer removed experimental badges for its supported AMD and EXL3
 options. The fork's measured two-host model coverage is the scope listed above.
-The last merged-main upstream checkpoint is [v1.1.53](upstream/v1.1.53.md).
-The v54–v58 integration branch is under validation; [v57](upstream/v1.1.57.md)
-and [v58](upstream/v1.1.58.md) record the new full-model catalog and its limits.
+The preceding upstream checkpoint is [v1.1.53](upstream/v1.1.53.md).
+The v54–v58 integration passed sequential Flash validation; final publication
+is tracked in #159. [v57](upstream/v1.1.57.md) and
+[v58](upstream/v1.1.58.md) record the new full-model catalog and its limits.
 
 ## How the quants are named
 

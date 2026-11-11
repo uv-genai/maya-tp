@@ -2328,6 +2328,7 @@ Full GLM-5.3 (744B) settings above are upstream standalone model settings.
 This fork's qualified paired path remains GLM-5.3-Flash and DeepSeek-V4.1-Flash.
 Full-model remote TP2 is rejected before bootstrap, and no full-model weights
 were downloaded/tested during integration. Flash cache defaults and thinking
-answer reserves remain distinct. The v58 branch remains under final validation;
+answer reserves remain distinct. Final v58 Flash validation passed, with
+source/PR/main publication tracked in #159;
 see [v57](upstream/v1.1.57.md), [v58](upstream/v1.1.58.md) and
 [the model guide](GLM53.md) for scope.

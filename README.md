@@ -14,9 +14,10 @@ The original Maya was created and led by **Peasant Smith ([@mw00](https://github
 their model engines, quantization work, expert memory management and serving stack. Development of this
 derived project is tracked in [uv-genai/maya-tp](https://github.com/uv-genai/maya-tp).
 
-The next upstream update batch (v1.1.54–v1.1.58) is being integrated in
-[#159](https://github.com/uv-genai/maya-tp/issues/159), with paired GLM-5.3-Flash and DeepSeek-V4.1-Flash
-validation before the final PR. Production selections remain unchanged.
+Upstream **v1.1.54–v1.1.58** is integrated as sequentially validated checkpoints,
+tracked in [#159](https://github.com/uv-genai/maya-tp/issues/159). GLM-5.3-Flash TP2/MTP and
+DeepSeek-V4.1-Flash TP2/DSpark pass default and batched regression checks, including
+four-slot public HTTP operation. Production selections remain unchanged.
 
 ## Why Maya-TP?
 
@@ -114,21 +115,23 @@ isolated gfx1151 GLM TP2/MTP and DeepSeek TP2/DSpark validation, ending at
 `de184d9` through PR #134 with merged-main CI passing. The later
 checkpoints add serving, model-storage/UI, packing and GPU-fault handling fixes.
 The new optional engine experiments are tracked for separate assessment in #133.
-[Last merged-main upstream checkpoint](docs/upstream/v1.1.53.md).
-The active v54–v58 branch includes full GLM-5.3 source/catalog additions, while
+[Previous upstream checkpoint](docs/upstream/v1.1.53.md).
+The v54–v58 integration includes full GLM-5.3 source/catalog additions, while
 remote TP2 remains **Flash-only** and rejects the 744B architecture before
 bootstrap. Full-model support is unqualified here; no 744B model is downloaded
 or tested. Its new Q8 attention repacking and single-APU drafting calibration do
 not repack Flash models or change the accepted Flash launch defaults. New
 refusal-ablation controls are limited to unpaired engines: TP2 refuses their
 startup/config settings and every explicit `ablate` request, including `false`,
-and exposes no ablation UI capability. The branch also adds
+and exposes no ablation UI capability. The integration also adds
 Responses compatibility and inline document inputs;
 text extraction works within paired text-only limits. Images/video remain outside
 the validated TP2 scope. [v54](docs/upstream/v1.1.54.md), [v55](docs/upstream/v1.1.55.md),
 [v56](docs/upstream/v1.1.56.md), [v57](docs/upstream/v1.1.57.md),
-[v58](docs/upstream/v1.1.58.md). The final branch is still under validation;
-source integration does not change production binaries or model selections.
+[v58](docs/upstream/v1.1.58.md). Each tag passed paired Flash validation and
+exact-source CI; the final checkpoint also checks Unicode drafting, cancellation,
+slot reuse and sticky peer failure. Source integration does not change production
+binaries or model selections.
 
 DeepSeek TP2 and DSpark were merged into `main` through PR #122 at `75e18e8`
 after extended user trials. HIP mapping, server and tools CI passed on the
@@ -270,7 +273,7 @@ draft width, cache/disk counters and reproduction steps. `./maya.sh --report` co
 GitHub CI runs the HIP compatibility-name gate, server and installer/tools tests,
 plus CPU memory-policy and row-preparation/stub checks. The latest source
 checkpoint passed paired GLM Maya-S and DeepSeek XS/S controls. Its bounded
-measurements and model coverage are in the [v1.1.53 report](docs/upstream/v1.1.53.md).
+measurements and model coverage are in the [v1.1.58 report](docs/upstream/v1.1.58.md).
 GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery were exercised on the
 Strix Halo pair for **Maya-S, Maya-M and Maya-L** (simple and MTP) on earlier builds. Evidence:
 

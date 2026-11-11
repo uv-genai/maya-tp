@@ -1,9 +1,9 @@
-> **Active integration (2026-11-11):** upstream v1.1.54–v1.1.58 on `codex/upstream-v1.1.54-v1.1.58`; read §54. Main/production remain at the accepted tp-v1.1.44 checkpoint until final validation and PR merge.
+> **Current checkpoint (2026-11-11):** upstream v1.1.54–v1.1.58 sequential validation is complete; read §54 and #159 for the final PR/main publication. Production selections remain the accepted pinned binaries; this source integration does not deploy them.
 
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-05 · Current state: **§53**, user-accepted batching and release tp-v1.1.44 (#156). §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
+> Last updated: 2026-11-11 · Current state: **§54**, validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -3158,8 +3158,9 @@ does not authorize overwriting the protected peer checkout or production files.
 The user authorized sequential tag checkpoints on
 `codex/upstream-v1.1.54-v1.1.58`, followed by one validated final PR into main.
 Epic [#159](https://github.com/uv-genai/maya-tp/issues/159) indexes the phases;
-completed discovery is #158. Main/production remain at `1cb29e0` (tp-v1.1.44).
-Both hosts are available for owned validation. Use existing GLM-5.3-Flash
+completed discovery is #158. The source batch is validated; final PR/main
+publication is recorded in #159. Production remains at the accepted pinned
+selections described in §§33/44. The campaign used existing GLM-5.3-Flash
 Maya-S and DeepSeek-V4.1-Flash Maya-XS/S only: no downloads and no full
 GLM-5.3 744B model tests. Synthetic architecture/kernel tests are model-free.
 The fork-owned README/AGENTS/operational guides require semantic merging;
@@ -3171,7 +3172,10 @@ numeric VERSION and pinned llama.cpp are preserved.
 | v1.1.55 | #161 | Source `cc5ea59`, exact-head CI 42967989395 passed; default-off2304 tokens exact; bounded performance replay passes; #165/#166 remain follow-ups |
 | v1.1.56 | #162 | Source `14a127f`, CI42973291953 passed; host/EXL3 and all six Flash gates pass;2304 tokens exact |
 | v1.1.57 | #163 | Source `4911c55`, CI42977956159 and host/GPU gates pass;2304 tokens exact |
-| v1.1.58 | #164 | Queued; additional Q5_K parity and Flash Unicode drafting checks identified |
+| v1.1.58 | #164 | Source `2485cb6`, CI42981756547; all host/six-case and Q5_K/Unicode/lifecycle/fatal/four-slot HTTP gates pass |
+
+The following entries are the chronological work log. Completed checkpoint
+summary and evidence at the end supersede earlier pending/next-step notes.
 
 V54 passes mapping, 756 server tests (20 skips), 782 tools tests (3 skips),
 workflow CPU/control suites, sanitized RAM slicing and affected component
@@ -3323,3 +3327,37 @@ Q5_K multi-column and whole-vocabulary fallback fixes are imported. Full-model
 catalog/calibration/Q8 packing changes remain scoped; no Flash repack/default
 promotion. Final six cases plus kernel/Chinese and same-pair4-slot HTTP gates
 are planned. No new model/full744B inference or production deployment.
+
+### Completed v54–v58 checkpoint
+
+All five tags were imported sequentially and passed exact-source CI plus
+ordered host suites/isolated gfx1151 builds and six Flash default1/batch2
+comparisons before proceeding. Final source `2485cb6` passes CI42981756547,
+979 server tests (32 skips), 937 tools tests (5 skips) and all workflow CPU gates.
+V58 matches all 36 fixed normal responses / 2,304 tokens vs v57, with actual
+MTP/DSpark. Q5_K parity passes 568 bit-exact cases; Chinese 96 ordinary/MTP picks
+match and actual whole-head fallback is demonstrated. GLM/XS cancellation,
+refill, retained-prefix reuse and sticky worker-loss fanout pass.
+
+Final public HTTP runs pass at 4 slots for GLM 32K FP16 and DeepSeek XS 8K, on
+existing owned pairs: 9 captures each, ordinary/nonstream vs speculative/SSE
+IDs/tokens/text exact, real proposals, STAT.active=4, client cancellation,
+surviving request/refill overlap, route drain and healthy pair before shutdown.
+The short 4-client 256-token waves measure 30.20/37.06 aggregate tok/s, without a
+matched parent HTTP timing control. See the report for bounded normal timings.
+All 66 recorded validation/telemetry/fixture identities exited; engines returned
+0/0 on normal final-pair shutdown and all samplers 0. Exact helper scripts,
+commands, effective overrides, hashes, raw results and cleanup audit are archived
+in `docs/upstream/validation-v1.1.58/`. No further GPU runs are pending.
+
+Use `docs/upstream/v1.1.54.md` through `v1.1.58.md` for decisions/evidence.
+Epic #159 and phases #160–#164 record final evidence-head/PR/main publication;
+the final PR closes those integration workstreams after passing checks. Keep
+#165 (intermittent stalls), #166 (experimental AI_RUN answer changes), #167
+(full-GLM RAM-slot trailer) and remaining #133 experiments open. Full GLM-5.3
+TP2 stays refused before bootstrap; paired ablation/unmirrored tuning stays
+refused before mutation. Keep rank-local descriptors and all checked speculative
+protocols. No model download, 744B inference, Flash repack, release bump or
+production/protected-peer changes were made. README/AGENTS/current guides and
+restart prompt reflect this completed source checkpoint. Numeric VERSION
+remains 1.1.44 and the published release remains `tp-v1.1.44`.

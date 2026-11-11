@@ -1,15 +1,25 @@
 # Handoff-Prompt — Maya-TP restart
 
-Active task: upstream v1.1.54–v1.1.58 sequential integration on
-`codex/upstream-v1.1.54-v1.1.58`, epic #159 and phases #160–#164.
-Read Handoff.md §54 first. Validate each checkpoint, then merge one final PR.
-Use existing GLM Flash and DeepSeek Flash XS/S packs; no downloads or
-GLM-5.3 744B testing. Preserve all TP2/MTP/DSpark/batching invariants and the
-protected production paths. Earlier acceptance below remains the baseline.
+Read Handoff.md §54 first: upstream v1.1.54–v1.1.58 sequential Flash validation
+is complete. Epic #159 and phases #160–#164 record final PR/main publication;
+use the merged main source after that recorded PR. All per-tag six-case default/
+batch GPU comparisons and exact-source CI pass; final Q5_K/Unicode MTP,
+GLM/XS lifecycle/fatal and four-slot public HTTP checks pass. All owned validation
+processes are stopped. No model was downloaded or full GLM-5.3 744B run.
+Production selections and the protected peer checkout remain unchanged.
+
+Preserve rank-local KDA descriptors/copies and checked speculative slot/verdict/
+ACK contracts. Full GLM-5.3 TP2 and unmirrored tuning/ablation are refused before
+mutation/bootstrap. Flash packs/defaults are unchanged; new full-model Q8
+packing/calibration is distinct. AI_RUN stays experimental/off with changed
+long-prompt answers (#166). #165 intermittent stalls, #167 full-model RAM-slot
+trailer and remaining #133 experiments stay open. Do not repeat the completed
+campaign or promote runtime binaries without a new task. Earlier acceptance
+below remains the operating baseline.
 
 GLM/MTP and DeepSeek/DSpark opt-in continuous batching is implemented and
 validated in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), starting
-from `72d9260` on `codex/tp2-continuous-batching`. Read Handoff.md §53 first, then §52.
+from `72d9260` on `codex/tp2-continuous-batching`. For batching implementation history, read Handoff.md §53, then §52.
 C1, GLM G1–G5 and DeepSeek D1–D5 engineering gates passed; exact final
 publication/PR/main CI is tracked in #153. PR #155 is merged at `3f26526`; use `main`.
 Both wrappers default to one sequence; new 2–4-slot mode requires explicit
@@ -27,7 +37,7 @@ with notes in `docs/releases/tp-v1.1.44.md` and publication/CI tracked in #156.
 Do not repeat the broad completed campaign or change the production selections
 without a new task.
 
-Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. The source incorporates the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
+Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. That earlier checkpoint incorporated the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 
 The latest DeepSeek startup repair is in Handoff.md §49 and issue #138.
 Btrfs device renumbering invalidated the old identity caches. Both runtime

@@ -210,12 +210,22 @@ Source integration does not authorize changing production binaries or the
 protected peer checkout.
 
 
-## Active upstream v54–v58 integration
+## Upstream v54–v58 checkpoint
 
-The user authorized sequential tag integration on
-`codex/upstream-v1.1.54-v1.1.58`, followed by one validated final PR.
-Epic #159 indexes per-tag issues #160–#164. Test existing GLM-5.3-Flash
-Maya-S and DeepSeek-V4.1-Flash Maya-XS/S only; do not download any model
-or run full GLM-5.3 744B. Include default single-slot and opt-in batch paths
-with real MTP/DSpark proposals. Read Handoff.md §54 for current progress.
-Retain opt-in `DS4_INDEX_TC` and review upstream default changes explicitly.
+Upstream v1.1.54–v1.1.58 was integrated sequentially on
+`codex/upstream-v1.1.54-v1.1.58`; #159 and per-tag #160–#164 record final
+PR/main publication. Each checkpoint passed exact-source CI and GLM Flash
+Maya-S / DeepSeek Flash XS/S default1/batch2 GPU comparisons. Final four-slot
+public HTTP, Unicode whole-head MTP, Q5_K parity, lifecycle and first-fatal
+checks also pass. No model was downloaded and no full 744B model was run.
+Read Handoff.md §54 and docs/upstream/v1.1.58.md for evidence and scope.
+
+Preserve explicit rank-local KDA descriptors for carving/sequence contexts and
+all snapshot/checkpoint/slot copies; keep canonical DSA/residual/NextN geometry.
+Full GLM-5.3 remote TP2 is refused before bootstrap. Unmirrored request tuning
+and all explicit paired ablation settings are refused before mutation; ablation
+is unpaired only. Full-model attention repacking/calibration must not alter
+Flash packs/defaults. `DS4_INDEX_TC` remains opt-in; AI_RUN is experimental/off
+with observed answer changes (#166). #165 intermittent stalls, #167 full-model
+RAM-slot trailer and remaining #133 experiments stay open. Production selections
+and the protected peer checkout are unchanged; use isolated matching builds.

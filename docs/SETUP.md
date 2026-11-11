@@ -21,8 +21,9 @@ inherited installer reference material. Open kernel-parity investigations are
 tracked in [#68](https://github.com/uv-genai/maya-tp/issues/68), separately from
 the accepted XS/S inference workloads.
 
-The v54–v58 integration branch imports newer installer/catalog changes and remains
-under validation. Full GLM-5.3 (744B) is an unqualified standalone option;
+The v54–v58 integration imports newer installer/catalog changes and passed
+sequential Flash validation; final publication is tracked in #159.
+Full GLM-5.3 (744B) is an unqualified standalone option;
 remote TP2 rejects it before bootstrap. No 744B weights were downloaded or run.
 See [v57](upstream/v1.1.57.md), [v58](upstream/v1.1.58.md) and the
 [full-model scope](GLM53.md). The accepted Flash pair paths above stay unchanged.
@@ -275,4 +276,4 @@ restart engines, including context changes and Turbo.
 A fatal DeepSeek GPU-state notice ends its engine after the request and leaves
 the pair down with the original failure cause. Restart both ranks through the
 appropriate GLM or DeepSeek launcher. Current source integration and validation
-are recorded in [the v1.1.53 report](upstream/v1.1.53.md).
+are recorded in [the v1.1.58 report](upstream/v1.1.58.md).

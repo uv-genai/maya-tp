@@ -1,0 +1,37 @@
+ds4 tp2: rank 0 loaded 54814310400 routed expert bytes (4249600 pinned staging bytes); awaiting peer attachment
+maya ds4 serve: GEN <max_new> [keys] <ids>; GENI <max_new> [keys] <pictures> <ids>; STOP, QUIT
+maya ds4 serve: 4 conversations at once (--parallel): GEN needs rid=<id>; STOP <rid>
+maya ds4 serve: prompt read: 20 tokens in 0.7 s; VRAM free CUDA0 56.9 of 121.0 GB before, 56.8 after
+maya ds4 serve: request 1: prompt 20 tokens = 0 reused + 20 read in 671 ms (29.8 tok/s), 64 generated in 2569 ms (24.92 tok/s, 0 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 20 tokens in 0.4 s; VRAM free CUDA0 56.8 of 121.0 GB before, 56.8 after
+maya ds4 serve: request 2: prompt 20 tokens = 0 reused + 20 read in 405 ms (49.4 tok/s), 64 generated in 1871 ms (34.21 tok/s, 0 conversations running; drafts 33 of 41 kept)
+maya ds4 serve: prompt read: 1441 tokens in 6.0 s; VRAM free CUDA0 56.8 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 3: prompt 1441 tokens = 0 reused + 1441 read in 6010 ms (239.8 tok/s), 64 generated in 2684 ms (23.84 tok/s, 0 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 1441 tokens in 5.9 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 4: prompt 1441 tokens = 0 reused + 1441 read in 5919 ms (243.5 tok/s), 64 generated in 1857 ms (34.47 tok/s, 0 conversations running; drafts 35 of 43 kept)
+maya ds4 serve: prompt read: 17 tokens in 0.4 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: prompt read: 17 tokens in 0.9 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: prompt read: 17 tokens in 1.4 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: prompt read: 17 tokens in 2.0 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 8: prompt 17 tokens = 0 reused + 17 read in 1950 ms (8.7 tok/s), 64 generated in 3672 ms (17.43 tok/s, 3 conversations running; drafts 34 of 43 kept)
+maya ds4 serve: request 7: prompt 17 tokens = 0 reused + 17 read in 1422 ms (12.0 tok/s), 64 generated in 4335 ms (14.76 tok/s, 2 conversations running; drafts 31 of 36 kept)
+maya ds4 serve: request 5: prompt 17 tokens = 0 reused + 17 read in 406 ms (41.9 tok/s), 64 generated in 5393 ms (11.87 tok/s, 1 conversations running; drafts 28 of 39 kept)
+maya ds4 serve: request 6: prompt 17 tokens = 0 reused + 17 read in 949 ms (17.9 tok/s), 64 generated in 5990 ms (10.68 tok/s, 0 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 25 tokens in 0.5 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 9: prompt 25 tokens = 0 reused + 25 read in 454 ms (55.1 tok/s), 64 generated in 2516 ms (25.44 tok/s, 0 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 25 tokens in 0.4 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 10: prompt 25 tokens = 0 reused + 25 read in 406 ms (61.6 tok/s), 64 generated in 1827 ms (35.03 tok/s, 0 conversations running; drafts 31 of 33 kept)
+maya ds4 serve: prompt read: 22 tokens in 0.4 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: prompt read: 22 tokens in 0.9 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: prompt read: 22 tokens in 1.4 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: prompt read: 22 tokens in 1.9 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 12: prompt 22 tokens = 0 reused + 22 read in 881 ms (25.0 tok/s), 64 generated in 4473 ms (14.31 tok/s, 3 conversations running; drafts 33 of 42 kept)
+maya ds4 serve: request 14: prompt 22 tokens = 0 reused + 22 read in 1891 ms (11.6 tok/s), 64 generated in 3742 ms (17.10 tok/s, 2 conversations running; drafts 32 of 33 kept)
+maya ds4 serve: request 11: prompt 22 tokens = 0 reused + 22 read in 407 ms (54.0 tok/s), 64 generated in 5349 ms (11.96 tok/s, 1 conversations running; drafts 27 of 37 kept)
+maya ds4 serve: request 13: prompt 22 tokens = 0 reused + 22 read in 1384 ms (15.9 tok/s), 64 generated in 5516 ms (11.60 tok/s, 0 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 30 tokens in 0.5 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: prompt read: 22 tokens in 0.9 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 16: prompt 22 tokens = 0 reused + 22 read in 927 ms (23.7 tok/s), 8 generated in 373 ms (21.43 tok/s, 1 conversations running; drafts 5 of 5 kept)
+maya ds4 serve: prompt read: 20 tokens in 0.4 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.7 after
+maya ds4 serve: request 17: prompt 20 tokens = 0 reused + 20 read in 405 ms (49.4 tok/s), 32 generated in 1540 ms (20.77 tok/s, 1 conversations running; drafts 13 of 18 kept)
+maya ds4 serve: request 15: prompt 30 tokens = 0 reused + 30 read in 455 ms (65.9 tok/s), 64 generated in 3045 ms (21.01 tok/s, 0 conversations running; drafts 35 of 39 kept)
