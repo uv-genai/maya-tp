@@ -13,6 +13,9 @@ namespace strata::ds4 {
 // a 0 / 1 switch: -1 when it is not set (or empty), else whether it is non-zero
 inline int tri_of(const char* v) { return v == nullptr || *v == 0 ? -1 : std::atoi(v) != 0; }
 
+// Kept opt-in by this fork. Allocation, runtime slabs and peer identity use this same rule.
+inline bool ai_run_enabled(const char* v) { return tri_of(v) == 1; }
+
 // ---- which way a prompt goes
 // The timing pick (pick_path) predicts each path's time from this run's measured speeds, earlier prompts' times and
 // the page cache's state, so the same prompt can take the chunked pass in one run and windows of 16 in the next - and

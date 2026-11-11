@@ -348,7 +348,8 @@ def go_on(m: dict) -> bool:
 def _gist(result: str) -> str:
     """A result without its numbers, white space and anything outside printable ASCII: "bytes received: 12 ..."
     and "bytes received: 15 ..." the same."""
-    if os.environ.get("MAYA_PROMPT_MEMO", "") not in ("", "0"):   # (a re-sent history's results: by text, the same)
+    if os.environ.get("MAYA_PROMPT_MEMO", os.environ.get("STRATA_PROMPT_MEMO", "")) not in ("", "0"):
+        # A re-sent history's results, memoized only when explicitly enabled, under either setting name.
         return _gist_memo(result)
     return re.sub(r"\d+|[^\x21-\x7e]+", "", result)
 

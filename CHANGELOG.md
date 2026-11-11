@@ -8,6 +8,23 @@ only what changed and starts; the model is not downloaded again.
 
 - Integrating upstream v1.1.54–v1.1.58 on an isolated branch; per-tag Flash TP2 validation is tracked in #159–#164. Production selections and fork release VERSION are unchanged.
 
+## Upstream v1.1.55 - 2026-11-05
+
+Codex CLI works with Maya, web-chat answers always run to their end and survive a restart, and a few speed settings now on by default.
+
+- **Codex CLI (#726):** Maya's Responses API (`/v1/responses`) now accepts what Codex CLI sends: its grouped tools (`namespace`, shown to the model as `namespace::name` and returned with their namespace), built-in tools Maya cannot run (`web_search`, `local_shell`, ...) left out instead of failing the request, `reasoning.summary`, and `include: ["reasoning.encrypted_content"]` - the reasoning comes back as an opaque blob that Codex sends with the next turn. Tested end to end with Codex CLI 0.160.0 on GLM-5.3-Flash, DeepSeek-V4.1-Flash and Qwen-3.8-Flash-Next (a shell command run and a file written correctly on each).
+- **Web chat: an answer runs to its end unless you press Stop.** Before, the server stopped an answer that no page had read for 5 minutes - a phone whose screen locked during a long thinking answer lost it. Now it always finishes, and the page takes the whole answer up whenever it is opened again; the page also reconnects once a waking phone's Wi-Fi is back. Finished answers are kept for a day (was 15 minutes) and saved in `answers/` next to the config, so a server restart keeps them too; one that a restart cut off comes back with what it had written and a note saying so.
+- **Speed settings now on by default** (measured with this release against v1.1.54 on the same PC, quant and prompts):
+  - **DeepSeek, prompt reading (prefill):** the indexer's buffers are sized by the prompt instead of the whole context (`DS4_AI_RUN`), and on NVIDIA a two-GPU group's prompt sums run in one pipelined launch, bit for bit the same (`MAYA_DS4_AR2=1`). On 3x V100 with the EXL3 2.9 bpw quant and `--tp 2`: **+1.3%** at 2K tokens, **+3%** at 8K, **+4%** at 32K. Decode is unchanged.
+  - **DeepSeek, loading:** the model's files are read in turn instead of one after another (`MAYA_DS4_LOAD_INTERLEAVE`): the EXL3 2.9 bpw quant loads **31% faster** on a Gorgon Halo; the same on 3x V100.
+  - **Every model, long agent chats:** the server prepares a re-sent conversation by increment (`MAYA_PROMPT_MEMO`, the same token ids): a follow-up turn after a 115K-token history takes about **6% less time** (measured on GLM-5.3-Flash, 3x V100).
+  - **GLM, memory:** the attention's cache in 8 bits by default (`MAYA_GLM_KV_INT8`, as the setup already set it for new installs): half the cache's VRAM (one V100 at 128K context: 1.78 -> 1.13 GB, room for 84 more experts). Checked against the full model: the same quality as 16 bits (within its own run-to-run spread) and no looping. `--kv fp16` keeps 16 bits.
+  - `0` turns each one off, in the config's `"env"` block or with `--env`.
+- **Docs:** `MAYA_GLM_PREFILL_FUSED` and `MAYA_GLM_MV_RDNA` are listed as on for RDNA4 (gfx12) too, as the code has them.
+
+
+Fork defaults: prompt memo, GLM INT8 cache, DS4_AI_RUN and load interleave remain opt-in. See docs/SETTINGS.md; published upstream speed figures refer to their configurations.
+
 ## Upstream v1.1.54 - 2026-11-05
 
 DeepSeek reads prompts (prefill) much faster on AMD Strix / Gorgon Halo and faster on multi-GPU NVIDIA PCs, Qwen-3.8-Flash-Next itself as unsloth's UD-IQ2_XS GGUF, and four community pull requests.

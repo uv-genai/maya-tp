@@ -3167,8 +3167,8 @@ numeric VERSION and pinned llama.cpp are preserved.
 
 | Tag | Issue | State |
 | --- | --- | --- |
-| v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates pass, final evidence publication CI pending |
-| v1.1.55 | #161 | Queued; do not merge until v54 publication CI passes |
+| v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates and evidence CI 42966915176 pass at `ad7f71f` |
+| v1.1.55 | #161 | Semantic merge resolved; ordered suites/build/GPU validation in progress |
 | v1.1.56 | #162 | Queued |
 | v1.1.57 | #163 | Queued; shared Flash state layout needs rank-local review; full-model TP2 must be rejected |
 | v1.1.58 | #164 | Queued; additional Q5_K parity and Flash Unicode drafting checks identified |
@@ -3194,7 +3194,7 @@ are frozen under `engines/<checkpoint>/` on both hosts. Final v54 hashes are
 in the report (GLM `49c5868e…`, DeepSeek `5ece66ec…`). The initial unused
 DeepSeek build was replaced after a final header-dependency refresh.
 
-**No owned GPU or telemetry processes remain after v54.** Per-case
+**All v54 owned GPU and telemetry processes exited. V55 validation may be active:** consult current ownership before launching another pair. Per-case
 `ownership.json`, `peer-identity.json` and the stopped-process audit are under
 `/tmp/maya-upstream-20261111-validation/`; committed bounded evidence is in
 `docs/upstream/validation-v1.1.54/`. External case/checkpoint harnesses are
@@ -3211,10 +3211,15 @@ remote RDMA TP2. Shared API changes retain command serialization, first-fatal
 fanout and paired health. Initial test/harness precondition corrections are
 recorded in #160/report; no uncertain state is reset or retried in one rank.
 
-V55 review: preserve explicit Flash defaults, prompt memo opt-in/aliases and
-INT8 selection behavior. The deferred `DS4_AI_RUN` prerequisite is small and
-can be integrated opt-in with identical allocation/runtime predicates and
-paired feature negotiation. The 1,441-token XS prompt at 262K allocation
+V55 integrates Responses namespace/sealed-reasoning compatibility and persistent
+web answers while preserving all C1/pair safety and memo opt-in/aliases. GLM
+INT8 and DeepSeek load interleave retain explicit selection. `MAYA_DS4_AI_RUN`
+is imported opt-in with complete AIM/slab-stride prerequisites. Allocation,
+runtime and wire identity use the same rule; feature bit1 rejects mismatches
+for both protocols, and batch launcher digests include the normalized choice.
+Independent source review and 200 focused server tests (13 skips), 10 launcher
+tests, HIP mapping and the identity CPU test pass. Full suites and isolated
+build/GPU checks are in progress; no v56 merge until gates/CI pass. The 1,441-token XS prompt at 262K allocation
 exercises index selection beyond top-k512 with ratio2 compression; it does
 not cover candidate-block reduction beyond 16K compressed keys.
 V57/V58 shared-GLM audit notes are in

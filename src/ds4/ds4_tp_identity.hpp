@@ -13,6 +13,9 @@
 
 namespace strata::ds4::tp2 {
 
+// Bit zero is DSpark; disabled AI_RUN contributes zero to the existing identity.
+inline constexpr std::uint64_t kAiRunFeature = 1ull << 1;
+
 struct Identity {
     std::uint32_t protocol = 0, world = 0, rank = 0;
     std::uint32_t hidden = 0, layers = 0, experts = 0, expert_width = 0;

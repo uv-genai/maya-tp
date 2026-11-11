@@ -890,6 +890,7 @@ struct Dev {
 
 struct Chunk {
     int C = 0, A = 0, AI = 0;
+    int AIM = 0;   // maximum indexer query/map rows; score storage remains AI * context stride
     int HQ = 0, OG = 0, FF = 0;              // (lay_chunk: this device's heads' width, wo_a groups, FFN share)
     bool has_first = false, has_eg = false;
     // the buffers' room: borrowed (a run lays them out in the device's tail of expert slots at its own chunk size,
@@ -5178,8 +5179,8 @@ struct Model::Impl {
                      ehd = (size_t) pk.eg_hd;
         if (part & 1) {
             put(c.q, A * HQ), put(c.o, A * HQ), put(c.o16, A * HQ), put(c.oa, A * OG * g.o_lora);
-            put(c.oa16, A * OG * g.o_lora), put(c.iq, AI * g.ix_heads * g.ix_hd), put(c.scores, AI * ss);
-            put(c.bm, AI * bm_stride()), put(c.bounds, 2048), put(c.w16, c.w16_elems);
+            put(c.oa16, A * OG * g.o_lora), put(c.iq, (size_t) c.AIM * g.ix_heads * g.ix_hd), put(c.scores, AI * ss);
+            put(c.bm, (size_t) c.AIM * bm_stride()), put(c.bounds, 2048), put(c.w16, c.w16_elems);
             if (c.has_eg) put(c.eg_x, ES * cols * ehd), put(c.eg_x16, ES * cols * ehd), put(c.eg_kv, ES * (H + 1) * D);
         }
         if (part & 2) {
@@ -5303,6 +5304,9 @@ struct Model::Impl {
         const size_t qb = (slab_mb != nullptr ? (size_t) std::max(1, std::atoi(slab_mb)) : auto_mb) << 20;
         c.A = std::max(64, (int) (qb / (size_t) HQ) / 64 * 64);
         c.AI = std::max(32, std::min(128, (int) (((size_t) 64 << 20) / (((size_t) o.max_context + 64) * 4)) / 32 * 32));
+        // Opt-in MAYA_DS4_AI_RUN: disabled preserves the context-sized rows and expert placement.
+        static const bool ai_run = ai_run_enabled(ds4_env("DS4_AI_RUN"));
+        c.AIM = ai_run ? std::max(c.AI, 128) : c.AI;
         c.w16_elems = (w16_mb != nullptr ? (size_t) std::max(1, std::atoi(w16_mb)) : 2 * auto_mb) << 19;
     }
 
@@ -8792,9 +8796,9 @@ struct Model::Impl {
                 return la.region_file[(size_t) a.e] < lb.region_file[(size_t) b.e];
             return la.region_off[(size_t) a.e] < lb.region_off[(size_t) b.e];
         });
-        // STRATA_DS4_LOAD_INTERLEAVE (0): 1 = the files round-robin - the first expert of each file, then the second,
-        // ... - so the threads read several files at once (a pack split over two drives streams both).  0: file by
-        // file, as before.
+        // STRATA_DS4_LOAD_INTERLEAVE (opt-in in this fork: the same bytes, a load 109 -> 75 s on a Gorgon Halo,
+        // the same on 3x V100): the files round-robin - the first expert of each file, then the second, ... - so the
+        // threads read several files at once (a pack split over two drives streams both).  0: file by file, as before.
         if (const char* iv = std::getenv("STRATA_DS4_LOAD_INTERLEAVE"); iv != nullptr && std::atoi(iv) != 0) {
             std::vector<int> rank(jobs.size());
             int cur = -1, r = 0;
@@ -16909,11 +16913,17 @@ struct Model::Impl {
     // DS4_AR2=1 / 2 (0 / unset: off): a group of two's chunk all-reduces - the attention output's and the MoE's - in
     // ar2_kernel: the put and the sums pipelined in pieces, the other member's rows read 16 bytes a lane.  1:
     // ar_sum_kernel's sums bit for bit; 2: FP16 on the wire (both partials rounded, summed in F32 in member order).
-    // Decode's all-reduces (G.ar) never take it.  Another value: the load refuses (-1)
+    // Decode's all-reduces (G.ar) never take it.  Another value: the load refuses (-1).  Unset: 1 on NVIDIA (the same
+    // sums, prompt +1.5% at 8K and +3% at 32K on 3x V100 --tp 2, v1.1.55), 0 on AMD (its peer path's calibration
+    // decides there, below)
     static int ar2() {
         static const int v = [] {
             const char* e = ds4_env("DS4_AR2");
+#if defined(STRATA_USE_HIP)
             if (e == nullptr || *e == 0) return 0;
+#else
+            if (e == nullptr || *e == 0) return 1;
+#endif
             const int x = std::atoi(e);
             return (x >= 0 && x <= 2 && std::strspn(e, "0123456789") == std::strlen(e)) ? x : -1;
         }();
@@ -17080,8 +17090,20 @@ struct Model::Impl {
                     if (!gemm_f16w(c, l.i_wproj, g.ix_heads, D, c.x16, D, T,
                                    1.0f / std::sqrt((float) g.ix_hd) / std::sqrt((float) g.ix_heads), c.iw, 64, err))
                         return false;
-                    for (int a0 = 0; a0 < T; a0 += c.AI) {
-                        const int na = std::min(c.AI, T - a0);
+                    // the slab's rows as wide as this run's keys, not the context's: a prompt shorter than the
+                    // context gets the rows a context of its length would (128 below ~64K keys) - the same GEMM
+                    // shapes, fewer slabs (MAYA_DS4_AI_RUN=1; default: the context's original AI rows)
+                    static const bool ai_run = ai_run_enabled(ds4_env("DS4_AI_RUN"));
+                    long long ssr = ss;
+                    int air = c.AI;
+                    if (ai_run) {
+                        long long keys = (long long) ((p0 + T) / R) + 1;
+                        if (l.uses_cand) keys = std::max<long long>(keys, (long long) g.cand_topk * g.cand_blk);
+                        ssr = std::min<long long>(ss, (keys + 64 + 63) / 64 * 64);
+                        air = (int) std::min<long long>(c.AIM, std::max<long long>(c.AI, (long long) c.AI * ss / ssr / 32 * 32));
+                    }
+                    for (int a0 = 0; a0 < T; a0 += air) {
+                        const int na = std::min(air, T - a0);
                         const int64_t pa = p0 + a0;
                         if (!gemm(d, c, l.i_wq_b, c.qr16 + (size_t) a0 * g.q_lora, g.q_lora, na, c.iq,
                                   g.ix_heads * g.ix_hd, 0.0f, err))
@@ -17109,20 +17131,20 @@ struct Model::Impl {
                             Rows cl = lim;
                             cl.gen = 2;
                             index_score(c.iq, iw, ks.ik[(size_t) l.dev], g.ix_heads, g.ix_hd, na, g.cand_topk * g.cand_blk,
-                                        cd, (int) cand_stride(), g.cand_blk, cl, c.scores, ss, s);
+                                        cd, (int) cand_stride(), g.cand_blk, cl, c.scores, ssr, s);
                             Rows tr = lim;
                             tr.gen = 3;
-                            topk(c.scores, ss, na, tr, cd, (int) cand_stride(), g.cand_blk, tk, (int) topk_stride(), s);
+                            topk(c.scores, ssr, na, tr, cd, (int) cand_stride(), g.cand_blk, tk, (int) topk_stride(), s);
                         } else {
                             index_score(c.iq, iw, ks.ik[(size_t) l.dev], g.ix_heads, g.ix_hd, na, nlast, nullptr, 0, 1,
-                                        lim, c.scores, ss, s);
+                                        lim, c.scores, ssr, s);
                             if (l.cand_src) {
                                 Rows cr = lim;
                                 cr.kcap = g.cand_topk;
-                                cand_blocks(c.scores, ss, na, cr, g.cand_blk, c.bm, (long long) bm_stride(), cd,
+                                cand_blocks(c.scores, ssr, na, cr, g.cand_blk, c.bm, (long long) bm_stride(), cd,
                                             (int) cand_stride(), s);
                             }
-                            topk(c.scores, ss, na, lim, nullptr, 0, 1, tk, (int) topk_stride(), s);
+                            topk(c.scores, ssr, na, lim, nullptr, 0, 1, tk, (int) topk_stride(), s);
                         }
                     }
                 }

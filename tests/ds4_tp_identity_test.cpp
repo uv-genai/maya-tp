@@ -35,6 +35,23 @@ int main() {
     broken = wire; broken.push_back(0); CHECK(!decode_identity(broken, decoded, error));
     CHECK(agree_identity(a, b, limit, error) && limit == 524288 && error.empty());
     CHECK(agree_identity(b, a, limit, error) && limit == 524288);
+    // AI_RUN is a paired execution choice in both control versions; disabled
+    // mode leaves the legacy flags unchanged and negotiation must retain the bit.
+    for (const unsigned slots : {1u, 2u, 4u}) {
+        Identity left = a, right = b;
+        CHECK(configure_batch_identity(left, slots, error));
+        CHECK(configure_batch_identity(right, slots, error));
+        CHECK((left.feature_flags & kAiRunFeature) == 0);
+        CHECK(agree_identity(left, right, limit, error));
+        left.feature_flags |= kAiRunFeature;
+        CHECK(!agree_identity(left, right, limit, error));
+        right.feature_flags |= kAiRunFeature;
+        CHECK(agree_identity(left, right, limit, error));
+        Identity roundtrip;
+        CHECK(decode_identity(encode_identity(right), roundtrip, error));
+        CHECK((roundtrip.feature_flags & kAiRunFeature) != 0);
+        CHECK(agree_identity(left, roundtrip, limit, error));
+    }
     auto rejected = [&](const Identity& x) {
         limit = 99; error.clear();
         return !agree_identity(a, x, limit, error) && limit == 99 && !error.empty();

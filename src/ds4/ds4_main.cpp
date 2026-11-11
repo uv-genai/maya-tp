@@ -22,6 +22,7 @@
 // `LP <id> <logprob> <id>:<logprob> ...` line after each T line: the token's log-probability and its row's k most likely
 // (ds4_logprobs.hpp; INFO logprobs=20 says the engine has them).
 #include "ds4_evt.hpp"
+#include "ds4_prompt_mem.hpp"
 #include "ds4_logprobs.hpp"
 #include "ds4_marks.hpp"
 #include "ds4_gguf.cuh"       // (--pack-info: the types the kernels take, asked of them)
@@ -3690,6 +3691,7 @@ int main(int argc, char** argv) {
         tp2_identity.hidden=g.hidden; tp2_identity.layers=g.layers; tp2_identity.experts=g.experts;
         tp2_identity.expert_width=g.expert_width; tp2_identity.max_context=static_cast<std::uint64_t>(m.max_context());
         tp2_identity.feature_flags=(tp2_dspark ? 1ull : 0ull) |
+            (strata::ds4::ai_run_enabled(ds4_env("DS4_AI_RUN")) ? strata::ds4::tp2::kAiRunFeature : 0ull) |
             (static_cast<std::uint64_t>(o.prefill_chunk)<<16) | (static_cast<std::uint64_t>(tp2_lookup)<<32);
         tp2_identity.max_partial_bytes=tp2_comm->MaxPartialBytes();
         if (!strata::ds4::tp2::configure_batch_identity(tp2_identity,m.seq_count(),err)) {
