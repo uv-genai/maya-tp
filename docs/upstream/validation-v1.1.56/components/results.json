@@ -1,0 +1,43 @@
+[
+  {
+    "name": "prefill-default",
+    "pid": 742964,
+    "start": "14964593",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.56/exl3_test",
+    "args": [
+      "--prefill-only"
+    ],
+    "env_overrides": {},
+    "started": 1794379032.2810516,
+    "exit_code": 0,
+    "finished": 1794379033.1428163
+  },
+  {
+    "name": "prefill-uniform",
+    "pid": 742968,
+    "start": "14964679",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.56/exl3_test",
+    "args": [
+      "--prefill-only"
+    ],
+    "env_overrides": {
+      "MAYA_EXL3_WMMA_SHAPE": "0"
+    },
+    "started": 1794379033.1435316,
+    "exit_code": 0,
+    "finished": 1794379033.9792683
+  },
+  {
+    "name": "decode",
+    "pid": 742972,
+    "start": "14964763",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.56/exl3_test",
+    "args": [
+      "--decode-only"
+    ],
+    "env_overrides": {},
+    "started": 1794379033.9799912,
+    "exit_code": 0,
+    "finished": 1794379034.072766
+  }
+]

@@ -1,0 +1,51 @@
+control vectors
+  one direction: found, unit, scale 1                                    ok
+      (/tmp/strata_ds4_ablate_cv3.gguf: a control vector with 3 directions: say which with --ablate-layer N (1-based))
+  three directions without --ablate-layer: refused                       ok
+  --ablate-layer 2 picks direction.2                                     ok
+      (/tmp/strata_ds4_ablate_cv3.gguf: no direction.4 (layers 1..3))
+  --ablate-layer past the file: refused                                  ok
+  a caller scale overrides the default                                   ok
+      (/tmp/strata_ds4_ablate_cv3.gguf: ablation scale is not a positive finite number)
+  a NaN / inf / negative caller scale: refused                           ok
+      (/tmp/strata_ds4_ablate_cv3.gguf: ablation scale is not a positive finite number)
+  a NaN / inf / negative caller scale: refused                           ok
+      (/tmp/strata_ds4_ablate_cv3.gguf: ablation scale is not a positive finite number)
+  a NaN / inf / negative caller scale: refused                           ok
+      (/tmp/strata_ds4_ablate_cvneg.gguf: controlvector.layer_count out of range)
+  a negative controlvector.layer_count: refused                          ok
+  a Maya direction file: its maya.ablate.scale                           ok
+  ... a caller scale overrides it                                        ok
+      (/tmp/strata_ds4_ablate_cvmayabad.gguf: maya.ablate.scale is not a positive finite number)
+  a negative maya.ablate.scale: refused                                  ok
+      (/tmp/strata_ds4_ablate_cvzero.gguf: the direction is zero or not finite)
+  a zero direction: refused                                              ok
+      (/tmp/strata_ds4_ablate_cvf16.gguf: direction.1 is not F32)
+  a non-F32 direction: refused                                           ok
+      (/tmp/strata_ds4_ablate_cvcut.gguf: direction.1 lies outside the file)
+  a file cut short inside the tensor: refused                            ok
+      (/tmp/strata_ds4_ablate_cvwrap.gguf: direction.1 lies outside the file)
+  a tensor offset that wraps around: refused                             ok
+      (/tmp/strata_ds4_ablate_cvpast.gguf: direction.1 lies outside the file)
+  a tensor offset past the end: refused                                  ok
+      (/nonexistent/strata_ds4_ablate.gguf: cannot open /nonexistent/strata_ds4_ablate.gguf)
+  a missing file: refused                                                ok
+      (/tmp/strata_ds4_ablate_junk.gguf: not a GGUF file (bad magic))
+  not a GGUF: refused                                                    ok
+adapters (2-block model)
+  whole-model adapter: r = -lora_b, unit                                 ok
+  scale = abliterate.scale 0.5 x adapter.lora.alpha 2                    ok
+  a caller scale overrides the adapter's                                 ok
+      (/tmp/strata_ds4_ablate_adnoexps.gguf: no blk.1.ffn_down_exps.weight pair - only an adapter on every writer of every block is a projection of every write)
+  a routed writer missing: refused                                       ok
+      (/tmp/strata_ds4_ablate_adshort.gguf: no blk.1.attn_output_b.weight pair - only an adapter on every writer of every block is a projection of every write)
+  a block missing: refused                                               ok
+      (/tmp/strata_ds4_ablate_addeep.gguf: an adapter for more than this model's 2 blocks)
+  an adapter for a deeper model: refused                                 ok
+      (/tmp/strata_ds4_ablate_adodd.gguf: blk.1.ffn_down_shexp.weight.lora_b is not blk.0.attn_output_b.weight.lora_b - not a one-direction adapter)
+  a writer with a different direction: refused                           ok
+      (/tmp/strata_ds4_ablate_adlayer.gguf: abliterate.direction_layer out of range)
+  abliterate.direction_layer out of int range: refused                   ok
+      (/tmp/strata_ds4_ablate_adscale.gguf: abliterate.scale is not a positive finite number)
+  a negative abliterate.scale: refused                                   ok
+all ok

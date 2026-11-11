@@ -1,0 +1,472 @@
+{
+  "label": "v1.1.55",
+  "previous": "v1.1.54",
+  "started": 1794376088.3580222,
+  "cases": {
+    "glm-s-slots1": {
+      "sha256": "84a746336e155e64e385153f94f53fae8797024a0f81577130628d1bec5e1a37",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 26.646681655425095,
+          "prompt_tokens": 28,
+          "reused": 0,
+          "prefill_ms": 703.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.1083424440003,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 38.24548822756065,
+          "prompt_tokens": 28,
+          "reused": 27,
+          "prefill_ms": 38.0,
+          "drafts_offered": 47,
+          "drafts_accepted": 39,
+          "wall_s": 1.7123934239789378,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 26.421169962432398,
+          "prompt_tokens": 1376,
+          "reused": 0,
+          "prefill_ms": 4547.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 6.9724300779926125,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 33.23984626571102,
+          "prompt_tokens": 1376,
+          "reused": 1375,
+          "prefill_ms": 38.9,
+          "drafts_offered": 51,
+          "drafts_accepted": 37,
+          "wall_s": 1.9655163929855917,
+          "error": null
+        }
+      ]
+    },
+    "glm-s-slots2": {
+      "sha256": "84a746336e155e64e385153f94f53fae8797024a0f81577130628d1bec5e1a37",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 25.37366689132934,
+          "prompt_tokens": 28,
+          "reused": 0,
+          "prefill_ms": 725.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.2529838330228813,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 36.56933889492029,
+          "prompt_tokens": 28,
+          "reused": 27,
+          "prefill_ms": 38.3,
+          "drafts_offered": 47,
+          "drafts_accepted": 38,
+          "wall_s": 1.7898207460239064,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 24.23508027870342,
+          "prompt_tokens": 1376,
+          "reused": 0,
+          "prefill_ms": 4591.3,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 7.235675934003666,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 33.42385627741801,
+          "prompt_tokens": 1376,
+          "reused": 1375,
+          "prefill_ms": 39.2,
+          "drafts_offered": 49,
+          "drafts_accepted": 37,
+          "wall_s": 1.9550743860017974,
+          "error": null
+        },
+        {
+          "label": "mixed-0",
+          "generated": 64,
+          "decode_tok_s": 14.454130719544695,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 468.4,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 9.449050885014003,
+          "error": null
+        },
+        {
+          "label": "mixed-1",
+          "generated": 64,
+          "decode_tok_s": 13.84442329324219,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 460.1,
+          "drafts_offered": 61,
+          "drafts_accepted": 31,
+          "wall_s": 5.086354538012529,
+          "error": null
+        },
+        {
+          "label": "mixed-2",
+          "generated": 64,
+          "decode_tok_s": 17.695200176952,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 465.0,
+          "drafts_offered": 60,
+          "drafts_accepted": 32,
+          "wall_s": 4.549964069010457,
+          "error": null
+        },
+        {
+          "label": "mixed-3",
+          "generated": 64,
+          "decode_tok_s": 24.063768987817717,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 464.0,
+          "drafts_offered": 58,
+          "drafts_accepted": 33,
+          "wall_s": 8.212339560996043,
+          "error": null
+        }
+      ]
+    },
+    "ds4-xs-slots1": {
+      "sha256": "da47391eb9f3bbee83a76d8d3b51003fdb86a0df99acc4c85e7cce1a85f52fcb",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 25.254518191145138,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 803.5,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.3379128130036406,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 33.97388257776834,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 403.2,
+          "drafts_offered": 41,
+          "drafts_accepted": 33,
+          "wall_s": 2.287145760987187,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 24.028533883987233,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6251.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 8.914746788999764,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 31.446540880503143,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6000.0,
+          "drafts_offered": 40,
+          "drafts_accepted": 32,
+          "wall_s": 8.035542972997064,
+          "error": null
+        }
+      ]
+    },
+    "ds4-xs-slots2": {
+      "sha256": "da47391eb9f3bbee83a76d8d3b51003fdb86a0df99acc4c85e7cce1a85f52fcb",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 24.97073741708935,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 869.4,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.4341526580101345,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 33.719704952581665,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 402.8,
+          "drafts_offered": 41,
+          "drafts_accepted": 33,
+          "wall_s": 2.3014063389855437,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 22.80095478998183,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6318.2,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 9.127101669000695,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 31.38793526238352,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 5969.8,
+          "drafts_offered": 40,
+          "drafts_accepted": 32,
+          "wall_s": 8.00998071100912,
+          "error": null
+        },
+        {
+          "label": "mixed-0",
+          "generated": 64,
+          "decode_tok_s": 19.18350218811822,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 403.5,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 7.969179781008279,
+          "error": null
+        },
+        {
+          "label": "mixed-1",
+          "generated": 64,
+          "decode_tok_s": 24.65331278890601,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 403.5,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 6.488268832996255,
+          "error": null
+        },
+        {
+          "label": "mixed-2",
+          "generated": 64,
+          "decode_tok_s": 21.120718104415552,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 457.0,
+          "drafts_offered": 36,
+          "drafts_accepted": 31,
+          "wall_s": 3.488259410019964,
+          "error": null
+        },
+        {
+          "label": "mixed-3",
+          "generated": 64,
+          "decode_tok_s": 19.398054132694813,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 928.1,
+          "drafts_offered": 39,
+          "drafts_accepted": 28,
+          "wall_s": 4.229144096985692,
+          "error": null
+        }
+      ]
+    },
+    "ds4-s-slots1": {
+      "sha256": "da47391eb9f3bbee83a76d8d3b51003fdb86a0df99acc4c85e7cce1a85f52fcb",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 21.207502153886935,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 855.5,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.8740506900066976,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 25.443269460125624,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 453.4,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 2.968998778000241,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 20.56885746424554,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 7000.7,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 10.11248459899798,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 32.328130524826996,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6410.4,
+          "drafts_offered": 37,
+          "drafts_accepted": 36,
+          "wall_s": 8.390285606001271,
+          "error": null
+        }
+      ]
+    },
+    "ds4-s-slots2": {
+      "sha256": "da47391eb9f3bbee83a76d8d3b51003fdb86a0df99acc4c85e7cce1a85f52fcb",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 11.84001184001184,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 1205.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 6.614314034988638,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 23.133923730345202,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 455.1,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 3.2238725749775767,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 6.3419709656641725,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 11729.4,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 21.822464100987418,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 31.477473932716897,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6575.9,
+          "drafts_offered": 37,
+          "drafts_accepted": 36,
+          "wall_s": 8.613273191993358,
+          "error": null
+        },
+        {
+          "label": "mixed-0",
+          "generated": 64,
+          "decode_tok_s": 7.491162768921039,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 753.4,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 21.82800007399055,
+          "error": null
+        },
+        {
+          "label": "mixed-1",
+          "generated": 64,
+          "decode_tok_s": 5.65171317555634,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 1205.3,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 12.530473993974738,
+          "error": null
+        },
+        {
+          "label": "mixed-2",
+          "generated": 64,
+          "decode_tok_s": 5.621332958577803,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 1944.5,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 13.331568166002398,
+          "error": null
+        },
+        {
+          "label": "mixed-3",
+          "generated": 64,
+          "decode_tok_s": 11.628118243427389,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 703.6,
+          "drafts_offered": 35,
+          "drafts_accepted": 31,
+          "wall_s": 19.539867209998192,
+          "error": null
+        }
+      ]
+    }
+  },
+  "differences": [],
+  "dynamic_input_changes": [],
+  "finished": 1794376761.191297
+}

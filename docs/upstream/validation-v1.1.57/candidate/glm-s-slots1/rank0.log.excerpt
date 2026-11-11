@@ -1,0 +1,15 @@
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm stat: decode 36.76 ms/tok (27.20 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 22.3 ms/tok | vram 12384/13072 ram 0/48
+glm mtp: a drafting round's host time - drafts 7.29 ms, verify 61.19 ms, commit + cache 0.08 ms (24 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 24 drafting rounds on the whole head
+glm mtp: 24 rounds, 2.67 tokens a round | rounds by draft length 1:1 2:23
+glm stat: decode 25.72 ms/tok (38.88 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 1.3 ms/tok | vram 12384/13072 ram 0/48
+glm spec: 39 of 47 drafts accepted (83.0%)
+glm stat: decode 37.83 ms/tok (26.43 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 3.2 ms/tok | vram 12384/13072 ram 0/48
+glm mtp: a drafting round's host time - drafts 8.20 ms, verify 64.44 ms, commit + cache 0.06 ms (26 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head
+glm mtp: 26 rounds, 2.46 tokens a round | rounds by draft length 1:1 2:25
+glm stat: decode 29.54 ms/tok (33.85 tok/s) | vram hit 100.00% | ram fetches 0.00/tok | disk 0.00 reads/tok in 0.00 waits/tok, 0.00 ms/tok | promotions 0.00/tok | cpu lane 0.00/tok in 0.00 ms/tok | prompt 0.0 ms/tok | vram 12384/13072 ram 0/48
+glm spec: 37 of 51 drafts accepted (72.5%)
+glm spec: 98 speculative positions, 77.6% accepted

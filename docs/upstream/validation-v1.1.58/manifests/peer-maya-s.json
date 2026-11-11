@@ -1,0 +1,278 @@
+{
+  "canonical": {
+    "engram_sha256": "08d55d6433f389b14aa115f4ea4eb31d6a2d63df1ae40821f03facf4c2d49142",
+    "index_sha256": "cded105d5d187f5c786a2862f63006672079da9e88fbf5b115536265e5f88f75",
+    "model_config_sha256": "2d7a4cf9a36880747d39439ddd482ea3f7ecde977cbdf03f1a1116bf6e5b98ef",
+    "sources": [
+      {
+        "index": 0,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+        "sha256": "1f3437f57042e69f94c141ffbcba0d5610dab63feb07244fb468be4940d6763f",
+        "size": 47887697312
+      },
+      {
+        "index": 1,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+        "sha256": "66501fee8702ffd54e6f065323ab54bb3150d20b10b01922c589e7462c7b5ba6",
+        "size": 47669578400
+      },
+      {
+        "index": 2,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+        "sha256": "3195b23f33337c46a07c48583946d99147c3635412bc4adc6acdc4cf42bf30ad",
+        "size": 47103347360
+      },
+      {
+        "index": 3,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+        "sha256": "d60dba35fac9601cd5c6026439dd980c457a5bb1c009192ea539b220108ea0db",
+        "size": 35532532032
+      },
+      {
+        "index": 4,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+        "sha256": "c98d46f96a25d17c4c54da5a60782c130255c364a22e621ea28d5c98a692ceb2",
+        "size": 80641295472
+      },
+      {
+        "index": 5,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+        "sha256": "98d65ef4f36e0b193935d44c3586241ca09b1b47e90f118e85332cfdb5860263",
+        "size": 80643503412
+      },
+      {
+        "index": 6,
+        "name": "../dspark/dspark.bin",
+        "sha256": "42df65159f980a9189d80597e42b30012c7b10e0dd385a47051f3b2fd659bb7b",
+        "size": 7967616768
+      },
+      {
+        "index": 7,
+        "name": "../vision/vision.bin",
+        "sha256": "685d935986a030ba1965af5c1e06b55614c7778c821daae1917dde5d2152ff68",
+        "size": 970536960
+      }
+    ],
+    "tokenizer": {
+      "chat_template.jinja": "e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa",
+      "merges.txt": "547bace837acea98652eef5669c9b01cee1c73ad1d2a44d6fdce9e6a81c22147",
+      "token_type.json": "0a61021438e5ce6041133495f18fc360a6587aea748b17d953f552d2119ba51e",
+      "tokenizer.json": "5a47981b685b75154e29bfb0299584c9b3a4a28679585e86d524c34c065d037f",
+      "vocab.json": "2f0bf5b31f4aa191d5d0d78291927a4f28c9ceb498a5e345b97e926c4cb99c1a"
+    },
+    "version": 1
+  },
+  "identity": "e8d41763b86d0ed5430202521f42c1089205d3bf14afc2e0308ca82e1d481c71",
+  "local": [
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/ds4.txt",
+      "role": "config",
+      "sha256": "46631a093d84c0f9edeef808640c360770725d5abf909a5ea301e2ebdfa7297e",
+      "stat": {
+        "ctime_ns": 1793680143704788720,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159154,
+        "mtime_ns": 1793630507902714440,
+        "size": 1457
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/tensors.txt",
+      "role": "index",
+      "sha256": "cded105d5d187f5c786a2862f63006672079da9e88fbf5b115536265e5f88f75",
+      "stat": {
+        "ctime_ns": 1793680143730178429,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159160,
+        "mtime_ns": 1793630507923265741,
+        "size": 3719751
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/engram.bin",
+      "role": "engram",
+      "sha256": "08d55d6433f389b14aa115f4ea4eb31d6a2d63df1ae40821f03facf4c2d49142",
+      "stat": {
+        "ctime_ns": 1793680143705028674,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159155,
+        "mtime_ns": 1793630507925265667,
+        "size": 517980
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/tokenizer/vocab.json",
+      "role": "tokenizer/vocab.json",
+      "sha256": "2f0bf5b31f4aa191d5d0d78291927a4f28c9ceb498a5e345b97e926c4cb99c1a",
+      "stat": {
+        "ctime_ns": 1793680143770075381,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159165,
+        "mtime_ns": 1793630507950264740,
+        "size": 2730577
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/tokenizer/merges.txt",
+      "role": "tokenizer/merges.txt",
+      "sha256": "547bace837acea98652eef5669c9b01cee1c73ad1d2a44d6fdce9e6a81c22147",
+      "stat": {
+        "ctime_ns": 1793680143743370826,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159162,
+        "mtime_ns": 1793630507954264591,
+        "size": 1504833
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/tokenizer/tokenizer.json",
+      "role": "tokenizer/tokenizer.json",
+      "sha256": "5a47981b685b75154e29bfb0299584c9b3a4a28679585e86d524c34c065d037f",
+      "stat": {
+        "ctime_ns": 1793680143746622114,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159164,
+        "mtime_ns": 1793630507958955029,
+        "size": 80
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/tokenizer/token_type.json",
+      "role": "tokenizer/token_type.json",
+      "sha256": "0a61021438e5ce6041133495f18fc360a6587aea748b17d953f552d2119ba51e",
+      "stat": {
+        "ctime_ns": 1793680143746592024,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159163,
+        "mtime_ns": 1793630507958901071,
+        "size": 387840
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4/tokenizer/chat_template.jinja",
+      "role": "tokenizer/chat_template.jinja",
+      "sha256": "e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa",
+      "stat": {
+        "ctime_ns": 1793680143730895591,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159161,
+        "mtime_ns": 1793630507958972249,
+        "size": 5508
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00001-of-00006.gguf",
+      "role": "source/0",
+      "sha256": "1f3437f57042e69f94c141ffbcba0d5610dab63feb07244fb468be4940d6763f",
+      "stat": {
+        "ctime_ns": 1793677623053080124,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159148,
+        "mtime_ns": 1793627789638244880,
+        "size": 47887697312
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00002-of-00006.gguf",
+      "role": "source/1",
+      "sha256": "66501fee8702ffd54e6f065323ab54bb3150d20b10b01922c589e7462c7b5ba6",
+      "stat": {
+        "ctime_ns": 1793678034627954443,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159149,
+        "mtime_ns": 1793627795849964645,
+        "size": 47669578400
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00003-of-00006.gguf",
+      "role": "source/2",
+      "sha256": "3195b23f33337c46a07c48583946d99147c3635412bc4adc6acdc4cf42bf30ad",
+      "stat": {
+        "ctime_ns": 1793678443221692312,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159150,
+        "mtime_ns": 1793627805939510426,
+        "size": 47103347360
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00004-of-00006.gguf",
+      "role": "source/3",
+      "sha256": "d60dba35fac9601cd5c6026439dd980c457a5bb1c009192ea539b220108ea0db",
+      "stat": {
+        "ctime_ns": 1793678749987498646,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159151,
+        "mtime_ns": 1793627249328994421,
+        "size": 35532532032
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00005-of-00006.gguf",
+      "role": "source/4",
+      "sha256": "c98d46f96a25d17c4c54da5a60782c130255c364a22e621ea28d5c98a692ceb2",
+      "stat": {
+        "ctime_ns": 1793679446676062941,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159152,
+        "mtime_ns": 1793629808863437970,
+        "size": 80641295472
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/DeepSeek-V4.1-Flash-1017-Maya-S-IQ2_XXS-00006-of-00006.gguf",
+      "role": "source/5",
+      "sha256": "98d65ef4f36e0b193935d44c3586241ca09b1b47e90f118e85332cfdb5860263",
+      "stat": {
+        "ctime_ns": 1793680143703263766,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159153,
+        "mtime_ns": 1793629841459315958,
+        "size": 80643503412
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark.bin",
+      "role": "source/6",
+      "sha256": "42df65159f980a9189d80597e42b30012c7b10e0dd385a47051f3b2fd659bb7b",
+      "stat": {
+        "ctime_ns": 1793674043070188544,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159132,
+        "mtime_ns": 1793630499663572076,
+        "size": 7967616768
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+      "role": "source/7",
+      "sha256": "685d935986a030ba1965af5c1e06b55614c7778c821daae1917dde5d2152ff68",
+      "stat": {
+        "ctime_ns": 1793674051450306619,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159135,
+        "mtime_ns": 1793614592576583114,
+        "size": 970536960
+      }
+    }
+  ],
+  "pack": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4",
+  "version": 1
+}

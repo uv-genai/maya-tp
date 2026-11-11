@@ -1,0 +1,7 @@
+DeepSeek TP2 control: portable round-trip and malformed frames passed
+DeepSeek TP2 identity: matching peers, negotiated window and mismatch rejection passed
+DeepSeek TP2 worker state: transaction, rollback verdict, boundaries and sticky failure passed
+DeepSeek TP2 model worker dispatch and sticky failure passed
+DeepSeek TP2 channel: identity ordering, bounded receive and transport errors passed
+DeepSeek bounded batch plans/commits and per-slot state passed
+DeepSeek batch acceptance/completion ordering and sticky first failure passed

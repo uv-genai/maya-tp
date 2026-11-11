@@ -1,0 +1,86 @@
+{
+  "checked": 1794377912.1264277,
+  "identities": [
+    {
+      "host": "local",
+      "case": "control",
+      "pid": 723072,
+      "start": "14807701",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "local",
+      "case": "control-sampler",
+      "pid": 723064,
+      "start": "14807619",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "local",
+      "case": "candidate",
+      "pid": 724806,
+      "start": "14822441",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.55/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "local",
+      "case": "candidate-sampler",
+      "pid": 724800,
+      "start": "14822398",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "local",
+      "case": "diagnostic-driver",
+      "pid": 723063,
+      "start": "14807606",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "peer",
+      "case": "control",
+      "pid": 292263,
+      "start": "14807723",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "peer",
+      "case": "control-sampler",
+      "pid": 292255,
+      "start": "14807651",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "peer",
+      "case": "candidate",
+      "pid": 292678,
+      "start": "14822460",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.55/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "host": "peer",
+      "case": "candidate-sampler",
+      "pid": 292672,
+      "start": "14822399",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    }
+  ]
+}

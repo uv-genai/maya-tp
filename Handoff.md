@@ -1,7 +1,9 @@
+> **Current checkpoint (2026-11-11):** upstream v1.1.54–v1.1.58 sequential validation is complete; read §54 and #159 for the final PR/main publication. Production selections remain the accepted pinned binaries; this source integration does not deploy them.
+
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-05 · Current state: **§53**, user-accepted batching and release tp-v1.1.44 (#156). §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
+> Last updated: 2026-11-11 · Current state: **§54**, validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
@@ -3150,3 +3152,212 @@ The earlier frozen binaries and runtime selections remain recorded in §52 and
 §§33/44. Historical reports retain their dated measurement limits. User-facing
 and coding-agent guides record the acceptance; source release metadata alone
 does not authorize overwriting the protected peer checkout or production files.
+
+## 54. Upstream v1.1.54–v1.1.58 integration (2026-11-11)
+
+The user authorized sequential tag checkpoints on
+`codex/upstream-v1.1.54-v1.1.58`, followed by one validated final PR into main.
+Epic [#159](https://github.com/uv-genai/maya-tp/issues/159) indexes the phases;
+completed discovery is #158. The source batch is validated; final PR/main
+publication is recorded in #159. Production remains at the accepted pinned
+selections described in §§33/44. The campaign used existing GLM-5.3-Flash
+Maya-S and DeepSeek-V4.1-Flash Maya-XS/S only: no downloads and no full
+GLM-5.3 744B model tests. Synthetic architecture/kernel tests are model-free.
+The fork-owned README/AGENTS/operational guides require semantic merging;
+numeric VERSION and pinned llama.cpp are preserved.
+
+| Tag | Issue | State |
+| --- | --- | --- |
+| v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates and evidence CI 42966915176 pass at `ad7f71f` |
+| v1.1.55 | #161 | Source `cc5ea59`, exact-head CI 42967989395 passed; default-off2304 tokens exact; bounded performance replay passes; #165/#166 remain follow-ups |
+| v1.1.56 | #162 | Source `14a127f`, CI42973291953 passed; host/EXL3 and all six Flash gates pass;2304 tokens exact |
+| v1.1.57 | #163 | Source `4911c55`, CI42977956159 and host/GPU gates pass;2304 tokens exact |
+| v1.1.58 | #164 | Source `2485cb6`, CI42981756547; all host/six-case and Q5_K/Unicode/lifecycle/fatal/four-slot HTTP gates pass |
+
+The following entries are the chronological work log. Completed checkpoint
+summary and evidence at the end supersede earlier pending/next-step notes.
+
+V54 passes mapping, 756 server tests (20 skips), 782 tools tests (3 skips),
+workflow CPU/control suites, sanitized RAM slicing and affected component
+checks. All three HIP Release engines build. GLM S and DeepSeek XS/S each pass
+single-slot and batch2, all 2,304 fixed normal tokens matching the accepted
+baseline, actual MTP/DSpark, mixed requests and batch cancellation/refill/reuse.
+GLM/XS injected peer-loss tests preserve the first cause across four routes
+and later GEN. The one XS mixed-wave timing excursion (31.66 → 11.58 tok/s)
+did not recur in three measured warmed waves per build (medians 32.74 control /
+33.07 candidate); the original data and unestablished cause remain recorded.
+Read [the v54 report](docs/upstream/v1.1.54.md) and its raw evidence.
+Exact-head CI at `0663f7a` is [42962996575](https://github.com/uv-genai/maya-tp/actions/runs/42962996575), passed.
+
+Controls are batching-accepted `g5-release/maya` and `d5-guard/maya-ds4` under
+`/home/ugo/software/project-maya-batching-validation` on both hosts, not the
+pre-batching v53 engines. New isolated source/runtime is
+`/home/ugo/software/project-maya-upstream-20261111-runtime`; build tree is
+`/home/ugo/software/project-maya-upstream-20261111-build`. Versioned engines
+are frozen under `engines/<checkpoint>/` on both hosts. Final v54 hashes are
+in the report (GLM `49c5868e…`, DeepSeek `5ece66ec…`). The initial unused
+DeepSeek build was replaced after a final header-dependency refresh.
+
+**All v54 owned GPU and telemetry processes exited. V55 validation may be active:** consult current ownership before launching another pair. Per-case
+`ownership.json`, `peer-identity.json` and the stopped-process audit are under
+`/tmp/maya-upstream-20261111-validation/`; committed bounded evidence is in
+`docs/upstream/validation-v1.1.54/`. External case/checkpoint harnesses are
+`/tmp/maya-upstream-20261111-case.py` and
+`/tmp/maya-upstream-20261111-checkpoint.py`. Future cleanup verifies PID start
+identity/executable and stops only those owned pairs. Never run another pair
+while a validation driver is active. No production config/executable or
+protected host-1 checkout is changed.
+
+V54 retains default-off `DS4_INDEX_TC` and the 400 MB ring default. Its normal
+streamer adopts per-chunk skip policy with sliced RAM staging and correct
+routing publication/virtual offsets. Local GPU placement does not replace
+remote RDMA TP2. Shared API changes retain command serialization, first-fatal
+fanout and paired health. Initial test/harness precondition corrections are
+recorded in #160/report; no uncertain state is reset or retried in one rank.
+
+V55 integrates Responses namespace/sealed-reasoning compatibility and persistent
+web answers while preserving all C1/pair safety and memo opt-in/aliases. GLM
+INT8 and DeepSeek load interleave retain explicit selection. `MAYA_DS4_AI_RUN`
+is imported opt-in with complete AIM/slab-stride prerequisites. Allocation,
+runtime and wire identity use the same rule; feature bit1 rejects mismatches
+for both protocols, and batch launcher digests include the normalized choice.
+Independent source review and 200 focused server tests (13 skips), 10 launcher
+tests, HIP mapping and the identity CPU test pass. Full suites pass770 server tests (21 skips) and784 tools tests (3 skips),
+plus workflow CPU gates; exact-head CI42967989395 passes at `cc5ea59`. All
+three gfx1151 HIP targets build, and frozen binary hashes are in the phase
+evidence. Paired GPU comparisons/AI_RUN probe are in progress; no v56 merge
+until those gates pass. V55 raw evidence and report updates will be included
+with the next source checkpoint; the tested source head remains `cc5ea59`. The 1,441-token XS prompt at 262K allocation
+exercises index selection beyond top-k512 with ratio2 compression; it does
+not cover candidate-block reduction beyond 16K compressed keys.
+V57/V58 shared-GLM audit notes are in
+`/tmp/maya-v57-v58-glm-merge-notes.md` and #163. Preserve rank-local KDA state,
+slot/snapshot sizes and explicit paired semantics; reject unmirrored tuning
+and ablation. `glm_mv_nt_test` covers changed Q5_K n-column dispatch without
+new weights; existing Flash packs' dense tensors are F32/Q8_0, so another
+large model load would not exercise that path. Final bounded max-slot probes
+are GLM4 at32K and DeepSeek XS4 at8K allocation, not a capacity campaign.
+
+V55 default-off GPU comparisons match all2,304 reference tokens. Its opt-in
+AI_RUN experiment changes both long-prompt responses after seven matching IDs,
+while short/mixed outputs match and each mode's ordinary/DSpark results agree.
+Independent audit found no stride/capacity/control defect; the feature stays
+experimental/default-off, with observed answer changes and unqualified quality
+tracked in open #166. Do not claim its strict parity probe passed.
+
+A second intermittent slow wave appeared on S2 in v55. #165 now tracks a
+bounded two-load v54/v55 original-prefix/mixed transition comparison with GPU,
+CPU/memory/IO and owned-process telemetry. The validation agent may be active;
+check its recorded ownership. No v56 merge until this performance gate is
+assessed. All normal/AI-probe processes were stopped before this diagnostic.
+
+V55 performance diagnostic completed without reproducing the slow wave: first
+post-prefix mixed28.13 control /28.65 candidate tok/s, warmed28.80/29.47 vs
+28.80/29.36, all1,024 tokens/build exact. All pairs/samplers exited. #165
+remains open for intermittent stalls; no cause/fix claimed. #166 remains
+open for AI_RUN numerical qualification, with default-off preservation and
+experimental answer-change caveat. V55 compatibility and bounded performance
+are accepted; evidence-head CI42970916477 at `8f0ac7e` passed before v56 began. Its final
+report/diagnostic artifacts are bundled with the v56 source commit. #165 stays
+open without a causal claim; #166 stays experimental/default-off. All v55 and
+diagnostic owned identities exited before v56 setup.
+
+V56 semantic merge/review is complete. Keep converted NO_* Boolean handling,
+local two-part drafting fix and invalid-token guards without weakening TP2
+geometry, replicated NextN scratch or collectives. Direct GLM validation will
+use NO_SPEC=0/NO_MTP=off/NO_PREFILL=false on both ranks because wrapper cleanup
+would otherwise hide parser reach. New gfx11 EXL3 shaped/inlined kernels have
+model-free prefill/default/rollback and decode parity selectors; no EXL3 model
+is downloaded. Public MAYA_EXL3_WMMA_SHAPE wins over STRATA/bare aliases.
+DS4 pooled helper staging retains rank slices/per-chunk routing and includes
+helper-only load jobs without duplicate warming. CUDA-only lane-parity and
+prior local P2P/BAR/Metal exclusions remain; source/settings/tests are kept
+consistent. Existing Flash packs are not repacked; F32 bias applies new packs.
+The workflow now runs env_switch_test. Ordered suites and isolated builds are
+starting; consult current validation ownership before another GPU launch.
+
+V56 exact source `14a127f` passes CI42973291953,820 local server tests
+(21 skips),787 tools tests (3 skips), HIP mapping and updated workflow CPU
+suites. All engines and EXL3 fixture build. Model-free default shaped prefill,
+public-name uniform rollback and decode parity pass. GLM default/batch and
+XS default outputs match v55 so far; direct false-valued NO_* flags prove
+MTP/bulk-prefill reach. The validation driver continues XS2/S1/S2 with bounded
+STAT/GPU/owned-IO sampling; check current ownership before any GPU launch.
+
+V56 checkpoint is accepted at `14a127f` with exact-head CI42973291953 passed.
+All six configurations match2,304 v55 tokens; direct false-valued GLM flags,
+real drafting and synthetic EXL3 gates pass. XS2/S2 mixed31.44/28.55tok/s are
+comparable with prior steady controls; no severe timing anomaly. All39 recorded
+identities exited. Final report/raw evidence will be bundled with v57 source.
+Read `docs/upstream/v1.1.56.md` and `validation-v1.1.56/`. V57 now starts after
+these gates, on the same branch; main and production remain unchanged.
+
+V57 source is semantically resolved. New shared state layout takes explicit
+rank-local KDA head count in production carving/seq_layout while keeping DSA,
+indexer, residual and NextN geometry canonical. All snapshot/checkpoint/slot
+copy sizes use the corrected descriptor; SeqCtx swaps the descriptor. A
+Flash-only host regression passes normal/ASan/UBSan and fails40 checks when
+global heads are substituted. New full-GLM TP2 is rejected before bootstrap.
+Unmirrored GEN/API tuning is refused before mutation; Flash answer reserve,
+DeepSeek spec0, C1 writer/fatal guards and memo defaults survive semantic merge.
+Focused serving368 tests (22 skips) and installer117 tests pass; no real model
+is used by those fixtures. Root added the exact Flash-only state command to CI.
+
+V57 imports full GLM-5.3 source/catalog with no model download/GPU qualification.
+Inherited full-model-only RAM trailer behavior is recorded in open #167 and
+left unchanged outside Flash scope. Fork README/AGENTS/docs index remain owned;
+new security/issue-form docs name this fork, both configured hosts, Linux/gfx1151
+and ROCm. Metal/MSVC-only source-audit tests are outside scope, not restored.
+Pin/ROCm split paths/RDMA flags/version remain unchanged. Isolated builds and
+ordered full suites are starting; consult current ownership before GPU use.
+
+V57 accepted at `4911c55`, CI42977956159 passed. Full967server/905tools and
+workflow CPU gates plus all six Flash GPU cases match2,304 prior tokens.
+GLM descriptor lifecycle/fatal checks pass. All49 recorded identities exited.
+XS mixed27.60 vs31.44 is retained with changed-admission-order caveat, no
+speedup/regression attribution; long control31.31 vs30.99 remains stable.
+Read `docs/upstream/v1.1.57.md` and raw evidence. V58 now starts after these
+gates, with final kernel/Unicode/max-slot HTTP validation planned.
+
+V58 source integration is resolved; final HIP builds and ordered host gates
+are running. New ablation is unpaired only: explicit paired startup/config/
+request settings fail before mutation; installer skips paired direction fetch.
+Preserve v57 rank-local state corrections and remote speculative protocols.
+Q5_K multi-column and whole-vocabulary fallback fixes are imported. Full-model
+catalog/calibration/Q8 packing changes remain scoped; no Flash repack/default
+promotion. Final six cases plus kernel/Chinese and same-pair4-slot HTTP gates
+are planned. No new model/full744B inference or production deployment.
+
+### Completed v54–v58 checkpoint
+
+All five tags were imported sequentially and passed exact-source CI plus
+ordered host suites/isolated gfx1151 builds and six Flash default1/batch2
+comparisons before proceeding. Final source `2485cb6` passes CI42981756547,
+979 server tests (32 skips), 937 tools tests (5 skips) and all workflow CPU gates.
+V58 matches all 36 fixed normal responses / 2,304 tokens vs v57, with actual
+MTP/DSpark. Q5_K parity passes 568 bit-exact cases; Chinese 96 ordinary/MTP picks
+match and actual whole-head fallback is demonstrated. GLM/XS cancellation,
+refill, retained-prefix reuse and sticky worker-loss fanout pass.
+
+Final public HTTP runs pass at 4 slots for GLM 32K FP16 and DeepSeek XS 8K, on
+existing owned pairs: 9 captures each, ordinary/nonstream vs speculative/SSE
+IDs/tokens/text exact, real proposals, STAT.active=4, client cancellation,
+surviving request/refill overlap, route drain and healthy pair before shutdown.
+The short 4-client 256-token waves measure 30.20/37.06 aggregate tok/s, without a
+matched parent HTTP timing control. See the report for bounded normal timings.
+All 66 recorded validation/telemetry/fixture identities exited; engines returned
+0/0 on normal final-pair shutdown and all samplers 0. Exact helper scripts,
+commands, effective overrides, hashes, raw results and cleanup audit are archived
+in `docs/upstream/validation-v1.1.58/`. No further GPU runs are pending.
+
+Use `docs/upstream/v1.1.54.md` through `v1.1.58.md` for decisions/evidence.
+Epic #159 and phases #160–#164 record final evidence-head/PR/main publication;
+the final PR closes those integration workstreams after passing checks. Keep
+#165 (intermittent stalls), #166 (experimental AI_RUN answer changes), #167
+(full-GLM RAM-slot trailer) and remaining #133 experiments open. Full GLM-5.3
+TP2 stays refused before bootstrap; paired ablation/unmirrored tuning stays
+refused before mutation. Keep rank-local descriptors and all checked speculative
+protocols. No model download, 744B inference, Flash repack, release bump or
+production/protected-peer changes were made. README/AGENTS/current guides and
+restart prompt reflect this completed source checkpoint. Numeric VERSION
+remains 1.1.44 and the published release remains `tp-v1.1.44`.

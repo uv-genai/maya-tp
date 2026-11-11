@@ -14,6 +14,11 @@ The original Maya was created and led by **Peasant Smith ([@mw00](https://github
 their model engines, quantization work, expert memory management and serving stack. Development of this
 derived project is tracked in [uv-genai/maya-tp](https://github.com/uv-genai/maya-tp).
 
+Upstream **v1.1.54–v1.1.58** is integrated as sequentially validated checkpoints,
+tracked in [#159](https://github.com/uv-genai/maya-tp/issues/159). GLM-5.3-Flash TP2/MTP and
+DeepSeek-V4.1-Flash TP2/DSpark pass default and batched regression checks, including
+four-slot public HTTP operation. Production selections remain unchanged.
+
 ## Why Maya-TP?
 
 Very large MoE models put pressure on both memory capacity and memory bandwidth. A single APU has a finite
@@ -110,7 +115,23 @@ isolated gfx1151 GLM TP2/MTP and DeepSeek TP2/DSpark validation, ending at
 `de184d9` through PR #134 with merged-main CI passing. The later
 checkpoints add serving, model-storage/UI, packing and GPU-fault handling fixes.
 The new optional engine experiments are tracked for separate assessment in #133.
-[Latest review and validation](docs/upstream/v1.1.53.md).
+[Previous upstream checkpoint](docs/upstream/v1.1.53.md).
+The v54–v58 integration includes full GLM-5.3 source/catalog additions, while
+remote TP2 remains **Flash-only** and rejects the 744B architecture before
+bootstrap. Full-model support is unqualified here; no 744B model is downloaded
+or tested. Its new Q8 attention repacking and single-APU drafting calibration do
+not repack Flash models or change the accepted Flash launch defaults. New
+refusal-ablation controls are limited to unpaired engines: TP2 refuses their
+startup/config settings and every explicit `ablate` request, including `false`,
+and exposes no ablation UI capability. The integration also adds
+Responses compatibility and inline document inputs;
+text extraction works within paired text-only limits. Images/video remain outside
+the validated TP2 scope. [v54](docs/upstream/v1.1.54.md), [v55](docs/upstream/v1.1.55.md),
+[v56](docs/upstream/v1.1.56.md), [v57](docs/upstream/v1.1.57.md),
+[v58](docs/upstream/v1.1.58.md). Each tag passed paired Flash validation and
+exact-source CI; the final checkpoint also checks Unicode drafting, cancellation,
+slot reuse and sticky peer failure. Source integration does not change production
+binaries or model selections.
 
 DeepSeek TP2 and DSpark were merged into `main` through PR #122 at `75e18e8`
 after extended user trials. HIP mapping, server and tools CI passed on the
@@ -134,12 +155,12 @@ deferred DeepSeek work, including [WMMA parity](https://github.com/uv-genai/maya
 | Platform | Two Strix Halo gfx1151 systems, Linux, HIP/ROCm, Thunderbolt/USB4 RDMA |
 | Validated models (TP2 + MTP) | **Maya-S**, **Maya-M**, **Maya-L** — API matrices, CLI pair parity, kill/recover, controlled bench ([S](docs/benchmarks/tp2-mtp-review-2026-10-30/RESULTS.md), [M](docs/benchmarks/tp2-maya-m-mtp-2026-10-31/RESULTS.md), [L](docs/benchmarks/tp2-maya-l-mtp-2026-10-31/RESULTS.md)) |
 | Larger GLM packs | Partition geometry comes from pack metadata; validate memory fit and results per pack before claiming support |
-| MTP | Opt-in, greedy TP2 verification, configurable fixed width of 1–8 drafts |
-| Conversations | One active sequence; cached follow-ups and cancellation tested |
+| MTP | Opt-in, configurable draft width; legacy single-slot flow is greedy, batching preserves per-request sampling and speculation controls |
+| Conversations | One sequence by default; explicit `--parallel 2..4` enables checked continuous batching for GLM/MTP and DeepSeek/DSpark; cached follow-ups and cancellation tested |
 | Model selection | Launchers take `--model` / `--pack` / `--config` (or `MAYA_*` env) — [choosing a model](docs/TP2-RUN.md#choosing-a-model) |
 | DeepSeek TP2 + DSpark | Maya-XS and Maya-S have paired validation and successful user trials including coding workloads. [Operations and validation scope](docs/DEEPSEEK-TP2-RUN.md). |
 | MiniMax TP2 | Outside the current validation scope |
-| Deferred work | [Multi-sequence TP2](https://github.com/uv-genai/maya-tp/issues/11), [vision](https://github.com/uv-genai/maya-tp/issues/16) and [gather-based reduction](https://github.com/uv-genai/maya-tp/issues/10); DFlash under TP2 remains gated |
+| Deferred work | [vision](https://github.com/uv-genai/maya-tp/issues/16) and [gather-based reduction](https://github.com/uv-genai/maya-tp/issues/10); DFlash under TP2 remains gated |
 
 DeepSeek launchers are available as `tools/ds4/rank0.sh`,
 `tools/ds4/rank1.sh` and `tools/llama-swap/tp2-ds4.sh run PORT --model NAME`.
@@ -252,7 +273,7 @@ draft width, cache/disk counters and reproduction steps. `./maya.sh --report` co
 GitHub CI runs the HIP compatibility-name gate, server and installer/tools tests,
 plus CPU memory-policy and row-preparation/stub checks. The latest source
 checkpoint passed paired GLM Maya-S and DeepSeek XS/S controls. Its bounded
-measurements and model coverage are in the [v1.1.53 report](docs/upstream/v1.1.53.md).
+measurements and model coverage are in the [v1.1.58 report](docs/upstream/v1.1.58.md).
 GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery were exercised on the
 Strix Halo pair for **Maya-S, Maya-M and Maya-L** (simple and MTP) on earlier builds. Evidence:
 
@@ -294,6 +315,8 @@ Their work makes this project's focus on dual Strix Halo tensor parallelism poss
   The ggml authors, Anbeeld; `third_party/beellama.cpp/LICENSE`).
 - The models: [GLM-5.3-Flash](https://huggingface.co/zai-org/GLM-5.3-Flash) by zai-org (MIT); Maya's quants and the
   image encoder file are made from zai-org's released weights and keep its license.
+  [GLM-5.3](https://huggingface.co/zai-org/GLM-5.3) by zai-org (its own license); its GGUF is
+  [unsloth's](https://huggingface.co/unsloth/GLM-5.3-GGUF).
   [DeepSeek-V4.1-Flash-1017](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017) by DeepSeek (MIT); Maya's
   quant, its Engram tables and the drafter are made from DeepSeek's released weights and keep its license; the vision
   tower comes from DeepSeek's checkpoint, the GGUF option from

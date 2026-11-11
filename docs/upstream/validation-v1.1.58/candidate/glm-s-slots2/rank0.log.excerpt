@@ -1,0 +1,73 @@
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm multi: CUDA0 2 sequence states: the first for 32768 tokens (0.63 GB), 1 more for 32768 (0.78 GB in all, with every sequence's snapshot)
+glm multi mtp: CUDA0 windows of 3 rows (2 drafts) for 2 conversations, 16 rows a group: 158 MB of VRAM, 0.2 MB pinned
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft)
+glm prefill: CUDA0 cuBLAS warm-up: sgemm 0, gemm f16 0, sync no error
+glm prefill: CUDA0 the chunk stage line is on (STRATA_GLM_PREFILL_STAGES=0 silences it)
+glm prefill: CUDA0 chunks of 3008 tokens (--prefill auto, up to 3008; mixer sub-batches of 1024), borrowing 1940 MB of the expert pool while a prompt runs (activations 1208, weight scratch 96, expert staging 43, prestage 576: 160 experts); disk landing ring 12 experts (43 MB pinned)
+glm multi mtp: the running requests verify up to 2 drafts each in their batched steps (16 rows a group)
+glm prefill: CUDA0 the MMQ scratch pool has 16.0 MB of the loan (16.0 MB past the layout's need; 0 experts more lent for it)
+glm prefill: CUDA0 chunk 1/1, 27 tokens, wall 481 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 481 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (9072 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 27 tokens in 585.5 ms (21.69 ms/token, 46 tok/s), 1 chunk of 64 tokens | CUDA0 481 ms
+glm multi mtp: request 1: 0 of 0 drafts accepted (0.0%) in 63 verify steps, 1.00 tokens a step
+glm multi: request 1 done (length): 64 tokens in 2.5 s (25.3 tok/s), 0 running
+glm multi mtp: request 2: 38 of 47 drafts accepted (80.9%) in 25 verify steps, 2.52 tokens a step
+glm multi: request 2 done (length): 64 tokens in 1.8 s (34.7 tok/s), 0 running
+glm prefill: CUDA0 chunk 1/1, 1375 tokens, wall 4250 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 4250 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (462000 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 3 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 1375 tokens in 4270.2 ms (3.11 ms/token, 322 tok/s), 1 chunk of 1408 tokens | CUDA0 4250 ms
+glm multi mtp: request 3: 0 of 0 drafts accepted (0.0%) in 63 verify steps, 1.00 tokens a step
+glm multi: request 3 done (length): 64 tokens in 2.6 s (24.6 tok/s), 0 running
+glm multi mtp: request 4: 37 of 49 drafts accepted (75.5%) in 26 verify steps, 2.42 tokens a step
+glm multi: request 4 done (length): 64 tokens in 1.9 s (33.2 tok/s), 0 running
+glm prefill: CUDA0 chunk 1/1, 26 tokens, wall 422 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 422 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (8736 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 26 tokens in 422.8 ms (16.26 ms/token, 61 tok/s), 1 chunk of 64 tokens | CUDA0 422 ms
+glm prefill: CUDA0 chunk 1/1, 26 tokens, wall 430 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 430 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (8736 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 26 tokens in 430.1 ms (16.54 ms/token, 60 tok/s), 1 chunk of 64 tokens | CUDA0 430 ms
+glm multi: request 7 waits for a context that holds 99 tokens
+glm multi: request 8 waits for a context that holds 99 tokens
+glm multi mtp: request 5: 31 of 61 drafts accepted (50.8%) in 32 verify steps, 1.97 tokens a step
+glm multi: request 5 done (length): 64 tokens in 3.5 s (18.5 tok/s), 1 running
+glm prefill: CUDA0 chunk 1/1, 26 tokens, wall 421 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 421 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (8736 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 26 tokens in 421.3 ms (16.20 ms/token, 62 tok/s), 1 chunk of 64 tokens | CUDA0 421 ms
+glm multi mtp: request 7: 33 of 58 drafts accepted (56.9%) in 30 verify steps, 2.10 tokens a step
+glm multi: request 7 done (length): 64 tokens in 2.6 s (24.4 tok/s), 1 running
+glm prefill: CUDA0 chunk 1/1, 26 tokens, wall 427 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 427 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (8736 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 26 tokens in 427.5 ms (16.44 ms/token, 61 tok/s), 1 chunk of 64 tokens | CUDA0 427 ms
+glm multi mtp: request 6: 0 of 0 drafts accepted (0.0%) in 63 verify steps, 1.00 tokens a step
+glm multi: request 6 done (length): 64 tokens in 6.6 s (9.7 tok/s), 1 running
+glm multi mtp: request 8: 32 of 60 drafts accepted (53.3%) in 31 verify steps, 2.03 tokens a step
+glm multi: request 8 done (length): 64 tokens in 2.2 s (28.7 tok/s), 0 running
+glm prefill: CUDA0 chunk 1/1, 23 tokens, wall 404 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 404 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (7728 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 23 tokens in 403.8 ms (17.56 ms/token, 57 tok/s), 1 chunk of 64 tokens | CUDA0 404 ms
+glm prefill: CUDA0 chunk 1/1, 19 tokens, wall 391 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 391 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (6384 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 19 tokens in 399.9 ms (21.05 ms/token, 48 tok/s), 1 chunk of 64 tokens | CUDA0 391 ms
+glm multi: request 11 waits for a context that holds 1452 tokens
+glm multi mtp: request 10: 0 of 0 drafts accepted (0.0%) in 9 verify steps, 1.00 tokens a step
+glm multi: request 10 done (cancel): 10 tokens in 0.8 s (12.4 tok/s), 1 running
+glm prefill: CUDA0 chunk 1/1, 256 tokens, wall 1470 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 1470 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (86016 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 256 tokens in 1471.4 ms (5.75 ms/token, 174 tok/s), 1 chunk of 256 tokens | CUDA0 1470 ms
+glm prefill: CUDA0 chunk 1/1, 256 tokens, wall 1316 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 1316 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (86016 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 256 tokens in 1317.6 ms (5.15 ms/token, 194 tok/s), 1 chunk of 256 tokens | CUDA0 1316 ms
+glm prefill: CUDA0 chunk 1/1, 256 tokens, wall 1367 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 1367 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (86016 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 256 tokens in 1369.2 ms (5.35 ms/token, 187 tok/s), 1 chunk of 256 tokens | CUDA0 1367 ms
+glm prefill: CUDA0 chunk 1/1, 256 tokens, wall 1409 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 1409 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (86016 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 256 tokens in 1411.6 ms (5.51 ms/token, 181 tok/s), 1 chunk of 256 tokens | CUDA0 1409 ms
+glm prefill: CUDA0 chunk 1/1, 256 tokens, wall 1416 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 1416 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (86016 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 256 tokens in 1418.9 ms (5.54 ms/token, 180 tok/s), 1 chunk of 256 tokens | CUDA0 1416 ms
+glm prefill: CUDA0 chunk 1/1, 139 tokens, wall 971 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 971 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (46704 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 139 tokens in 972.6 ms (7.00 ms/token, 143 tok/s), 1 chunk of 192 tokens | CUDA0 971 ms
+glm multi: request 12 waits for a context that holds 38 tokens
+glm multi mtp: request 11: 13 of 16 drafts accepted (81.2%) in 10 verify steps, 2.30 tokens a step
+glm multi: request 11 done (length): 24 tokens in 1.2 s (20.7 tok/s), 1 running
+glm prefill: CUDA0 chunk 1/1, 21 tokens, wall 395 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 395 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (7056 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 21 tokens in 395.1 ms (18.81 ms/token, 53 tok/s), 1 chunk of 64 tokens | CUDA0 395 ms
+glm multi mtp: request 12: 2 of 6 drafts accepted (33.3%) in 5 verify steps, 1.40 tokens a step
+glm multi: request 12 done (length): 8 tokens in 0.6 s (13.6 tok/s), 1 running
+glm multi mtp: request 9: 103 of 173 drafts accepted (59.5%) in 88 verify steps, 2.17 tokens a step
+glm multi: request 9 done (length): 192 tokens in 16.3 s (11.8 tok/s), 0 running
+glm prefill: CUDA0 chunk 1/1, 194 tokens, wall 1366 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 1366 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (65184 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 2 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 194 tokens in 1367.0 ms (7.05 ms/token, 142 tok/s), 1 chunk of 256 tokens | CUDA0 1366 ms
+glm multi mtp: request 13: 0 of 9 drafts accepted (0.0%) in 7 verify steps, 1.00 tokens a step
+glm multi: request 13 done (length): 8 tokens in 0.4 s (18.0 tok/s), 0 running
+glm prefill: CUDA0 chunk 1/1, 24 tokens, wall 408 ms | the copy lane 0 ms: copies 0 (0.0 GB/s), ring wait 0, gaps 0, mixer windows 0 | lead 0, tail 408 | pcie 0.00 GB (ram 0.00, disk 0.00) + 0.00 GB vram | experts: staged 0, resident 12222 (8064 rows), prestaged 0, cpu 0 (0 rows, 0 ms) | plan 1 ms host, disk wait 0 ms, hop in 0 ms | layer lane 0.0/0.0 ms max/min (no staged groups)
+glm prefill: 24 tokens in 409.3 ms (17.05 ms/token, 59 tok/s), 1 chunk of 64 tokens | CUDA0 408 ms

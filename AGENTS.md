@@ -208,3 +208,24 @@ Release `tp-v1.1.44` uses numeric VERSION `1.1.44`; publication is tracked in #1
 This acceptance does not change the recorded deployed single-slot selections.
 Source integration does not authorize changing production binaries or the
 protected peer checkout.
+
+
+## Upstream v54–v58 checkpoint
+
+Upstream v1.1.54–v1.1.58 was integrated sequentially on
+`codex/upstream-v1.1.54-v1.1.58`; #159 and per-tag #160–#164 record final
+PR/main publication. Each checkpoint passed exact-source CI and GLM Flash
+Maya-S / DeepSeek Flash XS/S default1/batch2 GPU comparisons. Final four-slot
+public HTTP, Unicode whole-head MTP, Q5_K parity, lifecycle and first-fatal
+checks also pass. No model was downloaded and no full 744B model was run.
+Read Handoff.md §54 and docs/upstream/v1.1.58.md for evidence and scope.
+
+Preserve explicit rank-local KDA descriptors for carving/sequence contexts and
+all snapshot/checkpoint/slot copies; keep canonical DSA/residual/NextN geometry.
+Full GLM-5.3 remote TP2 is refused before bootstrap. Unmirrored request tuning
+and all explicit paired ablation settings are refused before mutation; ablation
+is unpaired only. Full-model attention repacking/calibration must not alter
+Flash packs/defaults. `DS4_INDEX_TC` remains opt-in; AI_RUN is experimental/off
+with observed answer changes (#166). #165 intermittent stalls, #167 full-model
+RAM-slot trailer and remaining #133 experiments stay open. Production selections
+and the protected peer checkout are unchanged; use isolated matching builds.

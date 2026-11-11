@@ -1,0 +1,259 @@
+{
+  "canonical": {
+    "engram_sha256": "08d55d6433f389b14aa115f4ea4eb31d6a2d63df1ae40821f03facf4c2d49142",
+    "index_sha256": "97317e264031e56a2a50119908c6988a734c3dfb3f5e5b49be4b7d611d64234c",
+    "model_config_sha256": "2d7a4cf9a36880747d39439ddd482ea3f7ecde977cbdf03f1a1116bf6e5b98ef",
+    "sources": [
+      {
+        "index": 0,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00001-of-00003.gguf",
+        "sha256": "9d92dd13d4603dbf07720845419963693f4c07ae098e55a5aae2f207dd44d04d",
+        "size": 47993866016
+      },
+      {
+        "index": 1,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00002-of-00003.gguf",
+        "sha256": "b7f26bae6d6fccfb256c911f645289c0aec8459766ef83f6a04d7ed47c7e06c8",
+        "size": 47421853600
+      },
+      {
+        "index": 2,
+        "name": "DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00003-of-00003.gguf",
+        "sha256": "62b98172562543126204fa2ff18f7d72d75353445ff93f4135d037355b409f35",
+        "size": 21422979296
+      },
+      {
+        "index": 3,
+        "name": "../Engram-Q6_K/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf",
+        "sha256": "0d93315942c523d82f6dbc0a6e0e1751548e309f3963f96b82f92e8f9bc52e36",
+        "size": 80641295472
+      },
+      {
+        "index": 4,
+        "name": "../Engram-Q6_K/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf",
+        "sha256": "39bbc8cde8b17604fed9a7ba7fc6bc9c5e72e34733657943ac049b4b9ca2d340",
+        "size": 80643503412
+      },
+      {
+        "index": 5,
+        "name": "../dspark/dspark-xs2.bin",
+        "sha256": "8dfe21082a6cb320f334fddb454630c241c6d44e0463eef4f8b0b07334511779",
+        "size": 4251725568
+      },
+      {
+        "index": 6,
+        "name": "../vision/vision.bin",
+        "sha256": "685d935986a030ba1965af5c1e06b55614c7778c821daae1917dde5d2152ff68",
+        "size": 970536960
+      }
+    ],
+    "tokenizer": {
+      "chat_template.jinja": "e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa",
+      "merges.txt": "547bace837acea98652eef5669c9b01cee1c73ad1d2a44d6fdce9e6a81c22147",
+      "token_type.json": "0a61021438e5ce6041133495f18fc360a6587aea748b17d953f552d2119ba51e",
+      "tokenizer.json": "5a47981b685b75154e29bfb0299584c9b3a4a28679585e86d524c34c065d037f",
+      "vocab.json": "2f0bf5b31f4aa191d5d0d78291927a4f28c9ceb498a5e345b97e926c4cb99c1a"
+    },
+    "version": 1
+  },
+  "identity": "0c4933e6b70f53f7eff163a4053f8970fce470cacc4065983ebe28bd507c57af",
+  "local": [
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/ds4.txt",
+      "role": "config",
+      "sha256": "da43d3aa21a692c22aa68c0532d00aa3920d16b8460fe23f8d5880e1ee3be542",
+      "stat": {
+        "ctime_ns": 1793673937504779176,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159118,
+        "mtime_ns": 1793614592938586092,
+        "size": 1458
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/tensors.txt",
+      "role": "index",
+      "sha256": "97317e264031e56a2a50119908c6988a734c3dfb3f5e5b49be4b7d611d64234c",
+      "stat": {
+        "ctime_ns": 1793673937541156051,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159123,
+        "mtime_ns": 1793614592965572085,
+        "size": 3655266
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/engram.bin",
+      "role": "engram",
+      "sha256": "08d55d6433f389b14aa115f4ea4eb31d6a2d63df1ae40821f03facf4c2d49142",
+      "stat": {
+        "ctime_ns": 1793673937508980918,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159119,
+        "mtime_ns": 1793614592969571971,
+        "size": 517980
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/tokenizer/vocab.json",
+      "role": "tokenizer/vocab.json",
+      "sha256": "2f0bf5b31f4aa191d5d0d78291927a4f28c9ceb498a5e345b97e926c4cb99c1a",
+      "stat": {
+        "ctime_ns": 1793673937580965558,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159128,
+        "mtime_ns": 1793614592995571234,
+        "size": 2730577
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/tokenizer/merges.txt",
+      "role": "tokenizer/merges.txt",
+      "sha256": "547bace837acea98652eef5669c9b01cee1c73ad1d2a44d6fdce9e6a81c22147",
+      "stat": {
+        "ctime_ns": 1793673937554163284,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159125,
+        "mtime_ns": 1793614593001571064,
+        "size": 1504833
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/tokenizer/tokenizer.json",
+      "role": "tokenizer/tokenizer.json",
+      "sha256": "5a47981b685b75154e29bfb0299584c9b3a4a28679585e86d524c34c065d037f",
+      "stat": {
+        "ctime_ns": 1793673937557721073,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159127,
+        "mtime_ns": 1793614593007896569,
+        "size": 80
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/tokenizer/token_type.json",
+      "role": "tokenizer/token_type.json",
+      "sha256": "0a61021438e5ce6041133495f18fc360a6587aea748b17d953f552d2119ba51e",
+      "stat": {
+        "ctime_ns": 1793673937557695664,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159126,
+        "mtime_ns": 1793614593007750583,
+        "size": 387840
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4/tokenizer/chat_template.jinja",
+      "role": "tokenizer/chat_template.jinja",
+      "sha256": "e9f7db2fa773233bdfd0c5f21cf5d300283aad08fd6d056593634a5a375306fa",
+      "stat": {
+        "ctime_ns": 1793673937541174890,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159124,
+        "mtime_ns": 1793614593007930707,
+        "size": 5508
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00001-of-00003.gguf",
+      "role": "source/0",
+      "sha256": "9d92dd13d4603dbf07720845419963693f4c07ae098e55a5aae2f207dd44d04d",
+      "stat": {
+        "ctime_ns": 1793673343158199905,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159115,
+        "mtime_ns": 1793611961565159348,
+        "size": 47993866016
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00002-of-00003.gguf",
+      "role": "source/1",
+      "sha256": "b7f26bae6d6fccfb256c911f645289c0aec8459766ef83f6a04d7ed47c7e06c8",
+      "stat": {
+        "ctime_ns": 1793673752553182964,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159116,
+        "mtime_ns": 1793612017029377152,
+        "size": 47421853600
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/DeepSeek-V4.1-Flash-1017-Maya-XS-v2-IQ1_S-00003-of-00003.gguf",
+      "role": "source/2",
+      "sha256": "62b98172562543126204fa2ff18f7d72d75353445ff93f4135d037355b409f35",
+      "stat": {
+        "ctime_ns": 1793673937504668050,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159117,
+        "mtime_ns": 1793611313157594781,
+        "size": 21422979296
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Engram-Q6_K/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00004-of-00005.gguf",
+      "role": "source/3",
+      "sha256": "0d93315942c523d82f6dbc0a6e0e1751548e309f3963f96b82f92e8f9bc52e36",
+      "stat": {
+        "ctime_ns": 1793672232583167356,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159112,
+        "mtime_ns": 1793614237451655708,
+        "size": 80641295472
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Engram-Q6_K/DeepSeek-V4.1-Flash-1017-Maya-XS-IQ1_S-00005-of-00005.gguf",
+      "role": "source/4",
+      "sha256": "39bbc8cde8b17604fed9a7ba7fc6bc9c5e72e34733657943ac049b4b9ca2d340",
+      "stat": {
+        "ctime_ns": 1793672928790441239,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159113,
+        "mtime_ns": 1793614076339228856,
+        "size": 80643503412
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/dspark/dspark-xs2.bin",
+      "role": "source/5",
+      "sha256": "8dfe21082a6cb320f334fddb454630c241c6d44e0463eef4f8b0b07334511779",
+      "stat": {
+        "ctime_ns": 1793673974288215341,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159130,
+        "mtime_ns": 1793614544336950912,
+        "size": 4251725568
+      }
+    },
+    {
+      "path": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/vision/vision.bin",
+      "role": "source/6",
+      "sha256": "685d935986a030ba1965af5c1e06b55614c7778c821daae1917dde5d2152ff68",
+      "stat": {
+        "ctime_ns": 1793674051450306619,
+        "device": 59,
+        "filesystem_id": 14266262434675632417,
+        "inode": 4159135,
+        "mtime_ns": 1793614592576583114,
+        "size": 970536960
+      }
+    }
+  ],
+  "pack": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-XS/maya-ds4",
+  "version": 1
+}

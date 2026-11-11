@@ -1,0 +1,16 @@
+{
+  "label": "v1.1.55",
+  "previous": "v1.1.54",
+  "raw_directory": "/tmp/maya-upstream-20261111-validation",
+  "runtime": "/home/ugo/software/project-maya-upstream-20261111-runtime",
+  "scope": "HIP gfx1151 / APU RDMA Flash models; raw-engine StrataEngine gates, not public HTTP; no model downloads or GLM 744B execution",
+  "audited_identity_count": 26,
+  "harness_sha256": {
+    "case": "a2a80b463731ad42f3d67eac10978c96b0dcd70f914adb14c891be0acdaa13b0",
+    "checkpoint": "98abbebaac66a87953183565c209a1fa10acdf52912aa3642130544c1479e7ee",
+    "build": "74b0919d8e9f924ff173ae512c3e9a18f810a48450841b448ef196ede35aceb2",
+    "collect": "2b5fde8bee62dab7e0aa3bab339b4b97acff012e3772ad55e7989ea48d94200f",
+    "perf": "2387cf3768fba3da82f2ff6559543ac90f44d9385a363f2cec64ce64f2aaa63a",
+    "ai-run": "04936341e6d3d32f19c06b4295c4f447f0bb83e66b393db13fb800b418cec907"
+  }
+}

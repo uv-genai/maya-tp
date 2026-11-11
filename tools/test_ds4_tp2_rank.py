@@ -84,6 +84,33 @@ class DeepSeekTP2RankTest(unittest.TestCase):
         self.assertEqual(len({a['MAYA_DS4_TP2_EXECUTION_DIGEST'],single['MAYA_DS4_TP2_EXECUTION_DIGEST'],small['MAYA_DS4_TP2_EXECUTION_DIGEST']}),3)
         for env in (a,b,single,small): self.assertEqual(env['MAYA_DS4_TP2_MODEL_DIGEST'],'a'*64)
 
+    def test_indexer_slab_identity_normalizes_aliases_and_disabled_defaults(self):
+        flags = ["--serve", "--rank", "0", "--parallel", "2"]
+        def digest(environment):
+            return self.build(flags, environment)[1]["MAYA_DS4_TP2_EXECUTION_DIGEST"]
+        disabled = digest({})
+        enabled = digest({"DS4_AI_RUN": "1"})
+        self.assertNotEqual(disabled, enabled)
+        for values in ({"DS4_AI_RUN": "0"}, {"MAYA_DS4_AI_RUN": ""},
+                       {"MAYA_DS4_AI_RUN": "0", "STRATA_DS4_AI_RUN": "1", "DS4_AI_RUN": "1"},
+                       {"STRATA_DS4_AI_RUN": "0", "DS4_AI_RUN": "1"},
+                       {"MAYA_DS4_AI_RUN": "", "STRATA_DS4_AI_RUN": "1"}):
+            with self.subTest(disabled=values):
+                self.assertEqual(digest(values), disabled)
+        for values in ({"STRATA_DS4_AI_RUN": "1"}, {"MAYA_DS4_AI_RUN": "1"},
+                       {"STRATA_DS4_AI_RUN": "1", "DS4_AI_RUN": "0"},
+                       {"MAYA_DS4_AI_RUN": "1", "STRATA_DS4_AI_RUN": "0", "DS4_AI_RUN": "0"},
+                       {"MAYA_DS4_AI_RUN": " +2 "}, {"DS4_AI_RUN": "-1"}):
+            with self.subTest(enabled=values):
+                self.assertEqual(digest(values), enabled)
+        _, worker = self.build(["--rank", "1", "--parallel", "2"], {"MAYA_DS4_AI_RUN": "1"})
+        self.assertEqual(worker["MAYA_DS4_TP2_EXECUTION_DIGEST"], enabled)
+
+    def test_indexer_slab_rejects_ambiguous_or_out_of_range_values_before_launch(self):
+        for value in ("on", "1x", "1.0", "1_0", "\u00a01", "2147483648", "-2147483649"):
+            with self.subTest(value=value), self.assertRaisesRegex(tp2_identity.IdentityError, "DS4_AI_RUN"):
+                self.build(["--serve", "--rank", "0", "--parallel", "2"], {"MAYA_DS4_AI_RUN": value})
+
     def test_default_preflight_retains_legacy_identity_format(self):
         settings=dict(tp2_launch.RANK_DEFAULTS,pack=str(self.pack),manifest=str(self.manifest),
                       engine=str(self.engine),host='rank0.local',rdma_device='usb4_rdma5')
@@ -91,6 +118,9 @@ class DeepSeekTP2RankTest(unittest.TestCase):
             _,_,_,legacy=tp2_launch.prepare(settings,0)
             settings['parallel']=4
             _,_,_,batch=tp2_launch.prepare(settings,0)
+            for value in ("0", "1"):
+                settings.update(parallel=1, env={"MAYA_DS4_AI_RUN": value})
+                self.assertEqual(tp2_launch.prepare(settings,0)[3], legacy)
         self.assertEqual(legacy,{'model':'a'*64,'partition':'b'*64,'build':'c'*64})
         self.assertEqual({k:batch[k] for k in legacy},legacy)
         self.assertEqual(set(batch)-set(legacy),{'execution'})

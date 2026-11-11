@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import sys
 
@@ -49,6 +50,26 @@ def parser():
     return p
 
 
+def ai_run_enabled(environ):
+    """Resolve the indexer slab opt-in exactly as the engine does: MAYA, STRATA, then bare DS4.
+
+    Empty or missing means disabled. Require a signed 32-bit decimal so Python and C++ atoi cannot disagree.
+    """
+    value = next((environ[key] for key in ("MAYA_DS4_AI_RUN", "STRATA_DS4_AI_RUN", "DS4_AI_RUN")
+                  if key in environ), "")
+    if not isinstance(value, str):
+        raise IdentityError("DS4_AI_RUN must be a decimal integer (0 disables; nonzero enables)")
+    value = value.strip(" \t\n\r\v\f")
+    if not value:
+        return False
+    if re.fullmatch(r"[+-]?[0-9]+", value) is None:
+        raise IdentityError("DS4_AI_RUN must be a decimal integer (0 disables; nonzero enables)")
+    number = int(value)
+    if not -(1 << 31) <= number < (1 << 31):
+        raise IdentityError("DS4_AI_RUN must fit a signed 32-bit integer")
+    return number != 0
+
+
 def prepare_launch(opts, environ):
     if opts.serve != (opts.rank == 0):
         raise IdentityError("rank 0 requires --serve; rank 1 must not use it")
@@ -85,9 +106,12 @@ def prepare_launch(opts, environ):
     env["MAYA_DS4_TP2_DSPARK"] = "1" if opts.dspark == "on" else "0"
     env["MAYA_DS4_TP2_CHUNK"] = str(opts.prefill_chunk)
     env["MAYA_DS4_TP2_LOOKUP"] = str(opts.suffix_draft)
+    ai_run = ai_run_enabled(env)
     execution = {"context": opts.context, "parallel": opts.parallel, "rows": 16,
                  "dspark": opts.dspark, "prefill_chunk": opts.prefill_chunk,
                  "suffix_draft": opts.suffix_draft, "proposals": "point" if opts.parallel>1 else "legacy"}
+    if opts.parallel > 1:
+        execution["ai_run"] = ai_run
     env["MAYA_DS4_TP2_EXECUTION_DIGEST"] = hashlib.sha256(
         json.dumps(execution,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
     env["MAYA_DS4_TP2_PARALLEL"] = str(opts.parallel)

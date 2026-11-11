@@ -1,0 +1,29 @@
+{
+  "source_commit": "2485cb609da0c436e1b7d9012d31a136656dd013",
+  "HIP_PATH": "/opt/rocm/core",
+  "cmake_cache_selected": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+    "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+    "CMAKE_HIP_ARCHITECTURES": "gfx1151",
+    "CMAKE_HIP_COMPILER": "/opt/rocm/lib/llvm/bin/clang++",
+    "CMAKE_HIP_FLAGS_RELEASE": "-O3 -DNDEBUG",
+    "STRATA_BUILD_TESTS": "ON",
+    "STRATA_ENABLE_CUDA": "OFF",
+    "STRATA_ENABLE_HIP": "ON",
+    "STRATA_ENABLE_TP2_RDMA": "ON",
+    "STRATA_GGML_DIR": "/home/ugo/software/project-maya/third_party/llama.cpp",
+    "STRATA_NATIVE_EXPERTS": "ON",
+    "STRATA_PREFILL_MMQ": "ON"
+  },
+  "compiler": [
+    "AMD clang version 24.0.0git (https://github.com/ROCm/llvm-project.git d6f6cb691863e9258034ab48c1dfce21689d5606)",
+    "Target: x86_64-unknown-linux-gnu",
+    "Thread model: posix",
+    "InstalledDir: /opt/rocm/core/lib/llvm/bin",
+    "Configuration file: /opt/rocm/core/lib/llvm/bin/clang++.cfg"
+  ],
+  "cmake": "cmake version 4.4.4",
+  "setup_llama_cpp_pin": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+  "llama_cpp_identity_note": "Installer-extracted source has no independent .git directory; setup pin recorded, not an independently queried git HEAD."
+}

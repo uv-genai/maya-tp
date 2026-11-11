@@ -1,0 +1,26 @@
+Source checkpoint: 2485cb609da0c436e1b7d9012d31a136656dd013 (resolved upstream v1.1.58 merge)
+Parent source: 4911c5565992ce201486916cb8b446bf8d47acf3 (accepted v1.1.57)
+Working source: /home/ugo/software/project-maya
+Isolated runtime, same absolute path on both hosts: /home/ugo/software/project-maya-upstream-20261111-runtime
+Isolated local build: /home/ugo/software/project-maya-upstream-20261111-build
+Lead: strix-halo-2.local (192.168.1.92); peer: strix-halo-1.local (192.168.1.22), direct SSH
+Transport: usb4_rdma5, control/bootstrap port19351; no TCP tensor path
+No model files or executables are included in this archive. Existing packs are referenced only by explicit configs. Production checkouts/binaries/configs were not modified.
+
+Build started from resolved working file contents while root finalized the index; build-source.json preserves the exact initial snapshot and old HEAD. Finalize verifies every compiled input matches the committed merge, syncs final serving/tooling, freezes parity fixtures, verifies both-host hashes, and writes final source/runtime provenance.
+
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-build.py --label v1.1.58 --allow-unmerged-metadata
+HIP_PATH=/opt/rocm/core /home/ugo/software/project-maya/.venv/bin/cmake --build /home/ugo/software/project-maya-upstream-20261111-build --target glm_mv_nt_test glm_ablate_test -j 6
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-finalize.py --label v1.1.58 --commit 2485cb609da0c436e1b7d9012d31a136656dd013 --fixtures glm_mv_nt_test glm_ablate_test
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-components.py
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-checkpoint.py --label v1.1.58 --previous v1.1.57 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-case.py --name v1.1.58-glm-s-http-slots4 --family glm --model s --engine /home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.58/maya --slots 4 --context 32768 --http-smoke
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-case.py --name v1.1.58-ds4-xs-http-slots4 --family ds4 --model xs --engine /home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.58/maya-ds4 --slots 4 --context 8192 --http-smoke
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-collect.py --label v1.1.58 --previous v1.1.57
+
+Each case.py call embeds the ownership and 1Hz telemetry helpers; they inspect only the recorded owned engine identities plus system GPU/memory/pressure counters. The peer engine and peer telemetry are started by direct SSH and reaped by their owners. No name-wide/port-wide process removal. Final process identity audit is stopped-owned-processes.json. The collector saves exact helpers, per-case requests/tokens/DONE fields, bounded TP/proposal/error log excerpts, losslessly compressed telemetry, configs, source/binary hashes, host checks, and synthetic parity/startup-rejection logs.
+
+Six normal cases compare fixed prompt IDs and output token IDs to accepted frozen v1.1.57 results; no baseline model reload. Unicode, new XS lifecycle/fatal and four-slot HTTP are candidate-specific bounded gates. Ordinary/spec same-prompt comparisons require exact token equality and positive real proposals. Repeated prompt spec-on prefill is cached and is not cold prefill throughput. Timing points are observations, not a broad performance acceptance campaign; #165 remains open for intermittent throughput, #166 for experimental/default-off AI_RUN numerical qualification, #167 for inherited full-model-only RAM trailer behavior. No AI_RUN on, GLM744B, downloads, or production deployment in this checkpoint.
+
+The two explicit four-slot case.py commands above were executed sequentially by the archived final-http.py driver, after it checked six-case summary.finished, six successful cases and zero fixed-output differences:
+/home/ugo/software/project-maya/.venv/bin/python /tmp/maya-upstream-20261111-final-http.py

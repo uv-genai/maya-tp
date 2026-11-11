@@ -21,13 +21,29 @@ inherited installer reference material. Open kernel-parity investigations are
 tracked in [#68](https://github.com/uv-genai/maya-tp/issues/68), separately from
 the accepted XS/S inference workloads.
 
-The current installer follows upstream v1.1.53's updated AMD/EXL3 model labels.
-The fork's validated TP2 models and accepted runtime paths are described above.
+The v54–v58 integration imports newer installer/catalog changes and passed
+sequential Flash validation; final publication is tracked in #159.
+Full GLM-5.3 (744B) is an unqualified standalone option;
+remote TP2 rejects it before bootstrap. No 744B weights were downloaded or run.
+See [v57](upstream/v1.1.57.md), [v58](upstream/v1.1.58.md) and the
+[full-model scope](GLM53.md). The accepted Flash pair paths above stay unchanged.
+
+The new Q8 attention repack check applies only to `glm-dsa`: older full-model
+packs may be rebuilt to retain their native Q8 attention matrices; an explicit
+`MAYA_PACK_NATIVE32=0` selects BF16 upcasting there. Full-model single-APU drafting
+estimation/calibration is also architecture-specific. Neither change rebuilds
+Flash packs or changes their accepted TP2/MTP choices.
+
+Refusal ablation is an unpaired-engine feature. Paired GLM/DeepSeek launchers
+refuse ablation config/startup settings and expose no ablation UI capability.
+Any explicit per-request `ablate`, including `false`, is rejected before engine
+mutation. See [the settings scope](SETTINGS.md#refusal-ablation-per-request-ablate).
 
 ## What the first run does
 
 It first asks which model to set up:
 
+- **GLM-5.3 (744B), unqualified standalone catalog** - Maya's own Maya-XS GGUF (`--model glm-5.3-maya-xs`) or unsloth's UD-IQ2_M GGUF (`--model GLM-5.3-UD-IQ2_M`), on the same engine; [its page](GLM53.md);
 - **GLM-5.3-Flash** - Project Maya's GGUF quants (or turboderp's EXL3 quants), from one GPU up; the steps below;
 - **DeepSeek-V4.1-Flash-1017**, with GGUF and EXL3 installer options. This fork's
   accepted TP2/DSpark packs are Maya-XS and Maya-S. The following EXL3 and local
@@ -96,7 +112,7 @@ GLM-5.3-Flash's first run takes 20-40 minutes plus the download:
 
 1. checks the PC (GPUs, driver, CUDA toolkit, compiler, RAM, CPU);
 2. asks which GPUs to use (all of them by default, up to 16), how much context (32K recommended), which model to
-   download: GLM-5.3 · Maya-S (recommended; Maya-S24 on cards of 24 GB or less), Maya-M, Maya-M-Derisked or Maya-L, and how it
+   download: GLM-5.3-Flash · Maya-S (recommended; Maya-S24 on cards of 24 GB or less), Maya-M, Maya-M-Derisked or Maya-L, and how it
    drafts: the model's MTP block (the default) or a [DFlash2 drafter](SETTINGS.md#drafting-with-dflash2) (NVIDIA RTX
    30 / A100 and newer);
 3. installs its Python packages into `.venv` and gets llama.cpp's source at a pinned commit (it lists both and asks);
@@ -166,7 +182,7 @@ local edits first. The updated dashboard accepts both prefixed and legacy releas
 | `--import-model FOLDER` | use model files you downloaded some other way (a download manager, a copy from another PC, a Hugging Face cache): finds Maya's published files in FOLDER and its subfolders by size and sha256 - their names do not matter - and moves them into `--models-dir`'s layout (same drive) or copies them (another drive, a cache link: `--copy`; the originals stay). Prints what was found, what is missing and what did not match; files that did not match are never touched, and a file already in place is never replaced. Moved files are recorded as verified |
 | `--copy` | with `--import-model`: copy the files that cannot be moved |
 | `--download-model` | download the model without asking (the commands and size are still printed) |
-| `--model NAME` | which model and files, without asking. Maya's quants by their setup id - the model first, then the tier (XS, S, M, L by the experts' bits): `glm-maya-s`, `glm-maya-s24`, `glm-maya-m`, `glm-maya-m-derisked`, `glm-maya-l`, `deepseek-maya-xs`, `deepseek-maya-s`, `deepseek-maya-m`, `minimax-maya-xs`, `minimax-maya-s` (or the full name, e.g. `MiniMax-M3.1-Flash-Maya-XS`). Or a model, its files asked: `DeepSeek-V4.1-Flash-1017`, `MiniMax-M3.1-Flash`. The names used before still work: `Maya-S-v2-IQ2_XXS` (GLM-5.3 · Maya-S), `Maya-S24`, `Maya-M`, `Maya-M-Derisked`, `Maya-L`, and `EXL3-3.05bpw` / `EXL3-4.05bpw` / `EXL3-sc_4.10bpw` - an experimental EXL3 quant of GLM-5.3-Flash at 3.05 or 4.05 bits per weight, or the self-calibrated one at 4.10 with 8-bit attention and shared experts ([3.05bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/3.05bpw), 125.3 GB; [4.05bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/4.05bpw), 165.2 GB; [sc_4.10bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/sc_4.10bpw), 167.8 GB; all with the MTP block) that the engine reads in place from its safetensors: NVIDIA and AMD installer support; 3.05bpw tested on Linux, none measured against the FP8 model (`EXL3-sc_4.10bpw` is not in the setup's list: named by hand, or set up before, it works as before) |
+| `--model NAME` | which model and files, without asking. Maya's quants by their setup id - the model first, then the tier (XS, S, M, L by the experts' bits): `glm-maya-s`, `glm-maya-s24`, `glm-maya-m`, `glm-maya-m-derisked`, `glm-maya-l`, `deepseek-maya-xs`, `deepseek-maya-s`, `deepseek-maya-m`, `minimax-maya-xs`, `minimax-maya-s` (or the full name, e.g. `MiniMax-M3.1-Flash-Maya-XS`). Or a model, its files asked: `DeepSeek-V4.1-Flash-1017`, `MiniMax-M3.1-Flash`. The names used before still work: `Maya-S-v2-IQ2_XXS` (GLM-5.3-Flash · Maya-S), `Maya-S24`, `Maya-M`, `Maya-M-Derisked`, `Maya-L`, and `EXL3-3.05bpw` / `EXL3-4.05bpw` / `EXL3-sc_4.10bpw` - an experimental EXL3 quant of GLM-5.3-Flash at 3.05 or 4.05 bits per weight, or the self-calibrated one at 4.10 with 8-bit attention and shared experts ([3.05bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/3.05bpw), 125.3 GB; [4.05bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/4.05bpw), 165.2 GB; [sc_4.10bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/sc_4.10bpw), 167.8 GB; all with the MTP block) that the engine reads in place from its safetensors: NVIDIA and AMD installer support; 3.05bpw tested on Linux, none measured against the FP8 model (`EXL3-sc_4.10bpw` is not in the setup's list: named by hand, or set up before, it works as before) |
 | `--model-dir DIR` | use DeepSeek-V4.1-Flash-1017's files you already have: the folder with a GGUF's shards, or with the EXL3 quant's files and the Engram shards `model-00047-of-00048.safetensors` / `model-00048-of-00048.safetensors` of DeepSeek's repo (it must be writable: the pack goes inside it). Or an EXL3 folder of GLM-5.3-Flash or MiniMax-M3.1-Flash at any bit rate that is not one of the listed downloads (turboderp's other branches, Mia-AiLab's other bit rates): the setup reads the folder's own `config.json` and `model.safetensors.index.json`, checks each file whole by its header, never offers the listed downloads for it, writes a config named after the folder (`maya-<folder>.json`) and uses the folder's own sampling (`generation_config.json`) and chat template (`chat_template.jinja`) - GLM's / MiniMax's where the folder has none. MiniMax: `--model MiniMax-M3.1-Flash --model-dir DIR` is the same |
 | `--ds4-quant Q` | DeepSeek-V4.1-Flash-1017's files: `maya-s`, `maya-xs` (Maya's quants, the same as `--model deepseek-maya-s` / `deepseek-maya-xs`; Maya-S the default), `gguf-q8` (unsloth's UD-Q8_K_XL GGUF), `gguf-q4` (its UD-Q4_K_XL: dense weights Q8_0; not in the setup's list, named by hand), `exl3` (LibertAIDAI's EXL3 quant at 2.9 bits), `exl3-3.5` (its 3.5-bit quant: closer to the original, about 280 GB of VRAM and RAM), `abliterated-128g` / `abliterated-256g` (orcarouter's abliterated model as its Mix-128G / Mix-256G GGUF, with Maya's Q6_K n-gram tables; `abliterated`: the one this PC holds; a gated repo: `HF_TOKEN` or `hf auth login`); the EXL3 quants need NVIDIA V100 or newer (pictures: RTX 30 / A100 or newer) and are offered only there, and on AMD ([EXL3 HIP reference](EXL3_HIP.md)) |
 | `--mm3-quant Q` | MiniMax-M3.1-Flash's files: `exl3` (Mia-AiLab's EXL3 quant at 3.5 bits, NVIDIA), `maya-xs` or `maya-s` (Maya's GGUF quants, the same as `--model minimax-maya-xs` / `minimax-maya-s`; `gguf-xs` / `gguf-s` before) |
@@ -260,4 +276,4 @@ restart engines, including context changes and Turbo.
 A fatal DeepSeek GPU-state notice ends its engine after the request and leaves
 the pair down with the original failure cause. Restart both ranks through the
 appropriate GLM or DeepSeek launcher. Current source integration and validation
-are recorded in [the v1.1.53 report](upstream/v1.1.53.md).
+are recorded in [the v1.1.58 report](upstream/v1.1.58.md).

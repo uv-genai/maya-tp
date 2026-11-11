@@ -4,7 +4,8 @@ This fork validates GLM-5.3-Flash TP2/MTP and DeepSeek-V4.1-Flash TP2/DSpark on 
 pair of Strix Halo APUs over USB4 RDMA. The inherited single-host installer also
 contains MiniMax and Qwen paths. See README.md for model and validation scope.
 The quants are named model first, then the tier by the experts' bits (XS, S, M, L): --model glm-maya-s,
-deepseek-maya-xs, minimax-maya-xs ... (tools/maya_quants.py); every name used before still works.
+deepseek-maya-xs, minimax-maya-xs, glm-5.3-maya-xs ... (tools/maya_quants.py; GLM-5.3's: its download's name,
+G53_MODELS); every name used before still works.
 
     ./maya.sh                 the first run sets everything up and starts the dashboard; later runs just start it
     ./maya.sh --setup         set up again (other GPUs, another context length, another model folder)
@@ -30,7 +31,7 @@ no tuning step - it balances its own split):
      the C++ compiler (g++; on Windows Visual Studio's Build Tools - 2019/2022 always, 2026 with CUDA 13.2+), CMake,
      RAM, CPU; HIP checks AMD gfx1100/gfx1201/gfx1151 and ROCm 7 instead
      (on Windows AMD's ROCm SDK wheels in .venv, offered when they are not there)
-  2. asks: which GPUs (one, or several that split the layers), how much context, which model to download (GLM-5.3 ·
+  2. asks: which GPUs (one, or several that split the layers), how much context, which model to download (GLM-5.3-Flash ·
      Maya-S, Maya-S24, Maya-M, Maya-M-Derisked or Maya-L; or turboderp's EXL3 quant at 3.05 or 4.05 bits or the
      self-calibrated one at 4.10: NVIDIA from V100, and AMD)
   3. Python packages into .venv, llama.cpp's source at the pinned commit (it lists them and asks first)
@@ -84,6 +85,8 @@ import calibrate_ds4_tp as CAL4  # noqa: E402  DeepSeek's: --tp and the CPU thre
 import calibrate_draft as CD  # noqa: E402  the speed calibration: DFlash2 or the MTP block on this PC
 import calibrate_ds4 as CDS  # noqa: E402  DeepSeek's: the DSpark drafter or none, on this PC
 import calibrate_mm3_prefill as CPF  # noqa: E402  MiniMax's: how this PC reads prompts fastest (chunk, GEMMs)
+from serve import glm_dsa_product as G53  # noqa: E402  GLM-5.3 (744B, glm-dsa)
+from strata import maya_sync  # noqa: E402  (tools/strata/) a glm-dsa pack's expert profile and drafting
 
 WIN = S.WIN
 ME = "START-MAYA.bat" if WIN else "./maya.sh"      # how this is started, for the messages
@@ -99,7 +102,8 @@ VEXE = VBUILD / "bin" / ("maya-vision.exe" if WIN else "maya-vision")  # the ima
 VSTAMP = VBUILD / "MAYA-BUILD.json"
 MIN_CC = 60                                        # Pascal and newer (the GLM path; see arch_setting) ...
 VALIDATED_CC = 70                                  # ... Volta (V100) and newer validated, Pascal experimental (#212)
-MAX_GPUS = 16                                      # the layer split's parts at most (glm_model.hpp, kMaxParts)
+SMALL_GPU_SHARE = 0.25                             # choose_gpus: a card under this share of the biggest one's VRAM is left out
+MAX_GPUS = 16                                     # the layer split's parts at most (glm_model.hpp, kMaxParts)
 HIP_ARCHS = ("gfx1100", "gfx1201", "gfx1151")        # Maya also supports Strix Halo (unified memory)
 HIP_ARCHS_UNVALIDATED = ("gfx1030",)               # RDNA 2 (RX 6800 / 6900, Radeon PRO V620 / W6800), experimental: not
                                                    # validated on a card; no matrix cores, the portable kernels; compiled
@@ -534,6 +538,55 @@ MODELS = {
 # an install's update and a config that names them work as before; the list shows one only on a PC that has it set up
 # (its default there: a setup again, --yes included, keeps the model).
 MODELS_BY_HAND = ("EXL3-sc_4.10bpw",)
+# GLM-5.3 (744B, glm-dsa) downloads, in MODELS' form: offered on every backend but Metal, and kept out of MODELS itself - its list, --model's help and the dashboard's catalog stay GLM-5.3-Flash's
+# (glm_downloads() adds them).  Maya's own quant first: GLM-5.3-Maya-XS (v1.1.58; the experts in ~1.6 bits, one repo
+# per model: peasantsmith/GLM-5.3-Maya-GGUF, folder Maya-XS), then the owner's pick "for now" (2026-11-06): unsloth's
+# UD-IQ2_M.  Each pinned to the revision checked - each shard's size and sha256 from the Hugging Face API, equal to
+# the sha256 of the copies made from it.  "memory_gb": the VRAM + RAM that keep every expert in memory (G53.MEMORY_GB
+# when an entry names none: UD-IQ2_M's), "dense_gb": the dense weights the GPUs hold (G53.DENSE_GB likewise) - Maya-XS:
+# its weights (169.98 GB by the GGUF's header) and UD-IQ2_M's headroom (the same model's cache and working memory), the
+# dense part as measured on an AMD APU (16.98 GB; its header's non-expert tensors, 18.4 GB, less what UD-IQ2_M's
+# measurement leaves out of its own 15.7)
+G53_MODELS = {
+    "GLM-5.3-Maya-XS": {
+        "about": "Maya-XS, Project Maya's own GLM-5.3 quant (744B, 40B active a token; the routed experts in ~1.6 "
+                 "bits), text only, drafting with its own NextN block",
+        "repo": "peasantsmith/GLM-5.3-Maya-GGUF", "revision": "2fb34fe0d9398f33782b6ece7dca1bb798f8b168",
+        "folder": "Maya-XS", "file": "GLM-5.3-Maya-XS-{i:05d}-of-{n:05d}.gguf", "shards": 4, "download_gb": 170.0,
+        "memory_gb": 176, "dense_gb": 17.0, "maya": True,
+        "bytes": {"GLM-5.3-Maya-XS-00001-of-00004.gguf": 47680896576,
+                  "GLM-5.3-Maya-XS-00002-of-00004.gguf": 47406972992,
+                  "GLM-5.3-Maya-XS-00003-of-00004.gguf": 47620593024,
+                  "GLM-5.3-Maya-XS-00004-of-00004.gguf": 27281804864},
+        "sha256": {
+            "GLM-5.3-Maya-XS-00001-of-00004.gguf": "3c9b12e7d36c675e961185cd947841f650745abcb746b4c5042c2e97212cf75c",
+            "GLM-5.3-Maya-XS-00002-of-00004.gguf": "3be4fd84c71938ab39a6834c8e70aba411e766b80fb68cd48c5f95d8b6bb16d8",
+            "GLM-5.3-Maya-XS-00003-of-00004.gguf": "26ac27adf0d5d441aa10daf3cfb7eb7745447be26a8bce4cbdc7794f4c093fad",
+            "GLM-5.3-Maya-XS-00004-of-00004.gguf": "ef968744e05d5f062e203dc22146700db00e35c80655cc4880cfeee047500c26"}},
+    "GLM-5.3-UD-IQ2_M": {
+        "about": "Z.ai's GLM-5.3 (744B, 40B active a token) in unsloth's UD-IQ2_M GGUF (its dynamic 2-bit quant), "
+                 "text only, drafting with its own NextN block",
+        "repo": "unsloth/GLM-5.3-GGUF", "revision": "346b3591c7f28d1a23716f97a065ecf12ec14771", "folder": "UD-IQ2_M",
+        "file": "GLM-5.3-UD-IQ2_M-{i:05d}-of-{n:05d}.gguf", "shards": 6, "download_gb": 238.6,
+        "bytes": {"GLM-5.3-UD-IQ2_M-00001-of-00006.gguf": 9428677,
+                  "GLM-5.3-UD-IQ2_M-00002-of-00006.gguf": 49223976800,
+                  "GLM-5.3-UD-IQ2_M-00003-of-00006.gguf": 49143176640,
+                  "GLM-5.3-UD-IQ2_M-00004-of-00006.gguf": 49143176640,
+                  "GLM-5.3-UD-IQ2_M-00005-of-00006.gguf": 49143176640,
+                  "GLM-5.3-UD-IQ2_M-00006-of-00006.gguf": 41914650304},
+        "sha256": {
+            "GLM-5.3-UD-IQ2_M-00001-of-00006.gguf": "88ec1b9e924bbfe2f5e210bcedb5146aefca41567cdc021c344b253cb733b21d",
+            "GLM-5.3-UD-IQ2_M-00002-of-00006.gguf": "fc036c1c96f30d0b8fa334339cd1f9c68b1a3ab7fbc9440ee92df2a65b2a5e11",
+            "GLM-5.3-UD-IQ2_M-00003-of-00006.gguf": "684b069f8e7a6b28ba04dc2a4d63757db4270bdad95ac931cd013394c638b4da",
+            "GLM-5.3-UD-IQ2_M-00004-of-00006.gguf": "10c735d4af5d923adff14edb9bfbef63e5dce6187720c5db08a45f630638eccb",
+            "GLM-5.3-UD-IQ2_M-00005-of-00006.gguf": "69ee92423d65605f3b7b07744492d42fd85c0fd898127cb23a44f213823f4cff",
+            "GLM-5.3-UD-IQ2_M-00006-of-00006.gguf": "b8f96f7183eba431e047c52adab9091b3e465819c83c8c42ed94697b63507708"}},
+}
+
+
+def glm_downloads() -> dict:
+    """The GLM downloads the setup takes: MODELS and G53_MODELS."""
+    return {**MODELS, **G53_MODELS}
 # The DFlash2 drafter the setup offers instead of drafting with the model's MTP block (--dflash): a small block drafter
 # made for GLM-5.3-Flash (any of the quants above), pinned to the revision it was measured with and verified.
 DFLASH = {"repo": "Anbeeld/GLM-5.3-Flash-DFlash2-GGUF", "revision": "f3569acb7f9cee95e66d24442d75536eb00ab842",
@@ -702,6 +755,15 @@ QWEN_PROFILE = ROOT / "data" / "expert-profile-qwen.bin"
 # the attention's time the same as FP16's, half its VRAM left to experts)
 QWEN_KV = "int8"
 QWEN_KV_BYTES = 12 * (2 * 2 * 256 + 2 * 2 * 256 // 64 * 2 + 128)
+# Qwen3.8-Flash-Next itself in unsloth's UD-IQ2_XS GGUF (v1.1.54; the only one of unsloth's UD quants listed): the same
+# Qwen path, three shards (1 the metadata, 2 the weights, 3 the n-gram table alone) and its MTP head as a separate GGUF
+# (tools/qwen/download_unsloth.json: pinned, sha256-checked; shard 3 from Maya's own repo, byte for byte unsloth's).  The
+# n-gram table is memory-mapped (--ple-io mmap: the page cache, never loaded into RAM by the engine).
+QWEN_UD = "ud-iq2_xs"                              # (its key: --qwen-quant, the installer record's qwen_quant)
+QWEN_UD_DIR = "Qwen3.8-Flash-Next-UD-IQ2_XS"       # (its folder in the models folder, the installer's "quant")
+QWEN_UD_MANIFEST = ROOT / "tools" / "qwen" / "download_unsloth.json"
+QWEN_UD_MODEL_NAME = "qwen3.8-flash-next"
+QWEN_QUANTS = ("q5_k_m", QWEN_UD)
 FAMILIES = ("glm", "deepseek", "minimax", "qwen")
 SHARD_RE = re.compile(r"-(\d{5})-of-(\d{5})\.gguf$")
 
@@ -711,6 +773,13 @@ def exe_for_target(target: str) -> Path:
     fresh on every call since select_build_backend() reassigns EXE/DS4_EXE once the backend (cuda/hip) is known."""
     return {"maya": EXE, "maya-ds4": DS4_EXE, "maya-mm3": MM3_EXE}[target]
 GLM_ARCHS = ("glm5-next", "glm5next")             # llama.cpp's spelling and unsloth's
+
+
+def glm_archs() -> tuple:
+    """The GGUF architectures the GLM setup takes: GLM-5.3-Flash's, and GLM-5.3's (glm-dsa, 744B, same engine)."""
+    return GLM_ARCHS + (G53.ARCH,)
+
+
 # the expert profile setup passes to every GLM config (tools/make_profile.py --glm):
 # its ranking of every (layer, expert) pair decides each layer's VRAM slots and which experts start there
 PROFILE = ROOT / "data" / "expert-profile-glm.bin"
@@ -919,6 +988,10 @@ def hip_clang(root: Path) -> Path | None:
     slots = sorted((root / "lib" / "llvm").glob(f"*/bin/{exe}"),
                    key=lambda p: [int(x) for x in re.findall(r"\d+", p.parent.parent.name)],
                    reverse=True) if not WIN else []
+    # Debian/Ubuntu's own ROCm packages: hipcc drives the distribution's LLVM, /usr/lib/llvm-<N>/bin
+    slots += sorted((root / "lib").glob(f"llvm-[0-9]*/bin/{exe}"),
+                    key=lambda p: [int(x) for x in re.findall(r"\d+", p.parent.parent.name)],
+                    reverse=True) if not WIN else []
     return next((p for p in (root / "llvm" / "bin" / exe, root / "lib" / "llvm" / "bin" / exe,
                              root / "lib64" / "rocm" / "llvm" / "bin" / exe, *slots, root / "bin" / exe)
                  if p.exists()), None)
@@ -1127,20 +1200,26 @@ def check_hip_pc(a, installed=False, text_only=True) -> dict:
         root = root.resolve()
         clang = hip_clang(root)
         if (clang is None or clang.parent == root / "bin"
-                or not any(list((root / d).glob("libhipblas.so*")) for d in ("lib", "lib64"))):
+                or not any(list((root / d).glob("libhipblas.so*"))
+                           for d in ("lib", "lib64", *(q.relative_to(root) for q in (root / "lib").glob("*-linux-gnu"))))):
             fail("ROCm's HIP compiler and hipBLAS are required", "install ROCm 7, or set ROCM_PATH to its root")
         if tool_version(str(root / "bin/hipcc")) < (7, 0):
-            fail("Maya's HIP port requires ROCm 7 or newer")
+            if os.environ.get("MAYA_HIP_ALLOW_ROCM6") != "1":
+                fail("Maya's HIP port requires ROCm 7 or newer",
+                     "or set MAYA_HIP_ALLOW_ROCM6=1 to try a ROCm 6.x (untested, e.g. a distribution's packages)")
+            warn("ROCm older than 7 (MAYA_HIP_ALLOW_ROCM6=1): untested, the build or the engine may fail")
         if not shutil.which("c++"):
             fail("a C++ compiler is needed", "Ubuntu/Debian: sudo apt install build-essential")
     cpu, avx2, avx512 = S.cpu_info()
     if not avx2:
-        fail(f"the CPU ({cpu}) needs AVX2 for the expert lane")
+        # as on CUDA (#32): the CPU expert lane falls back to ggml's own kernels (src/kernels/cpu/expert_layout.cpp)
+        warn(f"the CPU ({cpu}) has no AVX2: the engine runs, its CPU expert lane on ggml's own kernels (slower). "
+             "MAYA_GLM_CPU_LANE=0 turns it off")
     total, avail = mem_gb()
     split = f"{len(chosen)} GPUs (layer split)" if len(chosen) > 1 else "one GPU"
     ok(f"using {' + '.join(gpu_label(g) for g in chosen)}; HIP, {split}" +
        (", text only" if text_only else ""))
-    ok(f"ROCm: {root}; CPU: {cpu} ({'AVX-512' if avx512 else 'AVX2'})")
+    ok(f"ROCm: {root}; CPU: {cpu} ({'AVX-512' if avx512 else 'AVX2' if avx2 else 'no AVX2'})")
     ok(f"RAM: {total:.0f} GB, {avail:.0f} GB available now")
     if any(hip_unified_memory(g) for g in chosen) and WIN:
         # Windows gives the APU's GPU a fixed carve-out, which it does not count as RAM: the engine sizes the pool
@@ -1267,6 +1346,13 @@ def choose_gpus(a, found, min_cc: int = MIN_CC, family: str = "") -> list:
              ("V100 and newer; Pascal - Tesla P40 / P100, GTX 10 - is experimental)" if min_cc < 80 else
               "RTX 30 / A100 and newer)"))
     best = sorted(usable, key=lambda g: (-round(g["vram_gb"]), g["index"]))
+    # A card with under a quarter of the biggest one's VRAM (a 2 GB display card beside 32 GB ones) still gets whole
+    # layers of the split and runs out of memory at the pack; the automatic pick leaves it out (--gpus still takes it).
+    small = [g for g in best[1:] if g["vram_gb"] < SMALL_GPU_SHARE * best[0]["vram_gb"]]
+    for g in small:
+        say(f"    {gpu_label(g)} is left out: too little VRAM beside the others for a part of the split "
+            f"(--gpus takes it anyway)")
+    best = [g for g in best if g not in small]
     if len(best) == 1:
         return best
     opts = ([best[:MAX_GPUS]] if len(best) > 2 else []) + [best[:2], best[:1]]
@@ -1528,7 +1614,7 @@ def download_dir(models: Path, quant: str) -> Path:
     """A download's folder: <models folder>/<quant> (--models-dir).  Files already there are used where they are:
     in that folder, in <models folder>/glm-5.3-flash-<quant> (an earlier version's downloads), or straight in the
     models folder - under their names on Hugging Face or an earlier one."""
-    m = MODELS[quant]
+    m = glm_downloads()[quant]
     d = models / quant
     for c in (d, models / f"glm-5.3-flash-{quant}".lower(), models):
         for names in [shard_names(m)] + old_names(m):
@@ -1570,6 +1656,18 @@ def config_family(cfg: dict) -> str:
     return Q.family_of(cfg)
 
 
+# each model's name on the setup's screen, under its logo (Qwen's: the model, whichever of its files - never its id)
+FAMILY_TITLE = {**Q.MODEL, "qwen": "Qwen-3.8-Flash-Next"}
+
+
+def setup_title(cfg: dict) -> str:
+    """The setup screen's header name for a config: its family's, except a glm-dsa config (family "glm"), which
+    is GLM-5.3's own name, not GLM-5.3-Flash."""
+    if G53.config_is_glm_dsa(cfg):
+        return G53.SHOWN
+    return FAMILY_TITLE.get(config_family(cfg), "")
+
+
 # the models whose engine answers several requests at once (--parallel): GLM-5.3-Flash's, DeepSeek-V4.1-Flash's
 # (maya-ds4 --parallel: a conversation's state each, their tokens decoded together), MiniMax-M3.1-Flash's (maya-mm3
 # --parallel: a KV cache each in VRAM - no KV streaming, no DSpark)
@@ -1589,6 +1687,8 @@ def choose_family(a, prev: dict) -> str:
     is the default."""
     if a.model:
         return "deepseek" if a.model == DS4 else "minimax" if a.model == MM3 else "qwen" if a.model == QWEN else "glm"
+    if getattr(a, "qwen_quant", None):                 # (--qwen-quant alone: Qwen's files named)
+        return "qwen"
     if a.gguf_dir or a.draft:
         return "glm"
     if a.model_dir:                                    # (an EXL3 folder of GLM or MiniMax; else DeepSeek's files)
@@ -1623,7 +1723,8 @@ def choose_family(a, prev: dict) -> str:
              f"{QWEN_SHOWN}: 180B, 10 of 512 experts a token; Blackfrost-AI's cybersecurity fine-tune of Qwen3.8-Flash-Next "
              "in peasantsmith's GGUF, on Maya's own Qwen path; NVIDIA from V100 on or AMD, Linux or Windows; all its "
              f"experts in about {qwen_entry()['memory_gb']:.0f} GB of VRAM and RAM together{here}, with less the others "
-             "read from the SSD; tool calls, its three reasoning efforts, MTP drafting, up to a 256K context; text only.")]
+             "read from the SSD; tool calls, its three reasoning efforts, MTP drafting, up to a 256K context; text only. "
+             f"Or the base model itself in unsloth's UD-IQ2_XS GGUF ({qwen_entry(QWEN_UD)['download_gb']:.0f} GB).")]
     pick = choose("Model?", ["Which model to set up:"], rows, FAMILIES.index(default), a.yes)
     return FAMILIES[pick]
 
@@ -1642,6 +1743,7 @@ def choose_model(a, models: Path, inst: dict) -> tuple:
     if a.model:
         return "download", a.model
     opts = [q for q in MODELS if q not in MODELS_BY_HAND or q == inst.get("quant")]   # (a chosen-by-hand download: only where it is installed)
+    g53 = [q for q in G53_MODELS if q in glm_downloads()]
     # cards of 24 GB or less: Maya-S24 (its 4-bit attention leaves ~1.5 GB more of the card for experts - decode about
     # 14% faster there), else Maya-S
     try:
@@ -1649,7 +1751,7 @@ def choose_model(a, models: Path, inst: dict) -> tuple:
     except Exception:  # noqa: BLE001 - no NVIDIA tools (AMD): no card-based recommendation
         cards = []
     rec = "Maya-S24" if cards and all(g["vram_gb"] <= 24.5 for g in cards) and "Maya-S24" in MODELS else opts[0]
-    default = inst["quant"] if inst.get("quant") in MODELS else rec
+    default = inst["quant"] if inst.get("quant") in MODELS or inst.get("quant") in g53 else rec
     rows = []
     for q in opts:
         m, d = MODELS[q], download_dir(models, q)
@@ -1658,9 +1760,143 @@ def choose_model(a, models: Path, inst: dict) -> tuple:
                                                  f"download {m['download_gb']:.1f} GB from Hugging Face"),
                      ("recommended for cards of 24 GB or less" if q == "Maya-S24" else "recommended") if q == rec
                      else None, m["about"]))
+    for q in g53:                                      # GLM-5.3 (744B, glm-dsa): its downloads (hidden)
+        m, d = G53_MODELS[q], download_dir(models, q)
+        have = all(p.exists() for p in local_shards(m, d))
+        rows.append((f"{G53.LABEL} · {Q.glm53_quant(q)}, text only: " +
+                     (f"downloaded, in {d}" if have else f"download {m['download_gb']:.1f} GB from Hugging Face"), None,
+                     f"{m['about']}; {g53_memory_note(quant=q)}"))
+    rows.append((f"{G53.SHOWN} (744B, text only): GGUF files you already have", None,   # GLM-5.3 (744B, glm-dsa)
+                 "Z.ai's GLM-5.3 on the same engine; set up from its GGUF folder with --gguf-dir <folder>"))
     pick = choose("Which GLM-5.3-Flash?", ["The model to download (GLM-5.3-Flash GGUF files you already have: "
-                                           "--gguf-dir <file or folder>):"], rows, opts.index(default), a.yes)
-    return "download", opts[pick]
+                                           "--gguf-dir <file or folder>):"], rows, (opts + g53).index(default), a.yes)
+    if pick >= len(opts) + len(g53):
+        fail(f"{G53.SHOWN} is set up from its GGUF files", f"{ME} --setup --gguf-dir <the folder of its .gguf files>")
+    return "download", (opts + g53)[pick]
+
+
+def g53_choice(choice: tuple | None) -> bool:
+    """choose_model's answer is GLM-5.3 (744B, glm-dsa), known before its files are read: one of its downloads, or
+    GGUF files whose header says glm-dsa."""
+    if not choice:
+        return False
+    if choice[0] == "download":
+        return choice[1] in G53_MODELS
+    return choice[0] == "local" and Path(choice[1]).suffix == ".gguf" and gguf_head(Path(choice[1]))[0] == G53.ARCH
+
+
+def g53_figures(quant: str | None) -> tuple:
+    """(memory_gb, dense_gb) of a GLM-5.3 download (G53_MODELS' own figures), G53's (UD-IQ2_M's) for any other files."""
+    m = G53_MODELS.get(quant or "", {})
+    return m.get("memory_gb", G53.MEMORY_GB), m.get("dense_gb", G53.DENSE_GB)
+
+
+def g53_contexts(pc: dict, parallel: int = 1, kv_bytes: int | None = None, reserve_mib: int | None = None,
+                 dense_gb: float | None = None) -> list:
+    """The contexts the setup offers for GLM-5.3 (744B).  Its engine keeps the whole cache in VRAM for now
+    (G53.KV_STREAMING False), so on discrete GPUs only the contexts whose cache - one a conversation (`parallel`: the
+    config's --parallel), `kv_bytes` a position (G53.KV_BYTES: the INT8 latent) - with the dense weights (`dense_gb`:
+    the quant's, g53_figures; G53.DENSE_GB) and on each GPU its working memory and the VRAM the engine leaves free
+    (`reserve_mib`, G53.RESERVE_MIB: CUDA's default) leaves a tenth of the VRAM to the experts (G53's estimates): a
+    larger one would not start.  g53_cache_plan reads them from what the setup writes.  An APU that shares its RAM
+    (hip_unified_memory: its VRAM figure is no limit), a PC whose VRAM does not read, and KV streaming once it is
+    served: every one.  The smallest is always offered."""
+    gpus = pc.get("gpus") or []
+    vram = sum(g.get("vram_gb") or 0 for g in gpus)
+    if G53.KV_STREAMING or not gpus or not vram or any(hip_unified_memory(g) for g in gpus):
+        return list(CONTEXTS)
+    reserve = G53.RESERVE_MIB if reserve_mib is None else reserve_mib
+    dense = G53.DENSE_GB if dense_gb is None else dense_gb
+    room = 0.9 * vram - dense - (G53.GPU_WORK_GB + reserve / 1024) * len(gpus)
+    fit = [c for c in CONTEXTS if max(1, parallel) * c * (kv_bytes or G53.KV_BYTES) / 2**30 <= room]
+    if len(fit) < len(CONTEXTS):
+        (ok if fit else warn)(
+            f"{G53.SHOWN} keeps its whole attention cache in VRAM for now: " +
+            (f"up to a {context_label(fit[-1])} context on these GPUs ({vram:.0f} GB of VRAM" +
+             (f", {parallel} answers at once" if parallel > 1 else "") + ")" if fit else
+             f"its dense weights and the smallest context need more VRAM than these GPUs have ({vram:.0f} GB) - "
+             "it may not start"))
+    return fit or CONTEXTS[:1]
+
+
+def g53_cache_plan(a, pc: dict, choice: tuple) -> dict:
+    """g53_contexts' "parallel", "kv_bytes", "reserve_mib" and "dense_gb" as the GLM-5.3 config this setup writes will
+    have them (write_config): --parallel given now, else the one its config before has (keep_args keeps it - the Models
+    page sets it there), else 1; the cache's formats an --env given now asks for (MAYA_GLM_KV_INT8=0: an FP16 latent,
+    MAYA_GLM_IDX_FP16=1: FP16 index keys); the reserve: --vram-reserve-mib given now or kept (it wins over the
+    environment in the engine), else an --env MAYA_GLM_RESERVE_MB, else the HIP setup's (hip_reserve_mib), else
+    CUDA's default; the dense weights: the quant's (g53_figures)."""
+    quant = choice[1] if choice[0] == "download" else quant_of(Path(choice[1]))
+    old = read_json(glm_config_path(pc, quant)).get("args") or []
+    env = parse_env(getattr(a, "env", None) or [])
+
+    def num(v):
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
+    given = getattr(a, "vram_reserve_mib", None)
+    reserve = num(given if given is not None else flag_value(old, "--vram-reserve-mib"))
+    if reserve is None:
+        reserve = num(N.lookup(env, "MAYA_GLM_RESERVE_MB"))
+    if reserve is None:
+        reserve = hip_reserve_mib(pc.get("gpus") or []) if pc.get("backend") == "hip" else G53.RESERVE_MIB
+    return {"parallel": max(1, num(getattr(a, "parallel", None) or flag_value(old, "--parallel")) or 1),
+            "kv_bytes": G53.kv_bytes_of(G53.GEOMETRY, str(N.lookup(env, "MAYA_GLM_KV_INT8", "1")).strip() != "0",
+                                        str(N.lookup(env, "MAYA_GLM_IDX_FP16", "")).strip() == "1"),
+            "reserve_mib": max(0, reserve), "dense_gb": g53_figures(quant)[1]}
+
+
+def g53_drafting_default(pc: dict, pack, ctx: int, env: dict) -> dict | None:
+    """GLM-5.3 on one AMD APU (hip_unified_memory): one-GPU drafting's setting until the speed calibration has
+    measured it on this PC - {"on", "outside"} from G53.drafting_estimate (on when nearly every routed expert fits in
+    GPU memory).  None for any other PC or pack, when the pack's sizes do not read, or when the user set
+    MAYA_GLM_MTP_DECODE (--env: theirs stays, nothing measured)."""
+    gpus = pc.get("gpus") or []
+    if pc.get("backend") != "hip" or len(gpus) != 1 or not hip_unified_memory(gpus[0]) or \
+            not G53.pack_is_glm_dsa(pack) or N.lookup(env, "MAYA_GLM_MTP_DECODE") is not None:
+        return None
+    sizes = G53.pack_bytes(pack)
+    if sizes is None:
+        return None
+    try:
+        reserve = int(N.lookup(env, "MAYA_GLM_RESERVE_MB") or hip_reserve_mib(gpus)) / 1024
+        headroom = float(N.lookup(env, "MAYA_GLM_RAM_HEADROOM_GB") or 16)
+    except ValueError:
+        reserve, headroom = hip_reserve_mib(gpus) / 1024, 16.0
+    per = G53.kv_bytes_per_token(pack, str(N.lookup(env, "MAYA_GLM_KV_INT8", "1")).strip() != "0",
+                                 str(N.lookup(env, "MAYA_GLM_IDX_FP16", "")).strip() == "1") or G53.KV_BYTES
+    gpu = float(gpus[0].get("vram_gb") or 0)
+    if not WIN:          # a Linux APU's experts sit in the RAM it shares (its VRAM figure is only the carve-out)
+        gpu = max(gpu, mem_gb()[0] - headroom)
+    on, out = G53.drafting_estimate(gpu, sizes, ctx * per / 2**30, reserve)
+    return {"on": on, "outside": out}
+
+
+def g53_one_gpu_drafting(cfg: dict) -> bool:
+    """A GLM-5.3 config whose one-GPU drafting the speed calibration decides: the setup wrote its default
+    (installer.one_gpu_drafting, g53_drafting_default), one conversation at a time, no DFlash2."""
+    args = cfg.get("args") or []
+    return bool((cfg.get("installer") or {}).get("one_gpu_drafting")) and "--dflash" not in args[:-1] and \
+        parallel_of(cfg) <= 1 and cfg.get("backend") == "hip"
+
+
+def g53_memory_gb(pc: dict) -> float | None:
+    """VRAM (the GPUs check_pc chose) and RAM together, GB; None when it does not read."""
+    try:
+        return sum(g.get("vram_gb") or 0 for g in pc.get("gpus") or []) + mem_gb()[0]
+    except Exception:  # noqa: BLE001 - no figure for this PC
+        return None
+
+
+def g53_memory_note(pc: dict | None = None, quant: str | None = None) -> str:
+    """GLM-5.3's memory guidance, neutral (no speeds): from about the quant's figure (g53_figures: G53.MEMORY_GB for
+    UD-IQ2_M and any other files) of VRAM and RAM together every expert stays in memory, with less the engine reads
+    the rest from the SSD while it answers - with this PC's figure when `pc` (check_pc's) is given and reads."""
+    have = g53_memory_gb(pc) if pc else None
+    here = f" (this PC: {have:.0f} GB)" if have else ""
+    return (f"every expert stays in memory from about {g53_figures(quant)[0]} GB of VRAM and RAM together{here}; with "
+            "less, the engine reads the rest from the SSD while it answers (keep the model on an NVMe SSD)")
 
 
 # ------------------------------------------------------------------------------------------------ 3. tools
@@ -1895,11 +2131,9 @@ def toolchain_for(archs, nvcc_given: str | None, hc_given: str | None) -> tuple:
     return (nvccs[0] if nvccs else nvcc_given), hc_given
 
 
-def compile_engine_hip(pc: dict, llama: Path, src: str, soft=False, target: str = "maya") -> dict | None:
+def hip_toolchain(pc: dict) -> tuple:
+    """ROCm root, compiler, binary folder and environment, including split installations."""
     root = Path(pc["rocm"])
-    cmake = pick_cmake()
-    if not cmake:
-        fail("CMake 3.24 or newer is needed")
     clang = hip_clang(root) or root / "llvm/bin/clang++"
     bindir = Path(pc.get("rocm_bin") or root / "bin")
     hip_root = root
@@ -1920,6 +2154,25 @@ def compile_engine_hip(pc: dict, llama: Path, src: str, soft=False, target: str 
         env["LD_LIBRARY_PATH"] = os.pathsep.join(libs + [env.get("LD_LIBRARY_PATH", "")]).rstrip(os.pathsep)
     # Keep compiler-cache writes inside this project, including when run in a workspace sandbox.
     env.setdefault("CCACHE_DIR", str(BUILD / ".ccache"))
+    if WIN:
+        env["HIP_DEVICE_LIB_PATH"] = str(clang.parent.parent / "amdgcn" / "bitcode")
+    elif (clang.parent.parent.parent == root / "lib" and re.fullmatch(r"llvm-\d+", clang.parent.parent.name)
+          and not (root / "amdgcn" / "bitcode").is_dir() and "HIP_DEVICE_LIB_PATH" not in env):
+        # Debian/Ubuntu's rocm-device-libs-<N>: the bitcode sits in the LLVM's clang resource folder
+        # (/usr/lib/llvm-<N>/lib/clang/<N>/amdgcn/bitcode), not under ROCM_PATH, where clang looks with ROCM_PATH set.
+        # Only for that layout's compiler (<root>/lib/llvm-<N>/bin): every other ROCm builds as before
+        found = sorted(clang.parent.parent.glob("lib/clang/*/amdgcn/bitcode"),
+                       key=lambda p: [int(x) for x in re.findall(r"\d+", p.parent.parent.name)])
+        if found:
+            env["HIP_DEVICE_LIB_PATH"] = str(found[-1])
+    return root, clang, bindir, env
+
+
+def compile_engine_hip(pc: dict, llama: Path, src: str, soft=False, target: str = "maya") -> dict | None:
+    cmake = pick_cmake()
+    if not cmake:
+        fail("CMake 3.24 or newer is needed")
+    root, clang, bindir, env = hip_toolchain(pc)
     conf = [cmake]
     if WIN:
         # as tools\hip\build_maya_windows.bat, which built it on Windows (#54): ROCm's clang for the host code too, in
@@ -2102,7 +2355,7 @@ def glm_files(d: Path) -> list:
         if m and int(m.group(1)) != 1:
             continue
         arch, n = gguf_head(f)
-        if arch in GLM_ARCHS and (n > 0 or m):
+        if arch in glm_archs() and (n > 0 or m):
             found.append(f)
     return found
 
@@ -2113,7 +2366,7 @@ def local_first(p: Path) -> tuple:
     if p.is_file():
         first = shard_set(p)[0]
         arch = gguf_head(first)[0] if first.exists() else ""
-        if first.exists() and arch not in GLM_ARCHS:
+        if first.exists() and arch not in glm_archs():
             return None, f"{first.name} is " + (f"a {arch!r} model, not GLM-5.3-Flash ({GLM_ARCHS[0]})" if arch else
                                                 "not a GGUF file")
         return first, None
@@ -2162,6 +2415,10 @@ def quant_of(first: Path) -> str:
         if first.name in [names[0] for names in [shard_names(mm)] + old_names(mm)]:
             return q
     m = re.match(r"GLM-5\.3-Flash-(.+?)(-\d{5}-of-\d{5})?\.gguf$", first.name, re.I)
+    if m is None:                                      # GLM-5.3 (glm-dsa): "GLM-5.3-UD-IQ2_M", its own config name
+        d = re.match(r"(GLM-5\.3-(?!Flash-).+?)(-\d{5}-of-\d{5})?\.gguf$", first.name, re.I)
+        if d and gguf_head(first)[0] == G53.ARCH:
+            return d.group(1)
     return m.group(1) if m else first.parent.name
 
 
@@ -2257,6 +2514,9 @@ def import_catalog(models: Path) -> list:
     q = tolerant(qwen_entry)
     if q:
         entry(QWEN, QWEN, q)
+    q = tolerant(qwen_entry, QWEN_UD)
+    if q:
+        entry(QWEN_UD_DIR, QWEN_UD_DIR, q)
     return cat
 
 
@@ -2474,7 +2734,7 @@ def linked_downloads(m: dict, d: Path, missing: list) -> dict:
 def offer_download(a, quant: str, d: Path, shards: list, m: dict | None = None) -> bool:
     """Shows what would be downloaded - the source, the size, the exact commands - and downloads only after a yes
     (or --download-model).  False: nothing was downloaded."""
-    m = m or MODELS[quant]
+    m = m or glm_downloads()[quant]
     missing = [s for s in shards if file_incomplete(m, s)]
     urls = {s: file_url(m, hf_name(m, s)) for s in shards}
     on_disk = sum(s.stat().st_size for s in shards if s.exists()) / 1e9
@@ -2564,8 +2824,8 @@ def offer_download(a, quant: str, d: Path, shards: list, m: dict | None = None) 
 
 def model_step(a, models: Path, choice: tuple):
     """(model folder, shards, quant name), or None when the files are not there and were not downloaded."""
-    step(5, "the model (GLM-5.3-Flash)")
     kind, what = choice
+    step(5, f"the model ({G53.SHOWN if kind == 'download' and what in G53_MODELS else 'GLM-5.3-Flash'})")
     if kind == "exl3":                                 # an EXL3 folder of your own (--model-dir): complete by its own index
         d, quant = what, what.name
         shards = exl3_folder_files(d, ("config.json", "tokenizer.json", "tokenizer_config.json"))
@@ -2576,11 +2836,11 @@ def model_step(a, models: Path, choice: tuple):
             why = incomplete(s)
             if why:
                 fail(f"{s.name}: {why}", f"finish copying or downloading it, then run {ME} again")
-        if quant not in MODELS:
+        if quant not in glm_downloads():
             warn(f"{quant}: experimental - only {', '.join(MODELS)} has been measured with Maya (README.md)")
     else:
         quant = what
-        m = MODELS[quant]
+        m = glm_downloads()[quant]
         d = download_dir(models, quant)
         shards = local_shards(m, d)
         if any(file_incomplete(m, s) for s in shards) and not offer_download(a, quant, d, shards):
@@ -2594,7 +2854,7 @@ def model_step(a, models: Path, choice: tuple):
     else:
         from gguf_reader import GGUFFile
         arch = str(GGUFFile(shards[0]).metadata.get("general.architecture", ""))
-        if arch not in GLM_ARCHS:
+        if arch not in glm_archs():
             fail(f"{shards[0].name} is a {arch!r} model, not GLM-5.3-Flash (glm5-next)")
     gb = sum(s.stat().st_size for s in shards) / 1e9
     ok(f"{quant}: {len(shards)} file(s), {gb:.1f} GB in {d}")
@@ -2602,6 +2862,14 @@ def model_step(a, models: Path, choice: tuple):
         warn(f"{d} is on a spinning hard disk: expect slow answers (the engine reads experts from it) - an NVMe SSD "
              "is strongly recommended")
     return d, shards, quant
+
+
+def kind_is_glm_dsa(choice: tuple, shards: list) -> bool:
+    """The model set up is GLM-5.3 (glm-dsa): GGUF files of your own, or one of its downloads (G53_MODELS)."""
+    if choice and choice[0] == "download" and choice[1] not in G53_MODELS:
+        return False                                   # (GLM-5.3-Flash's downloads: no header read)
+    return bool(choice and choice[0] in ("local", "download") and shards and shards[0].suffix == ".gguf"
+                and gguf_head(shards[0])[0] == G53.ARCH)
 
 
 def drafter_step(models: Path) -> Path:
@@ -2656,6 +2924,24 @@ def pack_stale(pack: Path, shards: list):
     return f"{late[0]} was written after the pack was built" if late else None
 
 
+def headwise_wanted() -> bool:
+    """GLM-5.3 packs keep the GGUF's Q8_0 attn_k_b / attn_v_b native (tools/strata/glm_dsa_pack.py's default);
+    MAYA_PACK_NATIVE32=0 upcasts them to BF16 as before."""
+    return str(N.lookup(os.environ, "MAYA_PACK_NATIVE32", "")).strip() != "0"
+
+
+def headwise_stale(pack: Path):
+    """Why a GLM-5.3 pack is built again for its attention weights, or None: one built before Q8_0 attn_k_b /
+    attn_v_b stayed native (it upcast them to BF16), or the other way round with MAYA_PACK_NATIVE32=0."""
+    if not G53.pack_is_glm_dsa(pack):
+        return None
+    have, want = G53.pack_headwise_q8(pack), headwise_wanted()
+    if have is None or have == want:
+        return None
+    return ("it keeps the attention's Q8_0 weights native now (the model's own weights, about 1 GB less to read a "
+            "token)" if want else "MAYA_PACK_NATIVE32=0 upcasts the attention's Q8_0 weights to BF16")
+
+
 def stamp_pack(pack: Path, shards: list) -> None:
     """The model files' sizes and times into the pack (PACK_SOURCES), for pack_stale."""
     files = [{"name": s.name, "size": s.stat().st_size, "mtime_ns": s.stat().st_mtime_ns} for s in shards]
@@ -2683,6 +2969,17 @@ def pack_index_files(pack: Path) -> list | None:
     return out or None
 
 
+def check_sha256(shards: list, quant: str | None) -> None:
+    """The files a pack is built from: a Maya download's against its published sha256 (once a file - a
+    download is checked as it lands), so a file still being written or damaged stops here, not as garbage answers (#155)."""
+    m = glm_downloads().get(quant or "") or {}
+    for s in shards:
+        want = (m.get("sha256") or {}).get(hf_name(m, s)) if m else None
+        if want and not sha256_checked(s, want):
+            fail(f"{s.name}: the sha256 does not match the published one - still being downloaded, or damaged",
+                 f"let the download finish, or delete the file and run {ME} --download-model")
+
+
 def pack_step(a, d: Path, shards: list, llama: Path, quant: str | None = None) -> Path:
     step(6, "the pack (the engine's index of the model files)")
     if quant is not None and is_exl3(quant):
@@ -2699,7 +2996,7 @@ def pack_step(a, d: Path, shards: list, llama: Path, quant: str | None = None) -
     if pack_source(pack) not in (None, shards[0].name):
         pack = d / f"pack-{quant_of(shards[0])}".lower()
     if not a.repack and pack_source(pack) == shards[0].name and all((pack / f).exists() for f in PACK_FILES):
-        why = pack_stale(pack, shards)
+        why = pack_stale(pack, shards) or headwise_stale(pack)
         if why is None:
             if not (pack / PACK_SOURCES).exists():
                 stamp_pack(pack, shards)
@@ -2741,6 +3038,8 @@ def base_template(pack: Path) -> None:
     """A GLM pack whose GGUF carried no chat template gets GLM-5's: the server would take its generic one otherwise (a
     GGUF with a template of its own keeps it)."""
     base = ROOT / "serve" / "glm5_chat_template.jinja"
+    if G53.pack_is_glm_dsa(pack):                      # GLM-5.3: Z.ai's own template, never Flash's (image slots)
+        base = G53.TEMPLATE
     if not (pack / "tokenizer" / "chat_template.jinja").is_file() and base.is_file():
         put_template(pack, base.read_bytes())
         ok("chat template: GLM-5's (the GGUF carries none)")
@@ -2858,6 +3157,113 @@ def fetch(url: str, dst: Path, want: str | None) -> None:
         dst.unlink(missing_ok=True)
         fail(f"{dst.name}: the sha256 does not match the published one (the file was removed)",
              f"run {ME} --setup again to download it again")
+
+
+# ------------------------------------------------------------------ refusal ablation: the model's direction file
+# <Model>-refusal-direction.gguf at the top of each model's own Maya repo (fitted by tools/ablate_fit.py, a few KB):
+# downloaded with the model into <models>/refusal-directions/ and recorded as the config's "ablate" (loaded, off by
+# default - the Models page's switch).  A repo that ships none yet, no connection, or a file that is not a direction
+# for this model: the setup goes on without it and the switch stays off ("not available").
+ABLATE_DIRECTIONS = {"glm": ("GLM-5.3-Flash", "peasantsmith/GLM-5.3-Flash-Maya-GGUF"),
+                     "glm-dsa": ("GLM-5.3", "peasantsmith/GLM-5.3-Maya-GGUF"),
+                     "deepseek": ("DeepSeek-V4.1-Flash", "peasantsmith/DeepSeek-V4.1-Flash-1017-Maya-GGUF"),
+                     "minimax": ("MiniMax-M3.1-Flash", "peasantsmith/MiniMax-M3.1-Flash-Maya-GGUF")}
+ABLATE_DIR = "refusal-directions"
+ABLATE_MAX_BYTES = 1 << 20
+
+
+def ablate_direction_check(path: Path, model: str) -> str:
+    """"" when path is a direction file for model (a control vector GGUF with one 1-D F32 direction.1 and, when it
+    says, maya.ablate.model = model), else why not."""
+    try:
+        if path.stat().st_size > ABLATE_MAX_BYTES:
+            return "too big for a direction file"
+        import gguf_reader as GR
+        g = GR.GGUFFile(path)
+    except Exception as e:  # noqa: BLE001  (a broken or partial file)
+        return f"not a GGUF ({e})"
+    if g.metadata.get("general.architecture") != "controlvector":
+        return "not a control vector"
+    t = [x for x in g.tensors if x.name == "direction.1"]
+    if len(t) != 1 or len(t[0].shape) != 1 or t[0].type_name != "F32":
+        return "no one-dimensional F32 direction.1"
+    if g.metadata.get("maya.ablate.model") not in (None, model):
+        return f"fitted for {g.metadata.get('maya.ablate.model')}, not {model}"
+    return ""
+
+
+def fetch_ablate_direction(key: str, models: Path) -> Path | None:
+    """The model's direction file from its own repo into <models>/refusal-directions/ (again each setup: a refit
+    replaces it), or the copy from an earlier setup when the download fails; None when there is neither."""
+    model, repo = ABLATE_DIRECTIONS[key]
+    name = model + "-refusal-direction.gguf"
+    dst = models / ABLATE_DIR / name
+    part = dst.with_name(name + ".part")
+    url = hf_url(repo, "main", "", name)
+    why = ""
+    try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        part.unlink(missing_ok=True)
+        if shutil.which("curl"):
+            r = subprocess.run(["curl", "-sS", "-L", "--fail", "--connect-timeout", "15", "--max-time", "60",
+                                "--max-filesize", str(ABLATE_MAX_BYTES), "-o", str(part), url],
+                               stdin=subprocess.DEVNULL, capture_output=True, text=True)
+            why = "" if r.returncode == 0 else ("the repo ships none yet" if r.returncode == 22 else
+                                                (r.stderr.strip().splitlines() or [f"curl exit code {r.returncode}"])[-1])
+        else:
+            import urllib.error
+            import urllib.request
+            try:
+                with urllib.request.urlopen(url, timeout=60) as resp:
+                    part.write_bytes(resp.read(ABLATE_MAX_BYTES + 1))
+            except urllib.error.HTTPError as e:
+                why = "the repo ships none yet" if e.code in (401, 403, 404) else f"HTTP {e.code}"
+            except OSError as e:
+                why = str(e)
+        if not why:
+            why = ablate_direction_check(part, model)
+            if not why:
+                os.replace(part, dst)
+                ok(f"refusal ablation: {name} from https://huggingface.co/{repo} (off until you switch it on: the "
+                   "Models page or a request's \"ablate\")")
+                return dst
+    except OSError as e:
+        why = str(e)
+    finally:
+        part.unlink(missing_ok=True)
+    if dst.is_file() and not ablate_direction_check(dst, model):
+        ok(f"refusal ablation: the {name} from an earlier setup ({why})")
+        return dst
+    # (no line: until a model's repo has its direction file, the setup says nothing about it)
+    return None
+
+
+def ablate_step(cfg_path: Path, key: str, models: Path) -> None:
+    """The config's refusal direction: the downloaded file recorded as cfg["ablate"] (its model and quant, a default
+    set on the Models page kept) with --ablate FILE --ablate-default off in the engine's args.  A file named by hand
+    (outside the setup's folder) stays as it is; without a file the three flags go."""
+    from serve import models as SM
+    cfg = read_json(cfg_path)
+    if SM.is_tp2(cfg):
+        return  # Paired ablation is not negotiated; preserve the explicit pair configuration.
+    old = cfg.get("ablate") if isinstance(cfg.get("ablate"), dict) else {}
+    mine = models / ABLATE_DIR
+    hand = old.get("file") and Path(str(old["file"])).expanduser().is_file() and \
+        Path(str(old["file"])).expanduser().resolve().parent != mine.resolve()
+    if hand:
+        ok(f"refusal ablation: the direction file set by hand stays ({old['file']})")
+        return
+    p = fetch_ablate_direction(key, models)
+    kept = {k: v for k, v in old.items() if k in ("default", "scale")}   # (what the Models page set)
+    if p is None:
+        cfg.pop("ablate", None)
+    else:
+        import gguf_reader as GR
+        md = GR.GGUFFile(p).metadata
+        cfg["ablate"] = {**kept, "file": str(p), "model": md.get("maya.ablate.model") or ABLATE_DIRECTIONS[key][0],
+                         **({"fitted_on": md["maya.ablate.fitted_on"]} if md.get("maya.ablate.fitted_on") else {})}
+    cfg["args"] = SM.ablate_args(cfg, list(cfg.get("args") or []))
+    cfg_path.write_text(json.dumps(N.env_out(cfg), indent=1), encoding="utf-8")
 
 
 def compile_vision(pc, meta, llama: Path, src: str) -> bool:
@@ -3031,25 +3437,47 @@ def glm_sampling(choice: tuple | None, quant: str) -> dict:
     return dict(Q.QUANT_SAMPLING.get(("glm", Q.tier("glm", quant)), SAMPLING))   # (Maya-XS: its own)
 
 
+def g53_defaults(choice: tuple | None, quant: str) -> tuple:
+    """(sampling, reasoning_effort) of a GLM-5.3 (744B) config: its own (maya_quants' "glm53" - zai-org/GLM-5.3's card)
+    for a listed download, a quant of its own where QUANT_SAMPLING names one; GGUF files not listed: the sampling they
+    carry (unsloth's: the card's), else its own - never GLM-5.3-Flash's tuned quant values."""
+    sampling, effort = Q.MODEL_DEFAULTS[Q.GLM53]
+    if choice and choice[0] == "local" and quant not in G53_MODELS:
+        return gguf_sampling(choice[1], sampling), effort
+    return dict(Q.QUANT_SAMPLING.get((Q.GLM53, Q.tier("glm", quant)), sampling)), effort
+
+
+def glm_config_path(pc: dict, quant: str) -> Path:
+    """The config write_config writes for `quant` on this PC's backend (and keeps settings from, when it is there)."""
+    return ROOT / f"maya-{quant.lower()}{('-hip' if pc.get('backend') == 'hip' else '')}.json"
+
+
 def write_config(a, pc, meta, pack: Path, quant: str, ctx: int, models: Path, vision: dict | None,
                  choice: tuple | None = None, dflash: Path | None = None) -> Path:
     step(8, "the configuration and the start script")
     port = a.port or 8080
+    # GLM-5.3 (744B, glm-dsa): its own name and defaults; KV streaming only once its engine serves it - until then
+    # --kv-streaming off, so that every context the setup offers starts (G53.KV_STREAMING)
+    dsa = G53.pack_is_glm_dsa(pack)
+    sampling, effort = g53_defaults(choice, quant) if dsa else (glm_sampling(choice, quant), EFFORT)
     # --expert-cache auto: the expert pool takes the VRAM left free less the reserve (--vram-reserve-mib, 700 MiB) and
     # is checked again once written; a number set by hand caps it at that many experts (a setup again keeps it)
     # --prefill auto (as Strata's setup writes it): the engine picks its prompt chunk - the largest its expert pool
     # can lend, up to 8192; a number (`32768`) sets the chunk itself
     cfg = {"exe": str(EXE), "args": ["--glm-pack", str(pack), "--max-context", str(ctx), "--expert-cache", "auto",
-                                     "--prefill", "auto", "--kv-streaming", KV_STREAMING],
+                                     "--prefill", "auto", "--kv-streaming",
+                                     "off" if dsa and not G53.KV_STREAMING else KV_STREAMING],
            "cwd": str(ROOT),
-           "tokenizer": str(pack / "tokenizer"), "model_name": MODEL_NAME, "gpu": [g["index"] for g in pc["gpus"]],
-           "sampling": glm_sampling(choice, quant), "reasoning_effort": EFFORT,
+           "tokenizer": str(pack / "tokenizer"),
+           "model_name": G53.MODEL_NAME if dsa else MODEL_NAME, "gpu": [g["index"] for g in pc["gpus"]],
+           "sampling": sampling, "reasoning_effort": effort,
            "lib_dirs": meta.get("lib_dirs") or [], "port": port}
     if MODELS.get(quant, {}).get("kv"):
         cfg["args"] += ["--kv", MODELS[quant]["kv"]]
     if dflash is not None:                         # DFlash2 drafts instead of the MTP block (the engine loads no MTP)
         cfg["args"] += ["--dflash", str(dflash)]
     env = parse_env(a.env)
+    drafting = None
     if pc.get("backend") == "hip":
         cfg["backend"] = "hip"
         # Leave space for the Linux desktop. The engine sizes its prompt chunk from
@@ -3058,12 +3486,21 @@ def write_config(a, pc, meta, pack: Path, quant: str, ctx: int, models: Path, vi
         gpus = pc["gpus"]
         if len(gpus) == 1:
             hip_env["STRATA_GLM_SPLIT"] = "0"   # two or more cards: the engine picks the split (and drafts with MTP)
+        # GLM-5.3 on one APU: one-GPU drafting until the speed calibration measures it (g53_drafting_default)
+        drafting = None if dflash is not None else g53_drafting_default(pc, pack, ctx, {**hip_env, **env})
+        if drafting is not None:
+            hip_env["STRATA_GLM_MTP_DECODE"] = "1" if drafting["on"] else "0"
         # Larger prompt sub-batches feed the matrix cores much better (7900 XT: ~250 -> ~410 tok/s); they need
         # a bigger prompt budget, borrowed from the expert pool only while a prompt runs.
         if any(hip_unified_memory(g) for g in gpus):
             if len(gpus) > 1:
                 # Pin the first part's RAM tier before the APU measures the shared memory left.
                 hip_env["STRATA_GLM_PARALLEL_LOAD"] = "0"
+            if WIN and G53.pack_is_glm_dsa(pack):
+                # GLM-5.3 on a Windows APU: the engine already holds its RAM tier within Windows' shared GPU memory
+                # (glm_fast_path's apu_shared_room cap), so 8 GB of headroom is enough - a Radeon 8065S (32 GB of
+                # system RAM) gets a 10.4 GB tier instead of ~3 GB, decode +10% with the same tokens, 7.8 GB still free
+                hip_env["STRATA_GLM_RAM_HEADROOM_GB"] = "8"
             total_ram, _ = mem_gb()
             if WIN:     # Windows counts the GPU's carve-out apart from its RAM, and its desktop runs on that GPU
                 total_ram += sum(g.get("vram_gb", 0) for g in gpus)
@@ -3077,18 +3514,21 @@ def write_config(a, pc, meta, pack: Path, quant: str, ctx: int, models: Path, vi
         # version that number their solutions differently); the engine takes, per shape, the first one its build
         # accepts, so each version's own file comes first.
         tables = []
+        # GLM-5.3 (glm-dsa) also takes its own prompt shapes' rows (<arch>-glm53-hipblaslt-<version>.txt: N / K of 6144,
+        # which no GLM-5.3-Flash projection has) - a Flash config's tables stay what they were
+        families = ("glm", "glm53") if G53.pack_is_glm_dsa(pack) else ("glm",)
         for arch in dict.fromkeys(g.get("arch", "") for g in gpus):
-            found = sorted((ROOT / "tools" / "hip").glob(f"{arch}-glm-hipblaslt-*.txt"),
-                           key=lambda p: (p.stem.split("-")[3], p.stem))
-            tables.extend(str(path) for path in found)
+            for fam in families:
+                found = sorted((ROOT / "tools" / "hip").glob(f"{arch}-{fam}-hipblaslt-*.txt"),
+                               key=lambda p: (p.stem.split("-")[3], p.stem))
+                tables.extend(str(path) for path in found)
         if tables:
             # the OS's path-list separator: a ':' would also split a Windows drive letter (C:\...)
             hip_env["STRATA_HIPBLASLT_TUNING"] = os.pathsep.join(tables)
         env = {**hip_env, **env}
     if env:
         cfg["env"] = env
-    suffix = "-hip" if pc.get("backend") == "hip" else ""
-    cfg_path = ROOT / f"maya-{quant.lower()}{suffix}.json"
+    cfg_path = glm_config_path(pc, quant)
     old_cfg = read_json(cfg_path)
     # the server's own settings from the config before (the address it listens on, its API key, ...): kept, as the
     # DeepSeek, MiniMax and Qwen setups keep them - a GLM setup run again dropped them; --host / --api-key given now win
@@ -3103,14 +3543,19 @@ def write_config(a, pc, meta, pack: Path, quant: str, ctx: int, models: Path, vi
         cfg["vision"] = vision
     cfg["log"] = str(cfg_path.with_suffix(".log"))
     local = choice[1] if choice and choice[0] == "local" else None   # (choose_model's answer)
-    if PROFILE.exists() and profile_fits(pack):
+    if dsa:                                            # GLM-5.3: the pack's own profile, else its shipped one, if it fits
+        if (prof := maya_sync.profile_for(pack, PROFILE, G53.PROFILE)) is not None:
+            cfg["args"] += ["--expert-profile", str(prof)]
+    elif PROFILE.exists() and profile_fits(pack):
         cfg["args"] += ["--expert-profile", str(PROFILE)]
     if cfg_path.exists():
         old = old_cfg.get("args") or []
+        # (GLM-5.3 without KV streaming: an older config's --kv-streaming on / --kv-resident is not kept - with them a
+        #  context above the window does not start)
+        kv_kept = () if dsa and not G53.KV_STREAMING else ("--kv-streaming", "--kv-resident")
         kept = keep_args(old, cfg["args"],
                          ("--expert-cache", "--vram-reserve-mib", "--vram-reserve-later-mib", "--prefill",
-                          "--parallel", "--expert-profile-save", "--expert-profile-save-every", "--kv-streaming",
-                          "--kv-resident"))
+                          "--parallel", "--expert-profile-save", "--expert-profile-save-every") + kv_kept)
         kept += keep_profile(old, cfg["args"])
         if kept:
             ok("kept from the config before: " + ", ".join(kept))
@@ -3119,13 +3564,18 @@ def write_config(a, pc, meta, pack: Path, quant: str, ctx: int, models: Path, vi
     if getattr(a, "vram_reserve_mib", None) is not None:   # given now: written, and a later setup keeps it
         set_arg(cfg["args"], "--vram-reserve-mib", a.vram_reserve_mib)
         ok(f"VRAM kept free beside the expert pool: {a.vram_reserve_mib} MiB (--vram-reserve-mib)")
-    for line in prefill_tips(cfg["args"], mem_gb()[0], len(pc["gpus"])):
+    # (GLM-5.3-Flash's measurements: not said for GLM-5.3, whose prompt chunks are not measured that way yet)
+    for line in ([] if dsa else prefill_tips(cfg["args"], mem_gb()[0], len(pc["gpus"]))):
         ok(line)
     gguf_dir = local.parent if local else Path(a.gguf_dir).expanduser().resolve() if a.gguf_dir else None
     cfg["installer"] = {"models_dir": str(models), "quant": quant, "gguf": str(local) if local else None,
                         "gguf_dir": str(gguf_dir) if gguf_dir else None, "draft": "dflash2" if dflash else "mtp",
                         **({"model_dir": str(choice[1])} if choice and choice[0] == "exl3" else {}),
+                        **({"one_gpu_drafting": drafting} if drafting is not None else {}),
                         "written": time.strftime("%Y-%m-%d %H:%M")}
+    if drafting is not None:
+        ok(f"one-GPU drafting (the MTP block): {'on' if drafting['on'] else 'off'} until the speed calibration "
+           f"measures it here (about {drafting['outside'] * 100:.0f}% of the experts would stay outside GPU memory)")
     if cfg_path.exists():                              # a setup again: the budget the user set stays (GLM's 8192 else)
         before = read_json(cfg_path)
         if before.get("thinking_budget") is not None:
@@ -3278,7 +3728,13 @@ def add_profile(cfg: dict) -> bool:
     args = cfg.get("args")
     if not isinstance(args, list) or "--glm-pack" not in args[:-1] or "--expert-profile" in args or not PROFILE.exists():
         return False
-    if not profile_fits(flag_value(args, "--glm-pack")):
+    pack = flag_value(args, "--glm-pack")
+    if pack is not None and G53.pack_is_glm_dsa(pack):   # GLM-5.3: its own profile only (never Flash's)
+        if (prof := maya_sync.profile_for(Path(pack), PROFILE, G53.PROFILE)) is None:
+            return False
+        args += ["--expert-profile", str(prof)]
+        return True
+    if pack is not None and not profile_fits(pack):
         return False
     args += ["--expert-profile", str(PROFILE)]
     return True
@@ -3507,8 +3963,12 @@ def calibrate_config(cfg_path: Path) -> bool:
         return False
     say()
     say("  Tuning Maya for this PC: the output speed is measured with a few splits of the work between the CPU and")
-    say("  the PCIe link, and with fewer and more CPU threads. It takes about 10-15 minutes (the model loads first);")
-    say("  the PC is busy meanwhile.")
+    if G53.config_is_glm_dsa(cfg):                     # (GLM-5.3, 744B: a longer load, slower answers)
+        say(f"  the PCIe link, and with fewer and more CPU threads. On {G53.SHOWN} it takes about {G53.CALIBRATE_MINUTES}")
+        say("  minutes (the model loads first); the PC is busy meanwhile.")
+    else:
+        say("  the PCIe link, and with fewer and more CPU threads. It takes about 10-15 minutes (the model loads first);")
+        say("  the PC is busy meanwhile.")
     log = cfg.get("log")
     since = os.path.getsize(log) if log and os.path.isfile(log) else 0
     try:
@@ -3653,6 +4113,8 @@ def needs_speed_calibration(cfg: dict) -> bool:
     if config_family(cfg) in ("deepseek", "minimax"):  # (their DSpark drafter: measured once too)
         return CDS.has_drafter(cfg) and "speed_calibration" not in (cfg.get("installer") or {}) and \
             not (config_family(cfg) == "minimax" and parallel_of(cfg) > 1)   # (maya-mm3 --parallel: no drafting)
+    if g53_one_gpu_drafting(cfg):                      # (GLM-5.3 on one APU: drafting on or off, measured once)
+        return "speed_calibration" not in (cfg.get("installer") or {})
     return "--dflash" in args[:-1] and parallel_of(cfg) <= 1 and \
         "speed_calibration" not in (cfg.get("installer") or {})
 
@@ -3668,6 +4130,8 @@ def speed_calibration(cfg_path: Path, why: str = "") -> bool:
         return bool(qwen_draft_calibration(cfg_path) is not None)
     if config_family(cfg) in ("deepseek", "minimax"):
         return speed_calibration_ds4(cfg_path, cfg, why)
+    if g53_one_gpu_drafting(cfg):
+        return speed_calibration_g53(cfg_path, cfg, why)
     drafter = drafter_file(cfg)
     if drafter is None or not drafter.is_file():
         warn("the speed calibration compares the DFlash2 drafter with the MTP block, and the drafter is not on this "
@@ -3733,6 +4197,68 @@ def speed_calibration(cfg_path: Path, why: str = "") -> bool:
            "Maya " + ("decodes without drafting" if one else "drafts with the MTP block"))
         say(f"       (saved in {cfg_path.name}; to draft with DFlash2 anyway: {ME} --setup --draft dflash2 "
             "--no-speed-calibration)")
+    return True
+
+
+G53_DRAFT_TIE = 0.02     # one-GPU drafting: within this of each other the setup's default (its estimate) stays
+# its probe: four short answers a side as in real use - code, an explanation, plain text, thinking (calibrate_draft's
+# MIXED; decode speed only - two loads plus a couple of minutes)
+G53_DRAFT_PROBE = {"mixed": True, "tokens": 512, "answer": 128, "warm": 32}
+
+
+def g53_with_drafting(cfg: dict, on: bool) -> dict:
+    """A copy of a GLM-5.3 config with one-GPU drafting on or off (its STRATA_GLM_MTP_DECODE)."""
+    out = json.loads(json.dumps(cfg))
+    out["env"] = {**(out.get("env") or {}), "STRATA_GLM_MTP_DECODE": "1" if on else "0"}
+    return out
+
+
+def speed_calibration_g53(cfg_path: Path, cfg: dict, why: str = "") -> bool:
+    """GLM-5.3 on one APU: its sustained decode speed with one-GPU drafting (the MTP block drafts, one verify pass
+    checks: the same tokens) and without, measured here as tools/calibrate_draft.py measures DFlash2.  The faster is
+    kept; within G53_DRAFT_TIE the setup's own default (installer.one_gpu_drafting) stays.  False: not measured."""
+    busy = busy_gpus(cfg)
+    if busy:
+        warn("the speed calibration needs the GPU to itself: " +
+             ", ".join(f"GPU {i} has {m} MiB in use" for i, m in busy) +
+             f" (a model server still running?) - it runs at the next start, or: {ME} --speed-calibration")
+        return False
+    fallback = bool(((cfg.get("installer") or {}).get("one_gpu_drafting") or {}).get("on"))
+    off, on = g53_with_drafting(cfg, False), g53_with_drafting(cfg, True)
+    say()
+    say("  Speed calibration: drafting with the MTP block on this GPU, or not?" + (f" ({why})" if why else ""))
+    say("  Drafting writes the same answers; whether it is faster depends on how much of the model the GPU holds.")
+    say(f"  Maya loads the model twice (no drafting, then drafting); each time it writes about "
+        f"{G53_DRAFT_PROBE['tokens']} tokens of")
+    say("  short answers (code, an explanation, plain text, thinking) after a warm-up, and the speeds are compared.")
+    say("  The PC is busy meanwhile.")
+    log = cfg.get("log")
+    since = os.path.getsize(log) if log and os.path.isfile(log) else 0
+    try:
+        res = CD.run(off, on, say=say, other_label="no drafting", draft_label="drafting", size=G53_DRAFT_PROBE)
+    except Exception as e:                             # never stops a setup or a start: the config stays as it was
+        warn(f"the speed calibration did not finish ({e}): nothing changed - Maya keeps drafting "
+             f"{'on' if fallback else 'off'}; {ME} --speed-calibration tries again")
+        why_not = CAL.engine_error(log, since)
+        if why_not:
+            say(f"       the engine said: {why_not}")
+        cfg.setdefault("installer", {})["speed_calibration"] = {"date": time.strftime("%Y-%m-%d %H:%M"),
+                                                                "failed": str(e)[:300]}
+        cfg_path.write_text(json.dumps(N.env_out(cfg), indent=1), encoding="utf-8")
+        return False
+    o, d = res["other"]["tok_s"], res["dflash2"]["tok_s"]
+    keep = True if d > o * (1 + G53_DRAFT_TIE) else False if o > d * (1 + G53_DRAFT_TIE) else fallback
+    out = on if keep else off
+    out.setdefault("installer", {})["speed_calibration"] = {
+        "date": time.strftime("%Y-%m-%d %H:%M"), "version": maya_version(), "drafting_tok_s": d,
+        "no_drafting_tok_s": o, "tokens": [res["other"]["tokens"], res["dflash2"]["tokens"]],
+        "kept": "mtp" if keep else "none"}
+    cfg_path.write_text(json.dumps(N.env_out(out), indent=1), encoding="utf-8")
+    say()
+    ok(f"speed calibration: {d:.1f} tokens/s drafting against {o:.1f} without - Maya " +
+       ("drafts with the MTP block on this GPU" if keep else "decodes without drafting") +
+       (" (a tie: the default for this PC)" if abs(d - o) <= G53_DRAFT_TIE * max(o, d) else ""))
+    say(f"       (saved in {cfg_path.name}; {ME} --speed-calibration measures again)")
     return True
 
 
@@ -3862,6 +4388,16 @@ def keep_drafting(cfg_path: Path, on: bool) -> None:
     installer.speed_calibration records the choice - so a start does not measure by itself (--speed-calibration
     measures any time)."""
     cfg = read_json(cfg_path)
+    if g53_one_gpu_drafting(cfg):                          # (GLM-5.3 on one APU: one-GPU drafting on or off)
+        out = g53_with_drafting(cfg, on)
+        out.setdefault("installer", {})["speed_calibration"] = {"date": time.strftime("%Y-%m-%d %H:%M"),
+                                                                "version": maya_version(), "skipped": "chosen",
+                                                                "kept": "mtp" if on else "none"}
+        cfg_path.write_text(json.dumps(N.env_out(out), indent=1), encoding="utf-8")
+        ok("speed calibration skipped: Maya " + ("drafts with the MTP block on this GPU" if on else
+                                                 "decodes without drafting") + ", as chosen")
+        say(f"       ({ME} --speed-calibration measures which is faster on this PC any time)")
+        return
     ds4 = config_family(cfg) in ("deepseek", "minimax")   # (DSpark: DeepSeek's and MiniMax's drafter)
     if config_family(cfg) == "qwen":                       # (CYBER-FROST: the MTP drafter in its pack, or none)
         args = cfg.get("args") or []
@@ -4087,6 +4623,7 @@ def stop_signals() -> None:
 def serve_on_screen(cfg_path: Path, a) -> int:
     """Maya's server on the setup's screen (setup.UI): its exit code; one it did not choose stops there, with the
     last line its engine logged in this start (mostly the reason: "strata generate: pack: out of memory")."""
+    S.model_named(setup_title(read_json(cfg_path)))
     cmd, env, info = server_command(cfg_path, a)
     log = Path(info["log"]) if info.get("log") else None
     seen = log.stat().st_size if log is not None and log.is_file() else 0
@@ -4541,6 +5078,7 @@ def set_up(a, prev: dict) -> Path | None:
     config of the setup before (its answers are the defaults).  The model comes first: GLM-5.3-Flash or DeepSeek-V4.1-
     Flash-1017 (set_up_ds4), each then with the answers of its own setup before."""
     family = choose_family(a, prev)
+    S.model_named(FAMILY_TITLE[family])
     check_parallel(a, family)
     if config_family(prev) != family:
         prev = next((c for c in map(read_json, configs()) if config_family(c) == family and
@@ -4562,11 +5100,17 @@ def set_up(a, prev: dict) -> Path | None:
               Path(inst["models_dir"]) if inst.get("models_dir") else
               Path(inst["data_dir"]) / "models" if inst.get("data_dir") else ROOT.parent / "Maya-data" / "models")
     choice = choose_model(a, models, inst)
-    if choice[0] == "download":
+    if choice[0] == "download" and choice[1] in G53_MODELS:   # (GLM-5.3: "GLM-5.3 (744B) · UD-IQ2_M")
+        ok(f"model: {G53.LABEL} · {Q.glm53_quant(choice[1])}, in {download_dir(models, choice[1])}")
+    elif choice[0] == "download":
         ok(f"model: {Q.shown('glm', choice[1])}, in {download_dir(models, choice[1])}")
     else:
         ok(f"model: {choice[1]} (yours)")
-    ctx = choose_context(a, prev_ctx, recommended=recommended_context(choice, pc))
+    if g53_choice(choice):                             # GLM-5.3 (744B): the contexts its cache fits on these GPUs
+        contexts = g53_contexts(pc, **g53_cache_plan(a, pc, choice))   # (as the config will run: write_config's)
+        ctx = choose_context(a, prev_ctx, contexts, DEFAULT_CONTEXT if DEFAULT_CONTEXT in contexts else contexts[-1])
+    else:
+        ctx = choose_context(a, prev_ctx, recommended=recommended_context(choice, pc))
     ok(f"context: {ctx} tokens")
     draft = choose_draft(a, pc, inst)
     ok("drafting: " + ("a DFlash2 drafter (downloaded with the model)" if draft == "dflash2" else "the MTP block"))
@@ -4576,17 +5120,41 @@ def set_up(a, prev: dict) -> Path | None:
     if got is None:
         return None
     d, shards, quant = got
+    dsa = kind_is_glm_dsa(choice, shards)              # GLM-5.3 (glm-dsa): text only, NextN drafting
+    if dsa:
+        S.model_named(G53.SHOWN)                       # (the header: GLM-5.3, not GLM-5.3-Flash)
+        draft = maya_sync.draft_for(draft, G53.ARCH, warn)
+        have = g53_memory_gb(pc)                       # (neutral memory guidance, no speeds)
+        (ok if have is not None and have >= g53_figures(quant)[0] else warn)(
+            f"{G53.SHOWN}: {g53_memory_note(pc, quant)}")
     dflash = drafter_step(models) if draft == "dflash2" else None
     pack = pack_step(a, d, shards, llama, quant)       # 6
-    vision = vision_step(a, pc, meta, llama, d, quant)  # 7
+    if dsa:
+        step(7, "images (the vision encoder)")
+        ok(f"{G53.SHOWN}: text only (the model has no vision tower)")
+        vision = None
+    else:
+        vision = vision_step(a, pc, meta, llama, d, quant)  # 7
     cfg_path = write_config(a, pc, meta, pack, quant, ctx, models, vision, choice, dflash)   # 8
-    if dflash is not None:                             # DFlash2: kept only if it makes THIS PC faster (measured)
+    ablate_step(cfg_path, "glm-dsa" if dsa else "glm", models)
+    if dflash is not None:                             # kept only if it makes this PC faster
         how = drafting_choice(a, "DFlash2", "5-20")
         if how != "measure":                           # (or as the user chose)
             keep_drafting(cfg_path, how == "on")
         else:
             if S.UI is not None:                       # (the screen shows it in the tuning's tab)
                 S.UI.step(9, "speed calibration: DFlash2 or the MTP block")
+            speed_calibration(cfg_path)
+    elif g53_one_gpu_drafting(read_json(cfg_path)):    # GLM-5.3 on one APU: drafting kept only where it is faster
+        fallback = bool(read_json(cfg_path)["installer"]["one_gpu_drafting"].get("on"))
+        how = "on" if fallback else "off"
+        if not getattr(a, "no_speed_calibration", False):   # (skipped: the setup's estimate for this PC stays)
+            how = drafting_choice(a, "Drafting with the MTP block on this GPU", "5-10")
+        if how != "measure":
+            keep_drafting(cfg_path, how == "on")
+        else:
+            if S.UI is not None:
+                S.UI.step(9, "speed calibration: drafting or not")
             speed_calibration(cfg_path)
     # the tuning: asked for (--calibrate), or offered when nothing was tuned for this PC and model yet and someone
     # answers (--yes and --no-start setups are not held up by it)
@@ -4596,7 +5164,8 @@ def set_up(a, prev: dict) -> Path | None:
              not a.no_start)
     if a.calibrate or (offer and ask(
             "Tune Maya for this PC now? It measures the split of the work between the CPU and the PCIe link and the "
-            "CPU threads (about 10-15 minutes; later: ./maya.sh --calibrate)", ["y", "n"], "y", a.yes) == "y"):
+            f"CPU threads (about {G53.CALIBRATE_MINUTES if dsa else '10-15'} minutes; later: ./maya.sh --calibrate)",
+            ["y", "n"], "y", a.yes) == "y"):
         if S.UI is not None:                           # (the screen lists the tuning as a step of its own)
             S.UI.step(9, "tuning Maya for this PC")
         tuned = calibrate_config(cfg_path)
@@ -5650,6 +6219,7 @@ def set_up_ds4(a, prev: dict) -> Path | None:
     if gguf:                                           # (an earlier layout's copy of the shared tables: one copy, #777)
         ds4_table_dupes(pack, d)
     cfg_path = write_config_ds4(a, pc, meta, pack, ctx, models, d, quant, vision)   # 8
+    ablate_step(cfg_path, "deepseek", models)
     if (drafter or not gguf) and CDS.has_drafter(read_json(cfg_path)):
         how = drafting_choice(a, "The DSpark drafter", "10-30")
         if how != "measure":
@@ -6209,6 +6779,7 @@ def set_up_mm3(a, prev: dict) -> Path | None:
     else:
         ok("no vision tower in this pack: text only")
     cfg_path = write_config_mm3(a, pc, meta, pack, ctx, models, d, quant, bool(own))   # 8
+    ablate_step(cfg_path, "minimax", models)
     if S.UI is not None:                               # 9: how this PC reads prompts fastest, measured
         S.UI.step(9, "prefill calibration")
     prefill_calibration(cfg_path, "once, for this setup")
@@ -6227,8 +6798,28 @@ def set_up_mm3(a, prev: dict) -> Path | None:
 
 
 # ------------------------------------------------------------------------------------------------ CYBER-FROST-3.8-PS
-def qwen_entry() -> dict:
-    """CYBER-FROST-3.8-PS's download (tools/qwen/download.json) as a MODELS entry (offer_download's form)."""
+def qwen_entry(quant: str = "q5_k_m") -> dict:
+    """CYBER-FROST-3.8-PS's download (tools/qwen/download.json) as a MODELS entry (offer_download's form); quant
+    QWEN_UD: unsloth's UD-IQ2_XS of Qwen3.8-Flash-Next (tools/qwen/download_unsloth.json: its n-gram shard from Maya's
+    repo, its MTP head from the repo's top - "sources")."""
+    if quant == QWEN_UD:
+        man = read_json(QWEN_UD_MANIFEST)
+        if not man.get("files") or not man.get("revision") or not man.get("ngram") or not man.get("mtp"):
+            fail(f"{QWEN_UD_MANIFEST} is missing or damaged",
+                 "restore it (git checkout tools/qwen/download_unsloth.json)")
+        src = man.get("sources") or {}
+        return {"about": f"Qwen3.8-Flash-Next in unsloth's UD-IQ2_XS GGUF ({man.get('about', '')}); "
+                         f"{man.get('license', 'the Qwen Community License')}",
+                "format": "qwen-gguf", "repo": man["repo"], "revision": man["revision"],
+                "folder": man.get("folder", ""),
+                "files": {k: v[0] for k, v in man["files"].items()},
+                "sha256": {k: v[1] for k, v in man["files"].items()},
+                "sources": {k: (v["repo"], v["revision"]) for k, v in src.items()},
+                "source_folders": {k: v.get("folder", "") for k, v in src.items()},
+                "ngram": man["ngram"], "mtp": man["mtp"],
+                "download_gb": sum(v[0] for v in man["files"].values()) / 1e9,
+                "ngram_gb": man["files"][man["ngram"]][0] / 1e9,
+                "memory_gb": float(man.get("memory_gb") or 47)}
     man = read_json(QWEN_MANIFEST)
     if not man.get("files") or not man.get("revision"):
         fail(f"{QWEN_MANIFEST} is missing or damaged", "restore it (git checkout tools/qwen/download.json)")
@@ -6254,43 +6845,87 @@ def qwen_recommended_context(vram: float, starved: bool = False) -> int:
     return max(fits) if fits else QWEN_CONTEXTS[0]
 
 
-def qwen_dir(a, models: Path, prev: dict) -> Path:
-    """The model's folder: --model-dir, else the folder of the setup before (its pack is inside it), else
-    <models folder>/CYBER-FROST-3.8-PS."""
+def qwen_dir(a, models: Path, prev: dict, quant: str = "q5_k_m") -> Path:
+    """The model's folder: --model-dir, else the folder of the setup before of the same files (its pack is inside it),
+    else <models folder>/CYBER-FROST-3.8-PS (unsloth's UD-IQ2_XS: <models folder>/Qwen3.8-Flash-Next-UD-IQ2_XS)."""
     if a.model_dir:
         return Path(a.model_dir).expanduser().resolve()
     args = prev.get("args") or []
-    if "--native" in args[:-1]:
+    if "--native" in args[:-1] and ((prev.get("installer") or {}).get("qwen_quant") or "q5_k_m") == quant:
         d = Path(args[args.index("--native") + 1]).parent
         if d.is_dir():
             return d
-    return models / QWEN
+    return models / (QWEN_UD_DIR if quant == QWEN_UD else QWEN)
 
 
-def qwen_model_step(a, d: Path) -> list | None:
-    """The GGUF in d (downloaded when it is not there, then checked against its published sha256): [the file], or None
-    when nothing was downloaded."""
-    step(5, f"the model ({QWEN_SHOWN})")
-    m = qwen_entry()
+def link_published(dst: Path, size: int, sha: str, places: list) -> Path | None:
+    """dst missing, the same published file (its size, then its sha256 - never assumed) whole in one of `places`:
+    hard-linked from it (one copy on the disk, no second download), with its sha256 record.  The source linked, or None
+    (none there, or on another drive: the download fetches it)."""
+    if dst.exists():
+        return None
+    for src in dict.fromkeys(Path(p) for p in places):
+        try:
+            if src.resolve() == dst.resolve() or not src.is_file() or src.stat().st_size != size:
+                continue
+            if not sha256_checked(src, sha):
+                continue
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            os.link(src, dst)
+        except OSError:
+            continue
+        seen = read_json(src.parent / VERIFIED).get(src.name)
+        if seen:   # (a hard link: the same size and time - its check still holds)
+            book = read_json(dst.parent / VERIFIED)
+            book[dst.name] = seen
+            try:
+                (dst.parent / VERIFIED).write_text(json.dumps(book, indent=1), encoding="utf-8")
+            except OSError:
+                pass
+        ok(f"{dst.name}: linked from {src.parent} (the same file, one copy)")
+        return src
+    return None
+
+
+def qwen_places(models: Path, rel: str) -> list:
+    """Where another Qwen setup keeps the file `rel` (relative to its model folder): both quants' default folders in the
+    models folder and the folders of the Qwen configs here."""
+    dirs = [models / QWEN, models / QWEN_UD_DIR]
+    for c in configs():
+        cfg = read_json(c)
+        if config_family(cfg) == "qwen" and (cfg.get("installer") or {}).get("model_dir"):
+            dirs.append(Path(cfg["installer"]["model_dir"]))
+    return [x / rel for x in dirs]
+
+
+def qwen_model_step(a, d: Path, quant: str = "q5_k_m", models: Path | None = None) -> list | None:
+    """The model's files in d (downloaded when they are not there, then checked against their published sha256): [the
+    GGUF, or unsloth's shards and MTP head - the first shard first], or None when nothing was downloaded.  A file
+    another Qwen setup here already has (the same sha256) is hard-linked from it."""
+    step(5, f"the model ({Q.shown('qwen', quant)})")
+    m = qwen_entry(quant)
     files = [d / n for n in m["files"]]
+    for f in files:
+        if file_incomplete(m, f) and models is not None:
+            link_published(f, m["files"][f.name], m["sha256"][f.name], qwen_places(models, f.name))
     missing = [f for f in files if file_incomplete(m, f)]
-    if missing and not offer_download(a, Q.shown("qwen", "q5_k_m", m["download_gb"]), d, files, m):
+    if missing and not offer_download(a, Q.shown("qwen", quant, m["download_gb"]), d, files, m):
         return None
     for f in files:                                    # (a file that was already there: checked once, then remembered)
         if not sha256_checked(f, m["sha256"][f.name]):
             fail(f"{f.name}: the sha256 does not match the published one - still being downloaded, or damaged",
                  f"let the download finish, or delete the file and run {ME} --download-model")
-    ok(f"{QWEN_SHOWN}: {sum(f.stat().st_size for f in files) / 1e9:.1f} GB in {d}")
+    ok(f"{Q.shown('qwen', quant)}: {sum(f.stat().st_size for f in files) / 1e9:.1f} GB in {d}")
     if rotational(d):
-        warn(f"{d} is on a spinning hard disk: the engine reads the n-gram table (52 GB) from it row by row on every "
-             "token, and the experts RAM cannot hold - use an NVMe SSD (--models-dir)")
+        warn(f"{d} is on a spinning hard disk: the engine reads the n-gram table ({m.get('ngram_gb', 52):.0f} GB) from "
+             "it row by row on every token, and the experts RAM cannot hold - use an NVMe SSD (--models-dir)")
     return files
 
 
-def qwen_pack_step(a, d: Path, files: list, llama: Path) -> Path:
+def qwen_pack_step(a, d: Path, files: list, llama: Path, mtp_gguf: Path | None = None) -> Path:
     """tools/iq_pack.py's pack in <model>/pack (the index of every tensor, the small float weights, the tokenizer with
-    the GGUF's chat template), and the MTP drafter built from the GGUF's NextN block (<pack>/mtp, tools/mtp_from_gguf.py)
-    - built again when its tools or the model file changed."""
+    the GGUF's chat template), and the MTP drafter built from the GGUF's NextN block (<pack>/mtp, tools/mtp_from_gguf.py;
+    mtp_gguf: unsloth's separate MTP head) - built again when its tools or the model files changed."""
     step(6, "the pack (the engine's index of the model file) and the MTP drafter")
     pack = d / "pack"
     tools = S.source_hash(QWEN_PACK_TOOLS)
@@ -6313,8 +6948,8 @@ def qwen_pack_step(a, d: Path, files: list, llama: Path) -> Path:
         fail(f"the pack builder did not write {pack / missing[0]}", "the reason is in the messages above")
     say("  The MTP drafter from the model's NextN block (its 512 experts requantized to 2 bits for the drafts; a few "
         "minutes) ...")
-    run([sys.executable, str(ROOT / "tools" / "mtp_from_gguf.py"), "--gguf", str(files[0]), "--out", str(pack / "mtp")],
-        env=env)
+    run([sys.executable, str(ROOT / "tools" / "mtp_from_gguf.py"), "--gguf", str(mtp_gguf or files[0]),
+         "--out", str(pack / "mtp")], env=env)
     if QWEN_PROFILE.exists():                          # (the shipped ranking of the experts: which start in VRAM)
         shutil.copyfile(QWEN_PROFILE, pack / "expert-profile.bin")
     stamp_pack(pack, files)
@@ -6325,32 +6960,39 @@ def qwen_pack_step(a, d: Path, files: list, llama: Path) -> Path:
     return pack
 
 
-def write_config_qwen(a, pc: dict, meta: dict, pack: Path, gguf: Path, ctx: int, models: Path, d: Path) -> Path:
-    """maya-cyber-frost.json (maya-cyber-frost-hip.json on AMD) and its start script.  A setup again keeps what the
-    config before says that this one does not ask: its engine settings, the thinking level and sampling, where the
-    server listens and its key."""
+def write_config_qwen(a, pc: dict, meta: dict, pack: Path, gguf: Path, ctx: int, models: Path, d: Path,
+                      quant: str = "q5_k_m", ple: Path | None = None) -> Path:
+    """maya-cyber-frost.json (maya-cyber-frost-hip.json on AMD; unsloth's UD-IQ2_XS: maya-qwen-ud-iq2_xs.json) and its
+    start script.  A setup again keeps what the config before says that this one does not ask: its engine settings,
+    where the server listens and its key; the model's own sampling and thinking level every setup.  ple: the shard
+    that holds the n-gram table (unsloth's shard 3), else the GGUF itself."""
     step(8, "the configuration and the start script")
     port = a.port or 8080
     hip = pc.get("backend") == "hip"
-    cfg_path = ROOT / f"{Q.config_stem('qwen', 'q5_k_m')}{'-hip' if hip else ''}.json"
+    cfg_path = ROOT / f"{Q.config_stem('qwen', quant)}{'-hip' if hip else ''}.json"
     old = read_json(cfg_path)
     profile = pack / "expert-profile.bin"
     # the Qwen path: the pack, the model file for its native weights and its n-gram table, decode windows of up to 4
     # tokens (prompt-lookup drafts; the MTP drafter where it measures faster - qwen_draft_calibration), prompts in
     # chunks sized from the expert cache it lends them, the expert cache sized from the free VRAM
-    args = ["--pack", str(pack), "--native", str(gguf), "--ple-gguf", str(gguf), "--spec", "4", "--prefill", "auto",
-            "--expert-cache", "auto", "--max-context", str(ctx), "--kv", QWEN_KV]
+    args = ["--pack", str(pack), "--native", str(gguf), "--ple-gguf", str(ple or gguf), "--spec", "4", "--prefill",
+            "auto", "--expert-cache", "auto", "--max-context", str(ctx), "--kv", QWEN_KV]
+    if quant == QWEN_UD:                               # (its n-gram table memory-mapped: the page cache, never loaded)
+        args += ["--ple-io", "mmap"]
     if profile.exists():
         args += ["--expert-profile", str(profile)]
     # (the engine's server needs the MTP drafter loaded - the setup always builds it; drafting off is --mtp-max-t 1)
     if (pack / "mtp" / "dense.txt").exists():
         args += ["--mtp", str(pack / "mtp")]
     kept = keep_args(old.get("args") or [], args, ("--mtp-max-t", "--kv", "--vram-reserve-mib", "--pool-workers",
-                                                   "--experts-from-gguf"))
+                                                   "--experts-from-gguf", "--ple-io"))
+    inst = {"family": "qwen", "quant": QWEN_UD_DIR if quant == QWEN_UD else QWEN, "qwen_quant": quant}
+    sampling, effort = Q.model_defaults({"installer": inst})   # (the model's own, every setup: its card's)
     cfg = {"exe": str(EXE), "args": args, "cwd": str(ROOT), "tokenizer": str(pack / "tokenizer"),
            **({"backend": "hip"} if hip else {}),
-           "model_name": QWEN_MODEL_NAME, "gpu": [g["index"] for g in pc["gpus"]],
-           "sampling": dict(QWEN_SAMPLING), "reasoning_effort": QWEN_EFFORT,   # (the model's own, every setup)
+           "model_name": QWEN_UD_MODEL_NAME if quant == QWEN_UD else QWEN_MODEL_NAME,
+           "gpu": [g["index"] for g in pc["gpus"]],
+           "sampling": sampling, "reasoning_effort": effort,
            "lib_dirs": meta.get("lib_dirs") or old.get("lib_dirs") or [], "port": port}
     for k in ("host", "api_key", "cors_origins", "mcp_servers", "layer_split"):
         if old.get(k) is not None:
@@ -6366,8 +7008,7 @@ def write_config_qwen(a, pc: dict, meta: dict, pack: Path, gguf: Path, ctx: int,
     if kept:
         ok("kept from the config before: " + ", ".join(kept))
     cfg["log"] = str(cfg_path.with_suffix(".log"))
-    cfg["installer"] = {"family": "qwen", "models_dir": str(models), "quant": QWEN, "qwen_quant": "q5_k_m",
-                        "model_dir": str(d), "written": time.strftime("%Y-%m-%d %H:%M")}
+    cfg["installer"] = {**inst, "models_dir": str(models), "model_dir": str(d), "written": time.strftime("%Y-%m-%d %H:%M")}
     cfg_path.write_text(json.dumps(N.env_out(cfg), indent=1), encoding="utf-8")
     ok(f"config: {cfg_path}")
     ok(f"start script: {write_run_script(cfg_path, port)}")
@@ -6453,14 +7094,40 @@ def qwen_draft_calibration(cfg_path: Path) -> bool | None:
     return use
 
 
+def choose_qwen_quant(a, prev: dict) -> str:
+    """Which Qwen files: --qwen-quant (or a --model id that names them), else asked - CYBER-FROST-3.8-PS's Q5_K_M or
+    unsloth's UD-IQ2_XS of the base model; the files set up before are the default."""
+    given = getattr(a, "qwen_quant", None)
+    if given:
+        return given
+    before = (prev.get("installer") or {}).get("qwen_quant") or "q5_k_m"
+    default = before if before in QWEN_QUANTS else "q5_k_m"
+    rows = []
+    for q in QWEN_QUANTS:
+        m = qwen_entry(q)
+        rows.append((Q.shown("qwen", q, m["download_gb"]), "new" if q == QWEN_UD else None,
+                     "Qwen3.8-Flash-Next itself in unsloth's UD-IQ2_XS GGUF (its n-gram table from Maya's repo, its MTP "
+                     f"head, the experts in about {m['memory_gb']:.0f} GB of VRAM and RAM together)" if q == QWEN_UD else
+                     "Blackfrost-AI's cybersecurity fine-tune in peasantsmith's GGUF (Q5_K experts, all of them in about "
+                     f"{m['memory_gb']:.0f} GB of VRAM and RAM together)"))
+    pick = choose("Which Qwen3.8-Flash-Next?", ["The files to set up:"], rows, QWEN_QUANTS.index(default),
+                  getattr(a, "yes", False))
+    return QWEN_QUANTS[pick]
+
+
 def set_up_qwen(a, prev: dict) -> Path | None:
     """CYBER-FROST-3.8-PS's steps 1-8: the PC (NVIDIA from V100, or AMD), the context (recommended by this PC's VRAM),
     the engine (build/maya), the file (pinned, sha256-checked), the pack and the MTP drafter, the config; then the
     drafter measured."""
     inst = prev.get("installer") or {}
+    quant = choose_qwen_quant(a, prev)
+    if (inst.get("qwen_quant") or "q5_k_m") != quant:   # (the other Qwen files' setup before: its own config's answers)
+        prev = next((c for c in map(read_json, configs()) if config_family(c) == "qwen" and
+                     ((c.get("installer") or {}).get("qwen_quant") or "q5_k_m") == quant), {})
+        inst = prev.get("installer") or inst
     prev_args = prev.get("args") or []
     prev_ctx = int(prev_args[prev_args.index("--max-context") + 1]) if "--max-context" in prev_args[:-1] else None
-    m = qwen_entry()
+    m = qwen_entry(quant)
     pc = check_pc(a, "qwen")                           # 1
     total, _ = mem_gb()
     vram = sum(g["vram_gb"] for g in pc["gpus"])
@@ -6468,7 +7135,8 @@ def set_up_qwen(a, prev: dict) -> Path | None:
         warn(f"{vram:.0f} GB of VRAM and {total:.0f} GB of RAM: below the ~{m['memory_gb']:.0f} GB that hold all of its "
              "experts - the engine reads the others from the SSD when they are routed (slower)")
     step(2, "your choices")                            # 2
-    ok(f"model: {Q.shown('qwen', 'q5_k_m', m['download_gb'])} - a fine-tune of Qwen3.8-Flash-Next "
+    ok(f"model: {Q.shown('qwen', quant, m['download_gb'])} - " +
+       ("unsloth's GGUF of Qwen3.8-Flash-Next " if quant == QWEN_UD else "a fine-tune of Qwen3.8-Flash-Next ") +
        "(Qwen Community License 1.0: LICENSE.qwen-community-1.0; a Model-as-a-Service business needs Qwen's own license)")
     rec = qwen_recommended_context(vram, vram + total < m["memory_gb"])
     ctx = choose_context(a, prev_ctx, QWEN_CONTEXTS, rec)
@@ -6476,17 +7144,19 @@ def set_up_qwen(a, prev: dict) -> Path | None:
        f"; its KV cache: {qwen_kv_gb(ctx):.1f} GB of VRAM")
     models = (Path(a.models_dir).expanduser().resolve() if a.models_dir else
               Path(inst["models_dir"]) if inst.get("models_dir") else ROOT.parent / "Maya-data" / "models")
-    d = qwen_dir(a, models, prev)
+    d = qwen_dir(a, models, prev, quant)
     ok(f"model folder: {d}")
     llama = tools_step(a)                              # 3
     meta = build_step(a, pc, llama)                    # 4
-    files = qwen_model_step(a, d)                      # 5
+    files = qwen_model_step(a, d, quant, models)       # 5
     if files is None:
         return None
-    pack = qwen_pack_step(a, d, files, llama)          # 6
+    ud = quant == QWEN_UD
+    pack = qwen_pack_step(a, d, files, llama, d / m["mtp"] if ud else None)   # 6
     step(7, "images")                                  # 7
-    ok("pictures: none - the model has no vision tower (text only)")
-    cfg_path = write_config_qwen(a, pc, meta, pack, files[0], ctx, models, d)   # 8
+    ok("pictures: none - this fork's HIP port is text only")
+    cfg_path = write_config_qwen(a, pc, meta, pack, files[0], ctx, models, d, quant,
+                                 d / m["ngram"] if ud else None)                # 8
     if "mtp_calibration" not in (read_json(cfg_path).get("installer") or {}) or a.calibrate:
         how = drafting_choice(a, "the MTP drafter", "10-40")
         if how != "measure":
@@ -6523,7 +7193,7 @@ def model_option(a) -> str | None:
         a.mm3_quant = Q.MM3_QUANT_ALIASES.get(a.mm3_quant, a.mm3_quant)
     if not a.model:
         return None
-    hit = Q.resolve(a.model, list(MODELS))
+    hit = Q.resolve(a.model, list(glm_downloads()))   # (GLM-5.3's downloads included)
     if hit is None:
         return (f"--model {a.model}: not a model Maya knows - one of " + ", ".join(i for _, _, _, i in Q.QUANTS) +
                 f", {DS4}, {MM3}, cyber-frost = {QWEN_SHOWN}, or a GLM-5.3-Flash download: " + ", ".join(MODELS))
@@ -6531,8 +7201,13 @@ def model_option(a) -> str | None:
     if family == "glm":
         a.model = key
         return None
-    if family == "qwen":                                 # (its one GGUF: no quant to choose)
+    if family == "qwen":                                 # (CYBER-FROST's GGUF, or unsloth's UD-IQ2_XS: --qwen-quant)
+        given = getattr(a, "qwen_quant", None)
+        if key is not None and given and given != key:
+            return (f"--model {a.model} is {Q.shown(family, key)}, but --qwen-quant says {given}: give one of them")
         a.model = QWEN
+        if key is not None:
+            a.qwen_quant = key
         return None
     a.model, flag = (DS4, "ds4_quant") if family == "deepseek" else (MM3, "mm3_quant")
     if key is not None:
@@ -6596,6 +7271,10 @@ def main() -> int:
                          "PC), maya-s (gguf-s) = MiniMax-M3.1-Flash-Maya-S (~2.1 bits, ~122 GB) - the GGUFs on NVIDIA "
                          "from V100 on and on AMD; with --model-dir: the files you have (the same as --model "
                          "minimax-maya-xs / minimax-maya-s)")
+    ap.add_argument("--qwen-quant", choices=list(QWEN_QUANTS),
+                    help=f"Qwen3.8-Flash-Next's files: q5_k_m = {Q.shown('qwen', 'q5_k_m')} (peasantsmith's GGUF), "
+                         f"{QWEN_UD} = Qwen3.8-Flash-Next in unsloth's UD-IQ2_XS GGUF (~80 GB, text only; the same as --model "
+                         "qwen-ud-iq2_xs)")
     ap.add_argument("--draft", choices=list(DRAFTS),
                     help="how the model drafts: mtp = its MTP block (the default), dflash2 = a DFlash2 drafter "
                          f"(downloads {DFLASH['bytes'] / 1e9:.1f} GB; NVIDIA)")

@@ -1,0 +1,92 @@
+name: Bug report
+description: Something does not work, crashes, or gives a wrong answer
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Run `./maya.sh --report` (both hosts for a pair) and attach the `maya-report.txt` it writes. It holds your hardware, your setup and the engine's log lines. Nothing is sent anywhere by itself, and API keys are left out.
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Maya-TP source/release version
+      description: The `VERSION` file in the Maya folder, or Settings > About in the web page.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Linux distribution and kernel version
+    validations:
+      required: true
+  - type: input
+    id: gpus
+    attributes:
+      label: GPU model(s) and VRAM
+      placeholder: Two Strix Halo gfx1151 APUs, memory per host
+    validations:
+      required: true
+  - type: input
+    id: cpu_ram
+    attributes:
+      label: CPU and RAM
+      placeholder: Ryzen 9 7950X, 96 GB
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: ROCm version
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model and quant
+      placeholder: GLM-5.3-Flash, Maya-S (or GLM-5.3, UD-IQ2_M)
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Context length
+  - type: textarea
+    id: command
+    attributes:
+      label: The command or config you used
+      description: For example `./maya.sh --setup --model glm-maya-s`, or the settings you changed.
+      render: shell
+  - type: textarea
+    id: report
+    attributes:
+      label: maya-report.txt
+      description: Drag the file here, or paste its text.
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: The engine's log is `maya-<model>.log` in the Maya folder (the report holds its last lines). Attach more of it if the problem is not in those lines.
+      render: text
+  - type: input
+    id: pair_context
+    attributes:
+      label: Pair and request settings
+      description: Host roles, RDMA device, model/quant, context, parallel slots and MTP/DSpark flags; say single-host for installer issues.
+  - type: input
+    id: source_build
+    attributes:
+      label: Source and executable identities
+      description: Commit SHA and selected executable hashes/paths on both hosts, when available.

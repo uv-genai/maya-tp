@@ -1,0 +1,1 @@
+DS4 PCIe gates: persisted lane off, no/zero/partial pinning, force and hold cases passed; the warm-only decision where no pick can be cold (#551) passed; decode's checks keep streaming on a tie (#697); the one-GPU path's warm rule (#920) passed

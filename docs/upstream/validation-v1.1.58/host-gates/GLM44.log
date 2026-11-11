@@ -1,0 +1,183 @@
+GLM memory policy checks passed (CPU only)
+GLM TP2 batch framing, bounds, identities and legacy word counts passed
+env_switch_test: all cases passed
+ok   Flash load(): offsets, ring and bytes equal Maya's (ctx 4096)
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 4096): snapshot sizes
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 4096): offsets, ring and bytes
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 4096): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 4096): snapshot sizes
+ok   Flash split price (slow) equals the old one (ctx 4096)
+ok   Flash split price (fast) equals the old one (ctx 4096)
+ok   Flash load(): offsets, ring and bytes equal Maya's (ctx 8256)
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 8256): snapshot sizes
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 8256): offsets, ring and bytes
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 8256): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 8256): snapshot sizes
+ok   Flash split price (slow) equals the old one (ctx 8256)
+ok   Flash split price (fast) equals the old one (ctx 8256)
+ok   Flash load(): offsets, ring and bytes equal Maya's (ctx 131072)
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,45) mtp -1 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,45) mtp 45 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [0,22) mtp -1 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 0 [22,45) mtp 45 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,45) mtp -1 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,45) mtp 45 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [0,22) mtp -1 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 1 [22,45) mtp 45 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,45) mtp -1 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,45) mtp 45 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [0,22) mtp -1 (ctx 131072): snapshot sizes
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 131072): offsets, ring and bytes
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 131072): slot runs equal slot_dsa_runs
+ok   Flash load_pack mode 2 [22,45) mtp 45 (ctx 131072): snapshot sizes
+ok   Flash split price (slow) equals the old one (ctx 131072)
+ok   Flash split price (fast) equals the old one (ctx 131072)
+ok   Flash slots stay MAYALST2
+ok   TP2 architecture gate accepts Flash and refuses full GLM before bootstrap
+ok   Flash TP1 rank0 mode1 NextN0 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN0 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN0 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN0 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN0: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP1 rank0 mode1 NextN1 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN1 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN1 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN1 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode1 NextN1: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP1 rank0 mode2 NextN0 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN0 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN0 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN0 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN0: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP1 rank0 mode2 NextN1 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN1 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN1 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN1 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP1 rank0 mode2 NextN1: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank0 mode1 NextN0 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN0 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN0 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN0 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN0: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank0 mode1 NextN1 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN1 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN1 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN1 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode1 NextN1: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank0 mode2 NextN0 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN0 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN0 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN0 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN0: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank0 mode2 NextN1 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN1 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN1 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN1 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank0 mode2 NextN1: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank1 mode1 NextN0 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN0 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN0 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN0 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN0: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank1 mode1 NextN1 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN1 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN1 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN1 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode1 NextN1: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank1 mode2 NextN0 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN0 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN0 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN0 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN0: four unequal slots snapshot/serialization canaries intact
+ok   Flash TP2 rank1 mode2 NextN1 ctx256: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN1 ctx512: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN1 ctx8320: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN1 ctx32768: offsets/snapshot/slot regions bounded
+ok   Flash TP2 rank1 mode2 NextN1: four unequal slots snapshot/serialization canaries intact
+Flash-only PASSED (0 failures)

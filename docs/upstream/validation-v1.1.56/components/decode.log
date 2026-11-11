@@ -1,0 +1,8 @@
+exl3_test on AMD Radeon 8060S Graphics (129.9 GB)
+  moe K2 cb2                                   rel 1.73e-06  worst/rms 7.24e-06  ok
+  win K2 cb2 7 tokens, 5 experts               0 of 3584 differ from the token path  ok
+  win K2 cb2 16 tokens, 5 experts              0 of 8192 differ from the token path  ok
+  moe K2.5 cb2                                 rel 7.33e-06  worst/rms 2.52e-05  ok
+  win K2.5 cb2 7 tokens, 5 experts             0 of 3584 differ from the token path  ok
+  win K2.5 cb2 16 tokens, 5 experts            0 of 8192 differ from the token path  ok
+decode-only: ok (0 failures, 0 launch errors)

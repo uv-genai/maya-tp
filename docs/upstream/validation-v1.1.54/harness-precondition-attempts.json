@@ -1,0 +1,444 @@
+[
+  {
+    "attempt": "failed-reuse-assumption",
+    "success": false,
+    "rank0_pid": 691751,
+    "rank0_exit": 0,
+    "ssh_exit": 0,
+    "case_summaries": [
+      {
+        "label": "short-off",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 28,
+          "prompt_ms": 720.3,
+          "decode_ms": 2541.2,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 21168,
+          "lookups": 21168
+        },
+        "error": null
+      },
+      {
+        "label": "short-on",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 28,
+          "prompt_ms": 38.0,
+          "decode_ms": 1737.0,
+          "finish": "length",
+          "drafts_accepted": 38,
+          "drafts_offered": 47,
+          "reused": 27,
+          "hits": 24568,
+          "lookups": 24568
+        },
+        "error": null
+      },
+      {
+        "label": "prefill-off",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 1376,
+          "prompt_ms": 4445.8,
+          "decode_ms": 2620.4,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 21168,
+          "lookups": 21168
+        },
+        "error": null
+      },
+      {
+        "label": "prefill-on",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 1376,
+          "prompt_ms": 40.9,
+          "decode_ms": 1921.9,
+          "finish": "length",
+          "drafts_accepted": 37,
+          "drafts_offered": 49,
+          "reused": 1375,
+          "hits": 25592,
+          "lookups": 25592
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-0",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 473.4,
+          "decode_ms": 4399.0,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 52208,
+          "lookups": 52208
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-1",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 464.3,
+          "decode_ms": 4191.4,
+          "finish": "length",
+          "drafts_accepted": 31,
+          "drafts_offered": 61,
+          "reused": 0,
+          "hits": 63464,
+          "lookups": 63464
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-2",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 470.7,
+          "decode_ms": 4112.4,
+          "finish": "length",
+          "drafts_accepted": 32,
+          "drafts_offered": 60,
+          "reused": 0,
+          "hits": 62456,
+          "lookups": 62456
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-3",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 468.4,
+          "decode_ms": 2606.9,
+          "finish": "length",
+          "drafts_accepted": 33,
+          "drafts_offered": 58,
+          "reused": 0,
+          "hits": 40112,
+          "lookups": 40112
+        },
+        "error": null
+      },
+      {
+        "label": "life-cancel",
+        "last": {
+          "generated": 10,
+          "prompt_tokens": 20,
+          "prompt_ms": 428.8,
+          "decode_ms": 738.0,
+          "finish": "cancel",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 12240,
+          "lookups": 12240
+        },
+        "error": null
+      },
+      {
+        "label": "life-long",
+        "last": {
+          "generated": 192,
+          "prompt_tokens": 24,
+          "prompt_ms": 447.3,
+          "decode_ms": 16188.5,
+          "finish": "length",
+          "drafts_accepted": 103,
+          "drafts_offered": 173,
+          "reused": 0,
+          "hits": 105720,
+          "lookups": 105720
+        },
+        "error": null
+      },
+      {
+        "label": "life-prefill",
+        "last": {
+          "generated": 24,
+          "prompt_tokens": 1420,
+          "prompt_ms": 8505.6,
+          "decode_ms": 1200.6,
+          "finish": "length",
+          "drafts_accepted": 13,
+          "drafts_offered": 16,
+          "reused": 0,
+          "hits": 19104,
+          "lookups": 19104
+        },
+        "error": null
+      },
+      {
+        "label": "life-refill",
+        "last": {
+          "generated": 8,
+          "prompt_tokens": 22,
+          "prompt_ms": 434.0,
+          "decode_ms": 577.5,
+          "finish": "length",
+          "drafts_accepted": 2,
+          "drafts_offered": 6,
+          "reused": 0,
+          "hits": 8864,
+          "lookups": 8864
+        },
+        "error": null
+      },
+      {
+        "label": "life-reuse",
+        "last": {
+          "generated": 8,
+          "prompt_tokens": 218,
+          "prompt_ms": 1419.7,
+          "decode_ms": 443.0,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 9,
+          "reused": 23,
+          "hits": 5448,
+          "lookups": 5448
+        },
+        "error": null
+      }
+    ]
+  },
+  {
+    "attempt": "failed-output-directory-reuse",
+    "success": false,
+    "rank0_pid": 692823,
+    "rank0_exit": -9,
+    "ssh_exit": 1,
+    "case_summaries": []
+  },
+  {
+    "attempt": "failed-last-prompt-snapshot-assumption",
+    "success": false,
+    "rank0_pid": 693019,
+    "rank0_exit": 0,
+    "ssh_exit": 0,
+    "case_summaries": [
+      {
+        "label": "short-off",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 28,
+          "prompt_ms": 744.4,
+          "decode_ms": 2552.0,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 21168,
+          "lookups": 21168
+        },
+        "error": null
+      },
+      {
+        "label": "short-on",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 28,
+          "prompt_ms": 37.5,
+          "decode_ms": 1755.0,
+          "finish": "length",
+          "drafts_accepted": 38,
+          "drafts_offered": 47,
+          "reused": 27,
+          "hits": 24568,
+          "lookups": 24568
+        },
+        "error": null
+      },
+      {
+        "label": "prefill-off",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 1376,
+          "prompt_ms": 4299.0,
+          "decode_ms": 2632.0,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 21168,
+          "lookups": 21168
+        },
+        "error": null
+      },
+      {
+        "label": "prefill-on",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 1376,
+          "prompt_ms": 39.3,
+          "decode_ms": 1906.4,
+          "finish": "length",
+          "drafts_accepted": 37,
+          "drafts_offered": 49,
+          "reused": 1375,
+          "hits": 25592,
+          "lookups": 25592
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-0",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 458.1,
+          "decode_ms": 6758.0,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 84296,
+          "lookups": 84296
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-1",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 457.2,
+          "decode_ms": 2677.1,
+          "finish": "length",
+          "drafts_accepted": 31,
+          "drafts_offered": 61,
+          "reused": 0,
+          "hits": 42488,
+          "lookups": 42488
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-2",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 456.9,
+          "decode_ms": 2238.7,
+          "finish": "length",
+          "drafts_accepted": 32,
+          "drafts_offered": 60,
+          "reused": 0,
+          "hits": 31392,
+          "lookups": 31392
+        },
+        "error": null
+      },
+      {
+        "label": "mixed-3",
+        "last": {
+          "generated": 64,
+          "prompt_tokens": 27,
+          "prompt_ms": 455.6,
+          "decode_ms": 2642.6,
+          "finish": "length",
+          "drafts_accepted": 33,
+          "drafts_offered": 58,
+          "reused": 0,
+          "hits": 40112,
+          "lookups": 40112
+        },
+        "error": null
+      },
+      {
+        "label": "life-cancel",
+        "last": {
+          "generated": 10,
+          "prompt_tokens": 20,
+          "prompt_ms": 431.7,
+          "decode_ms": 789.2,
+          "finish": "cancel",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 12240,
+          "lookups": 12240
+        },
+        "error": null
+      },
+      {
+        "label": "life-long",
+        "last": {
+          "generated": 192,
+          "prompt_tokens": 24,
+          "prompt_ms": 441.0,
+          "decode_ms": 15985.4,
+          "finish": "length",
+          "drafts_accepted": 103,
+          "drafts_offered": 173,
+          "reused": 0,
+          "hits": 105720,
+          "lookups": 105720
+        },
+        "error": null
+      },
+      {
+        "label": "life-prefill",
+        "last": {
+          "generated": 24,
+          "prompt_tokens": 1420,
+          "prompt_ms": 8384.6,
+          "decode_ms": 1151.3,
+          "finish": "length",
+          "drafts_accepted": 13,
+          "drafts_offered": 16,
+          "reused": 0,
+          "hits": 19104,
+          "lookups": 19104
+        },
+        "error": null
+      },
+      {
+        "label": "life-refill",
+        "last": {
+          "generated": 8,
+          "prompt_tokens": 22,
+          "prompt_ms": 427.7,
+          "decode_ms": 517.9,
+          "finish": "length",
+          "drafts_accepted": 2,
+          "drafts_offered": 6,
+          "reused": 0,
+          "hits": 8864,
+          "lookups": 8864
+        },
+        "error": null
+      },
+      {
+        "label": "life-reuse",
+        "last": {
+          "generated": 8,
+          "prompt_tokens": 218,
+          "prompt_ms": 1404.6,
+          "decode_ms": 444.3,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 9,
+          "reused": 23,
+          "hits": 5448,
+          "lookups": 5448
+        },
+        "error": null
+      }
+    ]
+  }
+]

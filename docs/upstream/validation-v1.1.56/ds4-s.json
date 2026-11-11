@@ -1,0 +1,18 @@
+{
+  "pack": "/home/ugo/software/Maya-data/models/DeepSeek-V4.1-Flash-1017-GGUF/Maya-S/maya-ds4",
+  "manifest": "/home/ugo/software/project-maya-upstream-20261111-runtime/manifests/maya-s.json",
+  "engine": "/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/maya-ds4",
+  "model_label": "DeepSeek V4.1 \u00b7 Maya-S",
+  "host": "192.168.1.92",
+  "peer": "strix-halo-1.local",
+  "peer_root": "/home/ugo/software/project-maya-upstream-20261111-runtime",
+  "port": 18525,
+  "rdma_device": "usb4_rdma5",
+  "context": 262144,
+  "expert_budget_mib": 92160,
+  "reserve_mib": 1024,
+  "cpu_threads": 14,
+  "prefill_chunk": 256,
+  "dspark": "on",
+  "suffix_draft": 0
+}

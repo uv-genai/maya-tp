@@ -1,0 +1,21 @@
+{
+  "label": "v1.1.58",
+  "previous": "v1.1.57",
+  "raw_directory": "/tmp/maya-upstream-20261111-validation",
+  "runtime": "/home/ugo/software/project-maya-upstream-20261111-runtime",
+  "scope": "HIP gfx1151 / APU RDMA Flash models; six raw-engine StrataEngine cases plus two same-pair four-slot real public HTTP/Service smoke cases; synthetic GPU parity and pre-bootstrap rejection gates; no model downloads or GLM 744B execution",
+  "config_notes": "Archived configs are base templates; case commands override engine/context/parallel/host/port. Effective argv, executable hashes, env and INFO in per-case ownership/results are authoritative.",
+  "audited_identity_count": 66,
+  "harness_sha256": {
+    "case": "26b96cf5cc62a38f93fcb6a776ec0b2c7624bd06959d387737196b030fff446a",
+    "checkpoint": "b058f0d6f92d6f1720387e4f080b65962869ea8afe36bdcf3654633e1a84d26a",
+    "build": "6eb814039c90f30af23e031d79f612ecb71dddd2f45874a50b12a140592e638a",
+    "collect": "3e76f6d5c10a99c22414c07e1cb6ae267576c7d56ca6073c591d4f86aaec4435",
+    "perf": "2387cf3768fba3da82f2ff6559543ac90f44d9385a363f2cec64ce64f2aaa63a",
+    "finalize": "ab7b2a051e27edff2226c6285f3d6fb1b743e6b983f2ba0b3ff90337052c7338",
+    "components": "1ddb74392ca476063c546feafb806bee89b718809ca7025a20ec087328a5f9e8",
+    "final-http": "9368b9ee95c3e4a6e0b44bdeed7843c9bba08034f903b32629dfa6105622d532",
+    "ai-run": "04936341e6d3d32f19c06b4295c4f447f0bb83e66b393db13fb800b418cec907",
+    "http-smoke": "430f515cde037119d0f1391ced1e692304670834fcaff1b3963335d25ad65105"
+  }
+}
