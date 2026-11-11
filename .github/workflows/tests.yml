@@ -45,6 +45,8 @@ jobs:
           "$RUNNER_TEMP/glm_tp_batch_test"
           c++ -std=c++20 -O2 -UNDEBUG -Wall -Wextra -Werror -Iinclude tests/env_switch_test.cpp -o "$RUNNER_TEMP/env_switch_test"
           "$RUNNER_TEMP/env_switch_test"
+          c++ -std=c++20 -O2 -UNDEBUG -Wall -Wextra -Werror -Itests/host -Iinclude tests/glm_dsa/glm_state_layout_test.cpp src/core/glm_state_layout.cpp -o "$RUNNER_TEMP/glm_state_layout_test"
+          "$RUNNER_TEMP/glm_state_layout_test" --flash-only
       - name: DeepSeek CPU row preparation (CPU only)
         run: |
           c++ -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Werror tests/ds4_cpu_prepare_rows_test.cpp -o "$RUNNER_TEMP/ds4_cpu_prepare_rows_test"

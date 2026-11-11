@@ -1,0 +1,32 @@
+{
+  "pid": 295645,
+  "start": "14970712",
+  "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.56/maya",
+  "args": [
+    "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.56/maya",
+    "--serve",
+    "--glm-pack",
+    "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack",
+    "--max-context",
+    "32768",
+    "--parallel",
+    "2",
+    "--expert-cache",
+    "auto",
+    "--prefill",
+    "auto",
+    "--kv-streaming",
+    "on",
+    "--tp-world-size",
+    "2",
+    "--tp-bootstrap-port",
+    "19351",
+    "--tp-rdma-device",
+    "usb4_rdma5",
+    "--tp-rank",
+    "1",
+    "--tp-bootstrap-host",
+    "192.168.1.92"
+  ],
+  "sha256": "3b33caf22a1b7bdb31f0d26ec7f0dba3ef6ea16d7eb9c2104f22239249540b7d"
+}

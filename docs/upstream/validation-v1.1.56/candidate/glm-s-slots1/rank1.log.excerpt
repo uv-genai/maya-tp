@@ -1,0 +1,8 @@
+glm mtp: CUDA0 the NextN block (blk.45) loaded: 173 MB dense, experts q2_K/q3_K
+glm mtp: CUDA0 the MTP decode drafts over 98741 of 154880 tokens (the ids below 98304 and 437 more: 316 of 496 MB a draft), chained on the device (token_embd there, 496 MB)
+glm mtp: a drafting round's host time - drafts 7.47 ms, verify 60.50 ms, commit + cache 0.56 ms (24 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 24 drafting rounds on the whole head
+glm mtp: a drafting round's host time - drafts 8.33 ms, verify 64.20 ms, commit + cache 0.55 ms (26 rounds)
+glm mtp: the draft vocabulary (98304 + 437 tokens) - 0 of 64 emitted tokens outside it, 0 of 26 drafting rounds on the whole head
+TP2 worker recv: verbs peer closed the bootstrap connection
+glm spec: 98 speculative positions, 77.6% accepted

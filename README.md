@@ -115,7 +115,10 @@ isolated gfx1151 GLM TP2/MTP and DeepSeek TP2/DSpark validation, ending at
 checkpoints add serving, model-storage/UI, packing and GPU-fault handling fixes.
 The new optional engine experiments are tracked for separate assessment in #133.
 [Last merged-main upstream checkpoint](docs/upstream/v1.1.53.md).
-The active v54–v58 branch adds Responses compatibility and inline document inputs;
+The active v54–v58 branch includes full GLM-5.3 source/catalog additions, while
+remote TP2 remains **Flash-only** and rejects the 744B architecture before
+bootstrap. No 744B model is downloaded or tested. The branch also adds
+Responses compatibility and inline document inputs;
 text extraction works within paired text-only limits. Images/video remain outside
 the validated TP2 scope. [v54](docs/upstream/v1.1.54.md), [v55](docs/upstream/v1.1.55.md).
 

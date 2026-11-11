@@ -3169,8 +3169,8 @@ numeric VERSION and pinned llama.cpp are preserved.
 | --- | --- | --- |
 | v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates and evidence CI 42966915176 pass at `ad7f71f` |
 | v1.1.55 | #161 | Source `cc5ea59`, exact-head CI 42967989395 passed; default-off2304 tokens exact; bounded performance replay passes; #165/#166 remain follow-ups |
-| v1.1.56 | #162 | Semantic merge/reviews complete; builds/ordered suites/GPU checks starting |
-| v1.1.57 | #163 | Queued; shared Flash state layout needs rank-local review; full-model TP2 must be rejected |
+| v1.1.56 | #162 | Source `14a127f`, CI42973291953 passed; host/EXL3 and all six Flash gates pass;2304 tokens exact |
+| v1.1.57 | #163 | Semantic source reviewed; rank-local state repair + Flash-only host/sanitizer gates pass; builds/ordered suites starting |
 | v1.1.58 | #164 | Queued; additional Q5_K parity and Flash Unicode drafting checks identified |
 
 V54 passes mapping, 756 server tests (20 skips), 782 tools tests (3 skips),
@@ -3271,3 +3271,38 @@ prior local P2P/BAR/Metal exclusions remain; source/settings/tests are kept
 consistent. Existing Flash packs are not repacked; F32 bias applies new packs.
 The workflow now runs env_switch_test. Ordered suites and isolated builds are
 starting; consult current validation ownership before another GPU launch.
+
+V56 exact source `14a127f` passes CI42973291953,820 local server tests
+(21 skips),787 tools tests (3 skips), HIP mapping and updated workflow CPU
+suites. All engines and EXL3 fixture build. Model-free default shaped prefill,
+public-name uniform rollback and decode parity pass. GLM default/batch and
+XS default outputs match v55 so far; direct false-valued NO_* flags prove
+MTP/bulk-prefill reach. The validation driver continues XS2/S1/S2 with bounded
+STAT/GPU/owned-IO sampling; check current ownership before any GPU launch.
+
+V56 checkpoint is accepted at `14a127f` with exact-head CI42973291953 passed.
+All six configurations match2,304 v55 tokens; direct false-valued GLM flags,
+real drafting and synthetic EXL3 gates pass. XS2/S2 mixed31.44/28.55tok/s are
+comparable with prior steady controls; no severe timing anomaly. All39 recorded
+identities exited. Final report/raw evidence will be bundled with v57 source.
+Read `docs/upstream/v1.1.56.md` and `validation-v1.1.56/`. V57 now starts after
+these gates, on the same branch; main and production remain unchanged.
+
+V57 source is semantically resolved. New shared state layout takes explicit
+rank-local KDA head count in production carving/seq_layout while keeping DSA,
+indexer, residual and NextN geometry canonical. All snapshot/checkpoint/slot
+copy sizes use the corrected descriptor; SeqCtx swaps the descriptor. A
+Flash-only host regression passes normal/ASan/UBSan and fails40 checks when
+global heads are substituted. New full-GLM TP2 is rejected before bootstrap.
+Unmirrored GEN/API tuning is refused before mutation; Flash answer reserve,
+DeepSeek spec0, C1 writer/fatal guards and memo defaults survive semantic merge.
+Focused serving368 tests (22 skips) and installer117 tests pass; no real model
+is used by those fixtures. Root added the exact Flash-only state command to CI.
+
+V57 imports full GLM-5.3 source/catalog with no model download/GPU qualification.
+Inherited full-model-only RAM trailer behavior is recorded in open #167 and
+left unchanged outside Flash scope. Fork README/AGENTS/docs index remain owned;
+new security/issue-form docs name this fork, both configured hosts, Linux/gfx1151
+and ROCm. Metal/MSVC-only source-audit tests are outside scope, not restored.
+Pin/ROCm split paths/RDMA flags/version remain unchanged. Isolated builds and
+ordered full suites are starting; consult current ownership before GPU use.

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Maya-TP questions and ideas
+    url: https://github.com/uv-genai/maya-tp/issues
+    about: Discuss this gfx1151 HIP/RDMA fork in its own issue tracker

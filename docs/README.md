@@ -20,13 +20,15 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | Installer and clean-install updates | [Setup](SETUP.md) |
 | Model catalog and fork validation limits | [Models](MODELS.md) |
 | Runtime settings, thinking budgets and default-off options | [Settings](SETTINGS.md) |
+| Upstream standalone full GLM-5.3 model (remote TP2 unsupported) | [GLM-5.3 scope](GLM53.md) and [memory overview](MEMORY.md) |
 | Responses API | [Responses](RESPONSES.md) |
 | Agent-shaped API benchmark and coverage | [Agent benchmark](AGENT_BENCH.md) |
 | Contributor workflow and validation | [Contributing](../CONTRIBUTING.md) |
 | Coding-agent rules | [AGENTS.md](../AGENTS.md) |
 | Coding-agent current state and restart prompt | [Handoff](../Handoff.md), [Handoff-Prompt](../Handoff-Prompt.md) |
 | Current release and changes | [tp-v1.1.44 notes](releases/tp-v1.1.44.md), [changelog](../CHANGELOG.md) |
-| Upstream integration decisions and evidence | [v1.1.53](upstream/v1.1.53.md), [v1.1.52](upstream/v1.1.52.md), [v1.1.51](upstream/v1.1.51.md), [v1.1.50](upstream/v1.1.50.md), [v1.1.49 merge and fresh live validation](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
+| Current v54–v58 integration | [v54](upstream/v1.1.54.md), [v55](upstream/v1.1.55.md), [v56](upstream/v1.1.56.md); progress in [#159](https://github.com/uv-genai/maya-tp/issues/159) |
+| Earlier upstream integration decisions and evidence | [v1.1.53](upstream/v1.1.53.md), [v1.1.52](upstream/v1.1.52.md), [v1.1.51](upstream/v1.1.51.md), [v1.1.50](upstream/v1.1.50.md), [v1.1.49 merge and fresh live validation](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
 
 The current source incorporates applicable upstream v1.1.50–v1.1.53 changes as
 individual validated checkpoints, completed through PR #134 at `de184d9` with
