@@ -6,7 +6,7 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
-- Integrating upstream v1.1.54–v1.1.58 on an isolated branch; per-tag Flash TP2 validation is tracked in #159–#164. Production selections and fork release VERSION are unchanged.
+- Integrated upstream v1.1.54–v1.1.58 as sequentially validated Flash TP2 checkpoints. GLM MTP and DeepSeek DSpark pass default/batched and final four-slot HTTP checks; evidence and final PR/main publication are tracked in #159–#164. Production selections and fork release VERSION are unchanged.
 
 ## Upstream v1.1.58 - 2026-11-10
 
