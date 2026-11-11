@@ -1,0 +1,338 @@
+{
+  "checked": 1794375389.6397207,
+  "identities": [
+    {
+      "case": "baseline-ds4-s-slots1",
+      "host": "strix-halo-2.local",
+      "pid": 689011,
+      "start": "14433272",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-ds4-s-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 689814,
+      "start": "14445611",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-ds4-xs-slots1",
+      "host": "strix-halo-2.local",
+      "pid": 685842,
+      "start": "14403274",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-ds4-xs-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 687536,
+      "start": "14414322",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-glm-s-slots1",
+      "host": "strix-halo-2.local",
+      "pid": 680877,
+      "start": "14383993",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-glm-s-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 684637,
+      "start": "14397741",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-s-slots1",
+      "host": "strix-halo-2.local",
+      "pid": 696705,
+      "start": "14532881",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-s-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 697813,
+      "start": "14551176",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-xs-slots1",
+      "host": "strix-halo-2.local",
+      "pid": 694904,
+      "start": "14511604",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-xs-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 695572,
+      "start": "14519763",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-glm-s-slots1",
+      "host": "strix-halo-2.local",
+      "pid": 691077,
+      "start": "14460696",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-glm-s-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 694133,
+      "start": "14499536",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-baseline-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 699179,
+      "start": "14567341",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-baseline-slots2-sampler",
+      "host": "strix-halo-2.local",
+      "pid": 699173,
+      "start": "14567297",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-candidate-slots2",
+      "host": "strix-halo-2.local",
+      "pid": 700029,
+      "start": "14576311",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-candidate-slots2-sampler",
+      "host": "strix-halo-2.local",
+      "pid": 700021,
+      "start": "14576269",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "failed-reuse-assumption",
+      "host": "strix-halo-2.local",
+      "pid": 691751,
+      "start": "14466510",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "failed-output-directory-reuse",
+      "host": "strix-halo-2.local",
+      "pid": 692823,
+      "start": "14480804",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "failed-last-prompt-snapshot-assumption",
+      "host": "strix-halo-2.local",
+      "pid": 693019,
+      "start": "14483723",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-ds4-s-slots1",
+      "host": "strix-halo-1.local",
+      "pid": 283550,
+      "start": "14433292",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-ds4-s-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 283889,
+      "start": "14445632",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-ds4-xs-slots1",
+      "host": "strix-halo-1.local",
+      "pid": 282778,
+      "start": "14403296",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-ds4-xs-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 283103,
+      "start": "14414369",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-glm-s-slots1",
+      "host": "strix-halo-1.local",
+      "pid": 282305,
+      "start": "14383992",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "baseline-glm-s-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 282630,
+      "start": "14397744",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-s-slots1",
+      "host": "strix-halo-1.local",
+      "pid": 286157,
+      "start": "14532899",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-s-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 286595,
+      "start": "14551195",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-xs-slots1",
+      "host": "strix-halo-1.local",
+      "pid": 285535,
+      "start": "14511623",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-ds4-xs-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 285796,
+      "start": "14519782",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-glm-s-slots1",
+      "host": "strix-halo-1.local",
+      "pid": 284274,
+      "start": "14460698",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "v1.1.54-glm-s-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 285259,
+      "start": "14499537",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-baseline-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 287014,
+      "start": "14567361",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/baseline/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-baseline-slots2-sampler",
+      "host": "strix-halo-1.local",
+      "pid": 287008,
+      "start": "14567313",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-candidate-slots2",
+      "host": "strix-halo-1.local",
+      "pid": 287299,
+      "start": "14576332",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya-ds4",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "perf-v54-xs-candidate-slots2-sampler",
+      "host": "strix-halo-1.local",
+      "pid": 287292,
+      "start": "14576271",
+      "exe": "/usr/bin/python3.14",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "failed-reuse-assumption",
+      "host": "strix-halo-1.local",
+      "pid": 284425,
+      "start": "14466514",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    },
+    {
+      "case": "failed-last-prompt-snapshot-assumption",
+      "host": "strix-halo-1.local",
+      "pid": 284917,
+      "start": "14483724",
+      "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.54/maya",
+      "owned_alive": false,
+      "status": "exited"
+    }
+  ]
+}

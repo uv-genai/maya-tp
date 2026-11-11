@@ -3155,24 +3155,72 @@ does not authorize overwriting the protected peer checkout or production files.
 
 ## 54. Upstream v1.1.54–v1.1.58 integration (2026-11-11)
 
-The user authorized a separate branch with sequential tag checkpoints and a final
-validated pull request into main. Tracking: epic #159, v54 #160, v55 #161,
-v56 #162, v57 #163, v58 #164; the completed inventory is #158.
+The user authorized sequential tag checkpoints on
+`codex/upstream-v1.1.54-v1.1.58`, followed by one validated final PR into main.
+Epic [#159](https://github.com/uv-genai/maya-tp/issues/159) indexes the phases;
+completed discovery is #158. Main/production remain at `1cb29e0` (tp-v1.1.44).
 Both hosts are available for owned validation. Use existing GLM-5.3-Flash
-Maya-S and DeepSeek-V4.1-Flash Maya-XS/S packs only. Do not download a model or
-run GLM-5.3 744B. The fork-owned README/AGENTS/operational guides require
-semantic merging. Preserve the numeric VERSION and pinned llama.cpp revision.
+Maya-S and DeepSeek-V4.1-Flash Maya-XS/S only: no downloads and no full
+GLM-5.3 744B model tests. Synthetic architecture/kernel tests are model-free.
+The fork-owned README/AGENTS/operational guides require semantic merging;
+numeric VERSION and pinned llama.cpp are preserved.
 
-The initial baseline is main `1cb29e0` (tp-v1.1.44), with batching-accepted
-`g5-release/maya` and `d5-guard/maya-ds4` binaries under
-`/home/ugo/software/project-maya-batching-validation` on both hosts. Do not
-use pre-batching v53 binaries as controls. New builds and validation configs
-are isolated; production selections and the protected host-1 checkout remain
-unchanged. Validation setup is in progress; no owned GPU processes yet.
+| Tag | Issue | State |
+| --- | --- | --- |
+| v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates pass, final evidence publication CI pending |
+| v1.1.55 | #161 | Queued; do not merge until v54 publication CI passes |
+| v1.1.56 | #162 | Queued |
+| v1.1.57 | #163 | Queued; shared Flash state layout needs rank-local review; full-model TP2 must be rejected |
+| v1.1.58 | #164 | Queued; additional Q5_K parity and Flash Unicode drafting checks identified |
 
-V54 semantic merge is in progress. Retain the fork's default-off
-`DS4_INDEX_TC` despite upstream's output-affecting default flip. The normal
-streamer's new per-chunk expert-skip policy preserves sliced RAM staging.
-Local in-process GPU placement does not replace remote RDMA TP2. Shared API
-changes preserve command serialization, first-fatal fanout and paired health.
-Per-tag issues record exact source/build identities, gates and ownership.
+V54 passes mapping, 756 server tests (20 skips), 782 tools tests (3 skips),
+workflow CPU/control suites, sanitized RAM slicing and affected component
+checks. All three HIP Release engines build. GLM S and DeepSeek XS/S each pass
+single-slot and batch2, all 2,304 fixed normal tokens matching the accepted
+baseline, actual MTP/DSpark, mixed requests and batch cancellation/refill/reuse.
+GLM/XS injected peer-loss tests preserve the first cause across four routes
+and later GEN. The one XS mixed-wave timing excursion (31.66 → 11.58 tok/s)
+did not recur in three measured warmed waves per build (medians 32.74 control /
+33.07 candidate); the original data and unestablished cause remain recorded.
+Read [the v54 report](docs/upstream/v1.1.54.md) and its raw evidence.
+Exact-head CI at `0663f7a` is [42962996575](https://github.com/uv-genai/maya-tp/actions/runs/42962996575), passed.
+
+Controls are batching-accepted `g5-release/maya` and `d5-guard/maya-ds4` under
+`/home/ugo/software/project-maya-batching-validation` on both hosts, not the
+pre-batching v53 engines. New isolated source/runtime is
+`/home/ugo/software/project-maya-upstream-20261111-runtime`; build tree is
+`/home/ugo/software/project-maya-upstream-20261111-build`. Versioned engines
+are frozen under `engines/<checkpoint>/` on both hosts. Final v54 hashes are
+in the report (GLM `49c5868e…`, DeepSeek `5ece66ec…`). The initial unused
+DeepSeek build was replaced after a final header-dependency refresh.
+
+**No owned GPU or telemetry processes remain after v54.** Per-case
+`ownership.json`, `peer-identity.json` and the stopped-process audit are under
+`/tmp/maya-upstream-20261111-validation/`; committed bounded evidence is in
+`docs/upstream/validation-v1.1.54/`. External case/checkpoint harnesses are
+`/tmp/maya-upstream-20261111-case.py` and
+`/tmp/maya-upstream-20261111-checkpoint.py`. Future cleanup verifies PID start
+identity/executable and stops only those owned pairs. Never run another pair
+while a validation driver is active. No production config/executable or
+protected host-1 checkout is changed.
+
+V54 retains default-off `DS4_INDEX_TC` and the 400 MB ring default. Its normal
+streamer adopts per-chunk skip policy with sliced RAM staging and correct
+routing publication/virtual offsets. Local GPU placement does not replace
+remote RDMA TP2. Shared API changes retain command serialization, first-fatal
+fanout and paired health. Initial test/harness precondition corrections are
+recorded in #160/report; no uncertain state is reset or retried in one rank.
+
+V55 review: preserve explicit Flash defaults, prompt memo opt-in/aliases and
+INT8 selection behavior. The deferred `DS4_AI_RUN` prerequisite is small and
+can be integrated opt-in with identical allocation/runtime predicates and
+paired feature negotiation. The 1,441-token XS prompt at 262K allocation
+exercises index selection beyond top-k512 with ratio2 compression; it does
+not cover candidate-block reduction beyond 16K compressed keys.
+V57/V58 shared-GLM audit notes are in
+`/tmp/maya-v57-v58-glm-merge-notes.md` and #163. Preserve rank-local KDA state,
+slot/snapshot sizes and explicit paired semantics; reject unmirrored tuning
+and ablation. `glm_mv_nt_test` covers changed Q5_K n-column dispatch without
+new weights; existing Flash packs' dense tensors are F32/Q8_0, so another
+large model load would not exercise that path. Final bounded max-slot probes
+are GLM4 at32K and DeepSeek XS4 at8K allocation, not a capacity campaign.

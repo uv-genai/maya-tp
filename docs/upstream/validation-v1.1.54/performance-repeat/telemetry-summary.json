@@ -1,0 +1,102 @@
+{
+  "clock_wall_minus_monotonic": 1794229386.3484917,
+  "scope": "Sysfs GPU frequency, busy, temperature and average power during the three measured waves; no telemetry was captured for the initial isolated slow wave. Thus its cause remains unestablished.",
+  "samples": {
+    "baseline-local": {
+      "sample_count": 47,
+      "wall_interval": [1794375124.4016745,1794375147.8256745],
+      "temp1_input": {
+        "min": 53.0,
+        "median": 57.0,
+        "max": 61.0
+      },
+      "power1_average": {
+        "min": 81.637,
+        "median": 85.39,
+        "max": 94.935
+      },
+      "gpu_busy_percent": {
+        "min": 93.0,
+        "median": 97.0,
+        "max": 99.0
+      },
+      "gpu_MHz": {
+        "min": 2771,
+        "median": 2869,
+        "max": 2893
+      }
+    },
+    "baseline-peer": {
+      "sample_count": 46,
+      "wall_interval": [1794375124.4016745,1794375147.8256745],
+      "temp1_input": {
+        "min": 52.0,
+        "median": 60.5,
+        "max": 64.0
+      },
+      "power1_average": {
+        "min": 75.23299999999999,
+        "median": 84.645,
+        "max": 88.33
+      },
+      "gpu_busy_percent": {
+        "min": 81.0,
+        "median": 86.0,
+        "max": 96.0
+      },
+      "gpu_MHz": {
+        "min": 2488,
+        "median": 2611.0,
+        "max": 2837
+      }
+    },
+    "candidate-local": {
+      "sample_count": 47,
+      "wall_interval": [1794375197.1345644,1794375220.340099],
+      "temp1_input": {
+        "min": 51.0,
+        "median": 59.0,
+        "max": 62.0
+      },
+      "power1_average": {
+        "min": 81.658,
+        "median": 85.292,
+        "max": 95.788
+      },
+      "gpu_busy_percent": {
+        "min": 92.0,
+        "median": 97.0,
+        "max": 99.0
+      },
+      "gpu_MHz": {
+        "min": 2757,
+        "median": 2871,
+        "max": 2896
+      }
+    },
+    "candidate-peer": {
+      "sample_count": 46,
+      "wall_interval": [1794375197.1345644,1794375220.340099],
+      "temp1_input": {
+        "min": 54.0,
+        "median": 62.0,
+        "max": 66.0
+      },
+      "power1_average": {
+        "min": 79.97699999999999,
+        "median": 85.166,
+        "max": 91.34299999999999
+      },
+      "gpu_busy_percent": {
+        "min": 81.0,
+        "median": 86.0,
+        "max": 96.0
+      },
+      "gpu_MHz": {
+        "min": 2490,
+        "median": 2610.0,
+        "max": 2843
+      }
+    }
+  }
+}
