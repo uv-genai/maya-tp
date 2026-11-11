@@ -10,21 +10,31 @@ server config; the final section covers the SSH-managed llama-swap wrapper.
 PR #122 merged the implementation into `main` at `75e18e8`. Feature-head and
 post-merge CI passed. [Merged pull request](https://github.com/uv-genai/maya-tp/pull/122).
 
-The source checkpoint through upstream v1.1.53 is `de184d9`, with final main CI
-41834772034 passing. Per-tag validation used isolated GLM Maya-S and DeepSeek
-XS/S builds. Accepted runtime paths are recorded below, and the full source
-checkpoint is in [Handoff §47](../Handoff.md#47-sequential-upstream-v1150v1153-integration).
+The source includes sequentially validated upstream v1.1.54–v1.1.58 through
+[PR #168](https://github.com/uv-genai/maya-tp/pull/168), merged as `b7458c4`.
+[#169](https://github.com/uv-genai/maya-tp/issues/169) installs the validated
+engines at existing executable paths, without changing launchers/configs.
+Current installation and user-testing state are recorded below and in Handoff §55.
 
-## Accepted runtime on the user's pair
+<a id="accepted-runtime-on-the-users-pair"></a>
+
+## Current runtime on the user's pair
 
 Start the existing `maya-deepseek-xs-mtp` or `maya-deepseek-s-mtp` llama-swap
 entry on strix-halo-1.local. The wrapper starts rank 1 on strix-halo-2.local.
 Both hosts use the runtime at
 `/home/ugo/software/project-maya-ds4-tp2-review` and the versioned executable
-`build-hip/queued-a950e7e9350b/maya-ds4` within it. Its SHA-256 is
-`a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102`.
-The directory name reflects its original staging role. This is the build
-accepted in the user's extended trials.
+`build-hip/queued-a950e7e9350b/maya-ds4` within it. At the user's request this
+same file path now contains the validated v58 engine, SHA256
+`17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076`.
+The directory name is historical: it no longer names the contents' hash. No
+launcher/config path was changed. User testing of the new contents is pending.
+An already-loaded process retains the previous executable until the user
+unloads/reloads it. Original files are backed up on each host under
+`/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/`.
+[Deployment evidence](deployments/v58-existing-paths-2026-11-11/README.md) records
+exact paths, backups and unchanged launcher/config fingerprints. Model manifests
+were unchanged; the launcher hashes the executable afresh on each start.
 
 The per-model launcher files are `maya-ds4-tp2-maya-xs.json` and
 `maya-ds4-tp2-maya-s.json`. They select distinct packs and local manifests,
@@ -157,71 +167,31 @@ records the original phase gates.
 
 ## Promotion and rollback
 
-The queued build above has user acceptance, and operational validation #116 is
-closed. Numerical/capacity follow-ups are tracked in #110/#112. Use the
-procedure below when selecting a future versioned build or restoring a previous
-pair configuration. The accepted executable and config paths are recorded above.
+The initial queued engine was accepted in extended user trials; the v58 engine
+now installed at the same path is pending user testing (#169). Numerical/
+capacity follow-ups remain in #110/#112. Preserve the existing commands,
+executable paths, model/config selections and launcher files during binary-only
+updates.
 
-Before a change, record the exact commands and environment used to start both
-previous ranks, including their binary paths and hashes, local pack and manifest
-paths, context, RDMA device, bootstrap port and feature settings. Preserve the
-previous server config at a separate path and keep the previous executables and
-packs available on both hosts. Check that the two previous ranks' selections
-match. For a single-host DeepSeek setup, preserve its original server config,
-executable and launch command instead. GLM has separate executables and configs.
+For a future user-authorized installation, record each selected engine's path,
+hash, owner/mode and current pair settings, then copy and verify the original
+file into a separate backup directory on each host. Stage the validated new
+binary beside the existing target, verify its hash and shared libraries, and
+atomically rename it over that target on both hosts. Compare installed hashes.
+Do not create new configured engine paths, rewrite launcher JSON, or redirect
+llama-swap entries. A binary-only update needs no model repack or manifest
+rehash: executable identity is freshly checked at launch.
 
-After the user accepts the candidate, install a **versioned copy** on each host,
-using a directory dedicated to locally managed releases. This example refuses to
-reuse a filename containing different bytes. Set `TP2_ENGINE` independently to
-the reviewed local executable on each host, and choose the same release directory
-convention; the directory itself may be different on the two hosts.
+The user controls model unload/reload. An existing process can keep running its
+old executable inode after atomic replacement; the next model start loads the
+new file. Do not stop user processes or manage services as implicit installation
+steps. After the user's restart, check health and a normal request.
 
-```sh
-TP2_RELEASE_DIR=/absolute/path/to/deepseek-releases
-stage_tp2_release() {
-  TP2_SHA=$(sha256sum -- "$TP2_ENGINE") || return 1
-  TP2_SHA=${TP2_SHA%% *}
-  mkdir -p -- "$TP2_RELEASE_DIR" || return 1
-  TP2_VERSIONED_ENGINE="$TP2_RELEASE_DIR/maya-ds4-$TP2_SHA"
-  if test -L "$TP2_VERSIONED_ENGINE"; then
-    printf '%s\n' 'Release path is a symlink; stop.' >&2
-    return 1
-  fi
-  if test -e "$TP2_VERSIONED_ENGINE"; then
-    TP2_EXISTING_SHA=$(sha256sum -- "$TP2_VERSIONED_ENGINE") || return 1
-    test "${TP2_EXISTING_SHA%% *}" = "$TP2_SHA" || {
-      printf '%s\n' 'Existing release file has the wrong hash; stop.' >&2
-      return 1
-    }
-  else
-    install -m 0755 -- "$TP2_ENGINE" "$TP2_VERSIONED_ENGINE" || return 1
-  fi
-  TP2_INSTALLED_SHA=$(sha256sum -- "$TP2_VERSIONED_ENGINE") || return 1
-  test "${TP2_INSTALLED_SHA%% *}" = "$TP2_SHA" || {
-    printf '%s\n' 'Installed release hash does not match; stop.' >&2
-    return 1
-  }
-  printf 'Release SHA-256: %s\nBinary: %s\n' "$TP2_SHA" "$TP2_VERSIONED_ENGINE"
-}
-stage_tp2_release
-```
-
-Compare the printed SHA-256 on both hosts with the reviewed build's hash. Set
-`TP2_ENGINE` to the versioned path on **each** host, and generate a **new**
-server config using the earlier instructions, retaining the previous config
-unchanged. Record the new worker command and config path with the release hash.
-Both ranks must use the same pack contents, context and feature selections;
-local paths and RDMA device names can differ. The user then stops their old
-server and worker in their usual controlled manner and starts the new worker,
-followed by the server, as shown above. Verify `/health` reports the peer up,
-the expected chunk setting and the selected model, then send a test request.
-
-To roll back, the user stops the new server first and then its worker. Start the
-previous configuration using the recorded commands, original binary paths and
-matching rank settings; for a prior single-host setup, start its original
-server command and config. Verify health and a test request. Do not mix a new
-rank with an old rank or reuse a poisoned pair. Keep the versioned candidate and
-its config separate until the user has finished comparing or troubleshooting.
+To roll back on user instruction, atomically restore the matching backup binary
+contents at those same paths on both hosts and verify the hashes. Preserve the
+launchers/configs. The user reloads both ranks together; never mix a new rank
+with an old rank or reuse a poisoned pair. The [v58 deployment record](deployments/v58-existing-paths-2026-11-11/README.md)
+contains exact current paths and backups.
 
 ## Rank scripts and llama-swap
 
@@ -302,28 +272,22 @@ slightly above 30 tok/s with prefill similar to XS and a larger relative speedup
 ## Opt-in continuous batching
 
 Current source adds checked 2–4-slot TP2 serving for XS/S, including real DSpark
-proposals and per-request commits. Keep `parallel` at its default 1 for the
-accepted single-sequence flow. The versioned accepted executable documented
-above predates this option; select a matching newly built `maya-ds4` on both
-hosts and matching launcher source before opting in. Model manifests remain
-valid: slot/context/speculation choices have a separate execution identity.
+proposals and per-request commits. The newly installed v58 binary contains this
+support. Existing model entries/configs and the protected runtime's launcher/
+server source were preserved by the binary-only installation; the default is
+still one conversation. Binary replacement does not opt those entries into a
+new mode or upgrade their Python/launcher code.
 
-Launch from the API host only, using a dedicated port/config while comparing:
-
-```sh
-./tools/llama-swap/tp2-ds4.sh run 18080 --model Maya-XS --parallel 4 \
-  --engine /absolute/path/to/new/maya-ds4 \
-  --peer-root /absolute/path/to/matching/peer/source
-./tools/llama-swap/tp2-ds4.sh stop 18080
-```
-
-`--engine` requires that explicit path on both hosts. For different local
-executable paths, put them in the launcher's `rank0`/`rank1` objects and omit
-that override. `rank0.sh`, `rank1.sh` and `tp2_config.py` also accept
-`--parallel`; use the same count on both. A shared JSON `"parallel": 4`
-provides the persistent equivalent. Preserve the existing pack/context,
-manifest, bootstrap and RDMA selections. An old peer launcher fails preflight
-rather than silently changing batch semantics.
+Opting into batching separately requires matching current server/launcher code
+on both hosts and explicit `--parallel 2`–`4` (or the launcher's `parallel`
+setting). Preserve existing executable paths, packs, manifests, contexts and
+RDMA selections. Do not rewire existing launchers or configs as an automatic
+installation step. An older peer launcher fails preflight instead of silently
+changing semantics. Source-level setup and isolated validation are recorded in
+the [D5 report](validation/tp2-batching-d5-2026-11-05.md); the current stable-path
+installation is recorded in #169. Slot/context/speculation choices have a
+separate execution identity; replacing the engine does not invalidate model
+manifests.
 
 Batch mode requires lookup off (`--suffix-draft 0`). DSpark drafting uses
 argmax point proposals on rank zero in fitting groups, so all four eligible
@@ -348,5 +312,5 @@ it records PIDs/start identities and stops only its own pair. Shared HTTP
 measurements use `tools/bench_concurrency.py`; DeepSeek `--spec 0` disables
 DSpark, whereas GLM uses 1 to disable proposals. Raw throughput, numerical
 checks and rollout limits are in the [D5 validation report](validation/tp2-batching-d5-2026-11-05.md)
-and [matched XS/S measurements](benchmarks/deepseek-tp2-batching-2026-11-05/README.md). Production configs and executables are not changed by
-source integration.
+and [matched XS/S measurements](benchmarks/deepseek-tp2-batching-2026-11-05/README.md). Source integration alone does not authorize production changes. The explicit
+subsequent binary-only installation in #169 preserves launcher/config files.

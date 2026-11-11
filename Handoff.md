@@ -1,12 +1,12 @@
-> **Current checkpoint (2026-11-11):** upstream v1.1.54–v1.1.58 sequential validation is complete; read §54 and #159 for the final PR/main publication. Production selections remain the accepted pinned binaries; this source integration does not deploy them.
+> **Current runtime (2026-11-11):** read §55 / #169. At the user's explicit request, validated v58 GLM/DeepSeek executables now replace the files at their existing paths on both hosts. Launcher/config paths and files are unchanged; user testing is pending. §54 records the completed upstream integration.
 
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-11 · Current state: **§54**, validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. Source integration does not replace those production selections.
+> Last updated: 2026-11-11 · Current state: **§55**, v58 binary installation at unchanged paths (#169), user testing pending. §54 records validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. The explicit binary-only installation in §55 supersedes earlier binary hashes, preserving paths/configs.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
-> Current process-ownership rules in §2 and the promotion state in §33 override those snapshots.
+> Current process-ownership rules in §2 and binary installation state in §55 override those snapshots.
 
 ## 1. What we are building
 
@@ -3361,3 +3361,44 @@ protocols. No model download, 744B inference, Flash repack, release bump or
 production/protected-peer changes were made. README/AGENTS/current guides and
 restart prompt reflect this completed source checkpoint. Numeric VERSION
 remains 1.1.44 and the published release remains `tp-v1.1.44`.
+
+## 55. Same-path v58 binary installation (#169, 2026-11-11)
+
+The user explicitly requires replacing executables at their SAME configured
+paths. Do not change launcher scripts/configs or redirect them to isolated
+validation builds. The upstream v54–v58 merge did not change path selectors;
+the earlier answer about “switching launchers” meant binary files had not yet
+been installed and was misleading. This installation is now complete.
+
+| Host | Existing target now containing validated v58 engine | SHA256 |
+| --- | --- | --- |
+| Both | `/home/ugo/software/project-maya/build-hip/maya` | `dd37dbd84cabcfce75c4072a8fdac95b08a065ae47481c8bba77fbb9ab07f965` |
+| Both | `/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/maya-ds4` | `17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076` |
+| Host2 | `/home/ugo/software/project-maya/build-hip/maya-ds4` | same DeepSeek SHA256 above |
+
+Host1 had no canonical DeepSeek file and none was created. The existing TP2
+review directory name is historical; its engine hash is now the v58 value
+above. Both hosts use matching bytes from source 2485cb6 (merged PR #168 at
+b7458c4; exact source/PR/main CI and Flash GPU gates passed). No fresh model
+load or broad benchmark was run for this file installation; the user will test.
+
+Before replacement, originals were copied/verified under
+`/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/` on EACH host.
+`0-maya.before` backs up GLM; `2-maya-ds4.before` backs up the TP2 DeepSeek file;
+`1-maya-ds4.before` exists only on host2 for canonical single-host DeepSeek.
+Plans/results and the exact helper are archived in
+`docs/deployments/v58-existing-paths-2026-11-11/`. Replacement was atomic, with
+mode/ownership preserved. Both hosts pass installed hash, dynamic-library and
+help-exit checks. All 134 host2 /109 host1 launcher/config fingerprints stayed
+unchanged, including the relevant llama-swap config where present. No model
+manifest, tuning, model file, protected peer source or service was modified;
+no user process was stopped. Model manifests do not contain executable identity,
+and each launcher freshly hashes its selected engine on start.
+
+Use the usual GLM and DeepSeek llama-swap entries. On the next model start they
+load the new files; an already-loaded model remains on its old inode until the
+user unloads/reloads it. User acceptance of these installed builds is PENDING.
+§55 supersedes earlier current-binary hashes, while prior sections retain their
+historical acceptance/performance scope. #169 tracks installation/doc publication;
+#133/#165/#166/#167 remain open. Keep stable executable paths for future
+user-authorized installations and preserve backups; do not redirect launchers.

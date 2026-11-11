@@ -1,21 +1,31 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read Handoff.md §54 first: upstream v1.1.54–v1.1.58 sequential Flash validation
-is complete. Epic #159 and phases #160–#164 record final PR/main publication;
-use the merged main source after that recorded PR. All per-tag six-case default/
-batch GPU comparisons and exact-source CI pass; final Q5_K/Unicode MTP,
-GLM/XS lifecycle/fatal and four-slot public HTTP checks pass. All owned validation
-processes are stopped. No model was downloaded or full GLM-5.3 744B run.
-Production selections and the protected peer checkout remain unchanged.
+Read Handoff.md §55 first. The user explicitly requested replacing the validated
+v58 GLM/DeepSeek binaries at the SAME existing paths, with NO launcher/config
+changes. This is complete on both hosts (#169); user testing is pending. GLM
+canonical build-hip/maya is SHA256 dd37dbd8…; existing DeepSeek TP2 review path
+build-hip/queued-a950e7e9350b/maya-ds4 now contains SHA256 17f42fa1… (directory
+name is historical). Host2's existing canonical build-hip/maya-ds4 is updated
+too; host1 had no canonical DS4 file and none was created there. Original files
+and exact deployment records are in /home/ugo/software/maya-binary-backups/
+issue-169-20261111-v58 on each host and docs/deployments/v58-existing-paths-2026-11-11/.
+All 134 host2 /109 host1 launcher/config fingerprints are unchanged. No user
+process was stopped or model started; the user launches/reloads models.
 
+Keep stable executable paths for future authorized deployments: replace binary
+contents atomically with backups; do not rewire launchers to temporary review
+builds. Preserve the protected peer source/user edits. §55 supersedes earlier
+binary-selection statements; §§33/44 retain previous acceptance history.
+
+Upstream v1.1.54–v1.1.58 sequential Flash validation is complete (§54), merged
+through PR #168 at b7458c4. Per-tag/PR/final main CI passed; #159–#164 are closed.
+All GPU validation processes are stopped; no model download or 744B model run.
 Preserve rank-local KDA descriptors/copies and checked speculative slot/verdict/
-ACK contracts. Full GLM-5.3 TP2 and unmirrored tuning/ablation are refused before
-mutation/bootstrap. Flash packs/defaults are unchanged; new full-model Q8
-packing/calibration is distinct. AI_RUN stays experimental/off with changed
-long-prompt answers (#166). #165 intermittent stalls, #167 full-model RAM-slot
-trailer and remaining #133 experiments stay open. Do not repeat the completed
-campaign or promote runtime binaries without a new task. Earlier acceptance
-below remains the operating baseline.
+ACK contracts. Full GLM-5.3 TP2 and unmirrored tuning/ablation remain refused.
+AI_RUN stays experimental/off with changed long-prompt answers (#166).
+#165 intermittent stalls, #167 full-model RAM-slot trailer and remaining #133
+experiments stay open. Do not repeat the completed campaign; wait for the user's
+reports from their normal entries. Earlier acceptance below is historical.
 
 GLM/MTP and DeepSeek/DSpark opt-in continuous batching is implemented and
 validated in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), starting
@@ -23,8 +33,9 @@ from `72d9260` on `codex/tp2-continuous-batching`. For batching implementation h
 C1, GLM G1–G5 and DeepSeek D1–D5 engineering gates passed; exact final
 publication/PR/main CI is tracked in #153. PR #155 is merged at `3f26526`; use `main`.
 Both wrappers default to one sequence; new 2–4-slot mode requires explicit
-matching current binaries and launchers. Accepted production runtime files
-and the protected peer checkout are unchanged. All owned GPU validation
+matching current binaries and launchers. That source-release checkpoint left
+production runtime files and the protected peer checkout unchanged; the later
+user-authorized same-path binary installation is recorded in §55. All owned GPU validation
 processes are stopped; the D5 report has their identity audit.
 
 XS/S batch HTTP tests match all 88 measured parent responses, and DeepSeek's
@@ -37,7 +48,7 @@ with notes in `docs/releases/tp-v1.1.44.md` and publication/CI tracked in #156.
 Do not repeat the broad completed campaign or change the production selections
 without a new task.
 
-Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. That earlier checkpoint incorporated the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Accepted user runtime paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
+Read [AGENTS.md](AGENTS.md), then Handoff.md §51 for the GLM/DeepSeek continuous-batching plans and implementation phase issues. Handoff.md §47 records the sequential upstream v1.1.50–v1.1.53 integration. That earlier checkpoint incorporated the applicable changes through v53, with isolated GLM TP2/MTP and DeepSeek TP2/DSpark checks per tag. PRs #126/#129/#131/#134 completed the batch at `de184d9`. Final exact-head push CI 41833758436, PR CI 41833925330 and merged-main CI 41834772034 passed. Issue #132 records completion. Reports and raw evidence are in `docs/upstream/`. Deferred v53 engine experiments are tracked in open #133. No owned model processes remain. Current binary installation is in §55; historical accepted paths are in §§33/44, and user acceptance/main merge history is in §§45–46. Preserve the protected remote checkout and use isolated builds for future validation. Handoff.md §48 records the post-v53 documentation audit and publication status in #135.
 
 The latest DeepSeek startup repair is in Handoff.md §49 and issue #138.
 Btrfs device renumbering invalidated the old identity caches. Both runtime
@@ -79,7 +90,7 @@ relative speedup. Issue #120 is complete, and extended user trials complete
 operational acceptance in #116. Do not restart the broad
 validation campaign; the user explicitly requested a few checks and then testing
 through the existing entries. No owned validation processes remain.
-Use Handoff.md §47 for the source checkpoint and §§33/44 for accepted runtime selection. §42, the implementation plan and
+Use Handoff.md §54 for the merged source checkpoint and §55 for current binary selection; §§33/44 retain earlier acceptance history. §42, the implementation plan and
 phase issues #110–#116 record the implementation history and separate follow-ups.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
 procedure and accepted deployment paths are in
@@ -99,14 +110,14 @@ The earlier single-host DeepSeek investigation was merged at `76e0279`.
 The later TP2/DSpark implementation and user acceptance are recorded by PR #122.
 Treat model processes as user-owned and preserve their recorded ownership boundaries.
 
-## Accepted GLM runtime and checkpoint
+## Earlier accepted GLM checkpoint
 
 - PR [#94](https://github.com/uv-genai/maya-tp/pull/94) merged as `6f85d3036a1010b3a2f1b0cfca2105b3f28fdb94`. It includes HIP APU complete-pool sizing, TP2 startup scratch bounded by the existing receive window, and gfx1151/hipBLASLt 100401 DSA projection tuning. Issues #33, #90, #91 and #93 are closed at the user's request.
 - The user tested Maya-S, Maya-M and Maya-L through llama-swap and reported working prefill and generation. Their eBPF tutorial prompt averaged 30, 32 and 28 generation tok/s respectively; [report and raw results](docs/benchmarks/tp2-prefill-2026-11-02/README.md).
-- The promoted `build-hip/maya` on both hosts has MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
+- The then-promoted `build-hip/maya` on both hosts had MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
 - The earlier prefill checkpoint is immutable `tp-v1.1.43` (then VERSION `1.1.43`);
-  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). No further GLM prefill investigation or deployment is requested. Push only to `origin`.
+  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). Current installation is the later v58 same-path delivery in §55; user testing is pending. Push only to `origin`.
 
 ## Operating rules
 

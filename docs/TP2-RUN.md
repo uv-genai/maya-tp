@@ -9,10 +9,11 @@ Platform: **HIP/ROCm gfx1151 Linux only**. Interconnect: **RDMA only** (`usb4_rd
 For DeepSeek TP2 and DSpark, use its family-specific launchers in the
 [DeepSeek TP2 operations guide](DEEPSEEK-TP2-RUN.md).
 
-The source checkpoint through upstream v1.1.53 is `de184d9`, with final main CI
-41834772034 passing. Per-tag validation used isolated GLM Maya-S and DeepSeek
-XS/S builds. Accepted runtime paths are recorded below, and the full source
-checkpoint is in [Handoff §47](../Handoff.md#47-sequential-upstream-v1150v1153-integration).
+The source includes sequentially validated upstream v1.1.54–v1.1.58 through
+[PR #168](https://github.com/uv-genai/maya-tp/pull/168), merged as `b7458c4`.
+The user requested installing the validated engines at their existing paths in
+[#169](https://github.com/uv-genai/maya-tp/issues/169). Launcher/config paths
+remain unchanged; current binary selection is recorded below and in Handoff §55.
 
 ## Prerequisites
 
@@ -32,14 +33,22 @@ checkpoint is in [Handoff §47](../Handoff.md#47-sequential-upstream-v1150v1153-
 
 ## Development pair: production and review builds
 
-The user accepted the prefill candidate after Maya-S, Maya-M and Maya-L llama-swap tests. Canonical
-`build-hip/maya` on both hosts is MD5 `cbd9e99a6a49e9107b0db3190a40766a`, with matching calibrated
-tuning. The user validated this selection through llama-swap. The
-previous binaries, configs, rank1 launchers and tuning are backed up on both hosts in
-`/home/ugo/software/project-maya-before-prefill-90-promotion`; the rank0 backup also contains its
-previous server files. The rank0 llama-swap backup is `~/.config/llama-swap/config.yaml.before-prefill-90`. The remote canonical checkout
-still contains user edits; do not reset it. See [Handoff §33](../Handoff.md#33-prefill-promotion-and-user-acceptance-90--91--93--33)
-for performance and validation limits.
+Canonical `/home/ugo/software/project-maya/build-hip/maya` on both hosts now
+contains the GPU-validated v58 engine, SHA256
+`dd37dbd84cabcfce75c4072a8fdac95b08a065ae47481c8bba77fbb9ab07f965`.
+The executable path, launcher scripts, model/config selections and tuning files
+were preserved. Existing llama-swap entries use the new file on their next model
+start; an already-loaded process continues with its previous executable until
+the user unloads/reloads it. User testing of this installation is pending.
+
+The preceding accepted prefill binary (MD5 `cbd9e99a6a49e9107b0db3190a40766a`)
+is backed up on each host under
+`/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/`.
+[Deployment evidence](deployments/v58-existing-paths-2026-11-11/README.md) records
+the exact backup mapping, installed hashes and unchanged launcher/config
+fingerprints. Handoff §33 retains the earlier acceptance measurements; §55
+supersedes its binary selection. The protected peer source/user edits were not
+pulled/reset or overwritten. No user process was stopped or model launched.
 
 ## Process ownership and validation
 

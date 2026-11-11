@@ -17,7 +17,10 @@ derived project is tracked in [uv-genai/maya-tp](https://github.com/uv-genai/may
 Upstream **v1.1.54–v1.1.58** is integrated as sequentially validated checkpoints,
 tracked in [#159](https://github.com/uv-genai/maya-tp/issues/159). GLM-5.3-Flash TP2/MTP and
 DeepSeek-V4.1-Flash TP2/DSpark pass default and batched regression checks, including
-four-slot public HTTP operation. Production selections remain unchanged.
+four-slot public HTTP operation. The user subsequently requested installing the
+validated engines at their existing paths on both hosts (#169). Launchers and
+model/config selections are unchanged; user testing of the installed binaries
+is pending. See [current deployment](docs/deployments/v58-existing-paths-2026-11-11/README.md).
 
 ## Why Maya-TP?
 
@@ -259,8 +262,10 @@ DeepSeek XS/S continuous batching is also opt-in with `--parallel 2`–`4` on
 its pair wrapper, using matching current `maya-ds4` binaries and launchers.
 DSpark remains active through fitting drafter groups and complete per-slot
 verdicts. The default is one conversation. See [DeepSeek batching and runtime
-selection](docs/DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching); existing pinned
-production binaries/configs require explicit selection of the new build.
+selection](docs/DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching). The installed v58
+binaries include batching support; current entries/configs remain unchanged.
+Opting into batching requires matching current server/launcher source and an
+explicit parallel setting; the binary-only installation does not enable it.
 The user has tested and accepted this mode; #11/#140 are closed. See the
 [1.1.44 release notes](docs/releases/tp-v1.1.44.md) for measured scope and upgrade details.
 

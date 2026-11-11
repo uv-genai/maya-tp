@@ -227,5 +227,11 @@ and all explicit paired ablation settings are refused before mutation; ablation
 is unpaired only. Full-model attention repacking/calibration must not alter
 Flash packs/defaults. `DS4_INDEX_TC` remains opt-in; AI_RUN is experimental/off
 with observed answer changes (#166). #165 intermittent stalls, #167 full-model
-RAM-slot trailer and remaining #133 experiments stay open. Production selections
-and the protected peer checkout are unchanged; use isolated matching builds.
+RAM-slot trailer and remaining #133 experiments stay open. The source
+integration initially preserved production files; #169 subsequently
+installed validated v58 binary contents at the same existing paths on explicit
+user instruction. Launcher/config files and protected peer source are unchanged.
+Use isolated matching builds for validation; keep stable executable paths when
+the user authorizes installation. Back up and atomically replace binary files
+on both hosts; do not rewire launchers to review paths. Handoff §55 records the
+current hashes/backups and pending user testing.

@@ -1,0 +1,30 @@
+{
+  "host": "strix-halo-2",
+  "verified": 1794385939.7462268,
+  "source_commit": "2485cb609da0c436e1b7d9012d31a136656dd013",
+  "targets": [
+    {
+      "path": "/home/ugo/software/project-maya/build-hip/maya",
+      "sha256": "dd37dbd84cabcfce75c4072a8fdac95b08a065ae47481c8bba77fbb9ab07f965",
+      "ldd_ok": true,
+      "help_exit": 0
+    },
+    {
+      "path": "/home/ugo/software/project-maya/build-hip/maya-ds4",
+      "sha256": "17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076",
+      "ldd_ok": true,
+      "help_exit": 0
+    },
+    {
+      "path": "/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/maya-ds4",
+      "sha256": "17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076",
+      "ldd_ok": true,
+      "help_exit": 0
+    }
+  ],
+  "selector_count": 134,
+  "selectors_unchanged": true,
+  "backup_dir": "/home/ugo/software/maya-binary-backups/issue-169-20261111-v58",
+  "processes_stopped": 0,
+  "models_started": 0
+}

@@ -12,9 +12,9 @@ for the two-host RDMA build, model selection and launch.
 
 Installer output uses `build-hip/maya` for GLM and `build-hip/maya-ds4` for
 DeepSeek. `./maya.sh` selects a local server config. Two-host orchestration is
-provided by the family-specific rank/llama-swap scripts. The accepted pair's
-versioned executable paths and model configs are recorded in
-[Handoff runtime and source checkpoints](../Handoff.md#47-sequential-upstream-v1150v1153-integration).
+provided by the family-specific rank/llama-swap scripts. The pair's current
+executables replace the files at their existing paths; launchers/configs are
+unchanged. See [current installation and user-testing state](../Handoff.md#55-same-path-v58-binary-installation-169-2026-11-11).
 
 The model catalog and other-platform/same-host multi-GPU examples below are
 inherited installer reference material. Open kernel-parity investigations are

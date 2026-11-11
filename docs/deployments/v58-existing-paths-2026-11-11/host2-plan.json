@@ -1,0 +1,585 @@
+{
+  "issue": 169,
+  "source_commit": "2485cb609da0c436e1b7d9012d31a136656dd013",
+  "host": "strix-halo-2",
+  "created": 1794385888.8182762,
+  "backup_dir": "/home/ugo/software/maya-binary-backups/issue-169-20261111-v58",
+  "selectors_before": {
+    "/home/ugo/.config/llama-swap/config.yaml": {
+      "sha256": "1595af6385c06759dfe0c7fe66a01729d17e8aa267ce2dededdda9fdd54e17d1",
+      "size": 1119
+    },
+    "/home/ugo/software/project-maya/maya-ds4-hip.json": {
+      "sha256": "ebd1f4ad9da44452049498db23d38f5a3357549f06d479fffaebe0cfc46e059d",
+      "size": 1022
+    },
+    "/home/ugo/software/project-maya/maya-ds4-maya-s-hip.json": {
+      "sha256": "edda1b0ca0c841ada380add4db63b6df57be04db0ffc4804881f3f47dff97ee7",
+      "size": 1139
+    },
+    "/home/ugo/software/project-maya/maya-ds4-maya-xs-hip.json": {
+      "sha256": "ebd1f4ad9da44452049498db23d38f5a3357549f06d479fffaebe0cfc46e059d",
+      "size": 1022
+    },
+    "/home/ugo/software/project-maya/maya-maya-l-hip.json": {
+      "sha256": "292ad141576681ba967c566987e833ae1776da9b561149a23b4891e3ba6f71ac",
+      "size": 1496
+    },
+    "/home/ugo/software/project-maya/maya-maya-s-v2-iq2_xxs-hip.json": {
+      "sha256": "26b16b61359fac4086d4d163b5f15e08dc8183a270f92999822ac2eea5e120e9",
+      "size": 1540
+    },
+    "/home/ugo/software/project-maya/tools/ds4/agent_bench.py": {
+      "sha256": "49745c5e8736baa90edcf3fe3104d01616297509553194aa165d108e7f195d35",
+      "size": 14994
+    },
+    "/home/ugo/software/project-maya/tools/ds4/bench_tp2_prefill.py": {
+      "sha256": "9c57274728769d9daa3552507dac5f72419365d11f260c7983dbb9bd554130e3",
+      "size": 4619
+    },
+    "/home/ugo/software/project-maya/tools/ds4/bench_tp2_reference.py": {
+      "sha256": "cfc602396a29ff7dd5f532885c0de33522904e770418af9094426348959367c6",
+      "size": 4235
+    },
+    "/home/ugo/software/project-maya/tools/ds4/bytecheck.sh": {
+      "sha256": "4dda31c21954b2301801ce63b1e03143870acb26fb3ca358c51bbfbe5146b38e",
+      "size": 3646
+    },
+    "/home/ugo/software/project-maya/tools/ds4/compare.py": {
+      "sha256": "2dc93a8e320c520df4b825231c46cecb60c90942cd6e80cfce4e385b6c60fd4e",
+      "size": 2546
+    },
+    "/home/ugo/software/project-maya/tools/ds4/concurrent_check.py": {
+      "sha256": "22a38f8cf241f22813efe98f6545ba31de65a7e20ac7648c1bed2c439f770d73",
+      "size": 11453
+    },
+    "/home/ugo/software/project-maya/tools/ds4/download-3.5bpw.json": {
+      "sha256": "54343493baee36fe80f378beb3cc0b868c2856dbd96dc63af6f847595f2f6175",
+      "size": 7884
+    },
+    "/home/ugo/software/project-maya/tools/ds4/download.json": {
+      "sha256": "ca53d6aa2785b0db89e46e6e2ea124676fd44fd91e64cb604c67bddc9283d9ec",
+      "size": 7696
+    },
+    "/home/ugo/software/project-maya/tools/ds4/download_gguf.json": {
+      "sha256": "4972b976c96060d04fb0df5060e8313962ed9600c471c3d929df12dbfac1878a",
+      "size": 34488
+    },
+    "/home/ugo/software/project-maya/tools/ds4/drafter_pack.py": {
+      "sha256": "bd32b017403fad3b4e4377395c61f007999c6dea7db059c9d22953a42def0d44",
+      "size": 11629
+    },
+    "/home/ugo/software/project-maya/tools/ds4/dspark_ref.py": {
+      "sha256": "0dde8eeb4abd941d742882ddc2d9e26cf557a86fb41d65c42ce27623798c30e2",
+      "size": 17579
+    },
+    "/home/ugo/software/project-maya/tools/ds4/dumpcmp.py": {
+      "sha256": "b1a33c4170e1285cd383550a065403b0b00b5fda46b16fb1883fa8bc2426daf4",
+      "size": 8332
+    },
+    "/home/ugo/software/project-maya/tools/ds4/dumpscan.py": {
+      "sha256": "6d79391f3f92e6e6e71059ec9a07f769941754a309d2e72f1f6167dc369668cd",
+      "size": 1754
+    },
+    "/home/ugo/software/project-maya/tools/ds4/dumpscan_y.py": {
+      "sha256": "6b69cf3527a01eb022d3ec0d94e0b051e6c13b402dc7bece1ca01df31a98d9ac",
+      "size": 2013
+    },
+    "/home/ugo/software/project-maya/tools/ds4/engram_hash.py": {
+      "sha256": "764106d9c4c48c0a16f2357903806872333775bda374690a21e08bb5430ecba4",
+      "size": 5948
+    },
+    "/home/ugo/software/project-maya/tools/ds4/estimate_tp2_experts.py": {
+      "sha256": "a1a78b9c2b6ad79856cebbe0ff041d8310d8fdd4b4244764682e226cb805890a",
+      "size": 3029
+    },
+    "/home/ugo/software/project-maya/tools/ds4/exl3_torch.py": {
+      "sha256": "f653da73e8783005b92c42bb7366790e45e151d8d1aa7ad982174be26cba63f0",
+      "size": 5948
+    },
+    "/home/ugo/software/project-maya/tools/ds4/fp8_dense.py": {
+      "sha256": "56b3cfecb406d37c4dab99af77449805bcba3b23a269b6ca6e2f83cad0c98528",
+      "size": 6302
+    },
+    "/home/ugo/software/project-maya/tools/ds4/pack.py": {
+      "sha256": "bdc2604ea369917f19af5c8c550855a3f48bc17695c9c0c40517caa47c6e531d",
+      "size": 17906
+    },
+    "/home/ugo/software/project-maya/tools/ds4/pack_gguf.py": {
+      "sha256": "f45c5c16cbd59d5aa1ad5b22d07f082818d4d806cfa9254b66bc173d9a458859",
+      "size": 37457
+    },
+    "/home/ugo/software/project-maya/tools/ds4/parallel_test.py": {
+      "sha256": "4fb5680c141229130a00838485bd10d5efd200a531b8d3a348dcae4d5549c078",
+      "size": 22504
+    },
+    "/home/ugo/software/project-maya/tools/ds4/profile.py": {
+      "sha256": "819a40971f88d6ea83ece0e588c47e103287b620112f1948aeccd657a2211223",
+      "size": 4966
+    },
+    "/home/ugo/software/project-maya/tools/ds4/rank0.sh": {
+      "sha256": "2e4db451f0bf1ebd2e76da9021bd4b0db1c6be6f3922e3a6e9c09ef8c5416402",
+      "size": 233
+    },
+    "/home/ugo/software/project-maya/tools/ds4/rank1.sh": {
+      "sha256": "c52126f92398ec058fcb0261a23a5fbe5bf0c91a550566f701ce62015d067a8f",
+      "size": 224
+    },
+    "/home/ugo/software/project-maya/tools/ds4/recipe_maya_s_test.json": {
+      "sha256": "ad224aef6d65a5862853d4d76ad1775a06b402ffee0a6a26784d2a1ec6a7735b",
+      "size": 774
+    },
+    "/home/ugo/software/project-maya/tools/ds4/ref.py": {
+      "sha256": "652345adfc0f625e0c1bdb89ce0fc4e6f8107da83c296ed4c2231e6e1dafb61e",
+      "size": 21346
+    },
+    "/home/ugo/software/project-maya/tools/ds4/ref_gguf.py": {
+      "sha256": "5f7ccb3e6b4de7f008d62d19e2a7d3946a9ca618685c98bbf8bb85a9a9efab78",
+      "size": 14032
+    },
+    "/home/ugo/software/project-maya/tools/ds4/requant_gguf.py": {
+      "sha256": "c7e798c5954ca62c4e5880f044785c16c6630e34ebb90105668128b00492d769",
+      "size": 22270
+    },
+    "/home/ugo/software/project-maya/tools/ds4/slot_api_image_test.py": {
+      "sha256": "69481f226ebba12a003ac1c7d43600a966ee8560b9abcb22582b8de0551228e7",
+      "size": 5644
+    },
+    "/home/ugo/software/project-maya/tools/ds4/slot_image_test.py": {
+      "sha256": "22bfce091697e2a0ec24757ce95f0b33ce8ffaf99148221c7137adce17a31e37",
+      "size": 11197
+    },
+    "/home/ugo/software/project-maya/tools/ds4/slot_keep_test.py": {
+      "sha256": "28ce5ab2110ef6aa0b58e98d5810743d80de9f35d2a7a859267aa21c04881359",
+      "size": 25524
+    },
+    "/home/ugo/software/project-maya/tools/ds4/st.py": {
+      "sha256": "951a4333a12ab521d31730d0af011683e50d2f54fd1dc6256cefcca736cb6ae8",
+      "size": 3444
+    },
+    "/home/ugo/software/project-maya/tools/ds4/tok.py": {
+      "sha256": "a2423e1f0e2b688e91d80074eca695497f79025188f97c55373ca55b1d50f786",
+      "size": 1407
+    },
+    "/home/ugo/software/project-maya/tools/ds4/tp2-launch.example.json": {
+      "sha256": "6106299aa5bd71ea03436a54bbcefd9d92872051df6f5cdbf24a9a6112f116a1",
+      "size": 506
+    },
+    "/home/ugo/software/project-maya/tools/ds4/tp2_config.py": {
+      "sha256": "66f645e9b4bc9c6b04d3ddf58c8b7da04005faef3452c59dd856b931dbc62cbe",
+      "size": 2570
+    },
+    "/home/ugo/software/project-maya/tools/ds4/tp2_identity.py": {
+      "sha256": "5cbec57f0430eb7bbe87381233afdb8892292ec0cfc56649c74bd425c45a809a",
+      "size": 17195
+    },
+    "/home/ugo/software/project-maya/tools/ds4/tp2_launch.py": {
+      "sha256": "ed81750df7c60aef1b891fde8943877deeb4b855be6f777a543e669473fe1f6b",
+      "size": 20262
+    },
+    "/home/ugo/software/project-maya/tools/ds4/tp2_rank.py": {
+      "sha256": "c1327544fdbdb92718860b21505092cf084f293a654a828349cc20881eb34097",
+      "size": 6889
+    },
+    "/home/ugo/software/project-maya/tools/ds4/validate_batch.py": {
+      "sha256": "d61111f39957e11c56655de4a7ea2a59d84d5a43ac8e778e17df1633de2cf1e3",
+      "size": 12825
+    },
+    "/home/ugo/software/project-maya/tools/ds4/vision_pack.py": {
+      "sha256": "68c1298b393cfad2b363e265853e6726b9c0e25edb70428f7c440bd5d89ba93c",
+      "size": 15833
+    },
+    "/home/ugo/software/project-maya/tools/llama-swap/tp2-ds4.sh": {
+      "sha256": "8416096a4ce482dc03cdbdc941d5a1a95f0f36b4c77061cf0368b01a1874ede9",
+      "size": 230
+    },
+    "/home/ugo/software/project-maya/tools/llama-swap/tp2.sh": {
+      "sha256": "3c8ca0f45d4f3f88f327daf03fe8bdce98f62554e5473529b065c97b6a3e922e",
+      "size": 308
+    },
+    "/home/ugo/software/project-maya/tools/tp2/acceptance.sh": {
+      "sha256": "e3e3436afdf8a744b7a0d9084687d7626b800eaa4b7fff55c1ce782be9517ad4",
+      "size": 957
+    },
+    "/home/ugo/software/project-maya/tools/tp2/audit_split.py": {
+      "sha256": "27e2682319bc8fdb381caf0e4dbc25da013468f2991c2b40af6a2926db15671d",
+      "size": 6886
+    },
+    "/home/ugo/software/project-maya/tools/tp2/bench_mtp.py": {
+      "sha256": "460ca80e908d12eaba90d5fc07730fc8fe69347842e178816e22891385408048",
+      "size": 16164
+    },
+    "/home/ugo/software/project-maya/tools/tp2/bench_prefill.py": {
+      "sha256": "bd007a0b6acb708ba52256689daa5d02569cdad783f3e3b21ff61ff5b1041301",
+      "size": 3106
+    },
+    "/home/ugo/software/project-maya/tools/tp2/continuation_boundaries.py": {
+      "sha256": "ec305b0ba598b506baa457bc4e79c7446d93e112f1c634d352d1d1322c66ab07",
+      "size": 4911
+    },
+    "/home/ugo/software/project-maya/tools/tp2/greedy_parity.py": {
+      "sha256": "956128a60dc389d52352366c9b7c2814066058f790aa511c7a64549423374e43",
+      "size": 2554
+    },
+    "/home/ugo/software/project-maya/tools/tp2/launch.py": {
+      "sha256": "2d0de5fc63152db205f14e7282fc7e4ab1ae173f852128ebbac5addb76cee792",
+      "size": 8728
+    },
+    "/home/ugo/software/project-maya/tools/tp2/long_loop_reuse.py": {
+      "sha256": "64116ef3545895a03c0dc1523f1b6f0160ca4ee1dc13a7bc2dcb51539938d42e",
+      "size": 4360
+    },
+    "/home/ugo/software/project-maya/tools/tp2/maya-rank0.sh": {
+      "sha256": "97d97d14fcd591be212ba27969cb63531fb11e8310509e81b4ef198fa1fcd27a",
+      "size": 2455
+    },
+    "/home/ugo/software/project-maya/tools/tp2/maya-rank1.sh": {
+      "sha256": "3eae4c069fa21b1d80fa3897f3b1ca88e8f04f10c02b3d012e4bc1b2d516f4d4",
+      "size": 2339
+    },
+    "/home/ugo/software/project-maya/tools/tp2/model_env.sh": {
+      "sha256": "f3680e9a6f675cec3fe8d7f1bf5194a8bf989a33d23f7fbee7f254f96fb99337",
+      "size": 2892
+    },
+    "/home/ugo/software/project-maya/tools/tp2/mtp_acceptance.py": {
+      "sha256": "bf1ba593494fb4aaeccc6eb16ee8bb2ac7c4cd4f10d281861338649e767a1b91",
+      "size": 3422
+    },
+    "/home/ugo/software/project-maya/tools/tp2/owned_exec.py": {
+      "sha256": "df3ab3c362f39ff13880a98c55566b6cc3e0955f483884c894b8e7a777886182",
+      "size": 1582
+    },
+    "/home/ugo/software/project-maya/tools/tp2/prefill_cancel.py": {
+      "sha256": "faa826ed85c8e10f898396609391f504ff31a004c7e9c9f7dc542416f2beefd7",
+      "size": 3438
+    },
+    "/home/ugo/software/project-maya/tools/tp2/rank0.sh": {
+      "sha256": "3f0002393ddcd5715d67769cf0f4c4b39a53cb149903033bd436dcc45b1307e3",
+      "size": 3686
+    },
+    "/home/ugo/software/project-maya/tools/tp2/rank1.sh": {
+      "sha256": "48727e781b767d84c74f0f52f52d671279ffb81b40e76781febb84309ed7aac6",
+      "size": 4178
+    },
+    "/home/ugo/software/project-maya/tools/tp2/regression_collectives.py": {
+      "sha256": "d800663f26e870a2d9aa0e4ecccd978ccfa44e655c4b36888c11a7886204b80e",
+      "size": 5974
+    },
+    "/home/ugo/software/project-maya/tools/tp2/run_bench.sh": {
+      "sha256": "7ba7c85b465decc772a475a9b5b52d2dafeca4186c3edea5975282c30af27383",
+      "size": 1927
+    },
+    "/home/ugo/software/project-maya/tools/tp2/run_comm_test.sh": {
+      "sha256": "04114c0cb5459dda78cb13794e4c98a095da4a91e5da9a20389045b53db2e74e",
+      "size": 1250
+    },
+    "/home/ugo/software/project-maya/tools/tp2/run_noar.sh": {
+      "sha256": "d20d9ca10be8ef6053fbf98481cfd6eeb40100cddc1ea6e745447cdcb1d1f50a",
+      "size": 1449
+    },
+    "/home/ugo/software/project-maya/tools/tp2/run_prof.sh": {
+      "sha256": "70632cfb2769b5b3c2cc8830f2e75e71f2bea4ee0403cbc156762ef2aa21b4fd",
+      "size": 1385
+    },
+    "/home/ugo/software/project-maya/tools/tp2/tp2-swap.sh": {
+      "sha256": "bc08c6238ddc35f7d73a8ded082667c088569acbc9c947c4c175853978487e7a",
+      "size": 192
+    },
+    "/home/ugo/software/project-maya/tools/tp2/validate_batch.py": {
+      "sha256": "d3087e6c9728aa2c03dbbbec5640ca7be296923f2a29bb71f4e3b9443f833dfb",
+      "size": 12669
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/maya-ds4-tp2-maya-s.json": {
+      "sha256": "238675e979bfca12f012e67a16948d3e2c5f4bdd3ec086302482db6e80e8b56f",
+      "size": 668
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/maya-ds4-tp2-maya-xs.json": {
+      "sha256": "994c099e780be885fb14bfe003483dc203cdb72fe640e33514e870af3c2ed65e",
+      "size": 671
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/agent_bench.py": {
+      "sha256": "49745c5e8736baa90edcf3fe3104d01616297509553194aa165d108e7f195d35",
+      "size": 14994
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/bench_tp2_prefill.py": {
+      "sha256": "9c57274728769d9daa3552507dac5f72419365d11f260c7983dbb9bd554130e3",
+      "size": 4619
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/bench_tp2_reference.py": {
+      "sha256": "cfc602396a29ff7dd5f532885c0de33522904e770418af9094426348959367c6",
+      "size": 4235
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/bytecheck.sh": {
+      "sha256": "4dda31c21954b2301801ce63b1e03143870acb26fb3ca358c51bbfbe5146b38e",
+      "size": 3646
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/compare.py": {
+      "sha256": "2dc93a8e320c520df4b825231c46cecb60c90942cd6e80cfce4e385b6c60fd4e",
+      "size": 2546
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/concurrent_check.py": {
+      "sha256": "22a38f8cf241f22813efe98f6545ba31de65a7e20ac7648c1bed2c439f770d73",
+      "size": 11453
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/download-3.5bpw.json": {
+      "sha256": "54343493baee36fe80f378beb3cc0b868c2856dbd96dc63af6f847595f2f6175",
+      "size": 7884
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/download.json": {
+      "sha256": "a1392fa69b610daa58577fd6f66819236c8888c242493cccf609265effa18478",
+      "size": 7632
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/download_gguf.json": {
+      "sha256": "4972b976c96060d04fb0df5060e8313962ed9600c471c3d929df12dbfac1878a",
+      "size": 34488
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/drafter_pack.py": {
+      "sha256": "bd32b017403fad3b4e4377395c61f007999c6dea7db059c9d22953a42def0d44",
+      "size": 11629
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/dspark_ref.py": {
+      "sha256": "0dde8eeb4abd941d742882ddc2d9e26cf557a86fb41d65c42ce27623798c30e2",
+      "size": 17579
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/dumpcmp.py": {
+      "sha256": "b1a33c4170e1285cd383550a065403b0b00b5fda46b16fb1883fa8bc2426daf4",
+      "size": 8332
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/dumpscan.py": {
+      "sha256": "6d79391f3f92e6e6e71059ec9a07f769941754a309d2e72f1f6167dc369668cd",
+      "size": 1754
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/dumpscan_y.py": {
+      "sha256": "6b69cf3527a01eb022d3ec0d94e0b051e6c13b402dc7bece1ca01df31a98d9ac",
+      "size": 2013
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/engram_hash.py": {
+      "sha256": "764106d9c4c48c0a16f2357903806872333775bda374690a21e08bb5430ecba4",
+      "size": 5948
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/estimate_tp2_experts.py": {
+      "sha256": "a1a78b9c2b6ad79856cebbe0ff041d8310d8fdd4b4244764682e226cb805890a",
+      "size": 3029
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/exl3_torch.py": {
+      "sha256": "f653da73e8783005b92c42bb7366790e45e151d8d1aa7ad982174be26cba63f0",
+      "size": 5948
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/fp8_dense.py": {
+      "sha256": "56b3cfecb406d37c4dab99af77449805bcba3b23a269b6ca6e2f83cad0c98528",
+      "size": 6302
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/pack.py": {
+      "sha256": "aca774982333e2b8d6d466be9a2c487f4ec188592a680db479f117eba11eb02f",
+      "size": 12013
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/pack_gguf.py": {
+      "sha256": "f45c5c16cbd59d5aa1ad5b22d07f082818d4d806cfa9254b66bc173d9a458859",
+      "size": 37457
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/parallel_test.py": {
+      "sha256": "4fb5680c141229130a00838485bd10d5efd200a531b8d3a348dcae4d5549c078",
+      "size": 22504
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/profile.py": {
+      "sha256": "819a40971f88d6ea83ece0e588c47e103287b620112f1948aeccd657a2211223",
+      "size": 4966
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/rank0.sh": {
+      "sha256": "2e4db451f0bf1ebd2e76da9021bd4b0db1c6be6f3922e3a6e9c09ef8c5416402",
+      "size": 233
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/rank1.sh": {
+      "sha256": "c52126f92398ec058fcb0261a23a5fbe5bf0c91a550566f701ce62015d067a8f",
+      "size": 224
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/recipe_maya_s_test.json": {
+      "sha256": "ad224aef6d65a5862853d4d76ad1775a06b402ffee0a6a26784d2a1ec6a7735b",
+      "size": 774
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/ref.py": {
+      "sha256": "652345adfc0f625e0c1bdb89ce0fc4e6f8107da83c296ed4c2231e6e1dafb61e",
+      "size": 21346
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/ref_gguf.py": {
+      "sha256": "5f7ccb3e6b4de7f008d62d19e2a7d3946a9ca618685c98bbf8bb85a9a9efab78",
+      "size": 14032
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/requant_gguf.py": {
+      "sha256": "c7e798c5954ca62c4e5880f044785c16c6630e34ebb90105668128b00492d769",
+      "size": 22270
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/slot_api_image_test.py": {
+      "sha256": "69481f226ebba12a003ac1c7d43600a966ee8560b9abcb22582b8de0551228e7",
+      "size": 5644
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/slot_image_test.py": {
+      "sha256": "22bfce091697e2a0ec24757ce95f0b33ce8ffaf99148221c7137adce17a31e37",
+      "size": 11197
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/slot_keep_test.py": {
+      "sha256": "28ce5ab2110ef6aa0b58e98d5810743d80de9f35d2a7a859267aa21c04881359",
+      "size": 25524
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/st.py": {
+      "sha256": "9d328b1959cd3d7709524bb90e5eaf5b3316508b0e6ec5f4350a08006c7c66e4",
+      "size": 2493
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/tok.py": {
+      "sha256": "a2423e1f0e2b688e91d80074eca695497f79025188f97c55373ca55b1d50f786",
+      "size": 1407
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/tp2-launch.example.json": {
+      "sha256": "8368ba84fc512db3c026305b0fcbdcd095a0182d68e2ac8b91b37ae6d88eef7c",
+      "size": 489
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/tp2_config.py": {
+      "sha256": "dadd1b7f62ccf030ec82bcff9ebd11eb694bdb60955be8fc1fb1c32455bca58a",
+      "size": 2536
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/tp2_identity.py": {
+      "sha256": "5cbec57f0430eb7bbe87381233afdb8892292ec0cfc56649c74bd425c45a809a",
+      "size": 17195
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/tp2_launch.py": {
+      "sha256": "6e3877173cef4a11f0ccd4e8ff32e1015dc5c458d5d7086f02673b691762bab4",
+      "size": 19054
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/tp2_rank.py": {
+      "sha256": "9d7d9c81f190f4a96152988d6dc77995629b119ed531a66529a4149a3d077b24",
+      "size": 4947
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/ds4/vision_pack.py": {
+      "sha256": "68c1298b393cfad2b363e265853e6726b9c0e25edb70428f7c440bd5d89ba93c",
+      "size": 15833
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/llama-swap/tp2-ds4.sh": {
+      "sha256": "8416096a4ce482dc03cdbdc941d5a1a95f0f36b4c77061cf0368b01a1874ede9",
+      "size": 230
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/llama-swap/tp2.sh": {
+      "sha256": "16d5aa78a06fa46e7e77db727ce34de63a72f0c327f1558db5151d645af6c680",
+      "size": 4730
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/acceptance.sh": {
+      "sha256": "718faf3a15761e559b5ac486de50dff1cd6c1d1f2d582a457945f6f1a0821219",
+      "size": 3901
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/audit_split.py": {
+      "sha256": "27e2682319bc8fdb381caf0e4dbc25da013468f2991c2b40af6a2926db15671d",
+      "size": 6886
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/bench_mtp.py": {
+      "sha256": "781c34f6a76ae9ba8d451ec5a346ff8811134e71616b2a20291d851bbdd013fe",
+      "size": 16368
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/bench_prefill.py": {
+      "sha256": "bd007a0b6acb708ba52256689daa5d02569cdad783f3e3b21ff61ff5b1041301",
+      "size": 3106
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/continuation_boundaries.py": {
+      "sha256": "ec305b0ba598b506baa457bc4e79c7446d93e112f1c634d352d1d1322c66ab07",
+      "size": 4911
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/greedy_parity.py": {
+      "sha256": "956128a60dc389d52352366c9b7c2814066058f790aa511c7a64549423374e43",
+      "size": 2554
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/long_loop_reuse.py": {
+      "sha256": "64116ef3545895a03c0dc1523f1b6f0160ca4ee1dc13a7bc2dcb51539938d42e",
+      "size": 4360
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/maya-rank0.sh": {
+      "sha256": "97d97d14fcd591be212ba27969cb63531fb11e8310509e81b4ef198fa1fcd27a",
+      "size": 2455
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/maya-rank1.sh": {
+      "sha256": "3eae4c069fa21b1d80fa3897f3b1ca88e8f04f10c02b3d012e4bc1b2d516f4d4",
+      "size": 2339
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/model_env.sh": {
+      "sha256": "f3680e9a6f675cec3fe8d7f1bf5194a8bf989a33d23f7fbee7f254f96fb99337",
+      "size": 2892
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/mtp_acceptance.py": {
+      "sha256": "bf1ba593494fb4aaeccc6eb16ee8bb2ac7c4cd4f10d281861338649e767a1b91",
+      "size": 3422
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/prefill_cancel.py": {
+      "sha256": "faa826ed85c8e10f898396609391f504ff31a004c7e9c9f7dc542416f2beefd7",
+      "size": 3438
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/rank0.sh": {
+      "sha256": "395f1dd52d3c1f70134b0b462484debe49cd15b976b031eaa238011ccc1262d6",
+      "size": 3484
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/rank1.sh": {
+      "sha256": "5fcb9b5fd5df242f455720d7c67c3033113c7e72b2f38c6555df1da05c3f7135",
+      "size": 3645
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/regression_collectives.py": {
+      "sha256": "d800663f26e870a2d9aa0e4ecccd978ccfa44e655c4b36888c11a7886204b80e",
+      "size": 5974
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/run_bench.sh": {
+      "sha256": "7ba7c85b465decc772a475a9b5b52d2dafeca4186c3edea5975282c30af27383",
+      "size": 1927
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/run_comm_test.sh": {
+      "sha256": "04114c0cb5459dda78cb13794e4c98a095da4a91e5da9a20389045b53db2e74e",
+      "size": 1250
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/run_noar.sh": {
+      "sha256": "d20d9ca10be8ef6053fbf98481cfd6eeb40100cddc1ea6e745447cdcb1d1f50a",
+      "size": 1449
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/run_prof.sh": {
+      "sha256": "70632cfb2769b5b3c2cc8830f2e75e71f2bea4ee0403cbc156762ef2aa21b4fd",
+      "size": 1385
+    },
+    "/home/ugo/software/project-maya-ds4-tp2-review/tools/tp2/tp2-swap.sh": {
+      "sha256": "bc08c6238ddc35f7d73a8ded082667c088569acbc9c947c4c175853978487e7a",
+      "size": 192
+    }
+  },
+  "targets": [
+    {
+      "path": "/home/ugo/software/project-maya/build-hip/maya",
+      "source": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.58/maya",
+      "old_sha256": "3ffec5fec2bc9484daa0e3900490303aa4b7acd7ec8e716f3310e2535609b8b9",
+      "new_sha256": "dd37dbd84cabcfce75c4072a8fdac95b08a065ae47481c8bba77fbb9ab07f965",
+      "backup": "/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/0-maya.before",
+      "stage": "/home/ugo/software/project-maya/build-hip/.maya.issue169-t_yuc4r4",
+      "mode": 493,
+      "uid": 1000,
+      "gid": 1000,
+      "ldd": "\tlinux-vdso.so.1 (0x00007fd36534c000)\n\tlibm.so.6 => /usr/lib/libm.so.6 (0x00007fd3628f7000)\n\tlibhipblas.so.3 => /opt/rocm/lib/libhipblas.so.3 (0x00007fd362842000)\n\tlibhipblaslt.so.1 => /opt/rocm/lib/libhipblaslt.so.1 (0x00007fd362000000)\n\tlibamdhip64.so.7 => /opt/rocm/lib/libamdhip64.so.7 (0x00007fd360400000)\n\tlibibverbs.so.1 => /usr/lib/libibverbs.so.1 (0x00007fd362818000)\n\tlibgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0x00007fd3627e3000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007fd360000000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007fd36534e000)\n\tlibstdc++.so.6 => /usr/lib/libstdc++.so.6 (0x00007fd35fc00000)\n\tlibrocsolver.so.0 => /opt/rocm/lib/librocsolver.so.0 (0x00007fd35c400000)\n\tlibrocblas.so.5 => /opt/rocm/lib/librocblas.so.5 (0x00007fd35a600000)\n\tlibdl.so.2 => /usr/lib/libdl.so.2 (0x00007fd365313000)\n\tlibroctx64.so.4 => /opt/rocm/lib/libroctx64.so.4 (0x00007fd36530f000)\n\tliborigami.so.1 => /opt/rocm/lib/liborigami.so.1 (0x00007fd36276e000)\n\tlibrocm_sysdeps_z.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1 (0x00007fd362750000)\n\tlibrocroller.so.1 => /opt/rocm/lib/librocroller.so.1 (0x00007fd351600000)\n\tlibrocm_kpack.so.0 => /opt/rocm/lib/librocm_kpack.so.0 (0x00007fd36270c000)\n\tlibrocprofiler-register.so.0 => /opt/rocm/lib/librocprofiler-register.so.0 (0x00007fd360321000)\n\tlibrt.so.1 => /usr/lib/librt.so.1 (0x00007fd365308000)\n\tlibamd_comgr.so.3 => /opt/rocm/lib/libamd_comgr.so.3 (0x00007fd350800000)\n\tlibhsa-runtime64.so.1 => /opt/rocm/lib/libhsa-runtime64.so.1 (0x00007fd350200000)\n\tlibpthread.so.0 => /usr/lib/libpthread.so.0 (0x00007fd365303000)\n\tlibnl-route-3.so.200 => /usr/lib/libnl-route-3.so.200 (0x00007fd36266b000)\n\tlibnl-3.so.200 => /usr/lib/libnl-3.so.200 (0x00007fd361fd6000)\n\tlibrocm_sysdeps_zstd.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1 (0x00007fd360252000)\n\tlibclang-cpp.so.24.0git => /opt/rocm/lib/llvm/lib/libclang-cpp.so.24.0git (0x00007fd34ba00000)\n\tlibLLVM.so.24.0git => /opt/rocm/lib/llvm/lib/libLLVM.so.24.0git (0x00007fd344c00000)\n\tlibrocm_sysdeps_elf.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1 (0x00007fd361fba000)\n\tlibrocm_sysdeps_drm.so.2 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2 (0x00007fd361fa5000)\n\tlibrocm_sysdeps_drm_amdgpu.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1 (0x00007fd361f90000)\n\tlibrocm_sysdeps_numa.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1 (0x00007fd361f81000)\n\tlibrocm_sysdeps_liblzma.so.5 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5 (0x00007fd361f50000)\n\tlibrocm_sysdeps_bz2.so => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so (0x00007fd35ffe7000)\n"
+    },
+    {
+      "path": "/home/ugo/software/project-maya/build-hip/maya-ds4",
+      "source": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.58/maya-ds4",
+      "old_sha256": "3769a1f1cabeb314ec9daa5fada0594d2be1551bfc8d83b0921f5e37e3cece07",
+      "new_sha256": "17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076",
+      "backup": "/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/1-maya-ds4.before",
+      "stage": "/home/ugo/software/project-maya/build-hip/.maya-ds4.issue169-mozv6iab",
+      "mode": 493,
+      "uid": 1000,
+      "gid": 1000,
+      "ldd": "\tlinux-vdso.so.1 (0x00007efc9a0c1000)\n\tlibhipblaslt.so.1 => /opt/rocm/lib/libhipblaslt.so.1 (0x00007efc96a00000)\n\tlibhipblas.so.3 => /opt/rocm/lib/libhipblas.so.3 (0x00007efc99fdc000)\n\tlibm.so.6 => /usr/lib/libm.so.6 (0x00007efc99ed3000)\n\tlibamdhip64.so.7 => /opt/rocm/lib/libamdhip64.so.7 (0x00007efc94e00000)\n\tlibibverbs.so.1 => /usr/lib/libibverbs.so.1 (0x00007efc99ea7000)\n\tlibgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0x00007efc971cb000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007efc94a00000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007efc9a0c3000)\n\tlibstdc++.so.6 => /usr/lib/libstdc++.so.6 (0x00007efc94600000)\n\tlibdl.so.2 => /usr/lib/libdl.so.2 (0x00007efc99ea2000)\n\tlibroctx64.so.4 => /opt/rocm/lib/libroctx64.so.4 (0x00007efc99e9c000)\n\tliborigami.so.1 => /opt/rocm/lib/liborigami.so.1 (0x00007efc97156000)\n\tlibrocm_sysdeps_z.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1 (0x00007efc97138000)\n\tlibrocroller.so.1 => /opt/rocm/lib/librocroller.so.1 (0x00007efc8b600000)\n\tlibrocsolver.so.0 => /opt/rocm/lib/librocsolver.so.0 (0x00007efc87e00000)\n\tlibrocblas.so.5 => /opt/rocm/lib/librocblas.so.5 (0x00007efc86000000)\n\tlibrocm_kpack.so.0 => /opt/rocm/lib/librocm_kpack.so.0 (0x00007efc970f4000)\n\tlibrocprofiler-register.so.0 => /opt/rocm/lib/librocprofiler-register.so.0 (0x00007efc94d21000)\n\tlibrt.so.1 => /usr/lib/librt.so.1 (0x00007efc970ef000)\n\tlibamd_comgr.so.3 => /opt/rocm/lib/libamd_comgr.so.3 (0x00007efc85200000)\n\tlibhsa-runtime64.so.1 => /opt/rocm/lib/libhsa-runtime64.so.1 (0x00007efc84c00000)\n\tlibpthread.so.0 => /usr/lib/libpthread.so.0 (0x00007efc970e8000)\n\tlibnl-route-3.so.200 => /usr/lib/libnl-route-3.so.200 (0x00007efc9695f000)\n\tlibnl-3.so.200 => /usr/lib/libnl-3.so.200 (0x00007efc970be000)\n\tlibrocm_sysdeps_zstd.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1 (0x00007efc94c52000)\n\tlibclang-cpp.so.24.0git => /opt/rocm/lib/llvm/lib/libclang-cpp.so.24.0git (0x00007efc80400000)\n\tlibLLVM.so.24.0git => /opt/rocm/lib/llvm/lib/libLLVM.so.24.0git (0x00007efc79600000)\n\tlibrocm_sysdeps_elf.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1 (0x00007efc970a0000)\n\tlibrocm_sysdeps_drm.so.2 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2 (0x00007efc9708b000)\n\tlibrocm_sysdeps_drm_amdgpu.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1 (0x00007efc97076000)\n\tlibrocm_sysdeps_numa.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1 (0x00007efc97065000)\n\tlibrocm_sysdeps_liblzma.so.5 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5 (0x00007efc949cf000)\n\tlibrocm_sysdeps_bz2.so => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so (0x00007efc949b6000)\n"
+    },
+    {
+      "path": "/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/maya-ds4",
+      "source": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.58/maya-ds4",
+      "old_sha256": "a950e7e9350be4fa49a7063c67ef901ebbc1bd2a9b583d07250eb016bcf72102",
+      "new_sha256": "17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076",
+      "backup": "/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/2-maya-ds4.before",
+      "stage": "/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/.maya-ds4.issue169-whjati7m",
+      "mode": 493,
+      "uid": 1000,
+      "gid": 1000,
+      "ldd": "\tlinux-vdso.so.1 (0x00007f2d568ca000)\n\tlibhipblaslt.so.1 => /opt/rocm/lib/libhipblaslt.so.1 (0x00007f2d53400000)\n\tlibhipblas.so.3 => /opt/rocm/lib/libhipblas.so.3 (0x00007f2d53b4b000)\n\tlibm.so.6 => /usr/lib/libm.so.6 (0x00007f2d532f7000)\n\tlibamdhip64.so.7 => /opt/rocm/lib/libamdhip64.so.7 (0x00007f2d51600000)\n\tlibibverbs.so.1 => /usr/lib/libibverbs.so.1 (0x00007f2d53b1f000)\n\tlibgcc_s.so.1 => /usr/lib/libgcc_s.so.1 (0x00007f2d53aea000)\n\tlibc.so.6 => /usr/lib/libc.so.6 (0x00007f2d51200000)\n\t/lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007f2d568cc000)\n\tlibstdc++.so.6 => /usr/lib/libstdc++.so.6 (0x00007f2d50e00000)\n\tlibdl.so.2 => /usr/lib/libdl.so.2 (0x00007f2d53ae5000)\n\tlibroctx64.so.4 => /opt/rocm/lib/libroctx64.so.4 (0x00007f2d53adf000)\n\tliborigami.so.1 => /opt/rocm/lib/liborigami.so.1 (0x00007f2d53a6a000)\n\tlibrocm_sysdeps_z.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1 (0x00007f2d532d9000)\n\tlibrocroller.so.1 => /opt/rocm/lib/librocroller.so.1 (0x00007f2d47e00000)\n\tlibrocsolver.so.0 => /opt/rocm/lib/librocsolver.so.0 (0x00007f2d44600000)\n\tlibrocblas.so.5 => /opt/rocm/lib/librocblas.so.5 (0x00007f2d42800000)\n\tlibrocm_kpack.so.0 => /opt/rocm/lib/librocm_kpack.so.0 (0x00007f2d53295000)\n\tlibrocprofiler-register.so.0 => /opt/rocm/lib/librocprofiler-register.so.0 (0x00007f2d531b6000)\n\tlibrt.so.1 => /usr/lib/librt.so.1 (0x00007f2d53a63000)\n\tlibamd_comgr.so.3 => /opt/rocm/lib/libamd_comgr.so.3 (0x00007f2d41a00000)\n\tlibhsa-runtime64.so.1 => /opt/rocm/lib/libhsa-runtime64.so.1 (0x00007f2d41400000)\n\tlibpthread.so.0 => /usr/lib/libpthread.so.0 (0x00007f2d531b1000)\n\tlibnl-route-3.so.200 => /usr/lib/libnl-route-3.so.200 (0x00007f2d5155f000)\n\tlibnl-3.so.200 => /usr/lib/libnl-3.so.200 (0x00007f2d53187000)\n\tlibrocm_sysdeps_zstd.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1 (0x00007f2d51490000)\n\tlibclang-cpp.so.24.0git => /opt/rocm/lib/llvm/lib/libclang-cpp.so.24.0git (0x00007f2d3cc00000)\n\tlibLLVM.so.24.0git => /opt/rocm/lib/llvm/lib/libLLVM.so.24.0git (0x00007f2d35e00000)\n\tlibrocm_sysdeps_elf.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1 (0x00007f2d5316b000)\n\tlibrocm_sysdeps_drm.so.2 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2 (0x00007f2d53156000)\n\tlibrocm_sysdeps_drm_amdgpu.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1 (0x00007f2d5147b000)\n\tlibrocm_sysdeps_numa.so.1 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1 (0x00007f2d5146c000)\n\tlibrocm_sysdeps_liblzma.so.5 => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5 (0x00007f2d511cf000)\n\tlibrocm_sysdeps_bz2.so => /opt/rocm/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so (0x00007f2d51453000)\n"
+    }
+  ],
+  "absent_targets": [],
+  "committed": 1794385934.1779158
+}
