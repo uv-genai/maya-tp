@@ -930,18 +930,17 @@ console.log(JSON.stringify({set: m.tierSet(q).find((x) => x.key === "disk"), glm
         self.assertTrue(got["cfCpu"].startswith("Most experts run on the CPU"))
 
     def test_about_has_the_support_line_always_and_the_update_card_none(self):
-        # owner 2026-11-05: one line on About (always, also while an update shows), its link on "supporting me" in bold
-        # violet; no row under an update's button; the sidebar's heart stays
+        # One line on About, including during updates, with explicit upstream attribution and a bold violet link;
+        # no row under an update's button; the sidebar's heart stays.
         web = ROOT / "serve" / "web"
         js = (web / "settings.js").read_text(encoding="utf-8")
         line = js[js.index("const SupportLine"):js.index("function UpdateCard")]
         body = line.split("<span>", 1)[1].split("</span></p>", 1)[0].replace('${" "}', " ")
         text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", body))
-        self.assertEqual(text, "I build Maya because I believe everyone should have access to great local AI. If you enjoy "
-                               "what I'm building, consider supporting me. Every little bit helps keep the project alive "
-                               "and growing. ❤️")
+        self.assertEqual(text, "Maya-TP builds on upstream Project Maya. If Maya helps your work, consider "
+                               "supporting its development. ❤️")
         self.assertRegex(line, r'<a class="support-link" href=\$\{SUPPORT_URL\} target="_blank" rel="noopener"\s+'
-                               r'title="[^"]*">supporting me</a>')
+                               r'title="Sponsor upstream Project Maya on GitHub">supporting its development</a>')
         self.assertNotIn('name="heart"', line)                               # (no second heart before the text)
         card = js[js.index("function UpdateCard"):js.index("\n}\n", js.index("function UpdateCard"))]
         self.assertNotIn("SupportLine", card)

@@ -343,7 +343,7 @@ class OtherQuantsTest(unittest.TestCase):
     def test_qwen_unsloth_ud_iq2_xs(self):
         """unsloth's Qwen3.8-Flash-Next GGUFs: UD-IQ2_XS only, under "Other quants" by unsloth (CYBER-FROST stays
         Maya's row); offered from V100 on and on AMD as the setup's check_pc; its setup id on the command line; the
-        size the setup's list says (its files and the vision tower); installed by its own config."""
+        size the setup's text-only list says (its model files); installed by its own config."""
         c = {m["id"]: m for m in self.cat()}
         ud = c["qwen-ud-iq2_xs"]
         self.assertEqual((ud["family"], ud["group"], ud["by"], ud["note"]), ("qwen", "other", "unsloth", ""))
@@ -361,7 +361,9 @@ class OtherQuantsTest(unittest.TestCase):
         self.assertEqual(model_pull.QWEN_MIN_CC, maya.QWEN_MIN_CC)
         model_pull._other_gb.clear()
         try:
-            self.assertAlmostEqual(model_pull._other_sizes()["qwen-ud-iq2_xs"], 80.9, delta=0.1)   # (80.0 + the 0.9 GB mmproj)
+            self.assertAlmostEqual(model_pull._other_sizes()["qwen-ud-iq2_xs"], 80.0, delta=0.1)   # model only, no mmproj
+            self.assertEqual(model_pull._other_sizes()["qwen-ud-iq2_xs"],
+                             round(maya.qwen_entry(maya.QWEN_UD)["download_gb"], 1))
         finally:
             model_pull._other_gb.clear()
         self.assertFalse(ud["installed"])

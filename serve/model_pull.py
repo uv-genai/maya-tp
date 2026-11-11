@@ -146,9 +146,8 @@ def _other_sizes() -> dict:
                 gb = mk["download_gb"] - mk["files"].get(t, 0) / 1e9 + maya.ds4_abl_engram_gb() if t else mk["download_gb"]
             elif fam == "minimax":
                 gb = maya.mm3_models()[0]["download_gb"]
-            elif fam == "qwen":                        # (its files and the vision tower the setup fetches with them)
-                vision = maya.qwen_vision_model()
-                gb = maya.qwen_entry(key)["download_gb"] + (vision["download_gb"] if vision else 0)
+            elif fam == "qwen":                        # this fork's Qwen path is text-only: model files only
+                gb = maya.qwen_entry(key)["download_gb"]
             else:
                 continue                               # (GLM's: the MODELS table, as Maya's own)
             _other_gb[ident] = round(float(gb), 1)
