@@ -26,3 +26,6 @@ data/glm-dsa/** -text
 
 # Intentional trailing spaces/tabs test tokenizer byte preservation.
 data/glm-dsa/tokenizer-corpus/en.txt -whitespace
+
+# Frozen upstream-integration evidence preserves captured progress lines and exact script/log hashes.
+docs/upstream/validation-v1.1.5[4-8]/** -text -whitespace
