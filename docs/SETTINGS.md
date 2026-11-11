@@ -2086,6 +2086,13 @@ the checked wire identity includes this choice, and batched launchers also
 compare its execution digest. Disabled mode retains the original allocation
 and slab stride. Larger query/map buffers can change available expert memory.
 The existing 256-row TP2 chunk boundaries and collective shapes are unchanged.
+This option is experimental: the gfx1151 XS2 probe at 262K allocation and
+1,441 input tokens changed the long-prompt answer after seven matching output
+IDs. Ordinary and DSpark agree within each setting, but enabling it is not
+bit-exact to disabled mode and quality is unqualified. Query GEMM shape changes
+are a possible cause, not an established diagnosis; see
+[#166](https://github.com/uv-genai/maya-tp/issues/166). Keep it off to preserve
+the accepted execution behavior.
 
 Unlike upstream v55, prompt memoization, GLM INT8 latent-cache selection and
 DeepSeek load interleave remain explicit choices. Existing configs that opt

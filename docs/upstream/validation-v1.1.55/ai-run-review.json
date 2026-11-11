@@ -1,0 +1,89 @@
+{
+  "source_commit": "cc5ea593b01be3b9991e0b12a3e546592f694633",
+  "same_binary": true,
+  "sha256": "da47391eb9f3bbee83a76d8d3b51003fdb86a0df99acc4c85e7cce1a85f52fcb",
+  "context": 262144,
+  "prompt_tokens": 1441,
+  "comparisons": [
+    {
+      "label": "short-off",
+      "inputs_equal": true,
+      "tokens_equal": true,
+      "first_difference_zero_based": null,
+      "matching_prefix": 64,
+      "old_first_different": null,
+      "new_first_different": null
+    },
+    {
+      "label": "short-on",
+      "inputs_equal": true,
+      "tokens_equal": true,
+      "first_difference_zero_based": null,
+      "matching_prefix": 64,
+      "old_first_different": null,
+      "new_first_different": null
+    },
+    {
+      "label": "prefill-off",
+      "inputs_equal": true,
+      "tokens_equal": false,
+      "first_difference_zero_based": 7,
+      "matching_prefix": 7,
+      "old_first_different": 15840,
+      "new_first_different": 42199
+    },
+    {
+      "label": "prefill-on",
+      "inputs_equal": true,
+      "tokens_equal": false,
+      "first_difference_zero_based": 7,
+      "matching_prefix": 7,
+      "old_first_different": 15840,
+      "new_first_different": 42199
+    },
+    {
+      "label": "mixed-0",
+      "inputs_equal": true,
+      "tokens_equal": true,
+      "first_difference_zero_based": null,
+      "matching_prefix": 64,
+      "old_first_different": null,
+      "new_first_different": null
+    },
+    {
+      "label": "mixed-1",
+      "inputs_equal": true,
+      "tokens_equal": true,
+      "first_difference_zero_based": null,
+      "matching_prefix": 64,
+      "old_first_different": null,
+      "new_first_different": null
+    },
+    {
+      "label": "mixed-2",
+      "inputs_equal": true,
+      "tokens_equal": true,
+      "first_difference_zero_based": null,
+      "matching_prefix": 64,
+      "old_first_different": null,
+      "new_first_different": null
+    },
+    {
+      "label": "mixed-3",
+      "inputs_equal": true,
+      "tokens_equal": true,
+      "first_difference_zero_based": null,
+      "matching_prefix": 64,
+      "old_first_different": null,
+      "new_first_different": null
+    }
+  ],
+  "additional_query_bytes": 1572864,
+  "additional_block_map_bytes": 12610560,
+  "score_capacity_float_elements": 8390656,
+  "candidate_score_stride": 16448,
+  "candidate_rows_product": 2105344,
+  "candidate_branch_exercised_by_1441_tokens": false,
+  "pair_healthy_before_shutdown": true,
+  "clean_exits": true
+}

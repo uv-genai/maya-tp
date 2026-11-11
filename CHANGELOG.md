@@ -23,7 +23,7 @@ Codex CLI works with Maya, web-chat answers always run to their end and survive 
 - **Docs:** `MAYA_GLM_PREFILL_FUSED` and `MAYA_GLM_MV_RDNA` are listed as on for RDNA4 (gfx12) too, as the code has them.
 
 
-Fork defaults: prompt memo, GLM INT8 cache, DS4_AI_RUN and load interleave remain opt-in. See docs/SETTINGS.md; published upstream speed figures refer to their configurations.
+Fork defaults: prompt memo, GLM INT8 cache, DS4_AI_RUN and load interleave remain opt-in. See docs/SETTINGS.md; published upstream speed figures refer to their configurations. The experimental AI_RUN option changed long-prompt output in our gfx1151 probe; bit-exactness and quality parity are not established (#166).
 
 ## Upstream v1.1.54 - 2026-11-05
 

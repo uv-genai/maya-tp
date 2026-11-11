@@ -3168,7 +3168,7 @@ numeric VERSION and pinned llama.cpp are preserved.
 | Tag | Issue | State |
 | --- | --- | --- |
 | v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates and evidence CI 42966915176 pass at `ad7f71f` |
-| v1.1.55 | #161 | Semantic merge resolved; ordered suites/build/GPU validation in progress |
+| v1.1.55 | #161 | Source `cc5ea59`, exact-head CI 42967989395 passed; default-off outputs pass; performance investigation #165 and experimental numerical follow-up #166 |
 | v1.1.56 | #162 | Queued |
 | v1.1.57 | #163 | Queued; shared Flash state layout needs rank-local review; full-model TP2 must be rejected |
 | v1.1.58 | #164 | Queued; additional Q5_K parity and Flash Unicode drafting checks identified |
@@ -3218,8 +3218,12 @@ is imported opt-in with complete AIM/slab-stride prerequisites. Allocation,
 runtime and wire identity use the same rule; feature bit1 rejects mismatches
 for both protocols, and batch launcher digests include the normalized choice.
 Independent source review and 200 focused server tests (13 skips), 10 launcher
-tests, HIP mapping and the identity CPU test pass. Full suites and isolated
-build/GPU checks are in progress; no v56 merge until gates/CI pass. The 1,441-token XS prompt at 262K allocation
+tests, HIP mapping and the identity CPU test pass. Full suites pass770 server tests (21 skips) and784 tools tests (3 skips),
+plus workflow CPU gates; exact-head CI42967989395 passes at `cc5ea59`. All
+three gfx1151 HIP targets build, and frozen binary hashes are in the phase
+evidence. Paired GPU comparisons/AI_RUN probe are in progress; no v56 merge
+until those gates pass. V55 raw evidence and report updates will be included
+with the next source checkpoint; the tested source head remains `cc5ea59`. The 1,441-token XS prompt at 262K allocation
 exercises index selection beyond top-k512 with ratio2 compression; it does
 not cover candidate-block reduction beyond 16K compressed keys.
 V57/V58 shared-GLM audit notes are in
@@ -3229,3 +3233,16 @@ and ablation. `glm_mv_nt_test` covers changed Q5_K n-column dispatch without
 new weights; existing Flash packs' dense tensors are F32/Q8_0, so another
 large model load would not exercise that path. Final bounded max-slot probes
 are GLM4 at32K and DeepSeek XS4 at8K allocation, not a capacity campaign.
+
+V55 default-off GPU comparisons match all2,304 reference tokens. Its opt-in
+AI_RUN experiment changes both long-prompt responses after seven matching IDs,
+while short/mixed outputs match and each mode's ordinary/DSpark results agree.
+Independent audit found no stride/capacity/control defect; the feature stays
+experimental/default-off, with observed answer changes and unqualified quality
+tracked in open #166. Do not claim its strict parity probe passed.
+
+A second intermittent slow wave appeared on S2 in v55. #165 now tracks a
+bounded two-load v54/v55 original-prefix/mixed transition comparison with GPU,
+CPU/memory/IO and owned-process telemetry. The validation agent may be active;
+check its recorded ownership. No v56 merge until this performance gate is
+assessed. All normal/AI-probe processes were stopped before this diagnostic.
