@@ -1,0 +1,2 @@
+glm mv: CUDA0 dense GEMVs on the RDNA3 kernel
+glm_mv_nt_test: 568 cases, every output bit for bit the one-activation GEMV's

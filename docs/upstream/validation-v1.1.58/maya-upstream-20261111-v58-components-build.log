@@ -1,0 +1,153 @@
+[ 10%] Built target strata_core
+[ 30%] Built target ggml-base
+[100%] Built target strata_kernels
+[100%] Building HIP object CMakeFiles/glm_mv_nt_test.dir/tests/glm_mv_nt_test.cu.o
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_mv_nt_test.cu:179:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  179 |         cudaFree(y_nt[(size_t) i]);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_mv_nt_test.cu:180:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  180 |         cudaFree(y_col[(size_t) i]);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_mv_nt_test.cu:181:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  181 |         cudaFree(y_one[(size_t) i]);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+3 warnings generated when compiling for gfx1151.
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_mv_nt_test.cu:179:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  179 |         cudaFree(y_nt[(size_t) i]);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_mv_nt_test.cu:180:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  180 |         cudaFree(y_col[(size_t) i]);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_mv_nt_test.cu:181:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  181 |         cudaFree(y_one[(size_t) i]);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+3 warnings generated when compiling for host.
+[100%] Linking HIP executable glm_mv_nt_test
+[100%] Built target glm_mv_nt_test
+[  4%] Built target strata_core
+[ 12%] Built target ggml-base
+[ 25%] Built target strata_mmq
+[ 54%] Built target strata_kernels
+[ 62%] Built target ggml-cpu
+[ 66%] Built target strata_kernels_cpu
+[100%] Built target strata_engine
+[100%] Built target strata_prefill
+[100%] Building HIP object CMakeFiles/glm_ablate_test.dir/tests/glm_ablate_test.cu.o
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:67:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   67 |     cudaMemcpy(dr, r.data(), r.size() * 4, cudaMemcpyHostToDevice);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:68:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   68 |     cudaMemcpy(dy, y.data(), y.size() * 4, cudaMemcpyHostToDevice);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:69:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   69 |     cudaMemcpy(dz, y.data(), y.size() * 4, cudaMemcpyHostToDevice);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:80:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   80 |     cudaMemcpy(got.data(), dy, got.size() * 4, cudaMemcpyDeviceToHost);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:81:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   81 |     cudaMemcpy(runs_out.data(), dz, runs_out.size() * 4, cudaMemcpyDeviceToHost);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:99:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   99 |     cudaFree(dr);
+      |     ^~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:100:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  100 |     cudaFree(dy);
+      |     ^~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:101:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  101 |     cudaFree(dz);
+      |     ^~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+8 warnings generated when compiling for gfx1151.
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:67:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   67 |     cudaMemcpy(dr, r.data(), r.size() * 4, cudaMemcpyHostToDevice);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:68:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   68 |     cudaMemcpy(dy, y.data(), y.size() * 4, cudaMemcpyHostToDevice);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:69:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   69 |     cudaMemcpy(dz, y.data(), y.size() * 4, cudaMemcpyHostToDevice);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:80:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   80 |     cudaMemcpy(got.data(), dy, got.size() * 4, cudaMemcpyDeviceToHost);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:81:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   81 |     cudaMemcpy(runs_out.data(), dz, runs_out.size() * 4, cudaMemcpyDeviceToHost);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:101:20: note: expanded from macro 'cudaMemcpy'
+  101 | #define cudaMemcpy hipMemcpy
+      |                    ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:99:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   99 |     cudaFree(dr);
+      |     ^~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:100:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  100 |     cudaFree(dy);
+      |     ^~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+/home/ugo/software/project-maya-upstream-20261111-runtime/tests/glm_ablate_test.cu:101:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  101 |     cudaFree(dz);
+      |     ^~~~~~~~~~~~
+/home/ugo/software/project-maya-upstream-20261111-runtime/include/strata/hip_compat/cuda_runtime.h:57:18: note: expanded from macro 'cudaFree'
+   57 | #define cudaFree hipFree
+      |                  ^
+8 warnings generated when compiling for host.
+[100%] Linking HIP executable glm_ablate_test
+[100%] Built target glm_ablate_test

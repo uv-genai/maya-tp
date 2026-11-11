@@ -1,0 +1,49 @@
+exl3_test on AMD Radeon 8060S Graphics (129.9 GB)
+  set K1 cb0 (3 experts, 107 rows)             rel 8.07e-05  worst/rms 1.44e-03  ok
+  set K1 cb1 (3 experts, 107 rows)             rel 7.82e-05  worst/rms 1.36e-03  ok
+  set K1 cb2 (3 experts, 107 rows)             rel 7.38e-05  worst/rms 1.26e-03  ok
+  set K2 cb0 (3 experts, 107 rows)             rel 8.76e-05  worst/rms 1.24e-03  ok
+  set K2 cb1 (3 experts, 107 rows)             rel 7.41e-05  worst/rms 1.49e-03  ok
+  set K2 cb2 (3 experts, 107 rows)             rel 6.54e-05  worst/rms 1.18e-03  ok
+  set K3 cb0 (3 experts, 107 rows)             rel 7.57e-05  worst/rms 1.20e-03  ok
+  set K3 cb1 (3 experts, 107 rows)             rel 8.48e-05  worst/rms 1.44e-03  ok
+  set K3 cb2 (3 experts, 107 rows)             rel 9.89e-05  worst/rms 1.67e-03  ok
+  set K4 cb0 (3 experts, 107 rows)             rel 9.36e-05  worst/rms 1.81e-03  ok
+  set K4 cb1 (3 experts, 107 rows)             rel 9.10e-05  worst/rms 1.32e-03  ok
+  set K4 cb2 (3 experts, 107 rows)             rel 7.68e-05  worst/rms 1.87e-03  ok
+  set K5 cb0 (3 experts, 107 rows)             rel 9.03e-05  worst/rms 1.83e-03  ok
+  set K5 cb1 (3 experts, 107 rows)             rel 8.43e-05  worst/rms 1.53e-03  ok
+  set K5 cb2 (3 experts, 107 rows)             rel 8.40e-05  worst/rms 1.18e-03  ok
+  set K6 cb0 (3 experts, 107 rows)             rel 8.34e-05  worst/rms 1.69e-03  ok
+  set K6 cb1 (3 experts, 107 rows)             rel 8.30e-05  worst/rms 1.23e-03  ok
+  set K6 cb2 (3 experts, 107 rows)             rel 8.73e-05  worst/rms 2.00e-03  ok
+  set K7 cb0 (3 experts, 107 rows)             rel 8.05e-05  worst/rms 8.55e-04  ok
+  set K7 cb1 (3 experts, 107 rows)             rel 8.27e-05  worst/rms 1.50e-03  ok
+  set K7 cb2 (3 experts, 107 rows)             rel 7.51e-05  worst/rms 1.01e-03  ok
+  set K8 cb0 (3 experts, 107 rows)             rel 8.94e-05  worst/rms 1.32e-03  ok
+  set K8 cb1 (3 experts, 107 rows)             rel 9.74e-05  worst/rms 2.51e-03  ok
+  set K8 cb2 (3 experts, 107 rows)             rel 9.54e-05  worst/rms 1.75e-03  ok
+  set K1.5 cb2 (3 experts, 107 rows)           rel 7.76e-05  worst/rms 9.10e-04  ok
+  set K2.5 cb2 (3 experts, 107 rows)           rel 1.11e-04  worst/rms 3.31e-03  ok
+  set K3.5 cb2 (3 experts, 107 rows)           rel 8.36e-05  worst/rms 1.27e-03  ok
+  set K3.5/5 cb2 (3 experts, 107 rows)         rel 6.80e-05  worst/rms 9.72e-04  ok
+  set K2.5/4 cb2 (3 experts, 107 rows)         rel 9.63e-05  worst/rms 1.44e-03  ok
+  set K3/4 cb2 (3 experts, 38 rows)            rel 9.16e-05  worst/rms 1.34e-03  ok
+  set K3/4 cb2 (3 experts, 52 rows)            rel 7.45e-05  worst/rms 1.11e-03  ok
+  set K3/4 cb2 (3 experts, 53 rows)            rel 1.10e-04  worst/rms 1.55e-03  ok
+  set K3/4 cb2 (3 experts, 54 rows)            rel 8.90e-05  worst/rms 1.02e-03  ok
+  set K3/4 cb2 (3 experts, 68 rows)            rel 6.86e-05  worst/rms 9.21e-04  ok
+  set K3/4 cb2 (3 experts, 69 rows)            rel 9.76e-05  worst/rms 2.57e-03  ok
+  set K3/4 cb2 (3 experts, 70 rows)            rel 6.53e-05  worst/rms 1.20e-03  ok
+  set K2 cb2 (3 experts, 270 rows)             rel 9.77e-05  worst/rms 2.49e-03  ok
+  set K2.5 cb2 (3 experts, 270 rows)           rel 1.15e-04  worst/rms 3.60e-03  ok
+  moe mixed cb0 (3 experts, K 1/1/2, 2/1/3, 3/4/1) rel 5.69e-05  worst/rms 1.78e-04  ok
+  set mixed cb0 (3 experts, 112 rows)          rel 8.50e-05  worst/rms 1.08e-03  ok
+  set mixed cb0 bits 06381b0d01615e16
+  moe mixed cb1 (3 experts, K 1/1/2, 2/1/3, 3/4/1) rel 4.42e-05  worst/rms 2.19e-04  ok
+  set mixed cb1 (3 experts, 112 rows)          rel 8.38e-05  worst/rms 1.18e-03  ok
+  set mixed cb1 bits 6a426cb95d43c178
+  moe mixed cb2 (3 experts, K 1/1/2, 2/1/3, 3/4/1) rel 1.15e-04  worst/rms 4.26e-04  ok
+  set mixed cb2 (3 experts, 112 rows)          rel 9.46e-05  worst/rms 1.65e-03  ok
+  set mixed cb2 bits e907b6e39e64290a
+prefill-only: ok (0 failures, 0 launch errors)
