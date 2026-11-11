@@ -1,6 +1,11 @@
 # Handoff-Prompt — Maya-TP restart
 
-Read Handoff.md §55 first. The user explicitly requested replacing the validated
+Read Handoff.md §56 for source release tp-v1.1.45 (numeric VERSION 1.1.45),
+with publication/tag/CI recorded in #170; consult that issue before any release
+action to avoid duplicate publication. Read §55 for the accepted runtime.
+The release metadata does not rebuild/redeploy the accepted engines.
+
+The user explicitly requested replacing the validated
 v58 GLM/DeepSeek binaries at the SAME existing paths, with NO launcher/config
 changes. This is complete on both hosts (#169); the user reports the installed
 builds are working fine and accepts them. GLM

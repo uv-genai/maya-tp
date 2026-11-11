@@ -6,9 +6,13 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+## tp-v1.1.45 — 2026-11-11
+
+[Release notes](docs/releases/tp-v1.1.45.md). Source VERSION is 1.1.45; existing accepted runtime binaries retain their recorded build identities. Publication is tracked in #170.
+
 - Installed the validated v58 GLM/DeepSeek engines at their existing paths on both hosts, preserving launcher/config files and verified backups. The user confirmed the installed builds are working fine (#169).
 
-- Integrated upstream v1.1.54–v1.1.58 as sequentially validated Flash TP2 checkpoints. GLM MTP and DeepSeek DSpark pass default/batched and final four-slot HTTP checks; evidence and final PR/main publication are tracked in #159–#164. Production selections and fork release VERSION are unchanged.
+- Integrated upstream v1.1.54–v1.1.58 as sequentially validated Flash TP2 checkpoints. GLM MTP and DeepSeek DSpark pass default/batched and final four-slot HTTP checks; evidence and final PR/main publication are tracked in #159–#164. The integration preserved Flash defaults and executable paths; the subsequent user-authorized same-path installation is recorded in #169.
 
 ## Upstream v1.1.58 - 2026-11-10
 

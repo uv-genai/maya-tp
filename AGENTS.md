@@ -235,3 +235,13 @@ Use isolated matching builds for validation; keep stable executable paths when
 the user authorizes installation. Back up and atomically replace binary files
 on both hosts; do not rewire launchers to review paths. Handoff §55 records the
 current hashes/backups and the user's successful testing/acceptance (#169).
+
+
+## Current release checkpoint
+
+The user requested source release `tp-v1.1.45` after accepting the installed
+v58 engines. Numeric VERSION is `1.1.45`; #170 records release metadata PR,
+exact-head/main CI, immutable tag target and GitHub publication. Notes are in
+`docs/releases/tp-v1.1.45.md`; use Handoff §56 for release status and §55 for
+installed binaries. Release metadata does not rebuild/redeploy those accepted
+engine files or change launcher/config paths. Preserve their recorded hashes.

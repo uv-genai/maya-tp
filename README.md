@@ -22,6 +22,8 @@ validated engines at their existing paths on both hosts (#169). Launchers and
 model/config selections are unchanged. The user confirmed that the installed
 binaries are working fine on 2026-11-11. See [current deployment](docs/deployments/v58-existing-paths-2026-11-11/README.md).
 
+Latest source release: **[tp-v1.1.45](https://github.com/uv-genai/maya-tp/releases/tag/tp-v1.1.45)** — [release notes](docs/releases/tp-v1.1.45.md).
+
 ## Why Maya-TP?
 
 Very large MoE models put pressure on both memory capacity and memory bandwidth. A single APU has a finite

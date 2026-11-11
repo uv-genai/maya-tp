@@ -1,3 +1,5 @@
+> **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. User-accepted runtime selection remains §55.
+
 > **Current runtime (2026-11-11):** read §55 / #169. At the user's explicit request, validated v58 GLM/DeepSeek executables now replace the files at their existing paths on both hosts. Launcher/config paths and files are unchanged; the user reports the installed builds are working fine and accepts them. §54 records the completed upstream integration.
 
 # Handoff — Maya-TP (two-host tensor parallel)
@@ -3405,3 +3407,28 @@ historical acceptance/performance scope. #169 is complete following the user
 report and documentation audit. #133/#165/#166/#167 remain open. Keep stable
 executable paths for future user-authorized installations and preserve backups;
 do not redirect launchers.
+
+
+## 56. tp-v1.1.45 release publication (#170, 2026-11-11)
+
+After confirming the installed builds work fine, the user explicitly requested
+an immutable tag and GitHub release with release notes. Requested release is
+`tp-v1.1.45`, with numeric VERSION `1.1.45`; prior tags/releases are immutable.
+Release notes are `docs/releases/tp-v1.1.45.md`. The batch includes upstream
+v54–v58 integration PR #168 and accepted same-path binary installation #169.
+Source implementation/GPU/PR/main gates are complete; #170 records final
+release-metadata PR/exact-head/main CI, tag target and publication outcome.
+
+This follows the previous release metadata PR workflow, on
+`codex/release-tp-v1.1.45`, merged before tagging validated main. The release
+publishes source/notes without prebuilt assets. It does not rebuild/redeploy
+accepted binary files, touch launchers/configs or manipulate user processes.
+Installed engines still have the source 2485cb6/build-time 1.1.44 identities and
+SHA256 values recorded in §55. Do not infer a different binary from the source
+VERSION bump. No new GPU campaign or model download is required for metadata.
+
+The current guides/restart prompt and changelog identify the new source release.
+Preserve Flash TP2/MTP/DSpark/default/batching contracts and all qualification
+limits in the notes. #133/#165/#166/#167 remain open. Publication alone does not
+resolve those numerical/performance/full-model follow-ups. Consult #170 before
+attempting another tag/release; do not republish or move an existing tag.

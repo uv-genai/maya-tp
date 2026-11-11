@@ -12,7 +12,9 @@ The installed engines are the frozen Release gfx1151 HIP/MMQ/RDMA builds from
 source `2485cb609da0c436e1b7d9012d31a136656dd013`, validated during the upstream
 v54–v58 integration and merged through [PR #168](https://github.com/uv-genai/maya-tp/pull/168)
 at `b7458c4`. Later publication commits changed documentation/evidence only.
-The fork's numeric VERSION remains 1.1.44; v58 names the integration checkpoint.
+At build/installation time the fork's numeric VERSION was 1.1.44; v58 names the
+integration checkpoint. The later source release tp-v1.1.45 changes release
+metadata without rebuilding/replacing these accepted engine files.
 Per-tag Flash GPU and final source/PR/main CI passed before installation.
 
 ## Existing file paths
