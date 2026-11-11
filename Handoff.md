@@ -3168,8 +3168,8 @@ numeric VERSION and pinned llama.cpp are preserved.
 | Tag | Issue | State |
 | --- | --- | --- |
 | v1.1.54 | #160 | Semantic merge `371bbd8`, catalog fix `0663f7a`; all host/GPU gates and evidence CI 42966915176 pass at `ad7f71f` |
-| v1.1.55 | #161 | Source `cc5ea59`, exact-head CI 42967989395 passed; default-off outputs pass; performance investigation #165 and experimental numerical follow-up #166 |
-| v1.1.56 | #162 | Queued |
+| v1.1.55 | #161 | Source `cc5ea59`, exact-head CI 42967989395 passed; default-off2304 tokens exact; bounded performance replay passes; #165/#166 remain follow-ups |
+| v1.1.56 | #162 | Semantic merge/reviews complete; builds/ordered suites/GPU checks starting |
 | v1.1.57 | #163 | Queued; shared Flash state layout needs rank-local review; full-model TP2 must be rejected |
 | v1.1.58 | #164 | Queued; additional Q5_K parity and Flash Unicode drafting checks identified |
 
@@ -3246,3 +3246,28 @@ bounded two-load v54/v55 original-prefix/mixed transition comparison with GPU,
 CPU/memory/IO and owned-process telemetry. The validation agent may be active;
 check its recorded ownership. No v56 merge until this performance gate is
 assessed. All normal/AI-probe processes were stopped before this diagnostic.
+
+V55 performance diagnostic completed without reproducing the slow wave: first
+post-prefix mixed28.13 control /28.65 candidate tok/s, warmed28.80/29.47 vs
+28.80/29.36, all1,024 tokens/build exact. All pairs/samplers exited. #165
+remains open for intermittent stalls; no cause/fix claimed. #166 remains
+open for AI_RUN numerical qualification, with default-off preservation and
+experimental answer-change caveat. V55 compatibility and bounded performance
+are accepted; evidence-head CI42970916477 at `8f0ac7e` passed before v56 began. Its final
+report/diagnostic artifacts are bundled with the v56 source commit. #165 stays
+open without a causal claim; #166 stays experimental/default-off. All v55 and
+diagnostic owned identities exited before v56 setup.
+
+V56 semantic merge/review is complete. Keep converted NO_* Boolean handling,
+local two-part drafting fix and invalid-token guards without weakening TP2
+geometry, replicated NextN scratch or collectives. Direct GLM validation will
+use NO_SPEC=0/NO_MTP=off/NO_PREFILL=false on both ranks because wrapper cleanup
+would otherwise hide parser reach. New gfx11 EXL3 shaped/inlined kernels have
+model-free prefill/default/rollback and decode parity selectors; no EXL3 model
+is downloaded. Public MAYA_EXL3_WMMA_SHAPE wins over STRATA/bare aliases.
+DS4 pooled helper staging retains rank slices/per-chunk routing and includes
+helper-only load jobs without duplicate warming. CUDA-only lane-parity and
+prior local P2P/BAR/Metal exclusions remain; source/settings/tests are kept
+consistent. Existing Flash packs are not repacked; F32 bias applies new packs.
+The workflow now runs env_switch_test. Ordered suites and isolated builds are
+starting; consult current validation ownership before another GPU launch.

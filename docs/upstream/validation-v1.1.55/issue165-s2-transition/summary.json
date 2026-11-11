@@ -1,0 +1,78 @@
+{
+  "issue": 165,
+  "scope": "Accepted v54 vs v55 defaultoff; original short off/on,1441-token prefill off/on,first mixed wave retained then2 warmed waves. No unrelated process/service inspection.",
+  "started": 1794377462.541877,
+  "clock_wall_minus_monotonic": 1794229386.348492,
+  "runs": {
+    "control": {
+      "sha256": "5ece66ece3e7c5deb8e61c7d8792ba5b031eb344fee5c15f0db5de4b46bca338",
+      "transition_waves": [
+        {
+          "wave": 0,
+          "post_prefill_transition": true,
+          "wall_s": 9.0990171500016,
+          "tokens": 256,
+          "aggregate_tok_s": 28.134906856391073,
+          "started_s": 148195.030636738,
+          "finished_s": 148204.129653888
+        },
+        {
+          "wave": 1,
+          "post_prefill_transition": false,
+          "wall_s": 8.888075058988761,
+          "tokens": 256,
+          "aggregate_tok_s": 28.802637050313834,
+          "started_s": 148204.132734606,
+          "finished_s": 148213.020809665
+        },
+        {
+          "wave": 2,
+          "post_prefill_transition": false,
+          "wall_s": 8.685416508989874,
+          "tokens": 256,
+          "aggregate_tok_s": 29.4746947063536,
+          "started_s": 148213.023278511,
+          "finished_s": 148221.70869502
+        }
+      ],
+      "sampler_exits": [0,0],
+      "rank_exits": [0,0]
+    },
+    "candidate": {
+      "sha256": "da47391eb9f3bbee83a76d8d3b51003fdb86a0df99acc4c85e7cce1a85f52fcb",
+      "transition_waves": [
+        {
+          "wave": 0,
+          "post_prefill_transition": true,
+          "wall_s": 8.934665759996278,
+          "tokens": 256,
+          "aggregate_tok_s": 28.65244284192525,
+          "started_s": 148337.811548491,
+          "finished_s": 148346.746214251
+        },
+        {
+          "wave": 1,
+          "post_prefill_transition": false,
+          "wall_s": 8.890022687002784,
+          "tokens": 256,
+          "aggregate_tok_s": 28.796326962615304,
+          "started_s": 148346.748544561,
+          "finished_s": 148355.638567248
+        },
+        {
+          "wave": 2,
+          "post_prefill_transition": false,
+          "wall_s": 8.720426655985648,
+          "tokens": 256,
+          "aggregate_tok_s": 29.356361804188005,
+          "started_s": 148355.640762522,
+          "finished_s": 148364.361189178
+        }
+      ],
+      "sampler_exits": [0,0],
+      "rank_exits": [0,0]
+    }
+  },
+  "raw_tokens_equal": true,
+  "finished": 1794377752.4216943
+}
