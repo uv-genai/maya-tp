@@ -6,6 +6,28 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- Integrating upstream v1.1.54–v1.1.58 on an isolated branch; per-tag Flash TP2 validation is tracked in #159–#164. Production selections and fork release VERSION are unchanged.
+
+## Upstream v1.1.54 - 2026-11-05
+
+DeepSeek reads prompts (prefill) much faster on AMD Strix / Gorgon Halo and faster on multi-GPU NVIDIA PCs, Qwen-3.8-Flash-Next itself as unsloth's UD-IQ2_XS GGUF, and four community pull requests.
+
+- **Speed-ups, DeepSeek-V4.1-Flash prompt reading (prefill).** Every figure is prompt-reading speed, this release against v1.1.53 on the same PC with the same quant and the same prompts. Decode (writing the answer) is unchanged.
+  - **AMD, experts read in place from the model's files** (a quant larger than the GPU's memory, such as the EXL3 2.9 bpw on a 128 GB Strix / Gorgon Halo): a prompt's chunk reads only the experts its tokens use instead of all of them. On a Gorgon Halo (Radeon 8065S) with the EXL3 2.9 bpw quant: **+250%** at ~2K tokens, **+178%** at ~9K tokens. The same answers.
+  - **AMD Radeon RDNA 3 / 3.5 (gfx11, Strix / Gorgon Halo included):** upstream enables the indexer's matrix path by default; this fork retains opt-in `DS4_INDEX_TC=1`. On a Gorgon Halo with the EXL3 2.25 bpw quant: **+3%** at 8K tokens, **+6%** at 32K, **+10%** at 64K. Changes the answers slightly (the quality against the full-precision model is the same); `DS4_INDEX_TC=0` turns it off.
+  - **NVIDIA, several GPUs, EXL3 quants whose experts are streamed from RAM:** two placement settings are now on by default - the prompt path copies experts in larger batches over fast links, and DSpark's draft blocks spread over a tensor-parallel pair. On 3x V100 with the EXL3 2.9 bpw quant: **+14%** at ~2K tokens, **+7%** at ~9K, **+4%** at ~35K. They change which experts sit in VRAM, so the answers change slightly (the quality against the full-precision model is the same); `MAYA_DS4_RING_FAST_LINK=0` and `MAYA_DS4_DRAFT_SPREAD=0` turn them off.
+  - The off switches go in the config's `"env"` block, or on the command line with `--env`.
+- **Qwen-3.8-Flash-Next (the base model), unsloth's UD-IQ2_XS GGUF:** the setup and the Models page's Add a model offer it beside the other models (NVIDIA from the V100 on, and AMD), with pictures, its MTP drafter, the model's own sampling and the n-gram table from Maya's Hugging Face repo (`./setup.sh --model qwen-ud-iq2_xs`). unsloth's other UD quants of it run on the same code but are not listed.
+- **Qwen, Monitor:** "Where the experts live" names its figure for what the engine counts - experts read from the model file, through the page cache or the SSD - and advises more RAM only when experts really live on the SSD alone.
+- **Fix, Qwen chats:** a follow-up message read the whole conversation again; it now reads only the new part. Tools reach the model in the format of Qwen's official template.
+- **Fix, Pascal cards (compute capability 6.x):** the engine's build stopped at a compile error; it compiles again.
+- **Community pull requests:**
+  - AMD on Linux with a distribution's own ROCm 6.x packages (Debian / Ubuntu layout): the setup finds them, and goes on with a warning when you set `MAYA_HIP_ALLOW_ROCM6=1` (ROCm 7 stays the default requirement); CPUs without AVX2 no longer stop the AMD setup - the CPU lane uses ggml's kernels, as on NVIDIA (#832, thanks @Huskynarr).
+  - Opt-in: `maya-mm3 --ablate` projects a direction out of MiniMax's residual stream (refusal ablation with a control vector), as `maya-ds4 --ablate` does for DeepSeek. Off by default; it changes the answers when used (#826, thanks @JoshBolding).
+  - Windows with several AMD cards: the Monitor reads the card the engine runs on, matched by its PCI bus, instead of going by Windows' adapter order (#825, fixes #780, thanks @Meistertech-JP).
+  - AMD Instinct MI50 (gfx906): native Wave64 reductions in the DeepSeek, GLM, MiniMax and prompt kernels; other GPUs are unchanged (#822, thanks @nicholas631).
+
+
 ## tp-v1.1.44 — 2026-11-05
 
 First published Maya-TP release after legacy v1.1.42. This section collects

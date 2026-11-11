@@ -1,3 +1,5 @@
+> **Active integration (2026-11-11):** upstream v1.1.54–v1.1.58 on `codex/upstream-v1.1.54-v1.1.58`; read §54. Main/production remain at the accepted tp-v1.1.44 checkpoint until final validation and PR merge.
+
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
@@ -3150,3 +3152,27 @@ The earlier frozen binaries and runtime selections remain recorded in §52 and
 §§33/44. Historical reports retain their dated measurement limits. User-facing
 and coding-agent guides record the acceptance; source release metadata alone
 does not authorize overwriting the protected peer checkout or production files.
+
+## 54. Upstream v1.1.54–v1.1.58 integration (2026-11-11)
+
+The user authorized a separate branch with sequential tag checkpoints and a final
+validated pull request into main. Tracking: epic #159, v54 #160, v55 #161,
+v56 #162, v57 #163, v58 #164; the completed inventory is #158.
+Both hosts are available for owned validation. Use existing GLM-5.3-Flash
+Maya-S and DeepSeek-V4.1-Flash Maya-XS/S packs only. Do not download a model or
+run GLM-5.3 744B. The fork-owned README/AGENTS/operational guides require
+semantic merging. Preserve the numeric VERSION and pinned llama.cpp revision.
+
+The initial baseline is main `1cb29e0` (tp-v1.1.44), with batching-accepted
+`g5-release/maya` and `d5-guard/maya-ds4` binaries under
+`/home/ugo/software/project-maya-batching-validation` on both hosts. Do not
+use pre-batching v53 binaries as controls. New builds and validation configs
+are isolated; production selections and the protected host-1 checkout remain
+unchanged. Validation setup is in progress; no owned GPU processes yet.
+
+V54 semantic merge is in progress. Retain the fork's default-off
+`DS4_INDEX_TC` despite upstream's output-affecting default flip. The normal
+streamer's new per-chunk expert-skip policy preserves sliced RAM staging.
+Local in-process GPU placement does not replace remote RDMA TP2. Shared API
+changes preserve command serialization, first-fatal fanout and paired health.
+Per-tag issues record exact source/build identities, gates and ownership.

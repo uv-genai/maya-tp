@@ -208,3 +208,14 @@ Release `tp-v1.1.44` uses numeric VERSION `1.1.44`; publication is tracked in #1
 This acceptance does not change the recorded deployed single-slot selections.
 Source integration does not authorize changing production binaries or the
 protected peer checkout.
+
+
+## Active upstream v54–v58 integration
+
+The user authorized sequential tag integration on
+`codex/upstream-v1.1.54-v1.1.58`, followed by one validated final PR.
+Epic #159 indexes per-tag issues #160–#164. Test existing GLM-5.3-Flash
+Maya-S and DeepSeek-V4.1-Flash Maya-XS/S only; do not download any model
+or run full GLM-5.3 744B. Include default single-slot and opt-in batch paths
+with real MTP/DSpark proposals. Read Handoff.md §54 for current progress.
+Retain opt-in `DS4_INDEX_TC` and review upstream default changes explicitly.

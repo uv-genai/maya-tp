@@ -14,6 +14,10 @@ The original Maya was created and led by **Peasant Smith ([@mw00](https://github
 their model engines, quantization work, expert memory management and serving stack. Development of this
 derived project is tracked in [uv-genai/maya-tp](https://github.com/uv-genai/maya-tp).
 
+The next upstream update batch (v1.1.54–v1.1.58) is being integrated in
+[#159](https://github.com/uv-genai/maya-tp/issues/159), with Flash-only paired
+validation before the final PR. Production selections remain unchanged.
+
 ## Why Maya-TP?
 
 Very large MoE models put pressure on both memory capacity and memory bandwidth. A single APU has a finite

@@ -1,5 +1,12 @@
 # Handoff-Prompt — Maya-TP restart
 
+Active task: upstream v1.1.54–v1.1.58 sequential integration on
+`codex/upstream-v1.1.54-v1.1.58`, epic #159 and phases #160–#164.
+Read Handoff.md §54 first. Validate each checkpoint, then merge one final PR.
+Use existing GLM Flash and DeepSeek Flash XS/S packs; no downloads or
+GLM-5.3 744B testing. Preserve all TP2/MTP/DSpark/batching invariants and the
+protected production paths. Earlier acceptance below remains the baseline.
+
 GLM/MTP and DeepSeek/DSpark opt-in continuous batching is implemented and
 validated in [PR #155](https://github.com/uv-genai/maya-tp/pull/155), starting
 from `72d9260` on `codex/tp2-continuous-batching`. Read Handoff.md §53 first, then §52.

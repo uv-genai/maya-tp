@@ -776,7 +776,10 @@ below that prompts run in windows of 16. The log says which.
 | --- | --- | --- |
 | `MAYA_DS4_PROMPT_PICK` | the timing pick | `length`: the chunked pass from 96 tokens, windows of 16 below; `length:N`: from N tokens (opt-in until measured) |
 | `MAYA_DS4_PROMPT_WARM` | on | `0`: the first chunked prompt pays the GEMM library's start, as before |
-| `DS4_RING_MB` | 400 | the prompt path's staging ring a GPU (MB). `link` (opt-in): sized at load from the GPU's measured host link - batches (a quarter of the ring each) of about 10 ms of it, or one expert if an expert takes at least 1 ms on the link, at least one expert, at most the 400 MB it was before and 1/16 of the GPU's VRAM room for experts, so a slow link (PCIe Gen2 x4) waits less for each batch and a fast one keeps 400 MB (the log's `prompt ring` line); `auto`: from each GPU's VRAM room for experts at load, 64 MB a GB of it, 400-1200 MB - more of a prompt's likely experts queued early where the GPUs cannot hold them, for that much VRAM less for experts (opt-in until measured) |
+| `DS4_RING_MB` | 400 | the prompt path's staging ring a GPU (MB). `link` (opt-in): sized at load from the GPU's measured host link - batches (a quarter of the ring each) of about 10 ms of it, or one expert if an expert takes at least 1 ms on a link below 8 GB/s (`MAYA_DS4_RING_FAST_LINK=0` keeps the earlier rule on faster links too), at least one expert, at most the 400 MB it was before and 1/16 of the GPU's VRAM room for experts, so a slow link (PCIe Gen2 x4) waits less for each batch and a fast one keeps 400 MB (the log's `prompt ring` line); `auto`: from each GPU's VRAM room for experts at load, 64 MB a GB of it, 400-1200 MB - more of a prompt's likely experts queued early where the GPUs cannot hold them, for that much VRAM less for experts (opt-in until measured) |
+
+| `MAYA_DS4_SPEC_HEAD` | on | where a GPU's ring holds less than half a layer of its streamed experts, a prompt chunk of more rows than `DS4_SKIP_UNPICKED_ROWS` copies a layer's first experts (as many as the ring holds) before the layer's routing, then only the picked ones - the link busy through the layer's attention instead of idle (3x V100, EXL3 2.9 bpw, tensor parallel 2 + one GPU: 2K / 8K / 32K prompts +3 / +7 / +7%). The same experts' sums: the same answers. Copies from pinned RAM only (experts read from the files keep waiting for the routing). `0`: wait for the routing, as before (the log's `prompt copies` line says where it runs) |
+| `MAYA_DS4_DRAFT_SPREAD` | on | with `MAYA_DS4_DRAFT_DEV` unset, a tensor-parallel drafter group and the experts not all fitting the GPUs: the DSpark blocks spread over the group's members, the lead the fewest (3 blocks on a pair: 0,1,1) - on the lead alone they take its room while the other members' goes unused (3x V100, EXL3 2.9 bpw: 2K / 8K / 32K prompts +4 / +2 / +3% on top of the spec head, decode the same; with the spec head and the fast-link ring +13 / +13 / +11% over neither). Placement only, but the experts in VRAM set the order of their sums (an EXL3 pack, or GGUF without `MAYA_DS4_LANE_PARITY=1`), so the answers can move slightly, the quality the same (KLD within noise). Elsewhere (one GPU, layer splits, every expert fitting) nothing changes (the log's `DSpark blocks spread` line says where it runs). `0`: all on the lead, as before |
 | `MAYA_DS4_SETTLE_MS` | 0 (off) | after a chunked prompt, the expert cache learns from the prompt's picks (as it does from windows) and moves the hottest of them into VRAM in rounds of its usual swap rule, for at most this many ms, so the decode that follows finds them on the card; the first answer token comes that much later. Placement only, as the cache's own moves (opt-in until measured) |
 
 ## DeepSeek: choosing the drafter GPU group (experimental)
@@ -1150,6 +1153,12 @@ refused. Its A halves are not used; on the weights it was computed against the r
 adapter's, on other weights it is the exact projection rather than the adapter. Without `--ablate` nothing runs.
 Measured with drafting off, 4x RTX 3090, four restart pairs alternating the two: decode 1.5-3.8% slower (about 3%),
 no consistent prompt-speed difference.
+With thinking on, a direction fitted on thinking-off prompts can need a higher `--ablate-scale`. On Maya-S, with the
+refusal direction fitted at layer 22 on thinking-off prompts, 120 held-out harmful prompts, thinking "high" (4096
+tokens): scale 1 refused 92, 1.375 refused 12 (thinking off, 256 tokens: 5 and 0). Neither refused any of 120
+harmless prompts in either mode. The cost is the thinking: about 8,800 characters on a harmful prompt at 1.375
+against 3,400 at scale 1 (medians), about 130 s a request against 76 s on 2x RTX 3090. Higher scales repeated
+themselves more in the thinking; a direction refitted on thinking-on prompts did not help (one layer, one scale).
 
 | Setting | Default | |
 | --- | --- | --- |
@@ -1709,6 +1718,23 @@ for this PC: its GPUs, their architecture, the GPU runtime and the driver) and t
 driver gets the defaults until it is measured again. The config records the result (`installer.prefill_calibration`).
 It takes one start of the model and a few minutes; the answers are the model's either way.
 
+**Projecting a direction out (`--ablate`; off by default, changes the answers).** As DeepSeek's
+[`--ablate`](#deepseek-projecting-a-direction-out---ablate): `--ablate FILE` removes one direction r from every residual write - each layer's attention output and its FFN output
+(the dense MLP's in a dense layer, else the routed experts' and the shared expert's together) become
+y - s r (r . y) before they are added to the residual stream. The use it is written for is abliteration (r a refusal
+direction); the pack is not changed. The direction comes from a `llama-cvector-generator` file (`direction.N`, pick N
+with `--ablate-layer`); an abliteration adapter is DeepSeek's only and is refused here. It runs on the layer split:
+`--tp` with `--ablate` loads the layer split instead (a NOTE). Without `--ablate` nothing runs; `--ablate-layer` or
+`--ablate-scale` without it is an error. A refusal direction can need `--ablate-scale` above 1 on this model: 1.5
+for the one fitted on Maya-XS. With thinking on (24 harmful prompts, 4096 tokens) it refused none at 1.5, but 4
+ended at the token cap with no answer, against 22 refusals and 2 with no answer for the stock model.
+
+| Option | Default | What it does |
+|---|---|---|
+| `--ablate FILE` | off | a control vector (GGUF) whose direction is projected out (changes the answers; without it nothing is loaded or run) |
+| `--ablate-layer N` (with `--ablate`) | the file's only `direction.N` | which `direction.N` of the control vector (1-4096) |
+| `--ablate-scale F` (with `--ablate`) | 1 | s, 1e-6 to 1e6; 1 removes the component along r, above 1 over-projects |
+
 Setup and debugging variables:
 
 | Variable | Default | What it does |
@@ -1739,6 +1765,20 @@ Setup and debugging variables:
 The switch quantizes both the prompt activations and the FP16 SwiGLU intermediate to q8_1.
 This approximate prompt path can change answers; it is off by default. It uses a separate workspace for each
 host thread, device and stream, and keeps the existing path during graph capture.
+
+## DeepSeek: the indexer's scores on the matrix cores
+
+The sparse attention's indexer scores every earlier position of the context for each new row (prompt and answer).
+On RDNA 3 / 3.5 (`gfx11`: RX 7000, Radeon 780M, Strix / Gorgon Halo's 8060S / 8065S) these scores run on the WMMAs by
+default: the same exact products, summed in another order than the portable kernel, so the last bits differ and a
+long greedy answer can part from the other kernel's after a while; the quality is the same (a Gorgon Halo, DeepSeek EXL3
+2.25: KL to the full-precision model 0.1649 against 0.1661, the same top token 91.08% against 91.07%) and long
+prompts read faster (+3% at 8K, +6% at 32K, +10% at 64K; answers the same speed). RDNA 4 (`gfx12`) and other AMD
+cards keep the portable kernel. On NVIDIA it stays opt-in.
+
+| Setting | Default | |
+| --- | --- | --- |
+| `DS4_INDEX_TC` | off | `1`: opt into the indexer matrix kernel on gfx11 (WMMA); retained off in this fork pending paired quality validation. `0`: the portable kernel. Upstream v54 enables gfx11 by default; this fork does not. The inherited NVIDIA path requires compute capability 8.0+ |
 
 ## Qwen-3.8-Flash-Next (CYBER-FROST)
 
@@ -2004,3 +2044,35 @@ mode), including with one active client. `MAYA_DS4_READ_PIECE` does not enlarge
 that bound. In-place continuation reuses each slot's committed prefix; file
 slots/checkpoint restore and vision remain unsupported for TP2. See the
 [DeepSeek runbook](DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching).
+
+The default, explicit-enable and opt-out tests run the existing CPU-reference and exact multi-row checks, plus mixed one-/three-row batches with
+strided inputs and guarded outputs. It includes integer EXL3 bitrates with all three codebooks and the supported
+half-integer bitrates. A controlled DS4 native-driver screen on three R9700s, based on v1.1.27, measured 3.4-5.0% higher generation
+throughput with draft proposals disabled, and about 0.7% with MTP. Expert placement was frozen and adjacent on/off
+requests shared one loaded model; the drafter stayed loaded in both modes. A separate fresh-load comparison was
+inconclusive because the controls drifted. These are limited model measurements, not production API acceptance or
+a general speed guarantee. Full-vocabulary diagnostic dumps matched across settings and repeats on the tested
+states; other GPU architectures and broader workloads remain unvalidated.
+
+## AMD: setting up with a ROCm older than 7
+
+The HIP setup takes ROCm 7 or newer. A distribution's own ROCm 6.x packages (Debian's 6.4 under `/usr`, hipBLAS 2.x) are
+untested and refused unless this is set when the setup or `--check` runs (in the shell, not the config's `"env"`); see
+[AMD_MAYA.md](AMD_MAYA.md). With ROCm 7 the setting does nothing.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `MAYA_HIP_ALLOW_ROCM6` | unset (ROCm 6 refused) | `1`: the setup goes on with a ROCm 6.x, with a warning (untested: the build or the engine may fail); the build then takes hipBLAS 2's `HIPBLAS_V2` API and leaves out `hipblasSetWorkspace`, which hipBLAS 2 does not have |
+
+
+### Upstream v54 streamer additions
+
+`DS4_SKIP_UNPICKED` selects per-chunk expert staging in the ordinary DeepSeek
+streamer: unset uses picked experts for file-backed HIP experts, `1` enables it
+for every chunk, `0` disables it, and `alt` is a single-GPU comparison hook.
+Sliced RAM staging, virtual slots and accumulation order are preserved. This
+does not change the remote TP2 resident-expert path. `MAYA_DS4_RING_FAST_LINK`
+(default `1`) affects only explicit `DS4_RING_MB=link`; the fork retains its
+400 MB default. `MAYA_DS4_SPEC_HEAD` and `MAYA_DS4_DRAFT_SPREAD` are inherited
+local multi-GPU policies, not a different remote TP2 transport or drafter.
+Their upstream measurements do not establish gfx1151 RDMA TP2 gains.
