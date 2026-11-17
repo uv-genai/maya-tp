@@ -1,3 +1,5 @@
+> **In progress (2026-11-17):** sequential upstream v1.1.59–v1.1.65 integration on `claude/upstream-v1.1.59-v1.1.65` (worktree `/home/ugo/software/project-maya-upstream-v59-v65`); read §57. The host2 canonical checkout stays on `main`.
+
 > **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. User-accepted runtime selection remains §55.
 
 > **Current runtime (2026-11-11):** read §55 / #169. At the user's explicit request, validated v58 GLM/DeepSeek executables now replace the files at their existing paths on both hosts. Launcher/config paths and files are unchanged; the user reports the installed builds are working fine and accepts them. §54 records the completed upstream integration.
@@ -3432,3 +3434,34 @@ Preserve Flash TP2/MTP/DSpark/default/batching contracts and all qualification
 limits in the notes. #133/#165/#166/#167 remain open. Publication alone does not
 resolve those numerical/performance/full-model follow-ups. Consult #170 before
 attempting another tag/release; do not republish or move an existing tag.
+
+
+## 57. Upstream v1.1.59–v1.1.65 sequential integration (2026-11-17)
+
+The user requested sequential per-tag integration of upstream v1.1.59–v1.1.65.
+Branch `claude/upstream-v1.1.59-v1.1.65` from `main` `d6b53f8`, in the worktree
+`/home/ugo/software/project-maya-upstream-v59-v65`. **Do not merge on the host2
+canonical checkout:** host1's launcher starts rank 1 from
+`/home/ugo/software/project-maya` on host2 and production configs read its
+`tools/hip` tuning tables, so it stays on `main`. Harness and raw output are in
+`/home/ugo/software/maya-upstream-20261117/` (moved off `/tmp`; the earlier
+`/tmp` harness was lost at a reboot). Runtime/build trees and frozen controls are
+the §54 ones (`engines/v1.1.58` = installed §55 bytes).
+
+| Tag | State |
+| --- | --- |
+| v1.1.59 | Source `147d2684`; CPU gates and six Flash cases pass (0 differences vs v1.1.58); [report](docs/upstream/v1.1.59.md). Branch not pushed; exact-head CI pending |
+| v1.1.60–v1.1.65 | Not started; v1.1.60 trial merge conflicts only in docs |
+
+v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
+`MAYA_*`, `STRATA_*` only as fallback), so fork code must read and set `MAYA_*`
+names; the hipBLASLt tuning parser accepts both header names while committed
+tables keep the legacy one (installed engines read only the legacy name);
+DeepSeek's borrow clear stays one-shot. During validation the peer host
+hard-stopped once mid-load (no panic/OOM logged, ~62 GiB free); after the user
+restarted it the same case passed. Cause unknown; watch for recurrence.
+
+GitHub issues for this campaign are drafted in
+`/home/ugo/software/maya-upstream-20261117/issues-draft.md`; `gh` was not
+authenticated on host2 in this session, so none exist yet.
+

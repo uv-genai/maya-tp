@@ -1,0 +1,18 @@
+{
+  "label": "v1.1.59",
+  "previous": "v1.1.58",
+  "raw_directory": "/home/ugo/software/maya-upstream-20261117/validation",
+  "runtime": "/home/ugo/software/project-maya-upstream-20261111-runtime",
+  "scope": "HIP gfx1151 / APU RDMA Flash models; six raw-engine StrataEngine cases (default1/batch2) compared with frozen v1.1.58 results, a matched DeepSeek S two-slot mixed-wave repeat, and pre-bootstrap paired-ablation refusals; not public HTTP; no model downloads or GLM 744B execution",
+  "config_notes": "Archived configs are base templates; case commands override engine/context/parallel/host/port. Effective argv, executable hashes, env and INFO in per-case ownership/results are authoritative.",
+  "audited_identity_count": 32,
+  "harness_sha256": {
+    "case": "db593d61904559474205fb20e42acdcfa28bc853fb1b180b3ce7bbabae0edfa7",
+    "checkpoint": "d428b34fac1dd4904eebac7b10ce6e9a70b967ed0dde7d6877c854109acbb4f0",
+    "build": "cc25c0b20f40fde08353726421982a362eea15fc0f824280c1862387cd685c2b",
+    "collect": "0d3e0f508b7c9699e2d29d4cbb628c13c1bba9470a9ef6549d401912bfa2ceec",
+    "finalize": "3e83a181b524225c4cf8298e78e84a8f20a0ef49a3be2e2da4c07f7362af344d",
+    "components-rejections": "f8f83ea0f9baaa420b6e2450b612ec873da8ee14954b3d1f72c6164b64c5dda6",
+    "collect-extra": "f87f8e43864e987b225ca676a287dce5703ff008c4fe70c7d837f0c1c59b9e18"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "control": {
+    "sha256": "17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076",
+    "waves_aggregate_tok_s": [
+      28.399281168572973,
+      29.262088661792628,
+      29.483647566212028
+    ]
+  },
+  "candidate": {
+    "sha256": "19c2119bf93a3a49bb522e47e3a78ab0667e4269f9fd358cf530f274b55dcbaf",
+    "waves_aggregate_tok_s": [
+      27.9280392199337,
+      28.980092182279964,
+      29.397842044612453
+    ]
+  },
+  "raw_tokens_equal": true,
+  "requests": 16
+}
