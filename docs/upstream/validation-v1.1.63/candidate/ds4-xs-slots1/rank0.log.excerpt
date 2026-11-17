@@ -1,0 +1,12 @@
+ds4 tp2: rank 0 loaded 54814310400 routed expert bytes (4249600 pinned staging bytes); awaiting peer attachment
+maya ds4 serve: GEN <max_new> [keys] <ids>; GENI <max_new> [keys] <pictures> <ids>; STOP, QUIT
+maya ds4 serve: prompt read: 20 tokens in 0.6 s; VRAM free CUDA0 56.7 of 121.0 GB before, 56.6 after
+maya ds4 serve: prompt 20 tokens = 0 reused + 20 read in 564 ms (35.5 tok/s), 64 generated in 2574 ms (24.87 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: prompt read: 20 tokens in 0.4 s; VRAM free CUDA0 56.6 of 121.0 GB before, 56.6 after
+maya ds4 serve: prompt 20 tokens = 0 reused + 20 read in 404 ms (49.5 tok/s), 64 generated in 1825 ms (35.08 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 33 of 41 kept; per position (kept / reached): 1: 17/21 81% 2: 8/9 89% 3: 4/5 80% 4: 3/3 100% 5: 1/1 100%
+maya ds4 serve: prompt read: 1441 tokens in 6.0 s; VRAM free CUDA0 56.5 of 121.0 GB before, 56.4 after
+maya ds4 serve: prompt 1441 tokens = 0 reused + 1441 read in 5951 ms (242.2 tok/s), 64 generated in 2673 ms (23.95 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: prompt read: 1441 tokens in 5.7 s; VRAM free CUDA0 56.4 of 121.0 GB before, 56.4 after
+maya ds4 serve: prompt 1441 tokens = 0 reused + 1441 read in 5748 ms (250.7 tok/s), 64 generated in 2024 ms (31.63 tok/s); CPU lane 0.0% of the experts
+maya ds4 serve: drafts 32 of 40 kept; per position (kept / reached): 1: 18/23 78% 2: 10/13 77% 3: 3/3 100% 4: 1/1 100%
