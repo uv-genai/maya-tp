@@ -29,7 +29,7 @@ bool exl3_cpu_vector();
 /// Whether the CPU lane's kernels exist here at all.  They are x86-only (the portable build has no version):
 /// false means the GPU computes every EXL3 expert, so the CPU lane must stay off.
 bool exl3_cpu_available();
-/// The kernel the functions below run here: 2 AVX-512 (F, BW), 1 AVX2 + FMA (+ F16C), 0 scalar.  STRATA_FORCE_AVX2=1
+/// The kernel the functions below run here: 2 AVX-512 (F, BW), 1 AVX2 + FMA (+ F16C), 0 scalar.  MAYA_FORCE_AVX2=1
 /// keeps an AVX-512 CPU on AVX2 (to compare the two; they give the same bits).
 int exl3_cpu_tier();
 /// xh = H(x * suh) (k values, k % 128 == 0); returns the sum of xh.

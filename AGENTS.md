@@ -107,7 +107,7 @@ Installer builds set `STRATA_BUILD_TESTS=OFF`. Prefer `./maya.sh` over raw cmake
 
 ## Engine build (CMake)
 
-- **Build HIP only:** `-DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF`, targeting `gfx1151`. Options accept `STRATA_*` or `MAYA_*` (`MAYA_X` sets `STRATA_X` in CMake; runtime env aliases are `MAYA_*` → `STRATA_*`).
+- **Build HIP only:** `-DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF`, targeting `gfx1151`. Options accept `STRATA_*` or `MAYA_*` (`MAYA_X` sets `STRATA_X` in CMake). At runtime the code reads `MAYA_*`; an older `STRATA_X` is copied to `MAYA_X` only when `MAYA_X` is unset (upstream v1.1.59).
 - **HIP requires MMQ:** `-DSTRATA_ENABLE_HIP=ON -DSTRATA_PREFILL_MMQ=ON` (`./maya.sh --backend hip` sets this).
 - Enable tests only when you need C++ suites: `-DSTRATA_BUILD_TESTS=ON`.
 - The inherited HIP backend contains other architecture paths; this fork's build and measurement target is `gfx1151` — see `cmake/hip_backend.cmake`.
@@ -120,7 +120,7 @@ gfx1201 reference, not this fork's target build recipe.
 
 1. **New CUDA / cuBLAS names need a HIP mapping.** The AMD build compiles the same sources with `include/strata/hip_compat/` forced in. Missing `#define`s break every HIP build (v1.0.21). Always run `python tools/check_hip_compat.py` after touching CUDA runtime calls.
 2. **Do not change the NVIDIA path for AMD.** Gate AMD behavior with `#if defined(STRATA_USE_HIP)` / related flags; leave CUDA behavior identical unless you have NVIDIA measurements.
-3. **New settings are `MAYA_*` environment variables.** Code still reads `STRATA_*`; both work, `MAYA_*` wins when both set. Default off or preserve current behavior unless measured better. Document every new knob in `docs/SETTINGS.md`.
+3. **New settings are `MAYA_*` environment variables.** Code reads `MAYA_*` (since upstream v1.1.59); `STRATA_*` still works as a fallback and `MAYA_*` wins when both are set. Fork code that reads or sets a setting must use the `MAYA_*` name: a `STRATA_*` read misses a value given as `MAYA_*`, and a runtime `setenv("STRATA_*")` after start is not seen by `MAYA_*` readers. Default off or preserve current behavior unless measured better. Document every new knob in `docs/SETTINGS.md`.
 4. **Python is stdlib unittest, not pytest.** Serve tests must stay importable as `serve.<module>` (`discover -t .`). Fixtures: `serve/fixtures/`, synthetic GGUFs from `tools/`.
 5. **llama.cpp is pinned.** Do not casually change `LLAMA_CPP_COMMIT` in `setup.py` (also used by CI). ggml / MMQ live under `third_party/llama.cpp`; a GLM MMQ patch is applied from the pinned checkout.
 6. **Per-model engines, not one generic backend.** `maya` (GLM: `src/core`, `src/prefill`, …), `maya-ds4` (`src/ds4`), and `maya-mm3` (`src/mm3`) share kernels but not control flow. A change in one engine usually does not apply to the others. Server routing and templates differ per model family (DeepSeek: vendored `serve/ds41_encoding.py` + fixtures; others: Jinja).

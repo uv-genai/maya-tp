@@ -48,7 +48,7 @@ public:
     /// At most this many drafts per round (below max_t - 1): a window longer than the MTP's comes from elsewhere.
     void set_max_drafts(int k) { max_drafts_ = k; }
     uint64_t vram_bytes() const { return vram_; }
-    /// The draft layer's K/V state (read-only: --serve's STRATA_STATE_HASH check hashes it)
+    /// The draft layer's K/V state (read-only: --serve's MAYA_STATE_HASH check hashes it)
     const QsaState& kv_state() const { return st_; }
     /// KV streaming: refill the ring of the drafter's window from its host copy for a sequence that continues at
     /// `upto` (a conversation-cache resume). No-op unless the drafter's K/V is a ring.

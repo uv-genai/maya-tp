@@ -861,7 +861,7 @@ EXL3_AVX2 void band_out_avx2(const float* acc, float ki, float kz, const uint16_
     }
 }
 
-// AVX-512 F and BW with FMA, the OS saving the state (STRATA_FORCE_AVX2 is the tier choice's, below)
+// AVX-512 F and BW with FMA, the OS saving the state (MAYA_FORCE_AVX2 is the tier choice's, below)
 bool cpu_avx512_exl3() {
     unsigned r[4] = {0, 0, 0, 0};
     auto cpuid = [&](unsigned leaf, unsigned sub) {
@@ -915,7 +915,7 @@ bool cpu_f16c() {
 #endif
 
 // the tiers this CPU runs (bit t: tier t - 0 scalar, 1 AVX2 + FMA + F16C, 2 AVX-512 F/BW, 3 AVX-512 VNNI), and the one
-// the lane takes: the widest, but AVX2 on an AVX-512 CPU with STRATA_FORCE_AVX2=1 (to compare the vector tiers)
+// the lane takes: the widest, but AVX2 on an AVX-512 CPU with MAYA_FORCE_AVX2=1 (to compare the vector tiers)
 int tier_mask() {
     static const int mask = [] {
         int t = 1;
@@ -930,7 +930,7 @@ int tier_mask() {
 }
 int detect_tier() {
     const int t = tier_mask();
-    const char* f = std::getenv("STRATA_FORCE_AVX2");
+    const char* f = std::getenv("MAYA_FORCE_AVX2");
     if ((t & 4) && !(f != nullptr && f[0] == '1')) return (t & 8) ? 3 : 2;
     return (t & 2) ? 1 : 0;
 }

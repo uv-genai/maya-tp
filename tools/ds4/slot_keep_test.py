@@ -59,7 +59,7 @@ import maya_names  # noqa: E402  (tools/) a model config's settings under the na
 
 CORPUS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tokenizer_corpus.txt")
 META_MAGIC = 0x334154454d345344   # "DS4META3" (little endian): a slot's .meta, as src/ds4/ds4_main.cpp writes it
-DS4_ENV = ("DS4_", "STRATA_DS4_")   # (the engine's own names: it aliases MAYA_DS4_* to STRATA_DS4_* at start)
+DS4_ENV = ("DS4_", "MAYA_DS4_", "STRATA_DS4_")   # (the engine's own names: it takes an older STRATA_DS4_* as MAYA_DS4_* at start)
 
 
 def text_tokens(tok, salt: str, n: int) -> list[int]:
