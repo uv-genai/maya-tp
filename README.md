@@ -2,8 +2,6 @@
 
 **Tensor parallel inference for very large MoE models on dual AMD Strix Halo systems.**
 
-[![Tests](https://github.com/uv-genai/maya-tp/actions/workflows/tests.yml/badge.svg)](https://github.com/uv-genai/maya-tp/actions/workflows/tests.yml)
-
 Maya-TP is a derived project built on [Project Maya](https://github.com/mw00/project-maya), focused on
 **HIP/ROCm, gfx1151 and Linux**, with two Strix Halo APUs connected over **Thunderbolt/USB4 RDMA**.
 It partitions model weights and computation across the pair to increase inference speed and make larger
@@ -277,8 +275,9 @@ Development and measurements are tracked in [Maya-TP issues](https://github.com/
 Reports should include the model/quant, both hosts' configuration, commit and binary hashes, context,
 draft width, cache/disk counters and reproduction steps. `./maya.sh --report` collects local diagnostics.
 
-GitHub CI runs the HIP compatibility-name gate, server and installer/tools tests,
-plus CPU memory-policy and row-preparation/stub checks. The latest source
+There is no GitHub CI. `tools/local_gates.sh` runs the HIP compatibility-name gate, server and
+installer/tools tests, plus the CPU memory-policy, tuning-table and row-preparation/stub checks, on the
+host at the exact commit before it is pushed. The latest source
 checkpoint passed paired GLM Maya-S and DeepSeek XS/S controls. Its bounded
 measurements and model coverage are in the [v1.1.58 report](docs/upstream/v1.1.58.md).
 GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery were exercised on the

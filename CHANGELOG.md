@@ -6,6 +6,7 @@ only what changed and starts; the model is not downloaded again.
 
 ## Unreleased
 
+- Removed the GitHub Actions workflow at the user's request: there is no GitHub CI. `tools/local_gates.sh` runs the same source gates (HIP mapping, server and tools tests, CPU memory-policy, TP2 batch, tuning-table and DeepSeek row/TP2 suites) on the host at the exact commit, and code is pushed only after it passes.
 - Integrating upstream v1.1.59–v1.1.65 as sequential Flash TP2 checkpoints on `claude/upstream-v1.1.59-v1.1.65` ([v1.1.59 report](docs/upstream/v1.1.59.md)). Upstream v1.1.59 makes the code read `MAYA_*` settings with `STRATA_*` only as a fallback; the fork's own TP2 batching defaults, MTP/trace switches and the DeepSeek TP2 slot-keep refusal now use the `MAYA_*` names so both names keep working. The tuning-table parser accepts upstream's new `MAYA_HIPBLASLT_TUNING_V1` header and the legacy one, and the committed tables keep the legacy header, so installed and new engines both read them on either rank. The fork keeps its one-shot DeepSeek borrow clear instead of upstream's error-clearing retry. All six Flash TP2 cases match v1.1.58 token for token. Production binaries, launchers and configs are unchanged.
 
 ## tp-v1.1.45 — 2026-11-11

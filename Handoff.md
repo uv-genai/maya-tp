@@ -39,6 +39,7 @@ The user reports hours of successful use including DeepSWE benchmarks.
 7. **Stop only validation processes you started**, using recorded PIDs/process groups. The user launches their own processes. No name-wide `pkill`, port-wide killing, or unrelated service inspection/control; prior validation permission is not standing permission to stop user processes.
 8. **Binaries are per-host.** Select matching review builds on both hosts and verify hashes before testing. Preserve the promoted canonical production binaries and the protected remote source; do not overwrite them as routine test setup. `run_bench.sh` uses rank0 `/tmp/maya-tp2`; verify its executable rather than assuming it matches production.
 9. **Stop an owned rank0 server before its owned engine** to prevent respawn and release its executable. Track those processes at launch. Do not clear a busy environment by name or port. Older harness cleanup is tracked in #83 and must not run against user processes.
+10. **No GitHub CI (user, 2026-11-17).** Run `tools/local_gates.sh` at the exact commit (and GPU checks for engine changes) before any push; never push to find out whether code works.
 
 ## 3. Git / GitHub
 
@@ -3450,7 +3451,7 @@ the §54 ones (`engines/v1.1.58` = installed §55 bytes).
 
 | Tag | State |
 | --- | --- |
-| v1.1.59 | Source `147d2684`; CPU gates and six Flash cases pass (0 differences vs v1.1.58); [report](docs/upstream/v1.1.59.md). Branch not pushed; exact-head CI pending |
+| v1.1.59 | Source `147d2684`; local gates and six Flash cases pass (0 differences vs v1.1.58); [report](docs/upstream/v1.1.59.md) |
 | v1.1.60–v1.1.65 | Not started; v1.1.60 trial merge conflicts only in docs |
 
 v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
@@ -3460,6 +3461,12 @@ tables keep the legacy one (installed engines read only the legacy name);
 DeepSeek's borrow clear stays one-shot. During validation the peer host
 hard-stopped once mid-load (no panic/OOM logged, ~62 GiB free); after the user
 restarted it the same case passed. Cause unknown; watch for recurrence.
+
+**No GitHub CI (the user's rule, 2026-11-17).** The workflow was deleted. Code
+is validated on the hosts at the exact commit with `tools/local_gates.sh` (plus
+GPU checks for engine changes) and only then pushed; never push to find out.
+Earlier sections' exact-head/post-merge CI records are history, not a step to
+repeat.
 
 GitHub issues for this campaign are drafted in
 `/home/ugo/software/maya-upstream-20261117/issues-draft.md`; `gh` was not

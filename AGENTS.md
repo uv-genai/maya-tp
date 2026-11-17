@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Project Maya: local inference for very large MoE models (GLM-5.3, DeepSeek-V4.1, MiniMax-M3.1). C++20 CUDA/HIP engine + stdlib Python server/installer. No GPU is required for CI checks.
+Project Maya: local inference for very large MoE models (GLM-5.3, DeepSeek-V4.1, MiniMax-M3.1). C++20 CUDA/HIP engine + stdlib Python server/installer. No GPU is required for the source gates (`tools/local_gates.sh`).
 
 ## Platform (hard rule)
 
@@ -45,7 +45,7 @@ or create a release merely because an upstream tag was merged.
 | `tests/` | C++ host tests (CMake-registered when present; omitted from some published trees) |
 | `maya.py` / `maya.sh` / `setup.sh` | Installer and runner (creates/reuses `.venv`) |
 | `CMakeLists.txt`, `cmake/` | Engine build; HIP backend in `cmake/hip_backend.cmake` |
-| `docs/` | SETTINGS, SETUP, MODELS, AMD_* — trust code/CI over prose |
+| `docs/` | SETTINGS, SETUP, MODELS, AMD_* — trust code/tests over prose |
 
 Configs are `maya-<quant>[-hip].json` (gitignored). Use `build-hip/` for this fork;
 inherited upstream references to `build/` describe its other build configurations.
@@ -64,9 +64,11 @@ protected user edits, and production and review binaries may differ. Use isolate
 explicit configs for future validation; do not pull/reset, rebuild or overwrite the protected
 production checkout as routine test setup.
 
-## Commands (CI / local, no GPU)
+## Commands (local source gates, no GPU)
 
-Run these in order after installing Python deps into a venv (see `.github/workflows/tests.yml`):
+**There is no GitHub CI** (the user's rule, 2026-11-17): validate on the host at the exact commit, then push.
+Never push code to find out whether it works. `tools/local_gates.sh` runs every gate below in order and stops at
+the first failure (`MAYA_PYTHON` / `STRATA_GGUF_PY` select the venv and gguf-py; defaults are the checkout's):
 
 ```sh
 # 1) HIP mapping check — every CUDA/cuBLAS name used in sources must exist in include/strata/hip_compat/
@@ -81,7 +83,7 @@ python -m unittest discover -s tools -p "test_*.py"
 
 The workflow also runs CPU-only GLM memory-policy/batch-framing and DeepSeek row-preparation/
 native-experts-OFF stub checks and checked DeepSeek TP2 batch-control suites after these three gates. Their exact compiler
-commands are in `.github/workflows/tests.yml`.
+commands are in `tools/local_gates.sh`.
 
 Single test:
 
@@ -90,7 +92,7 @@ python -m unittest serve.test_ds41_conformance -v
 python -m unittest tools.test_maya_hip -v
 ```
 
-`tools/_paths.py` needs llama.cpp's `gguf-py`: either run setup once (`third_party/llama.cpp/`) or set `STRATA_GGUF_PY`. CI pins the same commit as `setup.py` (`LLAMA_CPP_COMMIT`).
+`tools/_paths.py` needs llama.cpp's `gguf-py`: either run setup once (`third_party/llama.cpp/`) or set `STRATA_GGUF_PY` to a gguf-py at `setup.py`'s `LLAMA_CPP_COMMIT`.
 
 ## User-facing installer (GPU machines)
 
@@ -122,7 +124,7 @@ gfx1201 reference, not this fork's target build recipe.
 2. **Do not change the NVIDIA path for AMD.** Gate AMD behavior with `#if defined(STRATA_USE_HIP)` / related flags; leave CUDA behavior identical unless you have NVIDIA measurements.
 3. **New settings are `MAYA_*` environment variables.** Code reads `MAYA_*` (since upstream v1.1.59); `STRATA_*` still works as a fallback and `MAYA_*` wins when both are set. Fork code that reads or sets a setting must use the `MAYA_*` name: a `STRATA_*` read misses a value given as `MAYA_*`, and a runtime `setenv("STRATA_*")` after start is not seen by `MAYA_*` readers. Default off or preserve current behavior unless measured better. Document every new knob in `docs/SETTINGS.md`.
 4. **Python is stdlib unittest, not pytest.** Serve tests must stay importable as `serve.<module>` (`discover -t .`). Fixtures: `serve/fixtures/`, synthetic GGUFs from `tools/`.
-5. **llama.cpp is pinned.** Do not casually change `LLAMA_CPP_COMMIT` in `setup.py` (also used by CI). ggml / MMQ live under `third_party/llama.cpp`; a GLM MMQ patch is applied from the pinned checkout.
+5. **llama.cpp is pinned.** Do not casually change `LLAMA_CPP_COMMIT` in `setup.py`. ggml / MMQ live under `third_party/llama.cpp`; a GLM MMQ patch is applied from the pinned checkout.
 6. **Per-model engines, not one generic backend.** `maya` (GLM: `src/core`, `src/prefill`, …), `maya-ds4` (`src/ds4`), and `maya-mm3` (`src/mm3`) share kernels but not control flow. A change in one engine usually does not apply to the others. Server routing and templates differ per model family (DeepSeek: vendored `serve/ds41_encoding.py` + fixtures; others: Jinja).
 7. **Pack integrity.** The pack index next to model shards is hashed; engine refuses mismatched shards. Use `./maya.sh --repack` after intentional pack changes.
 8. **GLM TP2 launchers take the model as input.** Do not hardcode Maya-S paths in `tools/tp2/*` or `tools/llama-swap/tp2.sh`. Use `tools/tp2/model_env.sh` with `--model NAME`/`MAYA_MODEL`, `--pack PATH`/`MAYA_PACK`, `--config PATH`/`MAYA_CONFIG` and `MAYA_MODELS_DIR`. Pass the **same** selection to both ranks. Document new flags in `docs/TP2-RUN.md` “Choosing a model”. Example pack root is `/home/ugo/software/Maya-data/models/<Name>/pack`. DeepSeek uses the launcher JSON described below.
@@ -145,7 +147,7 @@ and `Handoff.md` for the accepted runtime paths and numerical/capacity follow-up
 - Base on `main`; one topic per PR.
 - Perf / output-affecting changes: measure before/after on the same harness; note if answers change (expert placement can flip bits).
 - Engine/performance changes require gfx1151 HIP measurements. Preserve inherited CUDA behavior when editing shared code; NVIDIA builds and measurements are outside this fork's validation scope.
-- CI must pass: HIP map check + `serve` + `tools` tests. GPU parity suites run on maintainers' machines before merge.
+- `tools/local_gates.sh` must pass at the exact commit before any push (there is no GitHub CI). GPU parity suites and paired TP2 checks run on the gfx1151 hosts before merge.
 
 ## Session handoff
 
@@ -153,7 +155,7 @@ and `Handoff.md` for the accepted runtime paths and numerical/capacity follow-up
 
 `README.md`, this file and the fork's operational docs are fork-owned. Merge applicable upstream
 documentation semantically; do not replace them wholesale. Follow the user's requested upstream
-batch size: for sequential work, finish affected validation plus exact-head and post-merge CI before
+batch size: for sequential work, finish affected validation plus the local gates at the exact head before
 the next tag; for a cumulative merge, review the entire delta and validate it as one checkpoint. Historical design
 documents and measurement reports describe their dated checkpoints; [docs/README.md](docs/README.md)
 identifies the current guides. v1.1.37–v1.1.46 was integrated sequentially; #85 integrates v1.1.47–v1.1.49
@@ -170,7 +172,7 @@ identity checks.
 ## Key references
 
 - `CONTRIBUTING.md` — PR / bug / bench expectations  
-- `.github/workflows/tests.yml` — exact CI commands and gguf-py pin  
+- `tools/local_gates.sh` — the exact source-gate commands (no GitHub CI)  
 - `docs/SETTINGS.md` — full `MAYA_*` / `STRATA_*` knob list  
 - `docs/TP2-RUN.md` — TP2 ops: model selection (`--model`/`--pack`), serve/bench examples  
 - `docs/DEEPSEEK-TP2-RUN.md` — DeepSeek TP2/DSpark launch, user acceptance and validation limits

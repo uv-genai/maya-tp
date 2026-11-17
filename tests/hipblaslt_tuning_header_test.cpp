@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 #ifndef STRATA_SOURCE_DIR
-#define STRATA_SOURCE_DIR "."   // (CI runs it from the source root)
+#define STRATA_SOURCE_DIR "."   // (tools/local_gates.sh runs it from the source root)
 #endif
 
 namespace {
