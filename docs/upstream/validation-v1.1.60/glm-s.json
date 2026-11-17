@@ -1,0 +1,48 @@
+{
+  "exe": "/home/ugo/software/project-maya/build-hip/maya",
+  "args": [
+    "--glm-pack",
+    "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack",
+    "--max-context",
+    "32768",
+    "--expert-cache",
+    "auto",
+    "--prefill",
+    "auto",
+    "--kv-streaming",
+    "on",
+    "--expert-profile",
+    "/home/ugo/software/project-maya/data/expert-profile-glm.bin"
+  ],
+  "cwd": "/home/ugo/software/project-maya",
+  "tokenizer": "/home/ugo/software/Maya-data/models/Maya-S-v2-IQ2_XXS/pack/tokenizer",
+  "model_name": "glm-5.3-flash",
+  "gpu": [0],
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95
+  },
+  "reasoning_effort": "high",
+  "lib_dirs": [
+    "/opt/rocm/lib"
+  ],
+  "port": 8099,
+  "backend": "hip",
+  "env": {
+    "MAYA_GLM_RESERVE_MB": "1024",
+    "MAYA_GLM_RAM_HEADROOM_GB": "16",
+    "MAYA_GLM_SPLIT": "0",
+    "MAYA_GLM_PREFILL_SUB": "1024",
+    "MAYA_GLM_PREFILL_MB": "6144",
+    "MAYA_HIPBLASLT_TUNING": "/home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100202.txt:/home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100401.txt:/home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100401-b.txt:/home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100500.txt"
+  },
+  "log": "/home/ugo/software/project-maya/maya-maya-s-v2-iq2_xxs-hip.log",
+  "installer": {
+    "models_dir": "/home/ugo/software/Maya-data/models",
+    "quant": "Maya-S-v2-IQ2_XXS",
+    "gguf": null,
+    "gguf_dir": null,
+    "draft": "mtp",
+    "written": "2026-10-27 13:43"
+  }
+}

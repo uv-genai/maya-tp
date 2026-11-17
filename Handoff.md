@@ -3452,7 +3452,8 @@ the §54 ones (`engines/v1.1.58` = installed §55 bytes).
 | Tag | State |
 | --- | --- |
 | v1.1.59 | Source `147d2684`; local gates and six Flash cases pass (0 differences vs v1.1.58); [report](docs/upstream/v1.1.59.md) |
-| v1.1.60–v1.1.65 | Not started; v1.1.60 trial merge conflicts only in docs |
+| v1.1.60 | Merge `aab6f369`; local gates and six Flash cases pass (0 differences vs v1.1.59); [report](docs/upstream/v1.1.60.md) |
+| v1.1.61–v1.1.65 | Not started; v1.1.61 trial merge conflicts in DeepSeek drafting/prefill, EXL3 and `maya.py` |
 
 v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
 `MAYA_*`, `STRATA_*` only as fallback), so fork code must read and set `MAYA_*`
@@ -3468,7 +3469,7 @@ GPU checks for engine changes) and only then pushed; never push to find out.
 Earlier sections' exact-head/post-merge CI records are history, not a step to
 repeat.
 
-GitHub issues for this campaign are drafted in
-`/home/ugo/software/maya-upstream-20261117/issues-draft.md`; `gh` was not
-authenticated on host2 in this session, so none exist yet.
+Issues: epic #179, phases #172–#178 (one per tag). The agent's non-interactive
+shell lacks `GH_TOKEN`; run `gh`/`git push` through `bash -ic` on strix-halo-2.
+Never run `gh` or push on strix-halo-1.
 
