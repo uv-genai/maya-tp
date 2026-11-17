@@ -92,6 +92,7 @@ These settings change what the engine chooses (put them in the config with `--en
 | `MAYA_GLM_HELPER_ZEROCOPY` | on for an integrated helper | An integrated (unified-memory) expert helper reads each call's input and plan from, and writes its result into, one mapped pinned block - four copies fewer a call; `0` makes the copies (a discrete helper always copies). With `MAYA_GLM_PROF` set, each helper prints a `glm helper prof` line at the end: its calls, experts a call, host time (enqueue, wait, the result's copy), each stage's GPU time and the bandwidth its kernels read the experts at |
 | `MAYA_GLM_RAM_HEADROOM_GB` | 6 | RAM left free for the system when the RAM tier is sized; it also takes one more GPU's prompt buffers, pinned after the measurement - a split of three or more GPUs sets the others' aside on top, and each later GPU measures again and leaves at least half of it free. The pinned tier can't be swapped out, so a Linux desktop whose kernel starts swapping with more free (several displays, a busy session) wants more: a 128 GB desktop with three GPUs and three displays stayed responsive at 16, and swapped at 12 (#77) |
 | `MAYA_GLM_RAM_GB` | from free RAM | a fixed RAM-tier size in GB |
+| `MAYA_GLM_POOL_CHECK_WAIT_MS` | 10000 | Linux with AMD GPUs (HIP) only: after the expert pool's check (`--expert-cache auto`) frees what it wrote, the start waits up to this many ms for that VRAM to read as free again before it sizes the pool - on some cards the free figure read right after the frees still counted them as in use, and the pool came out with 0 slots a layer and the start failed with "no room for the expert pool" (#899). It reads the free VRAM every 5 ms until it is back within 256 MiB of the figure before the check. When it had to wait, the log says `glm fast: CUDA<n> the expert pool's check: its <x> GB came back as free VRAM <ms> ms after it was freed`, or, when the time ran out first, a `WARNING ... still read as in use` line with how much (`MAYA_GLM_POOL_CHECK=0` skips the check); a start that did not have to wait prints neither. `0` = no wait (one read, as before). NVIDIA and Windows builds do not wait |
 | `MAYA_GLM_COMPLETE_POOL` | on | Keep every expert, three spares per layer and a separate tail for prompt scratch when the entire layout fits. Prefill borrows the tail without evicting resident experts. On Linux HIP APUs, the budget uses `MemAvailable` after dense/KV/scratch allocations and preserves `MAYA_GLM_RAM_HEADROOM_GB` plus the GPU reserve. Existing pool/VRAM/expert caps still apply; insufficient RAM or a smaller cap retains the original capped layout. The complete layout uses more pool memory than the experts alone, but TP2 startup scratch is bounded by its receive window. Set `0` on both ranks for the capped-pool control. This does not disable hipBLASLt tuning or restore an older scratch reservation. |
 | `MAYA_GLM_RESIDENT_SKIP` | AMD: on | while every expert is in VRAM, the decode leaves out each route's wait and fetch launches, which would find nothing to do (two a layer and token); `0` = launch them anyway; `1` = on for NVIDIA too |
 | `MAYA_GLM_FLUSH`, `MAYA_GLM_PREFILL_FLUSH` | off, off | Windows + AMD only, experimental: the HIP runtime holds queued kernels until the host waits; `n` = the decode submits its first layer as soon as it is queued and then every n layers, `1` = the prompt path each sub-batch and each layer's experts (`cudaStreamQuery`, which does not wait). On a Radeon 8065S every 4 layers was ~4% slower than without; prompts no faster |
@@ -172,6 +173,7 @@ These settings change what the engine chooses (put them in the config with `--en
 | `MAYA_GLM_SPEC_FOLLOW_SAVE` | off | `--spec-follow-save PATH`: each request's decoded token ids are written to that file - the continuation `MAYA_GLM_SPEC_FOLLOW` reads |
 | `MAYA_GLM_SERVICE_DEEP_S` | 60 | seconds without routes before CPU service threads wait on the request gate; `0` disables deep idle. TP2 mirrored requests wake the worker too |
 | `MAYA_GLM_SERVICE_DEEP_MS` | 100 | maximum deep-idle polling interval in milliseconds; stdin and TP2 mirror input wake it early |
+| `MAYA_GLM_STALL_S` | 20 | a split's drafting decode: when one step runs longer than this many seconds, a `glm stall:` line on stderr says where each GPU of the split is (the device's waits for the host that gave up, the service thread's routes and what it is doing); again every minute while it stays stuck; `0` = no line. Only a report - the answers and the speed do not change, and nothing is stopped (stopping a hung engine is `MAYA_WATCHDOG_S` and the server's `MAYA_ENGINE_STALL_S`) |
 | `MAYA_GLM_SERVICE_IDLE_MS` | 200 | the engine's tier threads (one per GPU) spin while a decode routes experts and sleep after this long without one, so an idle engine uses ~1% of a core instead of one core per GPU; `0` = spin always |
 | `MAYA_DS4_CPU_PREPARE_ROWS` | off | `1`: at DeepSeek GGUF load, before CPU-lane tuning, run the existing guarded one-token and multi-token row selection/parity checks for each distinct gate/up or down format with experts outside VRAM. IQ1_S also prepares its native multi-token fallback, since the one-GPU plan can later disable its own rows. This moves first-use checks to startup; it keeps the same numerical checks and fallback decisions. Unset or any value other than exactly `1` keeps lazy checks. `DS4_CPU_PREPARE_ROWS` and `STRATA_DS4_CPU_PREPARE_ROWS` are aliases (the `MAYA_` spelling wins). Adds startup work; no steady-state speedup is claimed. Builds with `STRATA_NATIVE_EXPERTS=OFF` keep a no-op stub. |
 | `MAYA_GLM_PREFILL_CPU` | on | prompts: the least routed RAM-tier experts are computed on the CPU while the GPU loads the rest over PCIe, the split balanced each layer so both finish together; `0` = off. `MAYA_GLM_PREFILL_CPU_ROW_MS` fixes the CPU cost of a row it plans with (default: learned) |
@@ -394,6 +396,31 @@ ends an answer (the end of a turn, and the markers a model would start the next 
 as in llama.cpp, so the model goes on with what it would write next instead of stopping - for speed benchmarks at a
 fixed answer length. It needs `max_tokens`, and an engine that applies token biases - GLM's and DeepSeek's (which take
 a request's own `logit_bias` as well); MiniMax's does not, so there it is refused.
+
+## When the engine stops an answer
+
+An answer ends with `finish_reason` "length" (Anthropic: `stop_reason` "max_tokens"; Responses: status "incomplete"
+with reason "max_output_tokens") only when it reached its token limit or the context. When the engine stops an
+answer itself because of an error - a GPU's fault, a failed decode step, numbers gone non-finite - the request ends
+with that API's own error instead, never with a finish reason a client would take for the limit:
+
+| API | Streamed | Not streamed |
+|---|---|---|
+| OpenAI chat completions | the text already sent stands; then a `data: {"error": {"type": "server_error", ...}}` chunk and `data: [DONE]` (no `finish_reason` chunk) | HTTP 422, `{"error": {"type": "engine_error", "code": "engine_error", "message": ..., "partial_text": ...}}` |
+| Anthropic messages | the text already sent stands; then `event: error` (`api_error`), no `message_delta` with a `stop_reason` | HTTP 422, `{"type": "error", "error": {"type": "engine_error", "message": ..., "partial_text": ...}}` |
+| Responses | `response.failed` with `error.code` "server_error" | HTTP 422, the response with status "failed", `error.code` "engine_error" and `error.partial_text` |
+| Maya's model API (`/api/chat`, `/api/generate`) | a last line `{"error": ...}`, no `done: true` line | HTTP 422 with `{"error": ..., "error_type": "engine_error", "partial_text": ...}` |
+
+The documented finish reasons have no "error" value (OpenAI's are stop / length / tool_calls / content_filter /
+function_call, Anthropic's end_turn / max_tokens / stop_sequence / tool_use / pause_turn / refusal), so a new one
+would be read as a normal end by some clients; the error forms above are the ones every client handles (the OpenAI and
+Anthropic SDKs raise an error on them). A request that is not streamed gets 422, not a 5xx: the SDKs send a 5xx,
+408, 409 or 429 again by themselves, which would run the same long answer once more without the client seeing the
+error. Its error carries what the answer had written before it: `partial_text` (and `partial_reasoning` - Maya's
+model API: `partial_thinking` - when it was still thinking), less the last few tokens the loop guard still held
+back. The message says how many tokens the answer had and why it stopped: after a GPU's fault on DeepSeek, the call
+that failed and the position in the context (what the engine prints on the console as it ends); otherwise that the
+reason is in the engine's log. After a GPU's fault the engine ends, and the next request starts a fresh one.
 
 ## The thinking level and the thinking budget
 

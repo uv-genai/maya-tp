@@ -17,6 +17,12 @@ only what changed and starts; the model is not downloaded again.
 
 - Integrated upstream v1.1.54–v1.1.58 as sequentially validated Flash TP2 checkpoints. GLM MTP and DeepSeek DSpark pass default/batched and final four-slot HTTP checks; evidence and final PR/main publication are tracked in #159–#164. The integration preserved Flash defaults and executable paths; the subsequent user-authorized same-path installation is recorded in #169.
 
+## Upstream v1.1.65 - 2026-11-16 (partially imported)
+
+- Imported: GLM waits for the expert pool check's frees on Linux HIP before sizing the pool (`MAYA_GLM_POOL_CHECK_WAIT_MS`), and its "no room" error names a smaller reserve only where that helps (#899); a GLM drafting step that stalls says where each GPU of a split is (`glm stall:`, `MAYA_GLM_STALL_S`, #860); an answer the engine stops itself on an error is reported as the request's error on every API (HTTP 422 `engine_error` with the partial text when not streamed), not as `length`, and DeepSeek's END line carries the failed call and position (#827); setup help, AMD-on-Ubuntu ROCm docs, the CUDA compute-capability floor, and test fixes.
+- For TP2 the fork keeps its first-cause contract (#88): a pair that is down reports its retained first cause, never the generic engine-stopped error; DeepSeek's END line keeps "restart both ranks" for a pair.
+- Not imported: GLM link-helper and DeepSeek two-GPU helper changes, link-mode repeatable timing, their settings rows, the Windows NVIDIA pin guard, and the calibration-on-a-busy-GPU setup change (built on the excluded mixed-GPU setup code).
+
 ## Upstream v1.1.64 - 2026-11-15 (partially imported)
 
 - Imported: native expert layers whose gate and up differ in type (unsloth's Qwen3.8 UD-IQ1_S; same-type layers keep their code), with `native_mixed_test`; DeepSeek on a local layer split or `--tp` turns a PCIe-lane tie off again as before v1.1.58, one GPU keeping #697's rule (#956); maya-mm3 names where a router NaN came from (#672); the MiniMax setup checks GGUF files already in place by sha256 (#672).
