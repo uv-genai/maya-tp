@@ -3688,6 +3688,12 @@ int main(int argc, char** argv) {
         if (ablate_option_asked) {
             std::fprintf(stderr,"maya-ds4: ablation is unsupported for DeepSeek TP2\n"); return 2;
         }
+        // Upstream v1.1.61's fast prompt reading (DS4_YOCO_CONE, the config's fast_prefill) plans each layer's first
+        // row from this process's environment alone; the pair's identity does not carry it, so ranks could plan
+        // different rows for the same chunk. Refused before bootstrap until it is negotiated and validated paired.
+        if (const char* cone=std::getenv("DS4_YOCO_CONE"); cone && std::atoi(cone)!=0) {
+            std::fprintf(stderr,"maya-ds4: fast prompt reading (DS4_YOCO_CONE) is unsupported for DeepSeek TP2\n"); return 2;
+        }
         const char* requested=std::getenv("MAYA_DS4_TP2_DSPARK");
         const char* requested_chunk=std::getenv("MAYA_DS4_TP2_CHUNK");
         const char* requested_lookup=std::getenv("MAYA_DS4_TP2_LOOKUP");

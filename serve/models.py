@@ -284,6 +284,14 @@ def check_tp2_ablation_config(cfg: dict) -> None:
         raise ValueError("TP2 refusal ablation is unavailable: direction/configuration is not negotiated between ranks")
 
 
+def check_tp2_fast_prefill_config(cfg: dict) -> None:
+    """Fail before paired startup: DeepSeek's fast prompt reading (fast_prefill, the engine's DS4_YOCO_CONE) plans each
+    rank's prompt rows from its own environment and is absent from the checked TP2 identity."""
+    env = cfg.get("env") if isinstance(cfg.get("env"), dict) else {}
+    if is_tp2(cfg) and (cfg.get("fast_prefill") is True or str(env.get("DS4_YOCO_CONE", "0")).strip() not in ("", "0")):
+        raise ValueError("TP2 fast prompt reading is unavailable: the prompt-row cone is not negotiated between ranks")
+
+
 def ablate_file(cfg: dict) -> Path | None:
     """The config's direction file (cfg["ablate"]["file"], else an --ablate FILE in its args) when it is on disk."""
     a = cfg.get("ablate") if isinstance(cfg.get("ablate"), dict) else {}
@@ -475,6 +483,8 @@ def apply(cfg: dict, settings: dict) -> dict:
     out = copy.deepcopy(cfg)
     if is_tp2(cfg) and "ablate" in settings:
         raise ValueError("TP2 refusal ablation is unavailable: direction state is not negotiated between ranks")
+    if is_tp2(cfg) and settings.get("fast_prefill") is True:
+        raise ValueError("TP2 fast prompt reading is unavailable: the prompt-row cone is not negotiated between ranks")
     # refusal ablation's default (cfg["ablate"]["default"]: requests without `ablate` take it; not an engine setting -
     # no restart, the direction stays loaded and each request asks); on only where the switch is (ablate_choice)
     if not isinstance(s.get("ablate"), bool):

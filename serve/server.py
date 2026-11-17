@@ -7274,6 +7274,7 @@ def main() -> int:
     cfg = maya_names.env_in(json.loads(Path(a.config).read_text(encoding="utf-8-sig"))) if a.config else {}   # (a BOM: Notepad)
     try:
         models.check_tp2_ablation_config(cfg)
+        models.check_tp2_fast_prefill_config(cfg)
     except ValueError as error:
         ap.error(str(error))
     apply_server_env(cfg)
