@@ -1303,6 +1303,11 @@ class StrataEngine:
         if (self.last or {}).get("finish") != "cancel" or cancel.is_set() or self._asked_end() != ends0 or \
                 rid in self.__dict__.get("_paused", ()):
             return
+        # TP2 (#88): a pair that is down keeps its first cause for every request - the pump queues that ERR ahead of
+        # the engine's DONE, and this keeps it so whatever the order: never a generic engine-stopped error instead
+        info = getattr(self, "info", {}) or {}
+        if int(info.get("tp_world", 1) or 1) > 1 and info.get("tp_pair") == "down":
+            raise ValueError(info.get("tp_error", "TP2 pair down: restart both ranks"))
         gone = bool(getattr(self, "ended", False))       # (its END line: a GPU's state is unknown, it ends now)
         why = (getattr(self, "end_reason", "") or "") if gone else ""   # (the END line's reason, #827)
         log = getattr(self, "log_path", None)

@@ -10,6 +10,7 @@ import urllib.error
 import urllib.request
 
 from serve.frontend import ChatTemplate
+from serve import server
 from serve.server import ByteTokenizer, Service, StrataEngine, serve
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -201,6 +202,38 @@ for line in sys.stdin:
         self.assertEqual(health['tp']['prefill_chunk'], 256)
         self.assertIn(POISON, health['tp']['error'])
         self.assertEqual(len(seen.read_text().splitlines()), 1)
+
+
+class EngineStoppedItselfKeepsFirstCause(unittest.TestCase):
+    """#827's engine-stopped answer (DONE finish=cancel, nothing asked) must not replace a TP2 pair's first cause."""
+
+    def _engine(self, tp_world, pair=None, cause=None):
+        engine = server.StrataEngine.__new__(server.StrataEngine)
+        engine.info = {"tp_world": tp_world}
+        if pair:
+            engine.info.update(tp_pair=pair, tp_error=cause)
+        engine.last = {"finish": "cancel", "generated": 7}
+        engine.ended, engine.end_reason, engine.log_path = True, "hipErrorIllegalAddress at position 42", None
+        return engine
+
+    def test_pair_down_raises_the_retained_first_cause(self):
+        engine = self._engine(2, "down", "TP2 pair down: verbs peer closed the bootstrap connection; restart both ranks")
+        with self.assertRaises(ValueError) as caught:
+            engine._ended_itself(threading.Event(), engine._asked_end())
+        self.assertNotIsInstance(caught.exception, server.EngineFault)
+        self.assertIn("verbs peer closed the bootstrap connection", str(caught.exception))
+
+    def test_single_host_reports_the_engine_fault_with_its_reason(self):
+        engine = self._engine(1)
+        with self.assertRaises(server.EngineFault) as caught:
+            engine._ended_itself(threading.Event(), engine._asked_end())
+        self.assertIn("hipErrorIllegalAddress at position 42", str(caught.exception))
+
+    def test_an_asked_cancel_is_not_a_fault(self):
+        engine = self._engine(2, "down", "TP2 pair down: x; restart both ranks")
+        cancel = threading.Event()
+        cancel.set()
+        engine._ended_itself(cancel, engine._asked_end())
 
 
 if __name__ == '__main__':
