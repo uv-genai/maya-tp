@@ -17,6 +17,11 @@ only what changed and starts; the model is not downloaded again.
 
 - Integrated upstream v1.1.54–v1.1.58 as sequentially validated Flash TP2 checkpoints. GLM MTP and DeepSeek DSpark pass default/batched and final four-slot HTTP checks; evidence and final PR/main publication are tracked in #159–#164. The integration preserved Flash defaults and executable paths; the subsequent user-authorized same-path installation is recorded in #169.
 
+## Upstream v1.1.63 - 2026-11-14 (partially imported)
+
+- Imported: an engine replaced by a restart no longer marks the new one ended when the old one's output closes late (upstream found it with the excluded NVIDIA helper; the fork keeps its TP2 pair-down handling for the running engine).
+- Not imported: the DeepSeek two-GPU helper's Windows build fix (the helper is excluded) and the README heading change.
+
 ## Upstream v1.1.62 - 2026-11-13 (partially imported)
 
 Upstream's release is mostly the AMD APU + NVIDIA GPU pairing (`--mixed-gpus`, a CUDA helper engine beside the HIP one, GLM helper link mode) and a DeepSeek "pool" that runs the last layers on a second PC over TCP. Neither is imported: this fork targets HIP/gfx1151 only, with an RDMA-only data path. Upstream's complete expert pool on Linux unified memory duplicates the fork's own APU complete-pool sizing (#94), which is kept.
