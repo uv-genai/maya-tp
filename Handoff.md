@@ -3453,13 +3453,14 @@ the §54 ones (`engines/v1.1.58` = installed §55 bytes).
 | --- | --- |
 | v1.1.59 | Source `147d2684`; local gates and six Flash cases pass (0 differences vs v1.1.58); [report](docs/upstream/v1.1.59.md) |
 | v1.1.60 | Merge `aab6f369`; local gates and six Flash cases pass (0 differences vs v1.1.59); [report](docs/upstream/v1.1.60.md) |
-| v1.1.61–v1.1.65 | Not started; v1.1.61 trial merge conflicts in DeepSeek drafting/prefill, EXL3 and `maya.py` |
+| v1.1.61 | Merge `d6e3bc87` + TP2 fast-prefill refusal `b3048fff`; local gates and six Flash cases pass (0 differences vs v1.1.60); [report](docs/upstream/v1.1.61.md) |
+| v1.1.62–v1.1.65 | Not started |
 
 v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
 `MAYA_*`, `STRATA_*` only as fallback), so fork code must read and set `MAYA_*`
 names; the hipBLASLt tuning parser accepts both header names while committed
 tables keep the legacy one (installed engines read only the legacy name);
-DeepSeek's borrow clear stays one-shot. During validation the peer host
+DeepSeek's borrow clear stays one-shot; DeepSeek keeps its eager DSpark round (no lazy drafter, so v1.1.61's trusted lookup is inert); fast prompt reading (`DS4_YOCO_CONE`) is refused for DeepSeek TP2. During validation the peer host
 hard-stopped once mid-load (no panic/OOM logged, ~62 GiB free); after the user
 restarted it the same case passed. Cause unknown; watch for recurrence.
 
