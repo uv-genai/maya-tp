@@ -3456,7 +3456,8 @@ the §54 ones (`engines/v1.1.58` = installed §55 bytes).
 | v1.1.61 | Merge `d6e3bc87` + TP2 fast-prefill refusal `b3048fff`; local gates and six Flash cases pass (0 differences vs v1.1.60); [report](docs/upstream/v1.1.61.md) |
 | v1.1.62 | Partial merge `d664bc7b` (user: exclude NVIDIA pairing and TCP DeepSeek pool); local gates, GPU unit tests and six Flash cases pass (0 differences vs v1.1.61); [report](docs/upstream/v1.1.62.md) |
 | v1.1.63 | Partial merge `1b948224` (engine-restart fix ported onto the TP2 pump); local gates and six Flash cases pass (0 differences vs v1.1.62); [report](docs/upstream/v1.1.63.md) |
-| v1.1.64–v1.1.65 | Not started; merge the same way (pairing/pool excluded) |
+| v1.1.64 | Partial merge `5310f627`; local gates, new unit tests and six Flash cases pass (0 differences vs v1.1.63); [report](docs/upstream/v1.1.64.md) |
+| v1.1.65 | Next; #827 engine-error reporting must keep the TP2 first-cause contract (#88) |
 
 v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
 `MAYA_*`, `STRATA_*` only as fallback), so fork code must read and set `MAYA_*`

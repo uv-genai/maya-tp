@@ -1,0 +1,7 @@
+Source checkpoint: 5310f627d32642a5e30039070fa347c63df1bb94 (merge of upstream v1.1.64 = d93d1499 with the fork's tree plus 64cd7ac8, 6d04eef7, 7394a9ec, 4146632b, 4d58a355)
+Previous checkpoint: v1.1.63 (1b948224; engines identical to v1.1.62)
+git merge -s ours --no-commit upstream/v1.1.64 ; git show --format= <commit> | git apply --3way --index   (CMakeLists.txt: both test targets kept)
+tools/local_gates.sh ; build.py --label v1.1.64 ; cmake --build <build> --target native_mixed_test mm3_wscan_test ; run both ; finalize.py ; components-rejections.py v1.1.64
+checkpoint.py --label v1.1.64 --previous v1.1.63 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+for kind in control:v1.1.63 candidate:v1.1.64 control2:v1.1.63 candidate2:v1.1.64: case.py --name perf-v64-glm2-<kind> --family glm --model s --engine <runtime>/engines/<label>/maya --slots 2 --tokens 64
+collect.py --label v1.1.64 --previous v1.1.63
