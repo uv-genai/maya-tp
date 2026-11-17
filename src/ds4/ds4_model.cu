@@ -18657,28 +18657,11 @@ struct Model::Impl {
             lay_chunk(c, C, d.tail + b0, 2);
             c.C = C;
             // (the clear writes over slots still mapped: a failure leaves them unknown - sticky, no later request runs;
-            //  a device lent before this one is handed back by the caller's guard.  #884: an error it returned is
-            //  cleared and the clear made once more first - a device that takes it is as after one clear)
-            struct Clear {
-                Dev& d;
-                size_t b0;
-                cudaError_t e = cudaSuccess;
-                int tries = 0;
-                void clear_error() { cudaGetLastError(); }
-                bool clear() {
-                    ++tries;
-                    e = cudaSetDevice(d.id);
-                    if (e == cudaSuccess)   // (DS4_TEST_LEND_FAULT=clear: the first clear fails, a test aid)
-                        e = lend_fault("clear") ? cudaErrorMemoryAllocation
-                                                : cudaMemsetAsync(d.tail + b0, 0, d.tail_bytes - b0, d.st);
-                    if (e == cudaSuccess) e = cudaStreamSynchronize(d.st);
-                    return e == cudaSuccess;
-                }
-            } clr{d, b0};
-            if (clear_retry(clr) && clr.tries > 1)
-                std::fprintf(stderr, "ds4: the prompt path's room on CUDA%d: its clear failed once and took the second "
-                                     "try - the request runs\n", d.id);
-            const cudaError_t e = clr.e;
+            //  a device lent before this one is handed back by the caller's guard.  The fork keeps this one-shot: an
+            //  uncertain device error is not cleared and retried - upstream #884's retry is not imported)
+            cudaError_t e = cudaSetDevice(d.id);
+            if (e == cudaSuccess) e = cudaMemsetAsync(d.tail + b0, 0, d.tail_bytes - b0, d.st);
+            if (e == cudaSuccess) e = cudaStreamSynchronize(d.st);
             if (e != cudaSuccess) {
                 lend_broken = true;
                 err = std::string("the prompt path's room on CUDA") + std::to_string(d.id) + ": " +
