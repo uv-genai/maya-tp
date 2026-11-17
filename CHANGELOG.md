@@ -17,6 +17,11 @@ only what changed and starts; the model is not downloaded again.
 
 - Integrated upstream v1.1.54–v1.1.58 as sequentially validated Flash TP2 checkpoints. GLM MTP and DeepSeek DSpark pass default/batched and final four-slot HTTP checks; evidence and final PR/main publication are tracked in #159–#164. The integration preserved Flash defaults and executable paths; the subsequent user-authorized same-path installation is recorded in #169.
 
+## Upstream v1.1.64 - 2026-11-15 (partially imported)
+
+- Imported: native expert layers whose gate and up differ in type (unsloth's Qwen3.8 UD-IQ1_S; same-type layers keep their code), with `native_mixed_test`; DeepSeek on a local layer split or `--tp` turns a PCIe-lane tie off again as before v1.1.58, one GPU keeping #697's rule (#956); maya-mm3 names where a router NaN came from (#672); the MiniMax setup checks GGUF files already in place by sha256 (#672).
+- Not imported: GLM link mode with EXL3 packs and the helper program's 1 GB RAM-tier registration (the AMD + NVIDIA pairing is excluded), its SETTINGS note, and README speed rows.
+
 ## Upstream v1.1.63 - 2026-11-14 (partially imported)
 
 - Imported: an engine replaced by a restart no longer marks the new one ended when the old one's output closes late (upstream found it with the excluded NVIDIA helper; the fork keeps its TP2 pair-down handling for the running engine).
