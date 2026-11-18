@@ -61,6 +61,11 @@ commands to clear the hosts. Do not inspect or manage unrelated services, includ
 unless the current task explicitly requests it. Earlier validation permission is not standing
 authorization to stop user processes.
 
+Run every long step (gates, builds, checkpoints, watchers) as a tracked job with a time bound sized to a
+few times its expected length, and read its result as soon as it ends. Never detach work with `&`, `nohup`
+or `setsid` where nothing reports its end, and never wait on `pgrep -f`/`pkill -f` (the pattern matches the
+waiting command itself). A failure must reach the user at once, not when they ask (Handoff §57, 2026-11-18).
+
 Read the current state in `Handoff.md` before deploying: the remote canonical checkout contains
 protected user edits, and production and review binaries may differ. Use isolated review trees and
 explicit configs for future validation; do not pull/reset, rebuild or overwrite the protected

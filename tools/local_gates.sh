@@ -31,7 +31,7 @@ step "Server tests"
 step "Installer and tools tests"
 "$PY" -m unittest discover -s tools -p "test_*.py"
 
-step "GLM memory policy, TP2 batch framing, env switches, Flash state layout, tuning-table headers (CPU only)"
+step "GLM memory policy, TP2 batch framing, env switches, Flash state layout, tuning-table headers, stall watch (CPU only)"
 "$CXX" -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Werror tests/glm_memory_test.cpp -o "$OUT/glm_memory_test"
 "$OUT/glm_memory_test"
 "$CXX" -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Werror -Iinclude tests/glm_tp_batch_test.cpp -o "$OUT/glm_tp_batch_test"
@@ -44,6 +44,8 @@ step "GLM memory policy, TP2 batch framing, env switches, Flash state layout, tu
 "$CXX" -std=c++20 -O2 -UNDEBUG -Wall -Wextra -Werror tests/hipblaslt_tuning_header_test.cpp \
     -o "$OUT/hipblaslt_tuning_header_test"
 "$OUT/hipblaslt_tuning_header_test"
+"$CXX" -std=c++20 -O2 -UNDEBUG -Wall -Wextra -Werror -Iinclude tests/stall_watch_test.cpp -o "$OUT/stall_watch_test" -pthread
+"$OUT/stall_watch_test"
 
 step "DeepSeek CPU row preparation (CPU only)"
 "$CXX" -std=c++20 -O2 -DNDEBUG -Wall -Wextra -Werror tests/ds4_cpu_prepare_rows_test.cpp -o "$OUT/ds4_cpu_prepare_rows_test"

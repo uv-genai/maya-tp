@@ -3457,7 +3457,10 @@ the §54 ones (`engines/v1.1.58` = installed §55 bytes).
 | v1.1.62 | Partial merge `d664bc7b` (user: exclude NVIDIA pairing and TCP DeepSeek pool); local gates, GPU unit tests and six Flash cases pass (0 differences vs v1.1.61); [report](docs/upstream/v1.1.62.md) |
 | v1.1.63 | Partial merge `1b948224` (engine-restart fix ported onto the TP2 pump); local gates and six Flash cases pass (0 differences vs v1.1.62); [report](docs/upstream/v1.1.63.md) |
 | v1.1.64 | Partial merge `5310f627`; local gates, new unit tests and six Flash cases pass (0 differences vs v1.1.63); [report](docs/upstream/v1.1.64.md) |
-| v1.1.65 | Next; #827 engine-error reporting must keep the TP2 first-cause contract (#88) |
+| v1.1.65 | Partial merge `d717bdf9` + TP2 first cause over the engine-stopped error `7f1ba00d` + test include `736e1cd7`; local gates and six Flash cases pass (0 differences vs v1.1.64); matched GLM repeat: no warm regression; [report](docs/upstream/v1.1.65.md) |
+
+All seven checkpoints pass. Next: one PR from `claude/upstream-v1.1.59-v1.1.65` into `main`, merged only
+on the user's approval; production binaries, launchers and the host2 canonical checkout stay as they are.
 
 v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
 `MAYA_*`, `STRATA_*` only as fallback), so fork code must read and set `MAYA_*`
@@ -3472,6 +3475,12 @@ is validated on the hosts at the exact commit with `tools/local_gates.sh` (plus
 GPU checks for engine changes) and only then pushed; never push to find out.
 Earlier sections' exact-head/post-merge CI records are history, not a step to
 repeat.
+
+**Background jobs are bounded (2026-11-18).** The first v1.1.65 chain was detached with `&`; it failed at the
+gates at 00:08 and its `pgrep -f` watcher matched its own command line, so nothing reported until the user asked at
+08:37. Long steps now run only as tracked, time-bounded background jobs (`timeout` sized to a few times the step:
+gates ~5 min, build 3-10 min, six-case checkpoint ~11 min); a user-level PreToolUse hook
+(`~/.claude/hooks/no-silent-stall.py`) denies detached jobs, unbounded background commands and `pgrep -f` waits.
 
 Issues: epic #179, phases #172–#178 (one per tag). The agent's non-interactive
 shell lacks `GH_TOKEN`; run `gh`/`git push` through `bash -ic` on strix-halo-2.
