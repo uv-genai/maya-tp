@@ -245,7 +245,7 @@ the user authorizes installation. Back up and atomically replace binary files
 on both hosts; do not rewire launchers to review paths. Handoff §55 records the
 v58 hashes/backups and the user's successful testing/acceptance (#169). On the user's
 request #182 then installed the validated v1.1.65 engines the same way (2026-11-18); Handoff §58 records
-the current hashes/backups, and the user's test is pending.
+the current hashes/backups and the user's successful testing/acceptance (2026-11-18).
 
 
 ## Current release checkpoint

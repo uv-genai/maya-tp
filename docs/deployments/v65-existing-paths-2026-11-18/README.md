@@ -3,8 +3,8 @@
 [#182](https://github.com/uv-genai/maya-tp/issues/182) records the user's request on 2026-11-18 ("Yes, deploy"),
 made after PR #180 merged the upstream v1.1.59–v1.1.65 integration into `main`. The request was to install the
 validated v1.1.65 engines at the same executable paths and to sync the strix-halo-2 checkout. The procedure is
-#169's, unchanged. Installation is complete. The user's first reload is the end-to-end test, and **that test is
-still pending**.
+#169's, unchanged. Installation is complete. The user then started models through the usual llama-swap entries and reported on
+2026-11-18 that it is working fine: **the installation is user-tested and accepted.**
 
 The installed files are the frozen Release gfx1151 HIP/MMQ/RDMA builds from source
 `736e1cd7616c61b4de53cf2c0d6777a285fb4cfd`. Those exact bytes passed the v1.1.65 checkpoint
@@ -91,5 +91,5 @@ matches that combination.
 already runs the v1.1.58 engines. It has no `END`-line handling, so v1.1.65's changed DeepSeek `END` text does not
 affect it. Older `STRATA_*` settings it passes reach the engines through their alias layer.
 
-The user's first reload of the usual llama-swap entries is the end-to-end test. A model that was already loaded
+The user's reload of the usual llama-swap entries was the end-to-end test, and it passed (2026-11-18). A model that was already loaded
 would keep its old executable until it is reloaded; none was loaded during this install.

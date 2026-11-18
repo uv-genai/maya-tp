@@ -40,7 +40,7 @@ contains the GPU-validated v1.1.65 engine, SHA256
 The executable path, launcher scripts, model/config selections and tuning files
 were preserved. Existing llama-swap entries use the new file on their next model
 start; an already-loaded process continues with its previous executable until
-the user unloads/reloads it. The user's test of this installation is pending. It replaced the v58 engine
+the user unloads/reloads it. The user tested this installation through llama-swap on 2026-11-18 and reports it working fine (accepted, #182). It replaced the v58 engine
 `dd37dbd8…` that the user accepted in #169; that file is backed up on each host under
 `/home/ugo/software/maya-binary-backups/issue-182-20261118-v65/`
 ([deployment evidence](deployments/v65-existing-paths-2026-11-18/README.md)).

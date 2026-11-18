@@ -1,13 +1,13 @@
-> **Done (2026-11-18):** upstream v1.1.59–v1.1.65 are integrated and merged into `main` (PR #180, `08cbbfc4`); read §57. At the user's request the v1.1.65 engines are then installed at the existing paths on both hosts and the host2 checkout is at `main` (§58 / #182), awaiting the user's test.
+> **Done (2026-11-18):** upstream v1.1.59–v1.1.65 are integrated and merged into `main` (PR #180, `08cbbfc4`); read §57. At the user's request the v1.1.65 engines are then installed at the existing paths on both hosts and the host2 checkout is at `main` (§58 / #182); the user reports them working fine and accepts them.
 
-> **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. Current runtime selection is §58 (v1.1.65, installed 2026-11-18, awaiting the user's test); §55 is the previous, user-accepted v58 installation, backed up.
+> **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. Current runtime selection is §58 (v1.1.65, installed 2026-11-18, user-tested and accepted); §55 is the previous, user-accepted v58 installation, backed up.
 
-> **Current runtime (2026-11-18):** read §58 / #182. At the user's request the validated v1.1.65 GLM/DeepSeek executables replace the files at their existing paths on both hosts; launcher/config paths and files are unchanged. The user's test is pending. The previous v58 installation (§55 / #169, user-accepted) is backed up on each host.
+> **Current runtime (2026-11-18):** read §58 / #182. At the user's request the validated v1.1.65 GLM/DeepSeek executables replace the files at their existing paths on both hosts; launcher/config paths and files are unchanged. The user tested them through the usual llama-swap entries and reports they are working fine; the installation is accepted. The previous v58 installation (§55 / #169, user-accepted) is backed up on each host.
 
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-18 · Current state: **§58**, v1.1.65 binary installation at unchanged paths (#182), awaiting the user's test; **§57**, upstream v1.1.59–v1.1.65 merged (PR #180). §55 records the previous v58 installation (#169), user-tested and accepted. §54 records validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. The binary-only installation in §58 supersedes §55's and earlier binary hashes, preserving paths/configs.
+> Last updated: 2026-11-18 · Current state: **§58**, v1.1.65 binary installation at unchanged paths (#182), user-tested and accepted; **§57**, upstream v1.1.59–v1.1.65 merged (PR #180). §55 records the previous v58 installation (#169), user-tested and accepted. §54 records validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. The binary-only installation in §58 supersedes §55's and earlier binary hashes, preserving paths/configs.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
 > Current process-ownership rules in §2 and binary installation state in §58 override those snapshots.
@@ -3497,7 +3497,9 @@ After PR #180 the user asked to deploy ("Yes, deploy"). The validated v1.1.65 en
 frozen checkpoint bytes) now replace the files at their existing paths on both hosts, by #169's procedure:
 staged, hash/`ldd`-checked, atomic same-path rename, then verified (hash, backups, mode/ownership, `ldd`, `--help`
 exit 0, all 134 host2 / 109 host1 launcher/config fingerprints unchanged). No model was loaded during the
-replacement; no process was stopped and no model started. **The user's test is pending.**
+replacement; no process was stopped and no model started. The user then started models through the usual
+llama-swap entries and reported on 2026-11-18 that it is working fine: **the installation is user-tested and
+accepted.** #182 is closed.
 
 | Host | Existing target | SHA256 |
 | --- | --- | --- |
