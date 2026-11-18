@@ -1,4 +1,4 @@
-> **In progress (2026-11-17):** sequential upstream v1.1.59–v1.1.65 integration on `claude/upstream-v1.1.59-v1.1.65` (worktree `/home/ugo/software/project-maya-upstream-v59-v65`); read §57. The host2 canonical checkout stays on `main`.
+> **Done (2026-11-18):** upstream v1.1.59–v1.1.65 are integrated and merged into `main` (PR #180, `08cbbfc4`); read §57. The host2 canonical checkout was not pulled (still `d6b53f8`): pulling it is the user's call.
 
 > **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. User-accepted runtime selection remains §55.
 
@@ -3459,8 +3459,12 @@ the §54 ones (`engines/v1.1.58` = installed §55 bytes).
 | v1.1.64 | Partial merge `5310f627`; local gates, new unit tests and six Flash cases pass (0 differences vs v1.1.63); [report](docs/upstream/v1.1.64.md) |
 | v1.1.65 | Partial merge `d717bdf9` + TP2 first cause over the engine-stopped error `7f1ba00d` + test include `736e1cd7`; local gates and six Flash cases pass (0 differences vs v1.1.64); matched GLM repeat: no warm regression; [report](docs/upstream/v1.1.65.md) |
 
-All seven checkpoints pass. Next: one PR from `claude/upstream-v1.1.59-v1.1.65` into `main`, merged only
-on the user's approval; production binaries, launchers and the host2 canonical checkout stay as they are.
+All seven checkpoints pass. On the user's approval, PR #180 merged them into `main` as `08cbbfc4`
+(2026-11-18); the merged tree is identical to the validated head `e60b57d4`, and no Actions run started.
+The host2 canonical checkout was not pulled and stays at `d6b53f8`: host1's launcher starts rank 1 from it,
+so pulling it is the user's deployment decision. Production binaries, launchers and configs are unchanged;
+`VERSION` stays `1.1.45` and no release was made. The v1.1.65 report's unproven early-request gap (the first
+two one-slot GLM requests after load) is the one open measurement note.
 
 v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
 `MAYA_*`, `STRATA_*` only as fallback), so fork code must read and set `MAYA_*`
@@ -3482,7 +3486,7 @@ gates at 00:08 and its `pgrep -f` watcher matched its own command line, so nothi
 gates ~5 min, build 3-10 min, six-case checkpoint ~11 min); a user-level PreToolUse hook
 (`~/.claude/hooks/no-silent-stall.py`) denies detached jobs, unbounded background commands and `pgrep -f` waits.
 
-Issues: epic #179, phases #172–#178 (one per tag). The agent's non-interactive
+Issues: epic #179, phases #172–#178 (one per tag), all closed at the merge. The agent's non-interactive
 shell lacks `GH_TOKEN`; run `gh`/`git push` through `bash -ic` on strix-halo-2.
 Never run `gh` or push on strix-halo-1.
 
