@@ -30,8 +30,8 @@ Both hosts use the runtime at
 `/home/ugo/software/project-maya-ds4-tp2-review` and the versioned executable
 `build-hip/queued-a950e7e9350b/maya-ds4` within it. At the user's request this
 same file path now contains the validated v1.1.65 engine, SHA256
-`66e1973d56fddbf3389d4588d3496819598c0410029921b184a5c144663d5cf8` (#182, 2026-11-18; the user's test is
-pending). It replaced the v58 engine `17f42fa1…` that the user accepted in #169.
+`66e1973d56fddbf3389d4588d3496819598c0410029921b184a5c144663d5cf8` (#182, 2026-11-18; the user tested it through
+llama-swap and accepts it). It replaced the v58 engine `17f42fa1…` that the user accepted in #169.
 The directory name is historical: it no longer names the contents' hash. No
 launcher/config path was changed. An already-loaded process retains the previous executable until the user
 unloads/reloads it. The v58 files are backed up on each host under

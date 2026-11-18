@@ -7,7 +7,7 @@ whether it works. CI records in older sections are history. The current campaign
 Read Handoff.md §56 for source release tp-v1.1.45 (numeric VERSION 1.1.45),
 with publication/tag/CI recorded in #170; consult that issue before any release
 action to avoid duplicate publication. Read §58 for the current runtime: the validated v1.1.65 engines, installed at the existing paths on
-2026-11-18 at the user's request (#182), user test pending; the host2 checkout is at `main`. §57 records
+2026-11-18 at the user's request (#182), user-tested and accepted; the host2 checkout is at `main`. §57 records
 the merged upstream v1.1.59–v1.1.65 integration (PR #180). §55 is the previous, user-accepted v58
 installation, backed up on each host.
 The release metadata does not rebuild/redeploy the accepted engines.
@@ -131,7 +131,7 @@ Treat model processes as user-owned and preserve their recorded ownership bounda
 - The then-promoted `build-hip/maya` on both hosts had MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
 - The earlier prefill checkpoint is immutable `tp-v1.1.43` (then VERSION `1.1.43`);
-  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). Current installation is the v1.1.65 same-path delivery in §58 (user test pending); the user-accepted v58 delivery in §55 is backed up. Push only to `origin`.
+  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). Current installation is the v1.1.65 same-path delivery in §58 (user-tested and accepted); the user-accepted v58 delivery in §55 is backed up. Push only to `origin`.
 
 ## Operating rules
 
