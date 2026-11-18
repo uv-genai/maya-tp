@@ -1,16 +1,16 @@
-> **Done (2026-11-18):** upstream v1.1.59–v1.1.65 are integrated and merged into `main` (PR #180, `08cbbfc4`); read §57. The host2 canonical checkout was not pulled (still `d6b53f8`): pulling it is the user's call.
+> **Done (2026-11-18):** upstream v1.1.59–v1.1.65 are integrated and merged into `main` (PR #180, `08cbbfc4`); read §57. At the user's request the v1.1.65 engines are then installed at the existing paths on both hosts and the host2 checkout is at `main` (§58 / #182), awaiting the user's test.
 
-> **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. User-accepted runtime selection remains §55.
+> **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. Current runtime selection is §58 (v1.1.65, installed 2026-11-18, awaiting the user's test); §55 is the previous, user-accepted v58 installation, backed up.
 
-> **Current runtime (2026-11-11):** read §55 / #169. At the user's explicit request, validated v58 GLM/DeepSeek executables now replace the files at their existing paths on both hosts. Launcher/config paths and files are unchanged; the user reports the installed builds are working fine and accepts them. §54 records the completed upstream integration.
+> **Current runtime (2026-11-18):** read §58 / #182. At the user's request the validated v1.1.65 GLM/DeepSeek executables replace the files at their existing paths on both hosts; launcher/config paths and files are unchanged. The user's test is pending. The previous v58 installation (§55 / #169, user-accepted) is backed up on each host.
 
 # Handoff — Maya-TP (two-host tensor parallel)
 
 > **Live document.** Update this whenever state changes so a fresh session can restart from here.
-> Last updated: 2026-11-11 · Current state: **§55**, v58 binary installation at unchanged paths (#169), user-tested and accepted. §54 records validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. The explicit binary-only installation in §55 supersedes earlier binary hashes, preserving paths/configs.
+> Last updated: 2026-11-18 · Current state: **§58**, v1.1.65 binary installation at unchanged paths (#182), awaiting the user's test; **§57**, upstream v1.1.59–v1.1.65 merged (PR #180). §55 records the previous v58 installation (#169), user-tested and accepted. §54 records validated upstream v1.1.54–v1.1.58 (#159–#164). §53 records user-accepted batching and release tp-v1.1.44 (#156); §52 records implementation PR #155. §47 records upstream v1.1.50–v1.1.53. §44 records the accepted DeepSeek binary; §33 records the promoted GLM runtime. The binary-only installation in §58 supersedes §55's and earlier binary hashes, preserving paths/configs.
 > PR #94 merged as `6f85d30`; #33/#90/#91/#93 are closed. The user launches their processes.
 > §§10–32 are dated history, including superseded status, deployment paths and pending actions.
-> Current process-ownership rules in §2 and binary installation state in §55 override those snapshots.
+> Current process-ownership rules in §2 and binary installation state in §58 override those snapshots.
 
 ## 1. What we are building
 
@@ -3461,9 +3461,9 @@ the §54 ones (`engines/v1.1.58` = installed §55 bytes).
 
 All seven checkpoints pass. On the user's approval, PR #180 merged them into `main` as `08cbbfc4`
 (2026-11-18); the merged tree is identical to the validated head `e60b57d4`, and no Actions run started.
-The host2 canonical checkout was not pulled and stays at `d6b53f8`: host1's launcher starts rank 1 from it,
-so pulling it is the user's deployment decision. Production binaries, launchers and configs are unchanged;
-`VERSION` stays `1.1.45` and no release was made. The v1.1.65 report's unproven early-request gap (the first
+At the merge the host2 canonical checkout was not pulled (host1's launcher starts rank 1 from it); at the
+user's request it was then fast-forwarded to `main` and the v1.1.65 engines installed at the existing paths
+(§58 / #182). Launchers and configs are unchanged; `VERSION` stays `1.1.45` and no release was made. The v1.1.65 report's unproven early-request gap (the first
 two one-slot GLM requests after load) is the one open measurement note.
 
 v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
@@ -3490,3 +3490,29 @@ Issues: epic #179, phases #172–#178 (one per tag), all closed at the merge. Th
 shell lacks `GH_TOKEN`; run `gh`/`git push` through `bash -ic` on strix-halo-2.
 Never run `gh` or push on strix-halo-1.
 
+
+## 58. Same-path v1.1.65 binary installation (#182, 2026-11-18)
+
+After PR #180 the user asked to deploy ("Yes, deploy"). The validated v1.1.65 engines (source `736e1cd7`, the exact
+frozen checkpoint bytes) now replace the files at their existing paths on both hosts, by #169's procedure:
+staged, hash/`ldd`-checked, atomic same-path rename, then verified (hash, backups, mode/ownership, `ldd`, `--help`
+exit 0, all 134 host2 / 109 host1 launcher/config fingerprints unchanged). No model was loaded during the
+replacement; no process was stopped and no model started. **The user's test is pending.**
+
+| Host | Existing target | SHA256 |
+| --- | --- | --- |
+| Both | `/home/ugo/software/project-maya/build-hip/maya` | `5556b6fe13932d220bf412a0aced76dab68bf669d8ca8469cc351cf484e891b3` |
+| Both | `/home/ugo/software/project-maya-ds4-tp2-review/build-hip/queued-a950e7e9350b/maya-ds4` | `66e1973d56fddbf3389d4588d3496819598c0410029921b184a5c144663d5cf8` |
+| Host2 | `/home/ugo/software/project-maya/build-hip/maya-ds4` | same DeepSeek SHA256 above |
+
+The v58 files (§55, user-accepted) are backed up on each host in
+`/home/ugo/software/maya-binary-backups/issue-182-20261118-v65/` (`0-maya.before`, `2-maya-ds4.before`, and on
+host2 `1-maya-ds4.before`); `install.py rollback` restores them at the same paths, only on the user's direction.
+Records: `docs/deployments/v65-existing-paths-2026-11-18/`.
+
+The host2 canonical checkout (clean) was fast-forwarded `d6b53f8` → `main` `8a2dd0d7`: no launch script, model
+config or llama-swap config changed; one DeepSeek download manifest was added and the DeepSeek pack tool and three
+test/validation scripts changed; tuning tables differ only in comments. Host1's checkout (`777cc92e` + 75 protected
+uncommitted edits; rank 0 and the API server) was not touched. The engines were validated with the v1.1.65 server
+code; production's rank-0 server is host1's edited one, which already runs v58 and ignores the DeepSeek `END`
+line in both versions. An already-loaded model would keep its old executable until reloaded.

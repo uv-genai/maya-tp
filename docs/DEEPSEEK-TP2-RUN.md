@@ -14,7 +14,8 @@ The source includes sequentially validated upstream v1.1.54–v1.1.58 through
 [PR #168](https://github.com/uv-genai/maya-tp/pull/168), merged as `b7458c4`.
 [#169](https://github.com/uv-genai/maya-tp/issues/169) installs the validated
 engines at existing executable paths, without changing launchers/configs.
-The current user-accepted installation is recorded below and in Handoff §55.
+[#182](https://github.com/uv-genai/maya-tp/issues/182) then installed the validated v1.1.65 engines the same way;
+the current installation is recorded below and in Handoff §58.
 
 <a id="accepted-runtime-on-the-users-pair"></a>
 
@@ -28,15 +29,15 @@ entry on strix-halo-1.local. The wrapper starts rank 1 on strix-halo-2.local.
 Both hosts use the runtime at
 `/home/ugo/software/project-maya-ds4-tp2-review` and the versioned executable
 `build-hip/queued-a950e7e9350b/maya-ds4` within it. At the user's request this
-same file path now contains the validated v58 engine, SHA256
-`17f42fa16d52dd59c2843138a23a2a2dbcbecc40826d623272e2456f82a11076`.
+same file path now contains the validated v1.1.65 engine, SHA256
+`66e1973d56fddbf3389d4588d3496819598c0410029921b184a5c144663d5cf8` (#182, 2026-11-18; the user's test is
+pending). It replaced the v58 engine `17f42fa1…` that the user accepted in #169.
 The directory name is historical: it no longer names the contents' hash. No
-launcher/config path was changed. The user confirmed the installed builds are
-working fine on 2026-11-11; this installation is accepted (#169).
-An already-loaded process retains the previous executable until the user
-unloads/reloads it. Original files are backed up on each host under
-`/home/ugo/software/maya-binary-backups/issue-169-20261111-v58/`.
-[Deployment evidence](deployments/v58-existing-paths-2026-11-11/README.md) records
+launcher/config path was changed. An already-loaded process retains the previous executable until the user
+unloads/reloads it. The v58 files are backed up on each host under
+`/home/ugo/software/maya-binary-backups/issue-182-20261118-v65/` (earlier originals under
+`issue-169-20261111-v58/`).
+[Deployment evidence](deployments/v65-existing-paths-2026-11-18/README.md) (and [#169's](deployments/v58-existing-paths-2026-11-11/README.md)) records
 exact paths, backups and unchanged launcher/config fingerprints. Model manifests
 were unchanged; the launcher hashes the executable afresh on each start.
 
@@ -162,7 +163,7 @@ chunk path. `--dspark off` disables the drafter on both ranks. Experimental
 prompt lookup is opt-in with `--suffix-draft 3` on both ranks; the launcher
 keeps lookup ownership on rank 0. Rank choices must match even though the
 worker does not run the drafter or lookup itself. Vision and performance at a filled 512K context are not validated for this
-path. The preserved deployed configuration selects one sequence. The installed v58
+path. The preserved deployed configuration selects one sequence. The installed
 engine also supports opt-in batching, which requires matching current server/
 launcher source and an explicit parallel setting as described below.
 The resident expert split does not imply that Engram and all model I/O have
@@ -277,7 +278,7 @@ slightly above 30 tok/s with prefill similar to XS and a larger relative speedup
 ## Opt-in continuous batching
 
 Current source adds checked 2–4-slot TP2 serving for XS/S, including real DSpark
-proposals and per-request commits. The newly installed v58 binary contains this
+proposals and per-request commits. The installed v1.1.65 binary contains this
 support. Existing model entries/configs and the protected runtime's launcher/
 server source were preserved by the binary-only installation; the default is
 still one conversation. Binary replacement does not opt those entries into a

@@ -27,8 +27,9 @@ Broader platform and model descriptions retained from Project Maya are upstream 
 | Coding-agent rules | [AGENTS.md](../AGENTS.md) |
 | Coding-agent current state and restart prompt | [Handoff](../Handoff.md), [Handoff-Prompt](../Handoff-Prompt.md) |
 | Current release and changes | [tp-v1.1.45 notes](releases/tp-v1.1.45.md), [changelog](../CHANGELOG.md) |
-| Current user-accepted binary installation | [v58 installed at unchanged paths](deployments/v58-existing-paths-2026-11-11/README.md), Handoff §55 / #169 |
-| Current v54–v58 integration | [v54](upstream/v1.1.54.md), [v55](upstream/v1.1.55.md), [v56](upstream/v1.1.56.md), [v57](upstream/v1.1.57.md), [v58](upstream/v1.1.58.md); validation and publication in [#159](https://github.com/uv-genai/maya-tp/issues/159) |
+| Current binary installation | [v1.1.65 installed at unchanged paths](deployments/v65-existing-paths-2026-11-18/README.md), Handoff §58 / #182 (user test pending); previous, user-accepted: [v58](deployments/v58-existing-paths-2026-11-11/README.md), §55 / #169 |
+| Current v59–v65 integration | [v59](upstream/v1.1.59.md), [v60](upstream/v1.1.60.md), [v61](upstream/v1.1.61.md), [v62](upstream/v1.1.62.md), [v63](upstream/v1.1.63.md), [v64](upstream/v1.1.64.md), [v65](upstream/v1.1.65.md); epic [#179](https://github.com/uv-genai/maya-tp/issues/179), merged in PR #180 |
+| Earlier v54–v58 integration | [v54](upstream/v1.1.54.md), [v55](upstream/v1.1.55.md), [v56](upstream/v1.1.56.md), [v57](upstream/v1.1.57.md), [v58](upstream/v1.1.58.md); validation and publication in [#159](https://github.com/uv-genai/maya-tp/issues/159) |
 | Earlier upstream integration decisions and evidence | [v1.1.53](upstream/v1.1.53.md), [v1.1.52](upstream/v1.1.52.md), [v1.1.51](upstream/v1.1.51.md), [v1.1.50](upstream/v1.1.50.md), [v1.1.49 merge and fresh live validation](upstream/v1.1.49.md), [earlier index](upstream/INTEGRATION-2026-11-01.md), [earlier completion](upstream/COMPLETION-2026-11-02.md) |
 
 The v54–v58 integration passed sequential Flash checkpoints and final four-slot

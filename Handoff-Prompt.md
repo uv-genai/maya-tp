@@ -6,7 +6,10 @@ whether it works. CI records in older sections are history. The current campaign
 
 Read Handoff.md §56 for source release tp-v1.1.45 (numeric VERSION 1.1.45),
 with publication/tag/CI recorded in #170; consult that issue before any release
-action to avoid duplicate publication. Read §55 for the accepted runtime.
+action to avoid duplicate publication. Read §58 for the current runtime: the validated v1.1.65 engines, installed at the existing paths on
+2026-11-18 at the user's request (#182), user test pending; the host2 checkout is at `main`. §57 records
+the merged upstream v1.1.59–v1.1.65 integration (PR #180). §55 is the previous, user-accepted v58
+installation, backed up on each host.
 The release metadata does not rebuild/redeploy the accepted engines.
 
 The user explicitly requested replacing the validated
@@ -24,7 +27,7 @@ process was stopped or model started; the user launches/reloads models.
 
 Keep stable executable paths for future authorized deployments: replace binary
 contents atomically with backups; do not rewire launchers to temporary review
-builds. Preserve the protected peer source/user edits. §55 supersedes earlier
+builds. Preserve the protected peer source/user edits. §58 supersedes §55 and earlier
 binary-selection statements; §§33/44 retain previous acceptance history.
 
 Upstream v1.1.54–v1.1.58 sequential Flash validation is complete (§54), merged
@@ -46,7 +49,7 @@ publication/PR/main CI is tracked in #153. PR #155 is merged at `3f26526`; use `
 Both wrappers default to one sequence; new 2–4-slot mode requires explicit
 matching current binaries and launchers. That source-release checkpoint left
 production runtime files and the protected peer checkout unchanged; the later
-user-authorized same-path binary installation is recorded in §55. All owned GPU validation
+user-authorized same-path binary installations are recorded in §55 (v58) and §58 (v1.1.65, current). All owned GPU validation
 processes are stopped; the D5 report has their identity audit.
 
 XS/S batch HTTP tests match all 88 measured parent responses, and DeepSeek's
@@ -101,7 +104,7 @@ relative speedup. Issue #120 is complete, and extended user trials complete
 operational acceptance in #116. Do not restart the broad
 validation campaign; the user explicitly requested a few checks and then testing
 through the existing entries. No owned validation processes remain.
-Use Handoff.md §54 for the merged source checkpoint and §55 for current binary selection; §§33/44 retain earlier acceptance history. §42, the implementation plan and
+Use Handoff.md §54 for the merged source checkpoint and §58 for current binary selection (§55 previous); §§33/44 retain earlier acceptance history. §42, the implementation plan and
 phase issues #110–#116 record the implementation history and separate follow-ups.
 Review any recorded owned test PIDs before acting and preserve user-owned processes. The review
 procedure and accepted deployment paths are in
@@ -128,7 +131,7 @@ Treat model processes as user-owned and preserve their recorded ownership bounda
 - The then-promoted `build-hip/maya` on both hosts had MD5 `cbd9e99a6a49e9107b0db3190a40766a`. Both hosts have matching tuning and model configs. Rank0 llama-swap's health timeout was later raised to 1800 seconds as a cold-start workaround (#105). Previous files are backed up on both hosts in `/home/ugo/software/project-maya-before-prefill-90-promotion`.
 - Acceptance is not a bit-exactness claim: a strict Maya-S historical reference differed on 12 of 256 raw picks, and one cold Maya-L baseline response differed from repeats. Full candidate API/CLI regression was not repeated. The existing 3008-row receive limit and cold/startup variability remain. Preserve the evidence; don't claim these were fixed.
 - The earlier prefill checkpoint is immutable `tp-v1.1.43` (then VERSION `1.1.43`);
-  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). Current installation is the later user-accepted v58 same-path delivery in §55. Push only to `origin`.
+  the later user-accepted batching source release is `tp-v1.1.44` (VERSION `1.1.44`). Current installation is the v1.1.65 same-path delivery in §58 (user test pending); the user-accepted v58 delivery in §55 is backed up. Push only to `origin`.
 
 ## Operating rules
 
