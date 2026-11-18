@@ -200,7 +200,7 @@ try:
 finally:
     if hasattr(engine,'proc'):
         result['rank0_pid']=engine.proc.pid
-        os.environ['STRATA_ENGINE_QUIT_S']='5'
+        os.environ['MAYA_ENGINE_QUIT_S']=os.environ['STRATA_ENGINE_QUIT_S']='5'
         if hasattr(engine,'lines') and engine.max_context>0:
             engine.close()
         else:

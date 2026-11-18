@@ -1,7 +1,7 @@
 # glm-dsa wave 9 (guards): B15.1 the FP16 activation range guard of the prompt path, B15.2 the MMQ read-past guard of
 # the expert banks, B15.5 thread pools from the affinity mask, B15.6 the CUDA-graph generation, B15.7 the
 # random-routing bench mode.
-#   src/core/glm_guards_host.cpp      plain C++: STRATA_GLM_F16_GUARD, the guard's CPU twins, the bank gap ranges, the
+#   src/core/glm_guards_host.cpp      plain C++: MAYA_GLM_F16_GUARD, the guard's CPU twins, the bank gap ranges, the
 #                                     graph generation (every backend; the CPU tests link it directly)
 #   src/kernels/cuda/glmd_guards.cu   the guard kernels and binding table, mmq_malloc / mmq_zero_gaps; joins on any GPU
 #                                     backend because Maya-owned glm_prefill.cu / glm_fast_path.cu call it (HIP: the
@@ -75,5 +75,7 @@ if(STRATA_BUILD_TESTS AND (STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP) AND TARGET s
   target_link_libraries(glmd_mmq_pad_gpu_test PRIVATE strata_mmq strata_engine ggml-base)
   glm_dsa_hip_links(glmd_mmq_pad_gpu_test)
   add_test(NAME glmd_mmq_pad_gpu_test COMMAND glmd_mmq_pad_gpu_test)
-  set_tests_properties(glmd_mmq_pad_gpu_test PROPERTIES LABELS gpu SKIP_RETURN_CODE 77)
+  # (a TIMEOUT of its own: without one a command-line ctest --timeout 150 applied; the CPU quantization of its
+  # experts is its long part - minutes on a 2 GHz Xeon until it quantized 512 rows a case)
+  set_tests_properties(glmd_mmq_pad_gpu_test PROPERTIES LABELS gpu SKIP_RETURN_CODE 77 TIMEOUT 600)
 endif()

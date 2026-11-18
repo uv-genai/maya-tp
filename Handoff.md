@@ -1,3 +1,5 @@
+> **In progress (2026-11-17):** sequential upstream v1.1.59–v1.1.65 integration on `claude/upstream-v1.1.59-v1.1.65` (worktree `/home/ugo/software/project-maya-upstream-v59-v65`); read §57. The host2 canonical checkout stays on `main`.
+
 > **Release checkpoint:** `tp-v1.1.45` / numeric VERSION `1.1.45`; publication, immutable target and CI are recorded in #170 and §56. User-accepted runtime selection remains §55.
 
 > **Current runtime (2026-11-11):** read §55 / #169. At the user's explicit request, validated v58 GLM/DeepSeek executables now replace the files at their existing paths on both hosts. Launcher/config paths and files are unchanged; the user reports the installed builds are working fine and accepts them. §54 records the completed upstream integration.
@@ -37,6 +39,7 @@ The user reports hours of successful use including DeepSWE benchmarks.
 7. **Stop only validation processes you started**, using recorded PIDs/process groups. The user launches their own processes. No name-wide `pkill`, port-wide killing, or unrelated service inspection/control; prior validation permission is not standing permission to stop user processes.
 8. **Binaries are per-host.** Select matching review builds on both hosts and verify hashes before testing. Preserve the promoted canonical production binaries and the protected remote source; do not overwrite them as routine test setup. `run_bench.sh` uses rank0 `/tmp/maya-tp2`; verify its executable rather than assuming it matches production.
 9. **Stop an owned rank0 server before its owned engine** to prevent respawn and release its executable. Track those processes at launch. Do not clear a busy environment by name or port. Older harness cleanup is tracked in #83 and must not run against user processes.
+10. **No GitHub CI (user, 2026-11-17).** Run `tools/local_gates.sh` at the exact commit (and GPU checks for engine changes) before any push; never push to find out whether code works.
 
 ## 3. Git / GitHub
 
@@ -3432,3 +3435,54 @@ Preserve Flash TP2/MTP/DSpark/default/batching contracts and all qualification
 limits in the notes. #133/#165/#166/#167 remain open. Publication alone does not
 resolve those numerical/performance/full-model follow-ups. Consult #170 before
 attempting another tag/release; do not republish or move an existing tag.
+
+
+## 57. Upstream v1.1.59–v1.1.65 sequential integration (2026-11-17)
+
+The user requested sequential per-tag integration of upstream v1.1.59–v1.1.65.
+Branch `claude/upstream-v1.1.59-v1.1.65` from `main` `d6b53f8`, in the worktree
+`/home/ugo/software/project-maya-upstream-v59-v65`. **Do not merge on the host2
+canonical checkout:** host1's launcher starts rank 1 from
+`/home/ugo/software/project-maya` on host2 and production configs read its
+`tools/hip` tuning tables, so it stays on `main`. Harness and raw output are in
+`/home/ugo/software/maya-upstream-20261117/` (moved off `/tmp`; the earlier
+`/tmp` harness was lost at a reboot). Runtime/build trees and frozen controls are
+the §54 ones (`engines/v1.1.58` = installed §55 bytes).
+
+| Tag | State |
+| --- | --- |
+| v1.1.59 | Source `147d2684`; local gates and six Flash cases pass (0 differences vs v1.1.58); [report](docs/upstream/v1.1.59.md) |
+| v1.1.60 | Merge `aab6f369`; local gates and six Flash cases pass (0 differences vs v1.1.59); [report](docs/upstream/v1.1.60.md) |
+| v1.1.61 | Merge `d6e3bc87` + TP2 fast-prefill refusal `b3048fff`; local gates and six Flash cases pass (0 differences vs v1.1.60); [report](docs/upstream/v1.1.61.md) |
+| v1.1.62 | Partial merge `d664bc7b` (user: exclude NVIDIA pairing and TCP DeepSeek pool); local gates, GPU unit tests and six Flash cases pass (0 differences vs v1.1.61); [report](docs/upstream/v1.1.62.md) |
+| v1.1.63 | Partial merge `1b948224` (engine-restart fix ported onto the TP2 pump); local gates and six Flash cases pass (0 differences vs v1.1.62); [report](docs/upstream/v1.1.63.md) |
+| v1.1.64 | Partial merge `5310f627`; local gates, new unit tests and six Flash cases pass (0 differences vs v1.1.63); [report](docs/upstream/v1.1.64.md) |
+| v1.1.65 | Partial merge `d717bdf9` + TP2 first cause over the engine-stopped error `7f1ba00d` + test include `736e1cd7`; local gates and six Flash cases pass (0 differences vs v1.1.64); matched GLM repeat: no warm regression; [report](docs/upstream/v1.1.65.md) |
+
+All seven checkpoints pass. Next: one PR from `claude/upstream-v1.1.59-v1.1.65` into `main`, merged only
+on the user's approval; production binaries, launchers and the host2 canonical checkout stay as they are.
+
+v1.1.59 findings to preserve: upstream inverted settings aliases (code reads
+`MAYA_*`, `STRATA_*` only as fallback), so fork code must read and set `MAYA_*`
+names; the hipBLASLt tuning parser accepts both header names while committed
+tables keep the legacy one (installed engines read only the legacy name);
+DeepSeek's borrow clear stays one-shot; DeepSeek keeps its eager DSpark round (no lazy drafter, so v1.1.61's trusted lookup is inert); fast prompt reading (`DS4_YOCO_CONE`) is refused for DeepSeek TP2. From v1.1.62 on, upstream's AMD APU + NVIDIA pairing and the TCP DeepSeek pool are excluded (user, 2026-11-17): merge each tag with `-s ours` and apply only in-scope commits. During validation the peer host
+hard-stopped once mid-load (no panic/OOM logged, ~62 GiB free); after the user
+restarted it the same case passed. Cause unknown; watch for recurrence.
+
+**No GitHub CI (the user's rule, 2026-11-17).** The workflow was deleted. Code
+is validated on the hosts at the exact commit with `tools/local_gates.sh` (plus
+GPU checks for engine changes) and only then pushed; never push to find out.
+Earlier sections' exact-head/post-merge CI records are history, not a step to
+repeat.
+
+**Background jobs are bounded (2026-11-18).** The first v1.1.65 chain was detached with `&`; it failed at the
+gates at 00:08 and its `pgrep -f` watcher matched its own command line, so nothing reported until the user asked at
+08:37. Long steps now run only as tracked, time-bounded background jobs (`timeout` sized to a few times the step:
+gates ~5 min, build 3-10 min, six-case checkpoint ~11 min); a user-level PreToolUse hook
+(`~/.claude/hooks/no-silent-stall.py`) denies detached jobs, unbounded background commands and `pgrep -f` waits.
+
+Issues: epic #179, phases #172–#178 (one per tag). The agent's non-interactive
+shell lacks `GH_TOKEN`; run `gh`/`git push` through `bash -ic` on strix-halo-2.
+Never run `gh` or push on strix-halo-1.
+

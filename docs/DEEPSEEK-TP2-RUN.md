@@ -18,6 +18,9 @@ The current user-accepted installation is recorded below and in Handoff §55.
 
 <a id="accepted-runtime-on-the-users-pair"></a>
 
+
+> **Upstream v1.1.61 fast prompt reading** (`fast_prefill`, `DS4_YOCO_CONE=1`) is refused for TP2 before bootstrap: each rank would plan its prompt rows alone. Single-host DeepSeek keeps the opt-in switch.
+
 ## Current runtime on the user's pair
 
 Start the existing `maya-deepseek-xs-mtp` or `maya-deepseek-s-mtp` llama-swap

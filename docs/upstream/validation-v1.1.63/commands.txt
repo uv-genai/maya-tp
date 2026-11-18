@@ -1,0 +1,6 @@
+Source checkpoint: 1b94822409e30bb6c46b289f811c8d7dc70e72b7 (merge of upstream v1.1.63 = 6651b5b1 with the fork's tree plus f964396b ported onto the fork's TP2 pump)
+Previous checkpoint: v1.1.62 (d664bc7b engines; v1.1.63 engines are byte-identical, only serve/ changed)
+git merge -s ours --no-commit upstream/v1.1.63 ; git show --format= f964396b | git apply --3way --index   (two server.py hunks resolved by hand)
+tools/local_gates.sh ; build.py --label v1.1.63 (runtime sync; engines identical to v1.1.62) ; finalize.py ; components-rejections.py v1.1.63
+checkpoint.py --label v1.1.63 --previous v1.1.62 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+collect.py --label v1.1.63 --previous v1.1.62

@@ -1,0 +1,203 @@
+[
+  {
+    "name": "glm-reject-ablate",
+    "pid": 277562,
+    "start": "2844475",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya",
+    "sha256": "c0d8872eb39cd5834da773b373fc2bd4cc16e10a176a5ccf5249edfc0ff35a2d",
+    "args": [
+      "--glm-pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--tp-world-size",
+      "2",
+      "--ablate",
+      "/tmp/maya-upstream-no-direction.gguf"
+    ],
+    "started": 1794925080.2166214,
+    "expected_exit_code": 1,
+    "exit_code": 1,
+    "finished": 1794925080.5050197,
+    "expected_message": "GLM refusal ablation is unavailable with TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "glm-reject-ablate-layer",
+    "pid": 277563,
+    "start": "2844504",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya",
+    "sha256": "c0d8872eb39cd5834da773b373fc2bd4cc16e10a176a5ccf5249edfc0ff35a2d",
+    "args": [
+      "--glm-pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--tp-world-size",
+      "2",
+      "--ablate-layer",
+      "1"
+    ],
+    "started": 1794925080.5054276,
+    "expected_exit_code": 1,
+    "exit_code": 1,
+    "finished": 1794925080.591412,
+    "expected_message": "GLM refusal ablation is unavailable with TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "glm-reject-ablate-scale",
+    "pid": 277564,
+    "start": "2844512",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya",
+    "sha256": "c0d8872eb39cd5834da773b373fc2bd4cc16e10a176a5ccf5249edfc0ff35a2d",
+    "args": [
+      "--glm-pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--tp-world-size",
+      "2",
+      "--ablate-scale",
+      "0.35"
+    ],
+    "started": 1794925080.5918543,
+    "expected_exit_code": 1,
+    "exit_code": 1,
+    "finished": 1794925080.6778898,
+    "expected_message": "GLM refusal ablation is unavailable with TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "glm-reject-ablate-default",
+    "pid": 277565,
+    "start": "2844521",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya",
+    "sha256": "c0d8872eb39cd5834da773b373fc2bd4cc16e10a176a5ccf5249edfc0ff35a2d",
+    "args": [
+      "--glm-pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--tp-world-size",
+      "2",
+      "--ablate-default",
+      "off"
+    ],
+    "started": 1794925080.6783626,
+    "expected_exit_code": 1,
+    "exit_code": 1,
+    "finished": 1794925080.7642689,
+    "expected_message": "GLM refusal ablation is unavailable with TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "ds4-reject-ablate",
+    "pid": 277566,
+    "start": "2844530",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya-ds4",
+    "sha256": "10b16799a09cd2daf1f0f3c03efc1b206d3e377c62d9c0a367c3f5d76a1d8abb",
+    "args": [
+      "--pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--serve",
+      "--tp2-rank",
+      "0",
+      "--ablate",
+      "/tmp/maya-upstream-no-direction.gguf"
+    ],
+    "started": 1794925080.76469,
+    "expected_exit_code": 2,
+    "exit_code": 2,
+    "finished": 1794925080.8531375,
+    "expected_message": "ablation is unsupported for DeepSeek TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "ds4-reject-ablate-layer",
+    "pid": 277567,
+    "start": "2844538",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya-ds4",
+    "sha256": "10b16799a09cd2daf1f0f3c03efc1b206d3e377c62d9c0a367c3f5d76a1d8abb",
+    "args": [
+      "--pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--serve",
+      "--tp2-rank",
+      "0",
+      "--ablate-layer",
+      "1"
+    ],
+    "started": 1794925080.853587,
+    "expected_exit_code": 2,
+    "exit_code": 2,
+    "finished": 1794925080.942083,
+    "expected_message": "ablation is unsupported for DeepSeek TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "ds4-reject-ablate-scale",
+    "pid": 277568,
+    "start": "2844547",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya-ds4",
+    "sha256": "10b16799a09cd2daf1f0f3c03efc1b206d3e377c62d9c0a367c3f5d76a1d8abb",
+    "args": [
+      "--pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--serve",
+      "--tp2-rank",
+      "0",
+      "--ablate-scale",
+      "0.35"
+    ],
+    "started": 1794925080.942617,
+    "expected_exit_code": 2,
+    "exit_code": 2,
+    "finished": 1794925081.0309649,
+    "expected_message": "ablation is unsupported for DeepSeek TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "ds4-reject-ablate-default",
+    "pid": 277569,
+    "start": "2844556",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya-ds4",
+    "sha256": "10b16799a09cd2daf1f0f3c03efc1b206d3e377c62d9c0a367c3f5d76a1d8abb",
+    "args": [
+      "--pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--serve",
+      "--tp2-rank",
+      "0",
+      "--ablate-default",
+      "off"
+    ],
+    "started": 1794925081.0315292,
+    "expected_exit_code": 2,
+    "exit_code": 2,
+    "finished": 1794925081.1192415,
+    "expected_message": "ablation is unsupported for DeepSeek TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  },
+  {
+    "name": "ds4-reject-yoco-cone",
+    "pid": 277570,
+    "start": "2844565",
+    "exe": "/home/ugo/software/project-maya-upstream-20261111-runtime/engines/v1.1.61/maya-ds4",
+    "sha256": "10b16799a09cd2daf1f0f3c03efc1b206d3e377c62d9c0a367c3f5d76a1d8abb",
+    "args": [
+      "--pack",
+      "/tmp/maya-upstream-no-model-or-ablation-file",
+      "--serve",
+      "--tp2-rank",
+      "0"
+    ],
+    "started": 1794925081.1198223,
+    "expected_exit_code": 2,
+    "exit_code": 2,
+    "finished": 1794925081.2079093,
+    "expected_message": "fast prompt reading (DS4_YOCO_CONE) is unsupported for DeepSeek TP2",
+    "passed": true,
+    "before_model_or_bootstrap": true
+  }
+]

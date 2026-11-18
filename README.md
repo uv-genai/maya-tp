@@ -2,8 +2,6 @@
 
 **Tensor parallel inference for very large MoE models on dual AMD Strix Halo systems.**
 
-[![Tests](https://github.com/uv-genai/maya-tp/actions/workflows/tests.yml/badge.svg)](https://github.com/uv-genai/maya-tp/actions/workflows/tests.yml)
-
 Maya-TP is a derived project built on [Project Maya](https://github.com/mw00/project-maya), focused on
 **HIP/ROCm, gfx1151 and Linux**, with two Strix Halo APUs connected over **Thunderbolt/USB4 RDMA**.
 It partitions model weights and computation across the pair to increase inference speed and make larger
@@ -277,8 +275,9 @@ Development and measurements are tracked in [Maya-TP issues](https://github.com/
 Reports should include the model/quant, both hosts' configuration, commit and binary hashes, context,
 draft width, cache/disk counters and reproduction steps. `./maya.sh --report` collects local diagnostics.
 
-GitHub CI runs the HIP compatibility-name gate, server and installer/tools tests,
-plus CPU memory-policy and row-preparation/stub checks. The latest source
+There is no GitHub CI. `tools/local_gates.sh` runs the HIP compatibility-name gate, server and
+installer/tools tests, plus the CPU memory-policy, tuning-table and row-preparation/stub checks, on the
+host at the exact commit before it is pushed. The latest source
 checkpoint passed paired GLM Maya-S and DeepSeek XS/S controls. Its bounded
 measurements and model coverage are in the [v1.1.58 report](docs/upstream/v1.1.58.md).
 GPU parity, large-prompt API, cancellation, forced retries and peer death/recovery were exercised on the
@@ -328,6 +327,7 @@ Their work makes this project's focus on dual Strix Halo tensor parallelism poss
   quant, its Engram tables and the drafter are made from DeepSeek's released weights and keep its license; the vision
   tower comes from DeepSeek's checkpoint, the GGUF option from
   [unsloth's GGUFs](https://huggingface.co/unsloth/DeepSeek-V4.1-Flash-1017-GGUF), the EXL3 options are
+  turboderp's ([2.25 bpw](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3/tree/2.25bpw)) and
   LibertAIDAI's ([2.9](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw) and
   [3.5 bpw](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-3.5bpw)). The optional DFlash2 drafter
   ([GLM-5.3-Flash-DFlash2-GGUF](https://huggingface.co/Anbeeld/GLM-5.3-Flash-DFlash2-GGUF) by Anbeeld) is CC BY-NC-ND

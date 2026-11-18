@@ -1,0 +1,33 @@
+ds4 tp2: rank 0 loaded 54814310400 routed expert bytes (4249600 pinned staging bytes); awaiting peer attachment
+maya ds4 serve: GEN <max_new> [keys] <ids>; GENI <max_new> [keys] <pictures> <ids>; STOP, QUIT
+maya ds4 serve: 2 conversations at once (--parallel): GEN needs rid=<id>; STOP <rid>
+maya ds4 serve: prompt read: 20 tokens in 0.7 s; VRAM free CUDA0 56.4 of 121.0 GB before, 56.3 after
+maya ds4 serve: request 1: prompt 20 tokens = 0 reused + 20 read in 714 ms (28.0 tok/s), 64 generated in 2562 ms (24.98 tok/s, 0 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 20 tokens in 0.4 s; VRAM free CUDA0 56.3 of 121.0 GB before, 56.3 after
+maya ds4 serve: request 2: prompt 20 tokens = 0 reused + 20 read in 404 ms (49.5 tok/s), 64 generated in 1859 ms (34.43 tok/s, 0 conversations running; drafts 33 of 41 kept)
+maya ds4 serve: prompt read: 1441 tokens in 6.3 s; VRAM free CUDA0 56.3 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 3: prompt 1441 tokens = 0 reused + 1441 read in 6257 ms (230.3 tok/s), 64 generated in 2678 ms (23.90 tok/s, 0 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 1441 tokens in 5.7 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 4: prompt 1441 tokens = 0 reused + 1441 read in 5727 ms (251.6 tok/s), 64 generated in 2009 ms (31.86 tok/s, 0 conversations running; drafts 32 of 40 kept)
+maya ds4 serve: prompt read: 17 tokens in 0.4 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: prompt read: 17 tokens in 0.9 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 5: prompt 17 tokens = 0 reused + 17 read in 406 ms (41.9 tok/s), 64 generated in 2627 ms (24.36 tok/s, 1 conversations running; drafts 31 of 36 kept)
+maya ds4 serve: prompt read: 17 tokens in 0.4 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 6: prompt 17 tokens = 0 reused + 17 read in 882 ms (19.3 tok/s), 64 generated in 4760 ms (13.44 tok/s, 1 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 17 tokens in 0.4 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 7: prompt 17 tokens = 0 reused + 17 read in 403 ms (42.2 tok/s), 64 generated in 2923 ms (21.90 tok/s, 1 conversations running; drafts 28 of 39 kept)
+maya ds4 serve: request 8: prompt 17 tokens = 0 reused + 17 read in 404 ms (42.1 tok/s), 64 generated in 1878 ms (34.08 tok/s, 0 conversations running; drafts 34 of 44 kept)
+maya ds4 serve: prompt read: 14 tokens in 0.1 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: prompt read: 11 tokens in 0.1 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 10: prompt 11 tokens = 0 reused + 11 read in 129 ms (85.5 tok/s), 9 generated in 706 ms (12.75 tok/s, 1 conversations running; drafts 0 of 0 kept)
+maya ds4 serve: prompt read: 1410 tokens in 6.0 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 11: prompt 1410 tokens = 0 reused + 1410 read in 5989 ms (235.4 tok/s), 24 generated in 1178 ms (20.37 tok/s, 1 conversations running; drafts 11 of 12 kept)
+maya ds4 serve: prompt read: 13 tokens in 0.1 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 12: prompt 13 tokens = 0 reused + 13 read in 121 ms (107.1 tok/s), 8 generated in 410 ms (19.51 tok/s, 1 conversations running; drafts 3 of 3 kept)
+maya ds4 serve: request 9: prompt 14 tokens = 0 reused + 14 read in 133 ms (105.4 tok/s), 192 generated in 12077 ms (15.90 tok/s, 0 conversations running; drafts 102 of 124 kept)
+maya ds4 serve: prompt read: 3 tokens in 0.1 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+maya ds4 serve: request 13: prompt 208 tokens = 205 reused + 3 read in 58 ms (51.9 tok/s), 8 generated in 186 ms (42.96 tok/s, 0 conversations running; drafts 4 of 4 kept)
+maya ds4 serve: prompt read: 15 tokens in 0.1 s; VRAM free CUDA0 56.2 of 121.0 GB before, 56.2 after
+ds4: verbs communicator is poisoned: verbs peer closed the bootstrap connection
+ds4: verbs communicator is poisoned: verbs peer closed the bootstrap connection
+maya ds4 serve: request 14: prompt 15 tokens = 0 reused + 15 read in 133 ms (112.5 tok/s), 5 generated in 1058 ms (4.72 tok/s, 0 conversations running; drafts 3 of 3 kept)

@@ -51,7 +51,8 @@ It first asks which model to set up:
   [LibertAIDAI's EXL3 quant at 2.9 bits](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-2.9bpw)
   (211 GB) or [at 3.5 bits](https://huggingface.co/LibertAIDAI/DeepSeek-V4.1-Flash-1017-EXL3-3.5bpw) (258 GB, about
   280 GB of VRAM and RAM; `--ds4-quant exl3-3.5`, its own folder; a second quant hard-links the Engram tables from the
-  first instead of downloading them) and its two Engram tables from [DeepSeek's repo](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)
+  first instead of downloading them), or [turboderp's at 2.25 bits](https://huggingface.co/turboderp/DeepSeek-V4.1-Flash-1017-exl3/tree/2.25bpw)
+  (159 GB, about 160 GB of VRAM and RAM; `--ds4-quant exl3-2.25`), and its two Engram tables from [DeepSeek's repo](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)
   (203 GB), on its own engine (`build/maya-ds4`): Linux, NVIDIA V100 or newer (pictures: RTX 30 / A100 or newer); AMD installer support. It is fast with about 230 GB
   of VRAM and RAM together; with less, the setup warns and the engine reads the experts that do not fit from the
   model's files on the SSD (`--mmap-experts auto`), much slower - one RTX 3090 with 64 GB of RAM: prompts about 50
@@ -59,7 +60,7 @@ It first asks which model to set up:
   contexts are 32K-1M (256K recommended where the PC's VRAM + RAM hold the model's files, else 64K; 512K and 1M
   take VRAM from the expert cache, and a prompt that long reads
   slowly - the indexer's work grows with the square of its length); step 5 shows both
-  sources and checks every file against its pinned size (and, once downloaded, its sha256: `tools/ds4/download.json`, `download-3.5bpw.json`);
+  sources and checks every file against its pinned size (and, once downloaded, its sha256: `tools/ds4/download.json`, `download-3.5bpw.json`, `download-2.25bpw.json`);
   `--model-dir DIR` uses files you already have; the pack is `DIR/maya-ds4/` (`tools/ds4/pack.py`, about a minute);
   pictures need nothing more - the model's own vision tower runs in the engine; the config is `maya-ds4.json`, with
   tensor parallel across pairs of equal GPUs (`--tp 2`). The engine balances its own layer split; `./maya.sh --calibrate`
@@ -184,7 +185,7 @@ local edits first. The updated dashboard accepts both prefixed and legacy releas
 | `--download-model` | download the model without asking (the commands and size are still printed) |
 | `--model NAME` | which model and files, without asking. Maya's quants by their setup id - the model first, then the tier (XS, S, M, L by the experts' bits): `glm-maya-s`, `glm-maya-s24`, `glm-maya-m`, `glm-maya-m-derisked`, `glm-maya-l`, `deepseek-maya-xs`, `deepseek-maya-s`, `deepseek-maya-m`, `minimax-maya-xs`, `minimax-maya-s` (or the full name, e.g. `MiniMax-M3.1-Flash-Maya-XS`). Or a model, its files asked: `DeepSeek-V4.1-Flash-1017`, `MiniMax-M3.1-Flash`. The names used before still work: `Maya-S-v2-IQ2_XXS` (GLM-5.3-Flash · Maya-S), `Maya-S24`, `Maya-M`, `Maya-M-Derisked`, `Maya-L`, and `EXL3-3.05bpw` / `EXL3-4.05bpw` / `EXL3-sc_4.10bpw` - an experimental EXL3 quant of GLM-5.3-Flash at 3.05 or 4.05 bits per weight, or the self-calibrated one at 4.10 with 8-bit attention and shared experts ([3.05bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/3.05bpw), 125.3 GB; [4.05bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/4.05bpw), 165.2 GB; [sc_4.10bpw](https://huggingface.co/turboderp/GLM-5.3-Flash-exl3/tree/sc_4.10bpw), 167.8 GB; all with the MTP block) that the engine reads in place from its safetensors: NVIDIA and AMD installer support; 3.05bpw tested on Linux, none measured against the FP8 model (`EXL3-sc_4.10bpw` is not in the setup's list: named by hand, or set up before, it works as before) |
 | `--model-dir DIR` | use DeepSeek-V4.1-Flash-1017's files you already have: the folder with a GGUF's shards, or with the EXL3 quant's files and the Engram shards `model-00047-of-00048.safetensors` / `model-00048-of-00048.safetensors` of DeepSeek's repo (it must be writable: the pack goes inside it). Or an EXL3 folder of GLM-5.3-Flash or MiniMax-M3.1-Flash at any bit rate that is not one of the listed downloads (turboderp's other branches, Mia-AiLab's other bit rates): the setup reads the folder's own `config.json` and `model.safetensors.index.json`, checks each file whole by its header, never offers the listed downloads for it, writes a config named after the folder (`maya-<folder>.json`) and uses the folder's own sampling (`generation_config.json`) and chat template (`chat_template.jinja`) - GLM's / MiniMax's where the folder has none. MiniMax: `--model MiniMax-M3.1-Flash --model-dir DIR` is the same |
-| `--ds4-quant Q` | DeepSeek-V4.1-Flash-1017's files: `maya-s`, `maya-xs` (Maya's quants, the same as `--model deepseek-maya-s` / `deepseek-maya-xs`; Maya-S the default), `gguf-q8` (unsloth's UD-Q8_K_XL GGUF), `gguf-q4` (its UD-Q4_K_XL: dense weights Q8_0; not in the setup's list, named by hand), `exl3` (LibertAIDAI's EXL3 quant at 2.9 bits), `exl3-3.5` (its 3.5-bit quant: closer to the original, about 280 GB of VRAM and RAM), `abliterated-128g` / `abliterated-256g` (orcarouter's abliterated model as its Mix-128G / Mix-256G GGUF, with Maya's Q6_K n-gram tables; `abliterated`: the one this PC holds; a gated repo: `HF_TOKEN` or `hf auth login`); the EXL3 quants need NVIDIA V100 or newer (pictures: RTX 30 / A100 or newer) and are offered only there, and on AMD ([EXL3 HIP reference](EXL3_HIP.md)) |
+| `--ds4-quant Q` | DeepSeek-V4.1-Flash-1017's files: `maya-s`, `maya-xs` (Maya's quants, the same as `--model deepseek-maya-s` / `deepseek-maya-xs`; Maya-S the default), `gguf-q8` (unsloth's UD-Q8_K_XL GGUF), `gguf-q4` (its UD-Q4_K_XL: dense weights Q8_0; not in the setup's list, named by hand), `exl3` (LibertAIDAI's EXL3 quant at 2.9 bits), `exl3-3.5` (its 3.5-bit quant: closer to the original, about 280 GB of VRAM and RAM), `exl3-2.25` (turboderp's EXL3 quant at 2.25 bits: the smallest, about 160 GB of VRAM and RAM), `abliterated-128g` / `abliterated-256g` (orcarouter's abliterated model as its Mix-128G / Mix-256G GGUF, with Maya's Q6_K n-gram tables; `abliterated`: the one this PC holds; a gated repo: `HF_TOKEN` or `hf auth login`); the EXL3 quants need NVIDIA V100 or newer (pictures: RTX 30 / A100 or newer) and are offered only there, and on AMD ([EXL3 HIP reference](EXL3_HIP.md)) |
 | `--mm3-quant Q` | MiniMax-M3.1-Flash's files: `exl3` (Mia-AiLab's EXL3 quant at 3.5 bits, NVIDIA), `maya-xs` or `maya-s` (Maya's GGUF quants, the same as `--model minimax-maya-xs` / `minimax-maya-s`; `gguf-xs` / `gguf-s` before) |
 | `--no-vision` | text only: no image encoder (DeepSeek, MiniMax: their vision tower off) |
 | `--draft mtp` / `--draft dflash2` | how the model drafts tokens ahead: its MTP block (the default), or a DFlash2 drafter - downloaded (0.7 GB) into `DIR/GLM-5.3-Flash-DFlash2/` and passed as `--dflash` (Maya-L: +44% on nine GPUs, +12% on two, +19% on one GPU; NVIDIA RTX 30 / A100 and newer - older cards keep the MTP block unless you pass this; the drafter's license is CC BY-NC-ND 4.0, non-commercial use only). The [speed calibration](SETTINGS.md#the-speed-calibration) then keeps it only if it is faster on your PC |
@@ -222,14 +223,14 @@ requests. In the config, `maya-<model>.json`:
 
 ```json
 "idle_unload_s": 900,
-"env": {"STRATA_GLM_SLOT_KEEP": "1"}
+"env": {"MAYA_GLM_SLOT_KEEP": "1"}
 ```
 
 (`--idle-unload 900` on the server's command line does the same.) After that many seconds with no request running or
 waiting, the engine ends: its GPU memory and its pinned RAM tier are given back (an RTX 3090 with Maya-S24: 22.9 GB of
 VRAM and 79 GB of RAM). The dashboard and `/health` say `unloaded`, and `/v1/models` still lists the model with the
 status `unloaded`. The next request loads the model again - about a minute before its first token - and the experts
-in VRAM warm up again over the next answers. With `STRATA_GLM_SLOT_KEEP=1` the conversation in the model is written to
+in VRAM warm up again over the next answers. With `MAYA_GLM_SLOT_KEEP=1` the conversation in the model is written to
 the disk on the way out and read back, so the next turn of the same chat reads only its new tokens (1,630 of 1,690
 prompt tokens reused after an unload). `0` (the default): never. A new `--setup` writes the config again: add the
 lines back after it.

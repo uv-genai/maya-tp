@@ -1093,11 +1093,11 @@ __global__ void __launch_bounds__(kThreads) mx_set_wmma_kernel(const SetK a) {
         }
 }
 #endif
-// sm_70 and later (WMMA F16) / AMD gfx11, gfx12 (wave32 WMMA); STRATA_DS4_NO_TC=1 keeps the F32 kernel - per device
+// sm_70 and later (WMMA F16) / AMD gfx11, gfx12 (wave32 WMMA); MAYA_DS4_NO_TC=1 keeps the F32 kernel - per device
 // (the GPUs of a run need not be of one generation: a card before sm_70 beside newer ones keeps its F32 kernel)
 bool tc_ok() {
     static const bool off = [] {
-        const char* v = std::getenv("STRATA_DS4_NO_TC");
+        const char* v = std::getenv("MAYA_DS4_NO_TC");
         return v != nullptr && v[0] == '1';
     }();
     static std::atomic<int> known[64];   // 0: not asked yet, 1: no, 2: yes
@@ -1170,7 +1170,7 @@ bool prepare(cudaStream_t s) { return scratch(s) != nullptr; }
 namespace {
 std::atomic<int> g_q8_mode{-1};   // (tests: q8_mode)
 bool q8_env(const char* name) {   // (unset: on)
-    const char* v = std::getenv((std::string("STRATA_") + name).c_str());
+    const char* v = std::getenv((std::string("MAYA_") + name).c_str());
     if (v == nullptr) v = std::getenv(name);
     return v == nullptr || std::atoi(v) != 0;
 }

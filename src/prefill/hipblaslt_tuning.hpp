@@ -23,6 +23,13 @@ struct TuningRow {
 
 class TuningTable {
 public:
+    /// Upstream v1.1.59 names the header MAYA_HIPBLASLT_TUNING_V1. This fork also accepts the legacy
+    /// STRATA_HIPBLASLT_TUNING_V1 that its committed tables and tools/hip/tune_hipblaslt still write: an engine built
+    /// before v1.1.59 accepts only the legacy name and silently falls back to hipBLASEx on any other, and each TP2
+    /// rank reads the tables of its own host's checkout.
+    static bool header_magic(const std::string& magic) {
+        return magic == "MAYA_HIPBLASLT_TUNING_V1" || magic == "STRATA_HIPBLASLT_TUNING_V1";
+    }
     bool load(const std::string& path, const std::string& expected_arch, int expected_version, std::string& err) {
         std::ifstream input(path);
         if (!input) {
@@ -44,7 +51,7 @@ public:
                 std::string arch;
                 int version = 0;
                 std::string extra;
-                if (!(row >> magic >> arch >> version) || (row >> extra) || magic != "STRATA_HIPBLASLT_TUNING_V1") {
+                if (!(row >> magic >> arch >> version) || (row >> extra) || !header_magic(magic)) {
                     err = "invalid tuning header at line " + std::to_string(line_number);
                     return false;
                 }
@@ -120,7 +127,7 @@ private:
     std::vector<TuningRow> rows_;
 };
 
-// The tuning-table list (STRATA_HIPBLASLT_TUNING): paths joined by the OS's path-list separator, ':' on Linux and
+// The tuning-table list (MAYA_HIPBLASLT_TUNING): paths joined by the OS's path-list separator, ':' on Linux and
 // ';' on Windows (maya.py joins them with os.pathsep). On Windows a ':' still separates too, for configs written
 // before the switch, except the one of a drive prefix ("C:\..." or "C:/..."), which belongs to the path.
 // Empty entries are skipped.

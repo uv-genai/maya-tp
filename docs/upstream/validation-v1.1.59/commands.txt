@@ -1,0 +1,18 @@
+Source checkpoint: 147d26845ee8121f34187bc8b3021cf774e752f6 on claude/upstream-v1.1.59-v1.1.65 (worktree /home/ugo/software/project-maya-upstream-v59-v65)
+Parent source: d6b53f8c6449639de017b96bae2f93c67a73de5f (main, tp-v1.1.45); upstream tag v1.1.59 = 027992cb
+Previous checkpoint: v1.1.58 frozen engines (same bytes as the installed §55 binaries) and archived results (docs/upstream/validation-v1.1.58/candidate)
+Isolated runtime, same absolute path on both hosts: /home/ugo/software/project-maya-upstream-20261111-runtime
+Isolated local build: /home/ugo/software/project-maya-upstream-20261111-build
+Harness and raw output: /home/ugo/software/maya-upstream-20261117/ (copied from validation-v1.1.58 with paths moved off /tmp)
+Lead: strix-halo-2.local (192.168.1.92); peer: strix-halo-1.local (192.168.1.22), direct SSH; transport usb4_rdma5, bootstrap port 19351
+Production checkout /home/ugo/software/project-maya was returned to main during this checkpoint; its tuning tables (legacy header) are read by the harness configs.
+
+/home/ugo/software/project-maya/.venv/bin/python build.py --label v1.1.59 --jobs 6        (cwd: the worktree)
+/home/ugo/software/project-maya/.venv/bin/python finalize.py --label v1.1.59 --commit 147d26845ee8121f34187bc8b3021cf774e752f6
+/home/ugo/software/project-maya/.venv/bin/python components-rejections.py v1.1.59
+/home/ugo/software/project-maya/.venv/bin/python checkpoint.py --label v1.1.59 --previous v1.1.58 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+  (interrupted by the peer host loss during ds4-xs-slots2; after the user restarted the peer, the same command with --resume reused the three completed cases and ran the remaining three)
+for kind in control:v1.1.58 candidate:v1.1.59: case.py --name perf-v59-s2-<kind> --family ds4 --model s --engine <runtime>/engines/<label>/maya-ds4 --slots 2 --tokens 64 --transition-waves 3
+collect.py --label v1.1.59 --previous v1.1.58 ; collect-extra.py
+
+Attempt 1 (engines f6bf54d1) and the aborted attempt 2 case are summarized in attempts.json; raw folders stay in the harness directory.

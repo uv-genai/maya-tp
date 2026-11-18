@@ -1,0 +1,9 @@
+Source checkpoint: aab6f369c93eb2ec1017cc211c1871fed6df5307 on claude/upstream-v1.1.59-v1.1.65 (worktree /home/ugo/software/project-maya-upstream-v59-v65)
+Previous checkpoint: v1.1.59 (147d2684 engines, frozen under engines/v1.1.59; results in validation-v1.1.59/candidate)
+Upstream tag v1.1.60 = 8b0a449c
+Runtime/build/harness: as in validation-v1.1.59/commands.txt; lead strix-halo-2, peer strix-halo-1, usb4_rdma5, port 19351
+
+tools/local_gates.sh                     (MAYA_PYTHON / STRATA_GGUF_PY from the main checkout)
+build.py --label v1.1.60 --jobs 6 ; finalize.py --label v1.1.60 --commit aab6f369c93eb2ec1017cc211c1871fed6df5307 ; components-rejections.py v1.1.60
+checkpoint.py --label v1.1.60 --previous v1.1.59 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+collect.py --label v1.1.60 --previous v1.1.59

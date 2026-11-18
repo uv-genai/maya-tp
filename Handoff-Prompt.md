@@ -1,3 +1,7 @@
+**There is no GitHub CI (the user's rule, 2026-11-17):** validate on the hosts at the exact commit with
+`tools/local_gates.sh` (and GPU checks for engine changes), then push. Never push code to find out
+whether it works. CI records in older sections are history. The current campaign is Handoff.md §57.
+
 # Handoff-Prompt — Maya-TP restart
 
 Read Handoff.md §56 for source release tp-v1.1.45 (numeric VERSION 1.1.45),

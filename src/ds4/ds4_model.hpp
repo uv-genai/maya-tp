@@ -113,6 +113,7 @@ struct FeedPlan {
     int n = 0, logits_rows = 0, slot = -1;
     std::vector<int> ends;
     int skip = -1, cut_k = 0, cut_r = 0;
+    std::vector<int> cone;   // (the cone: the row each layer from `skip` on starts at, later layer by layer; empty: the cut)
 };
 
 struct Stats {
@@ -136,7 +137,7 @@ struct Stats {
     int64_t eg_cached = 0, eg_cache_cap = 0;          // the row cache's rows held, its capacity
     int64_t eg_cache_row_bytes = 0;                   // each cached row's payload bytes
     int64_t swaps = 0;                // experts the cache moved into VRAM
-    int64_t skipped = 0;              // routed experts STRATA_DS4_DISK_SKIP_W left out (light, not in RAM)
+    int64_t skipped = 0;              // routed experts MAYA_DS4_DISK_SKIP_W left out (light, not in RAM)
     int skip_on = -1;                 // DISK_SKIP_AUTO: 1 skipping, 0 off (warm), -1 not in use
     int64_t skip_switches = 0;        // ... the times it switched
     double skip_cold = 0.0;           // ... the cold share over its window (while skipping)

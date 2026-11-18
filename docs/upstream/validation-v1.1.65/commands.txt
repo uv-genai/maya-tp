@@ -1,0 +1,9 @@
+Source checkpoint: 736e1cd7616c61b4de53cf2c0d6777a285fb4cfd (merge d717bdf9 of upstream v1.1.65 = c81fab6c with the fork's tree plus 29 in-scope commits; 7f1ba00d TP2 first cause over the engine-stopped error; 736e1cd7 <vector> include in glm_memory_test)
+Previous checkpoint: v1.1.64 (7b0fcabb; engines from 5310f627)
+git merge -s ours --no-commit upstream/v1.1.65 ; git show --format= <commit> | git apply --3way --index   (per in-scope commit; manual resolutions in serve/server.py, src/ds4/ds4_main.cpp, docs/SETTINGS.md)
+tools/local_gates.sh ; build.py --label v1.1.65 --jobs 6 ; finalize.py --label v1.1.65 --commit 736e1cd7 ; components-rejections.py v1.1.65
+c++ -std=c++20 -O2 -UNDEBUG -Wall -Wextra -Werror -Iinclude tests/stall_watch_test.cpp -pthread ; run   (now in tools/local_gates.sh)
+checkpoint.py --label v1.1.65 --previous v1.1.64 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+glm-repeat/repeat-v65-glm.sh: rounds 1,2 x (control v1.1.64, candidate v1.1.65) x (case.py --slots 1 ; case.py --slots 2 --transition-waves 3 --fatal)
+collect.py --label v1.1.65 --previous v1.1.64
+Every long step ran as a tracked, time-bounded background job (timeout 30-40 min); the first chain attempt, detached without a bound, failed unseen at the gates (missing <vector>) - see Handoff 57.

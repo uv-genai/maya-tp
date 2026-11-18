@@ -1,0 +1,10 @@
+Source checkpoint: b3048fff44bb05ecc3b084e09d8275d4909092f5 (merge d6e3bc87 + TP2 fast-prefill refusal) on claude/upstream-v1.1.59-v1.1.65
+Previous checkpoint: v1.1.60 (aab6f369 engines, frozen under engines/v1.1.60; results in validation-v1.1.60/candidate)
+Upstream tag v1.1.61 = f66a913c
+Runtime/build/harness: as in validation-v1.1.59/commands.txt; lead strix-halo-2, peer strix-halo-1, usb4_rdma5, port 19351
+
+tools/local_gates.sh
+build.py --label v1.1.61 --jobs 6 ; finalize.py --label v1.1.61 --commit b3048fff44bb05ecc3b084e09d8275d4909092f5
+components-rejections.py v1.1.61     (eight ablation refusals + the new DeepSeek TP2 DS4_YOCO_CONE refusal)
+checkpoint.py --label v1.1.61 --previous v1.1.60 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+collect.py --label v1.1.61 --previous v1.1.60

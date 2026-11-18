@@ -161,6 +161,40 @@ class RequestTuningBoundary(unittest.TestCase):
                         generate.assert_not_called()
 
 
+class FastPrefillConfigBoundary(unittest.TestCase):
+    PAIRS = (("maya-ds4", ["--tp2-rank", "0"]), ("/review/tools/ds4/tp2_rank.py", ["--rank", "0"]))
+
+    def test_paired_deepseek_refuses_fast_prompt_reading(self):
+        for exe, args in self.PAIRS:
+            base = {"exe": exe, "args": args, "backend": "hip"}
+            models.check_tp2_fast_prefill_config(base)
+            models.check_tp2_fast_prefill_config({**base, "fast_prefill": False, "env": {"DS4_YOCO_CONE": "0"}})
+            for cfg in ({**base, "fast_prefill": True}, {**base, "env": {"DS4_YOCO_CONE": "1"}}):
+                before = copy.deepcopy(cfg)
+                with self.subTest(exe=exe, cfg=cfg), self.assertRaisesRegex(ValueError, "TP2 fast prompt reading"):
+                    models.check_tp2_fast_prefill_config(cfg)
+                self.assertEqual(cfg, before)
+
+    def test_single_host_keeps_the_switch(self):
+        cfg = {"exe": "maya-ds4", "args": [], "backend": "hip", "fast_prefill": True}
+        models.check_tp2_fast_prefill_config(cfg)
+
+    def test_server_refuses_config_before_engine_start(self):
+        from serve import server
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "maya-ds4-paired.json"
+            path.write_text(json.dumps({"exe": "/must-not-start", "args": ["--tp2-rank", "0"], "fast_prefill": True}))
+            errors = io.StringIO()
+            with mock.patch.dict(os.environ), mock.patch.object(sys, "argv", ["server", "--engine", "maya",
+                    "--config", str(path)]), mock.patch.object(sys, "stderr", errors), \
+                    mock.patch.object(server, "StrataEngine") as start:
+                with self.assertRaises(SystemExit) as stopped:
+                    server.main()
+                self.assertEqual(stopped.exception.code, 2)
+                start.assert_not_called()
+                self.assertIn("TP2 fast prompt reading", errors.getvalue())
+
+
 class AblationConfigBoundary(unittest.TestCase):
     def test_pair_detection_matches_both_launchers_and_last_repeated_glm_option(self):
         for cfg, paired in (({"args": []}, False),

@@ -1,0 +1,67 @@
+{
+  "order": [
+    "control",
+    "candidate",
+    "control2",
+    "candidate2"
+  ],
+  "runs": {
+    "control": {
+      "sha256": "b83d17086f82af5203f1fffc61bc5addc2a0ba431cc56cc266da1384fd049f6b",
+      "decode_tok_s": {
+        "short-off": 25.325471884769104,
+        "short-on": 37.28082949845634,
+        "prefill-off": 23.98441013341328,
+        "prefill-on": 33.7303678718246
+      },
+      "mixed": [
+        26.9100411460614
+      ],
+      "raw_equal_to_control": true
+    },
+    "candidate": {
+      "sha256": "52113c3c626606618ab6b86b88458246a9a1c63ddc8e6bd40762f04b05eac22a",
+      "decode_tok_s": {
+        "short-off": 25.10887049315391,
+        "short-on": 36.85998963312792,
+        "prefill-off": 24.63054187192118,
+        "prefill-on": 33.782000527843756
+      },
+      "mixed": [
+        25.560628434920265
+      ],
+      "raw_equal_to_control": true
+    },
+    "control2": {
+      "sha256": "b83d17086f82af5203f1fffc61bc5addc2a0ba431cc56cc266da1384fd049f6b",
+      "decode_tok_s": {
+        "short-off": 25.045002739297175,
+        "short-on": 36.96003696003696,
+        "prefill-off": 24.019515856633515,
+        "prefill-on": 32.62642740619902
+      },
+      "mixed": [
+        26.365416130524107
+      ],
+      "raw_equal_to_control": true
+    },
+    "candidate2": {
+      "sha256": "52113c3c626606618ab6b86b88458246a9a1c63ddc8e6bd40762f04b05eac22a",
+      "decode_tok_s": {
+        "short-off": 24.444274692536858,
+        "short-on": 36.42365260941324,
+        "prefill-off": 23.97901835893593,
+        "prefill-on": 33.41687552213868
+      },
+      "mixed": [
+        26.59513023486335
+      ],
+      "raw_equal_to_control": true
+    }
+  },
+  "owned_identities_checked": {
+    "lead": 12,
+    "peer": 8,
+    "all_exited": true
+  }
+}

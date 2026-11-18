@@ -1,0 +1,745 @@
+{
+  "label": "v1.1.59",
+  "previous": "v1.1.58",
+  "started": 1794918851.5765674,
+  "cases": {
+    "glm-s-slots1": {
+      "sha256": "857db41ed4595cee6c4d07902dd721e234b17565c730b7e20ef254cf6302e2d2",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 27.332906256673073,
+          "prompt_tokens": 28,
+          "reused": 0,
+          "prefill_ms": 40177.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 42.52222976399935,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 38.70577562745691,
+          "prompt_tokens": 28,
+          "reused": 27,
+          "prefill_ms": 38.0,
+          "drafts_offered": 47,
+          "drafts_accepted": 39,
+          "wall_s": 1.6924249419971602,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 26.346122180141613,
+          "prompt_tokens": 1376,
+          "reused": 0,
+          "prefill_ms": 4310.1,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 6.742775996001001,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 33.655868742111906,
+          "prompt_tokens": 1376,
+          "reused": 1375,
+          "prefill_ms": 39.8,
+          "drafts_offered": 51,
+          "drafts_accepted": 37,
+          "wall_s": 1.9425272720000066,
+          "error": null
+        },
+        {
+          "label": "unicode-off",
+          "generated": 96,
+          "decode_tok_s": 26.976901028494353,
+          "prompt_tokens": 55,
+          "reused": 0,
+          "prefill_ms": 661.2,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 4.222839926002052,
+          "error": null
+        },
+        {
+          "label": "unicode-on",
+          "generated": 96,
+          "decode_tok_s": 31.43006809848088,
+          "prompt_tokens": 55,
+          "reused": 54,
+          "prefill_ms": 38.6,
+          "drafts_offered": 84,
+          "drafts_accepted": 52,
+          "wall_s": 3.0940042050024203,
+          "error": null
+        }
+      ]
+    },
+    "glm-s-slots2": {
+      "sha256": "857db41ed4595cee6c4d07902dd721e234b17565c730b7e20ef254cf6302e2d2",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 25.18594309550982,
+          "prompt_tokens": 28,
+          "reused": 0,
+          "prefill_ms": 979.8,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.5379075419987203,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 31.937721443185787,
+          "prompt_tokens": 28,
+          "reused": 27,
+          "prefill_ms": 39.8,
+          "drafts_offered": 47,
+          "drafts_accepted": 38,
+          "wall_s": 2.044949421000638,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 25.361600951060037,
+          "prompt_tokens": 1376,
+          "reused": 0,
+          "prefill_ms": 4420.5,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 6.947640204998606,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 33.35765662462212,
+          "prompt_tokens": 1376,
+          "reused": 1375,
+          "prefill_ms": 39.2,
+          "drafts_offered": 49,
+          "drafts_accepted": 37,
+          "wall_s": 1.9592444199988677,
+          "error": null
+        },
+        {
+          "label": "mixed-0",
+          "generated": 64,
+          "decode_tok_s": 8.494597966605612,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 469.8,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 8.007560181998997,
+          "error": null
+        },
+        {
+          "label": "mixed-1",
+          "generated": 64,
+          "decode_tok_s": 20.63118532606944,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 457.9,
+          "drafts_offered": 61,
+          "drafts_accepted": 31,
+          "wall_s": 7.476799265001318,
+          "error": null
+        },
+        {
+          "label": "mixed-2",
+          "generated": 64,
+          "decode_tok_s": 28.353712564238883,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 467.2,
+          "drafts_offered": 60,
+          "drafts_accepted": 32,
+          "wall_s": 10.204117361001408,
+          "error": null
+        },
+        {
+          "label": "mixed-3",
+          "generated": 64,
+          "decode_tok_s": 21.51839150023536,
+          "prompt_tokens": 27,
+          "reused": 0,
+          "prefill_ms": 464.0,
+          "drafts_offered": 58,
+          "drafts_accepted": 33,
+          "wall_s": 3.9139216679977835,
+          "error": null
+        },
+        {
+          "label": "life-cancel",
+          "generated": 8,
+          "decode_tok_s": 10.75413362011023,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 435.6,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 1.2287423749985464,
+          "error": null
+        },
+        {
+          "label": "life-long",
+          "generated": 192,
+          "decode_tok_s": 11.96470412283763,
+          "prompt_tokens": 24,
+          "reused": 0,
+          "prefill_ms": 448.0,
+          "drafts_offered": 173,
+          "drafts_accepted": 103,
+          "wall_s": 16.498750007001945,
+          "error": null
+        },
+        {
+          "label": "life-prefill",
+          "generated": 24,
+          "decode_tok_s": 19.502681618722576,
+          "prompt_tokens": 1420,
+          "reused": 0,
+          "prefill_ms": 8413.3,
+          "drafts_offered": 16,
+          "drafts_accepted": 13,
+          "wall_s": 10.874558936997346,
+          "error": null
+        },
+        {
+          "label": "life-refill",
+          "generated": 8,
+          "decode_tok_s": 15.188912094171254,
+          "prompt_tokens": 22,
+          "reused": 0,
+          "prefill_ms": 437.7,
+          "drafts_offered": 6,
+          "drafts_accepted": 2,
+          "wall_s": 10.610728251002001,
+          "error": null
+        },
+        {
+          "label": "life-reuse",
+          "generated": 8,
+          "decode_tok_s": 18.0099054479964,
+          "prompt_tokens": 218,
+          "reused": 23,
+          "prefill_ms": 1432.2,
+          "drafts_offered": 9,
+          "drafts_accepted": 0,
+          "wall_s": 1.878005607999512,
+          "error": null
+        },
+        {
+          "label": "fatal-0",
+          "generated": 1,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 1.3779264129989315,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-1",
+          "generated": 0,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 1.3777820770010294,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-2",
+          "generated": 1,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 1.3788981569996395,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-3",
+          "generated": 0,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 1.3774652050014993,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-later",
+          "generated": 0,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 5.588997737504542e-06,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        }
+      ]
+    },
+    "ds4-xs-slots1": {
+      "sha256": "19c2119bf93a3a49bb522e47e3a78ab0667e4269f9fd358cf530f274b55dcbaf",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 25.21968711825669,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 606.5,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.1450868220017583,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 20.18863758241065,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 403.0,
+          "drafts_offered": 41,
+          "drafts_accepted": 33,
+          "wall_s": 3.5731863850014633,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 24.034850533273243,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 8411.9,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 11.075055643002997,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 31.639311844967374,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 5952.7,
+          "drafts_offered": 40,
+          "drafts_accepted": 32,
+          "wall_s": 7.975897430998884,
+          "error": null
+        }
+      ]
+    },
+    "ds4-xs-slots2": {
+      "sha256": "19c2119bf93a3a49bb522e47e3a78ab0667e4269f9fd358cf530f274b55dcbaf",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 24.727609921953484,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 570.5,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 3.1617246540008637,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 34.10241381147759,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 406.4,
+          "drafts_offered": 41,
+          "drafts_accepted": 33,
+          "wall_s": 2.2846249219983292,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 23.695805102003035,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6217.8,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 8.921214767000492,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 31.20429058995612,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 5964.3,
+          "drafts_offered": 40,
+          "drafts_accepted": 32,
+          "wall_s": 8.016030781000154,
+          "error": null
+        },
+        {
+          "label": "mixed-0",
+          "generated": 64,
+          "decode_tok_s": 13.487313495743066,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 880.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 5.626579813000717,
+          "error": null
+        },
+        {
+          "label": "mixed-1",
+          "generated": 64,
+          "decode_tok_s": 34.05523333155963,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 404.0,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 7.910907996003516,
+          "error": null
+        },
+        {
+          "label": "mixed-2",
+          "generated": 64,
+          "decode_tok_s": 24.30872075357034,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 404.1,
+          "drafts_offered": 36,
+          "drafts_accepted": 31,
+          "wall_s": 3.037591058000544,
+          "error": null
+        },
+        {
+          "label": "mixed-3",
+          "generated": 64,
+          "decode_tok_s": 22.00446965789926,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 403.0,
+          "drafts_offered": 39,
+          "drafts_accepted": 28,
+          "wall_s": 6.349308492001001,
+          "error": null
+        },
+        {
+          "label": "life-cancel",
+          "generated": 8,
+          "decode_tok_s": 11.45639409995704,
+          "prompt_tokens": 11,
+          "reused": 0,
+          "prefill_ms": 121.7,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 0.8806185819994425,
+          "error": null
+        },
+        {
+          "label": "life-long",
+          "generated": 192,
+          "decode_tok_s": 15.77144546940586,
+          "prompt_tokens": 14,
+          "reused": 0,
+          "prefill_ms": 122.2,
+          "drafts_offered": 124,
+          "drafts_accepted": 102,
+          "wall_s": 12.298127071000636,
+          "error": null
+        },
+        {
+          "label": "life-prefill",
+          "generated": 24,
+          "decode_tok_s": 20.65760027543467,
+          "prompt_tokens": 1410,
+          "reused": 0,
+          "prefill_ms": 6187.2,
+          "drafts_offered": 12,
+          "drafts_accepted": 11,
+          "wall_s": 8.227994214998034,
+          "error": null
+        },
+        {
+          "label": "life-refill",
+          "generated": 8,
+          "decode_tok_s": 19.52648279228704,
+          "prompt_tokens": 13,
+          "reused": 0,
+          "prefill_ms": 119.5,
+          "drafts_offered": 3,
+          "drafts_accepted": 3,
+          "wall_s": 7.877440380998451,
+          "error": null
+        },
+        {
+          "label": "life-reuse",
+          "generated": 8,
+          "decode_tok_s": 42.417815482502654,
+          "prompt_tokens": 208,
+          "reused": 205,
+          "prefill_ms": 57.2,
+          "drafts_offered": 4,
+          "drafts_accepted": 4,
+          "wall_s": 0.2470270289995824,
+          "error": null
+        },
+        {
+          "label": "fatal-0",
+          "generated": 1,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 0.6216173909997451,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-1",
+          "generated": 0,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 0.6210970669999369,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-2",
+          "generated": 0,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 0.6210716370005684,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-3",
+          "generated": 0,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 0.6211690249983803,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        },
+        {
+          "label": "fatal-later",
+          "generated": 0,
+          "decode_tok_s": null,
+          "prompt_tokens": null,
+          "reused": null,
+          "prefill_ms": 0,
+          "drafts_offered": null,
+          "drafts_accepted": null,
+          "wall_s": 1.2858999980380759e-05,
+          "error": "TP2 pair down: verbs communicator is poisoned: verbs peer closed the bootstrap connection; restart both ranks"
+        }
+      ]
+    },
+    "ds4-s-slots1": {
+      "sha256": "19c2119bf93a3a49bb522e47e3a78ab0667e4269f9fd358cf530f274b55dcbaf",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 21.366094678507043,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 1204.4,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 4.200770807998197,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 27.51031636863824,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 453.4,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 2.7800546049984405,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 20.385411689759515,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6862.6,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 10.002684892002435,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 32.603158430973004,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6421.5,
+          "drafts_offered": 37,
+          "drafts_accepted": 36,
+          "wall_s": 8.38488544899883,
+          "error": null
+        }
+      ]
+    },
+    "ds4-s-slots2": {
+      "sha256": "19c2119bf93a3a49bb522e47e3a78ab0667e4269f9fd358cf530f274b55dcbaf",
+      "metrics": [
+        {
+          "label": "short-off",
+          "generated": 64,
+          "decode_tok_s": 18.78044486178766,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 804.1,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 4.215097031999903,
+          "error": null
+        },
+        {
+          "label": "short-on",
+          "generated": 64,
+          "decode_tok_s": 30.47473929812866,
+          "prompt_tokens": 20,
+          "reused": 0,
+          "prefill_ms": 453.8,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 2.555735789002938,
+          "error": null
+        },
+        {
+          "label": "prefill-off",
+          "generated": 64,
+          "decode_tok_s": 18.924832929209295,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6856.8,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 10.241625612001371,
+          "error": null
+        },
+        {
+          "label": "prefill-on",
+          "generated": 64,
+          "decode_tok_s": 32.456006896901464,
+          "prompt_tokens": 1441,
+          "reused": 0,
+          "prefill_ms": 6312.1,
+          "drafts_offered": 37,
+          "drafts_accepted": 36,
+          "wall_s": 8.285161416002666,
+          "error": null
+        },
+        {
+          "label": "mixed-0",
+          "generated": 64,
+          "decode_tok_s": 15.083667216592033,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 453.0,
+          "drafts_offered": 0,
+          "drafts_accepted": 0,
+          "wall_s": 11.402911170000152,
+          "error": null
+        },
+        {
+          "label": "mixed-1",
+          "generated": 64,
+          "decode_tok_s": 12.29114653351258,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 605.1,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 5.814369605999673,
+          "error": null
+        },
+        {
+          "label": "mixed-2",
+          "generated": 64,
+          "decode_tok_s": 19.66085033177685,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 453.3,
+          "drafts_offered": 44,
+          "drafts_accepted": 34,
+          "wall_s": 9.523334274999797,
+          "error": null
+        },
+        {
+          "label": "mixed-3",
+          "generated": 64,
+          "decode_tok_s": 11.508928410868744,
+          "prompt_tokens": 17,
+          "reused": 0,
+          "prefill_ms": 1142.6,
+          "drafts_offered": 35,
+          "drafts_accepted": 31,
+          "wall_s": 6.706455931998789,
+          "error": null
+        }
+      ]
+    }
+  },
+  "differences": [],
+  "dynamic_input_changes": [],
+  "glm_false_flags_gate": {
+    "env": {
+      "MAYA_GLM_NO_SPEC": "0",
+      "MAYA_GLM_NO_MTP": "off",
+      "MAYA_GLM_NO_PREFILL": "false"
+    },
+    "bulk_prefill_observed": true,
+    "real_mtp_observed": true
+  },
+  "finished": 1794919195.706886
+}

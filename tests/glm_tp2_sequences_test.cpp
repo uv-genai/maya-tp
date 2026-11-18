@@ -31,11 +31,11 @@ int main(int argc, char** argv) {
     CHECK(rank >= 0 && rank < 2 && port > 0 && port <= 65535);
     CHECK(context >= 256 && sequences >= 2 && sequences <= 4);
     const std::string count = std::to_string(sequences);
-    CHECK(setenv("STRATA_GLM_SEQS", count.c_str(), 1) == 0);
-    CHECK(setenv("STRATA_GLM_SPLIT", "0", 1) == 0);
+    CHECK(setenv("MAYA_GLM_SEQS", count.c_str(), 1) == 0);
+    CHECK(setenv("MAYA_GLM_SPLIT", "0", 1) == 0);
     if (check_mtp) {
-        CHECK(setenv("STRATA_GLM_MTP", "1", 1) == 0);
-        CHECK(setenv("STRATA_GLM_MULTI_MTP", "2", 1) == 0);
+        CHECK(setenv("MAYA_GLM_MTP", "1", 1) == 0);
+        CHECK(setenv("MAYA_GLM_MULTI_MTP", "2", 1) == 0);
     }
     std::vector<int32_t> prompt;
     {

@@ -1,0 +1,158 @@
+{
+  "attempt1-tuning-header-mismatch": {
+    "engines_commit": "f6bf54d109605f492ebec2e1a4517f625d7739e6",
+    "outcome": "GLM differs from v1.1.58 (13 labels), DeepSeek XS/S match; rank 1 rejected every legacy-header table on the peer checkout and used hipBLASEx; fixed by 147d2684",
+    "rank1_tuning_lines": [
+      "prefill gemm: /home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100202.txt: invalid tuning header at line 2; /home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100401.txt: invalid tuning header at line 2; /home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100401-b.txt: invalid tuning header at line 3; /home/ugo/software/project-maya/tools/hip/gfx1151-glm-hipblaslt-100500.txt: invalid tuning header at line 2; using hipBLASEx"
+    ],
+    "differences": [
+      {
+        "model": "glm-s",
+        "slots": 1,
+        "label": "short-off",
+        "inputs_equal": true,
+        "first_difference": 48
+      },
+      {
+        "model": "glm-s",
+        "slots": 1,
+        "label": "short-on",
+        "inputs_equal": true,
+        "first_difference": 48
+      },
+      {
+        "model": "glm-s",
+        "slots": 1,
+        "label": "prefill-off",
+        "inputs_equal": true,
+        "first_difference": 50
+      },
+      {
+        "model": "glm-s",
+        "slots": 1,
+        "label": "prefill-on",
+        "inputs_equal": true,
+        "first_difference": 50
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "short-off",
+        "inputs_equal": true,
+        "first_difference": 48
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "short-on",
+        "inputs_equal": true,
+        "first_difference": 48
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "prefill-off",
+        "inputs_equal": true,
+        "first_difference": 50
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "prefill-on",
+        "inputs_equal": true,
+        "first_difference": 50
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "mixed-0",
+        "inputs_equal": true,
+        "first_difference": 28
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "mixed-1",
+        "inputs_equal": true,
+        "first_difference": 12
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "mixed-2",
+        "inputs_equal": true,
+        "first_difference": 19
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "life-long",
+        "inputs_equal": true,
+        "first_difference": 27
+      },
+      {
+        "model": "glm-s",
+        "slots": 2,
+        "label": "life-prefill",
+        "inputs_equal": true,
+        "first_difference": 6
+      }
+    ],
+    "cases": {
+      "v1.1.59-ds4-s-slots1": {
+        "success": true,
+        "sha256": "d060c9bb384bed8e0679cfec1f8378ed86718d69c9508ac6240bf30a4edf5b8e",
+        "rank0_exit": 0,
+        "ssh_exit": 0,
+        "peer_shutdown": "clean"
+      },
+      "v1.1.59-ds4-s-slots2": {
+        "success": true,
+        "sha256": "d060c9bb384bed8e0679cfec1f8378ed86718d69c9508ac6240bf30a4edf5b8e",
+        "rank0_exit": 0,
+        "ssh_exit": 0,
+        "peer_shutdown": "clean"
+      },
+      "v1.1.59-ds4-xs-slots1": {
+        "success": true,
+        "sha256": "d060c9bb384bed8e0679cfec1f8378ed86718d69c9508ac6240bf30a4edf5b8e",
+        "rank0_exit": 0,
+        "ssh_exit": 0,
+        "peer_shutdown": "clean"
+      },
+      "v1.1.59-ds4-xs-slots2": {
+        "success": true,
+        "sha256": "d060c9bb384bed8e0679cfec1f8378ed86718d69c9508ac6240bf30a4edf5b8e",
+        "rank0_exit": 0,
+        "ssh_exit": 247,
+        "peer_shutdown": "injected_loss"
+      },
+      "v1.1.59-glm-s-slots1": {
+        "success": true,
+        "sha256": "032fc25dc589716a75934b48880b437c160756328fa29ed15883be248fcd78fc",
+        "rank0_exit": 0,
+        "ssh_exit": 1,
+        "peer_shutdown": "legacy_control_eof"
+      },
+      "v1.1.59-glm-s-slots2": {
+        "success": true,
+        "sha256": "032fc25dc589716a75934b48880b437c160756328fa29ed15883be248fcd78fc",
+        "rank0_exit": 1,
+        "ssh_exit": 247,
+        "peer_shutdown": "injected_loss"
+      }
+    }
+  },
+  "attempt2-peer-host-loss": {
+    "case": "v1.1.59-ds4-xs-slots2",
+    "engines_commit": "147d26845ee8121f34187bc8b3021cf774e752f6",
+    "case_started": 1794913713.808873,
+    "peer_last_telemetry": 1794913970.3673022,
+    "peer_last_mem_available_kib": 64747284,
+    "peer_min_mem_available_kib": 64517336,
+    "peer_journal_last_entry": "2026-11-17 19:11:47 AWST (no panic/OOM/shutdown; kernel log empty for the window)",
+    "lead_kernel": "19:12:51 thunderbolt retimers and both XDomain hosts disconnected; hotplug worker blocked in thunderbolt_ibverbs peer removal until 19:24:08",
+    "outcome": "peer host hard-stopped mid-load; user restarted it; same case later passed (0 differences)",
+    "telemetry": "attempt2-peer-context.jsonl.gz"
+  }
+}

@@ -278,12 +278,12 @@ std::string per_position(const strata::ds4::Stats& s0, const strata::ds4::Stats&
 
 // The drafts' cut on the product of their confidences (DeepInfer's cumulative rule, GLM's spec_cum): a draft is
 // verified while the chance that it and every draft before it are kept stays at least this - a long window whose later
-// drafts are likely lost is not verified whole.  MAYA_DS4_DSPARK_CUM=F (STRATA_DS4_DSPARK_CUM), a request's dspark_cum
+// drafts are likely lost is not verified whole.  MAYA_DS4_DSPARK_CUM=F, a request's dspark_cum
 // key; 0: off, only the floor on each draft's own confidence (dspark_conf).  0.5 by default: a Radeon 8065S, Maya-S,
 // greedy over code / chat / a list, two runs: decode 12.04 -> 12.82 tok/s (+6.5%), the same tokens
 float dspark_cum_default() {
     static const float v = [] {
-        const char* e = std::getenv("STRATA_DS4_DSPARK_CUM");
+        const char* e = std::getenv("MAYA_DS4_DSPARK_CUM");
         return e != nullptr ? (float) std::atof(e) : 0.5f;
     }();
     return v;
@@ -298,12 +298,20 @@ float dspark_cum_default() {
 // still the model's own draw.  Not beside DS4_DSPARK_SAMPLE=1's drawn drafts (the choice would then hang on a draw).
 // A round with no drafter window (--dspark none or off, or DSpark resting after drafts below its confidence) weighs
 // the lookup's drafts against a plain step the same way.  --suffix-draft N: the shortest match it proposes from (3; 0:
-// off)
+// off).  A proposal the policy trusts (DraftPolicy::trust: a long match whose windows measured hold) is verified alone,
+// DSpark's draft not made that round (verify() seeds the drafter with the kept tokens as after any window, so the next
+// drafted round is current); such a round's time counts with the draft's measured time added, so the policy keeps
+// comparing rounds that drafted.  MAYA_DS4_LOOKUP_TRUST=0: every round drafts first (a request's lookup_trust=0|1 key
+// over it)
 struct Lookup {
     strata::spec::SuffixDrafter sfx;
     strata::spec::DraftPolicy policy;   // (over the engine's life: the round times are this PC's)
     std::vector<int32_t> buf;
     long long windows = 0, offered = 0, accepted = 0;   // the lookup's own rounds and drafts
+    long long trusted = 0;                               // ... of them verified alone (no draft made)
+    double draft_ms = 0.0;                               // a draft()'s time (EMA)
+    int t_mtp = 1;                                       // the last drafted window's tokens (trust's comparison)
+    int trust_req = -1;                                  // the request's lookup_trust key (-1: MAYA_DS4_LOOKUP_TRUST)
     Lookup(int min_match, int max_t, size_t cap) : sfx(min_match, 64, cap), policy(max_t), buf((size_t) max_t) {}
     void start(const std::vector<int32_t>& ctx) {   // a request's history: what the state has consumed
         sfx.reset();
@@ -349,9 +357,9 @@ RoundLog& round_log() {
     return r;
 }
 
-// a DS4_ setting as MAYA_DS4_* sets it (read as STRATA_DS4_*), else the DS4_* name itself (the model's ds4_env)
+// a DS4_ setting as MAYA_DS4_* sets it, else the DS4_* name itself (the model's ds4_env)
 const char* ds4_env(const char* name) {
-    const char* v = std::getenv((std::string("STRATA_") + name).c_str());
+    const char* v = std::getenv((std::string("MAYA_") + name).c_str());
     return v != nullptr ? v : std::getenv(name);
 }
 
@@ -414,6 +422,7 @@ bool round(strata::ds4::Model& m, int tok, int room, bool spec, float conf_min, 
                 ++keep;
         }
         bool from_lk = false;
+        if (lk != nullptr) lk->t_mtp = keep + 1;
         if (lk != nullptr && !drafts.empty() && !m.drafts_sampled()) {
             const int k = lk->sfx.propose(std::min(room, m.verify_max()) - 1, lk->buf.data());
             match = lk->sfx.last_match();
@@ -493,6 +502,7 @@ struct Req {
     float conf = -1.0f;     // dspark_conf=F: the drafts' confidence floor for this request (-1: the engine's)
     float cum = -1.0f;      // dspark_cum=F: the cut on the product of the confidences (-1: the engine's, dspark_cum_default)
     int lookup = -1;        // suffix_draft=0|1: this request's prompt lookup off / on (-1: as the engine was started)
+    int trust = -1;         // lookup_trust=0|1: its trusted rounds without a draft off / on (-1: MAYA_DS4_LOOKUP_TRUST)
     // the penalties (penalty_last_n / _repeat / _freq / _present, llama.cpp's): over the last pen_n tokens of the state
     // (-1: the whole context, which the engine caps at its window; 0: none)
     int pen_n = 0;
@@ -655,6 +665,7 @@ bool parse_gen(const std::string& line, Req& r, bool geni) {
         else if (k == "dspark_cum" || k == "spec_cum") r.cum = std::strtof(v.c_str(), nullptr);
         else if (k == "spec_min_p") r.conf = std::strtof(v.c_str(), nullptr);   // (the server's strata_tune names)
         else if (k == "suffix_draft") r.lookup = std::atoi(v.c_str()) != 0;
+        else if (k == "lookup_trust") r.trust = std::atoi(v.c_str()) != 0;
         else if (k == "penalty_last_n") r.pen_n = std::atoi(v.c_str());
         else if (k == "penalty_repeat") r.pen_repeat = std::strtof(v.c_str(), nullptr);
         else if (k == "penalty_freq") r.pen_freq = std::strtof(v.c_str(), nullptr);
@@ -711,8 +722,7 @@ std::atomic<uint64_t> g_beats{0};
 std::atomic<bool> g_busy{false};
 void beat() { g_beats.fetch_add(1, std::memory_order_relaxed); }
 void start_watchdog(const strata::ds4::Model& m) {
-    const char* v = std::getenv("STRATA_DS4_WATCHDOG_S");
-    if (v == nullptr) v = std::getenv("MAYA_DS4_WATCHDOG_S");
+    const char* v = std::getenv("MAYA_DS4_WATCHDOG_S");
     const int limit = v != nullptr ? std::atoi(v) : 600;
     if (limit <= 0) return;
     std::thread([&m, limit] {
@@ -765,13 +775,20 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
     // fresh one), and once that DONE is out the engine ends (exit 3, as its watchdog does).  Staying up, it refused
     // every later request until a restart by hand
     bool ending = false;
-    const auto end_note = [&m, &ending] {   // (before a request's DONE)
+    // (#827: the decode's own reason - the failed call, the position - went to this log only, and the console read
+    //  just "a GPU's state is unknown" or, a request later, the next call's error: END carries it now)
+    std::string fault_why;
+    const auto end_note = [&m, &ending, &fault_why] {   // (before a request's DONE)
+        const std::string why = std::move(fault_why);
+        fault_why.clear();
         if (ending || !m.broken()) return;
         ending = true;
         const char* recovery = m.tp2_driving() ? "restart both ranks" : "the next request starts a fresh engine";
-        std::printf("END a GPU's state is unknown after this request - the engine ends (exit 3), %s\n", recovery);
-        std::fprintf(stderr, "maya ds4 serve: a GPU's state is unknown after this request - the engine ends (exit 3), "
-                             "%s\n", recovery);
+        // (#827: the decode's own reason - the failed call, the position - in parentheses, as the server reads it)
+        std::printf("END a GPU's state is unknown after this request%s%s%s - the engine ends (exit 3), %s\n",
+                    why.empty() ? "" : " (", why.c_str(), why.empty() ? "" : ")", recovery);
+        std::fprintf(stderr, "maya ds4 serve: a GPU's state is unknown after this request%s%s%s - the engine ends (exit 3), "
+                             "%s\n", why.empty() ? "" : " (", why.c_str(), why.empty() ? "" : ")", recovery);
     };
     const auto end_if_broken = [&ending] {   // (after it)
         if (!ending) return;
@@ -819,13 +836,13 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
     // picture, or the same one elsewhere, shares no state past that place.
     const auto env_num = [](const char* k, double d) { const char* v = std::getenv(k); return v ? std::atof(v) : d; };
     const bool slot_keep =
-        std::getenv("STRATA_DS4_SLOT_KEEP") != nullptr && std::atoi(std::getenv("STRATA_DS4_SLOT_KEEP")) != 0;
-    int slot_max = slot_keep ? std::max(0, (int) env_num("STRATA_DS4_SLOT_CAP", 4)) : 0;
-    const size_t slot_min = (size_t) std::max(1.0, env_num("STRATA_DS4_SLOT_MIN", 1024));
-    const double slot_days = env_num("STRATA_DS4_SLOT_DAYS", 7);
-    const uint64_t slot_budget = (uint64_t) (env_num("STRATA_DS4_SLOT_GB", 16) * 1073741824.0);
+        std::getenv("MAYA_DS4_SLOT_KEEP") != nullptr && std::atoi(std::getenv("MAYA_DS4_SLOT_KEEP")) != 0;
+    int slot_max = slot_keep ? std::max(0, (int) env_num("MAYA_DS4_SLOT_CAP", 4)) : 0;
+    const size_t slot_min = (size_t) std::max(1.0, env_num("MAYA_DS4_SLOT_MIN", 1024));
+    const double slot_days = env_num("MAYA_DS4_SLOT_DAYS", 7);
+    const uint64_t slot_budget = (uint64_t) (env_num("MAYA_DS4_SLOT_GB", 16) * 1073741824.0);
     const uint64_t slot_ram_budget = [] {
-        const char* k = "STRATA_DS4_SLOT_RAM_GB", *v = std::getenv(k);
+        const char* k = "MAYA_DS4_SLOT_RAM_GB", *v = std::getenv(k);
         if (v == nullptr) return (uint64_t) 0;
         char* end = nullptr;
         const double gb = std::strtod(v, &end);
@@ -1170,9 +1187,9 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
     };
     std::vector<Prefix> prefixes;
     uint64_t prefix_clock = 0;
-    const int prefix_max = m.marks_cap() > 0 ? std::max(0, (int) env_num("STRATA_DS4_PREFIX_KEEP", 0)) : 0;
-    const uint64_t prefix_budget = (uint64_t) (std::max(0.0, env_num("STRATA_DS4_PREFIX_GB", 2)) * 1073741824.0);
-    const size_t prefix_min = (size_t) std::max(1.0, env_num("STRATA_DS4_PREFIX_MIN", 1024));
+    const int prefix_max = m.marks_cap() > 0 ? std::max(0, (int) env_num("MAYA_DS4_PREFIX_KEEP", 0)) : 0;
+    const uint64_t prefix_budget = (uint64_t) (std::max(0.0, env_num("MAYA_DS4_PREFIX_GB", 2)) * 1073741824.0);
+    const size_t prefix_min = (size_t) std::max(1.0, env_num("MAYA_DS4_PREFIX_MIN", 1024));
     // the longest kept start the prompt begins with, past `floor` tokens and short of its last token (none: -1)
     const auto prefix_find = [&](const std::vector<int>& prompt, const std::vector<Pic>& want, size_t floor) -> int {
         int best = -1;
@@ -1241,7 +1258,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
         return true;
     };
     if (slot_max > 0) {
-        slot_dir = std::getenv("STRATA_DS4_SLOT_DIR") ? std::filesystem::path(std::getenv("STRATA_DS4_SLOT_DIR"))
+        slot_dir = std::getenv("MAYA_DS4_SLOT_DIR") ? std::filesystem::path(std::getenv("MAYA_DS4_SLOT_DIR"))
                                                       : std::filesystem::path(pack) / "slots";
         std::error_code ec;
         std::filesystem::create_directories(slot_dir, ec);
@@ -1415,7 +1432,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                           (double) (s.ahead_pf - s_dec.ahead_pf) / fed);
             out += b;
         }
-        if (s.skipped > s_dec.skipped) {   // (STRATA_DS4_DISK_SKIP_W: experts left out a token)
+        if (s.skipped > s_dec.skipped) {   // (MAYA_DS4_DISK_SKIP_W: experts left out a token)
             std::snprintf(b, sizeof b, " skipped=%.3f", (double) (s.skipped - s_dec.skipped) / fed);
             out += b;
         }
@@ -1850,7 +1867,8 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
         std::vector<strata::ds4::LogprobRow> got_lp;
         if (r.logprobs >= 0) tok_lp = lp_take(m, 1).back();
         if (lk) lk->start(m.tokens());
-        const long long lk_w0 = lk ? lk->windows : 0, lk_o0 = lk ? lk->offered : 0, lk_a0 = lk ? lk->accepted : 0;
+        const long long lk_w0 = lk ? lk->windows : 0, lk_o0 = lk ? lk->offered : 0, lk_a0 = lk ? lk->accepted : 0,
+                        lk_t0 = lk ? lk->trusted : 0;
         // STAT for the Monitor every 8 tokens and at the end, over this answer so far: the GLM engine's keys (speed, the
         // VRAM hit, promotions a token) and DeepSeek's own - experts a token on the CPU lane, MB a token the storage
         // read (Linux), the n-gram memory's (Engram) read time a token, the drafts' acceptance
@@ -1869,6 +1887,8 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
             }
             if (tok < 0) {   // (a sample's CUDA error, printed by the sampler: no T -1 to the client)
                 std::fprintf(stderr, "ds4: the sample failed\n");
+                fault_why = "the sample failed after " + std::to_string(produced) + " tokens, at position " +
+                            std::to_string(m.pos()) + " of a " + std::to_string(m.max_context()) + "-token context";
                 finish = "cancel";
                 break;
             }
@@ -1899,10 +1919,16 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 // (a request's spec / dspark_conf keys over the engine's: the speed calibration measures both ways)
                 const bool try_spec = (r.spec < 0 ? spec : r.spec != 0) && !cool;
                 m.set_logprobs(r.logprobs, close_think ? r.think_end : -1);
+                if (lk != nullptr) lk->trust_req = r.trust;
                 if (!round(m, tok, room, try_spec, r.conf >= 0 ? r.conf : conf_min, r.temperature, r.top_p, r.top_k,
                            r.min_p, r.seed, counter, got,
                            off, acc, err, r.cum, r.lookup == 0 ? nullptr : lk, dc)) {
                     std::fprintf(stderr, "ds4: %s\n", err.c_str());
+                    fault_why = err + " - after " + std::to_string(produced) + " tokens, at position " +
+                                std::to_string(m.pos()) + " of a " + std::to_string(m.max_context()) +
+                                "-token context, a round of up to " + std::to_string(room) + " tokens" +
+                                (try_spec ? " with drafts" : "");
+                    std::fprintf(stderr, "ds4: the decode stopped: %s\n", fault_why.c_str());
                     finish = "cancel";
                     break;
                 }
@@ -1947,23 +1973,24 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                                             : 0.0);
         if (d_off > 0) std::fprintf(stderr, "maya ds4 serve: drafts %lld of %lld kept; %s\n", d_acc, d_off,
                                     per_position(s_dec, s).c_str());
-        // (DS4_DRAFT_VRAM, read as STRATA_DS4_DRAFT_VRAM or DS4_DRAFT_VRAM: the cap's misses - this request's decode,
+        // (DS4_DRAFT_VRAM, read as MAYA_DS4_DRAFT_VRAM or DS4_DRAFT_VRAM: the cap's misses - this request's decode,
         //  the drafter's picks)
-        if (std::getenv("STRATA_DS4_DRAFT_VRAM") != nullptr || std::getenv("DS4_DRAFT_VRAM") != nullptr)
+        if (std::getenv("MAYA_DS4_DRAFT_VRAM") != nullptr || std::getenv("DS4_DRAFT_VRAM") != nullptr)
             std::fprintf(stderr, "maya ds4 serve: drafter experts: %lld picks, %lld of them on the CPU lane (this "
                                  "request's decode; DS4_DRAFT_VRAM)\n",
                          (long long) (s.draft_experts - s_dec.draft_experts),
                          (long long) (s.draft_cpu - s_dec.draft_cpu));
         if (s.hr_maps + s.hr_fails + s.hr_abandoned + s.hr_hits > 0 ||
-            std::getenv("STRATA_DS4_HELPER_RECENT") != nullptr || std::getenv("DS4_HELPER_RECENT") != nullptr)
+            std::getenv("MAYA_DS4_HELPER_RECENT") != nullptr || std::getenv("DS4_HELPER_RECENT") != nullptr)
             std::fprintf(stderr, "maya ds4 serve: helper recent slots: %lld picks served, %lld mapped, %lld let go, "
                                  "%lld fills not done, %lld left unmapped (this request)\n",
                          (long long) (s.hr_hits - s_dec.hr_hits), (long long) (s.hr_maps - s_dec.hr_maps),
                          (long long) (s.hr_evicts - s_dec.hr_evicts), (long long) (s.hr_fails - s_dec.hr_fails),
                          (long long) (s.hr_abandoned - s_dec.hr_abandoned));
         if (lk && lk->windows > lk_w0)
-            std::fprintf(stderr, "maya ds4 serve: prompt lookup: %lld rounds, %lld of its %lld drafts kept (in the above)\n",
-                         lk->windows - lk_w0, lk->accepted - lk_a0, lk->offered - lk_o0);
+            std::fprintf(stderr, "maya ds4 serve: prompt lookup: %lld rounds (%lld without a draft), %lld of its %lld "
+                         "drafts kept (in the above)\n", lk->windows - lk_w0, lk->trusted - lk_t0,
+                         lk->accepted - lk_a0, lk->offered - lk_o0);
         if (dc != nullptr && d_off > 0)
             std::fprintf(stderr, "maya ds4 serve: draft cost (DS4_DRAFT_COST), ms a round by its rows: %s\n", dc->text().c_str());
         prof_line(s_dec, s);   // DS4_PROF: this request's decode (the CLI's line, a request at a time)
@@ -2327,9 +2354,11 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 m.set_logprobs(a.r.logprobs, closing ? a.r.think_end : -1);
                 int off = 0, acc = 0;
                 const bool try_spec = (a.r.spec < 0 ? spec : a.r.spec != 0) && !a.cool;
+                if (L != nullptr) L->trust_req = a.r.trust;
                 if (!round(m, a.tok, room, try_spec, a.r.conf >= 0 ? a.r.conf : conf_min, a.r.temperature, a.r.top_p,
                            a.r.top_k, a.r.min_p, a.r.seed, a.counter, a.got, off, acc, err, a.r.cum, L, dc)) {
                     std::fprintf(stderr, "ds4: %s\n", err.c_str());
+                    fault_why = err;
                     a.finish = "cancel";
                     a.done = true;
                 } else {
@@ -2350,6 +2379,7 @@ int serve(strata::ds4::Model& m, const std::string& eos_list, bool spec, float c
                 const double t_step = now_ms();   // (DS4_DRAFT_COST: the step's time, its drafting included)
                 const auto cancel_all = [&] {
                     std::fprintf(stderr, "ds4: %s\n", err.c_str());
+                    fault_why = err;
                     for (Act* a : need) {
                         a->finish = "cancel";
                         a->done = true;
@@ -3674,6 +3704,12 @@ int main(int argc, char** argv) {
         if (ablate_option_asked) {
             std::fprintf(stderr,"maya-ds4: ablation is unsupported for DeepSeek TP2\n"); return 2;
         }
+        // Upstream v1.1.61's fast prompt reading (DS4_YOCO_CONE, the config's fast_prefill) plans each layer's first
+        // row from this process's environment alone; the pair's identity does not carry it, so ranks could plan
+        // different rows for the same chunk. Refused before bootstrap until it is negotiated and validated paired.
+        if (const char* cone=std::getenv("DS4_YOCO_CONE"); cone && std::atoi(cone)!=0) {
+            std::fprintf(stderr,"maya-ds4: fast prompt reading (DS4_YOCO_CONE) is unsupported for DeepSeek TP2\n"); return 2;
+        }
         const char* requested=std::getenv("MAYA_DS4_TP2_DSPARK");
         const char* requested_chunk=std::getenv("MAYA_DS4_TP2_CHUNK");
         const char* requested_lookup=std::getenv("MAYA_DS4_TP2_LOOKUP");
@@ -3702,7 +3738,7 @@ int main(int argc, char** argv) {
         if (o.dspark != (tp2_rank==0 && tp2_dspark)) {
             std::fprintf(stderr,"maya-ds4: DeepSeek TP2 drafter selection differs from preflight\n"); return 2;
         }
-        const char* keep=std::getenv("STRATA_DS4_SLOT_KEEP");
+        const char* keep=std::getenv("MAYA_DS4_SLOT_KEEP");
         if (keep && std::atoi(keep)!=0) { std::fprintf(stderr,"maya-ds4: DeepSeek TP2 does not support conversation slots\n"); return 2; }
         if (!strata::ds4::tp2::preflight_identity(o.pack,std::getenv("MAYA_DS4_TP2_PACK"),
                 std::getenv("MAYA_DS4_TP2_MODEL_DIGEST"),std::getenv("MAYA_DS4_TP2_PARTITION_DIGEST"),
@@ -3964,7 +4000,8 @@ int main(int argc, char** argv) {
         std::vector<int> got;
         round_log().tag = "ids";   // (DS4_ROUND_LOG)
         if (lk) lk->start(m.tokens());
-        const long long lk_w0 = lk ? lk->windows : 0, lk_o0 = lk ? lk->offered : 0, lk_a0 = lk ? lk->accepted : 0;
+        const long long lk_w0 = lk ? lk->windows : 0, lk_o0 = lk ? lk->offered : 0, lk_a0 = lk ? lk->accepted : 0,
+                        lk_t0 = lk ? lk->trusted : 0;
         for (;;) {
             if (tok < 0) {   // (a sample's CUDA error, printed by the sampler)
                 std::fprintf(stderr, "maya-ds4: the sample failed\n");
@@ -3995,8 +4032,9 @@ int main(int argc, char** argv) {
         std::printf("\n");
         if (df != nullptr && m.logits(lg)) std::fwrite(lg.data(), 4, lg.size(), df);
         if (lk && lk->windows > lk_w0)
-            std::fprintf(stderr, "prompt lookup: %lld rounds, %lld of its %lld drafts kept (in the dspark line's)\n",
-                         lk->windows - lk_w0, lk->accepted - lk_a0, lk->offered - lk_o0);
+            std::fprintf(stderr, "prompt lookup: %lld rounds (%lld without a draft), %lld of its %lld drafts kept (in "
+                         "the dspark line's)\n", lk->windows - lk_w0, lk->trusted - lk_t0, lk->accepted - lk_a0,
+                         lk->offered - lk_o0);
         if (dc != nullptr) std::fprintf(stderr, "draft cost (DS4_DRAFT_COST), ms a round by its rows: %s\n", dc->text().c_str());
     }
     if (prof && rep == reps - 1) cudaProfilerStop();
@@ -4049,7 +4087,7 @@ int main(int argc, char** argv) {
     const long long io1 = io_read_bytes();
     if (io0 >= 0 && io1 >= 0)
         std::fprintf(stderr, "decode reads from the disk: %.1f MB a token\n", (double) (io1 - io0) / 1e6 / nt);
-    if (s.skipped > s0.skipped)   // STRATA_DS4_DISK_SKIP_W
+    if (s.skipped > s0.skipped)   // MAYA_DS4_DISK_SKIP_W
         std::fprintf(stderr, "decode left out %.1f experts a token not in RAM (%.1f%% of the routed)\n",
                      (double) (s.skipped - s0.skipped) / nt,
                      100.0 * (double) (s.skipped - s0.skipped) / std::max<double>(1.0, (double) (s.experts - s0.experts)));

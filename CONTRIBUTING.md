@@ -34,8 +34,8 @@ ownership rules and legacy limitations.
   remains HIP/gfx1151; no NVIDIA build or measurement is required here.
 - Run the CPU checks in order: HIP mapping, server tests (`discover -s serve -p "test_*.py" -t .`),
   then tools tests (`discover -s tools -p "test_*.py"`). Use a venv and the pinned gguf-py checkout;
-  [AGENTS.md](AGENTS.md) and [the CI workflow](.github/workflows/tests.yml) give the exact commands.
-- Require green CI before merge. Engine changes also need affected HIP builds/parity and live TP2/MTP
+  [AGENTS.md](AGENTS.md) and [tools/local_gates.sh](tools/local_gates.sh) give the exact commands.
+- There is no GitHub CI: run `tools/local_gates.sh` at the exact commit and push only code that passes. Engine changes also need affected HIP builds/parity and live TP2/MTP
   validation, preserving strict raw-pick checks and paired cancellation/lifecycle behavior.
 - Update applicable user docs, changelog and [Handoff.md](Handoff.md). Merge upstream README/AGENTS
   changes semantically; those documents belong to this fork.

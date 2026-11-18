@@ -131,8 +131,8 @@ uint64_t ram_avail();
 cudaError_t mem_info(size_t* free_b, size_t* total_b) {
     const cudaError_t e = cudaMemGetInfo(free_b, total_b);
 #if !defined(_WIN32) && !defined(STRATA_USE_HIP)
-    const auto env = [](const char* k) {   // (MAYA_DS4_* as STRATA_DS4_*, else DS4_*)
-        const char* v = std::getenv((std::string("STRATA_") + k).c_str());
+    const auto env = [](const char* k) {   // (MAYA_DS4_*, else DS4_*)
+        const char* v = std::getenv((std::string("MAYA_") + k).c_str());
         return v != nullptr ? v : std::getenv(k);
     };
     static const bool uma_on = tri_of(env("DS4_UMA_FREE")) == 1;
@@ -997,7 +997,8 @@ struct Chunk {
     int spec_k = -1, spec_il = -1, n_spec = 0;   // the likely items queued last: (chunk, layer), how many, from where
     size_t spec_begin = 0;
     std::vector<int> fl_layers, fl_T;        // the device's trunk layers in order; the run's chunk sizes
-    int fl_yoco = -1, fl_cut_k = 0, fl_cut_r = 0;   // Run::yoco / cut_k / cut_r: what a layer's chunk streams for
+    int fl_yoco = -1;                        // Run::yoco / ck / cr: what a layer's chunk streams for
+    std::vector<int> fl_ck, fl_cr;
     int bc_n = 0, bc_w = 0;                  // a batch's compacted bounds: bc_n regions of bc_w, by batch count
     int *bc_pin = nullptr, *bc_dev = nullptr;
     uint64_t n_batch = 0;
@@ -1926,8 +1927,8 @@ struct Model::Impl {
     bool ahead_order = std::getenv("DS4_AHEAD_ORDER") == nullptr || std::atoi(std::getenv("DS4_AHEAD_ORDER")) != 0;
     // DS4_AHEAD_EXL3=1 (opt-in until measured on more PCs): an EXL3 pack read in place (--mmap-experts on) guesses and
     // asks too - a guessed expert's file region read ahead as a GGUF's three matrices are; off: its layers never guessed
-    bool ahead_exl3 = [] {   // (MAYA_DS4_AHEAD_EXL3, read as STRATA_DS4_AHEAD_EXL3, or the bare name)
-        const char* v = std::getenv("STRATA_DS4_AHEAD_EXL3");
+    bool ahead_exl3 = [] {   // (MAYA_DS4_AHEAD_EXL3, or the bare name)
+        const char* v = std::getenv("MAYA_DS4_AHEAD_EXL3");
         if (v == nullptr) v = std::getenv("DS4_AHEAD_EXL3");
         return v != nullptr && std::atoi(v) != 0;
     }();
@@ -1983,7 +1984,7 @@ struct Model::Impl {
     // files): RAM slots of one expert blob each, filled at load with the hottest experts VRAM does not hold, so the
     // CPU lane reads them from RAM; between windows (cache_tick) a hotter expert from the files takes the place of the
     // layer's coldest held one - read into a free slot by ram_th, switched while nothing reads them.  Opt-in
-    // (STRATA_DS4_RAM_TIER=1): on a V100 with 64 GB of RAM it was slower than the page cache alone (1.4 against 2.2-2.4
+    // (MAYA_DS4_RAM_TIER=1): on a V100 with 64 GB of RAM it was slower than the page cache alone (1.4 against 2.2-2.4
     // tokens/s sampled) - the cache follows a conversation's experts at once, the tier's moves lag behind.
     struct RamSwap {
         int layer = 0, in = -1, out = -1, slot = -1;
@@ -2013,7 +2014,7 @@ struct Model::Impl {
     std::condition_variable ram_cv;
     std::thread ram_th;
     int ram_inflight = 0, ram_held = 0;
-    bool ram_tier = std::getenv("STRATA_DS4_RAM_TIER") != nullptr && std::atoi(std::getenv("STRATA_DS4_RAM_TIER")) != 0;
+    bool ram_tier = std::getenv("MAYA_DS4_RAM_TIER") != nullptr && std::atoi(std::getenv("MAYA_DS4_RAM_TIER")) != 0;
     // the RAM expert store (--ssd-cache, DS4_STORE_GB; ds4_store.hpp; opt-in until measured): a GGUF's in-place CPU-lane
     // experts of the trunk kept whole in RAM slots of its own instead of the page cache - read past it (Linux O_DIRECT),
     // lru or lfu deciding which gives way, preloaded from the profile.  The CPU lane computes the ones it holds while it
@@ -2027,26 +2028,26 @@ struct Model::Impl {
     bool store_reads(const Layer& l, int e) const {
         return store && store->covers(l.il) && file_read(l, e) && !held_out(l, e);
     }
-    // STRATA_DS4_DISK_SKIP_W (experimental opt-in, CHANGES THE ANSWERS; 0 = off): on the small windows (decode, a
+    // MAYA_DS4_DISK_SKIP_W (experimental opt-in, CHANGES THE ANSWERS; 0 = off): on the small windows (decode, a
     // draft's check - never the prompt path) the CPU lane leaves out a routed expert whose share of its token's route
     // weights is below this and whose pages are not in RAM now (the page cache or the RAM tier; os::in_ram - Linux every
     // page, Windows sampled pages of the working set), so a token waits on the SSD only for the experts that weigh; the
-    // weight it carried is lost (no renormalisation).  On layers from STRATA_DS4_DISK_SKIP_FROM (0) on.  An expert left
+    // weight it carried is lost (no renormalisation).  On layers from MAYA_DS4_DISK_SKIP_FROM (0) on.  An expert left
     // out still counts as used (the expert cache, the profile).
     const float disk_skip_w = [] {
-        const char* v = std::getenv("STRATA_DS4_DISK_SKIP_W");
+        const char* v = std::getenv("MAYA_DS4_DISK_SKIP_W");
         return v != nullptr ? std::max(0.0f, (float) std::atof(v)) : 0.0f;
     }();
-    // STRATA_DS4_RAM_SKIP_W (experimental opt-in, CHANGES THE ANSWERS; 0 = off): the same rule for every routed expert
+    // MAYA_DS4_RAM_SKIP_W (experimental opt-in, CHANGES THE ANSWERS; 0 = off): the same rule for every routed expert
     // VRAM does not hold - in RAM or not: a token goes without the light ones the link or the CPU lane would read.
     // Where the experts all sit in RAM the decode is bound by the RAM's bandwidth, and each one left out is a
     // streamed or CPU-lane expert's bytes not read; DISK_SKIP_W then does nothing
     const float ram_skip_w = [] {
-        const char* v = std::getenv("STRATA_DS4_RAM_SKIP_W");
+        const char* v = std::getenv("MAYA_DS4_RAM_SKIP_W");
         return v != nullptr ? std::max(0.0f, (float) std::atof(v)) : 0.0f;
     }();
     const int disk_skip_from = [] {
-        const char* v = std::getenv("STRATA_DS4_DISK_SKIP_FROM");
+        const char* v = std::getenv("MAYA_DS4_DISK_SKIP_FROM");
         return v != nullptr ? std::max(0, std::atoi(v)) : 0;
     }();
     bool in_ram(const Layer& l, int e) const {   // (DISK_SKIP_W) expert e's pages in RAM now
@@ -2059,24 +2060,24 @@ struct Model::Impl {
         }
         return !file_experts || os::in_ram(file_part(l, e), l.blob);
     }
-    // STRATA_DS4_DISK_SKIP_AUTO=1 (with DISK_SKIP_W; experimental, off by default): DISK_SKIP_W only while the model is
+    // MAYA_DS4_DISK_SKIP_AUTO=1 (with DISK_SKIP_W; experimental, off by default): DISK_SKIP_W only while the model is
     // cold - from a start until VRAM and the page cache hold what they can, and again after an idle that let the page
     // cache lose what the last answer left there - so warm answers are the unmodified model's.
     //  - the cold share: of the routed experts heavy enough to be computed either way (VRAM ones too), those on the CPU
     //    lane and not in RAM when asked for (by the CPU lane, or by the lookahead a layer before - its read would hide
-    //    them), over the last STRATA_DS4_DISK_SKIP_WINDOW (32) tokens
-    //  - off, mid-answer too, once that share stops falling (no new low by 5% for STRATA_DS4_DISK_SKIP_SETTLE (64)
-    //    tokens: this PC's warm level, not a fixed bar) or falls under 2%, or after STRATA_DS4_DISK_SKIP_BUDGET (512)
+    //    them), over the last MAYA_DS4_DISK_SKIP_WINDOW (32) tokens
+    //  - off, mid-answer too, once that share stops falling (no new low by 5% for MAYA_DS4_DISK_SKIP_SETTLE (64)
+    //    tokens: this PC's warm level, not a fixed bar) or falls under 2%, or after MAYA_DS4_DISK_SKIP_BUDGET (512)
     //    tokens of skipping
     //  - on again only between requests (begin_request), never mid-answer and never for a new topic alone: when under
     //    half of the experts the last answer computed last (its last 512 CPU-lane experts, in RAM when it ended) still
     //    are.  A PC whose RAM cannot hold the model reads each new topic from the SSD, but between its answers nothing
     //    evicts, so it stays off; an idle while other programs took the RAM does evict.
     //  DS4_DEBUG_DROP_BEFORE_REQ=<n>: this process's file pages out of RAM before its n-th request (the switch back's test)
-    const bool disk_skip_auto = disk_skip_w > 0.0f && env_f("STRATA_DS4_DISK_SKIP_AUTO", 0.0f) != 0.0f;
-    const int disk_skip_window = std::max(4, (int) env_f("STRATA_DS4_DISK_SKIP_WINDOW", 32.0f));
-    const int disk_skip_settle = std::max(4, (int) env_f("STRATA_DS4_DISK_SKIP_SETTLE", 64.0f));
-    const int disk_skip_budget = std::max(1, (int) env_f("STRATA_DS4_DISK_SKIP_BUDGET", 512.0f));
+    const bool disk_skip_auto = disk_skip_w > 0.0f && env_f("MAYA_DS4_DISK_SKIP_AUTO", 0.0f) != 0.0f;
+    const int disk_skip_window = std::max(4, (int) env_f("MAYA_DS4_DISK_SKIP_WINDOW", 32.0f));
+    const int disk_skip_settle = std::max(4, (int) env_f("MAYA_DS4_DISK_SKIP_SETTLE", 64.0f));
+    const int disk_skip_budget = std::max(1, (int) env_f("MAYA_DS4_DISK_SKIP_BUDGET", 512.0f));
     const int debug_drop_before = (int) env_f("DS4_DEBUG_DROP_BEFORE_REQ", 0.0f);
     static constexpr size_t kRecent = 512;
     struct SkipAuto {
@@ -2206,7 +2207,7 @@ struct Model::Impl {
     std::vector<std::array<uint8_t*, kMaxNH>> ram_part;   // slot -> its parts
     std::vector<std::array<size_t, 4>> cp_lay;       // layer -> part offsets of gate, up, down rows; a part's bytes
     std::vector<int> copy_spare;                      // layer -> its spare slot (-1: none)
-    // MAYA_DS4_COPY_SWAP=1 (copy mode, opt-in; read as STRATA_DS4_COPY_SWAP, DS4_COPY_SWAP too): the copies follow the routes, as the RAM tier's do. DISK_SKIP_W never computes
+    // MAYA_DS4_COPY_SWAP=1 (copy mode, opt-in, DS4_COPY_SWAP too): the copies follow the routes, as the RAM tier's do. DISK_SKIP_W never computes
     // an expert it leaves out, so its pages never come off the SSD and it is left out wherever it is picked light, all
     // through a conversation; but its heat counts those picks too. A layer's hottest expert read from the files takes
     // the place of its coldest copy when it beats it by MAYA_DS4_COPY_SWAP_MARGIN x + 1 (1.25): read by a thread of its own
@@ -2214,8 +2215,8 @@ struct Model::Impl {
     // at most one every MAYA_DS4_COPY_SWAP_EVERY tokens (8). The copies keep their RAM (a slot a layer more), so nothing else
     // leaves the page cache for them. (The idea: Abyss's RAM fill for its disk tail skip - zephel01/Abyss v1.3.46,
     // issue #8 there.)
-    static const char* cs_env(const char* name) {   // STRATA_DS4_<name> (the MAYA_ name's), else DS4_<name>
-        const char* v = std::getenv((std::string("STRATA_DS4_") + name).c_str());
+    static const char* cs_env(const char* name) {   // MAYA_DS4_<name> (the MAYA_ name's), else DS4_<name>
+        const char* v = std::getenv((std::string("MAYA_DS4_") + name).c_str());
         return v != nullptr ? v : std::getenv((std::string("DS4_") + name).c_str());
     }
     bool copy_swap = [] {
@@ -2895,9 +2896,9 @@ struct Model::Impl {
     double dense_req_saved = 0, dense_req_ms = 0;
     int dense_req_n = 0, dense_req_cached = 0;
     std::string dense_req_why;   // (the last reason a matrix stayed Q8_0, logged once)
-    // (MAYA_DS4_DENSE_REQ in a config, read as STRATA_DS4_DENSE_REQ; DS4_DENSE_REQ also taken)
+    // (MAYA_DS4_DENSE_REQ in a config; DS4_DENSE_REQ also taken)
     static const char* dense_req_env(const char* name) {
-        const char* v = std::getenv((std::string("STRATA_") + name).c_str());
+        const char* v = std::getenv((std::string("MAYA_") + name).c_str());
         return v != nullptr ? v : std::getenv(name);
     }
     static const char* dense_req_name() {
@@ -3682,7 +3683,7 @@ struct Model::Impl {
         if (!pk.load(o.pack, err)) return false;
         // (AMD: the prompt GEMMs' measured kernels) the pack's lt-picks.txt, or MAYA_DS4_LT_STORE's file - empty: none,
         // each start measures its own and keeps them to itself (a pack that must not change: a run's own store instead)
-        const char* lt_store = std::getenv("STRATA_DS4_LT_STORE");
+        const char* lt_store = std::getenv("MAYA_DS4_LT_STORE");
         if (lt_store == nullptr) lt_store = std::getenv("DS4_LT_STORE");
         // TP2 ranks may read existing tuning, but review/paired launches must
         // not silently append to either host's model pack.
@@ -3786,7 +3787,7 @@ struct Model::Impl {
         if (pk.gguf) {
             gg::q8_batch();
             gg::q8_share();
-            if (std::getenv("STRATA_DS4_Q8_CHECK") != nullptr || std::getenv("DS4_Q8_CHECK") != nullptr) {
+            if (std::getenv("MAYA_DS4_Q8_CHECK") != nullptr || std::getenv("DS4_Q8_CHECK") != nullptr) {
                 for (int id : ids)
                     if (!gg::q8_batch_check(id, err)) return false;
             }
@@ -3907,9 +3908,9 @@ struct Model::Impl {
         // the groups' width: o.tp, less while the experts' blocks do not split in it (a member takes n_ff / tp of each
         // expert: the down's inputs in whole blocks - a GGUF's 256-value types split n_ff 2304 in 1, 3 or 9 parts)
         int tp = o.tp;
-        // MAYA_DS4_TP_GGUF_UNEVEN=1 (read as STRATA_DS4_TP_GGUF_UNEVEN, or DS4_TP_GGUF_UNEVEN): a GGUF's experts split
+        // MAYA_DS4_TP_GGUF_UNEVEN=1 (or DS4_TP_GGUF_UNEVEN): a GGUF's experts split
         // in whole blocks, as even as they go (no flow on its groups yet)
-        const char* tpu = std::getenv("STRATA_DS4_TP_GGUF_UNEVEN");
+        const char* tpu = std::getenv("MAYA_DS4_TP_GGUF_UNEVEN");
         if (tpu == nullptr) tpu = std::getenv("DS4_TP_GGUF_UNEVEN");
         if (const char* v = tpu) {
             if (std::strcmp(v, "1") != 0 && std::strcmp(v, "0") != 0) {
@@ -5033,7 +5034,7 @@ struct Model::Impl {
             if ((decode_trim & 12) && !trim_copy_check(err)) return false;
             if (route_fuse_win && !(route_fuse_check(err, 3) && route_fuse_check(err, kWin)))   // (=2: windows too)
                 return false;
-            if (tp_uneven && (std::getenv("STRATA_DS4_TP_CHECK") != nullptr || std::getenv("DS4_TP_CHECK") != nullptr) &&
+            if (tp_uneven && (std::getenv("MAYA_DS4_TP_CHECK") != nullptr || std::getenv("DS4_TP_CHECK") != nullptr) &&
                 !tp_check(err))
                 return false;   // (MAYA_DS4_TP_CHECK=1: at load, no request yet)
             if (helper_n > 0 && ds4_env("DS4_HELPER_CHECK") != nullptr) helper_check();   // (before the lane runs)
@@ -6418,16 +6419,17 @@ struct Model::Impl {
     // long prompt's skip leaves out its early chunks' layers from Run::yoco on (kv_only there: no experts)
     bool flow_next(const Chunk& c, int k, int il, int& k2, int& il2) const {
         while (flow_next1(c, k, il, k2, il2)) {
-            if (c.fl_yoco < 0 || k2 >= c.fl_cut_k || il2 < c.fl_yoco) return true;
+            if (c.fl_yoco < 0 || il2 < c.fl_yoco || k2 >= c.fl_ck[(size_t) il2]) return true;
             k = k2;
             il = il2;
         }
         return false;
     }
-    // the rows chunk k runs layer il on (a long prompt's skip: the cut chunk's from cut_r on, from the yoco layer on)
+    // the rows chunk k runs layer il on (a long prompt's skip: the layer's cut chunk's from its cut row on, from the
+    // yoco layer on)
     static int fl_rows(const Chunk& c, int k, int il) {
         const int T = c.fl_T[(size_t) k];
-        return c.fl_yoco >= 0 && k == c.fl_cut_k && il >= c.fl_yoco ? T - c.fl_cut_r : T;
+        return c.fl_yoco >= 0 && il >= c.fl_yoco && k == c.fl_ck[(size_t) il] ? T - c.fl_cr[(size_t) il] : T;
     }
     bool flow_next1(const Chunk& c, int k, int il, int& k2, int& il2) const {
         const auto it = std::find(c.fl_layers.begin(), c.fl_layers.end(), il);
@@ -7105,7 +7107,7 @@ struct Model::Impl {
             if (e.ev_seed != nullptr) CK(cudaStreamWaitEvent(s, e.ev_seed, 0));
         return true;
     }
-    // MAYA_DS4_DRAFT_DEV=m, or m0,m1,.. a block (read as STRATA_DS4_DRAFT_DEV, or DS4_DRAFT_DEV): the member of the
+    // MAYA_DS4_DRAFT_DEV=m, or m0,m1,.. a block (or DS4_DRAFT_DEV): the member of the
     // drafter's group each DSpark block runs on (0: the lead, as before).  place_experts gives a block's VRAM experts out
     // of its own member's room: a tensor-parallel group's members hold the same trunk slots, so every drafter byte on the
     // lead leaves as many idle on the others - with the blocks spread, the tightest member has more left for the trunk.
@@ -7149,7 +7151,7 @@ struct Model::Impl {
     }
     bool draft_devs(std::string& err) {
         draft_dev.clear();
-        const char* v = std::getenv("STRATA_DS4_DRAFT_DEV");
+        const char* v = std::getenv("MAYA_DS4_DRAFT_DEV");
         if (v == nullptr) v = std::getenv("DS4_DRAFT_DEV");
         if (v == nullptr) return draft_spread();
         if (g.n_mtp == 0) {
@@ -7196,7 +7198,7 @@ struct Model::Impl {
     int vram_cap(const Layer& l) const {
         return l.mtp && !draft_vram.empty() ? std::min(l.n_exp, draft_vram[(size_t) (l.il - g.nl)]) : l.n_exp;
     }
-    // MAYA_DS4_DRAFT_VRAM=n, or n0,n1,.. a block (read as STRATA_DS4_DRAFT_VRAM, or DS4_DRAFT_VRAM): the most VRAM
+    // MAYA_DS4_DRAFT_VRAM=n, or n0,n1,.. a block (or DS4_DRAFT_VRAM): the most VRAM
     // experts each DSpark block keeps - its profile's hottest (place_experts' order), the rest on the CPU lane - so the
     // trunk takes the room; one value: every block.  Unset: placed as before.  Not whole numbers 0 .. the block's
     // experts, a count of values neither 1 nor the blocks', or no blocks (--dspark none): the load fails - and so does
@@ -8324,12 +8326,12 @@ struct Model::Impl {
     // hottest n GB (the static hybrid, for tests).  Each copy in NH parts on the NUMA nodes (DS4_COPY_NUMA=1: one), read from the files in file
     // order by a few threads, anonymous memory on huge pages (Windows: plain), not pinned (only the CPU reads it; what
     // goes to a GPU passes the pinned staging) - a layer that cannot get its memory keeps its experts in place
-    // STRATA_DS4_LOAD_DROP_CACHE (1): once an expert's bytes are copied into VRAM or RAM, drop their pages from the
+    // MAYA_DS4_LOAD_DROP_CACHE (1): once an expert's bytes are copied into VRAM or RAM, drop their pages from the
     // file cache (posix_fadvise DONTNEED) instead of holding the same bytes twice: without it a pack whose copies and
     // their cache do not fit reclaims in the copying thread (0.8 GB/s measured).  0 keeps every region's pages - a
     // restart then starts warm, and a pack that does fit loads a few seconds faster without the calls.
     static bool load_drop_cache() {
-        const char* v = std::getenv("STRATA_DS4_LOAD_DROP_CACHE");
+        const char* v = std::getenv("MAYA_DS4_LOAD_DROP_CACHE");
         return v == nullptr || std::atoi(v) != 0;
     }
     bool copy_experts(const std::vector<std::pair<int, int>>& hot, std::string& err) {
@@ -8597,22 +8599,22 @@ struct Model::Impl {
     // from its copy - no read into the pinned staging first.  A streamed expert then crosses the memory once instead of
     // three times (read, staging write, DMA read) and takes no reader's core from the CPU lane.  (Not the page cache's
     // pages in place: a GeForce pins no read-only mapping - cudaDevAttrHostRegisterReadOnlySupported is 0)
-    // STRATA_DS4_PIN_BY_NEED=1 (opt-in): where the system cannot lock every copy - Windows lets a GPU lock about half
+    // MAYA_DS4_PIN_BY_NEED=1 (opt-in): where the system cannot lock every copy - Windows lets a GPU lock about half
     // the RAM - pin them a layer at a time, the layers whose copies the routing profile uses most a byte first, until a
-    // pin fails or STRATA_DS4_PIN_GB is reached: those are pulled in place, the others pass the staging.  Without it a
+    // pin fails or MAYA_DS4_PIN_GB is reached: those are pulled in place, the others pass the staging.  Without it a
     // failed pin leaves every copy to the staging.  A device that does not address registered memory at its host
     // address (Windows' WDDM) takes its mapped pointer (cudaHostGetDevicePointer, one GPU)
-    const bool pin_by_need_env = env_f("STRATA_DS4_PIN_BY_NEED", 0.0f) != 0.0f;
-    // Windows' one-GPU path pins by need by default (STRATA_DS4_PIN_BY_NEED=0 turns it off): WDDM locks about half
+    const bool pin_by_need_env = env_f("MAYA_DS4_PIN_BY_NEED", 0.0f) != 0.0f;
+    // Windows' one-GPU path pins by need by default (MAYA_DS4_PIN_BY_NEED=0 turns it off): WDDM locks about half
     // the RAM, so pinning every copy fails, and its mapped pointer (one GPU) is what pin by need already takes
     bool pin_by_need() const {
 #if defined(_WIN32) && !defined(STRATA_USE_HIP)
-        const char* v = std::getenv("STRATA_DS4_PIN_BY_NEED");
+        const char* v = std::getenv("MAYA_DS4_PIN_BY_NEED");
         if (ln_one && (v == nullptr || v[0] == '\0')) return true;
 #endif
         return pin_by_need_env;
     }
-    const double pin_cap_gb = env_f("STRATA_DS4_PIN_GB", 0.0f);
+    const double pin_cap_gb = env_f("MAYA_DS4_PIN_GB", 0.0f);
     std::vector<char> zc_slot;             // ram_part slot -> its copy is pinned (pin by need)
     std::vector<ptrdiff_t> zc_delta;       // ram_part slot -> device address - host address (0: the same)
     bool zc_host_ptr() const {   // (the pinned pages' host addresses are the devices' too)
@@ -8826,7 +8828,7 @@ struct Model::Impl {
                 for (size_t c = 0; c < nc; ++c)
                     if (done[c]) cudaHostUnregister(ram_chunks[c]);
                 std::fprintf(stderr, "ds4: PCIe lane: pinning the copied experts failed - streamed ones pass the staging "
-                                     "(STRATA_DS4_PIN_BY_NEED=1 pins the ones it can)\n");
+                                     "(MAYA_DS4_PIN_BY_NEED=1 pins the ones it can)\n");
                 return;
             }
         }
@@ -8990,10 +8992,10 @@ struct Model::Impl {
                 return la.region_file[(size_t) a.e] < lb.region_file[(size_t) b.e];
             return la.region_off[(size_t) a.e] < lb.region_off[(size_t) b.e];
         });
-        // STRATA_DS4_LOAD_INTERLEAVE (opt-in in this fork: the same bytes, a load 109 -> 75 s on a Gorgon Halo,
+        // MAYA_DS4_LOAD_INTERLEAVE (opt-in in this fork: the same bytes, a load 109 -> 75 s on a Gorgon Halo,
         // the same on 3x V100): the files round-robin - the first expert of each file, then the second, ... - so the
         // threads read several files at once (a pack split over two drives streams both).  0: file by file, as before.
-        if (const char* iv = std::getenv("STRATA_DS4_LOAD_INTERLEAVE"); iv != nullptr && std::atoi(iv) != 0) {
+        if (const char* iv = std::getenv("MAYA_DS4_LOAD_INTERLEAVE"); iv != nullptr && std::atoi(iv) != 0) {
             std::vector<int> rank(jobs.size());
             int cur = -1, r = 0;
             for (size_t i = 0; i < jobs.size(); ++i) {
@@ -9017,8 +9019,8 @@ struct Model::Impl {
         std::atomic<bool> failed{false};
         std::mutex emu;
         std::string ferr;
-        // STRATA_DS4_LOAD_THREADS (12): the threads that read the experts' regions.
-        const char* ntv = std::getenv("STRATA_DS4_LOAD_THREADS");
+        // MAYA_DS4_LOAD_THREADS (12): the threads that read the experts' regions.
+        const char* ntv = std::getenv("MAYA_DS4_LOAD_THREADS");
         const int nth = std::max(1, ntv != nullptr ? std::atoi(ntv) : 12);
         size_t maxr = 0, maxb = 0;
         for (const Layer& l : L) {
@@ -9210,7 +9212,7 @@ struct Model::Impl {
     //   node    node 0's cores alone (in place on two NUMA nodes or more: one pool spinning on both sockets syncs
     //           across them - GLM's lane on a 2-socket Xeon: 531 us an expert on 88 threads, 216 on one socket's 44)
     //   smt     a thread a logical CPU: every core's first CPU, then their siblings (a CPU with SMT) - by hand only
-    //           (STRATA_DS4_CPU_LANE=smt), never measured: the lane's calls time the same on a core's two CPUs as on
+    //           (MAYA_DS4_CPU_LANE=smt), never measured: the lane's calls time the same on a core's two CPUs as on
     //           one (i5-12600T 1.84 / 1.86 ms, Ryzen AI Max+ 395 0.62 / 0.63), while decoding with the siblings busy
     //           was no faster and once slower - the siblings are left to the readers, as GLM's lane leaves them
     struct LaneCfg {
@@ -9292,13 +9294,12 @@ struct Model::Impl {
         // kernels (and waits on the device) and whatever else the PC runs.  With every other core a worker spinning
         // between a token's layers - 19 on a 20-core Core Ultra 7 265K, Windows 11 - that thread waited for a core:
         // decode 28.3 tok/s, the device waiting 21.4 ms a token for the lane; 18 workers 47.2, 17 workers 55.5.
-        // MAYA_DS4_LANE_FREE (a config's env reaches the engine as STRATA_DS4_LANE_FREE; DS4_LANE_FREE for tests): the
+        // MAYA_DS4_LANE_FREE (a config's env reaches the engine as MAYA_DS4_LANE_FREE; DS4_LANE_FREE for tests): the
         // cores left free (2 by default, 0: as before).  Only where the lane would take every logical CPU: with SMT the
         // lane runs a thread a core and the siblings are free already - there leaving cores out cost decode (#394: a
         // 16-core Threadripper, 16 threads 50.6 tok/s against 14 threads 45.9)
         static const int spare_cores = [] {
-            const char* v = std::getenv("STRATA_DS4_LANE_FREE");
-            if (v == nullptr) v = std::getenv("MAYA_DS4_LANE_FREE");
+            const char* v = std::getenv("MAYA_DS4_LANE_FREE");
             if (v == nullptr) v = std::getenv("DS4_LANE_FREE");
             return v != nullptr ? std::max(0, std::atoi(v)) : 2;
         }();
@@ -9318,12 +9319,12 @@ struct Model::Impl {
         }
         return out;
     }
-    // the CPU lane's workers: lane_cfgs' first (cores), or the one STRATA_DS4_CPU_LANE=<name> asks for; tune_lane may
+    // the CPU lane's workers: lane_cfgs' first (cores), or the one MAYA_DS4_CPU_LANE=<name> asks for; tune_lane may
     // change them once the experts are placed
     void make_pools() {
         const std::vector<LaneCfg> cfgs = lane_cfgs();
         size_t pick = 0;
-        if (const char* v = std::getenv("STRATA_DS4_CPU_LANE"))
+        if (const char* v = std::getenv("MAYA_DS4_CPU_LANE"))
             for (size_t i = 0; i < cfgs.size(); ++i)
                 if (cfgs[i].name == v) pick = i;
         lane_name = cfgs[pick].name;
@@ -9350,11 +9351,11 @@ struct Model::Impl {
     // copies) - on the service thread's CPU, in rounds taken in turns (other work on the host hits them alike), each
     // round's median, the best round kept (interference only adds time).  Another configuration replaces the cores'
     // only when it is faster by more than kLaneGain.  The choice changes no output - every row is one job's sum,
-    // whichever thread runs it - only the speed.  Not with --cpu-threads or STRATA_DS4_CPU_LANE=<name> (the one asked
+    // whichever thread runs it - only the speed.  Not with --cpu-threads or MAYA_DS4_CPU_LANE=<name> (the one asked
     // for), nor with fewer than 8 experts on the lane in any layer.
     static constexpr double kLaneGain = 0.05;
     void tune_lane() {
-        if (o.cpu_threads > 0 || std::getenv("STRATA_DS4_CPU_LANE") != nullptr || pools.empty()) return;
+        if (o.cpu_threads > 0 || std::getenv("MAYA_DS4_CPU_LANE") != nullptr || pools.empty()) return;
         std::vector<LaneCfg> cfgs = lane_cfgs();
         cfgs.erase(std::remove_if(cfgs.begin(), cfgs.end(), [](const LaneCfg& c) { return !c.measured; }), cfgs.end());
         if (cfgs.size() < 2) return;   // (one way on this host: nothing to measure)
@@ -10248,7 +10249,7 @@ struct Model::Impl {
         // windows have no buffers to lend it, so the room is the tower's own then - taken here, before the split
         // (the settings' MAYA_DS4_VISION_RESIDENT=1, or DS4_VISION_RESIDENT for tests: the room kept, as before)
         const char* rv = std::getenv("DS4_VISION_RESIDENT");
-        if (rv == nullptr) rv = std::getenv("STRATA_DS4_VISION_RESIDENT");
+        if (rv == nullptr) rv = std::getenv("MAYA_DS4_VISION_RESIDENT");
         const bool resident = rv != nullptr && std::atoi(rv) != 0;
         vis_mode = o.vision_only ? kVisFree : chunk > 0 && !resident ? kVisChunk : kVisResident;
         if (vis_mode == kVisResident && !dalloc(d, vis_res, vt.room_bytes(), err, &vis_acct)) return false;
@@ -13827,9 +13828,9 @@ struct Model::Impl {
     }
 
     // ---- the helper GPU (DS4_HELPER; the state's note by helper_id)
-    // a DS4_ setting as MAYA_DS4_* sets it (read as STRATA_DS4_*), else the DS4_* name itself
+    // a DS4_ setting as MAYA_DS4_* sets it, else the DS4_* name itself
     static const char* ds4_env(const char* name) {
-        const char* v = std::getenv((std::string("STRATA_") + name).c_str());
+        const char* v = std::getenv((std::string("MAYA_") + name).c_str());
         return v != nullptr ? v : std::getenv(name);
     }
     static bool helper_owned(const Layer& l, int e) { return !l.helper.empty() && l.helper[(size_t) e] != nullptr; }
@@ -14769,9 +14770,9 @@ struct Model::Impl {
         auto last = std::chrono::steady_clock::now();
         // Idle (through a prompt, between requests) the thread backs off in stages instead of waking every 20 us for
         // good - a core of a server busy enough to show in `top` while nothing ran (issue #685).  A decode's routes
-        // come ~1 ms apart, so it spins all through one.  After STRATA_DS4_SERVICE_IDLE_MS (200; 0 = the old
+        // come ~1 ms apart, so it spins all through one.  After MAYA_DS4_SERVICE_IDLE_MS (200; 0 = the old
         // 2 ms spin and 20 us sleeps always) without a route it polls every 0.1 ms, after 10x that every 2 ms, and
-        // after STRATA_DS4_SERVICE_DEEP_S (60; 0 = never) of quiet it sleeps on the idle gate, STRATA_DS4_SERVICE_DEEP_MS
+        // after MAYA_DS4_SERVICE_DEEP_S (60; 0 = never) of quiet it sleeps on the idle gate, MAYA_DS4_SERVICE_DEEP_MS
         // (100) at a time: the thread that reads the engine's input pokes the gate at each line, so the next request
         // finds it awake (strata/platform/idle_gate.hpp).  The first route after a quiet spell is answered up to one
         // sleep later, as the GLM path's service thread (src/core/glm_fast_path.cu) already does.
@@ -15117,10 +15118,10 @@ struct Model::Impl {
         double t0 = 0;              // the split's time
     };
 
-    // DS4_STREAM, or the settings' MAYA_DS4_STREAM (STRATA_DS4_STREAM): 0 off, 2 the slots kept and nothing streamed
+    // DS4_STREAM, or the settings' MAYA_DS4_STREAM: 0 off, 2 the slots kept and nothing streamed
     static const char* lane_env() {
         const char* v = std::getenv("DS4_STREAM");
-        return v != nullptr ? v : std::getenv("STRATA_DS4_STREAM");
+        return v != nullptr ? v : std::getenv("MAYA_DS4_STREAM");
     }
     static bool lane_env_off() {
         const char* v = lane_env();
@@ -15547,7 +15548,20 @@ struct Model::Impl {
     // decode's check that streaming pays (LaneAB): a window's mean time with the split against the CPU lane alone;
     // the first window only warms up; 3% slower twice in a row: off (this kind of request streams nothing from then
     // on), twice not slower - faster or a tie: it keeps streaming, as it does when still undecided after 9 windows
-    // (pcie::ab_window, #697).  The times file keeps the verdict for the next start
+    // (pcie::ab_window, #697); a layer split: a tie turns it off (ab_tie_keeps).  The times file keeps the verdict for
+    // the next start
+    // one GPU: a tie in decode's checks keeps streaming (#697: there the lane's slots also carry the one-GPU decode
+    // path, which a written-off tie took away); several GPUs: the rule before #697 - 3% faster, else off (#956: on
+    // 2x RTX A4000 and 4x RTX 3090 a start with the lane off decoded 4-5% faster where the checks measured ties: the
+    // lane's cost when little streams falls on both of a check's turns).  DS4_STREAM_TIE=keep / off: either rule on
+    // any PC (A/B tests)
+    bool ab_tie_keeps() const {
+        static const int forced = [] {
+            const char* v = std::getenv("DS4_STREAM_TIE");
+            return v == nullptr ? -1 : std::strcmp(v, "keep") == 0 ? 1 : std::strcmp(v, "off") == 0 ? 0 : -1;
+        }();
+        return forced >= 0 ? forced == 1 : devs.size() <= 1;
+    }
     void lane_ab(LaneCls& C, int kind, bool split, double ms) {
         LaneAB& A = C.ab[kind];
         if (A.verdict != 0 || !(ms >= 0.0)) return;
@@ -15557,7 +15571,7 @@ struct Model::Impl {
         const double m0 = A.ms[0] / A.n[0], m1 = A.ms[1] / A.n[1], gain = 1.0 - m1 / m0;
         A.ms[0] = A.ms[1] = 0;
         A.n[0] = A.n[1] = 0;
-        A.verdict = pcie::ab_window(A.wins, A.good, A.bad, gain);   // (a tie keeps streaming: #697)
+        A.verdict = pcie::ab_window(A.wins, A.good, A.bad, gain, ab_tie_keeps());   // (see ab_tie_keeps)
         if (A.verdict == 0) return;
         std::fprintf(stderr, "ds4: PCIe lane: CUDA%d %s: decode measured the split against the CPU lane alone on "
                              "requests with %s: %.2f against %.2f ms (%+.1f%%) -> %s\n",
@@ -15578,7 +15592,8 @@ struct Model::Impl {
     // streaming allowed, or none (decoded tokens: the lane serves T == 1 steps only) - and their time a token decides with lane_ab's rule over windows of 64 tokens of each:
     // 3% slower twice in a row: none from then on, and the times file keeps it for the next start; twice not slower
     // (faster or a tie), or undecided after 9 windows: streaming stays (lane_ab decides the rest) - a tie is not written
-    // as off (pcie::ab_window, #697).  DS4_STREAM_TOKEN_AB=0: off (A/B tests)
+    // as off (pcie::ab_window, #697) on one GPU; a layer split: 3% faster or off, as before #697 (ab_tie_keeps, #956).
+    // DS4_STREAM_TOKEN_AB=0: off (A/B tests)
     struct TokAB {
         double ms[2] = {0, 0};
         int64_t n[2] = {0, 0};
@@ -15623,7 +15638,7 @@ struct Model::Impl {
         const double m0 = A.ms[0] / (double) A.n[0], m1 = A.ms[1] / (double) A.n[1], gain = 1.0 - m1 / m0;
         A.ms[0] = A.ms[1] = 0;
         A.n[0] = A.n[1] = 0;
-        A.verdict = pcie::ab_window(A.wins, A.good, A.bad, gain);   // (the first window warms up; a tie keeps it: #697)
+        A.verdict = pcie::ab_window(A.wins, A.good, A.bad, gain, ab_tie_keeps());   // (see ab_tie_keeps)
         if (A.verdict == 0) return;
         std::fprintf(stderr, "ds4: PCIe lane: decode measured whole steps with the split against the CPU lane alone: "
                              "%.2f against %.2f ms a token (%+.1f%%) -> %s\n", m1, m0, -100.0 * gain,
@@ -17676,13 +17691,18 @@ struct Model::Impl {
         std::vector<int> T;
         std::vector<unsigned> seq;
         int64_t snap_pos = -1;   // feed_mark: the position whose state before it the layers keep (-1: none)
-        // a long prompt's skip (forward_chunks): the cut at row cut_r of chunk cut_k - the chunks before it go through
-        // the layers before `yoco`, that layer as layer_chunk's kv_only and none after it; chunk cut_k's rows before
-        // cut_r the same, its rows from cut_r on and the chunks after it through every layer (yoco -1: no skip)
-        int yoco = -1, cut_k = 0, cut_r = 0;
-        bool runs(int k, int il) const { return yoco < 0 || k >= cut_k || il <= yoco; }
-        bool kv_only(int k, int il) const { return yoco >= 0 && k < cut_k && il == yoco; }
-        int r0(int k, int il) const { return yoco >= 0 && k == cut_k && il >= yoco ? cut_r : 0; }   // the first row
+        // a long prompt's skip (forward_chunks): layer il's cut (il >= yoco) at row cr[il] of chunk ck[il] - the
+        // chunks before the yoco layer's cut go through the layers before `yoco` and that layer as layer_chunk's
+        // kv_only (that chunk's rows before it the same); from the yoco layer on, a layer runs its cut chunk's rows from
+        // the cut on and the chunks after it - one cut for every layer, or the cone's, later layer by layer (plan_chunks)
+        // (yoco -1: no skip)
+        int yoco = -1;
+        std::vector<int> ck, cr;   // (by layer)
+        bool runs(int k, int il) const { return yoco < 0 || il <= yoco || k >= ck[(size_t) il]; }
+        bool kv_only(int k, int il) const { return yoco >= 0 && il == yoco && k < ck[(size_t) il]; }
+        int r0(int k, int il) const {   // the first row
+            return yoco >= 0 && il >= yoco && k == ck[(size_t) il] ? cr[(size_t) il] : 0;
+        }
     };
     // Whole-prompt Engram read-ahead: fill the ordinary row cache in consumption order, independently of the two
     // pinned staging slots.  A consumer waits for its unit before doing the normal lookup/copy, so no row is read by
@@ -17842,15 +17862,23 @@ struct Model::Impl {
             if (!layer_chunk(L0, mi, p0, r0, w0, S, err, true)) return false;
         }
         Chunk& c = *chunks[(size_t) member(L0, mi).dev];
+        // (the chunk's state from row r0 on - its rows' places kept, so a layer of another cut reads them where they
+        //  were written: the candidates the source layer picks and the top-k an index layer leaves to the layers after it)
         float* const h0 = c.h;
         float* const pre0 = c.pre;
+        int* const topk0 = c.topk;
+        int* const cand0 = c.cand;
         c.h += (size_t) r0 * g.hc * g.dim;
         c.pre += (size_t) r0 * 8;
+        c.topk += (size_t) r0 * topk_stride();
+        c.cand += (size_t) r0 * cand_stride();
         WinPlan w1 = wp;
         w1.snap_t = wp.snap_t >= r0 ? wp.snap_t - r0 : -1;
         const bool ok = layer_chunk(L0, mi, p0 + r0, T - r0, w1, S, err);
         c.h = h0;
         c.pre = pre0;
+        c.topk = topk0;
+        c.cand = cand0;
         return ok;
     }
 
@@ -17998,8 +18026,8 @@ struct Model::Impl {
                     if (member(L[(size_t) il], m).dev == di) c.fl_layers.push_back(il);
             c.fl_T = run.T;
             c.fl_yoco = run.yoco;
-            c.fl_cut_k = run.cut_k;
-            c.fl_cut_r = run.cut_r;
+            c.fl_ck = run.ck;
+            c.fl_cr = run.cr;
             c.spec_k = c.spec_il = -1;
             c.wait_ms = 0;
             c.it_file = c.it_ram = c.it_spec = c.it_spec_unused = c.it_lc = c.it_helper = c.chk_n = 0;
@@ -18022,7 +18050,7 @@ struct Model::Impl {
                 // A group starting at the YOCO source has only KV work before the cut: no flow_layer to advance it.
                 // (A part of a prompt's run read before its cut, Model::feed_part: no chunk of it past the cut, so
                 // nothing for such a group to stream.)
-                const int il = c.fl_layers[0], k = run.yoco >= 0 && il >= run.yoco ? run.cut_k : 0;
+                const int il = c.fl_layers[0], k = run.yoco >= 0 && il >= run.yoco ? run.ck[(size_t) il] : 0;
                 if (k < nk) {
                     flow_spec(c, k, il, fl_rows(c, k, il));
                     if (!flow_pump(c, err)) return false;
@@ -18658,7 +18686,8 @@ struct Model::Impl {
             lay_chunk(c, C, d.tail + b0, 2);
             c.C = C;
             // (the clear writes over slots still mapped: a failure leaves them unknown - sticky, no later request runs;
-            //  a device lent before this one is handed back by the caller's guard)
+            //  a device lent before this one is handed back by the caller's guard.  The fork keeps this one-shot: an
+            //  uncertain device error is not cleared and retried - upstream #884's retry is not imported)
             cudaError_t e = cudaSetDevice(d.id);
             if (e == cudaSuccess) e = cudaMemsetAsync(d.tail + b0, 0, d.tail_bytes - b0, d.st);
             if (e == cudaSuccess) e = cudaStreamSynchronize(d.st);
@@ -19098,13 +19127,13 @@ struct Model::Impl {
     // on one GPU, or on several (tensor parallel, groups) where no device streams its layers on the flow and no Engram
     // layer comes from it on (the cut then at a chunk's start: forward_chunks), or on a layer split whose earlier layers
     // are on other GPUs while the source and every layer after it share one GPU (the flow allowed: yoco_suffix_gpu).
-    // The settings' MAYA_DS4_PROMPT_SKIP (STRATA_DS4_PROMPT_SKIP; DS4_YOCO for tests):
+    // The settings' MAYA_DS4_PROMPT_SKIP (DS4_YOCO for tests):
     // 1 (the default) the exact skip, 2 DeepSeek's own serving's (the last 128 rows only: faster, the answers shift a
     // little), 0 off
     static int yoco_mode() {
         static const int m = [] {
             const char* v = std::getenv("DS4_YOCO");
-            if (v == nullptr) v = std::getenv("STRATA_DS4_PROMPT_SKIP");
+            if (v == nullptr) v = std::getenv("MAYA_DS4_PROMPT_SKIP");
             return v != nullptr ? std::atoi(v) : 1;
         }();
         return m;
@@ -19189,10 +19218,39 @@ struct Model::Impl {
     // start: chunk cut_k's rows go to the other groups whole); with the suffix on one GPU of a layer split, or one
     // tensor-parallel group under DS4_YOCO_TP (yoco_tp_group), as on one GPU.  DS4_YOCO=1 (0: off); not with every
     // row's logits (tests)
+    // DS4_YOCO_CONE=1 (default off): a long prompt's skip as a cone on one GPU -
+    // each layer past the skip's first leaves out the win - 1 rows more the layer after it cannot reach (layer il runs
+    // the last keep - (il - yoco) (win - 1) rows, the yoco layer keep), and it starts at any prompt length (the yoco
+    // layer's KV-only split from a window's rows).  The rows left out are the ones the skip's single cut runs with
+    // the earlier layers' rows they look back to left out already: every row whose result reaches the run's last
+    // rows, the rings and the drafter's taps sees what it saw before.  Off by default: the same sums, but the kernels
+    // a set of experts or a GEMM takes go by its row count (a few rows' experts on the light int8 kernel, the library
+    // GEMMs by row buckets), so the bits move a little as with the single cut against none (Radeon 8065S, Maya-XS:
+    // the same tokens at 2K-32K, the first token's top-5 log-probs within ~0.1)
+    static bool cone_on() {
+        static const bool on = [] {
+            const char* v = std::getenv("DS4_YOCO_CONE");
+            return v != nullptr && std::atoi(v) != 0;
+        }();
+        return on;
+    }
+    // the chunk and row a plan's layer il (from fp.skip on) starts at
+    static void plan_cut(const FeedPlan& fp, int il, int& k, int& r) {
+        if (fp.cone.empty()) {
+            k = fp.cut_k;
+            r = fp.cut_r;
+            return;
+        }
+        const int x = fp.cone[(size_t) (il - fp.skip)], nk = (int) fp.ends.size();
+        k = 0;
+        while (k < nk && fp.ends[(size_t) k] <= x) ++k;
+        r = k < nk ? x - (k > 0 ? fp.ends[(size_t) k - 1] : 0) : 0;
+    }
     void plan_chunks(int n, int logits_rows, FeedPlan& fp, int after = 0) {
         fp.ends.clear();
         fp.skip = -1;
         fp.cut_k = fp.cut_r = 0;
+        fp.cone.clear();
         const int yl = logits_rows > kWin ? -1 : yoco_layer();
         // (DS4_YOCO_KEEP=<rows>: fewer - DeepSeek's own serving replays the last 128 tokens through those layers
         //  (DeepInfer's "SWA bounded replay"), which shifts the answers a little; at least one window)
@@ -19203,7 +19261,15 @@ struct Model::Impl {
         // (a piece of a longer prompt, `after` more of its tokens in later feeds: the kept rows are the prompt's last,
         //  so a piece wholly before them is KV-only past yoco - as its rows are in the prompt read whole)
         const int skip = std::min(n, n + after - keep);
-        const int a = yl > 0 && skip >= kYocoMin ? skip : 0;
+        // the cone (cone_on): layer il's first row, from yl on (empty: none to leave out)
+        std::vector<int> cone;
+        if (yl > 0 && cone_on() && keep == (g.nl - yl) * (g.win - 1) + g.win && yoco_one_gpu()) {
+            for (int il = yl; il < g.nl; ++il)
+                cone.push_back(std::max(0, std::min(n, skip + (il - yl) * (g.win - 1))));
+            if (cone[0] < g.win) cone[0] = 0;
+            if (cone.back() <= 0) cone.clear();
+        }
+        const int a = !cone.empty() ? cone[0] : yl > 0 && skip >= kYocoMin ? skip : 0;
         const bool cut_rows = a > 0 && (yoco_one_gpu() || yoco_suffix_gpu(yl) || yoco_tp_group());
         if (a > 0 && yoco_tp_group()) {   // (DS4_YOCO_TP: once)
             static bool said = false;
@@ -19238,6 +19304,13 @@ struct Model::Impl {
                 fp.cut_r = a - fp.cut_k * per;
             }
         }
+        if (!cone.empty()) {
+            fp.skip = yl;
+            fp.cone = std::move(cone);
+        }
+        if (fp.skip >= 0 && o.verbose && !fp.cone.empty())
+            std::fprintf(stderr, "ds4: prompt cone: layer %d from row %d (KV-only before it), layer %d from row %d\n",
+                         yl, fp.cone.front(), g.nl - 1, fp.cone.back());
         if (fp.skip >= 0 && o.verbose)
             std::fprintf(stderr, "ds4: prompt skip: layers %d-%d from CUDA%d, %d early rows KV-only, %d kept\n",
                          yl, g.nl - 1, devs[(size_t) L[(size_t) yl].dev].id, a, n - a);
@@ -19291,10 +19364,20 @@ struct Model::Impl {
         }
         // (a part: the chunks before the cut skip as the whole run's do, the cut's chunk is cut where it is; past it
         //  no skip)
-        if (fp.skip >= 0 && k0 <= fp.cut_k) {
-            run.yoco = fp.skip;
-            run.cut_k = std::min(fp.cut_k, k1) - k0;
-            run.cut_r = fp.cut_k < k1 ? fp.cut_r : 0;
+        if (fp.skip >= 0) {   // (each layer's cut, from the skip's first layer on)
+            run.ck.assign((size_t) g.nl, 0);
+            run.cr.assign((size_t) g.nl, 0);
+            bool any = false;
+            for (int il = fp.skip; il < g.nl; ++il) {
+                int gk = 0, gr = 0;
+                plan_cut(fp, il, gk, gr);
+                if (gk < k0) continue;   // (the part wholly past the layer's cut)
+                run.ck[(size_t) il] = std::min(gk, k1) - k0;
+                run.cr[(size_t) il] = gk < k1 ? gr : 0;
+                any = any || run.ck[(size_t) il] > 0 || run.cr[(size_t) il] > 0;
+            }
+            if (any) run.yoco = fp.skip;
+            else run.ck.clear(), run.cr.clear();
         }
         logits_all = logits_rows > kWin;
         if (logits_all) chunk_logits.resize((size_t) n * g.vocab);
@@ -19670,7 +19753,9 @@ struct Model::Impl {
         }
         // the drafter seeded from the run's last rows - when they went through every layer: not after a yield, nor a
         // run wholly KV-only past the skip (a piece of a longer prompt, `after`: the piece that ends it seeds it)
-        const bool kv_only = fp.skip >= 0 && fp.cut_k >= k1;
+        int cut_kl = 0, cut_rl = 0;   // (the last layer's cut)
+        if (fp.skip >= 0) plan_cut(fp, g.nl - 1, cut_kl, cut_rl);
+        const bool kv_only = fp.skip >= 0 && cut_kl >= k1;
         const int nr = std::min(T_last, tap_cap);
         if (run_end && took == n && !kv_only && !seed_drafter(pos - nr, nr, 0, err)) return false;
         if (snap_slot >= 0 && took == n) {   // checkpoint `snap_slot` from what the layers kept (the drafter's blocks: as they are -

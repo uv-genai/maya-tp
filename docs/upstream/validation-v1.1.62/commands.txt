@@ -1,0 +1,12 @@
+Source checkpoint: d664bc7b883a98560e047dd54ece33f151bf3aff (merge of upstream v1.1.62 = 30145b8b with the fork's tree plus 78c7d414, b620e2b4, 1d74e41d)
+Previous checkpoint: v1.1.61 (b3048fff engines, frozen under engines/v1.1.61)
+Runtime/build/harness: as in validation-v1.1.59/commands.txt
+
+git merge -s ours --no-commit upstream/v1.1.62 ; git show --format= <commit> | git apply --3way --index   (78c7d414 b620e2b4 1d74e41d; glm_lat8.cuh conflict resolved to upstream's form)
+tools/local_gates.sh
+build.py --label v1.1.62 --jobs 6 ; cmake --build <build> --target glm_lat8_test glm_layer_graph_test
+finalize.py --label v1.1.62 --commit d664bc7b883a98560e047dd54ece33f151bf3aff --fixtures glm_lat8_test glm_layer_graph_test
+components-rejections.py v1.1.62 ; engines/v1.1.62/glm_lat8_test ; engines/v1.1.62/glm_layer_graph_test
+checkpoint.py --label v1.1.62 --previous v1.1.61 --glm-false-flags --unicode --lifecycle --lifecycle-models glm-s ds4-xs --fatal --fatal-models glm-s ds4-xs
+for kind in control:v1.1.61 candidate:v1.1.62: case.py --name perf-v62-xs2-<kind> --family ds4 --model xs --engine <runtime>/engines/<label>/maya-ds4 --slots 2 --tokens 64 --transition-waves 3
+collect.py --label v1.1.62 --previous v1.1.61
