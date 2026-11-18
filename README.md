@@ -262,7 +262,7 @@ DeepSeek XS/S continuous batching is also opt-in with `--parallel 2`–`4` on
 its pair wrapper, using matching current `maya-ds4` binaries and launchers.
 DSpark remains active through fitting drafter groups and complete per-slot
 verdicts. The default is one conversation. See [DeepSeek batching and runtime
-selection](docs/DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching). The installed v58
+selection](docs/DEEPSEEK-TP2-RUN.md#opt-in-continuous-batching). The installed
 binaries include batching support; current entries/configs remain unchanged.
 Opting into batching requires matching current server/launcher source and an
 explicit parallel setting; the binary-only installation does not enable it.
